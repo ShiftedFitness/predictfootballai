@@ -9,6 +9,7 @@
   <div id="picks"></div>
   <script src="/picks-widget.js"></script>
   <script>
+    // You can pass week/userId via Adalo WebView query params later
     PredictFootballPicks.render(
       document.getElementById('picks'),
       { base: '/.netlify/functions', week: 1, userId: '2' }
