@@ -5,29 +5,17 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>PredictFootball.ai – History</title>
 <style>
-  :root{
-    --bg: #30A278; --card:#000; --border:#1a1a1a; --text:#fff; --muted:#EAEAEA;
-    --accent:#fff; --accentText:#000; --points:#FFD700;
-  }
+  :root{ --bg:#30A278; --card:#000; --border:#1a1a1a; --text:#fff; --muted:#EAEAEA; --accent:#fff; --accentText:#000; }
   html, body { height:100% }
-  body{
-    margin:0; background:#111; color:#fff; font-family:Inter,system-ui,Arial;
-    display:flex; justify-content:center; align-items:flex-start; min-height:100vh;
-  }
-  .wrap{ max-width:750px; width:100%; margin:24px 12px; background:var(--bg);
-         color:var(--text); border-radius:14px; padding:16px; }
+  body{ margin:0; background:#111; color:#fff; font-family:Inter,system-ui,Arial; display:flex; justify-content:center; align-items:flex-start; min-height:100vh; }
+  .wrap{ max-width:750px; width:100%; margin:24px 12px; background:var(--bg); color:var(--text); border-radius:14px; padding:16px; }
   h2{ margin:0 0 12px }
-  .card{ background:var(--card); border:1px solid var(--border); border-radius:12px;
-         padding:12px; margin-bottom:12px; }
+  .card{ background:var(--card); border:1px solid var(--border); border-radius:12px; padding:12px; margin-bottom:12px; }
   .row{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; justify-content:space-between }
   .muted{ color:var(--muted) }
-
   .controls{ gap:8px; margin-bottom:8px }
-  select, input{
-    background:#0e0e0e; color:#fff; border:1px solid #2a2a2a; border-radius:8px; padding:8px 10px;
-  }
-  .btn{ background:var(--accent); color:var(--accentText); border:0; font-weight:800;
-        padding:8px 12px; border-radius:8px; cursor:pointer }
+  select, input{ background:#0e0e0e; color:#fff; border:1px solid #2a2a2a; border-radius:8px; padding:8px 10px; }
+  .btn{ background:var(--accent); color:var(--accentText); border:0; font-weight:800; padding:8px 12px; border-radius:8px; cursor:pointer }
   .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:8px }
   .stat{ background:#0e0e0e; border:1px solid #1f1f1f; padding:10px; border-radius:10px; text-align:center }
   .stat h4{ margin:0; font-size:12px; color:#cfcfcf; text-transform:uppercase; letter-spacing:.3px }
@@ -37,8 +25,7 @@
   .table th{ font-size:12px; color:#cfcfcf; text-transform:uppercase; letter-spacing:.3px }
   .table tr:last-child td{ border-bottom:none }
   .center{ text-align:center }
-  .good{ color:#7CFC00 }  /* lime for correct */
-  .bad{ color:#FF6B6B }   /* red for wrong */
+  .good{ color:#7CFC00 } .bad{ color:#FF6B6B }
 </style>
 </head>
 <body>
@@ -52,8 +39,8 @@
           <select id="weekSel"></select>
         </div>
         <div>
-          <label class="muted" for="compareId">Compare User ID</label><br/>
-          <input id="compareId" type="number" min="1" step="1" placeholder="1 (AI)" style="width:120px"/>
+          <label class="muted" for="compareSel">Compare With</label><br/>
+          <select id="compareSel" style="min-width:200px"></select>
         </div>
         <div>
           <button id="applyBtn" class="btn">Apply</button>
@@ -65,9 +52,9 @@
     <div class="card">
       <div class="grid2">
         <div class="stat"><h4>Your Points</h4><div id="myPts" class="v">-</div></div>
-        <div class="stat"><h4>AI/User Points</h4><div id="hisPts" class="v">-</div></div>
+        <div class="stat"><h4>Compare Points</h4><div id="hisPts" class="v">-</div></div>
         <div class="stat"><h4>Your Accuracy</h4><div id="myAcc" class="v">-</div></div>
-        <div class="stat"><h4>AI/User Accuracy</h4><div id="hisAcc" class="v">-</div></div>
+        <div class="stat"><h4>Compare Accuracy</h4><div id="hisAcc" class="v">-</div></div>
       </div>
     </div>
 
@@ -90,15 +77,15 @@
 
 <script>
 const base = '/.netlify/functions';
-const qs = new URLSearchParams(location.search);
-const userId = qs.get('userId') || '';     // required
-const qsWeek = qs.get('week');             // optional
-const qsCompare = qs.get('compareId') || '1';
+const qs   = new URLSearchParams(location.search);
+const userId    = qs.get('userId') || '';  // required (hidden)
+const weekQ     = qs.get('week');          // optional override
+const compareId = qs.get('compareId') || '1'; // hidden, but we’ll show names
 
 if (!userId) {
   document.body.innerHTML = '<div style="padding:24px;color:#fff;font-family:Inter,system-ui,Arial">Missing userId in URL</div>';
 } else {
-  load(qsWeek, qsCompare);
+  load(weekQ, compareId);
 }
 
 async function fetchJSON(u){ const r = await fetch(u, { cache:'no-store' }); if(!r.ok) throw new Error(await r.text()); return r.json(); }
@@ -106,12 +93,12 @@ async function fetchJSON(u){ const r = await fetch(u, { cache:'no-store' }); if(
 async function load(prefWeek, compareId) {
   const url = new URL(`${base}/history`, location.origin);
   url.searchParams.set('userId', userId);
-  if (prefWeek) url.searchParams.set('week', prefWeek);
+  if (prefWeek)  url.searchParams.set('week', prefWeek);
   if (compareId) url.searchParams.set('compareId', compareId);
 
   const data = await fetchJSON(url.toString());
 
-  // Controls
+  // Populate week select
   const weekSel = document.getElementById('weekSel');
   weekSel.innerHTML = '';
   data.availableWeeks.forEach(w=>{
@@ -120,8 +107,16 @@ async function load(prefWeek, compareId) {
     if (Number(w) === Number(data.week)) opt.selected = true;
     weekSel.appendChild(opt);
   });
-  const compareInput = document.getElementById('compareId');
-  compareInput.value = compareId || data.compare?.id || '1';
+
+  // Populate compare select by NAME (but keep the option value as id)
+  const compareSel = document.getElementById('compareSel');
+  compareSel.innerHTML = '';
+  (data.users || []).forEach(u=>{
+    const opt = document.createElement('option');
+    opt.value = u.id; opt.textContent = u.name;
+    if (String(u.id) === String(data.compare?.id)) opt.selected = true;
+    compareSel.appendChild(opt);
+  });
 
   // Week info
   document.getElementById('weekInfo').textContent = data.weekLocked ? 'This week is locked (results in).' : 'This week is still open.';
@@ -132,10 +127,10 @@ async function load(prefWeek, compareId) {
   document.getElementById('myAcc').textContent  = (Math.round(data.me.accuracy*1000)/10).toFixed(1) + '%';
   document.getElementById('hisAcc').textContent = (Math.round(data.compare.accuracy*1000)/10).toFixed(1) + '%';
 
-  // Table
+  // Table rows
   const tb = document.querySelector('#matchTbl tbody');
   tb.innerHTML = '';
-  data.rows.forEach(r=>{
+  (data.rows || []).forEach(r=>{
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${escapeHTML(r.fixture)}</td>
@@ -149,14 +144,13 @@ async function load(prefWeek, compareId) {
   document.getElementById('legends').textContent =
     `${data.me.name} vs ${data.compare.name} • Picks shown as HOME / DRAW / AWAY`;
 
-  // Apply handler (reload with chosen week/compare)
+  // Apply: reload with chosen week and compareId (names are for display only)
   document.getElementById('applyBtn').onclick = ()=>{
     const w = weekSel.value;
-    const cid = compareInput.value || '1';
+    const cid = compareSel.value || '1';
     const next = new URL(location.href);
     next.searchParams.set('week', w);
     next.searchParams.set('compareId', cid);
-    // keep userId in url
     next.searchParams.set('userId', userId);
     location.href = next.toString();
   };
