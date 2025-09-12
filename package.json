@@ -1,0 +1,11 @@
+{
+  "name": "predictfootball",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "netlify dev"
+  },
+  "dependencies": {
+    "node-fetch": "^3.3.2"
+  }
+}
