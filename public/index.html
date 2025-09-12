@@ -4,16 +4,49 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>PredictFootball.ai – Picks</title>
+  <style>
+    /* Fill the frame */
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      background: #111;           /* subtle page bg behind the widget */
+      color: #fff;
+      font-family: Inter, system-ui, Arial;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;    /* keep content pinned to top */
+      min-height: 100vh;          /* ensure full viewport height */
+    }
+    /* Optional: let the widget stretch the full width on small screens */
+    #picks { width: 100%; }
+  </style>
 </head>
-<body style="background:#0E0E0E;color:#E5E7EB;font-family:Inter,system-ui,Arial">
+<body>
   <div id="picks"></div>
+
   <script src="/picks-widget.js"></script>
   <script>
-    // You can pass week/userId via Adalo WebView query params later
+    // Read week & userId from URL
+    const qs = new URLSearchParams(location.search);
+    const week = qs.get('week') || 1;         // required for your flow; default 1
+    const userId = qs.get('userId') || '';    // required by API; don’t display it
+
+    // Render the widget (no userId shown on page)
     PredictFootballPicks.render(
       document.getElementById('picks'),
-      { base: '/.netlify/functions', week: 1, userId: '2' }
+      { base: '/.netlify/functions', week, userId }
     );
+
+    // --- Optional: report height to parent for auto-resize if you control the parent iframe ---
+    function postSize() {
+      const h = Math.max(
+        document.documentElement.scrollHeight,
+        document.body.scrollHeight
+      );
+      try { window.parent.postMessage({ type: 'pf-resize', height: h }, '*'); } catch(e){}
+    }
+    window.addEventListener('load', postSize);
+    window.addEventListener('resize', () => { clearTimeout(window.__pfTO); window.__pfTO = setTimeout(postSize, 100); });
   </script>
 </body>
 </html>
