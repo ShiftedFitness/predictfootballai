@@ -13,6 +13,8 @@
     --muted: #EAEAEA;
     --accent: #FFFFFF;
     --accentText: #000000;
+    --points-bg: rgba(255,255,255,0.1);
+    --points-color: #FFD700; /* gold-ish */
   }
   html, body { height:100%; }
   body{
@@ -42,44 +44,30 @@
   .table tr:last-child td{ border-bottom:none; }
   .pos{ width:64px; }
   .user{ max-width:260px; overflow:hidden; text-overflow:ellipsis; }
-  .acc, .pts{ width:90px; text-align:right; }
+  .acc{ width:90px; text-align:right; }
+  .pts{
+    width:90px; text-align:right;
+    font-weight:700;
+    background:var(--points-bg);
+    color:var(--points-color);
+    border-radius:6px;
+  }
   .highlight{
     background:var(--accent); color:var(--accentText) !important;
   }
   .highlight td{ color:var(--accentText) !important; }
-  .section-title{
-    font-weight:700; margin:8px 0 8px; display:flex; align-items:center; gap:8px;
+  .highlight td.pts{
+    background:var(--accent); color:var(--accentText) !important;
   }
-  .scroll{
-    max-height:420px; overflow:auto; border-radius:12px;
-  }
-  .pill{
-    display:inline-block; padding:2px 8px; border-radius:999px; font-size:12px;
-    background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2);
-  }
+  .section-title{ font-weight:700; margin:8px 0; }
+  .scroll{ max-height:500px; overflow:auto; border-radius:12px; }
 </style>
 </head>
 <body>
   <div class="wrap">
     <h2>League Table</h2>
 
-    <!-- Top 5 -->
-    <div class="card">
-      <div class="section-title">Top 5 <span id="totalCount" class="pill"></span></div>
-      <table class="table" id="top5">
-        <thead>
-          <tr>
-            <th class="pos">Pos</th>
-            <th>Username</th>
-            <th class="acc">% Accuracy</th>
-            <th class="pts">Points</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
-
-    <!-- Your position (if not in top 5) -->
+    <!-- Your position -->
     <div class="card" id="yoursection" style="display:none">
       <div class="section-title">Your Position</div>
       <table class="table" id="yourrowtbl">
@@ -95,9 +83,9 @@
       </table>
     </div>
 
-    <!-- Full table (scrollable) -->
+    <!-- Full table -->
     <div class="card">
-      <div class="section-title">All Players</div>
+      <div class="section-title">All Players <span id="totalCount" class="muted"></span></div>
       <div class="scroll">
         <table class="table" id="fulltbl">
           <thead>
@@ -118,7 +106,7 @@
 <script>
 const base = '/.netlify/functions';
 const qs = new URLSearchParams(location.search);
-const highlightUserId = qs.get('userId') || ''; // highlight this user if present
+const highlightUserId = qs.get('userId') || '';
 
 function pct(acc){ return (Math.round(acc*1000)/10).toFixed(1); } // 1 decimal
 function tr(row, highlight=false){
@@ -136,25 +124,15 @@ function escapeHTML(s){ return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;',
 
 async function load() {
   const res = await fetch(`${base}/leaderboard`, { cache: 'no-store' });
-  if (!res.ok) {
-    console.error(await res.text());
-    alert('Failed to load leaderboard');
-    return;
-  }
+  if (!res.ok) { alert('Failed to load leaderboard'); return; }
   const data = await res.json();
   const rows = data.leaderboard || [];
 
-  // Top 5
-  const top5Body = document.querySelector('#top5 tbody');
-  top5Body.innerHTML = '';
-  rows.slice(0,5).forEach(r => top5Body.appendChild(tr(r, String(r.id)===String(highlightUserId))));
-  document.getElementById('totalCount').textContent = `${rows.length} players`;
-
-  // Your row (if not already in top 5)
+  // Your row
   const yourSection = document.getElementById('yoursection');
   if (highlightUserId) {
     const me = rows.find(r => String(r.id) === String(highlightUserId));
-    if (me && me.position > 5) {
+    if (me) {
       yourSection.style.display = '';
       const body = document.querySelector('#yourrowtbl tbody');
       body.innerHTML = '';
@@ -162,10 +140,11 @@ async function load() {
     }
   }
 
-  // Full table (scrollable)
+  // Full table
   const fullBody = document.querySelector('#fulltbl tbody');
   fullBody.innerHTML = '';
   rows.forEach(r => fullBody.appendChild(tr(r, String(r.id)===String(highlightUserId))));
+  document.getElementById('totalCount').textContent = `(${rows.length} players)`;
 }
 
 load();
