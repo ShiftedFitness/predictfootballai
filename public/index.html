@@ -6,21 +6,13 @@
   <title>PredictFootball.ai – Picks</title>
 </head>
 <body style="background:#0E0E0E;color:#E5E7EB;font-family:Inter,system-ui,Arial">
-
   <div id="picks"></div>
-
-  <!-- load the widget script -->
   <script src="/picks-widget.js"></script>
   <script>
     PredictFootballPicks.render(
       document.getElementById('picks'),
-      {
-        base: '/.netlify/functions', // leave as is for Netlify
-        week: 1,                     // current week
-        userId: '2'                  // test user (string)
-      }
+      { base: '/.netlify/functions', week: 1, userId: '2' }
     );
   </script>
-
 </body>
 </html>
