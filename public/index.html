@@ -1,11 +1,26 @@
 <!doctype html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <title>LadBot Predictions</title>
-  </head>
-  <body>
-    <h1>PredictFootball.ai – Backend running 🎉</h1>
-    <p>Functions are under <code>/.netlify/functions/</code></p>
-  </body>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>PredictFootball.ai – Picks</title>
+</head>
+<body style="background:#0E0E0E;color:#E5E7EB;font-family:Inter,system-ui,Arial">
+
+  <div id="picks"></div>
+
+  <!-- load the widget script -->
+  <script src="/picks-widget.js"></script>
+  <script>
+    PredictFootballPicks.render(
+      document.getElementById('picks'),
+      {
+        base: '/.netlify/functions', // leave as is for Netlify
+        week: 1,                     // current week
+        userId: '2'                  // test user (string)
+      }
+    );
+  </script>
+
+</body>
 </html>
