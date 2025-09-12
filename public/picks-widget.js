@@ -1,26 +1,88 @@
 (function () {
+  // === THEME ===
+  const THEME = {
+    bg: '#30A278',          // page/section background
+    card: '#000000',        // cards
+    border: '#1a1a1a',
+    text: '#FFFFFF',
+    muted: '#C8C8C8',
+    accent: '#FFFFFF',      // buttons/active states
+    accentText: '#000000'
+  };
+
+  // === STYLES ===
   const css = `
-    .pf-wrap{max-width:760px;margin:24px auto;padding:16px;background:#0E0E0E;color:#E5E7EB;font-family:Inter,system-ui,Arial}
-    .pf-top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
-    .pf-deadline{font-weight:600}
-    .pf-countdown{font-variant-numeric:tabular-nums;background:#111827;border:1px solid #1F2937;border-radius:10px;padding:8px 12px}
-    .pf-card{background:#111827;border:1px solid #1F2937;border-radius:12px;padding:16px;margin-bottom:12px}
-    .pf-teams{font-weight:600}
-    .pf-muted{color:#9CA3AF}
-    .pf-btn{background:#0FF0FC;border:none;color:#0E0E0E;font-weight:700;padding:10px 16px;border-radius:8px;cursor:pointer}
-    .pf-btn.secondary{background:transparent;color:#0FF0FC;border:1px solid #0FF0FC}
-    .pf-btn[disabled]{opacity:.6;cursor:not-allowed}
-    .pf-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}
-    .pf-pick{padding:10px 12px;border:1px solid #1F2937;border-radius:10px;text-align:center;cursor:pointer;background:#0E0E0E}
-    .pf-pick.active{background:#0FF0FC;color:#0E0E0E;border-color:#0FF0FC;font-weight:800}
-    .pf-row{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
-    .pf-bar{height:8px;background:#1F2937;border-radius:8px;overflow:hidden}
-    .pf-bar span{display:block;height:100%;background:#0FF0FC}
-    .pf-note{margin-top:8px}
-    .pf-footer{margin-top:16px}
+    .pf-wrap{
+      max-width: 760px; margin: 24px auto; padding: 16px;
+      background:${THEME.bg}; color:${THEME.text};
+      font-family: Inter, system-ui, Arial;
+      border-radius: 14px;
+    }
+    .pf-top{ display:flex; justify-content:space-between; align-items:flex-end; gap:12px; flex-wrap:wrap; margin-bottom:12px }
+    .pf-deadline-line{ font-weight:600; color:${THEME.text}; }
+    .pf-countdown{
+      font-variant-numeric: tabular-nums;
+      line-height: 1; letter-spacing: 1px;
+      color:${THEME.text};
+    }
+    .pf-countdown .pf-digits{
+      display:block; font-size: 42px; font-weight: 800;
+      padding: 8px 12px; border-radius: 12px;
+      background: rgba(0,0,0,0.25);
+    }
+    .pf-countdown .pf-label{
+      display:block; margin-top:6px; font-size: 12px; color:${THEME.muted};
+    }
+
+    .pf-status{ color:${THEME.muted}; margin-bottom: 8px }
+
+    .pf-card{
+      background:${THEME.card}; color:${THEME.text};
+      border:1px solid ${THEME.border}; border-radius: 12px;
+      padding:16px; margin-bottom:12px;
+    }
+    .pf-teams{ font-weight:700 }
+
+    .pf-grid{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin-top:10px }
+    .pf-pick{
+      padding:10px 12px; border-radius:10px; text-align:center; cursor:pointer;
+      background: transparent; color:${THEME.text};
+      border:1px solid ${THEME.border}; transition: all .15s ease;
+    }
+    .pf-pick:hover{ border-color:#333 }
+    .pf-pick.active{
+      background:${THEME.accent}; color:${THEME.accentText};
+      border-color:${THEME.accent};
+      font-weight: 800;
+    }
+
+    .pf-row{ display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap }
+    .pf-muted{ color:${THEME.muted} }
+
+    .pf-bar{ height:8px; background:#1F1F1F; border-radius:8px; overflow:hidden }
+    .pf-bar span{ display:block; height:100%; background:${THEME.accent} }
+
+    .pf-footer{ margin-top: 12px }
+    .pf-btn{
+      background:${THEME.accent}; color:${THEME.accentText};
+      border: none; font-weight:800; padding:10px 16px; border-radius:10px; cursor:pointer;
+    }
+    .pf-btn.secondary{
+      background: transparent; color:${THEME.accent}; border:1px solid ${THEME.accent};
+    }
+    .pf-btn[disabled]{ opacity:.6; cursor:not-allowed }
+
+    .pf-btnrow{ display:flex; gap:8px; flex-wrap:wrap }
+    .pf-spinner{
+      display:inline-block; width:16px; height:16px; border-radius:50%;
+      border:2px solid rgba(255,255,255,0.35); border-top-color:${THEME.accentText};
+      animation: pfspin 0.7s linear infinite; vertical-align: -3px; margin-right:8px;
+    }
+    @keyframes pfspin{ to{ transform: rotate(360deg) } }
   `;
   const style = document.createElement('style'); style.textContent = css; document.head.appendChild(style);
 
+  // === HELPERS ===
   async function j(url, opt) {
     const r = await fetch(url, opt);
     if (!r.ok) throw new Error(await r.text());
@@ -39,6 +101,20 @@
     return `${pad(d)}d ${pad(h)}h ${pad(m)}m ${pad(sec)}s`;
   }
 
+  function formatCET(date) {
+    if (!date) return 'n/a';
+    try {
+      return new Intl.DateTimeFormat('en-GB', {
+        timeZone: 'Europe/Berlin', // CET/CEST
+        year:'numeric', month:'short', day:'2-digit',
+        hour:'2-digit', minute:'2-digit'
+      }).format(new Date(date));
+    } catch {
+      return new Date(date).toLocaleString('en-GB');
+    }
+  }
+
+  // === MAIN ===
   async function renderPicks(container, cfg) {
     const base = cfg.base || '/.netlify/functions';
     const week = String(cfg.week);
@@ -48,10 +124,17 @@
     const wrap = el(`
       <div class="pf-wrap">
         <div class="pf-top">
-          <h2 style="margin:0">Week <span id="pf-week"></span> Picks</h2>
-          <div class="pf-countdown"><span class="pf-deadline">Deadline:</span> <span id="pf-deadline"></span> • <span id="pf-timer">--</span></div>
+          <div>
+            <h2 style="margin:0 0 4px 0">Week <span id="pf-week"></span> Picks</h2>
+            <div id="pf-deadline-line" class="pf-deadline-line"></div>
+          </div>
+          <div class="pf-countdown">
+            <span id="pf-digits" class="pf-digits">--</span>
+            <span class="pf-label">Countdown to deadline</span>
+          </div>
         </div>
-        <div id="pf-status" class="pf-muted" style="margin-bottom:8px"></div>
+
+        <div id="pf-status" class="pf-status"></div>
         <div id="pf-matches"></div>
         <div id="pf-actions" class="pf-footer"></div>
         <div id="pf-summary" style="margin-top:24px"></div>
@@ -73,24 +156,33 @@
       .filter(Boolean)
       .sort((a,b)=>a-b);
     const deadline = deadlines[0] || null;
-    const deadlineEl = wrap.querySelector('#pf-deadline');
-    deadlineEl.textContent = deadline ? new Date(deadline).toLocaleString() : 'n/a';
 
-    // Determine initial edit mode (pre-deadline only)
-    let editMode = !locked; // pre-deadline start in edit mode
-    // If all five picks are already chosen and you want to default to view mode, toggle this:
-    const allChosen = matches.length>0 && matches.every(m => !!picks[m.id]);
-    if (!locked && allChosen) editMode = false;
-
+    const deadlineLineEl = wrap.querySelector('#pf-deadline-line');
+    const digitsEl = wrap.querySelector('#pf-digits');
     const statusEl = wrap.querySelector('#pf-status');
     const matchesEl = wrap.querySelector('#pf-matches');
     const actionsEl = wrap.querySelector('#pf-actions');
     const summaryEl = wrap.querySelector('#pf-summary');
 
+    // Start in edit mode if not locked; but if all picks chosen, start in view mode
+    let editMode = !locked;
+    const allChosen = matches.length>0 && matches.every(m => !!picks[m.id]);
+    if (!locked && allChosen) editMode = false;
+
+    function renderDeadlineLine() {
+      // If editing (and not locked): show ONLY countdown (as per your request)
+      if (!locked && editMode) {
+        deadlineLineEl.textContent = ''; // hide the absolute CET line
+      } else {
+        const when = deadline ? `${formatCET(deadline)} CET` : 'n/a';
+        deadlineLineEl.textContent = `Deadline (CET): ${when}`;
+      }
+    }
+
     function renderEdit() {
       statusEl.textContent = 'Select your picks. You can change them until the deadline.';
-      actionsEl.innerHTML = '';
-      matchesEl.innerHTML = '';
+      matchesEl.innerHTML = ''; actionsEl.innerHTML = '';
+
       matches.forEach(m => {
         const cur = picks[m.id] || '';
         const card = el(`<div class="pf-card">
@@ -106,31 +198,52 @@
             const mid = btn.getAttribute('data-match');
             const val = btn.getAttribute('data-val');
             picks[mid] = val;
-            // toggle active styles within this card
             card.querySelectorAll('.pf-pick').forEach(b=>b.classList.remove('active'));
             btn.classList.add('active');
           });
         });
         matchesEl.appendChild(card);
       });
-      const saveBtn = el(`<button class="pf-btn">Save Picks</button>`);
+
+      const btnRow = el(`<div class="pf-btnrow"></div>`);
+      const saveBtn = el(`<button class="pf-btn" id="pf-save">Save picks</button>`);
+      btnRow.appendChild(saveBtn);
+      actionsEl.appendChild(btnRow);
+
       saveBtn.addEventListener('click', async ()=>{
         const payload = matches.map(m => ({ match_id: m.id, pick: picks[m.id] || '' }));
         if (payload.some(p => !p.pick)) { alert('Choose a pick for all five matches.'); return; }
-        await j(`${base}/submit-picks`, {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId, week: Number(week), picks: payload })
-        });
-        editMode = false; // switch to view mode after save
-        render();
+
+        // Loading state
+        saveBtn.disabled = true;
+        const spinner = el(`<span class="pf-spinner"></span>`);
+        saveBtn.prepend(spinner);
+        saveBtn.innerHTML = `<span class="pf-spinner"></span>Saving…`;
+
+        // Disable all pick buttons while saving
+        matchesEl.querySelectorAll('.pf-pick').forEach(b=>b.disabled = true);
+
+        try {
+          await j(`${base}/submit-picks`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId, week: Number(week), picks: payload })
+          });
+          // Flip to view mode after success
+          editMode = false;
+          render();
+        } catch (e) {
+          alert('Save failed. Please try again.');
+          saveBtn.disabled = false;
+          saveBtn.textContent = 'Save picks';
+          matchesEl.querySelectorAll('.pf-pick').forEach(b=>b.disabled = false);
+        }
       });
-      actionsEl.appendChild(saveBtn);
     }
 
-    async function renderPreView() {
+    function renderPreView() {
       statusEl.textContent = 'Your saved picks (you can still edit until the deadline).';
-      actionsEl.innerHTML = '';
-      matchesEl.innerHTML = '';
+      matchesEl.innerHTML = ''; actionsEl.innerHTML = '';
+
       matches.forEach(m => {
         const myPick = picks[m.id] || '(none)';
         const card = el(`<div class="pf-card">
@@ -141,15 +254,18 @@
         </div>`);
         matchesEl.appendChild(card);
       });
+
+      const btnRow = el(`<div class="pf-btnrow"></div>`);
       const editBtn = el(`<button class="pf-btn secondary">Edit picks</button>`);
       editBtn.addEventListener('click', ()=>{ editMode = true; render(); });
-      actionsEl.appendChild(editBtn);
+      btnRow.appendChild(editBtn);
+      actionsEl.appendChild(btnRow);
     }
 
     async function renderPost() {
       statusEl.textContent = 'Deadline passed. Picks locked. Showing summary.';
-      actionsEl.innerHTML = '';
-      matchesEl.innerHTML = '';
+      matchesEl.innerHTML = ''; actionsEl.innerHTML = ''; summaryEl.innerHTML = '';
+
       const sum = await j(`${base}/summary?week=${encodeURIComponent(week)}&userId=${encodeURIComponent(userId)}`);
       summaryEl.innerHTML = '<h3 style="margin:0 0 8px">Summary</h3>';
 
@@ -157,7 +273,7 @@
         const m = matches.find(x => x.id === pm.match_id);
         const myPick = picks[m.id] || '(none)';
         const countsBit = (pm.total != null && pm.count)
-          ? `<div class="pf-note pf-muted">(${pm.count.HOME} home, ${pm.count.DRAW} draw, ${pm.count.AWAY} away • total ${pm.total})</div>`
+          ? `<div class="pf-muted" style="margin-top:6px">(${pm.count.HOME} home, ${pm.count.DRAW} draw, ${pm.count.AWAY} away • total ${pm.total})</div>`
           : '';
         const card = el(`<div class="pf-card">
           <div class="pf-row" style="justify-content:space-between">
@@ -183,6 +299,7 @@
     }
 
     function render() {
+      renderDeadlineLine();
       if (locked) {
         renderPost();
       } else {
@@ -190,30 +307,24 @@
       }
     }
 
-    // Countdown timer
-    const timerEl = wrap.querySelector('#pf-timer');
-    let timerId = null;
+    // Countdown
     function tick() {
-      if (!deadline) { timerEl.textContent='--'; return; }
+      if (!deadline) { digitsEl.textContent='--'; return; }
       const now = Date.now();
       const diff = new Date(deadline).getTime() - now;
-      timerEl.textContent = formatCountdown(diff);
+      digitsEl.textContent = formatCountdown(diff);
       if (diff <= 0 && !locked) {
         locked = true; // flip to locked once deadline passes
-        clearInterval(timerId);
-        render(); // rerender into post-deadline
+        render();
       }
     }
-    if (deadline) {
-      tick();
-      timerId = setInterval(tick, 1000);
-    } else {
-      timerEl.textContent = '--';
-    }
+    tick();
+    const timerId = setInterval(tick, 1000);
 
     // Initial render
     render();
   }
 
+  // Expose global init
   window.PredictFootballPicks = { render: renderPicks };
 })();
