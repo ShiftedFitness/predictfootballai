@@ -1,64 +1,71 @@
 // netlify/functions/history.js
 const { ADALO, listAll } = require('./_adalo.js');
 
-// ---- helpers ----
+// ---------- helpers ----------
 const toKey = (x) => String(x ?? '').trim().toUpperCase(); // HOME/DRAW/AWAY
-
-const getRelId = (v) => Array.isArray(v) ? (v[0] ?? '') : v ?? '';   // handles ["2"] or 2 or ""
+const getRelId = (v) => Array.isArray(v) ? (v[0] ?? '') : (v ?? '');
 const sameId = (a,b) => String(a) === String(b);
+const ok = (body) => ({ statusCode: 200, headers: { 'Content-Type': 'application/json', 'Cache-Control':'no-store' }, body: JSON.stringify(body) });
+const fail = (code, msg) => ({ statusCode: code, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ error: msg }) });
 
 function displayName(u){
   return u?.['Username'] || u?.['Name'] || u?.['Full Name'] || `User ${u?.id ?? ''}`;
 }
-
 function safePoints(pick, correct, pointsAwarded) {
   if (typeof pointsAwarded === 'number') return pointsAwarded;
   if (!pick || !correct) return 0;
   return toKey(pick) === toKey(correct) ? 1 : 0;
 }
 
+// ---------- handler ----------
 exports.handler = async (event) => {
   try {
-    const url = new URL(event.rawUrl);
-    const userIdParam  = url.searchParams.get('userId');     // REQUIRED
-    const currentWeekQ = url.searchParams.get('week');       // "current week" from URL
-    const viewWeekQ    = url.searchParams.get('viewWeek');   // explicit week to view (from UI)
-    const compareIdQ   = url.searchParams.get('compareId');  // optional; default 1 (AI)
+    const q = event.queryStringParameters || {};
+    const userIdParam  = q.userId;
+    const currentWeekQ = q.week;
+    const viewWeekQ    = q.viewWeek;
+    const compareIdQ   = q.compareId;
 
-    if (!userIdParam) {
-      return { statusCode: 400, body: JSON.stringify({ error: 'userId required' }) };
-    }
+    if (!userIdParam) return fail(400, 'userId required');
     const userId    = String(userIdParam);
-    const compareId = String(compareIdQ || '1'); // AI default
+    const compareId = String(compareIdQ || '1'); // default AI=1
 
-    // ---- load collections ----
-    const [matchesAll, predsAll, usersAll] = await Promise.all([
-      listAll(ADALO.col.matches, 1000),
-      listAll(ADALO.col.predictions, 10000),
-      listAll(ADALO.col.users, 2000)
-    ]);
+    // Load data defensively
+    let matchesAll = [], predsAll = [], usersAll = [];
+    try {
+      [matchesAll, predsAll, usersAll] = await Promise.all([
+        listAll(ADALO.col.matches, 1000),
+        listAll(ADALO.col.predictions, 10000),
+        listAll(ADALO.col.users, 2000)
+      ]);
+    } catch (e) {
+      console.error('Adalo fetch failed', e);
+      return fail(500, 'Failed to fetch data from Adalo – check env vars/IDs');
+    }
+    matchesAll = matchesAll || [];
+    predsAll   = predsAll || [];
+    usersAll   = usersAll || [];
 
-    // weeks present
+    // Weeks present
     const weeksAsc = Array.from(new Set(
-      (matchesAll || []).map(m => Number(m['Week'])).filter(n => !Number.isNaN(n))
+      matchesAll.map(m => Number(m['Week'])).filter(n => !Number.isNaN(n))
     )).sort((a,b)=>a-b);
     const weeksDesc = [...weeksAsc].reverse();
 
-    // helper: is a week locked by deadline or flag?
     const isWeekLocked = (wk) => {
-      const ms = (matchesAll || []).filter(m => Number(m['Week']) === Number(wk));
-      if (ms.length === 0) return false;
+      const ms = matchesAll.filter(m => Number(m['Week']) === Number(wk));
+      if (!ms.length) return false;
       const earliest = ms.map(m => m['Lockout Time'] ? new Date(m['Lockout Time']) : null)
                          .filter(Boolean).sort((a,b)=>a-b)[0];
       const now = new Date();
       return (earliest && now >= earliest) || ms.some(m => m['Locked'] === true);
     };
 
-    // choose currentWeek (from URL or latest available)
+    // Choose currentWeek (from URL or latest)
     let currentWeek = currentWeekQ ? Number(currentWeekQ) : (weeksAsc[weeksAsc.length-1] ?? 1);
     if (!weeksAsc.includes(currentWeek) && weeksAsc.length) currentWeek = weeksAsc[weeksAsc.length-1];
 
-    // decide which week to view
+    // Decide viewWeek
     let viewWeek;
     if (viewWeekQ) {
       viewWeek = Number(viewWeekQ);
@@ -68,48 +75,49 @@ exports.handler = async (event) => {
         : (weeksDesc.find(w => w < currentWeek) ?? currentWeek);
     }
 
-    // matches for viewWeek
-    const matches = (matchesAll || [])
+    // Matches for viewWeek
+    const matches = matchesAll
       .filter(m => Number(m['Week']) === Number(viewWeek))
       .sort((a,b)=> Number(a.id) - Number(b.id));
 
-    // correct results per match
+    // Correct results
     const correctByMatch = Object.fromEntries(
       matches.map(m => [ String(m.id), toKey(m['Correct Result']) ])
     );
 
-    // filter predictions that belong to matches in this week
-    const matchIdsSet = new Set(matches.map(m => String(m.id)));
-    const weekPreds = (predsAll || []).filter(p => matchIdsSet.has(String(getRelId(p['Match']))));
+    // Filter predictions belonging to this week
+    const matchIdSet = new Set(matches.map(m => String(m.id)));
+    const weekPreds = predsAll.filter(p => matchIdSet.has(String(getRelId(p['Match']))));
 
-    // build users list for UI: prefer Users table; if empty, derive from predictions seen
-    let usersList = (usersAll || []).map(u => ({ id: String(u.id), name: displayName(u) }));
+    // Build users list (names) for the dropdown
+    let usersList = usersAll.map(u => ({ id: String(u.id), name: displayName(u) }));
     if (!usersList.length) {
+      // fallback: derive from predictions
       const uniq = Array.from(new Set(weekPreds.map(p => String(getRelId(p['User'])))));
       usersList = uniq.map(id => ({ id, name: `User ${id}` }));
     }
     usersList.sort((a,b)=> a.name.localeCompare(b.name));
 
-    // predictions for the viewer + comparator (handle array relations)
-    const predsFor = (uid) => weekPreds
+    // Predictions for viewer + comparator
+    const forUser = (uid) => weekPreds
       .filter(p => sameId(getRelId(p['User']), uid))
       .sort((a,b)=> Number(getRelId(a['Match'])) - Number(getRelId(b['Match'])));
 
-    const mine   = predsFor(userId);
-    const theirs = predsFor(compareId);
+    const mine   = forUser(userId);
+    const theirs = forUser(compareId);
 
-    // rows
+    // Rows
     const rows = matches.map(m => {
-      const midStr = String(m.id);
-      const me  = mine.find(p => String(getRelId(p['Match'])) === midStr);
-      const him = theirs.find(p => String(getRelId(p['Match'])) === midStr);
+      const mid = String(m.id);
+      const me  = mine.find(p => String(getRelId(p['Match'])) === mid);
+      const him = theirs.find(p => String(getRelId(p['Match'])) === mid);
 
       const myPick  = toKey(me?.['Pick']);
       const hisPick = toKey(him?.['Pick']);
-      const correct = correctByMatch[midStr] || '';
+      const correct = correctByMatch[mid] || '';
 
-      const myPt  = safePoints(myPick, correct, typeof me?.['Points Awarded']==='number' ? me['Points Awarded'] : undefined);
-      const hisPt = safePoints(hisPick, correct, typeof him?.['Points Awarded']==='number' ? him['Points Awarded'] : undefined);
+      const myPt  = safePoints(myPick, correct, typeof me?.['Points Awarded'] === 'number' ? me['Points Awarded'] : undefined);
+      const hisPt = safePoints(hisPick, correct, typeof him?.['Points Awarded'] === 'number' ? him['Points Awarded'] : undefined);
 
       return {
         match_id: m.id,
@@ -120,7 +128,7 @@ exports.handler = async (event) => {
       };
     });
 
-    // summaries
+    // Summaries
     const myCorrect  = rows.filter(r => r.myCorrect).length;
     const myTotal    = rows.filter(r => r.myPick).length;
     const myPoints   = rows.reduce((s,r)=> s + (r.myPoint||0), 0);
@@ -132,23 +140,23 @@ exports.handler = async (event) => {
     const myAcc  = myTotal  > 0 ? myCorrect  / myTotal  : 0;
     const hisAcc = hisTotal > 0 ? hisCorrect / hisTotal : 0;
 
-    // names from Users table (fallback if missing)
-    const meUser  = (usersAll || []).find(u => sameId(u.id, userId));
-    const himUser = (usersAll || []).find(u => sameId(u.id, compareId));
-    const meName  = meUser ? displayName(meUser) : `User ${userId}`;
-    const himName = himUser ? displayName(himUser) : (usersList.find(u => sameId(u.id, compareId))?.name || `User ${compareId}`);
+    // Names
+    const meUser  = usersAll.find(u => sameId(u.id, userId));
+    const himUser = usersAll.find(u => sameId(u.id, compareId));
 
-    return {
+    return ok({
       currentWeek,
       viewWeek,
-      availableWeeks: weeksDesc,   // for dropdown (descending)
+      availableWeeks: weeksDesc,
       weekLocked: isWeekLocked(viewWeek),
-      users: usersList,            // [{id,name}] for name dropdown
-      me:      { id: userId,   name: meName,  correct: myCorrect, total: myTotal, accuracy: myAcc, points: myPoints },
-      compare: { id: compareId, name: himName, correct: hisCorrect, total: hisTotal, accuracy: hisAcc, points: hisPoints },
+      users: usersList,
+      me:      { id: userId,   name: meUser ? displayName(meUser) : `User ${userId}`,   correct: myCorrect, total: myTotal, accuracy: myAcc, points: myPoints },
+      compare: { id: compareId, name: himUser ? displayName(himUser) : (usersList.find(u=>sameId(u.id,compareId))?.name || `User ${compareId}`),
+                 correct: hisCorrect, total: hisTotal, accuracy: hisAcc, points: hisPoints },
       rows
-    };
+    });
   } catch (e) {
-    return { statusCode: 500, body: JSON.stringify({ error: e.message }) };
+    console.error('history.js top-level error:', e);
+    return fail(500, String(e));
   }
 };
