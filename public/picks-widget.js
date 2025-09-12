@@ -5,7 +5,7 @@
     card: '#000000',        // cards
     border: '#1a1a1a',
     text: '#FFFFFF',
-    muted: '#C8C8C8',
+    muted: '#EAEAEA',
     accent: '#FFFFFF',      // buttons/active states
     accentText: '#000000'
   };
@@ -13,7 +13,7 @@
   // === STYLES ===
   const css = `
     .pf-wrap{
-      max-width: 760px; margin: 24px auto; padding: 16px;
+      max-width: 750px; margin: 24px auto; padding: 16px;
       background:${THEME.bg}; color:${THEME.text};
       font-family: Inter, system-ui, Arial;
       border-radius: 14px;
@@ -22,16 +22,14 @@
     .pf-deadline-line{ font-weight:600; color:${THEME.text}; }
     .pf-countdown{
       font-variant-numeric: tabular-nums;
-      line-height: 1; letter-spacing: 1px;
+      line-height: 1; letter-spacing: 0.5px;
       color:${THEME.text};
+      white-space: nowrap;
     }
     .pf-countdown .pf-digits{
-      display:block; font-size: 42px; font-weight: 800;
-      padding: 8px 12px; border-radius: 12px;
+      display:block; font-size: 24px; font-weight: 800;
+      padding: 6px 10px; border-radius: 10px;
       background: rgba(0,0,0,0.25);
-    }
-    .pf-countdown .pf-label{
-      display:block; margin-top:6px; font-size: 12px; color:${THEME.muted};
     }
 
     .pf-status{ color:${THEME.muted}; margin-bottom: 8px }
@@ -45,15 +43,15 @@
 
     .pf-grid{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin-top:10px }
     .pf-pick{
-      padding:10px 12px; border-radius:10px; text-align:center; cursor:pointer;
+      padding:12px 12px; border-radius:10px; text-align:center; cursor:pointer;
       background: transparent; color:${THEME.text};
-      border:1px solid ${THEME.border}; transition: all .15s ease;
+      border:1px solid ${THEME.border}; transition: all .15s ease; font-weight:700;
     }
     .pf-pick:hover{ border-color:#333 }
     .pf-pick.active{
       background:${THEME.accent}; color:${THEME.accentText};
       border-color:${THEME.accent};
-      font-weight: 800;
+      font-weight: 900;
     }
 
     .pf-row{ display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap }
@@ -65,20 +63,22 @@
     .pf-footer{ margin-top: 12px }
     .pf-btn{
       background:${THEME.accent}; color:${THEME.accentText};
-      border: none; font-weight:800; padding:10px 16px; border-radius:10px; cursor:pointer;
+      border: none; font-weight:900; padding:12px 18px; border-radius:10px; cursor:pointer;
+      font-size:16px;
     }
     .pf-btn.secondary{
-      background: transparent; color:${THEME.accent}; border:1px solid ${THEME.accent};
+      background:${THEME.accent}; color:${THEME.accentText}; border:1px solid ${THEME.accent};
     }
     .pf-btn[disabled]{ opacity:.6; cursor:not-allowed }
 
-    .pf-btnrow{ display:flex; gap:8px; flex-wrap:wrap }
+    .pf-btnrow{ display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-start }
     .pf-spinner{
       display:inline-block; width:16px; height:16px; border-radius:50%;
-      border:2px solid rgba(255,255,255,0.35); border-top-color:${THEME.accentText};
+      border:2px solid rgba(0,0,0,0.25); border-top-color:${THEME.accentText};
       animation: pfspin 0.7s linear infinite; vertical-align: -3px; margin-right:8px;
     }
     @keyframes pfspin{ to{ transform: rotate(360deg) } }
+    .pf-hidden{ display:none !important; }
   `;
   const style = document.createElement('style'); style.textContent = css; document.head.appendChild(style);
 
@@ -128,10 +128,7 @@
             <h2 style="margin:0 0 4px 0">Week <span id="pf-week"></span> Picks</h2>
             <div id="pf-deadline-line" class="pf-deadline-line"></div>
           </div>
-          <div class="pf-countdown">
-            <span id="pf-digits" class="pf-digits">--</span>
-            <span class="pf-label">Countdown to deadline</span>
-          </div>
+          <div class="pf-countdown"><span id="pf-digits" class="pf-digits">--</span></div>
         </div>
 
         <div id="pf-status" class="pf-status"></div>
@@ -169,10 +166,21 @@
     const allChosen = matches.length>0 && matches.every(m => !!picks[m.id]);
     if (!locked && allChosen) editMode = false;
 
-    function renderDeadlineLine() {
-      // If editing (and not locked): show ONLY countdown (as per your request)
+    function renderHeaderVisibility() {
+      // In edit mode (and pre-deadline): hide both deadline line and countdown
       if (!locked && editMode) {
-        deadlineLineEl.textContent = ''; // hide the absolute CET line
+        deadlineLineEl.classList.add('pf-hidden');
+        digitsEl.parentElement.classList.add('pf-hidden');
+      } else {
+        deadlineLineEl.classList.remove('pf-hidden');
+        digitsEl.parentElement.classList.remove('pf-hidden');
+      }
+    }
+
+    function renderDeadlineLine() {
+      // Only show absolute CET time when not editing
+      if (!locked && editMode) {
+        deadlineLineEl.textContent = '';
       } else {
         const when = deadline ? `${formatCET(deadline)} CET` : 'n/a';
         deadlineLineEl.textContent = `Deadline (CET): ${when}`;
@@ -180,7 +188,7 @@
     }
 
     function renderEdit() {
-      statusEl.textContent = 'Select your picks. You can change them until the deadline.';
+      statusEl.textContent = ''; // remove “select your picks” text per request
       matchesEl.innerHTML = ''; actionsEl.innerHTML = '';
 
       matches.forEach(m => {
@@ -216,11 +224,7 @@
 
         // Loading state
         saveBtn.disabled = true;
-        const spinner = el(`<span class="pf-spinner"></span>`);
-        saveBtn.prepend(spinner);
         saveBtn.innerHTML = `<span class="pf-spinner"></span>Saving…`;
-
-        // Disable all pick buttons while saving
         matchesEl.querySelectorAll('.pf-pick').forEach(b=>b.disabled = true);
 
         try {
@@ -241,7 +245,7 @@
     }
 
     function renderPreView() {
-      statusEl.textContent = 'Your saved picks (you can still edit until the deadline).';
+      statusEl.textContent = 'Your saved picks.'; // concise per request
       matchesEl.innerHTML = ''; actionsEl.innerHTML = '';
 
       matches.forEach(m => {
@@ -256,14 +260,14 @@
       });
 
       const btnRow = el(`<div class="pf-btnrow"></div>`);
-      const editBtn = el(`<button class="pf-btn secondary">Edit picks</button>`);
+      const editBtn = el(`<button class="pf-btn secondary" style="font-size:18px;padding:14px 18px;">Edit picks</button>`);
       editBtn.addEventListener('click', ()=>{ editMode = true; render(); });
       btnRow.appendChild(editBtn);
       actionsEl.appendChild(btnRow);
     }
 
     async function renderPost() {
-      statusEl.textContent = 'Deadline passed. Picks locked. Showing summary.';
+      statusEl.textContent = 'Deadline passed. Picks locked.';
       matchesEl.innerHTML = ''; actionsEl.innerHTML = ''; summaryEl.innerHTML = '';
 
       const sum = await j(`${base}/summary?week=${encodeURIComponent(week)}&userId=${encodeURIComponent(userId)}`);
@@ -299,6 +303,7 @@
     }
 
     function render() {
+      renderHeaderVisibility();
       renderDeadlineLine();
       if (locked) {
         renderPost();
