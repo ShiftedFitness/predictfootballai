@@ -14,18 +14,23 @@
   .row{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; justify-content:space-between }
   .muted{ color:var(--muted) }
   .controls{ gap:8px; margin-bottom:8px }
-  select, input{ background:#0e0e0e; color:#fff; border:1px solid #2a2a2a; border-radius:8px; padding:8px 10px; }
+  select{ background:#0e0e0e; color:#fff; border:1px solid #2a2a2a; border-radius:8px; padding:8px 10px; }
   .btn{ background:var(--accent); color:var(--accentText); border:0; font-weight:800; padding:8px 12px; border-radius:8px; cursor:pointer }
+
   .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:8px }
   .stat{ background:#0e0e0e; border:1px solid #1f1f1f; padding:10px; border-radius:10px; text-align:center }
   .stat h4{ margin:0; font-size:12px; color:#cfcfcf; text-transform:uppercase; letter-spacing:.3px }
   .stat .v{ font-size:18px; font-weight:800; margin-top:4px }
+
   .table{ width:100%; border-collapse:collapse; font-size:14px; }
   .table th, .table td{ padding:10px 8px; border-bottom:1px solid #1f1f1f; text-align:left; }
   .table th{ font-size:12px; color:#cfcfcf; text-transform:uppercase; letter-spacing:.3px }
   .table tr:last-child td{ border-bottom:none }
+
   .center{ text-align:center }
-  .good{ color:#7CFC00 } .bad{ color:#FF6B6B }
+  .good{ color:#7CFC00 }  /* lime for correct */
+  .bad{ color:#FF6B6B }   /* red for wrong */
+  .pick-badge{ margin-left:6px; font-weight:900 }
 </style>
 </head>
 <body>
@@ -52,9 +57,9 @@
     <div class="card">
       <div class="grid2">
         <div class="stat"><h4>Your Points</h4><div id="myPts" class="v">-</div></div>
-        <div class="stat"><h4>Compare Points</h4><div id="hisPts" class="v">-</div></div>
+        <div class="stat"><h4><span id="compNamePts">Compare</span> Points</h4><div id="hisPts" class="v">-</div></div>
         <div class="stat"><h4>Your Accuracy</h4><div id="myAcc" class="v">-</div></div>
-        <div class="stat"><h4>Compare Accuracy</h4><div id="hisAcc" class="v">-</div></div>
+        <div class="stat"><h4><span id="compNameAcc">Compare</span> Accuracy</h4><div id="hisAcc" class="v">-</div></div>
       </div>
     </div>
 
@@ -65,8 +70,7 @@
             <th>Fixture</th>
             <th class="center">Your Pick</th>
             <th class="center">Correct</th>
-            <th class="center">Compare Pick</th>
-            <th class="center">✓</th>
+            <th class="center"><span id="compNameCol">Compare</span> Pick</th>
           </tr>
         </thead>
         <tbody></tbody>
@@ -79,7 +83,7 @@
 const base = '/.netlify/functions';
 const qs   = new URLSearchParams(location.search);
 const userId      = qs.get('userId') || '';      // REQUIRED
-const currentWeek = qs.get('week') || '';        // "current week" for default logic
+const currentWeek = qs.get('week') || '';        // defaulting seed
 const compareIdQ  = qs.get('compareId') || '1';  // default AI=1
 
 if (!userId) {
@@ -123,26 +127,34 @@ async function load({ currentWeek, viewWeek, compareId }) {
   document.getElementById('weekInfo').textContent =
     `Viewing Week ${data.viewWeek} • ${data.weekLocked ? 'Locked (results in)' : 'Open'}`;
 
+  // Stat card labels to use compare user's name
+  document.getElementById('compNamePts').textContent  = data.compare.name || 'Compare';
+  document.getElementById('compNameAcc').textContent  = data.compare.name || 'Compare';
+  document.getElementById('compNameCol').textContent  = data.compare.name || 'Compare';
+
   // Stats
   document.getElementById('myPts').textContent  = data.me.points;
   document.getElementById('hisPts').textContent = data.compare.points;
   document.getElementById('myAcc').textContent  = (Math.round(data.me.accuracy*1000)/10).toFixed(1) + '%';
   document.getElementById('hisAcc').textContent = (Math.round(data.compare.accuracy*1000)/10).toFixed(1) + '%';
 
-  // Table
+  // Table rows — put ✓/✗ next to each pick (you + compare)
   const tb = document.querySelector('#matchTbl tbody');
   tb.innerHTML = '';
   (data.rows || []).forEach(r=>{
+    const yourOk = !!r.myPick && !!r.correct && r.myPick === r.correct;
+    const hisOk  = !!r.hisPick && !!r.correct && r.hisPick === r.correct;
+
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${escapeHTML(r.fixture)}</td>
-      <td class="center">${escapeHTML(label(r.myPick))}</td>
+      <td class="center">${escapeHTML(label(r.myPick))}${badge(yourOk)}</td>
       <td class="center">${escapeHTML(label(r.correct))}</td>
-      <td class="center">${escapeHTML(label(r.hisPick))}</td>
-      <td class="center">${r.myCorrect ? '<span class="good">✓</span>' : '<span class="bad">✗</span>'}</td>
+      <td class="center">${escapeHTML(label(r.hisPick))}${badge(hisOk)}</td>
     `;
     tb.appendChild(tr);
   });
+
   document.getElementById('legends').textContent =
     `${data.me.name} vs ${data.compare.name} • Picks shown as HOME / DRAW / AWAY`;
 
@@ -152,14 +164,15 @@ async function load({ currentWeek, viewWeek, compareId }) {
     const selectedCompareId = compareSel.value || '1';
     const next = new URL(location.href);
     next.searchParams.set('userId', userId);
-    next.searchParams.set('week', currentWeek || '');   // keep the "current week" param for defaulting on future loads
-    next.searchParams.set('viewWeek', selectedWeek);     // explicitly view this week
+    next.searchParams.set('week', currentWeek || '');   // keep the "current week" for defaulting
+    next.searchParams.set('viewWeek', selectedWeek);     // explicitly show this week next load
     next.searchParams.set('compareId', selectedCompareId);
     location.href = next.toString();
   };
 }
 
 function label(x){ return (x || '-'); }
+function badge(ok){ return ok ? ' <span class="pick-badge good">✓</span>' : ' <span class="pick-badge bad">✗</span>'; }
 function escapeHTML(s){ return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 </script>
 </body>
