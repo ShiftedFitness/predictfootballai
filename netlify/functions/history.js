@@ -2,11 +2,13 @@
 const { ADALO, listAll } = require('./_adalo.js');
 
 function toKey(x){ return String(x||'').trim().toUpperCase(); } // HOME/DRAW/AWAY
+
 function safePoints(pick, correct, pointsAwarded) {
   if (typeof pointsAwarded === 'number') return pointsAwarded;
   if (!pick || !correct) return 0;
   return toKey(pick) === toKey(correct) ? 1 : 0;
 }
+
 function displayName(u){
   return u?.['Username'] || u?.['Name'] || u?.['Full Name'] || `User ${u?.id ?? ''}`;
 }
@@ -14,53 +16,68 @@ function displayName(u){
 exports.handler = async (event) => {
   try {
     const url = new URL(event.rawUrl);
-    const userId = url.searchParams.get('userId');             // REQUIRED (main user to show)
-    const weekParam = url.searchParams.get('week');            // optional (overrides default)
-    const compareIdParam = url.searchParams.get('compareId');  // optional; default 1
+    const userId       = url.searchParams.get('userId');             // REQUIRED (the viewer)
+    const currentWeekQ = url.searchParams.get('week');               // "current week" from URL (used for defaulting)
+    const viewWeekQ    = url.searchParams.get('viewWeek');           // explicit week to view (overrides default logic)
+    const compareIdQ   = url.searchParams.get('compareId');          // optional; default 1 (AI)
 
     if (!userId) {
       return { statusCode: 400, body: JSON.stringify({ error: 'userId required' }) };
     }
 
-    // Load all needed data
+    // Load everything we need
     const [matchesAll, predsAll, usersAll] = await Promise.all([
       listAll(ADALO.col.matches, 1000),
       listAll(ADALO.col.predictions, 10000),
       listAll(ADALO.col.users, 2000)
     ]);
 
-    // Build users list for the UI (name dropdown)
+    // Build list of users for UI (by name)
     const usersList = usersAll.map(u => ({ id: String(u.id), name: displayName(u) }))
                               .sort((a,b)=> a.name.localeCompare(b.name));
 
-    // Determine compare user id
-    const defaultCompareId = '1';
-    const compareId = String(compareIdParam || defaultCompareId);
-
-    // Weeks present
-    const weeks = Array.from(new Set(
+    // Weeks available (ascending & descending)
+    const weeksAsc = Array.from(new Set(
       matchesAll.map(m => Number(m['Week'])).filter(n => !Number.isNaN(n))
     )).sort((a,b)=>a-b);
+    const weeksDesc = [...weeksAsc].reverse();
 
-    // Choose week
-    let week;
-    if (weekParam) {
-      week = Number(weekParam);
-    } else {
-      const latest = weeks[weeks.length - 1];
-      week = latest;
-      const latestMatches = matchesAll.filter(m => Number(m['Week']) === latest);
-      const earliest = latestMatches
-        .map(m => m['Lockout Time'] ? new Date(m['Lockout Time']) : null)
-        .filter(Boolean).sort((a,b)=>a-b)[0];
+    // Helper: is a given week "locked" by time or flag?
+    const isWeekLocked = (wk) => {
+      const ms = matchesAll.filter(m => Number(m['Week']) === Number(wk));
+      if (ms.length === 0) return false;
+      const earliest = ms.map(m => m['Lockout Time'] ? new Date(m['Lockout Time']) : null)
+                         .filter(Boolean).sort((a,b)=>a-b)[0];
       const now = new Date();
-      const latestLocked = !!earliest && now >= earliest;
-      if (!latestLocked && weeks.includes(latest - 1)) week = latest - 1;
+      return (earliest && now >= earliest) || ms.some(m => m['Locked'] === true);
+    };
+
+    // Determine which week to show
+    let currentWeek = currentWeekQ ? Number(currentWeekQ) : (weeksAsc[weeksAsc.length-1] ?? 1);
+    let viewWeek;
+
+    if (viewWeekQ) {
+      // User explicitly asked to view this week
+      viewWeek = Number(viewWeekQ);
+    } else {
+      // Default logic based on currentWeek param
+      const currentExists = weeksAsc.includes(currentWeek);
+      if (!currentExists) {
+        // If currentWeek not present in data, fall back to latest available
+        currentWeek = weeksAsc[weeksAsc.length-1] ?? 1;
+      }
+      if (isWeekLocked(currentWeek)) {
+        viewWeek = currentWeek;
+      } else {
+        // Use the nearest previous week that exists
+        const prev = [...weeksDesc].find(w => w < currentWeek);
+        viewWeek = prev ?? currentWeek; // if none, show current anyway
+      }
     }
 
-    // Matches for chosen week
+    // Matches for the week we are showing
     const matches = matchesAll
-      .filter(m => Number(m['Week']) === Number(week))
+      .filter(m => Number(m['Week']) === Number(viewWeek))
       .sort((a,b)=> Number(a.id) - Number(b.id));
 
     // Correct results lookup
@@ -68,13 +85,14 @@ exports.handler = async (event) => {
       matches.map(m => [ String(m.id), toKey(m['Correct Result']) ])
     );
 
-    // Filter predictions for this week
+    // Predictions for that week
     const weekPreds = predsAll.filter(p => matches.some(m => String(m.id) === String(p['Match'])));
-    const predsFor = (uid) => weekPreds.filter(p => String(p['User']) === String(uid))
-                                       .sort((a,b)=> Number(a['Match']) - Number(b['Match']));
+    const forUser = (uid) => weekPreds.filter(p => String(p['User']) === String(uid))
+                                      .sort((a,b)=> Number(a['Match']) - Number(b['Match']));
 
-    const mine   = predsFor(userId);
-    const theirs = predsFor(compareId);
+    const compareId = String(compareIdQ || '1'); // default AI=1
+    const mine   = forUser(userId);
+    const theirs = forUser(compareId);
 
     // Build rows
     const rows = matches.map(m => {
@@ -106,22 +124,16 @@ exports.handler = async (event) => {
     const myAcc  = myTotal  > 0 ? myCorrect  / myTotal  : 0;
     const hisAcc = hisTotal > 0 ? hisCorrect / hisTotal : 0;
 
-    // Lock state
-    const earliest = matches
-      .map(m => m['Lockout Time'] ? new Date(m['Lockout Time']) : null)
-      .filter(Boolean).sort((a,b)=>a-b)[0];
-    const now = new Date();
-    const weekLocked = (!!earliest && now >= earliest) || matches.some(m => m['Locked'] === true);
-
     // Names
     const meUser  = usersAll.find(u => String(u.id) === String(userId));
     const himUser = usersAll.find(u => String(u.id) === String(compareId));
 
     return {
-      week: Number(week),
-      availableWeeks: weeks,
-      weekLocked,
-      users: usersList, // for name dropdown
+      currentWeek,                 // what was passed in URL (or latest if missing)
+      viewWeek,                    // week actually being displayed
+      availableWeeks: weeksDesc,   // descending for UI
+      weekLocked: isWeekLocked(viewWeek),
+      users: usersList,            // [{id,name}] for name dropdown
       me: {
         id: String(userId), name: displayName(meUser),
         correct: myCorrect, total: myTotal, accuracy: myAcc, points: myPoints
