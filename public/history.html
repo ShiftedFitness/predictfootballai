@@ -40,7 +40,7 @@
         </div>
         <div>
           <label class="muted" for="compareSel">Compare With</label><br/>
-          <select id="compareSel" style="min-width:200px"></select>
+          <select id="compareSel" style="min-width:220px"></select>
         </div>
         <div>
           <button id="applyBtn" class="btn">Apply</button>
@@ -78,37 +78,38 @@
 <script>
 const base = '/.netlify/functions';
 const qs   = new URLSearchParams(location.search);
-const userId    = qs.get('userId') || '';  // required (hidden)
-const weekQ     = qs.get('week');          // optional override
-const compareId = qs.get('compareId') || '1'; // hidden, but we’ll show names
+const userId      = qs.get('userId') || '';      // REQUIRED
+const currentWeek = qs.get('week') || '';        // "current week" for default logic
+const compareIdQ  = qs.get('compareId') || '1';  // default AI=1
 
 if (!userId) {
   document.body.innerHTML = '<div style="padding:24px;color:#fff;font-family:Inter,system-ui,Arial">Missing userId in URL</div>';
 } else {
-  load(weekQ, compareId);
+  load({ currentWeek, viewWeek: qs.get('viewWeek'), compareId: compareIdQ });
 }
 
 async function fetchJSON(u){ const r = await fetch(u, { cache:'no-store' }); if(!r.ok) throw new Error(await r.text()); return r.json(); }
 
-async function load(prefWeek, compareId) {
+async function load({ currentWeek, viewWeek, compareId }) {
   const url = new URL(`${base}/history`, location.origin);
   url.searchParams.set('userId', userId);
-  if (prefWeek)  url.searchParams.set('week', prefWeek);
-  if (compareId) url.searchParams.set('compareId', compareId);
+  if (currentWeek) url.searchParams.set('week', currentWeek);
+  if (viewWeek)    url.searchParams.set('viewWeek', viewWeek);
+  if (compareId)   url.searchParams.set('compareId', compareId);
 
   const data = await fetchJSON(url.toString());
 
-  // Populate week select
+  // Weeks dropdown (descending), select the week actually shown
   const weekSel = document.getElementById('weekSel');
   weekSel.innerHTML = '';
-  data.availableWeeks.forEach(w=>{
+  (data.availableWeeks || []).forEach(w=>{
     const opt = document.createElement('option');
     opt.value = w; opt.textContent = `Week ${w}`;
-    if (Number(w) === Number(data.week)) opt.selected = true;
+    if (Number(w) === Number(data.viewWeek)) opt.selected = true;
     weekSel.appendChild(opt);
   });
 
-  // Populate compare select by NAME (but keep the option value as id)
+  // Compare dropdown (names), select current compare id
   const compareSel = document.getElementById('compareSel');
   compareSel.innerHTML = '';
   (data.users || []).forEach(u=>{
@@ -118,8 +119,9 @@ async function load(prefWeek, compareId) {
     compareSel.appendChild(opt);
   });
 
-  // Week info
-  document.getElementById('weekInfo').textContent = data.weekLocked ? 'This week is locked (results in).' : 'This week is still open.';
+  // Info line
+  document.getElementById('weekInfo').textContent =
+    `Viewing Week ${data.viewWeek} • ${data.weekLocked ? 'Locked (results in)' : 'Open'}`;
 
   // Stats
   document.getElementById('myPts').textContent  = data.me.points;
@@ -127,7 +129,7 @@ async function load(prefWeek, compareId) {
   document.getElementById('myAcc').textContent  = (Math.round(data.me.accuracy*1000)/10).toFixed(1) + '%';
   document.getElementById('hisAcc').textContent = (Math.round(data.compare.accuracy*1000)/10).toFixed(1) + '%';
 
-  // Table rows
+  // Table
   const tb = document.querySelector('#matchTbl tbody');
   tb.innerHTML = '';
   (data.rows || []).forEach(r=>{
@@ -144,14 +146,15 @@ async function load(prefWeek, compareId) {
   document.getElementById('legends').textContent =
     `${data.me.name} vs ${data.compare.name} • Picks shown as HOME / DRAW / AWAY`;
 
-  // Apply: reload with chosen week and compareId (names are for display only)
+  // Apply = force exact week + selected compare
   document.getElementById('applyBtn').onclick = ()=>{
-    const w = weekSel.value;
-    const cid = compareSel.value || '1';
+    const selectedWeek = weekSel.value;
+    const selectedCompareId = compareSel.value || '1';
     const next = new URL(location.href);
-    next.searchParams.set('week', w);
-    next.searchParams.set('compareId', cid);
     next.searchParams.set('userId', userId);
+    next.searchParams.set('week', currentWeek || '');   // keep the "current week" param for defaulting on future loads
+    next.searchParams.set('viewWeek', selectedWeek);     // explicitly view this week
+    next.searchParams.set('compareId', selectedCompareId);
     location.href = next.toString();
   };
 }
