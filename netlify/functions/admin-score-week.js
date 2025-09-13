@@ -8,6 +8,7 @@ const resp = (status, body) => ({
   headers: { 'Content-Type': 'application/json' },
   body: typeof body === 'string' ? JSON.stringify({ error: body }) : JSON.stringify(body)
 });
+const nameOf = (u) => u?.['Username'] || u?.['Name'] || u?.['Full Name'] || `User ${u?.id ?? ''}`;
 
 exports.handler = async (event) => {
   try {
@@ -15,38 +16,40 @@ exports.handler = async (event) => {
     const secret = (event.headers['x-admin-secret'] || event.headers['X-Admin-Secret'] || '').trim();
     if (process.env.ADMIN_SECRET && secret !== process.env.ADMIN_SECRET) return resp(401, 'Unauthorised');
 
-    const { week, bumpCurrentWeekForAll } = JSON.parse(event.body || '{}');
+    const { week } = JSON.parse(event.body || '{}');
     if (!week) return resp(400, 'week required');
 
-    // Load data
     const [matchesAll, predsAll, usersAll] = await Promise.all([
       listAll(ADALO.col.matches, 1000),
       listAll(ADALO.col.predictions, 20000),
       listAll(ADALO.col.users, 5000)
     ]);
 
-    // Week’s matches
     const matches = matchesAll
       .filter(m => Number(m['Week']) === Number(week))
       .sort((a,b)=> Number(a.id) - Number(b.id));
     if (!matches.length) return resp(400, `No matches for week ${week}`);
 
-    // Map correct results
     const correctByMatch = Object.fromEntries(matches.map(m => [ String(m.id), K(m['Correct Result']) ]));
 
-    // Predictions for this week
     const matchIds = new Set(matches.map(m => String(m.id)));
     const weekPreds = predsAll.filter(p => matchIds.has(String(relId(p['Match']))));
 
-    // 1) Award per prediction (only where Points Awarded is null)
-    const perUserDelta = {}; // uid -> {correct, total}
+    // pre-run awarded points per user
+    const preAwardedByUser = {};
+    for (const p of weekPreds) {
+      const uid = String(relId(p['User']));
+      const pts = Number(p['Points Awarded'] ?? 0);
+      preAwardedByUser[uid] = (preAwardedByUser[uid] || 0) + pts;
+    }
+
+    const perUserDelta = {};
     let predictionsUpdated = 0;
 
     for (const p of weekPreds) {
       const uid = String(relId(p['User']));
       const mid = String(relId(p['Match']));
-
-      if (typeof p['Points Awarded'] === 'number') continue; // already scored
+      if (typeof p['Points Awarded'] === 'number') continue;
 
       const pick = K(p['Pick']);
       const correct = correctByMatch[mid];
@@ -59,79 +62,65 @@ exports.handler = async (event) => {
       predictionsUpdated++;
 
       if (!perUserDelta[uid]) perUserDelta[uid] = { correct: 0, total: 0 };
-      perUserDelta[uid].total += 1;
+      perUserDelta[uid].total   += 1;
       perUserDelta[uid].correct += point;
     }
 
-    // 2) Sum the week after updates to compute bonus and totals
-    const awardedByUser = {};
-    for (const p of weekPreds) {
-      const uid = String(relId(p['User']));
-      const pts = Number(p['Points Awarded'] ?? 0);
-      awardedByUser[uid] = (awardedByUser[uid] || 0) + pts;
-    }
-
-    // Users who participated this week (had at least one prediction)
     const participatingUserIds = Array.from(new Set(weekPreds.map(p => String(relId(p['User'])))));
-
-    // 3) Update user totals + bump "Current Week"
     const userUpdates = [];
+    const fullHouseUserIds = [];  // <- NEW
+
     for (const uid of participatingUserIds) {
       const u = usersAll.find(x => String(x.id) === uid);
       if (!u) continue;
 
-      // Deltas from this run only
-      const addCorrect = perUserDelta[uid]?.correct || 0;
+      const addCorrect   = perUserDelta[uid]?.correct || 0;
       const addIncorrect = perUserDelta[uid] ? (perUserDelta[uid].total - perUserDelta[uid].correct) : 0;
 
-      // Bonus (simple & safe since you said you won't re-score): +5 if total correct for the week === 5
-      const weeklyCorrect = awardedByUser[uid] || 0;
-      const bonus = (weeklyCorrect === 5) ? 5 : 0;
+      const weeklyCorrectTotal = (preAwardedByUser[uid] || 0) + addCorrect;
+
+      // +5 bonus for 5/5 after this run
+      const bonus = (weeklyCorrectTotal === 5) ? 5 : 0;
+      if (bonus === 5) fullHouseUserIds.push(uid); // <- NEW: collect full houses
 
       const newPoints    = Number(u['Points'] ?? 0) + addCorrect + bonus;
       const newCorrect   = Number(u['Correct Results'] ?? 0) + addCorrect;
       const newIncorrect = Number(u['Incorrect Results'] ?? 0) + addIncorrect;
 
-      // Bump "Current Week" +1 (per-user field)
-      const ck = findFieldKey(u, 'Current Week'); // tolerant to case/spacing
+      const ck = findFieldKey(u, 'Current Week');
       const currentWeekValue = ck ? Number(u[ck] ?? week) : Number(week);
       const newCurrentWeek = currentWeekValue + 1;
 
-      const body = {
-        'Points': newPoints,
-        'Correct Results': newCorrect,
-        'Incorrect Results': newIncorrect
-      };
+      const body = { 'Points': newPoints, 'Correct Results': newCorrect, 'Incorrect Results': newIncorrect };
       if (ck) body[ck] = newCurrentWeek; else body['Current Week'] = newCurrentWeek;
 
       await adaloFetch(`${ADALO.col.users}/${uid}`, { method: 'PUT', body: JSON.stringify(body) });
 
       userUpdates.push({
         uid,
+        name: nameOf(u),                          // <- include name for convenience
         addPoints: addCorrect + bonus,
         addCorrect,
         addIncorrect,
-        weeklyCorrect,
+        weeklyCorrectAfterRun: weeklyCorrectTotal,
         currentWeek: newCurrentWeek
       });
     }
 
-    // Optional: bump EVERYONE’s "Current Week" (you probably don't need this)
-    if (bumpCurrentWeekForAll === true) {
-      for (const u of usersAll) {
-        const ck = findFieldKey(u, 'Current Week');
-        const curr = ck ? Number(u[ck] ?? week) : Number(week);
-        const body = {}; body[ck || 'Current Week'] = curr + 1;
-        await adaloFetch(`${ADALO.col.users}/${u.id}`, { method: 'PUT', body: JSON.stringify(body) });
-      }
-    }
+    // Build a friendly list of full-house names
+    const fullHouseNames = fullHouseUserIds
+      .map(id => usersAll.find(u => String(u.id) === String(id)))
+      .filter(Boolean)
+      .map(nameOf);
 
     return resp(200, {
       ok: true,
       week,
       predictionsUpdated,
       usersUpdated: userUpdates.length,
-      detail: userUpdates
+      detail: userUpdates,
+      fullHouses: fullHouseUserIds,     // array of user IDs who hit 5/5
+      fullHouseNames                    // same, as names
     });
 
   } catch (e) {
