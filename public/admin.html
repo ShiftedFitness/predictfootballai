@@ -1,63 +1,20 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>PredictFootball – Admin</title>
-<style>
-  body{margin:0;background:#111;color:#fff;font-family:Inter,system-ui,Arial;display:flex;justify-content:center}
-  .wrap{max-width:780px;width:100%;margin:24px 12px;background:#30A278;color:#fff;border-radius:14px;padding:16px}
-  h2{margin:0 0 12px}
-  .card{background:#000;border:1px solid #1a1a1a;border-radius:12px;padding:12px;margin-bottom:12px}
-  label{display:block;margin-bottom:6px;color:#EAEAEA}
-  input,select{background:#0e0e0e;color:#fff;border:1px solid #2a2a2a;border-radius:8px;padding:8px 10px}
-  .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-  .btn{background:#fff;color:#000;border:0;padding:10px 14px;border-radius:8px;font-weight:800;cursor:pointer}
-  table{width:100%;border-collapse:collapse;margin-top:8px}
-  th,td{padding:8px;border-bottom:1px solid #1f1f1f;text-align:left}
-  select.result{min-width:120px}
-</style>
-</head>
-<body>
-<div class="wrap">
-  <h2>Admin – Results & Scoring</h2>
-
-  <div class="card">
-    <div class="row">
-      <div><label>Admin Secret</label><input id="secret" type="password" placeholder="ADMIN_SECRET"/></div>
-      <div><label>Week</label><input id="week" type="number" min="1" step="1" value="1" /></div>
-      <div><button class="btn" id="load">Load Matches</button></div>
-    </div>
-    <div id="status" style="margin-top:6px;color:#EAEAEA"></div>
-    <div id="matches"></div>
-  </div>
-
-  <div class="card">
-    <div class="row">
-      <button class="btn" id="applyResults">Apply Results & Lock</button>
-      <button class="btn" id="scoreWeek">Score Week</button>
-      <label style="display:flex;align-items:center;gap:6px"><input id="adv" type="checkbox"/> Advance current week +1</label>
-    </div>
-  </div>
-
-  <div class="card">
-    <h3 style="margin:0 0 8px">Seed Next Week (optional)</h3>
-    <div class="row">
-      <div><label>Next Week</label><input id="nextWeek" type="number" min="1" step="1"/></div>
-      <div><label>Lockout Time (ISO)</label><input id="nextLock" type="text" placeholder="2025-09-20T09:00:00.000Z"/></div>
-    </div>
-    <table id="seedTbl">
-      <thead><tr><th>#</th><th>Home</th><th>Away</th></tr></thead>
-      <tbody></tbody>
-    </table>
-    <button class="btn" id="seedBtn">Create 5 Matches</button>
-  </div>
-
-</div>
-
 <script>
 const base='/.netlify/functions';
 
 function h(t){ return document.getElementById(t); }
+function setStatus(msg){ h('status').textContent = msg; }
+function withLoading(btn, fn){
+  const orig = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<span style="display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.35);border-top-color:#fff;border-radius:50%;margin-right:8px;vertical-align:-2px;animation:spin .7s linear infinite"></span>Working…';
+  return fn().finally(()=>{ btn.disabled=false; btn.innerHTML=orig; });
+}
+(function addSpinCss(){
+  const s=document.createElement('style');
+  s.textContent='@keyframes spin{to{transform:rotate(360deg)}}';
+  document.head.appendChild(s);
+})();
+
 function row(match){
   const sel = (val)=>`<option ${val==='HOME'?'selected':''}>HOME</option>
                       <option ${val==='DRAW'?'selected':''}>DRAW</option>
@@ -65,24 +22,28 @@ function row(match){
   return `<tr data-id="${match.id}">
     <td>${match.id}</td>
     <td>${match['Home Team']} v ${match['Away Team']}</td>
-    <td><select class="result">${sel(match['Correct Result']||'')}</select></td>
+    <td><select class="result">${sel((match['Correct Result']||'').toUpperCase())}</select></td>
   </tr>`;
 }
 
-h('load').onclick = async ()=>{
-  const week = h('week').value;
-  const res = await fetch(`${base}/get-week?week=${encodeURIComponent(week)}&userId=0`);
+// Load matches
+h('load').onclick = ()=> withLoading(h('load'), async ()=>{
+  const week = Number(h('week').value);
+  const res = await fetch(`${base}/get-week?week=${encodeURIComponent(week)}&userId=0`, { cache:'no-store' });
   const data = await res.json();
   const m = data.matches || [];
-  h('status').textContent = `Loaded ${m.length} matches`;
+  setStatus(`Loaded ${m.length} matches`);
   h('matches').innerHTML = `
     <table>
       <thead><tr><th>ID</th><th>Fixture</th><th>Correct Result</th></tr></thead>
       <tbody>${m.map(row).join('')}</tbody>
     </table>`;
-};
+  // prefill next week = current + 1
+  h('nextWeek').value = String(week + 1);
+});
 
-h('applyResults').onclick = async ()=>{
+// Apply results & (optionally) lock
+h('applyResults').onclick = ()=> withLoading(h('applyResults'), async ()=>{
   const secret = h('secret').value.trim();
   const week = Number(h('week').value);
   const rows = Array.from(document.querySelectorAll('#matches tbody tr'));
@@ -95,10 +56,13 @@ h('applyResults').onclick = async ()=>{
     headers:{'Content-Type':'application/json','x-admin-secret':secret},
     body: JSON.stringify({ week, results })
   });
-  alert(await res.text());
-};
+  const txt = await res.text();
+  setStatus('Database updated ✓');    // show quick confirmation
+  setTimeout(()=> setStatus(txt), 600); // then show details
+});
 
-h('scoreWeek').onclick = async ()=>{
+// Score week
+h('scoreWeek').onclick = ()=> withLoading(h('scoreWeek'), async ()=>{
   const secret = h('secret').value.trim();
   const week = Number(h('week').value);
   const res = await fetch(`${base}/admin-score-week`, {
@@ -106,9 +70,12 @@ h('scoreWeek').onclick = async ()=>{
     headers:{'Content-Type':'application/json','x-admin-secret':secret},
     body: JSON.stringify({ week })
   });
-  alert(await res.text());
-};
+  const txt = await res.text();
+  setStatus('Database updated ✓');
+  setTimeout(()=> setStatus(txt), 600);
+});
 
+// Build seed rows once
 (function buildSeedTable(){
   const tb = h('seedTbl').querySelector('tbody');
   tb.innerHTML = '';
@@ -119,22 +86,29 @@ h('scoreWeek').onclick = async ()=>{
   }
 })();
 
-h('seedBtn').onclick = async ()=>{
+// Seed next week (with datetime-local picker)
+h('seedBtn').onclick = ()=> withLoading(h('seedBtn'), async ()=>{
   const secret = h('secret').value.trim();
   const week = Number(h('nextWeek').value);
-  const lockout = h('nextLock').value.trim();
+  const dt = h('nextLock').value; // yyyy-MM-ddTHH:mm (local)
+  if (!dt) { setStatus('Please choose a lockout date & time'); return; }
+  // Convert to ISO string in local time
+  const lockoutIso = new Date(dt).toISOString();
+
   const rows = Array.from(document.querySelectorAll('#seedTbl tbody tr'));
   const fixtures = rows.map(r => ({
     home: r.querySelector('.home').value.trim(),
     away: r.querySelector('.away').value.trim()
   }));
+  if (fixtures.some(f => !f.home || !f.away)) { setStatus('Please fill all 5 fixtures'); return; }
+
   const res = await fetch(`${base}/admin-seed-week`, {
     method:'POST',
     headers:{'Content-Type':'application/json','x-admin-secret':secret},
-    body: JSON.stringify({ week, lockoutTime: lockout, fixtures })
+    body: JSON.stringify({ week, lockoutTime: lockoutIso, fixtures })
   });
-  alert(await res.text());
-};
+  const txt = await res.text();
+  setStatus('Database updated ✓');
+  setTimeout(()=> setStatus(txt), 600);
+});
 </script>
-</body>
-</html>
