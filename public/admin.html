@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>PredictFootball – Admin</title>
+<style>
+  body{margin:0;background:#111;color:#fff;font-family:Inter,system-ui,Arial;display:flex;justify-content:center}
+  .wrap{max-width:780px;width:100%;margin:24px 12px;background:#30A278;color:#fff;border-radius:14px;padding:16px}
+  h2{margin:0 0 12px}
+  .card{background:#000;border:1px solid #1a1a1a;border-radius:12px;padding:12px;margin-bottom:12px}
+  label{display:block;margin-bottom:6px;color:#EAEAEA}
+  input,select{background:#0e0e0e;color:#fff;border:1px solid #2a2a2a;border-radius:8px;padding:8px 10px}
+  .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .btn{background:#fff;color:#000;border:0;padding:10px 14px;border-radius:8px;font-weight:800;cursor:pointer}
+  table{width:100%;border-collapse:collapse;margin-top:8px}
+  th,td{padding:8px;border-bottom:1px solid #1f1f1f;text-align:left}
+  select.result{min-width:120px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h2>Admin – Results & Scoring</h2>
+
+  <div class="card">
+    <div class="row">
+      <div><label>Admin Secret</label><input id="secret" type="password" placeholder="ADMIN_SECRET"/></div>
+      <div><label>Week</label><input id="week" type="number" min="1" step="1" value="1" /></div>
+      <div><button class="btn" id="load">Load Matches</button></div>
+    </div>
+    <div id="status" style="margin-top:6px;color:#EAEAEA"></div>
+    <div id="matches"></div>
+  </div>
+
+  <div class="card">
+    <div class="row">
+      <button class="btn" id="applyResults">Apply Results & Lock</button>
+      <button class="btn" id="scoreWeek">Score Week</button>
+      <label style="display:flex;align-items:center;gap:6px"><input id="adv" type="checkbox"/> Advance current week +1</label>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin:0 0 8px">Seed Next Week (optional)</h3>
+    <div class="row">
+      <div><label>Next Week</label><input id="nextWeek" type="number" min="1" step="1"/></div>
+      <div><label>Lockout Time (ISO)</label><input id="nextLock" type="text" placeholder="2025-09-20T09:00:00.000Z"/></div>
+    </div>
+    <table id="seedTbl">
+      <thead><tr><th>#</th><th>Home</th><th>Away</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <button class="btn" id="seedBtn">Create 5 Matches</button>
+  </div>
+
+</div>
+
+<script>
+const base='/.netlify/functions';
+
+function h(t){ return document.getElementById(t); }
+function row(match){
+  const sel = (val)=>`<option ${val==='HOME'?'selected':''}>HOME</option>
+                      <option ${val==='DRAW'?'selected':''}>DRAW</option>
+                      <option ${val==='AWAY'?'selected':''}>AWAY</option>`;
+  return `<tr data-id="${match.id}">
+    <td>${match.id}</td>
+    <td>${match['Home Team']} v ${match['Away Team']}</td>
+    <td><select class="result">${sel(match['Correct Result']||'')}</select></td>
+  </tr>`;
+}
+
+h('load').onclick = async ()=>{
+  const week = h('week').value;
+  const res = await fetch(`${base}/get-week?week=${encodeURIComponent(week)}&userId=0`);
+  const data = await res.json();
+  const m = data.matches || [];
+  h('status').textContent = `Loaded ${m.length} matches`;
+  h('matches').innerHTML = `
+    <table>
+      <thead><tr><th>ID</th><th>Fixture</th><th>Correct Result</th></tr></thead>
+      <tbody>${m.map(row).join('')}</tbody>
+    </table>`;
+};
+
+h('applyResults').onclick = async ()=>{
+  const secret = h('secret').value.trim();
+  const week = Number(h('week').value);
+  const rows = Array.from(document.querySelectorAll('#matches tbody tr'));
+  const results = rows.map(r => ({
+    match_id: r.getAttribute('data-id'),
+    correct: r.querySelector('select').value
+  }));
+  const res = await fetch(`${base}/admin-set-results`, {
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-admin-secret':secret},
+    body: JSON.stringify({ week, results })
+  });
+  alert(await res.text());
+};
+
+h('scoreWeek').onclick = async ()=>{
+  const secret = h('secret').value.trim();
+  const week = Number(h('week').value);
+  const res = await fetch(`${base}/admin-score-week`, {
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-admin-secret':secret},
+    body: JSON.stringify({ week })
+  });
+  alert(await res.text());
+};
+
+(function buildSeedTable(){
+  const tb = h('seedTbl').querySelector('tbody');
+  tb.innerHTML = '';
+  for (let i=1;i<=5;i++){
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${i}</td><td><input class="home" placeholder="Home ${i}"/></td><td><input class="away" placeholder="Away ${i}"/></td>`;
+    tb.appendChild(tr);
+  }
+})();
+
+h('seedBtn').onclick = async ()=>{
+  const secret = h('secret').value.trim();
+  const week = Number(h('nextWeek').value);
+  const lockout = h('nextLock').value.trim();
+  const rows = Array.from(document.querySelectorAll('#seedTbl tbody tr'));
+  const fixtures = rows.map(r => ({
+    home: r.querySelector('.home').value.trim(),
+    away: r.querySelector('.away').value.trim()
+  }));
+  const res = await fetch(`${base}/admin-seed-week`, {
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-admin-secret':secret},
+    body: JSON.stringify({ week, lockoutTime: lockout, fixtures })
+  });
+  alert(await res.text());
+};
+</script>
+</body>
+</html>
