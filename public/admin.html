@@ -128,7 +128,7 @@ window.addEventListener('DOMContentLoaded', () => {
     setTimeout(()=> setStatus(txt), 600);
   });
 
-  // Score week
+  // Score week (bonus banner)
   scoreBtn.onclick = ()=> withLoading(scoreBtn, async ()=>{
     const secret = ($('secret')?.value || '').trim();
     const week = Number($('week').value);
@@ -141,11 +141,12 @@ window.addEventListener('DOMContentLoaded', () => {
     try {
       const data = await res.json();
       if (data && data.ok) {
-        const count = (data.fullHouses || []).length;
-        const names = (data.fullHouseNames || []).join(', ');
-        message += count > 0
-          ? `  •  Full house: ${count} ${count === 1 ? 'player' : 'players'}${names ? ` (${names})` : ''}`
-          : `  •  No full houses this week`;
+        const names = data.fullHouseNames || [];
+        if (names.length > 0) {
+          message += `  •  BONUS WEEK WINNER${names.length>1?'S':''}: ${names.join(', ')}`;
+        } else {
+          message += `  •  No full houses this week`;
+        }
       }
       setStatus(message);
       setTimeout(()=> setStatus(message + '\n' + JSON.stringify(data, null, 2)), 600);
