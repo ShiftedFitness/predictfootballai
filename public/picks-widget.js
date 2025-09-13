@@ -7,7 +7,8 @@
     text: '#FFFFFF',
     muted: '#EAEAEA',
     accent: '#FFFFFF',      // buttons/active states
-    accentText: '#000000'
+    accentText: '#000000',
+    good: '#7CFC00'         // lime tick
   };
 
   // === STYLES ===
@@ -45,7 +46,8 @@
     .pf-pick{
       padding:12px 12px; border-radius:10px; text-align:center; cursor:pointer;
       background: transparent; color:${THEME.text};
-      border:1px solid ${THEME.border}; transition: all .15s ease; font-weight:700;
+      border:1px solid ${THEME.border}; transition: all .15s ease;
+      font-weight:700; display:flex; align-items:center; justify-content:center; gap:8px;
     }
     .pf-pick:hover{ border-color:#333 }
     .pf-pick.active{
@@ -53,6 +55,8 @@
       border-color:${THEME.accent};
       font-weight: 900;
     }
+    .pf-badge{ display:none; color:${THEME.good}; font-weight:900; }
+    .pf-pick.active .pf-badge{ display:inline; }
 
     .pf-row{ display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap }
     .pf-muted{ color:${THEME.muted} }
@@ -116,9 +120,11 @@
 
   // === MAIN ===
   async function renderPicks(container, cfg) {
-    const base = cfg.base || '/.netlify/functions';
-    const week = String(cfg.week);
-    const userId = String(cfg.userId);
+    // Allow URL params to override week/userId
+    const qs = new URLSearchParams(location.search);
+    const base   = cfg.base || '/.netlify/functions';
+    let week     = String(qs.get('week')   ?? cfg.week);
+    let userId   = String(qs.get('userId') ?? cfg.userId);
 
     container.innerHTML = '';
     const wrap = el(`
@@ -188,7 +194,7 @@
     }
 
     function renderEdit() {
-      statusEl.textContent = ''; // remove “select your picks” text per request
+      statusEl.textContent = ''; // no helper text
       matchesEl.innerHTML = ''; actionsEl.innerHTML = '';
 
       matches.forEach(m => {
@@ -197,7 +203,9 @@
           <div class="pf-teams">${m['Home Team']} v ${m['Away Team']}</div>
           <div class="pf-grid">
             ${['HOME','DRAW','AWAY'].map(opt => `
-              <button class="pf-pick ${cur===opt?'active':''}" data-match="${m.id}" data-val="${opt}">${opt}</button>
+              <button class="pf-pick ${cur===opt?'active':''}" data-match="${m.id}" data-val="${opt}">
+                <span class="pf-label">${opt}</span><span class="pf-badge">✓</span>
+              </button>
             `).join('')}
           </div>
         </div>`);
@@ -206,6 +214,7 @@
             const mid = btn.getAttribute('data-match');
             const val = btn.getAttribute('data-val');
             picks[mid] = val;
+            // Toggle active & tick in this card’s row only
             card.querySelectorAll('.pf-pick').forEach(b=>b.classList.remove('active'));
             btn.classList.add('active');
           });
@@ -245,7 +254,7 @@
     }
 
     function renderPreView() {
-      statusEl.textContent = 'Your saved picks.'; // concise per request
+      statusEl.textContent = 'Your saved picks.';
       matchesEl.innerHTML = ''; actionsEl.innerHTML = '';
 
       matches.forEach(m => {
