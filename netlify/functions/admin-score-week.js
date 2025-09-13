@@ -18,13 +18,14 @@ exports.handler = async (event) => {
     const { week } = JSON.parse(event.body || '{}');
     if (!week) return respond(400, 'week required');
 
-    // Load
+    // Load data
     const [matchesAll, predsAll, usersAll] = await Promise.all([
       listAll(ADALO.col.matches, 1000),
       listAll(ADALO.col.predictions, 20000),
       listAll(ADALO.col.users, 5000),
     ]);
 
+    // Matches for this week
     const matches = matchesAll
       .filter(m => Number(m['Week']) === Number(week))
       .sort((a,b)=> Number(a.id) - Number(b.id));
@@ -32,6 +33,8 @@ exports.handler = async (event) => {
 
     const correctByMatch = Object.fromEntries(matches.map(m => [ String(m.id), U(m['Correct Result']) ]));
     const matchIds = new Set(matches.map(m => String(m.id)));
+
+    // Predictions in this week
     const weekPreds = predsAll.filter(p => matchIds.has(String(relId(p['Match']))));
 
     // Award 0/1 where null
@@ -48,7 +51,7 @@ exports.handler = async (event) => {
       predictionsUpdated++;
     }
 
-    // Re-read predictions to get FINAL weekly correct counts (0..5)
+    // Re-read predictions to compute FINAL weekly correct counts
     const predsAfter = await listAll(ADALO.col.predictions, 20000);
     const weekAfter = predsAfter.filter(p => matchIds.has(String(relId(p['Match']))));
 
@@ -56,24 +59,24 @@ exports.handler = async (event) => {
     for (const p of weekAfter) {
       const uid = String(relId(p['User']));
       const pts = Number(p['Points Awarded'] ?? 0);
-      weeklyCorrectFinalByUser[uid] = (weeklyCorrectFinalByUser[uid] || 0) + pts;
+      weeklyCorrectFinalByUser[uid] = (weeklyCorrectFinalByUser[uid] || 0) + pts; // 0..5
     }
     const participatingUserIds = Array.from(new Set(weekAfter.map(p => String(relId(p['User'])))));
 
+    // Update users: add full weekly points (correct + bonus) & bump Current Week +1
     const updates = [];
     for (const uid of participatingUserIds) {
       const u = usersAll.find(x => String(x.id) === uid);
       if (!u) continue;
 
-      const weeklyCorrectFinal = weeklyCorrectFinalByUser[uid] || 0;    // 0..5
+      const weeklyCorrectFinal = weeklyCorrectFinalByUser[uid] || 0; // 0..5
       const bonus = (weeklyCorrectFinal === 5) ? 5 : 0;
-      const pointsToAdd = weeklyCorrectFinal + bonus;                    // ALWAYS add full weekly total
+      const pointsToAdd = weeklyCorrectFinal + bonus;
 
       const newPoints    = Number(u['Points'] ?? 0) + pointsToAdd;
       const newCorrect   = Number(u['Correct Results'] ?? 0) + weeklyCorrectFinal;
       const newIncorrect = Number(u['Incorrect Results'] ?? 0) + (5 - weeklyCorrectFinal);
 
-      // bump Current Week +1
       const ck = findKey(u, 'Current Week');
       const currW = ck ? Number(u[ck] ?? week) : Number(week);
       const body = {
@@ -94,7 +97,9 @@ exports.handler = async (event) => {
       });
     }
 
+    // Build lists for banner
     const fullHouseNames = updates.filter(u => u.weeklyCorrectFinal === 5).map(u => u.name);
+    const blanksNames    = updates.filter(u => u.weeklyCorrectFinal === 0).map(u => u.name);
 
     return respond(200, {
       ok: true,
@@ -102,6 +107,7 @@ exports.handler = async (event) => {
       predictionsUpdated,
       usersUpdated: updates.length,
       fullHouseNames,
+      blanksNames,
       detail: updates
     });
 
