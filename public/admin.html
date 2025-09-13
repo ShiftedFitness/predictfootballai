@@ -61,7 +61,7 @@ h('applyResults').onclick = ()=> withLoading(h('applyResults'), async ()=>{
   setTimeout(()=> setStatus(txt), 600); // then show details
 });
 
-// Score week
+// Score week (shows full-house summary)
 h('scoreWeek').onclick = ()=> withLoading(h('scoreWeek'), async ()=>{
   const secret = h('secret').value.trim();
   const week = Number(h('week').value);
@@ -70,10 +70,33 @@ h('scoreWeek').onclick = ()=> withLoading(h('scoreWeek'), async ()=>{
     headers:{'Content-Type':'application/json','x-admin-secret':secret},
     body: JSON.stringify({ week })
   });
-  const txt = await res.text();
-  setStatus('Database updated ✓');
-  setTimeout(()=> setStatus(txt), 600);
+
+  let message = 'Database updated ✓';
+  try {
+    const data = await res.json();
+    if (data && data.ok) {
+      const count = (data.fullHouses || []).length;
+      const names = (data.fullHouseNames || []).join(', ');
+      if (count > 0) {
+        message += `  •  Full house: ${count} ${count === 1 ? 'player' : 'players'}`;
+        if (names) message += ` (${names})`;
+      } else {
+        message += `  •  No full houses this week`;
+      }
+    } else {
+      message += ' (no JSON details)';
+    }
+    setStatus(message);
+    // After a moment, append the raw JSON for audit
+    setTimeout(()=> setStatus(message + '\n' + JSON.stringify(data, null, 2)), 600);
+  } catch {
+    // fallback to text if not JSON
+    const txt = await res.text();
+    setStatus(message);
+    setTimeout(()=> setStatus(message + '\n' + txt), 600);
+  }
 });
+
 
 // Build seed rows once
 (function buildSeedTable(){
