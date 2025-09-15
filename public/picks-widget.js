@@ -105,7 +105,8 @@
     return `${pad(d)}d ${pad(h)}h ${pad(m)}m ${pad(sec)}s`;
   }
 
-  function formatCET(date) {
+  // Renamed to formatUK and set to Europe/London
+  function formatUK(date) {
     if (!date) return 'n/a';
     try {
       return new Intl.DateTimeFormat('en-GB', {
@@ -184,12 +185,12 @@
     }
 
     function renderDeadlineLine() {
-      // Only show absolute CET time when not editing
+      // Only show absolute UK time when not editing
       if (!locked && editMode) {
         deadlineLineEl.textContent = '';
       } else {
-        const when = deadline ? `${formatCET(deadline)} CET` : 'n/a';
-        deadlineLineEl.textContent = `Deadline (CET): ${when}`;
+        const when = deadline ? `${formatUK(deadline)} UK Time` : 'n/a';
+        deadlineLineEl.textContent = `Deadline (UK Time): ${when}`;
       }
     }
 
