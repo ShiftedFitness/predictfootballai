@@ -109,7 +109,7 @@
     if (!date) return 'n/a';
     try {
       return new Intl.DateTimeFormat('en-GB', {
-        timeZone: 'Europe/Berlin', // CET/CEST
+        timeZone: 'Europe/London', // UK local time (GMT in winter, BST in summer)
         year:'numeric', month:'short', day:'2-digit',
         hour:'2-digit', minute:'2-digit'
       }).format(new Date(date));
