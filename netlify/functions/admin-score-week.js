@@ -1,6 +1,7 @@
 const { ADALO, adaloFetch, listAll } = require('./_adalo.js');
 
-const U = (s) => String(s || '').toUpperCase();
+// helpers
+const U = (s) => String(s || '').trim().toUpperCase();  // trim + uppercase
 const relId = (v) => Array.isArray(v) ? (v[0] ?? '') : (v ?? '');
 const respond = (status, body) => ({
   statusCode: status,
@@ -18,42 +19,49 @@ exports.handler = async (event) => {
     const { week } = JSON.parse(event.body || '{}');
     if (!week) return respond(400, 'week required');
 
-    // Load data
+    // 1) Load
     const [matchesAll, predsAll, usersAll] = await Promise.all([
       listAll(ADALO.col.matches, 1000),
       listAll(ADALO.col.predictions, 20000),
       listAll(ADALO.col.users, 5000),
     ]);
 
-    // Matches for this week
-    const matches = matchesAll
+    const matches = (matchesAll || [])
       .filter(m => Number(m['Week']) === Number(week))
       .sort((a,b)=> Number(a.id) - Number(b.id));
     if (!matches.length) return respond(400, `No matches for week ${week}`);
 
-    const correctByMatch = Object.fromEntries(matches.map(m => [ String(m.id), U(m['Correct Result']) ]));
+    const correctByMatch = Object.fromEntries(
+      matches.map(m => [ String(m.id), U(m['Correct Result']) ])
+    );
     const matchIds = new Set(matches.map(m => String(m.id)));
 
-    // Predictions in this week
-    const weekPreds = predsAll.filter(p => matchIds.has(String(relId(p['Match']))));
+    // Predictions belonging to this week
+    const weekPreds = (predsAll || []).filter(p => matchIds.has(String(relId(p['Match']))));
 
-    // Award 0/1 where null
+    // 2) Recompute & overwrite Points Awarded when needed
     let predictionsUpdated = 0;
     for (const p of weekPreds) {
-      if (typeof p['Points Awarded'] === 'number') continue;
-      const pick = U(p['Pick']);
-      const correct = correctByMatch[String(relId(p['Match']))];
-      const point = (pick && correct && pick === correct) ? 1 : 0;
-      await adaloFetch(`${ADALO.col.predictions}/${p.id}`, {
-        method: 'PUT',
-        body: JSON.stringify({ 'Points Awarded': point })
-      });
-      predictionsUpdated++;
+      const pick    = U(p['Pick']);
+      const mid     = String(relId(p['Match']));
+      const correct = correctByMatch[mid];
+      // If correct result missing, count as 0 (but we shouldn't be here until results are set)
+      const should = (pick && correct && pick === correct) ? 1 : 0;
+      const current = (typeof p['Points Awarded'] === 'number') ? Number(p['Points Awarded']) : null;
+
+      // Write when missing OR wrong
+      if (current === null || current !== should) {
+        await adaloFetch(`${ADALO.col.predictions}/${p.id}`, {
+          method: 'PUT',
+          body: JSON.stringify({ 'Points Awarded': should })
+        });
+        predictionsUpdated++;
+      }
     }
 
-    // Re-read predictions to compute FINAL weekly correct counts
+    // 3) Reload predictions AFTER fixing to compute final weekly correct
     const predsAfter = await listAll(ADALO.col.predictions, 20000);
-    const weekAfter = predsAfter.filter(p => matchIds.has(String(relId(p['Match']))));
+    const weekAfter  = predsAfter.filter(p => matchIds.has(String(relId(p['Match']))));
 
     const weeklyCorrectFinalByUser = {};
     for (const p of weekAfter) {
@@ -63,7 +71,7 @@ exports.handler = async (event) => {
     }
     const participatingUserIds = Array.from(new Set(weekAfter.map(p => String(relId(p['User'])))));
 
-    // Update users: add full weekly points (correct + bonus) & bump Current Week +1
+    // 4) Update users: add FULL weekly points (correct + bonus) & bump Current Week +1
     const updates = [];
     for (const uid of participatingUserIds) {
       const u = usersAll.find(x => String(x.id) === uid);
@@ -97,7 +105,6 @@ exports.handler = async (event) => {
       });
     }
 
-    // Build lists for banner
     const fullHouseNames = updates.filter(u => u.weeklyCorrectFinal === 5).map(u => u.name);
     const blanksNames    = updates.filter(u => u.weeklyCorrectFinal === 0).map(u => u.name);
 
