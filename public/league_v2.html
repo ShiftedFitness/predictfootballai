@@ -1,103 +1,216 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>PredictFootball.ai – Tables</title>
 <style>
-  :root{ --bg:#30A278; --card:#000; --border:#1a1a1a; --text:#fff; --muted:#EAEAEA; --accent:#fff; --accentText:#000; --points:#FFD700; }
-  html,body{ height:100% } body{ margin:0; background:#111; color:#fff; font-family:Inter,system-ui,Arial; display:flex; justify-content:center; align-items:flex-start; min-height:100vh }
+  :root{
+    --bg:#30A278; --card:#000000; --border:#1a1a1a; --text:#FFFFFF; --muted:#EAEAEA;
+    --accent:#FFFFFF; --accentText:#000000; --points-bg:rgba(255,255,255,0.1); --points-color:#FFD700;
+  }
+  html, body { height:100%; }
+  body{
+    margin:0; background:#111; color:#fff; font-family:Inter,system-ui,Arial;
+    display:flex; justify-content:center; align-items:flex-start; min-height:100vh;
+  }
   .wrap{ max-width:750px; width:100%; margin:24px 12px; background:var(--bg); color:var(--text); border-radius:14px; padding:16px; }
-  h2{ margin:0 0 12px }
+  h2{ margin:0 0 12px; }
+
+  /* Tabs */
   .tabs{ display:flex; gap:8px; margin-bottom:12px }
   .tab{ background:#0e0e0e; color:#fff; border:1px solid #2a2a2a; padding:8px 12px; border-radius:999px; cursor:pointer }
   .tab.active{ background:#fff; color:#000; font-weight:800 }
-  .card{ background:var(--card); border:1px solid var(--border); border-radius:12px; padding:12px; margin-bottom:12px }
-  .muted{ color:var(--muted) }
-  .row{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; justify-content:space-between }
-  select{ background:#0e0e0e; color:#fff; border:1px solid #2a2a2a; border-radius:8px; padding:8px 10px }
-  .table{ width:100%; border-collapse:collapse; font-size:14px }
-  .table th,.table td{ padding:10px 8px; border-bottom:1px solid #1f1f1f; text-align:left; white-space:nowrap }
-  .table th{ font-size:12px; color:#cfcfcf; text-transform:uppercase; letter-spacing:.3px }
-  .pts{ text-align:center; background:rgba(255,255,255,0.1); color:var(--points); font-weight:700; border-radius:6px }
-  .center{ text-align:center }
+
+  /* Cards / tables */
+  .card{ background:var(--card); color:var(--text); border:1px solid var(--border); border-radius:12px; padding:12px; margin-bottom:12px; }
+  .muted{ color:var(--muted); }
+  .scroll{ max-height:520px; overflow:auto; border-radius:12px; }
+
+  .table{ width:100%; border-collapse:collapse; font-size:14px; }
+  .table th, .table td{ padding:10px 8px; border-bottom:1px solid #1f1f1f; text-align:left; white-space:nowrap; }
+  .table th{ font-size:12px; letter-spacing:.3px; color:#cfcfcf; text-transform:uppercase; }
+  .table tr:last-child td{ border-bottom:none; }
+  .pos{ width:64px; }
+  .user{ max-width:260px; overflow:hidden; text-overflow:ellipsis; }
+  .acc{ width:90px; text-align:right; }
+  .center{ text-align:center; }
+
+  .pts{
+    width:90px; text-align:right; font-weight:700;
+    background:var(--points-bg); color:var(--points-color); border-radius:6px;
+  }
+  .highlight{ background:var(--accent); color:var(--accentText) !important; }
+  .highlight td{ color:var(--accentText) !important; }
+  .highlight td.pts{ background:var(--accent); color:var(--accentText) !important; }
+
   .tick{ color:#7CFC00; font-weight:900 }
   .cross{ color:#FF6B6B; font-weight:900 }
+  .small{ font-size:12px; color:#cfcfcf; margin-bottom:6px }
+  select{ background:#0e0e0e; color:#fff; border:1px solid #2a2a2a; border-radius:8px; padding:6px 10px }
+  .row{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; justify-content:space-between }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <h2>Tables</h2>
-  <div class="tabs">
-    <button class="tab active" id="tabOverall">Overall</button>
-    <button class="tab" id="tabWeekly">This Week</button>
-  </div>
+  <div class="wrap">
+    <h2>Tables</h2>
 
-  <!-- Overall -->
-  <div id="overall" class="card">
-    <div class="muted" id="overallCount"></div>
-    <table class="table" id="overallTbl">
-      <thead>
-        <tr><th>Pos</th><th>Username</th><th>% Acc</th><th>FH</th><th class="pts">Points</th></tr>
-      </thead><tbody></tbody>
-    </table>
-  </div>
-
-  <!-- Weekly -->
-  <div id="weekly" class="card" style="display:none">
-    <div class="row" style="margin-bottom:8px">
-      <div>
-        <span class="muted">Week</span>
-        <select id="weekSel"></select>
-      </div>
-      <div class="muted" id="lockedMsg"></div>
+    <div class="tabs">
+      <button class="tab active" id="tabOverall">Overall</button>
+      <button class="tab" id="tabWeekly">Matchweek</button>
     </div>
-    <table class="table" id="weeklyTbl">
-      <thead>
-        <tr><th>Pos</th><th>Username</th><th class="center">Points</th><th>Picks</th><th class="center">✓/✗</th></tr>
-      </thead><tbody></tbody>
-    </table>
+
+    <!-- Overall -->
+    <div id="overall" class="card">
+      <div class="muted" id="overallCount"></div>
+      <div class="scroll">
+        <table class="table" id="overallTbl">
+          <thead>
+            <tr>
+              <th class="pos">Pos</th>
+              <th>Username</th>
+              <th class="acc">% Acc</th>
+              <th class="center">FH</th>
+              <th class="center">Blanks</th>
+              <th class="pts">Points</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="muted" style="margin-top:8px">Sorted by points, then FH, then accuracy.</div>
+    </div>
+
+    <!-- Weekly -->
+    <div id="weekly" class="card" style="display:none">
+      <div class="row" style="margin-bottom:8px">
+        <div>
+          <span class="muted">Week</span>
+          <select id="weekSel"></select>
+        </div>
+        <div class="muted" id="lockedMsg"></div>
+      </div>
+
+      <!-- Match order reminder -->
+      <div id="matchMap" class="small"></div>
+
+      <div class="scroll">
+        <table class="table" id="weeklyTbl">
+          <thead>
+            <tr>
+              <th class="pos">Pos</th>
+              <th>Username</th>
+              <th class="center">Pts</th>
+              <th class="center">1</th>
+              <th class="center">2</th>
+              <th class="center">3</th>
+              <th class="center">4</th>
+              <th class="center">5</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="muted" style="margin-top:8px">✓/✗ appear once results are scored. Before that, cells show your pick (1 = Home, 2 = Away, X = Draw).</div>
+    </div>
   </div>
-</div>
 
 <script>
-const base='/.netlify/functions';
+const base = '/.netlify/functions';
 const qs = new URLSearchParams(location.search);
+const highlightUserId = qs.get('userId') || '';
 const currentWeek = Number(qs.get('week') || 1);
 
-function pct(x){ return (Math.round(x*1000)/10).toFixed(1)+'%'; }
-function rowOverall(r, i){
+function escapeHTML(s){ return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+function pct(acc){ return (Math.round(acc*1000)/10).toFixed(1); } // 1 decimal
+
+/* ---------- OVERALL ---------- */
+function trOverall(row){
   const tr = document.createElement('tr');
-  tr.innerHTML = `<td>${r.position}</td><td>${escape(r.name)}</td><td>${pct(r.accuracy)}</td><td class="center">${r.fh||0}</td><td class="pts">${r.points}</td>`;
+  if (String(row.id) === String(highlightUserId)) tr.classList.add('highlight');
+  tr.innerHTML = `
+    <td class="pos">${row.position}</td>
+    <td class="user">${escapeHTML(row.name)}</td>
+    <td class="acc">${pct(row.accuracy)}%</td>
+    <td class="center">${row.fh ?? 0}</td>
+    <td class="center">${row.blanks ?? 0}</td>
+    <td class="pts">${row.points}</td>
+  `;
   return tr;
 }
-function rowWeekly(r, i){
-  const ticks = r.correct.map(v => v ? '<span class="tick">✓</span>' : '<span class="cross">✗</span>').join(' ');
-  const tr = document.createElement('tr');
-  tr.innerHTML = `<td>${i+1}</td><td>${escape(r.name)}</td><td class="center">${r.points}</td><td>${escape(r.picks)}</td><td class="center">${ticks}</td>`;
-  return tr;
-}
-function escape(s){ return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 
 async function loadOverall(){
-  const r = await fetch(`${base}/leaderboard`, {cache:'no-store'}); const j = await r.json();
-  const b = document.querySelector('#overallTbl tbody'); b.innerHTML='';
-  (j.leaderboard||[]).forEach((x,i)=> b.appendChild(rowOverall(x,i)));
-  document.getElementById('overallCount').textContent = `${(j.leaderboard||[]).length} players`;
+  const res = await fetch(`${base}/leaderboard`, { cache: 'no-store' });
+  if (!res.ok) { alert('Failed to load leaderboard'); return; }
+  const data = await res.json();
+  const rows = data.leaderboard || [];
+
+  const body = document.querySelector('#overallTbl tbody');
+  body.innerHTML = '';
+  rows.forEach(r => body.appendChild(trOverall(r)));
+  document.getElementById('overallCount').textContent = `${rows.length} players`;
 }
 
-async function loadWeekly(week){
-  const r = await fetch(`${base}/weekly-table?week=${week}`, {cache:'no-store'}); const j = await r.json();
-  const b = document.querySelector('#weeklyTbl tbody'); b.innerHTML='';
-  (j.rows||[]).forEach((x,i)=> b.appendChild(rowWeekly(x,i)));
+/* ---------- WEEKLY ---------- */
+function toSymbol(p){ return p==='HOME'?'1':(p==='AWAY'?'2':(p==='DRAW'?'X':'-')); }
+function cellFor(pick, correctSet, isCorrect){
+  if (correctSet) return isCorrect ? '<span class="tick">✓</span>' : '<span class="cross">✗</span>';
+  return `<span>${toSymbol(pick)}</span>`;
+}
+function trWeekly(row, correctSetFlags, highlight=false){
+  const tr = document.createElement('tr');
+  if (highlight) tr.classList.add('highlight');
+  const cells = row.picksRaw.map((p, i)=> `<td class="center">${cellFor(p, correctSetFlags[i], row.correct[i])}</td>`).join('');
+  tr.innerHTML = `
+    <td>${row.pos}</td>
+    <td>${escapeHTML(row.name)}</td>
+    <td class="center">${row.points}</td>
+    ${cells}
+  `;
+  return tr;
+}
+
+async function loadWeekly(week) {
+  const r = await fetch(`${base}/weekly-table?week=${week}`, { cache:'no-store' });
+  const j = await r.json();
+
+  // Header: locked message
   document.getElementById('lockedMsg').textContent = j.locked ? 'Live (deadline passed)' : 'Not available (deadline not passed)';
-  // weeks dropdown
+
+  // Match number → fixture mapping
+  const order = (j.matches || []).map((m,i)=> `Match ${i+1}: ${m.home} v ${m.away}`);
+  document.getElementById('matchMap').textContent = order.join('  •  ');
+
+  // Build "result set" flags: if Correct Result exists for that match
+  const correctSet = (j.matches || []).map(m => !!m.correct); // may be undefined in older endpoint
+  // If your weekly-table doesn’t return m.correct, derive from rows.correct arrays:
+  if (!j.matches?.length || j.matches.some(m => m.correct === undefined)) {
+    // Infer: if any row has boolean (true/false) in that column, mark as set
+    const first = (j.rows || [])[0];
+    if (first && Array.isArray(first.correct)) {
+      for (let i=0;i<5;i++){ correctSet[i] = first.correct[i] === true || first.correct[i] === false; }
+    }
+  }
+
+  // Table
+  const body = document.querySelector('#weeklyTbl tbody');
+  body.innerHTML = '';
+  (j.rows || []).forEach((r,i)=>{
+    const highlight = String(r.userId) === String(highlightUserId);
+    const row = Object.assign({ pos: i+1 }, r);
+    body.appendChild(trWeekly(row, correctSet, highlight));
+  });
+
+  // Week selector (if you want a real list, wire a /weeks endpoint; for now keep current)
   const sel = document.getElementById('weekSel');
-  sel.innerHTML='';
-  const weeks = [...new Set((j.matches||[]).map(()=>week))]; // simple; we only know current here
-  // If you want a real list, pass available weeks from a small endpoint; for now just set selected.
-  const opt = document.createElement('option'); opt.value = week; opt.textContent = `Week ${week}`; opt.selected=true; sel.appendChild(opt);
+  sel.innerHTML = '';
+  const opt = document.createElement('option');
+  opt.value = week; opt.textContent = `Week ${week}`; opt.selected = true;
+  sel.appendChild(opt);
+  sel.onchange = ()=> loadWeekly(Number(sel.value));
 }
 
+/* ---------- Tabs ---------- */
 document.getElementById('tabOverall').onclick = ()=>{
   document.getElementById('tabOverall').classList.add('active');
   document.getElementById('tabWeekly').classList.remove('active');
@@ -112,6 +225,7 @@ document.getElementById('tabWeekly').onclick = async ()=>{
   await loadWeekly(currentWeek);
 };
 
+/* ---------- Init ---------- */
 loadOverall();
 </script>
 </body>
