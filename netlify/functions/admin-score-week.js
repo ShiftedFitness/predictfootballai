@@ -39,14 +39,14 @@ exports.handler = async (event) => {
     // Predictions belonging to this week
     const weekPreds = (predsAll || []).filter(p => matchIds.has(String(relId(p['Match']))));
 
-    // 2) Recompute & overwrite Points Awarded when needed
+    // 2) Recompute & overwrite Points Awarded when needed (idempotent and corrective)
     let predictionsUpdated = 0;
     for (const p of weekPreds) {
       const pick    = U(p['Pick']);
       const mid     = String(relId(p['Match']));
       const correct = correctByMatch[mid];
-      // If correct result missing, count as 0 (but we shouldn't be here until results are set)
-      const should = (pick && correct && pick === correct) ? 1 : 0;
+      // If correct result missing, count as 0 (but typically results are set first)
+      const should  = (pick && correct && pick === correct) ? 1 : 0;
       const current = (typeof p['Points Awarded'] === 'number') ? Number(p['Points Awarded']) : null;
 
       // Write when missing OR wrong
@@ -72,25 +72,33 @@ exports.handler = async (event) => {
     const participatingUserIds = Array.from(new Set(weekAfter.map(p => String(relId(p['User'])))));
 
     // 4) Update users: add FULL weekly points (correct + bonus) & bump Current Week +1
+    //    ALSO increment FH (full house) and Blanks counters.
     const updates = [];
     for (const uid of participatingUserIds) {
       const u = usersAll.find(x => String(x.id) === uid);
       if (!u) continue;
 
       const weeklyCorrectFinal = weeklyCorrectFinalByUser[uid] || 0; // 0..5
-      const bonus = (weeklyCorrectFinal === 5) ? 5 : 0;
+      const bonus    = (weeklyCorrectFinal === 5) ? 5 : 0;
+      const fhInc    = (weeklyCorrectFinal === 5) ? 1 : 0;   // NEW
+      const blankInc = (weeklyCorrectFinal === 0) ? 1 : 0;   // NEW
       const pointsToAdd = weeklyCorrectFinal + bonus;
 
       const newPoints    = Number(u['Points'] ?? 0) + pointsToAdd;
       const newCorrect   = Number(u['Correct Results'] ?? 0) + weeklyCorrectFinal;
       const newIncorrect = Number(u['Incorrect Results'] ?? 0) + (5 - weeklyCorrectFinal);
+      const newFH        = Number(u['FH'] ?? 0)      + fhInc;      // NEW
+      const newBlanks    = Number(u['Blanks'] ?? 0)  + blankInc;   // NEW
 
       const ck = findKey(u, 'Current Week');
       const currW = ck ? Number(u[ck] ?? week) : Number(week);
+
       const body = {
         'Points': newPoints,
         'Correct Results': newCorrect,
         'Incorrect Results': newIncorrect,
+        'FH': newFH,               // NEW
+        'Blanks': newBlanks,       // NEW
         [ck || 'Current Week']: currW + 1
       };
 
@@ -101,7 +109,11 @@ exports.handler = async (event) => {
         name: nameOf(u),
         weeklyCorrectFinal,
         bonusApplied: bonus,
-        pointsAdded: pointsToAdd
+        pointsAdded: pointsToAdd,
+        fhInc,
+        blankInc,
+        newFH,
+        newBlanks
       });
     }
 
