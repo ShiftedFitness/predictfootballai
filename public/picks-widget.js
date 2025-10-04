@@ -173,15 +173,15 @@
     const allChosen = matches.length>0 && matches.every(m => !!picks[m.id]);
     if (!locked && allChosen) editMode = false;
 
-    function renderHeaderVisibility() {
-      // In edit mode (and pre-deadline): hide both deadline line and countdown
-      if (!locked && editMode) {
-        deadlineLineEl.classList.add('pf-hidden');
-        digitsEl.parentElement.classList.add('pf-hidden');
-      } else {
-        deadlineLineEl.classList.remove('pf-hidden');
-        digitsEl.parentElement.classList.remove('pf-hidden');
-      }
+   function renderHeaderVisibility() {
+  // Always show countdown; hide only the absolute line when editing
+  if (!locked && editMode) {
+    deadlineLineEl.classList.add('pf-hidden');   // hide "Deadline (UK Time): ..."
+  } else {
+    deadlineLineEl.classList.remove('pf-hidden');
+  }
+  digitsEl.parentElement.classList.remove('pf-hidden'); // ensure countdown visible
+}
     }
 
     function renderDeadlineLine() {
