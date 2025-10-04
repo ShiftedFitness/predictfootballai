@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>PredictFootball.ai – Tables</title>
+<style>
+  :root{ --bg:#30A278; --card:#000; --border:#1a1a1a; --text:#fff; --muted:#EAEAEA; --accent:#fff; --accentText:#000; --points:#FFD700; }
+  html,body{ height:100% } body{ margin:0; background:#111; color:#fff; font-family:Inter,system-ui,Arial; display:flex; justify-content:center; align-items:flex-start; min-height:100vh }
+  .wrap{ max-width:750px; width:100%; margin:24px 12px; background:var(--bg); color:var(--text); border-radius:14px; padding:16px; }
+  h2{ margin:0 0 12px }
+  .tabs{ display:flex; gap:8px; margin-bottom:12px }
+  .tab{ background:#0e0e0e; color:#fff; border:1px solid #2a2a2a; padding:8px 12px; border-radius:999px; cursor:pointer }
+  .tab.active{ background:#fff; color:#000; font-weight:800 }
+  .card{ background:var(--card); border:1px solid var(--border); border-radius:12px; padding:12px; margin-bottom:12px }
+  .muted{ color:var(--muted) }
+  .row{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; justify-content:space-between }
+  select{ background:#0e0e0e; color:#fff; border:1px solid #2a2a2a; border-radius:8px; padding:8px 10px }
+  .table{ width:100%; border-collapse:collapse; font-size:14px }
+  .table th,.table td{ padding:10px 8px; border-bottom:1px solid #1f1f1f; text-align:left; white-space:nowrap }
+  .table th{ font-size:12px; color:#cfcfcf; text-transform:uppercase; letter-spacing:.3px }
+  .pts{ text-align:center; background:rgba(255,255,255,0.1); color:var(--points); font-weight:700; border-radius:6px }
+  .center{ text-align:center }
+  .tick{ color:#7CFC00; font-weight:900 }
+  .cross{ color:#FF6B6B; font-weight:900 }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h2>Tables</h2>
+  <div class="tabs">
+    <button class="tab active" id="tabOverall">Overall</button>
+    <button class="tab" id="tabWeekly">This Week</button>
+  </div>
+
+  <!-- Overall -->
+  <div id="overall" class="card">
+    <div class="muted" id="overallCount"></div>
+    <table class="table" id="overallTbl">
+      <thead>
+        <tr><th>Pos</th><th>Username</th><th>% Acc</th><th>FH</th><th class="pts">Points</th></tr>
+      </thead><tbody></tbody>
+    </table>
+  </div>
+
+  <!-- Weekly -->
+  <div id="weekly" class="card" style="display:none">
+    <div class="row" style="margin-bottom:8px">
+      <div>
+        <span class="muted">Week</span>
+        <select id="weekSel"></select>
+      </div>
+      <div class="muted" id="lockedMsg"></div>
+    </div>
+    <table class="table" id="weeklyTbl">
+      <thead>
+        <tr><th>Pos</th><th>Username</th><th class="center">Points</th><th>Picks</th><th class="center">✓/✗</th></tr>
+      </thead><tbody></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+const base='/.netlify/functions';
+const qs = new URLSearchParams(location.search);
+const currentWeek = Number(qs.get('week') || 1);
+
+function pct(x){ return (Math.round(x*1000)/10).toFixed(1)+'%'; }
+function rowOverall(r, i){
+  const tr = document.createElement('tr');
+  tr.innerHTML = `<td>${r.position}</td><td>${escape(r.name)}</td><td>${pct(r.accuracy)}</td><td class="center">${r.fh||0}</td><td class="pts">${r.points}</td>`;
+  return tr;
+}
+function rowWeekly(r, i){
+  const ticks = r.correct.map(v => v ? '<span class="tick">✓</span>' : '<span class="cross">✗</span>').join(' ');
+  const tr = document.createElement('tr');
+  tr.innerHTML = `<td>${i+1}</td><td>${escape(r.name)}</td><td class="center">${r.points}</td><td>${escape(r.picks)}</td><td class="center">${ticks}</td>`;
+  return tr;
+}
+function escape(s){ return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+async function loadOverall(){
+  const r = await fetch(`${base}/leaderboard`, {cache:'no-store'}); const j = await r.json();
+  const b = document.querySelector('#overallTbl tbody'); b.innerHTML='';
+  (j.leaderboard||[]).forEach((x,i)=> b.appendChild(rowOverall(x,i)));
+  document.getElementById('overallCount').textContent = `${(j.leaderboard||[]).length} players`;
+}
+
+async function loadWeekly(week){
+  const r = await fetch(`${base}/weekly-table?week=${week}`, {cache:'no-store'}); const j = await r.json();
+  const b = document.querySelector('#weeklyTbl tbody'); b.innerHTML='';
+  (j.rows||[]).forEach((x,i)=> b.appendChild(rowWeekly(x,i)));
+  document.getElementById('lockedMsg').textContent = j.locked ? 'Live (deadline passed)' : 'Not available (deadline not passed)';
+  // weeks dropdown
+  const sel = document.getElementById('weekSel');
+  sel.innerHTML='';
+  const weeks = [...new Set((j.matches||[]).map(()=>week))]; // simple; we only know current here
+  // If you want a real list, pass available weeks from a small endpoint; for now just set selected.
+  const opt = document.createElement('option'); opt.value = week; opt.textContent = `Week ${week}`; opt.selected=true; sel.appendChild(opt);
+}
+
+document.getElementById('tabOverall').onclick = ()=>{
+  document.getElementById('tabOverall').classList.add('active');
+  document.getElementById('tabWeekly').classList.remove('active');
+  document.getElementById('overall').style.display='';
+  document.getElementById('weekly').style.display='none';
+};
+document.getElementById('tabWeekly').onclick = async ()=>{
+  document.getElementById('tabWeekly').classList.add('active');
+  document.getElementById('tabOverall').classList.remove('active');
+  document.getElementById('overall').style.display='none';
+  document.getElementById('weekly').style.display='';
+  await loadWeekly(currentWeek);
+};
+
+loadOverall();
+</script>
+</body>
+</html>
