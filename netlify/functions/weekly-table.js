@@ -1,3 +1,4 @@
+// netlify/functions/weekly-table.js
 const { ADALO, listAll } = require('./_adalo.js');
 
 const U = (s)=> String(s||'').trim().toUpperCase();
@@ -18,20 +19,24 @@ exports.handler = async (event) => {
     const matches = (matchesAll||[])
       .filter(m => Number(m['Week']) === week)
       .sort((a,b)=> Number(a.id) - Number(b.id));
-    if (!matches.length) return json(200, { week, rows: [], locked:false });
+
+    if (!matches.length) {
+      return json(200, { week, locked:false, rows:[], matches:[] });
+    }
 
     // Is week past deadline?
-    const earliest = matches.map(m=> m['Lockout Time'] ? new Date(m['Lockout Time']) : null)
-                            .filter(Boolean).sort((a,b)=>a-b)[0];
-    const locked = (!!earliest && Date.now() >= earliest.getTime()) || matches.some(m => m['Locked']===true);
+    const earliest = matches
+      .map(m => m['Lockout Time'] ? new Date(m['Lockout Time']) : null)
+      .filter(Boolean).sort((a,b)=>a-b)[0];
+    const locked = (!!earliest && Date.now() >= earliest.getTime()) || matches.some(m => m['Locked'] === true);
 
-    // Map match order & correct result
-    const order = matches.map(m => String(m.id));
-    const correctBy = Object.fromEntries(matches.map(m => [String(m.id), U(m['Correct Result'])]));
+    // Order + correct results for each match
+    const orderIds = matches.map(m => String(m.id));
+    const correctById = Object.fromEntries(matches.map(m => [String(m.id), U(m['Correct Result'])]));
 
-    // All predictions for this week
-    const matchIds = new Set(order);
-    const weekPreds = (predsAll||[]).filter(p => matchIds.has(String(relId(p['Match']))));
+    // Pull predictions for this week
+    const matchIdSet = new Set(orderIds);
+    const weekPreds = (predsAll||[]).filter(p => matchIdSet.has(String(relId(p['Match']))));
 
     // Group by user
     const byUser = {};
@@ -42,26 +47,38 @@ exports.handler = async (event) => {
     }
 
     const rows = Object.entries(byUser).map(([uid, arr])=>{
-      // normalize to match order
       const byMatch = Object.fromEntries(arr.map(p => [String(relId(p['Match'])), p]));
-      const picks = order.map(mid => U(byMatch[mid]?.['Pick']));
-      const pts   = order.map(mid => Number(byMatch[mid]?.['Points Awarded'] ?? 0));
-      const corr  = order.map((mid,i) => (picks[i] && correctBy[mid]) ? (picks[i] === correctBy[mid]) : false);
+      const picksRaw = orderIds.map(mid => U(byMatch[mid]?.['Pick']));
+      const pts      = orderIds.map(mid => Number(byMatch[mid]?.['Points Awarded'] ?? 0));
+      const correctB = orderIds.map(mid => {
+        const c = correctById[mid];
+        const pr = U(byMatch[mid]?.['Pick']);
+        return c && pr ? (c === pr) : false;
+      });
 
-      // compact picks like H / X / 2
-      const mk = (p)=> p==='HOME'?'1':(p==='AWAY'?'2':(p==='DRAW'?'X':'-'));
-      const compact = picks.map(mk).join(' ');
+      // compact picks like 1 / 2 / X
+      const toSymbol = p => p==='HOME'?'1':(p==='AWAY'?'2':(p==='DRAW'?'X':'-'));
+      const compact = picksRaw.map(toSymbol).join(' ');
 
-      const user = usersAll.find(u => String(u.id) === uid);
-      const name = user?.['Username'] || user?.['Name'] || user?.['Full Name'] || `User ${uid}`;
+      const u = usersAll.find(x => String(x.id) === uid);
+      const name = u?.['Username'] || u?.['Name'] || u?.['Full Name'] || `User ${uid}`;
       const points = pts.reduce((s,v)=> s + (isNaN(v)?0:v), 0);
-      return { userId: uid, name, week, points, picks: compact, correct: corr, picksRaw: picks };
+
+      return { userId: uid, name, week, points, picks: compact, picksRaw, correct: correctB };
     });
 
-    // sort by points desc then name
+    // Sort by points then name
     rows.sort((a,b)=> (b.points - a.points) || a.name.localeCompare(b.name));
 
-    return json(200, { week, locked, rows, matches: matches.map(m=>({id:m.id, home:m['Home Team'], away:m['Away Team']})) });
+    // Expose match meta + whether a result exists for each
+    const matchesOut = matches.map(m => ({
+      id: m.id,
+      home: m['Home Team'],
+      away: m['Away Team'],
+      correct: U(m['Correct Result'])   // "HOME" | "DRAW" | "AWAY" | ""
+    }));
+
+    return json(200, { week, locked, rows, matches: matchesOut });
   } catch (e) {
     return json(500, { error: String(e) });
   }
