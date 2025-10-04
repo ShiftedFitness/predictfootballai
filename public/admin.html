@@ -13,10 +13,12 @@
   input,select{background:#0e0e0e;color:#fff;border:1px solid #2a2a2a;border-radius:8px;padding:8px 10px}
   .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
   .btn{background:#fff;color:#000;border:0;padding:10px 14px;border-radius:8px;font-weight:800;cursor:pointer}
+  .btn.small{padding:8px 10px}
   table{width:100%;border-collapse:collapse;margin-top:8px}
-  th,td{padding:8px;border-bottom:1px solid #1f1f1f;text-align:left}
+  th,td{padding:8px;border-bottom:1px solid #1f1f1f;text-align:left;vertical-align:middle}
   select.result{min-width:120px}
   #status{white-space:pre-wrap;margin-top:6px}
+  .right{ text-align:right }
 </style>
 </head>
 <body>
@@ -68,7 +70,7 @@ function withLoading(btn, fn){
   if(!btn) return fn();
   const orig = btn.innerHTML;
   btn.disabled = true;
-  btn.innerHTML = '<span style="display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.35);border-top-color:#fff;border-radius:50%;margin-right:8px;vertical-align:-2px;animation:spin .7s linear infinite"></span>Working…';
+  btn.innerHTML = '<span style="display:inline-block;width:14px;height:14px;border:2px solid rgba(0,0,0,0.35);border-top-color:#000;border-radius:50%;margin-right:8px;vertical-align:-2px;animation:spin .7s linear infinite"></span>Working…';
   return fn().finally(()=>{ btn.disabled=false; btn.innerHTML=orig; });
 }
 (function addSpinCss(){
@@ -77,14 +79,25 @@ function withLoading(btn, fn){
   document.head.appendChild(s);
 })();
 
+function resultOptions(val){
+  const up = (val||'').toUpperCase();
+  const opt = t => `<option value="${t}" ${up===t?'selected':''}>${t}</option>`;
+  return opt('HOME') + opt('DRAW') + opt('AWAY');
+}
+
+// Row template with a per-match "Save & Score" button
 function row(match){
-  const sel = (val)=>`<option ${val==='HOME'?'selected':''}>HOME</option>
-                      <option ${val==='DRAW'?'selected':''}>DRAW</option>
-                      <option ${val==='AWAY'?'selected':''}>AWAY</option>`;
   return `<tr data-id="${match.id}">
     <td>${match.id}</td>
     <td>${match['Home Team']} v ${match['Away Team']}</td>
-    <td><select class="result">${sel((match['Correct Result']||'').toUpperCase())}</select></td>
+    <td>
+      <select class="result">
+        ${resultOptions(match['Correct Result']||'')}
+      </select>
+    </td>
+    <td class="right">
+      <button class="btn small score-one">Save & Score</button>
+    </td>
   </tr>`;
 }
 
@@ -103,13 +116,58 @@ window.addEventListener('DOMContentLoaded', () => {
     setStatus(`Loaded ${m.length} matches`);
     $('matches').innerHTML = `
       <table>
-        <thead><tr><th>ID</th><th>Fixture</th><th>Correct Result</th></tr></thead>
+        <thead>
+          <tr><th>ID</th><th>Fixture</th><th>Correct Result</th><th class="right">Live Score</th></tr>
+        </thead>
         <tbody>${m.map(row).join('')}</tbody>
       </table>`;
     $('nextWeek').value = String(week + 1);
   });
 
-  // Apply results
+  // Delegate: per-row Save & Score
+  document.addEventListener('click', async (e)=>{
+    const btn = e.target.closest('.score-one');
+    if (!btn) return;
+    const tr = btn.closest('tr');
+    const matchId = tr.getAttribute('data-id');
+    const select = tr.querySelector('select.result');
+    const correct = (select?.value || '').toUpperCase();
+    const week = Number($('week').value);
+    const secret = ($('secret')?.value || '').trim();
+
+    if (!correct) { setStatus('Pick a correct result first (HOME/DRAW/AWAY)'); return; }
+
+    await withLoading(btn, async ()=>{
+      // 1) Save this one result via admin-set-results
+      const saveRes = await fetch(`${base}/admin-set-results`, {
+        method:'POST',
+        headers:{'Content-Type':'application/json','x-admin-secret':secret},
+        body: JSON.stringify({ week, results: [{ match_id: matchId, correct }] })
+      });
+      const saveTxt = await saveRes.text();
+
+      // 2) Score this match
+      const scoreRes = await fetch(`${base}/score-match`, {
+        method:'POST',
+        headers:{'Content-Type':'application/json','x-admin-secret':secret},
+        body: JSON.stringify({ match_id: matchId })
+      });
+      let message = 'Database updated ✓  •  ';
+      try {
+        const j = await scoreRes.json();
+        message += `Match ${matchId} scored (updated ${j.updated} predictions)`;
+        setStatus(message);
+        setTimeout(()=> setStatus(message + '\n' + JSON.stringify(j, null, 2)), 600);
+      } catch {
+        const txt = await scoreRes.text();
+        message += `Match ${matchId} scored`;
+        setStatus(message);
+        setTimeout(()=> setStatus(message + '\n' + txt + '\n' + saveTxt), 600);
+      }
+    });
+  });
+
+  // Apply results (bulk)
   applyBtn.onclick = ()=> withLoading(applyBtn, async ()=>{
     const secret = ($('secret')?.value || '').trim();
     const week = Number($('week').value);
