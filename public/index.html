@@ -5,48 +5,45 @@
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>PredictFootball.ai – Picks</title>
   <style>
-    /* Fill the frame */
-    html, body { height: 100%; }
     body {
-      margin: 0;
-      background: #111;           /* subtle page bg behind the widget */
-      color: #fff;
-      font-family: Inter, system-ui, Arial;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;    /* keep content pinned to top */
-      min-height: 100vh;          /* ensure full viewport height */
+      margin:0; padding:0; background:#111; color:#fff;
+      font-family: Inter, system-ui, Arial; display:flex; justify-content:center;
     }
-    /* Optional: let the widget stretch the full width on small screens */
-    #picks { width: 100%; }
+    #picks { width:100%; }
+    .loading { max-width:750px; width:100%; margin:24px 12px; background:#30A278; color:#fff; border-radius:14px; padding:16px; }
   </style>
 </head>
 <body>
-  <div id="picks"></div>
+  <div id="picks"><div class="loading">Loading week…</div></div>
 
+  <!-- Picks widget script (your existing picks-widget.js) -->
   <script src="/picks-widget.js"></script>
   <script>
-    // Read week & userId from URL
-    const qs = new URLSearchParams(location.search);
-    const week = qs.get('week') || 1;         // required for your flow; default 1
-    const userId = qs.get('userId') || '';    // required by API; don’t display it
+    (async function init() {
+      const qs = new URLSearchParams(location.search);
+      const urlWeek = qs.get('week');
+      const userId  = qs.get('userId') || ''; // optional—prefer to pass this from Adalo
 
-    // Render the widget (no userId shown on page)
-    PredictFootballPicks.render(
-      document.getElementById('picks'),
-      { base: '/.netlify/functions', week, userId }
-    );
+      let weekToUse = urlWeek ? Number(urlWeek) : null;
 
-    // --- Optional: report height to parent for auto-resize if you control the parent iframe ---
-    function postSize() {
-      const h = Math.max(
-        document.documentElement.scrollHeight,
-        document.body.scrollHeight
+      // If no week in URL, ask backend which week to show for PICKS
+      if (!weekToUse) {
+        try {
+          const r = await fetch('/.netlify/functions/weeks', { cache:'no-store' });
+          const j = await r.json();
+          weekToUse = j.recommendedPickWeek || j.latest || 1;
+        } catch (e) {
+          console.warn('weeks lookup failed, defaulting to 1', e);
+          weekToUse = 1;
+        }
+      }
+
+      // Render the widget
+      PredictFootballPicks.render(
+        document.getElementById('picks'),
+        { base: '/.netlify/functions', week: weekToUse, userId }
       );
-      try { window.parent.postMessage({ type: 'pf-resize', height: h }, '*'); } catch(e){}
-    }
-    window.addEventListener('load', postSize);
-    window.addEventListener('resize', () => { clearTimeout(window.__pfTO); window.__pfTO = setTimeout(postSize, 100); });
+    })();
   </script>
 </body>
 </html>
