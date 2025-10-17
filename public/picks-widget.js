@@ -24,7 +24,7 @@
     .pf-grid{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin-top:10px }
     .pf-pick{ padding:12px 12px; border-radius:10px; text-align:center; cursor:pointer; background: transparent; color:${THEME.text}; border:1px solid ${THEME.border}; transition: all .15s ease; font-weight:700; display:flex; align-items:center; justify-content:center; gap:8px; }
     .pf-pick:hover{ border-color:#333 }
-    .pf-pick.active{ background:${THEME.accent}; color:${THEME.accentText}; border-color:${THEME.accent}; font-weight: 900; }
+    .pf-pick.active{ background:${THEME.accent}; color:${THEME.accentText}; border-color:${THEME.accent}; font-weight:900; }
     .pf-badge{ display:none; color:${THEME.good}; font-weight:900; }
     .pf-pick.active .pf-badge{ display:inline; }
     .pf-row{ display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap }
@@ -53,10 +53,7 @@
     return r.json();
   }
   function el(html) { const d=document.createElement('div'); d.innerHTML=html.trim(); return d.firstChild; }
-  function showError(container, msg) {
-    const box = el(`<div class="pf-error">${msg}</div>`);
-    container.appendChild(box);
-  }
+  function showError(container, msg) { container.appendChild(el(`<div class="pf-error">${msg}</div>`)); }
 
   function formatCountdown(ms) {
     if (ms <= 0) return '00d 00h 00m 00s';
@@ -85,15 +82,14 @@
   // === MAIN ===
   async function renderPicks(container, cfg) {
     try {
-      // URL params override
-      const qs = new URLSearchParams(location.search);
+      const qs   = new URLSearchParams(location.search);
       const base = cfg.base || '/.netlify/functions';
 
       let week   = String(qs.get('week')   ?? cfg.week);
       let userId = String(qs.get('userId') ?? cfg.userId);
 
-      // Fallback: get-week requires userId. Use "0" if missing so the page still loads.
-      if (!userId || userId === 'undefined' || userId === 'null') userId = '0';
+      // Harden userId so get-week won't 400:
+      userId = (userId && userId !== 'undefined' && userId !== 'null') ? userId : '0';
 
       container.innerHTML = '';
       const wrap = el(`
@@ -115,7 +111,6 @@
       container.appendChild(wrap);
       wrap.querySelector('#pf-week').textContent = week;
 
-      // Load week + user picks
       let data;
       try {
         data = await j(`${base}/get-week?week=${encodeURIComponent(week)}&userId=${encodeURIComponent(userId)}`);
@@ -129,7 +124,7 @@
       const picks = {};
       (data.predictions || []).forEach(p => { picks[p['Match']] = p['Pick'] || ''; });
 
-      // Deadline
+      // Deadline (earliest)
       const deadlines = matches
         .map(m => m['Lockout Time'] ? new Date(m['Lockout Time']) : null)
         .filter(Boolean)
@@ -137,19 +132,17 @@
       const deadline = deadlines[0] || null;
 
       const deadlineLineEl = wrap.querySelector('#pf-deadline-line');
-      const digitsEl = wrap.querySelector('#pf-digits');
-      const statusEl = wrap.querySelector('#pf-status');
-      const matchesEl = wrap.querySelector('#pf-matches');
-      const actionsEl = wrap.querySelector('#pf-actions');
-      const summaryEl = wrap.querySelector('#pf-summary');
+      const digitsEl       = wrap.querySelector('#pf-digits');
+      const statusEl       = wrap.querySelector('#pf-status');
+      const matchesEl      = wrap.querySelector('#pf-matches');
+      const actionsEl      = wrap.querySelector('#pf-actions');
+      const summaryEl      = wrap.querySelector('#pf-summary');
 
-      // Start in edit mode if not locked; if all picks chosen, start in view mode
       let editMode = !locked;
       const allChosen = matches.length>0 && matches.every(m => !!picks[m.id]);
       if (!locked && allChosen) editMode = false;
 
       function renderHeaderVisibility() {
-        // Always show countdown; hide only the absolute line when editing
         if (!locked && editMode) {
           deadlineLineEl.classList.add('pf-hidden');
         } else {
@@ -289,8 +282,7 @@
 
       function render() {
         renderHeaderVisibility();
-        // Always show countdown digits
-        wrap.querySelector('.pf-countdown').classList.remove('pf-hidden');
+        // keep countdown visible
         renderDeadlineLine();
         if (locked) {
           renderPost();
@@ -299,12 +291,9 @@
         }
       }
 
-      // Countdown
       function tick() {
-        const digitsEl = wrap.querySelector('#pf-digits');
         if (!deadline) { digitsEl.textContent='--'; return; }
-        const now = Date.now();
-        const diff = new Date(deadline).getTime() - now;
+        const diff = new Date(deadline).getTime() - Date.now();
         digitsEl.textContent = formatCountdown(diff);
         if (diff <= 0 && !locked) {
           locked = true;
@@ -312,17 +301,13 @@
         }
       }
       tick();
-      const timerId = setInterval(tick, 1000);
+      setInterval(tick, 1000);
 
-      // First render
       render();
-
     } catch (err) {
-      // catastrophic error — show something on the page
       container.appendChild(el(`<div class="pf-error">Widget crashed:\n${err.message || err}</div>`));
     }
   }
 
-  // Expose global init
   window.PredictFootballPicks = { render: renderPicks };
 })();
