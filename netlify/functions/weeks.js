@@ -1,9 +1,9 @@
 // netlify/functions/weeks.js
-const { ADALO, listAll } = require('./_adalo.js');
+const { listAll } = require('./_adalo.js');
 
 exports.handler = async () => {
   try {
-    const matches = await listAll(ADALO.col.matches, 2000);
+    const matches = await listAll(process.env.ADALO_MATCHES_ID, 200);
 
     const byWeek = {};
     for (const m of (matches || [])) {
@@ -18,45 +18,30 @@ exports.handler = async () => {
     }
 
     const now = Date.now();
-    const weekInfo = weeks.map(w => {
+    const info = weeks.map(w => {
       const arr = byWeek[w];
-      // earliest lockout
       const earliest = arr
         .map(m => m['Lockout Time'] ? new Date(m['Lockout Time']).getTime() : null)
-        .filter(Boolean)
-        .sort((a,b)=>a-b)[0] ?? null;
+        .filter(Boolean).sort((a,b)=>a-b)[0] ?? null;
       const locked = (earliest && earliest <= now) || arr.some(m => m['Locked'] === true);
       return { week: w, earliest, locked };
     });
 
     const latest = weeks[weeks.length - 1];
-
-    // Picks widget should always show the latest/current week so users can submit before deadline.
-    const recommendedPickWeek = latest;
-
-    // For “viewing” pages (like weekly table), people sometimes prefer: if latest open -> show latest-1.
-    // Expose both, caller can choose.
-    const latestInfo = weekInfo.find(x => x.week === latest);
-    const recommendedViewWeek = latestInfo && latestInfo.locked
-      ? latest
-      : (weeks.length > 1 ? weeks[weeks.length - 2] : latest);
+    const latestInfo = info.find(x => x.week === latest);
 
     return json(200, {
       weeks,
       latest,
-      recommendedPickWeek,
-      recommendedViewWeek,
-      detail: weekInfo
+      recommendedPickWeek: latest,
+      recommendedViewWeek: latestInfo && latestInfo.locked ? latest : (weeks.length > 1 ? weeks[weeks.length-2] : latest),
+      detail: info
     });
   } catch (e) {
     return json(500, { error: String(e) });
   }
 };
 
-function json(status, body) {
-  return {
-    statusCode: status,
-    headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
-    body: JSON.stringify(body)
-  };
+function json(status, body){
+  return { statusCode: status, headers:{'Content-Type':'application/json','Cache-Control':'no-store'}, body: JSON.stringify(body) };
 }
