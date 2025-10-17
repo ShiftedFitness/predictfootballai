@@ -24,7 +24,7 @@
     .pf-grid{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin-top:10px }
     .pf-pick{ padding:12px 12px; border-radius:10px; text-align:center; cursor:pointer; background: transparent; color:${THEME.text}; border:1px solid ${THEME.border}; transition: all .15s ease; font-weight:700; display:flex; align-items:center; justify-content:center; gap:8px; }
     .pf-pick:hover{ border-color:#333 }
-    .pf-pick.active{ background:${THEME.accent}; color:${THEME.accentText}; border-color:${THEME.accent}; font-weight:900; }
+    .pf-pick.active{ background:${THEME.accent}; color:${THEME.accentText}; border-color:${THEME.accent}; font-weight: 900; }
     .pf-badge{ display:none; color:${THEME.good}; font-weight:900; }
     .pf-pick.active .pf-badge{ display:inline; }
     .pf-row{ display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap }
@@ -111,6 +111,7 @@
       container.appendChild(wrap);
       wrap.querySelector('#pf-week').textContent = week;
 
+      // Load week + picks
       let data;
       try {
         data = await j(`${base}/get-week?week=${encodeURIComponent(week)}&userId=${encodeURIComponent(userId)}`);
@@ -124,7 +125,7 @@
       const picks = {};
       (data.predictions || []).forEach(p => { picks[p['Match']] = p['Pick'] || ''; });
 
-      // Deadline (earliest)
+      // Deadline
       const deadlines = matches
         .map(m => m['Lockout Time'] ? new Date(m['Lockout Time']) : null)
         .filter(Boolean)
@@ -143,6 +144,7 @@
       if (!locked && allChosen) editMode = false;
 
       function renderHeaderVisibility() {
+        // Always show countdown; hide only the absolute line when editing
         if (!locked && editMode) {
           deadlineLineEl.classList.add('pf-hidden');
         } else {
@@ -282,7 +284,6 @@
 
       function render() {
         renderHeaderVisibility();
-        // keep countdown visible
         renderDeadlineLine();
         if (locked) {
           renderPost();
