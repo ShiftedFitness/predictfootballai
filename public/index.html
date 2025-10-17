@@ -5,10 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>PredictFootball.ai – Picks</title>
   <style>
-    body {
-      margin:0; padding:0; background:#111; color:#fff;
-      font-family: Inter, system-ui, Arial; display:flex; justify-content:center;
-    }
+    body { margin:0; padding:0; background:#111; color:#fff;
+      font-family: Inter, system-ui, Arial; display:flex; justify-content:center; }
     #picks { width:100%; }
     .panel { max-width:750px; width:100%; margin:24px 12px; background:#30A278; color:#fff; border-radius:14px; padding:16px; }
     .muted { opacity:.85 }
@@ -20,7 +18,6 @@
     <div class="panel" id="status">Loading week…</div>
   </div>
 
-  <!-- Make sure this file exists in /public and is the fixed version -->
   <script src="/picks-widget.js"></script>
 
   <script>
@@ -35,39 +32,37 @@
       };
 
       const qs = new URLSearchParams(location.search);
-      const urlWeek = qs.get('week');
-      const urlUserId = qs.get('userId');
+      const urlWeek  = qs.get('week');
+      const urlUser  = qs.get('userId');
 
-      // Never crash on userId; default to "0" if missing/blank
-      const userId = (urlUserId && urlUserId !== 'undefined' && urlUserId !== 'null') ? urlUserId : '0';
+      // Always pass something; widget will fallback to "0" safely
+      const userId = (urlUser && urlUser !== 'undefined' && urlUser !== 'null') ? urlUser : '0';
 
-      // Wait for widget to be present
-      async function waitForWidget(timeoutMs = 8000) {
+      // Wait for widget to load
+      async function waitForWidget(ms = 8000) {
         const start = Date.now();
-        while (Date.now() - start < timeoutMs) {
+        while (Date.now() - start < ms) {
           if (window.PredictFootballPicks && typeof window.PredictFootballPicks.render === 'function') return true;
           await new Promise(r => setTimeout(r, 100));
         }
         return false;
       }
 
-      // Decide week to use
+      // Choose week
       let weekToUse = urlWeek ? Number(urlWeek) : null;
-
       if (!weekToUse) {
         try {
           const r = await fetch(FN('weeks'), { cache:'no-store' });
-          if (!r.ok) throw new Error(`weeks returned ${r.status}`);
+          if (!r.ok) throw new Error(`weeks ${r.status}`);
           const j = await r.json();
           weekToUse = j?.recommendedPickWeek || j?.latest || 1;
         } catch (e) {
-          console.warn('weeks lookup failed, defaulting to 1', e);
+          console.warn('weeks lookup failed', e);
           setStatus('Loading week… (defaulting to Week 1)');
           weekToUse = 1;
         }
       }
 
-      // Ensure widget is available
       const ready = await waitForWidget();
       if (!ready) {
         setStatus(
@@ -77,13 +72,11 @@
         return;
       }
 
-      // Render
       try {
         window.PredictFootballPicks.render(
           document.getElementById('picks'),
           { base: `${ORIGIN}/.netlify/functions`, week: weekToUse, userId }
         );
-        // Remove the loading panel once render is called
         const panel = document.getElementById('status');
         if (panel && panel.parentNode) panel.parentNode.removeChild(panel);
       } catch (e) {
