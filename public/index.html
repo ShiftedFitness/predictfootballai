@@ -20,7 +20,7 @@
     <div class="panel" id="status">Loading week…</div>
   </div>
 
-  <!-- Picks widget (make sure this file exists in /public) -->
+  <!-- Make sure this file exists in /public and is the fixed version -->
   <script src="/picks-widget.js"></script>
 
   <script>
@@ -30,15 +30,19 @@
 
       const statusEl = document.getElementById('status');
       const setStatus = (msg, extra) => {
+        if (!statusEl) return;
         statusEl.innerHTML = msg + (extra ? `<pre class="muted">${extra}</pre>` : '');
       };
 
       const qs = new URLSearchParams(location.search);
       const urlWeek = qs.get('week');
-      const userId  = qs.get('userId') || '';
+      const urlUserId = qs.get('userId');
 
-      // Helper: wait for widget to be present
-      async function waitForWidget(timeoutMs = 7000) {
+      // Never crash on userId; default to "0" if missing/blank
+      const userId = (urlUserId && urlUserId !== 'undefined' && urlUserId !== 'null') ? urlUserId : '0';
+
+      // Wait for widget to be present
+      async function waitForWidget(timeoutMs = 8000) {
         const start = Date.now();
         while (Date.now() - start < timeoutMs) {
           if (window.PredictFootballPicks && typeof window.PredictFootballPicks.render === 'function') return true;
@@ -53,26 +57,28 @@
       if (!weekToUse) {
         try {
           const r = await fetch(FN('weeks'), { cache:'no-store' });
-          if (!r.ok) throw new Error(`weeks ${r.status}`);
+          if (!r.ok) throw new Error(`weeks returned ${r.status}`);
           const j = await r.json();
           weekToUse = j?.recommendedPickWeek || j?.latest || 1;
         } catch (e) {
-          // fallback
-          weekToUse = 1;
           console.warn('weeks lookup failed, defaulting to 1', e);
           setStatus('Loading week… (defaulting to Week 1)');
+          weekToUse = 1;
         }
       }
 
       // Ensure widget is available
       const ready = await waitForWidget();
       if (!ready) {
-        setStatus('Error: picks widget script did not load.', 'Expected window.PredictFootballPicks to be defined.\nCheck that /picks-widget.js exists and has no JS errors.');
+        setStatus(
+          'Error: picks widget script did not load.',
+          'Expected window.PredictFootballPicks.render()\nCheck that /picks-widget.js exists and has no JS errors.'
+        );
         return;
       }
 
+      // Render
       try {
-        // Render the widget
         window.PredictFootballPicks.render(
           document.getElementById('picks'),
           { base: `${ORIGIN}/.netlify/functions`, week: weekToUse, userId }
