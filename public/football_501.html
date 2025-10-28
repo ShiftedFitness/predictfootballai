@@ -1,147 +1,112 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Football 501 | PredictFootball.ai</title>
   <style>
-    body {
-      background:#000;
-      color:#fff;
-      font-family:Inter, sans-serif;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-      height:100vh;
-      margin:0;
-    }
-    .card {
-      background:#4f8b6e;
-      border-radius:16px;
-      padding:20px;
-      width:90%;
-      max-width:400px;
-      box-shadow:0 4px 12px rgba(0,0,0,0.4);
-      text-align:center;
-    }
-    input,button {
-      border:none;
-      border-radius:8px;
-      padding:10px 14px;
-      margin:6px;
-      font-size:1em;
-    }
-    input {
-      width:80%;
-    }
-    button {
-      background:#222;
-      color:#fff;
-      cursor:pointer;
-      transition:0.2s;
-    }
-    button:hover { background:#333; }
-    .scoreboard {
-      margin-top:10px;
-      display:flex;
-      justify-content:space-around;
-    }
+    :root{--bg:#000;--card:#4f8b6e;--ink:#fff;--muted:#cfe5db;--btn:#111;--btnH:#222;--danger:#ff5a5a}
+    *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;display:flex;min-height:100vh;align-items:center;justify-content:center;padding:18px}
+    .card{width:100%;max-width:480px;background:var(--card);border-radius:20px;padding:20px;box-shadow:0 8px 32px rgba(0,0,0,.5)}
+    h1{margin:0 0 8px;font-size:24px} .sub{margin:0 0 14px;color:var(--muted)} .row{display:flex;gap:8px}
+    input,button{width:100%;padding:12px 14px;border-radius:12px;border:none;font-size:16px}
+    button{background:var(--btn);color:#fff;cursor:pointer;transition:.15s} button:hover{background:var(--btnH)}
+    .scores{display:flex;gap:8px;margin:10px 0 4px} .pill{flex:1;background:rgba(0,0,0,.25);border-radius:14px;padding:12px;text-align:center}
+    .pill .name{font-weight:700}.pill .num{font-size:28px;font-weight:800;letter-spacing:.5px}
+    .turn{text-align:center;margin:10px 0;font-weight:600} .result{min-height:24px;text-align:center;margin:8px 0}
+    .danger{background:var(--danger);color:#000;font-weight:700} .footer{text-align:center;margin-top:10px;opacity:.7;font-size:12px}
+    .hidden{display:none}
   </style>
 </head>
 <body>
   <div class="card">
-    <h2>Football 501</h2>
+    <h1>Football 501</h1>
+    <p class="sub">Topic: Spanish players who have played in the Premier League (score = 501 − appearances)</p>
+
+    <!-- SETUP -->
     <div id="setup">
-      <input id="player1" placeholder="Player 1 Name"/>
-      <input id="player2" placeholder="Player 2 Name"/>
+      <div class="row" style="margin-bottom:8px;">
+        <input id="p1" placeholder="Player 1 name"/>
+        <input id="p2" placeholder="Player 2 name"/>
+      </div>
       <button id="startBtn">Start Game</button>
+      <p class="footer">Local match only. Player list cached ≤ 90 mins.</p>
     </div>
 
-    <div id="game" style="display:none;">
-      <div class="scoreboard">
-        <div><strong id="p1Name"></strong><br><span id="p1Score">501</span></div>
-        <div><strong id="p2Name"></strong><br><span id="p2Score">501</span></div>
+    <!-- GAME -->
+    <div id="game" class="hidden">
+      <div class="scores">
+        <div class="pill"><div class="name" id="p1Name"></div><div class="num" id="p1Score">501</div></div>
+        <div class="pill"><div class="name" id="p2Name"></div><div class="num" id="p2Score">501</div></div>
       </div>
-      <p id="turnInfo"></p>
-      <input id="guessInput" placeholder="Enter Spanish PL player"/>
-      <button id="submitGuess">Submit</button>
-      <p id="result"></p>
-      <button id="endBtn">End Game</button>
+      <div class="turn" id="turnInfo"></div>
+
+      <input id="guess" placeholder="Type a Spanish PL player"/>
+      <div class="row" style="margin-top:8px;">
+        <button id="submit">Submit Guess</button>
+        <button id="end" class="danger">End Game</button>
+      </div>
+
+      <div class="result" id="result"></div>
     </div>
   </div>
 
   <script>
-    const API = {
-      start: '/.netlify/functions/start-game',
-      validate: '/.netlify/functions/validate-player',
-      score: '/.netlify/functions/score-round'
-    };
-    let game = { players: [], scores: [501,501], turn:0, cacheTTL:90*60*1000 };
+    const API={start:'/.netlify/functions/start-game',validate:'/.netlify/functions/validate-player',score:'/.netlify/functions/score-round'};
+    const TTL=90*60*1000;
+    const state={names:['Player 1','Player 2'],scores:[501,501],turn:0,used:new Set()};
+    const $=id=>document.getElementById(id);
 
-    async function fetchPlayers(force=false){
-      const now=Date.now();
+    async function fetchAllPlayers(force=false){
+      const now=Date.now(), ts=parseInt(localStorage.getItem('players_ts')||'0',10);
       const cached=localStorage.getItem('players');
-      const ts=localStorage.getItem('players_ts');
-      if(!force && cached && ts && now-parseInt(ts)<game.cacheTTL){
-        console.log('Using cached player list');
-        return JSON.parse(cached);
-      }
-      const res=await fetch(API.validate+'?fetchAll=true');
-      const data=await res.json();
-      localStorage.setItem('players',JSON.stringify(data));
-      localStorage.setItem('players_ts',now.toString());
-      console.log('Fetched fresh players');
+      if(!force && cached && (now-ts)<TTL) return JSON.parse(cached);
+      const res=await fetch(API.validate+'?fetchAll=1'); const data=await res.json();
+      localStorage.setItem('players',JSON.stringify(data)); localStorage.setItem('players_ts',String(now));
       return data;
     }
+    function setTurn(){ $('turnInfo').textContent=`${state.names[state.turn]}'s turn`; }
+    function renderScores(){ $('p1Score').textContent=state.scores[0]; $('p2Score').textContent=state.scores[1]; }
 
-    document.getElementById('startBtn').onclick=async()=>{
-      game.players=[
-        document.getElementById('player1').value||'Player 1',
-        document.getElementById('player2').value||'Player 2'
-      ];
-      const res=await fetch(API.start);
-      const data=await res.json();
-      game.turn=data.first;
-      document.getElementById('p1Name').textContent=game.players[0];
-      document.getElementById('p2Name').textContent=game.players[1];
-      document.getElementById('setup').style.display='none';
-      document.getElementById('game').style.display='block';
-      document.getElementById('turnInfo').textContent=`${game.players[game.turn]}'s turn`;
-      await fetchPlayers();
+    $('startBtn').onclick=async()=>{
+      state.names=[$('p1').value||'Player 1',$('p2').value||'Player 2'];
+      $('p1Name').textContent=state.names[0]; $('p2Name').textContent=state.names[1];
+      const r=await fetch(API.start).then(r=>r.json()); state.turn=r.first??0;
+      await fetchAllPlayers();
+      $('setup').classList.add('hidden'); $('game').classList.remove('hidden');
+      setTurn(); renderScores(); $('guess').focus();
     };
 
-    document.getElementById('submitGuess').onclick=async()=>{
-      const guess=document.getElementById('guessInput').value.trim();
-      if(!guess) return;
-      const res=await fetch(API.validate,{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({ guess })
-      });
-      const data=await res.json();
-      document.getElementById('result').textContent=data.message;
-      if(data.valid){
-        const scr=await fetch(API.score,{
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body:JSON.stringify({ player:game.turn, valid:true })
-        });
-        const s=await scr.json();
-        game.scores=s.scores;
-        document.getElementById('p1Score').textContent=s.scores[0];
-        document.getElementById('p2Score').textContent=s.scores[1];
+    $('submit').onclick=async()=>{
+      const raw=$('guess').value.trim(); if(!raw) return;
+      const lower=raw.toLowerCase();
+      if(state.used.has(lower)){ $('result').textContent='⚠️ Already used. Try another.'; $('guess').value=''; $('guess').focus(); return; }
+
+      const v=await fetch(API.validate,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({guess:raw})}).then(r=>r.json());
+
+      if(!v.valid){ $('result').textContent=v.message||'❌ Not found.'; state.turn=1-state.turn; setTurn(); $('guess').value=''; $('guess').focus(); return; }
+
+      // v includes {canonical, matches}
+      const canonical=(v.canonical||raw).toLowerCase();
+      if(state.used.has(canonical)){ $('result').textContent='⚠️ Already used.'; state.turn=1-state.turn; setTurn(); $('guess').value=''; $('guess').focus(); return; }
+
+      const s=await fetch(API.score,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({player:state.turn,scores:state.scores,deduct:v.matches})}).then(r=>r.json());
+
+      if(s.error){ $('result').textContent='Error scoring round.'; return; }
+
+      if(s.bust){ $('result').textContent=`💥 Bust! ${v.canonical} has ${v.matches}. Score stays ${state.scores[state.turn]}.`; }
+      else{
+        state.scores=s.scores; renderScores();
+        $('result').textContent=s.win ? `🎯 ${state.names[state.turn]} checked out with ${v.canonical} (${v.matches}).` : `✅ ${v.canonical}: −${v.matches} → ${state.scores[state.turn]}`;
+        state.used.add(canonical);
       }
-      game.turn=1-game.turn;
-      document.getElementById('turnInfo').textContent=`${game.players[game.turn]}'s turn`;
-      document.getElementById('guessInput').value='';
+
+      if(s.win){ setTimeout(endGame,900); return; }
+      state.turn=1-state.turn; setTurn(); $('guess').value=''; $('guess').focus();
     };
 
-    document.getElementById('endBtn').onclick=()=>{
-      localStorage.removeItem('players');
-      localStorage.removeItem('players_ts');
-      location.reload();
-    };
+    function endGame(){ localStorage.removeItem('players'); localStorage.removeItem('players_ts'); location.reload(); }
+    $('end').onclick=endGame;
   </script>
 </body>
 </html>
