@@ -6,11 +6,10 @@
   <title>Football 501 | PredictFootball.ai</title>
   <style>
     :root{--bg:#000;--card:#4f8b6e;--ink:#fff;--muted:#cfe5db;--btn:#111;--btnH:#222;--danger:#ff5a5a}
-    *{box-sizing:border-box}
 
-    /* Page can scroll; room at bottom for fixed history chip */
+    *{box-sizing:border-box}
     body{
-      margin:0; background:var(--bg); color:var(--ink);
+      margin:0;background:var(--bg);color:var(--ink);
       font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;
       min-height:100svh; padding:24px 18px 76px;
     }
@@ -19,12 +18,12 @@
       border-radius:24px; padding:22px; box-shadow:0 8px 32px rgba(0,0,0,.5);
       position:relative; overflow:visible;
     }
-
     h1{margin:0 0 8px;font-size:26px}
     .sub{margin:0 0 14px;color:var(--muted)}
     .row{display:flex;gap:8px}
     input,button{width:100%;padding:12px 14px;border-radius:12px;border:none;font-size:16px}
-    button{background:var(--btn);color:#fff;cursor:pointer;transition:.15s} button:hover{background:var(--btnH)}
+    button{background:var(--btn);color:#fff;cursor:pointer;transition:.15s}
+    button:hover{background:var(--btnH)}
     .scores{display:flex;gap:10px;margin:10px 0 6px}
     .pill{flex:1;background:rgba(0,0,0,.25);border-radius:16px;padding:12px;text-align:center;cursor:pointer}
     .pill .name{font-weight:700}
@@ -35,12 +34,12 @@
     .footer{text-align:center;margin-top:10px;opacity:.7;font-size:12px}
     .hidden{display:none}
 
-    /* Impact toast: fixed, rests near top (12%) */
+    /* Impact toast (overlay) */
     .impact-toast{
       position:fixed; left:50%; top:12%;
       transform:translateX(-50%) translateY(0) scale(.96);
       background:rgba(0,0,0,.92); color:#fff; border-radius:16px; padding:12px 14px;
-      width:min(92vw, 520px); box-shadow:0 14px 34px rgba(0,0,0,.6);
+      width:min(92vw,520px); box-shadow:0 14px 34px rgba(0,0,0,.6);
       opacity:0; pointer-events:none; transition:transform .45s cubic-bezier(.22,.9,.3,1.2), opacity .25s ease;
       z-index:1000;
     }
@@ -52,8 +51,6 @@
     .toast-sub{opacity:.85; font-size:13px}
     .toast-meta{display:flex; gap:10px; margin-top:6px; font-size:12px; opacity:.85; flex-wrap:wrap}
     .toast-meta span{background:rgba(255,255,255,.08); padding:6px 8px; border-radius:9px}
-
-    /* Close/minimize button + minimized chip */
     .toast-close{
       position:absolute; top:8px; right:8px;
       background:rgba(255,255,255,.1); border:none; color:#fff;
@@ -91,7 +88,7 @@
     .pick .meta{opacity:.85; font-size:12px}
     .bust{color:#ff8a8a}
 
-    /* Scale UI on short heights */
+    /* Small-height scaling */
     @media (max-height: 680px){ .card{ transform:scale(.94); transform-origin: top center; } }
     @media (max-height: 560px){ .card{ transform:scale(.88); } }
   </style>
@@ -127,12 +124,12 @@
 
       <div class="result" id="result"></div>
     </div>
-
-    <!-- Impact toast + minimized chip + history -->
-    <div id="toast" class="impact-toast"></div>
-    <div id="minToast" class="min-toast">Show last pick</div>
-    <div id="history" class="history-bar"></div>
   </div>
+
+  <!-- Overlay + Min chip + History -->
+  <div id="toast" class="impact-toast"></div>
+  <div id="minToast" class="min-toast">Show last pick</div>
+  <div id="history" class="history-bar"></div>
 
   <!-- Progress Modal -->
   <div id="modalBack" class="modal-backdrop">
@@ -158,14 +155,14 @@
       scores:[501,501],
       turn:0,
       used:new Set(),
-      retry:false,                 // one retry on miss
-      historyScores:[[501],[501]],// running totals per player
-      picks:[[],[]]                // recent picks per player
+      retry:false,
+      historyScores:[[501],[501]],
+      picks:[[],[]]
     };
 
     const $=id=>document.getElementById(id);
 
-    /* ---------- UI helpers ---------- */
+    /* ---------- Helpers ---------- */
     function animateCount(el, from, to, dur=850){
       const start=performance.now(); const diff=to-from;
       function step(t){
@@ -180,25 +177,20 @@
 
     let toastTimer=null, lastToastHTML='';
     function toastFromPill(side, html){
-      const toast = $('toast'), minChip=$('minToast');
+      const toast=$('toast'), minChip=$('minToast');
       lastToastHTML = html;
-
-      // Add close/minimize button
       toast.innerHTML = `<button class="toast-close" id="toastClose">–</button>${html}`;
 
-      // origin at the active pill (viewport-based)
       const pill = side===0 ? $('p1Pill') : $('p2Pill');
       const pb = pill.getBoundingClientRect();
-      const vwCenter = window.innerWidth / 2;
-      const targetTop = window.innerHeight * 0.12; // CSS top:12%
+      const vwCenter = window.innerWidth/2;
+      const targetTop = window.innerHeight*0.12;
 
       const dx = (pb.left + pb.width/2) - vwCenter;
       const dy = (pb.top + 10) - targetTop;
 
-      // launch from pill
       toast.style.transform = `translateX(calc(-50% + ${dx}px)) translateY(${dy}px) scale(.85)`;
       toast.style.opacity = '0';
-
       if(toastTimer){ clearTimeout(toastTimer); toastTimer=null; }
 
       requestAnimationFrame(()=>{
@@ -207,26 +199,21 @@
         toast.style.opacity = '1';
       });
 
-      // Auto-dismiss after 5s
       toastTimer = setTimeout(()=>{ toast.classList.remove('show'); minChip.style.display='block'; }, 5000);
 
-      // Manual minimize
-      $('toastClose').onclick = ()=>{
-        toast.classList.remove('show');
-        if(toastTimer){ clearTimeout(toastTimer); toastTimer=null; }
+      $('toastClose').onclick = () => {
+        toast.classList.remove('show'); if(toastTimer){clearTimeout(toastTimer); toastTimer=null;}
         minChip.style.display='block';
       };
 
-      // Restore from minimized chip
-      minChip.onclick = ()=>{
+      minChip.onclick = () => {
         minChip.style.display='none';
         toast.innerHTML = `<button class="toast-close" id="toastClose">–</button>${lastToastHTML}`;
         toast.classList.add('show');
         if(toastTimer) clearTimeout(toastTimer);
         toastTimer = setTimeout(()=>{ toast.classList.remove('show'); minChip.style.display='block'; }, 5000);
-        $('toastClose').onclick = ()=>{
-          toast.classList.remove('show');
-          if(toastTimer){ clearTimeout(toastTimer); toastTimer=null; }
+        $('toastClose').onclick = () => {
+          toast.classList.remove('show'); if(toastTimer){clearTimeout(toastTimer); toastTimer=null;}
           minChip.style.display='block';
         };
       };
@@ -234,8 +221,7 @@
 
     const historyArr=[];
     function pushHistory(label){
-      historyArr.unshift(label);
-      if(historyArr.length>3) historyArr.pop();
+      historyArr.unshift(label); if(historyArr.length>3) historyArr.pop();
       const bar=$('history');
       bar.innerHTML = historyArr.map((t,i)=>`<span class="hist-chip" data-i="${i}">${t}</span>`).join('');
       bar.querySelectorAll('.hist-chip').forEach(chip=>{
@@ -264,27 +250,18 @@
       pushHistory(`${canonical} • -${matches}`);
     }
 
-    function openProgressModal(playerIdx){
-      $('modalTitle').textContent = `${state.names[playerIdx]} — Progress`;
-      $('chain').textContent = state.historyScores[playerIdx].join(' → ');
-      const list = state.picks[playerIdx]
-        .slice(0,8)
-        .map(p => `
-          <div class="pick${p.bust?' bust':''}">
-            <div><b>${p.name}</b> <span class="meta">-${p.matches}</span></div>
-            <div class="meta">${p.from} → ${p.to}${p.bust?' (bust)':''}</div>
-          </div>`)
-        .join('') || '<div class="pick"><div>No picks yet</div></div>';
+    function openProgressModal(i){
+      $('modalTitle').textContent = `${state.names[i]} — Progress`;
+      $('chain').textContent = state.historyScores[i].join(' → ');
+      const list = state.picks[i].slice(0,8).map(p=>`
+        <div class="pick${p.bust?' bust':''}">
+          <div><b>${p.name}</b> <span class="meta">-${p.matches}</span></div>
+          <div class="meta">${p.from} → ${p.to}${p.bust?' (bust)':''}</div>
+        </div>`).join('') || '<div class="pick"><div>No picks yet</div></div>';
       $('pickList').innerHTML = list;
-
-      $('modalBack').classList.add('show');
-      requestAnimationFrame(()=> $('modal').classList.add('show'));
+      $('modalBack').classList.add('show'); requestAnimationFrame(()=> $('modal').classList.add('show'));
     }
-    function closeProgressModal(){
-      $('modal').classList.remove('show');
-      setTimeout(()=> $('modalBack').classList.remove('show'), 160);
-    }
-
+    function closeProgressModal(){ $('modal').classList.remove('show'); setTimeout(()=> $('modalBack').classList.remove('show'), 160); }
     $('closeModal').onclick = closeProgressModal;
     $('modalBack').onclick = (e)=> { if(e.target.id==='modalBack') closeProgressModal(); };
     $('p1Pill').onclick = ()=> openProgressModal(0);
@@ -303,21 +280,27 @@
     function setTurn(){ $('turnInfo').textContent=`${state.names[state.turn]}'s turn`; }
     function renderScores(){ $('p1Score').textContent=state.scores[0]; $('p2Score').textContent=state.scores[1]; }
 
-    $('startBtn').onclick=async()=>{
-      state.names=[$('p1').value||'Player 1',$('p2').value||'Player 2'];
+    // START GAME
+    $('startBtn').onclick = async () => {
+      state.names=[$('p1').value||'Player 1', $('p2').value||'Player 2'];
       $('p1Name').textContent=state.names[0]; $('p2Name').textContent=state.names[1];
-      const r=await fetch(API.start).then(r=>r.json()); state.turn=r.first??0;
+
+      // random starter
+      const r = await fetch(API.start).then(r=>r.json()).catch(()=>({first:0}));
+      state.turn = r.first ?? 0;
+
       await fetchAllPlayers();
       $('setup').classList.add('hidden'); $('game').classList.remove('hidden');
       setTurn(); renderScores(); $('guess').focus();
     };
 
+    // SUBMIT GUESS
     $('submit').onclick=async()=>{
       const raw=$('guess').value.trim(); if(!raw) return;
       const lower=raw.toLowerCase();
       if(state.used.has(lower)){ $('result').textContent='⚠️ Already used. Try another.'; $('guess').value=''; $('guess').focus(); return; }
 
-      const v=await fetch(API.validate,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({guess:raw})}).then(r=>r.json());
+      const v=await fetch(API.validate,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({guess:raw})}).then(r=>r.json()).catch(()=>({valid:false}));
 
       if(!v.valid){
         if(!state.retry){ state.retry=true; $('result').textContent='❌ Not found. Try once more (one retry).'; $('guess').focus(); return; }
@@ -325,12 +308,11 @@
       }
 
       state.retry=false;
-
       const canonical=(v.canonical||raw).toLowerCase();
       if(state.used.has(canonical)){ $('result').textContent='⚠️ Already used.'; state.turn=1-state.turn; setTurn(); $('guess').value=''; $('guess').focus(); return; }
 
       const before = state.scores[state.turn];
-      const s=await fetch(API.score,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({player:state.turn,scores:state.scores,deduct:v.matches})}).then(r=>r.json());
+      const s=await fetch(API.score,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({player:state.turn,scores:state.scores,deduct:v.matches})}).then(r=>r.json()).catch(()=>({error:'score'}));
       if(s.error){ $('result').textContent='Error scoring round.'; return; }
 
       if(s.bust){
@@ -345,4 +327,15 @@
         state.used.add(canonical);
         state.historyScores[state.turn].push(after);
         state.picks[state.turn].unshift({name:v.canonical,matches:v.matches,from:before,to:after,bust:false});
-        showImpact({ canonical: v.canonical, matches: v.matches, starts: v.starts, goals: v.goals, mins: v.mins }, before,
+        showImpact({ canonical: v.canonical, matches: v.matches, starts: v.starts, goals: v.goals, mins: v.mins }, before, after, state.turn);
+      }
+
+      if(s.win){ setTimeout(endGame, 1000); return; }
+      state.turn=1-state.turn; setTurn(); $('guess').value=''; $('guess').focus();
+    };
+
+    function endGame(){ localStorage.removeItem('players'); localStorage.removeItem('players_ts'); location.reload(); }
+    $('end').onclick=endGame;
+  </script>
+</body>
+</html>
