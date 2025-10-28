@@ -15,7 +15,7 @@
     input,button{width:100%;padding:12px 14px;border-radius:12px;border:none;font-size:16px}
     button{background:var(--btn);color:#fff;cursor:pointer;transition:.15s} button:hover{background:var(--btnH)}
     .scores{display:flex;gap:10px;margin:10px 0 6px}
-    .pill{flex:1;background:rgba(0,0,0,.25);border-radius:16px;padding:12px;text-align:center}
+    .pill{flex:1;background:rgba(0,0,0,.25);border-radius:16px;padding:12px;text-align:center;cursor:pointer}
     .pill .name{font-weight:700}
     .pill .num{font-size:32px;font-weight:800;letter-spacing:.5px;min-width:3ch;display:inline-block}
     .turn{text-align:center;margin:10px 0;font-weight:700}
@@ -24,18 +24,46 @@
     .footer{text-align:center;margin-top:10px;opacity:.7;font-size:12px}
     .hidden{display:none}
 
-    /* Floating stats card */
-    .float-card{
-      position:absolute; left:50%; transform:translateX(-50%) translateY(10px);
-      background:rgba(0,0,0,.85); color:#fff; border-radius:14px; padding:12px 14px; width:92%;
-      max-width:460px; box-shadow:0 10px 24px rgba(0,0,0,.6); opacity:0; pointer-events:none;
-      transition:transform .6s cubic-bezier(.22,.9,.3,1.2), opacity .4s ease;
+    /* Impact toast */
+    .impact-toast{
+      position:absolute; left:50%; transform:translateX(-50%) translateY(10px) scale(.96);
+      background:rgba(0,0,0,.92); color:#fff; border-radius:16px; padding:12px 14px;
+      width:92%; max-width:480px; box-shadow:0 14px 34px rgba(0,0,0,.6);
+      opacity:0; pointer-events:none; transition:transform .45s cubic-bezier(.22,.9,.3,1.2), opacity .25s ease;
+      z-index:5;
     }
-    .float-card.show{ opacity:1; transform:translateX(-50%) translateY(-18px); }
-    .fc-title{font-weight:800;margin:0 0 6px}
-    .fc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;font-size:12px}
-    .fc-item{background:rgba(255,255,255,.08);border-radius:8px;padding:8px;text-align:center}
-    .fc-item b{display:block;font-size:14px}
+    .impact-toast.show{ opacity:1; transform:translateX(-50%) translateY(-14px) scale(1); }
+    .toast-row{display:flex; align-items:center; gap:12px}
+    .badge{min-width:56px; height:56px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:22px; background:#1f8a5e;}
+    .toast-body{flex:1}
+    .toast-title{font-weight:800; margin:0 0 4px}
+    .toast-sub{opacity:.85; font-size:13px}
+    .toast-meta{display:flex; gap:10px; margin-top:6px; font-size:12px; opacity:.85}
+    .toast-meta span{background:rgba(255,255,255,.08); padding:6px 8px; border-radius:9px}
+
+    /* History chips */
+    .history-bar{position:absolute; bottom:10px; left:50%; transform:translateX(-50%); display:flex; gap:8px; max-width:480px; width:92%; flex-wrap:wrap; z-index:4}
+    .hist-chip{background:rgba(0,0,0,.5); color:#fff; padding:6px 8px; border-radius:999px; font-size:12px; cursor:pointer}
+
+    /* Progress modal */
+    .modal-backdrop{
+      position:fixed; inset:0; background:rgba(0,0,0,.55); display:none; align-items:center; justify-content:center; z-index:20;
+    }
+    .modal-backdrop.show{ display:flex; }
+    .modal{
+      width:min(520px,92%); background:#0f2a21; color:#fff; border-radius:18px; box-shadow:0 18px 40px rgba(0,0,0,.7); padding:16px 16px 14px;
+      transform:translateY(8px); opacity:0; transition:transform .25s ease, opacity .2s ease;
+    }
+    .modal.show{ transform:translateY(0); opacity:1; }
+    .modal-header{display:flex; align-items:center; justify-content:space-between; margin-bottom:8px}
+    .modal-title{font-weight:900; font-size:18px}
+    .close-btn{background:#2a3e36; border:none; color:#fff; padding:8px 10px; border-radius:10px; cursor:pointer}
+    .chain{background:#133a2e; padding:10px 12px; border-radius:12px; font-family:ui-monospace, SFMono-Regular, Menlo, monospace; overflow:auto}
+    .pick-list{margin-top:10px; display:grid; gap:8px}
+    .pick{background:#0c241c; padding:10px; border-radius:10px; display:flex; justify-content:space-between; align-items:center; font-size:14px}
+    .pick b{font-weight:800}
+    .pick .meta{opacity:.85; font-size:12px}
+    .bust{color:#ff8a8a}
   </style>
 </head>
 <body>
@@ -56,8 +84,8 @@
     <!-- GAME -->
     <div id="game" class="hidden">
       <div class="scores">
-        <div class="pill"><div class="name" id="p1Name"></div><div class="num" id="p1Score">501</div></div>
-        <div class="pill"><div class="name" id="p2Name"></div><div class="num" id="p2Score">501</div></div>
+        <div class="pill" id="p1Pill"><div class="name" id="p1Name"></div><div class="num" id="p1Score">501</div></div>
+        <div class="pill" id="p2Pill"><div class="name" id="p2Name"></div><div class="num" id="p2Score">501</div></div>
       </div>
       <div class="turn" id="turnInfo"></div>
 
@@ -70,15 +98,21 @@
       <div class="result" id="result"></div>
     </div>
 
-    <!-- Floating stats (auto appears on success) -->
-    <div id="floatCard" class="float-card">
-      <div class="fc-title" id="fcTitle"></div>
-      <div class="fc-grid">
-        <div class="fc-item"><small>Matches</small><b id="fcMatches">0</b></div>
-        <div class="fc-item"><small>Starts</small><b id="fcStarts">0</b></div>
-        <div class="fc-item"><small>Goals</small><b id="fcGoals">0</b></div>
-        <div class="fc-item"><small>Mins</small><b id="fcMins">0</b></div>
+    <!-- Impact toast + history -->
+    <div id="toast" class="impact-toast"></div>
+    <div id="history" class="history-bar"></div>
+  </div>
+
+  <!-- Progress Modal -->
+  <div id="modalBack" class="modal-backdrop">
+    <div id="modal" class="modal">
+      <div class="modal-header">
+        <div class="modal-title" id="modalTitle">Progress</div>
+        <button id="closeModal" class="close-btn">Close</button>
       </div>
+      <div><strong>Checkout chain</strong></div>
+      <div id="chain" class="chain">—</div>
+      <div class="pick-list" id="pickList"></div>
     </div>
   </div>
 
@@ -91,16 +125,19 @@
       scores:[501,501],
       turn:0,
       used:new Set(),
-      retry:false // allow one retry per turn on invalid
+      retry:false,               // one retry on miss
+      historyScores:[[501],[501]], // per-player running totals
+      picks:[[],[]]              // per-player picks [{name,matches,from,to,bust}]
     };
 
     const $=id=>document.getElementById(id);
 
-    function animateCount(el, from, to, dur=800){
+    /* ---------- UI helpers ---------- */
+    function animateCount(el, from, to, dur=850){
       const start=performance.now(); const diff=to-from;
       function step(t){
         const p=Math.min(1,(t-start)/dur);
-        const ease=p<.5 ? 2*p*p : -1+(4-2*p)*p; // easeInOutQuad
+        const ease=p<.5 ? 2*p*p : -1+(4-2*p)*p;
         el.textContent = Math.round(from + diff*ease);
         if(p<1) requestAnimationFrame(step);
         else el.textContent = String(to);
@@ -108,6 +145,90 @@
       requestAnimationFrame(step);
     }
 
+    function toastFromPill(side, html){
+      const toast = $('toast');
+      toast.innerHTML = html;
+      const pill = side===0 ? $('p1Pill') : $('p2Pill');
+      const pb = pill.getBoundingClientRect(), cb = document.querySelector('.card').getBoundingClientRect();
+      const dx = (pb.left + pb.width/2) - (cb.left + cb.width/2);
+      const dy = (pb.top + 10) - (cb.top + 20);
+      toast.style.transform = `translateX(calc(-50% + ${dx}px)) translateY(${dy}px) scale(.85)`;
+      toast.style.opacity = '0';
+      requestAnimationFrame(()=>{
+        toast.classList.add('show');
+        toast.style.transform = `translateX(-50%) translateY(-14px) scale(1)`;
+        toast.style.opacity = '1';
+      });
+      setTimeout(()=>toast.classList.remove('show'), 1600);
+    }
+
+    const historyArr=[];
+    function pushHistory(label){
+      historyArr.unshift(label);
+      if(historyArr.length>3) historyArr.pop();
+      const bar=$('history');
+      bar.innerHTML = historyArr.map((t,i)=>`<span class="hist-chip" data-i="${i}">${t}</span>`).join('');
+      bar.querySelectorAll('.hist-chip').forEach(chip=>{
+        chip.onclick = ()=> toastFromPill(state.turn===0?1:0,
+          `<div class="toast-row"><div class="badge">ℹ️</div><div class="toast-body"><div class="toast-title">${chip.textContent}</div><div class="toast-sub">Recent pick</div></div></div>`);
+      });
+    }
+
+    function showImpact({ canonical, matches, starts, goals, mins }, before, after, side){
+      const badgeColor = side===0 ? '#1f8a5e' : '#2b5f4a';
+      const html = `
+        <div class="toast-row">
+          <div class="badge" style="background:${badgeColor}">-${matches}</div>
+          <div class="toast-body">
+            <div class="toast-title">${canonical}</div>
+            <div class="toast-sub">${before} → ${after}</div>
+            <div class="toast-meta">
+              <span>Matches ${matches}</span>
+              <span>Starts ${starts ?? 0}</span>
+              <span>Goals ${goals ?? 0}</span>
+              <span>Mins ${mins ?? 0}</span>
+            </div>
+          </div>
+        </div>`;
+      toastFromPill(side, html);
+      pushHistory(`${canonical} • -${matches}`);
+    }
+
+    function updateProgress(playerIdx, pick){
+      // pick: {name,matches,from,to,bust}
+      state.picks[playerIdx].unshift(pick);          // latest first
+      const chain = state.historyScores[playerIdx].join(' → ');
+      return chain;
+    }
+
+    function openProgressModal(playerIdx){
+      $('modalTitle').textContent = `${state.names[playerIdx]} — Progress`;
+      $('chain').textContent = state.historyScores[playerIdx].join(' → ');
+
+      const list = state.picks[playerIdx]
+        .slice(0,8)
+        .map(p => `
+          <div class="pick${p.bust?' bust':''}">
+            <div><b>${p.name}</b> <span class="meta">-${p.matches}</span></div>
+            <div class="meta">${p.from} → ${p.to}${p.bust?' (bust)':''}</div>
+          </div>`)
+        .join('') || '<div class="pick"><div>No picks yet</div></div>';
+      $('pickList').innerHTML = list;
+
+      $('modalBack').classList.add('show');
+      requestAnimationFrame(()=> $('modal').classList.add('show'));
+    }
+    function closeProgressModal(){
+      $('modal').classList.remove('show');
+      setTimeout(()=> $('modalBack').classList.remove('show'), 160);
+    }
+    $('closeModal').onclick = closeProgressModal;
+    $('modalBack').onclick = (e)=> { if(e.target.id==='modalBack') closeProgressModal(); };
+
+    $('p1Pill').onclick = ()=> openProgressModal(0);
+    $('p2Pill').onclick = ()=> openProgressModal(1);
+
+    /* ---------- Data & game ---------- */
     async function fetchAllPlayers(force=false){
       const now=Date.now(), ts=parseInt(localStorage.getItem('players_ts')||'0',10);
       const cached=localStorage.getItem('players');
@@ -118,21 +239,7 @@
     }
 
     function setTurn(){ $('turnInfo').textContent=`${state.names[state.turn]}'s turn`; }
-    function renderScores(){
-      $('p1Score').textContent=state.scores[0];
-      $('p2Score').textContent=state.scores[1];
-    }
-
-    function showStatsCard(player){
-      $('fcTitle').textContent = player.canonical;
-      $('fcMatches').textContent = player.matches ?? 0;
-      $('fcStarts').textContent  = player.starts ?? 0;
-      $('fcGoals').textContent   = player.goals ?? 0;
-      $('fcMins').textContent    = player.mins ?? 0;
-      const card=$('floatCard');
-      card.classList.add('show');
-      setTimeout(()=>card.classList.remove('show'), 1800);
-    }
+    function renderScores(){ $('p1Score').textContent=state.scores[0]; $('p2Score').textContent=state.scores[1]; }
 
     $('startBtn').onclick=async()=>{
       state.names=[$('p1').value||'Player 1',$('p2').value||'Player 2'];
@@ -145,52 +252,39 @@
 
     $('submit').onclick=async()=>{
       const raw=$('guess').value.trim(); if(!raw) return;
-
       const lower=raw.toLowerCase();
       if(state.used.has(lower)){ $('result').textContent='⚠️ Already used. Try another.'; $('guess').value=''; $('guess').focus(); return; }
 
       const v=await fetch(API.validate,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({guess:raw})}).then(r=>r.json());
 
       if(!v.valid){
-        // FIRST miss → allow one retry (do not pass turn)
-        if(!state.retry){
-          state.retry=true;
-          $('result').textContent='❌ Not found. Try once more (one retry).';
-          $('guess').focus();
-          return;
-        }
-        // SECOND miss → switch turn and reset retry
-        state.retry=false;
-        $('result').textContent='❌ Not found. Turn passes.';
-        state.turn=1-state.turn; setTurn();
-        $('guess').value=''; $('guess').focus();
-        return;
+        if(!state.retry){ state.retry=true; $('result').textContent='❌ Not found. Try once more (one retry).'; $('guess').focus(); return; }
+        state.retry=false; $('result').textContent='❌ Not found. Turn passes.'; state.turn=1-state.turn; setTurn(); $('guess').value=''; $('guess').focus(); return;
       }
 
-      // success → reset retry window
       state.retry=false;
 
       const canonical=(v.canonical||raw).toLowerCase();
-      if(state.used.has(canonical)){
-        $('result').textContent='⚠️ Already used.'; state.turn=1-state.turn; setTurn(); $('guess').value=''; $('guess').focus(); return;
-      }
+      if(state.used.has(canonical)){ $('result').textContent='⚠️ Already used.'; state.turn=1-state.turn; setTurn(); $('guess').value=''; $('guess').focus(); return; }
 
-      // score: deduct = matches from validator
       const before = state.scores[state.turn];
       const s=await fetch(API.score,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({player:state.turn,scores:state.scores,deduct:v.matches})}).then(r=>r.json());
       if(s.error){ $('result').textContent='Error scoring round.'; return; }
 
-      // floating stats
-      showStatsCard({ canonical: v.canonical, matches: v.matches, starts: v.starts, goals: v.goals, mins: v.mins });
-
+      // record pick, chain, and visuals
       if(s.bust){
         $('result').textContent=`💥 Bust! ${v.canonical} has ${v.matches}. Score stays ${state.scores[state.turn]}.`;
+        state.picks[state.turn].unshift({name:v.canonical,matches:v.matches,from:before,to:before,bust:true});
       }else{
         state.scores=s.scores;
-        const el = state.turn===0 ? $('p1Score') : $('p2Score');
-        animateCount(el, before, state.scores[state.turn], 850);
+        const after = state.scores[state.turn];
+        const scoreEl = state.turn===0 ? $('p1Score') : $('p2Score');
+        animateCount(scoreEl, before, after, 850);
         $('result').textContent = s.win ? `🎯 ${state.names[state.turn]} checked out with ${v.canonical} (${v.matches}).` : `✅ ${v.canonical}: −${v.matches}`;
         state.used.add(canonical);
+        state.historyScores[state.turn].push(after);
+        updateProgress(state.turn, {name:v.canonical,matches:v.matches,from:before,to:after,bust:false});
+        showImpact({ canonical: v.canonical, matches: v.matches, starts: v.starts, goals: v.goals, mins: v.mins }, before, after, state.turn);
       }
 
       if(s.win){ setTimeout(endGame, 1000); return; }
