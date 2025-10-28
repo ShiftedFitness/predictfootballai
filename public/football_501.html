@@ -6,16 +6,36 @@
   <title>Football 501 | PredictFootball.ai</title>
   <style>
     :root{--bg:#000;--card:#4f8b6e;--ink:#fff;--muted:#cfe5db;--btn:#111;--btnH:#222;--danger:#ff5a5a}
-    *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;display:flex;min-height:100vh;align-items:center;justify-content:center;padding:18px}
-    .card{width:100%;max-width:480px;background:var(--card);border-radius:20px;padding:20px;box-shadow:0 8px 32px rgba(0,0,0,.5)}
-    h1{margin:0 0 8px;font-size:24px} .sub{margin:0 0 14px;color:var(--muted)} .row{display:flex;gap:8px}
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;display:flex;min-height:100vh;align-items:center;justify-content:center;padding:18px}
+    .card{width:100%;max-width:520px;background:var(--card);border-radius:24px;padding:22px;box-shadow:0 8px 32px rgba(0,0,0,.5);position:relative;overflow:hidden}
+    h1{margin:0 0 8px;font-size:26px}
+    .sub{margin:0 0 14px;color:var(--muted)}
+    .row{display:flex;gap:8px}
     input,button{width:100%;padding:12px 14px;border-radius:12px;border:none;font-size:16px}
     button{background:var(--btn);color:#fff;cursor:pointer;transition:.15s} button:hover{background:var(--btnH)}
-    .scores{display:flex;gap:8px;margin:10px 0 4px} .pill{flex:1;background:rgba(0,0,0,.25);border-radius:14px;padding:12px;text-align:center}
-    .pill .name{font-weight:700}.pill .num{font-size:28px;font-weight:800;letter-spacing:.5px}
-    .turn{text-align:center;margin:10px 0;font-weight:600} .result{min-height:24px;text-align:center;margin:8px 0}
-    .danger{background:var(--danger);color:#000;font-weight:700} .footer{text-align:center;margin-top:10px;opacity:.7;font-size:12px}
+    .scores{display:flex;gap:10px;margin:10px 0 6px}
+    .pill{flex:1;background:rgba(0,0,0,.25);border-radius:16px;padding:12px;text-align:center}
+    .pill .name{font-weight:700}
+    .pill .num{font-size:32px;font-weight:800;letter-spacing:.5px;min-width:3ch;display:inline-block}
+    .turn{text-align:center;margin:10px 0;font-weight:700}
+    .result{min-height:24px;text-align:center;margin:8px 0}
+    .danger{background:var(--danger);color:#000;font-weight:700}
+    .footer{text-align:center;margin-top:10px;opacity:.7;font-size:12px}
     .hidden{display:none}
+
+    /* Floating stats card */
+    .float-card{
+      position:absolute; left:50%; transform:translateX(-50%) translateY(10px);
+      background:rgba(0,0,0,.85); color:#fff; border-radius:14px; padding:12px 14px; width:92%;
+      max-width:460px; box-shadow:0 10px 24px rgba(0,0,0,.6); opacity:0; pointer-events:none;
+      transition:transform .6s cubic-bezier(.22,.9,.3,1.2), opacity .4s ease;
+    }
+    .float-card.show{ opacity:1; transform:translateX(-50%) translateY(-18px); }
+    .fc-title{font-weight:800;margin:0 0 6px}
+    .fc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;font-size:12px}
+    .fc-item{background:rgba(255,255,255,.08);border-radius:8px;padding:8px;text-align:center}
+    .fc-item b{display:block;font-size:14px}
   </style>
 </head>
 <body>
@@ -49,13 +69,44 @@
 
       <div class="result" id="result"></div>
     </div>
+
+    <!-- Floating stats (auto appears on success) -->
+    <div id="floatCard" class="float-card">
+      <div class="fc-title" id="fcTitle"></div>
+      <div class="fc-grid">
+        <div class="fc-item"><small>Matches</small><b id="fcMatches">0</b></div>
+        <div class="fc-item"><small>Starts</small><b id="fcStarts">0</b></div>
+        <div class="fc-item"><small>Goals</small><b id="fcGoals">0</b></div>
+        <div class="fc-item"><small>Mins</small><b id="fcMins">0</b></div>
+      </div>
+    </div>
   </div>
 
   <script>
     const API={start:'/.netlify/functions/start-game',validate:'/.netlify/functions/validate-player',score:'/.netlify/functions/score-round'};
     const TTL=90*60*1000;
-    const state={names:['Player 1','Player 2'],scores:[501,501],turn:0,used:new Set()};
+
+    const state={
+      names:['Player 1','Player 2'],
+      scores:[501,501],
+      turn:0,
+      used:new Set(),
+      retry:false // allow one retry per turn on invalid
+    };
+
     const $=id=>document.getElementById(id);
+
+    function animateCount(el, from, to, dur=800){
+      const start=performance.now(); const diff=to-from;
+      function step(t){
+        const p=Math.min(1,(t-start)/dur);
+        const ease=p<.5 ? 2*p*p : -1+(4-2*p)*p; // easeInOutQuad
+        el.textContent = Math.round(from + diff*ease);
+        if(p<1) requestAnimationFrame(step);
+        else el.textContent = String(to);
+      }
+      requestAnimationFrame(step);
+    }
 
     async function fetchAllPlayers(force=false){
       const now=Date.now(), ts=parseInt(localStorage.getItem('players_ts')||'0',10);
@@ -65,8 +116,23 @@
       localStorage.setItem('players',JSON.stringify(data)); localStorage.setItem('players_ts',String(now));
       return data;
     }
+
     function setTurn(){ $('turnInfo').textContent=`${state.names[state.turn]}'s turn`; }
-    function renderScores(){ $('p1Score').textContent=state.scores[0]; $('p2Score').textContent=state.scores[1]; }
+    function renderScores(){
+      $('p1Score').textContent=state.scores[0];
+      $('p2Score').textContent=state.scores[1];
+    }
+
+    function showStatsCard(player){
+      $('fcTitle').textContent = player.canonical;
+      $('fcMatches').textContent = player.matches ?? 0;
+      $('fcStarts').textContent  = player.starts ?? 0;
+      $('fcGoals').textContent   = player.goals ?? 0;
+      $('fcMins').textContent    = player.mins ?? 0;
+      const card=$('floatCard');
+      card.classList.add('show');
+      setTimeout(()=>card.classList.remove('show'), 1800);
+    }
 
     $('startBtn').onclick=async()=>{
       state.names=[$('p1').value||'Player 1',$('p2').value||'Player 2'];
@@ -79,29 +145,55 @@
 
     $('submit').onclick=async()=>{
       const raw=$('guess').value.trim(); if(!raw) return;
+
       const lower=raw.toLowerCase();
       if(state.used.has(lower)){ $('result').textContent='⚠️ Already used. Try another.'; $('guess').value=''; $('guess').focus(); return; }
 
       const v=await fetch(API.validate,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({guess:raw})}).then(r=>r.json());
 
-      if(!v.valid){ $('result').textContent=v.message||'❌ Not found.'; state.turn=1-state.turn; setTurn(); $('guess').value=''; $('guess').focus(); return; }
+      if(!v.valid){
+        // FIRST miss → allow one retry (do not pass turn)
+        if(!state.retry){
+          state.retry=true;
+          $('result').textContent='❌ Not found. Try once more (one retry).';
+          $('guess').focus();
+          return;
+        }
+        // SECOND miss → switch turn and reset retry
+        state.retry=false;
+        $('result').textContent='❌ Not found. Turn passes.';
+        state.turn=1-state.turn; setTurn();
+        $('guess').value=''; $('guess').focus();
+        return;
+      }
 
-      // v includes {canonical, matches}
+      // success → reset retry window
+      state.retry=false;
+
       const canonical=(v.canonical||raw).toLowerCase();
-      if(state.used.has(canonical)){ $('result').textContent='⚠️ Already used.'; state.turn=1-state.turn; setTurn(); $('guess').value=''; $('guess').focus(); return; }
+      if(state.used.has(canonical)){
+        $('result').textContent='⚠️ Already used.'; state.turn=1-state.turn; setTurn(); $('guess').value=''; $('guess').focus(); return;
+      }
 
+      // score: deduct = matches from validator
+      const before = state.scores[state.turn];
       const s=await fetch(API.score,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({player:state.turn,scores:state.scores,deduct:v.matches})}).then(r=>r.json());
-
       if(s.error){ $('result').textContent='Error scoring round.'; return; }
 
-      if(s.bust){ $('result').textContent=`💥 Bust! ${v.canonical} has ${v.matches}. Score stays ${state.scores[state.turn]}.`; }
-      else{
-        state.scores=s.scores; renderScores();
-        $('result').textContent=s.win ? `🎯 ${state.names[state.turn]} checked out with ${v.canonical} (${v.matches}).` : `✅ ${v.canonical}: −${v.matches} → ${state.scores[state.turn]}`;
+      // floating stats
+      showStatsCard({ canonical: v.canonical, matches: v.matches, starts: v.starts, goals: v.goals, mins: v.mins });
+
+      if(s.bust){
+        $('result').textContent=`💥 Bust! ${v.canonical} has ${v.matches}. Score stays ${state.scores[state.turn]}.`;
+      }else{
+        state.scores=s.scores;
+        const el = state.turn===0 ? $('p1Score') : $('p2Score');
+        animateCount(el, before, state.scores[state.turn], 850);
+        $('result').textContent = s.win ? `🎯 ${state.names[state.turn]} checked out with ${v.canonical} (${v.matches}).` : `✅ ${v.canonical}: −${v.matches}`;
         state.used.add(canonical);
       }
 
-      if(s.win){ setTimeout(endGame,900); return; }
+      if(s.win){ setTimeout(endGame, 1000); return; }
       state.turn=1-state.turn; setTurn(); $('guess').value=''; $('guess').focus();
     };
 
