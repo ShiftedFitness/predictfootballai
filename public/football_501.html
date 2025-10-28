@@ -6,8 +6,8 @@
   <title>Football 501 | PredictFootball.ai</title>
   <style>
     :root{--bg:#000;--card:#4f8b6e;--ink:#fff;--muted:#cfe5db;--btn:#111;--btnH:#222;--danger:#ff5a5a}
-
     *{box-sizing:border-box}
+
     body{
       margin:0;background:var(--bg);color:var(--ink);
       font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;
@@ -18,6 +18,7 @@
       border-radius:24px; padding:22px; box-shadow:0 8px 32px rgba(0,0,0,.5);
       position:relative; overflow:visible;
     }
+
     h1{margin:0 0 8px;font-size:26px}
     .sub{margin:0 0 14px;color:var(--muted)}
     .row{display:flex;gap:8px}
@@ -34,13 +35,14 @@
     .footer{text-align:center;margin-top:10px;opacity:.7;font-size:12px}
     .hidden{display:none}
 
-    /* Impact toast (overlay) */
+    /* Impact overlay (clickable) */
     .impact-toast{
       position:fixed; left:50%; top:12%;
       transform:translateX(-50%) translateY(0) scale(.96);
       background:rgba(0,0,0,.92); color:#fff; border-radius:16px; padding:12px 14px;
       width:min(92vw,520px); box-shadow:0 14px 34px rgba(0,0,0,.6);
-      opacity:0; pointer-events:none; transition:transform .45s cubic-bezier(.22,.9,.3,1.2), opacity .25s ease;
+      opacity:0; pointer-events:auto;
+      transition:transform .45s cubic-bezier(.22,.9,.3,1.2), opacity .25s ease;
       z-index:1000;
     }
     .impact-toast.show{ opacity:1; transform:translateX(-50%) translateY(0) scale(1); }
@@ -202,7 +204,8 @@
       toastTimer = setTimeout(()=>{ toast.classList.remove('show'); minChip.style.display='block'; }, 5000);
 
       $('toastClose').onclick = () => {
-        toast.classList.remove('show'); if(toastTimer){clearTimeout(toastTimer); toastTimer=null;}
+        toast.classList.remove('show');
+        if(toastTimer){clearTimeout(toastTimer); toastTimer=null;}
         minChip.style.display='block';
       };
 
@@ -213,7 +216,8 @@
         if(toastTimer) clearTimeout(toastTimer);
         toastTimer = setTimeout(()=>{ toast.classList.remove('show'); minChip.style.display='block'; }, 5000);
         $('toastClose').onclick = () => {
-          toast.classList.remove('show'); if(toastTimer){clearTimeout(toastTimer); toastTimer=null;}
+          toast.classList.remove('show');
+          if(toastTimer){clearTimeout(toastTimer); toastTimer=null;}
           minChip.style.display='block';
         };
       };
@@ -285,7 +289,6 @@
       state.names=[$('p1').value||'Player 1', $('p2').value||'Player 2'];
       $('p1Name').textContent=state.names[0]; $('p2Name').textContent=state.names[1];
 
-      // random starter
       const r = await fetch(API.start).then(r=>r.json()).catch(()=>({first:0}));
       state.turn = r.first ?? 0;
 
