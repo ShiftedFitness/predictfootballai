@@ -6,28 +6,18 @@
   <title>Football 501 | PredictFootball.ai</title>
   <style>
     :root{--bg:#000;--card:#4f8b6e;--ink:#fff;--muted:#cfe5db;--btn:#111;--btnH:#222;--danger:#ff5a5a}
-
-    /* Allow page to scroll; give room for fixed history bar */
     *{box-sizing:border-box}
-    body{
-      margin:0;
-      background:var(--bg);
-      color:var(--ink);
-      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;
-      min-height:100svh;      /* better on iOS with toolbars */
-      padding:24px 18px 76px; /* bottom space for history bar */
-    }
 
+    /* Page can scroll; room at bottom for fixed history chip */
+    body{
+      margin:0; background:var(--bg); color:var(--ink);
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;
+      min-height:100svh; padding:24px 18px 76px;
+    }
     .card{
-      width:100%;
-      max-width:520px;
-      margin:0 auto;
-      background:var(--card);
-      border-radius:24px;
-      padding:22px;
-      box-shadow:0 8px 32px rgba(0,0,0,.5);
-      position:relative;
-      overflow:visible; /* important: avoid clipping */
+      width:100%; max-width:520px; margin:0 auto; background:var(--card);
+      border-radius:24px; padding:22px; box-shadow:0 8px 32px rgba(0,0,0,.5);
+      position:relative; overflow:visible;
     }
 
     h1{margin:0 0 8px;font-size:26px}
@@ -45,11 +35,9 @@
     .footer{text-align:center;margin-top:10px;opacity:.7;font-size:12px}
     .hidden{display:none}
 
-    /* Impact toast: now fixed to viewport, rests near top (12%) */
+    /* Impact toast: fixed, rests near top (12%) */
     .impact-toast{
-      position:fixed;
-      left:50%;
-      top:12%;
+      position:fixed; left:50%; top:12%;
       transform:translateX(-50%) translateY(0) scale(.96);
       background:rgba(0,0,0,.92); color:#fff; border-radius:16px; padding:12px 14px;
       width:min(92vw, 520px); box-shadow:0 14px 34px rgba(0,0,0,.6);
@@ -65,19 +53,28 @@
     .toast-meta{display:flex; gap:10px; margin-top:6px; font-size:12px; opacity:.85; flex-wrap:wrap}
     .toast-meta span{background:rgba(255,255,255,.08); padding:6px 8px; border-radius:9px}
 
-    /* History chips: fixed at bottom */
+    /* Close/minimize button + minimized chip */
+    .toast-close{
+      position:absolute; top:8px; right:8px;
+      background:rgba(255,255,255,.1); border:none; color:#fff;
+      padding:6px 8px; border-radius:8px; cursor:pointer; font-weight:700;
+    }
+    .toast-close:active{ transform:scale(.98); }
+    .min-toast{
+      position:fixed; left:50%; bottom:58px; transform:translateX(-50%);
+      background:rgba(0,0,0,.8); color:#fff; border-radius:999px;
+      padding:8px 12px; font-size:12px; cursor:pointer; z-index:1000; display:none;
+    }
+
+    /* History chips */
     .history-bar{
-      position:fixed;
-      left:50%; bottom:10px; transform:translateX(-50%);
-      display:flex; gap:8px; max-width:520px; width:min(92vw,520px); flex-wrap:wrap;
-      z-index:1000;
+      position:fixed; left:50%; bottom:10px; transform:translateX(-50%);
+      display:flex; gap:8px; max-width:520px; width:min(92vw,520px); flex-wrap:wrap; z-index:1000;
     }
     .hist-chip{background:rgba(0,0,0,.5); color:#fff; padding:6px 8px; border-radius:999px; font-size:12px; cursor:pointer}
 
     /* Progress modal */
-    .modal-backdrop{
-      position:fixed; inset:0; background:rgba(0,0,0,.55); display:none; align-items:center; justify-content:center; z-index:1200;
-    }
+    .modal-backdrop{ position:fixed; inset:0; background:rgba(0,0,0,.55); display:none; align-items:center; justify-content:center; z-index:1200; }
     .modal-backdrop.show{ display:flex; }
     .modal{
       width:min(520px,92vw); background:#0f2a21; color:#fff; border-radius:18px; box-shadow:0 18px 40px rgba(0,0,0,.7); padding:16px 16px 14px;
@@ -95,12 +92,8 @@
     .bust{color:#ff8a8a}
 
     /* Scale UI on short heights */
-    @media (max-height: 680px){
-      .card{ transform:scale(.94); transform-origin: top center; }
-    }
-    @media (max-height: 560px){
-      .card{ transform:scale(.88); }
-    }
+    @media (max-height: 680px){ .card{ transform:scale(.94); transform-origin: top center; } }
+    @media (max-height: 560px){ .card{ transform:scale(.88); } }
   </style>
 </head>
 <body>
@@ -135,8 +128,9 @@
       <div class="result" id="result"></div>
     </div>
 
-    <!-- Impact toast + history -->
+    <!-- Impact toast + minimized chip + history -->
     <div id="toast" class="impact-toast"></div>
+    <div id="minToast" class="min-toast">Show last pick</div>
     <div id="history" class="history-bar"></div>
   </div>
 
@@ -184,16 +178,19 @@
       requestAnimationFrame(step);
     }
 
-    // Toast now animates from the score pill toward the fixed top position
+    let toastTimer=null, lastToastHTML='';
     function toastFromPill(side, html){
-      const toast = $('toast');
-      toast.innerHTML = html;
+      const toast = $('toast'), minChip=$('minToast');
+      lastToastHTML = html;
+
+      // Add close/minimize button
+      toast.innerHTML = `<button class="toast-close" id="toastClose">–</button>${html}`;
 
       // origin at the active pill (viewport-based)
       const pill = side===0 ? $('p1Pill') : $('p2Pill');
       const pb = pill.getBoundingClientRect();
       const vwCenter = window.innerWidth / 2;
-      const targetTop = window.innerHeight * 0.12; // matches CSS top:12%
+      const targetTop = window.innerHeight * 0.12; // CSS top:12%
 
       const dx = (pb.left + pb.width/2) - vwCenter;
       const dy = (pb.top + 10) - targetTop;
@@ -202,13 +199,37 @@
       toast.style.transform = `translateX(calc(-50% + ${dx}px)) translateY(${dy}px) scale(.85)`;
       toast.style.opacity = '0';
 
+      if(toastTimer){ clearTimeout(toastTimer); toastTimer=null; }
+
       requestAnimationFrame(()=>{
-        toast.classList.add('show'); // settles at CSS top:12%
+        toast.classList.add('show');
         toast.style.transform = `translateX(-50%) translateY(0) scale(1)`;
         toast.style.opacity = '1';
       });
 
-      setTimeout(()=>toast.classList.remove('show'), 1600);
+      // Auto-dismiss after 5s
+      toastTimer = setTimeout(()=>{ toast.classList.remove('show'); minChip.style.display='block'; }, 5000);
+
+      // Manual minimize
+      $('toastClose').onclick = ()=>{
+        toast.classList.remove('show');
+        if(toastTimer){ clearTimeout(toastTimer); toastTimer=null; }
+        minChip.style.display='block';
+      };
+
+      // Restore from minimized chip
+      minChip.onclick = ()=>{
+        minChip.style.display='none';
+        toast.innerHTML = `<button class="toast-close" id="toastClose">–</button>${lastToastHTML}`;
+        toast.classList.add('show');
+        if(toastTimer) clearTimeout(toastTimer);
+        toastTimer = setTimeout(()=>{ toast.classList.remove('show'); minChip.style.display='block'; }, 5000);
+        $('toastClose').onclick = ()=>{
+          toast.classList.remove('show');
+          if(toastTimer){ clearTimeout(toastTimer); toastTimer=null; }
+          minChip.style.display='block';
+        };
+      };
     }
 
     const historyArr=[];
@@ -241,11 +262,6 @@
         </div>`;
       toastFromPill(side, html);
       pushHistory(`${canonical} • -${matches}`);
-    }
-
-    function updateProgress(playerIdx, pick){
-      state.picks[playerIdx].unshift(pick);          // latest first
-      return state.historyScores[playerIdx].join(' → ');
     }
 
     function openProgressModal(playerIdx){
@@ -328,16 +344,5 @@
         $('result').textContent = s.win ? `🎯 ${state.names[state.turn]} checked out with ${v.canonical} (${v.matches}).` : `✅ ${v.canonical}: −${v.matches}`;
         state.used.add(canonical);
         state.historyScores[state.turn].push(after);
-        updateProgress(state.turn, {name:v.canonical,matches:v.matches,from:before,to:after,bust:false});
-        showImpact({ canonical: v.canonical, matches: v.matches, starts: v.starts, goals: v.goals, mins: v.mins }, before, after, state.turn);
-      }
-
-      if(s.win){ setTimeout(endGame, 1000); return; }
-      state.turn=1-state.turn; setTurn(); $('guess').value=''; $('guess').focus();
-    };
-
-    function endGame(){ localStorage.removeItem('players'); localStorage.removeItem('players_ts'); location.reload(); }
-    $('end').onclick=endGame;
-  </script>
-</body>
-</html>
+        state.picks[state.turn].unshift({name:v.canonical,matches:v.matches,from:before,to:after,bust:false});
+        showImpact({ canonical: v.canonical, matches: v.matches, starts: v.starts, goals: v.goals, mins: v.mins }, before,
