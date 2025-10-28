@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Football 501 | PredictFootball.ai</title>
+  <style>
+    body {
+      background:#000;
+      color:#fff;
+      font-family:Inter, sans-serif;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      height:100vh;
+      margin:0;
+    }
+    .card {
+      background:#4f8b6e;
+      border-radius:16px;
+      padding:20px;
+      width:90%;
+      max-width:400px;
+      box-shadow:0 4px 12px rgba(0,0,0,0.4);
+      text-align:center;
+    }
+    input,button {
+      border:none;
+      border-radius:8px;
+      padding:10px 14px;
+      margin:6px;
+      font-size:1em;
+    }
+    input {
+      width:80%;
+    }
+    button {
+      background:#222;
+      color:#fff;
+      cursor:pointer;
+      transition:0.2s;
+    }
+    button:hover { background:#333; }
+    .scoreboard {
+      margin-top:10px;
+      display:flex;
+      justify-content:space-around;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Football 501</h2>
+    <div id="setup">
+      <input id="player1" placeholder="Player 1 Name"/>
+      <input id="player2" placeholder="Player 2 Name"/>
+      <button id="startBtn">Start Game</button>
+    </div>
+
+    <div id="game" style="display:none;">
+      <div class="scoreboard">
+        <div><strong id="p1Name"></strong><br><span id="p1Score">501</span></div>
+        <div><strong id="p2Name"></strong><br><span id="p2Score">501</span></div>
+      </div>
+      <p id="turnInfo"></p>
+      <input id="guessInput" placeholder="Enter Spanish PL player"/>
+      <button id="submitGuess">Submit</button>
+      <p id="result"></p>
+      <button id="endBtn">End Game</button>
+    </div>
+  </div>
+
+  <script>
+    const API = {
+      start: '/.netlify/functions/start-game',
+      validate: '/.netlify/functions/validate-player',
+      score: '/.netlify/functions/score-round'
+    };
+    let game = { players: [], scores: [501,501], turn:0, cacheTTL:90*60*1000 };
+
+    async function fetchPlayers(force=false){
+      const now=Date.now();
+      const cached=localStorage.getItem('players');
+      const ts=localStorage.getItem('players_ts');
+      if(!force && cached && ts && now-parseInt(ts)<game.cacheTTL){
+        console.log('Using cached player list');
+        return JSON.parse(cached);
+      }
+      const res=await fetch(API.validate+'?fetchAll=true');
+      const data=await res.json();
+      localStorage.setItem('players',JSON.stringify(data));
+      localStorage.setItem('players_ts',now.toString());
+      console.log('Fetched fresh players');
+      return data;
+    }
+
+    document.getElementById('startBtn').onclick=async()=>{
+      game.players=[
+        document.getElementById('player1').value||'Player 1',
+        document.getElementById('player2').value||'Player 2'
+      ];
+      const res=await fetch(API.start);
+      const data=await res.json();
+      game.turn=data.first;
+      document.getElementById('p1Name').textContent=game.players[0];
+      document.getElementById('p2Name').textContent=game.players[1];
+      document.getElementById('setup').style.display='none';
+      document.getElementById('game').style.display='block';
+      document.getElementById('turnInfo').textContent=`${game.players[game.turn]}'s turn`;
+      await fetchPlayers();
+    };
+
+    document.getElementById('submitGuess').onclick=async()=>{
+      const guess=document.getElementById('guessInput').value.trim();
+      if(!guess) return;
+      const res=await fetch(API.validate,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({ guess })
+      });
+      const data=await res.json();
+      document.getElementById('result').textContent=data.message;
+      if(data.valid){
+        const scr=await fetch(API.score,{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({ player:game.turn, valid:true })
+        });
+        const s=await scr.json();
+        game.scores=s.scores;
+        document.getElementById('p1Score').textContent=s.scores[0];
+        document.getElementById('p2Score').textContent=s.scores[1];
+      }
+      game.turn=1-game.turn;
+      document.getElementById('turnInfo').textContent=`${game.players[game.turn]}'s turn`;
+      document.getElementById('guessInput').value='';
+    };
+
+    document.getElementById('endBtn').onclick=()=>{
+      localStorage.removeItem('players');
+      localStorage.removeItem('players_ts');
+      location.reload();
+    };
+  </script>
+</body>
+</html>
