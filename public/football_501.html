@@ -7,11 +7,10 @@
   <style>
     :root{--bg:#000;--card:#4f8b6e;--ink:#fff;--muted:#cfe5db;--btn:#111;--btnH:#222;--danger:#ff5a5a}
     *{box-sizing:border-box}
-
     body{
       margin:0;background:var(--bg);color:var(--ink);
       font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;
-      min-height:100svh; padding:24px 18px 76px;
+      min-height:100svh; padding:24px 18px 32px;
     }
     .card{
       width:100%; max-width:520px; margin:0 auto; background:var(--card);
@@ -35,17 +34,18 @@
     .footer{text-align:center;margin-top:10px;opacity:.7;font-size:12px}
     .hidden{display:none}
 
-    /* Impact overlay (clickable) */
-    .impact-toast{
-      position:fixed; left:50%; top:12%;
-      transform:translateX(-50%) translateY(0) scale(.96);
-      background:rgba(0,0,0,.92); color:#fff; border-radius:16px; padding:12px 14px;
-      width:min(92vw,520px); box-shadow:0 14px 34px rgba(0,0,0,.6);
-      opacity:0; pointer-events:auto;
-      transition:transform .45s cubic-bezier(.22,.9,.3,1.2), opacity .25s ease;
-      z-index:1000;
+    /* Inline overlay (inside the card, just below the result line) */
+    .inline-toast{
+      margin:8px auto 0;
+      width:100%;
+      max-width:520px;
+      background:rgba(0,0,0,.92); color:#fff;
+      border-radius:16px; padding:12px 14px;
+      box-shadow:0 10px 28px rgba(0,0,0,.5);
+      opacity:0; transform:translateY(6px);
+      transition:opacity .25s ease, transform .25s ease;
     }
-    .impact-toast.show{ opacity:1; transform:translateX(-50%) translateY(0) scale(1); }
+    .inline-toast.show{opacity:1; transform:translateY(0);}
     .toast-row{display:flex; align-items:center; gap:12px}
     .badge{min-width:56px; height:56px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:22px; background:#1f8a5e;}
     .toast-body{flex:1}
@@ -53,24 +53,6 @@
     .toast-sub{opacity:.85; font-size:13px}
     .toast-meta{display:flex; gap:10px; margin-top:6px; font-size:12px; opacity:.85; flex-wrap:wrap}
     .toast-meta span{background:rgba(255,255,255,.08); padding:6px 8px; border-radius:9px}
-    .toast-close{
-      position:absolute; top:8px; right:8px;
-      background:rgba(255,255,255,.1); border:none; color:#fff;
-      padding:6px 8px; border-radius:8px; cursor:pointer; font-weight:700;
-    }
-    .toast-close:active{ transform:scale(.98); }
-    .min-toast{
-      position:fixed; left:50%; bottom:58px; transform:translateX(-50%);
-      background:rgba(0,0,0,.8); color:#fff; border-radius:999px;
-      padding:8px 12px; font-size:12px; cursor:pointer; z-index:1000; display:none;
-    }
-
-    /* History chips */
-    .history-bar{
-      position:fixed; left:50%; bottom:10px; transform:translateX(-50%);
-      display:flex; gap:8px; max-width:520px; width:min(92vw,520px); flex-wrap:wrap; z-index:1000;
-    }
-    .hist-chip{background:rgba(0,0,0,.5); color:#fff; padding:6px 8px; border-radius:999px; font-size:12px; cursor:pointer}
 
     /* Progress modal */
     .modal-backdrop{ position:fixed; inset:0; background:rgba(0,0,0,.55); display:none; align-items:center; justify-content:center; z-index:1200; }
@@ -89,10 +71,6 @@
     .pick b{font-weight:800}
     .pick .meta{opacity:.85; font-size:12px}
     .bust{color:#ff8a8a}
-
-    /* Small-height scaling */
-    @media (max-height: 680px){ .card{ transform:scale(.94); transform-origin: top center; } }
-    @media (max-height: 560px){ .card{ transform:scale(.88); } }
   </style>
 </head>
 <body>
@@ -125,13 +103,11 @@
       </div>
 
       <div class="result" id="result"></div>
+
+      <!-- Inline overlay sits just below the result -->
+      <div id="inlineToast" class="inline-toast"></div>
     </div>
   </div>
-
-  <!-- Overlay + Min chip + History -->
-  <div id="toast" class="impact-toast"></div>
-  <div id="minToast" class="min-toast">Show last pick</div>
-  <div id="history" class="history-bar"></div>
 
   <!-- Progress Modal -->
   <div id="modalBack" class="modal-backdrop">
@@ -177,68 +153,13 @@
       requestAnimationFrame(step);
     }
 
-    let toastTimer=null, lastToastHTML='';
-    function toastFromPill(side, html){
-      const toast=$('toast'), minChip=$('minToast');
-      lastToastHTML = html;
-      toast.innerHTML = `<button class="toast-close" id="toastClose">–</button>${html}`;
-
-      const pill = side===0 ? $('p1Pill') : $('p2Pill');
-      const pb = pill.getBoundingClientRect();
-      const vwCenter = window.innerWidth/2;
-      const targetTop = window.innerHeight*0.12;
-
-      const dx = (pb.left + pb.width/2) - vwCenter;
-      const dy = (pb.top + 10) - targetTop;
-
-      toast.style.transform = `translateX(calc(-50% + ${dx}px)) translateY(${dy}px) scale(.85)`;
-      toast.style.opacity = '0';
-      if(toastTimer){ clearTimeout(toastTimer); toastTimer=null; }
-
-      requestAnimationFrame(()=>{
-        toast.classList.add('show');
-        toast.style.transform = `translateX(-50%) translateY(0) scale(1)`;
-        toast.style.opacity = '1';
-      });
-
-      toastTimer = setTimeout(()=>{ toast.classList.remove('show'); minChip.style.display='block'; }, 5000);
-
-      $('toastClose').onclick = () => {
-        toast.classList.remove('show');
-        if(toastTimer){clearTimeout(toastTimer); toastTimer=null;}
-        minChip.style.display='block';
-      };
-
-      minChip.onclick = () => {
-        minChip.style.display='none';
-        toast.innerHTML = `<button class="toast-close" id="toastClose">–</button>${lastToastHTML}`;
-        toast.classList.add('show');
-        if(toastTimer) clearTimeout(toastTimer);
-        toastTimer = setTimeout(()=>{ toast.classList.remove('show'); minChip.style.display='block'; }, 5000);
-        $('toastClose').onclick = () => {
-          toast.classList.remove('show');
-          if(toastTimer){clearTimeout(toastTimer); toastTimer=null;}
-          minChip.style.display='block';
-        };
-      };
-    }
-
-    const historyArr=[];
-    function pushHistory(label){
-      historyArr.unshift(label); if(historyArr.length>3) historyArr.pop();
-      const bar=$('history');
-      bar.innerHTML = historyArr.map((t,i)=>`<span class="hist-chip" data-i="${i}">${t}</span>`).join('');
-      bar.querySelectorAll('.hist-chip').forEach(chip=>{
-        chip.onclick = ()=> toastFromPill(state.turn===0?1:0,
-          `<div class="toast-row"><div class="badge">ℹ️</div><div class="toast-body"><div class="toast-title">${chip.textContent}</div><div class="toast-sub">Recent pick</div></div></div>`);
-      });
-    }
-
-    function showImpact({ canonical, matches, starts, goals, mins }, before, after, side){
-      const badgeColor = side===0 ? '#1f8a5e' : '#2b5f4a';
-      const html = `
+    // Inline overlay logic (bottom of the card)
+    let toastTimer=null;
+    function showImpactInline({ canonical, matches, starts, goals, mins }, before, after){
+      const box = $('inlineToast');
+      box.innerHTML = `
         <div class="toast-row">
-          <div class="badge" style="background:${badgeColor}">-${matches}</div>
+          <div class="badge">-${matches}</div>
           <div class="toast-body">
             <div class="toast-title">${canonical}</div>
             <div class="toast-sub">${before} → ${after}</div>
@@ -249,10 +170,18 @@
               <span>Mins ${mins ?? 0}</span>
             </div>
           </div>
-        </div>`;
-      toastFromPill(side, html);
-      pushHistory(`${canonical} • -${matches}`);
+        </div>
+      `;
+      // show
+      box.classList.add('show');
+      // auto-hide after 5s (fallback)
+      if(toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(()=> box.classList.remove('show'), 5000);
     }
+    // Hide overlay when user starts typing next guess
+    $('guess').addEventListener('input', ()=> {
+      $('inlineToast').classList.remove('show');
+    });
 
     function openProgressModal(i){
       $('modalTitle').textContent = `${state.names[i]} — Progress`;
@@ -330,7 +259,7 @@
         state.used.add(canonical);
         state.historyScores[state.turn].push(after);
         state.picks[state.turn].unshift({name:v.canonical,matches:v.matches,from:before,to:after,bust:false});
-        showImpact({ canonical: v.canonical, matches: v.matches, starts: v.starts, goals: v.goals, mins: v.mins }, before, after, state.turn);
+        showImpactInline({ canonical: v.canonical, matches: v.matches, starts: v.starts, goals: v.goals, mins: v.mins }, before, after);
       }
 
       if(s.win){ setTimeout(endGame, 1000); return; }
