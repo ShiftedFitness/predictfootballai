@@ -2,13 +2,34 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
   <title>Football 501 | PredictFootball.ai</title>
   <style>
     :root{--bg:#000;--card:#4f8b6e;--ink:#fff;--muted:#cfe5db;--btn:#111;--btnH:#222;--danger:#ff5a5a}
+
+    /* Allow page to scroll; give room for fixed history bar */
     *{box-sizing:border-box}
-    body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;display:flex;min-height:100vh;align-items:center;justify-content:center;padding:18px}
-    .card{width:100%;max-width:520px;background:var(--card);border-radius:24px;padding:22px;box-shadow:0 8px 32px rgba(0,0,0,.5);position:relative;overflow:hidden}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--ink);
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;
+      min-height:100svh;      /* better on iOS with toolbars */
+      padding:24px 18px 76px; /* bottom space for history bar */
+    }
+
+    .card{
+      width:100%;
+      max-width:520px;
+      margin:0 auto;
+      background:var(--card);
+      border-radius:24px;
+      padding:22px;
+      box-shadow:0 8px 32px rgba(0,0,0,.5);
+      position:relative;
+      overflow:visible; /* important: avoid clipping */
+    }
+
     h1{margin:0 0 8px;font-size:26px}
     .sub{margin:0 0 14px;color:var(--muted)}
     .row{display:flex;gap:8px}
@@ -24,34 +45,42 @@
     .footer{text-align:center;margin-top:10px;opacity:.7;font-size:12px}
     .hidden{display:none}
 
-    /* Impact toast */
+    /* Impact toast: now fixed to viewport, rests near top (12%) */
     .impact-toast{
-      position:absolute; left:50%; transform:translateX(-50%) translateY(10px) scale(.96);
+      position:fixed;
+      left:50%;
+      top:12%;
+      transform:translateX(-50%) translateY(0) scale(.96);
       background:rgba(0,0,0,.92); color:#fff; border-radius:16px; padding:12px 14px;
-      width:92%; max-width:480px; box-shadow:0 14px 34px rgba(0,0,0,.6);
+      width:min(92vw, 520px); box-shadow:0 14px 34px rgba(0,0,0,.6);
       opacity:0; pointer-events:none; transition:transform .45s cubic-bezier(.22,.9,.3,1.2), opacity .25s ease;
-      z-index:5;
+      z-index:1000;
     }
-    .impact-toast.show{ opacity:1; transform:translateX(-50%) translateY(-14px) scale(1); }
+    .impact-toast.show{ opacity:1; transform:translateX(-50%) translateY(0) scale(1); }
     .toast-row{display:flex; align-items:center; gap:12px}
     .badge{min-width:56px; height:56px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:22px; background:#1f8a5e;}
     .toast-body{flex:1}
     .toast-title{font-weight:800; margin:0 0 4px}
     .toast-sub{opacity:.85; font-size:13px}
-    .toast-meta{display:flex; gap:10px; margin-top:6px; font-size:12px; opacity:.85}
+    .toast-meta{display:flex; gap:10px; margin-top:6px; font-size:12px; opacity:.85; flex-wrap:wrap}
     .toast-meta span{background:rgba(255,255,255,.08); padding:6px 8px; border-radius:9px}
 
-    /* History chips */
-    .history-bar{position:absolute; bottom:10px; left:50%; transform:translateX(-50%); display:flex; gap:8px; max-width:480px; width:92%; flex-wrap:wrap; z-index:4}
+    /* History chips: fixed at bottom */
+    .history-bar{
+      position:fixed;
+      left:50%; bottom:10px; transform:translateX(-50%);
+      display:flex; gap:8px; max-width:520px; width:min(92vw,520px); flex-wrap:wrap;
+      z-index:1000;
+    }
     .hist-chip{background:rgba(0,0,0,.5); color:#fff; padding:6px 8px; border-radius:999px; font-size:12px; cursor:pointer}
 
     /* Progress modal */
     .modal-backdrop{
-      position:fixed; inset:0; background:rgba(0,0,0,.55); display:none; align-items:center; justify-content:center; z-index:20;
+      position:fixed; inset:0; background:rgba(0,0,0,.55); display:none; align-items:center; justify-content:center; z-index:1200;
     }
     .modal-backdrop.show{ display:flex; }
     .modal{
-      width:min(520px,92%); background:#0f2a21; color:#fff; border-radius:18px; box-shadow:0 18px 40px rgba(0,0,0,.7); padding:16px 16px 14px;
+      width:min(520px,92vw); background:#0f2a21; color:#fff; border-radius:18px; box-shadow:0 18px 40px rgba(0,0,0,.7); padding:16px 16px 14px;
       transform:translateY(8px); opacity:0; transition:transform .25s ease, opacity .2s ease;
     }
     .modal.show{ transform:translateY(0); opacity:1; }
@@ -64,6 +93,14 @@
     .pick b{font-weight:800}
     .pick .meta{opacity:.85; font-size:12px}
     .bust{color:#ff8a8a}
+
+    /* Scale UI on short heights */
+    @media (max-height: 680px){
+      .card{ transform:scale(.94); transform-origin: top center; }
+    }
+    @media (max-height: 560px){
+      .card{ transform:scale(.88); }
+    }
   </style>
 </head>
 <body>
@@ -117,17 +154,19 @@
   </div>
 
   <script>
+    /* ---------- Config ---------- */
     const API={start:'/.netlify/functions/start-game',validate:'/.netlify/functions/validate-player',score:'/.netlify/functions/score-round'};
     const TTL=90*60*1000;
 
+    /* ---------- State ---------- */
     const state={
       names:['Player 1','Player 2'],
       scores:[501,501],
       turn:0,
       used:new Set(),
-      retry:false,               // one retry on miss
-      historyScores:[[501],[501]], // per-player running totals
-      picks:[[],[]]              // per-player picks [{name,matches,from,to,bust}]
+      retry:false,                 // one retry on miss
+      historyScores:[[501],[501]],// running totals per player
+      picks:[[],[]]                // recent picks per player
     };
 
     const $=id=>document.getElementById(id);
@@ -145,20 +184,30 @@
       requestAnimationFrame(step);
     }
 
+    // Toast now animates from the score pill toward the fixed top position
     function toastFromPill(side, html){
       const toast = $('toast');
       toast.innerHTML = html;
+
+      // origin at the active pill (viewport-based)
       const pill = side===0 ? $('p1Pill') : $('p2Pill');
-      const pb = pill.getBoundingClientRect(), cb = document.querySelector('.card').getBoundingClientRect();
-      const dx = (pb.left + pb.width/2) - (cb.left + cb.width/2);
-      const dy = (pb.top + 10) - (cb.top + 20);
+      const pb = pill.getBoundingClientRect();
+      const vwCenter = window.innerWidth / 2;
+      const targetTop = window.innerHeight * 0.12; // matches CSS top:12%
+
+      const dx = (pb.left + pb.width/2) - vwCenter;
+      const dy = (pb.top + 10) - targetTop;
+
+      // launch from pill
       toast.style.transform = `translateX(calc(-50% + ${dx}px)) translateY(${dy}px) scale(.85)`;
       toast.style.opacity = '0';
+
       requestAnimationFrame(()=>{
-        toast.classList.add('show');
-        toast.style.transform = `translateX(-50%) translateY(-14px) scale(1)`;
+        toast.classList.add('show'); // settles at CSS top:12%
+        toast.style.transform = `translateX(-50%) translateY(0) scale(1)`;
         toast.style.opacity = '1';
       });
+
       setTimeout(()=>toast.classList.remove('show'), 1600);
     }
 
@@ -195,16 +244,13 @@
     }
 
     function updateProgress(playerIdx, pick){
-      // pick: {name,matches,from,to,bust}
       state.picks[playerIdx].unshift(pick);          // latest first
-      const chain = state.historyScores[playerIdx].join(' → ');
-      return chain;
+      return state.historyScores[playerIdx].join(' → ');
     }
 
     function openProgressModal(playerIdx){
       $('modalTitle').textContent = `${state.names[playerIdx]} — Progress`;
       $('chain').textContent = state.historyScores[playerIdx].join(' → ');
-
       const list = state.picks[playerIdx]
         .slice(0,8)
         .map(p => `
@@ -222,9 +268,9 @@
       $('modal').classList.remove('show');
       setTimeout(()=> $('modalBack').classList.remove('show'), 160);
     }
+
     $('closeModal').onclick = closeProgressModal;
     $('modalBack').onclick = (e)=> { if(e.target.id==='modalBack') closeProgressModal(); };
-
     $('p1Pill').onclick = ()=> openProgressModal(0);
     $('p2Pill').onclick = ()=> openProgressModal(1);
 
@@ -271,7 +317,6 @@
       const s=await fetch(API.score,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({player:state.turn,scores:state.scores,deduct:v.matches})}).then(r=>r.json());
       if(s.error){ $('result').textContent='Error scoring round.'; return; }
 
-      // record pick, chain, and visuals
       if(s.bust){
         $('result').textContent=`💥 Bust! ${v.canonical} has ${v.matches}. Score stays ${state.scores[state.turn]}.`;
         state.picks[state.turn].unshift({name:v.canonical,matches:v.matches,from:before,to:before,bust:true});
