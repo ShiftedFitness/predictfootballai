@@ -1,6 +1,5 @@
 const { ADALO_API_BASE, ADALO_API_KEY, PREMIER_LEAGUE_PLAYERS_COLLECTION } = process.env;
 
-// --- utils ---
 function normalize(s){
   return String(s||'').toLowerCase()
     .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
@@ -18,40 +17,32 @@ function lev(a,b){
 }
 function sim(a,b){ const A=normalize(a),B=normalize(b); if(!A||!B) return 0; const L=Math.max(A.length,B.length); return 1 - (lev(A,B)/L); }
 
-// Ensure we hit the right endpoint whether ADALO_API_BASE has /collections or not
 function collectionsBase(){
   const base = String(ADALO_API_BASE || '').replace(/\/+$/,'');
   return base.includes('/collections') ? base : `${base}/collections`;
 }
 
 async function fetchAll(){
-  let offset = 0;
-  const all = [];
-  const base = collectionsBase();
-
+  let offset=0; const all=[]; const base=collectionsBase();
   while(true){
     const url = `${base}/${PREMIER_LEAGUE_PLAYERS_COLLECTION}?offset=${offset}&limit=1000`;
-    const res = await fetch(url, {
-      headers: {
-        Authorization: `Bearer ${ADALO_API_KEY}`,
-        'Content-Type': 'application/json'
-      }
-    });
-    if(!res.ok){
-      const t = await res.text();
-      throw new Error(`Adalo fetch failed ${res.status}: ${t}`);
-    }
-    const data = await res.json();
-    const rows = (data.records || []).filter(r => r && r.Player);
+    const res = await fetch(url,{ headers:{ Authorization:`Bearer ${ADALO_API_KEY}`,'Content-Type':'application/json' }});
+    if(!res.ok){ const t=await res.text(); throw new Error(`Adalo fetch ${res.status}: ${t}`); }
+    const data=await res.json();
+    const rows=(data.records||[]).filter(r=>r&&r.Player);
     for(const r of rows){
       all.push({
         player: r.Player,
-        matches: Number(r.Matches || 0),
-        norm: normalize(r.Player)
+        norm: normalize(r.Player),
+        matches: Number(r.Matches||0),
+        starts:  Number(r.Starts||0),
+        goals:   Number(r.Goals||0),
+        mins:    Number(r.Mins||0),
+        country: r.Country || ''
       });
     }
     if(!data.offset) break;
-    offset = data.offset;
+    offset=data.offset;
   }
   return all;
 }
@@ -59,55 +50,41 @@ async function fetchAll(){
 exports.handler = async (event) => {
   try{
     const qs = new URLSearchParams(event.queryStringParameters || {});
-
-    // Debug endpoint to confirm data load
-    if(qs.get('debug')){
-      const list = await fetchAll();
-      return {
-        statusCode: 200,
-        body: JSON.stringify({ count: list.length, sample: list.slice(0,5) })
-      };
-    }
-
-    // Bulk fetch for SPA cache
     if(qs.get('fetchAll')){
       const list = await fetchAll();
-      return { statusCode: 200, body: JSON.stringify(list) };
+      return { statusCode:200, body: JSON.stringify(list) };
     }
-
-    // Single guess validation
     const { guess } = JSON.parse(event.body || '{}');
-    if(!guess){
-      return { statusCode: 400, body: JSON.stringify({ valid:false, message:'No guess provided' }) };
-    }
+    if(!guess){ return { statusCode:400, body: JSON.stringify({ valid:false, message:'No guess provided' }) }; }
 
     const target = normalize(guess);
     const list = await fetchAll();
 
-    // exact / contains first
+    // exact → contains → similarity
     let best = list.find(it => it.norm === target);
-    if(!best){ best = list.find(it => it.norm.includes(target)); }
-
-    // similarity fallback
+    if(!best) best = list.find(it => it.norm.includes(target));
     if(!best){
-      let top = { rec:null, conf:0 };
-      for(const it of list){
-        const s = sim(it.norm, target);
-        if(s > top.conf) top = { rec: it, conf: s };
-      }
-      if(top.rec && top.conf >= 0.78) best = top.rec;
+      let top={rec:null,conf:0};
+      for(const it of list){ const s=sim(it.norm,target); if(s>top.conf) top={rec:it,conf:s}; }
+      if(top.rec && top.conf>=0.78) best=top.rec;
     }
 
     if(best){
-      return { statusCode:200, body: JSON.stringify({
-        valid: true,
-        canonical: best.player,
-        matches: Number(best.matches)||0
-      })};
+      return {
+        statusCode:200,
+        body: JSON.stringify({
+          valid:true,
+          canonical: best.player,
+          matches: best.matches,
+          starts:  best.starts,
+          goals:   best.goals,
+          mins:    best.mins,
+          country: best.country
+        })
+      };
     }
-
     return { statusCode:200, body: JSON.stringify({ valid:false, message:`❌ ${guess} not found.` }) };
   }catch(err){
-    return { statusCode:500, body: JSON.stringify({ valid:false, error: err.message }) };
+    return { statusCode:500, body: JSON.stringify({ valid:false, error:err.message }) };
   }
 };
