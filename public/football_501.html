@@ -29,12 +29,14 @@
     .pill .name{font-weight:700}
     .pill .num{font-size:32px;font-weight:800;letter-spacing:.5px;min-width:3ch;display:inline-block}
     .turn{text-align:center;margin:10px 0;font-weight:700}
+    .hint{margin:6px 0 8px; text-align:center; font-size:13px; color:#0b1; font-weight:700}
+    .hint small{display:block; color:#cfe5db; font-weight:600}
     .result{min-height:24px;text-align:center;margin:8px 0}
     .danger{background:var(--danger);color:#000;font-weight:700}
     .footer{text-align:center;margin-top:10px;opacity:.7;font-size:12px}
     .hidden{display:none}
 
-    /* Inline overlay (inside the card, just below the result line) */
+    /* Inline overlay (just below result) */
     .inline-toast{
       margin:8px auto 0;
       width:100%;
@@ -94,7 +96,9 @@
         <div class="pill" id="p1Pill"><div class="name" id="p1Name"></div><div class="num" id="p1Score">501</div></div>
         <div class="pill" id="p2Pill"><div class="name" id="p2Name"></div><div class="num" id="p2Score">501</div></div>
       </div>
+
       <div class="turn" id="turnInfo"></div>
+      <div id="checkoutHint" class="hint hidden"></div>
 
       <input id="guess" placeholder="Type a Spanish PL player"/>
       <div class="row" style="margin-top:8px;">
@@ -103,8 +107,6 @@
       </div>
 
       <div class="result" id="result"></div>
-
-      <!-- Inline overlay sits just below the result -->
       <div id="inlineToast" class="inline-toast"></div>
     </div>
   </div>
@@ -139,6 +141,7 @@
     };
 
     const $=id=>document.getElementById(id);
+    let playersCache = []; // [{player, norm, matches, starts, goals, mins, country}...]
 
     /* ---------- Helpers ---------- */
     function animateCount(el, from, to, dur=850){
@@ -172,17 +175,54 @@
           </div>
         </div>
       `;
-      // show
       box.classList.add('show');
-      // auto-hide after 5s (fallback)
       if(toastTimer) clearTimeout(toastTimer);
       toastTimer = setTimeout(()=> box.classList.remove('show'), 5000);
     }
-    // Hide overlay when user starts typing next guess
     $('guess').addEventListener('input', ()=> {
-      $('inlineToast').classList.remove('show');
+      $('inlineToast').classList.remove('show'); // auto-hide when typing next pick
     });
 
+    // Checkout helper (counts 1-player and 2-player possibilities excluding used names)
+    function updateCheckoutHint(){
+      const hint = $('checkoutHint');
+      const remaining = state.scores[state.turn];
+      if(remaining <= 0 || playersCache.length === 0){
+        hint.classList.add('hidden'); hint.textContent=''; return;
+      }
+
+      // available players (not used)
+      const available = playersCache.filter(p => !state.used.has((p.player||'').toLowerCase()));
+      // Count direct (exact matches)
+      const direct = available.reduce((acc,p)=> acc + (Number(p.matches)===remaining ? 1 : 0), 0);
+
+      // Count unordered pairs that sum to remaining (freq map by matches)
+      const freq = new Map();
+      for(const p of available){
+        const m = Number(p.matches)||0;
+        if(m>0 && m<=remaining){ freq.set(m, (freq.get(m)||0)+1); }
+      }
+      let pairs = 0;
+      for(const [m,count] of freq.entries()){
+        const n = remaining - m;
+        if(n < m) continue; // ensure unordered combos
+        if(!freq.has(n)) continue;
+        if(n === m){
+          // combinations C(count,2)
+          pairs += count * (count - 1) / 2;
+        } else {
+          pairs += count * freq.get(n);
+        }
+      }
+
+      // display (cap 2-player as ">10" if large)
+      const pairsDisplay = pairs > 10 ? '>10' : String(pairs);
+      const directLabel = direct === 0 ? 'no' : String(direct);
+      hint.innerHTML = `Checkout: <strong>${directLabel}</strong> direct match${direct===1?'':'es'} · <strong>${pairsDisplay}</strong> two-player combo${pairs===1?'':'s'}<br/><small>We won’t show names to avoid spoilers.</small>`;
+      hint.classList.remove('hidden');
+    }
+
+    // Progress modal
     function openProgressModal(i){
       $('modalTitle').textContent = `${state.names[i]} — Progress`;
       $('chain').textContent = state.historyScores[i].join(' → ');
@@ -204,13 +244,17 @@
     async function fetchAllPlayers(force=false){
       const now=Date.now(), ts=parseInt(localStorage.getItem('players_ts')||'0',10);
       const cached=localStorage.getItem('players');
-      if(!force && cached && (now-ts)<TTL) return JSON.parse(cached);
+      if(!force && cached && (now-ts)<TTL){
+        playersCache = JSON.parse(cached);
+        return playersCache;
+      }
       const res=await fetch(API.validate+'?fetchAll=1'); const data=await res.json();
       localStorage.setItem('players',JSON.stringify(data)); localStorage.setItem('players_ts',String(now));
+      playersCache = data;
       return data;
     }
 
-    function setTurn(){ $('turnInfo').textContent=`${state.names[state.turn]}'s turn`; }
+    function setTurn(){ $('turnInfo').textContent=`${state.names[state.turn]}'s turn`; updateCheckoutHint(); }
     function renderScores(){ $('p1Score').textContent=state.scores[0]; $('p2Score').textContent=state.scores[1]; }
 
     // START GAME
@@ -223,7 +267,7 @@
 
       await fetchAllPlayers();
       $('setup').classList.add('hidden'); $('game').classList.remove('hidden');
-      setTurn(); renderScores(); $('guess').focus();
+      renderScores(); setTurn(); $('guess').focus();
     };
 
     // SUBMIT GUESS
@@ -236,12 +280,12 @@
 
       if(!v.valid){
         if(!state.retry){ state.retry=true; $('result').textContent='❌ Not found. Try once more (one retry).'; $('guess').focus(); return; }
-        state.retry=false; $('result').textContent='❌ Not found. Turn passes.'; state.turn=1-state.turn; setTurn(); $('guess').value=''; $('guess').focus(); return;
+        state.retry=false; $('result').textContent='❌ Not found. Turn passes.'; state.turn=1-state.turn; $('guess').value=''; renderScores(); setTurn(); $('guess').focus(); return;
       }
 
       state.retry=false;
       const canonical=(v.canonical||raw).toLowerCase();
-      if(state.used.has(canonical)){ $('result').textContent='⚠️ Already used.'; state.turn=1-state.turn; setTurn(); $('guess').value=''; $('guess').focus(); return; }
+      if(state.used.has(canonical)){ $('result').textContent='⚠️ Already used.'; state.turn=1-state.turn; $('guess').value=''; renderScores(); setTurn(); $('guess').focus(); return; }
 
       const before = state.scores[state.turn];
       const s=await fetch(API.score,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({player:state.turn,scores:state.scores,deduct:v.matches})}).then(r=>r.json()).catch(()=>({error:'score'}));
@@ -263,7 +307,7 @@
       }
 
       if(s.win){ setTimeout(endGame, 1000); return; }
-      state.turn=1-state.turn; setTurn(); $('guess').value=''; $('guess').focus();
+      state.turn=1-state.turn; $('guess').value=''; renderScores(); setTurn(); $('guess').focus();
     };
 
     function endGame(){ localStorage.removeItem('players'); localStorage.removeItem('players_ts'); location.reload(); }
