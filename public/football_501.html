@@ -160,7 +160,7 @@ function buildGameCards(){
   COUNTRIES.forEach(c=>{
     const el=document.createElement('div'); el.className='game-card';
     el.innerHTML=`<div><div><b>${c.flag} ${c.name}</b> — players in PL</div><div class="game-meta" id="info-${c.code}">Loading…</div></div><div>➤</div>`;
-    el.onclick=()=> chooseGame(c.code, c.name);
+    el.onclick=()=> chooseGame(c.code);
     opts.appendChild(el);
     // preload stats for difficulty
     fetch(`${API.validate}?fetchAll=1&country=${encodeURIComponent(c.code)}`).then(r=>r.json()).then(data=>{
@@ -254,7 +254,7 @@ function updateCheckoutHint(){
   hint.classList.remove('hidden');
 }
 
-/* ---------- MODAL (progress) ---------- */
+/* ---------- MODAL (progress) — FIXED ---------- */
 function openProgressModal(i){
   document.getElementById('modalTitle').textContent=`${state.players[i]} — Progress`;
   document.getElementById('chain').textContent=state.historyScores[i].join(' → ');
@@ -264,11 +264,20 @@ function openProgressModal(i){
       <div class="meta">${p.from} → ${p.to}${p.bust?' (bust)':''}</div>
     </div>`).join('') || '<div class="pick"><div>No picks yet</div></div>';
   document.getElementById('pickList').innerHTML=list;
-  show('modalBack'); requestAnimationFrame(()=> show('modal'));
+
+  const back=document.getElementById('modalBack');
+  const modal=document.getElementById('modal');
+  back.classList.add('show');
+  requestAnimationFrame(()=> modal.classList.add('show'));
+}
+function closeModal(){
+  const back=document.getElementById('modalBack');
+  const modal=document.getElementById('modal');
+  modal.classList.remove('show');
+  setTimeout(()=> back.classList.remove('show'), 160);
 }
 document.getElementById('closeModal').onclick=closeModal;
 document.getElementById('modalBack').onclick=(e)=>{ if(e.target.id==='modalBack') closeModal(); };
-function closeModal(){ hide('modal'); setTimeout(()=>hide('modalBack'),160); }
 
 /* ---------- IMPACT OVERLAY ---------- */
 let toastTimer=null;
@@ -297,8 +306,8 @@ async function onSubmit(){
     state.retry=false; setResult('❌ Duplicate. Turn passes.'); nextTurn(); return;
   }
 
-  // validate (PASS COUNTRY HERE)
-  let v; 
+  // validate (country enforced)
+  let v;
   try{
     v=await fetch(`${API.validate}?country=${encodeURIComponent(selectedCountry)}`,{
       method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({guess:raw})
@@ -323,6 +332,14 @@ async function onSubmit(){
       body:JSON.stringify({player:state.turn,scores:state.scores,deduct:v.matches})
     }).then(r=>r.json());
   }catch(_){ setResult('Error scoring.'); return; }
+
+  // ---- client-side safety net for malformed scorer responses (keeps >2 players safe) ----
+  if(!s || !Array.isArray(s.scores) || s.scores.length !== state.scores.length){
+    const patched = state.scores.slice();
+    if(s && !s.bust){ patched[state.turn] = Math.max(0, state.scores[state.turn] - Number(v.matches||0)); }
+    s = { scores: patched, bust: s?.bust || false, win: patched[state.turn]===0, message: s?.message || '' };
+  }
+  // ---------------------------------------------------------------------------------------
 
   if(s.bust){
     setResult(`💥 Bust! ${v.canonical} has ${v.matches}. Score stays ${state.scores[state.turn]}.`);
