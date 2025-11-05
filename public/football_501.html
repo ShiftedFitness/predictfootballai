@@ -191,13 +191,14 @@ const GAMES = {
   competition: [
     { title:'Champions League — goals since 1992', flag:'🏆', collection:'ucl_goals', fieldName:'Goals' }
   ],
-  other: [
-    { title:'British players in Europe’s Top 5 (ex-EPL)', flag:'', collection:'british_europe', fieldName:'Matches', flagsHTML:`
-        <span class="flagrow">🇬🇧🇬🇧</span> <!-- visual gap -->
-        <span class="flagrow">🏴</span> <!-- Scotland -->
-        <span class="flagrow">🏴</span> <!-- Wales -->
-        <span class="badgeNI">NI</span>` }
-  ]
+ other: [
+  {
+    title: "British players in Europe’s Top 5 (ex-EPL) (ENG, SCO, WAL, NI)",
+    flag: "🇬🇧",
+    collection: "british_europe",
+    fieldName: "Matches"
+  }
+]
 };
 
 let playersCache=[], state=null, currentGame=null;
