@@ -24,8 +24,7 @@ function findKey(rec, label) {
   return null;
 }
 
-// Utility: increment a single user's Current Week by +1
-// Call from another admin function if you ever need to fix someone manually
+// Utility: increment a single user's Current Week by +1 (not used by this handler, but available)
 async function incrementUserWeek(uid, usersAll) {
   const user = usersAll.find(u => String(u.id) === String(uid));
   if (!user) return { ok: false, error: 'User not found' };
@@ -62,7 +61,7 @@ exports.handler = async (event) => {
     // ============================
     // MANUAL OVERRIDE SWITCH
     // ============================
-    // 1) You can send { "force": true } in the POST body
+    // 1) Send { "force": true } in the POST body
     // 2) Or set env var FORCE_SCORE_WEEK=true to force without changing UI
     const FORCE_OVERRIDE = process.env.FORCE_SCORE_WEEK === 'true';
     const allowForce = !!force || FORCE_OVERRIDE;
@@ -79,7 +78,15 @@ exports.handler = async (event) => {
       .sort((a, b) => Number(a.id) - Number(b.id));
 
     if (!matches.length) {
-      return respond(400, `No matches for week ${week}`);
+      return respond(400, {
+        error: `No matches for week ${week}`,
+        debug: {
+          week,
+          matchesTotal: matchesAll.length,
+          predsTotal: predsAll.length,
+          usersTotal: usersAll.length
+        }
+      });
     }
 
     // ---------------------------------
@@ -108,7 +115,14 @@ exports.handler = async (event) => {
             `Week ${week} appears already scored for at least one user (Current Week > ${week}).`,
             'To rescore anyway, send { "force": true } in the body or set FORCE_SCORE_WEEK=true.'
           ],
-          scoredUsersPreview: scoredUsers.slice(0, 5)
+          debug: {
+            week,
+            matchesForWeek: matches.length,
+            matchesIds: matches.map(m => m.id),
+            predsTotal: predsAll.length,
+            usersTotal: usersAll.length,
+            scoredUsersPreview: scoredUsers.slice(0, 5)
+          }
         });
       }
     }
@@ -119,7 +133,7 @@ exports.handler = async (event) => {
     );
     const matchIds = new Set(matches.map(m => String(m.id)));
 
-    // Predictions belonging to this week
+    // Predictions belonging to this week (via Match relation)
     const weekPreds = (predsAll || []).filter(p => matchIds.has(String(relId(p['Match']))));
 
     // 2) Recompute & overwrite Points Awarded when needed (idempotent and corrective)
@@ -213,7 +227,23 @@ exports.handler = async (event) => {
       usersUpdated: updates.length,
       fullHouseNames,
       blanksNames,
-      detail: updates
+      detail: updates,
+      debug: {
+        week,
+        matchesForWeek: matches.length,
+        matchIds: matches.map(m => m.id),
+        weekPredsCount: weekPreds.length,
+        weekAfterCount: weekAfter.length,
+        predsTotal: predsAll.length,
+        usersTotal: usersAll.length,
+        sampleWeekPreds: weekPreds.slice(0, 5).map(p => ({
+          id: p.id,
+          pick: p['Pick'],
+          match: relId(p['Match']),
+          user: relId(p['User']),
+          pointsAwarded: p['Points Awarded']
+        }))
+      }
     });
 
   } catch (e) {
