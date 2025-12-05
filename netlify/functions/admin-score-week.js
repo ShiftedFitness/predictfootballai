@@ -1,18 +1,55 @@
 // netlify/functions/admin-score-week.js
+// PredictFootball – score a whole week of fixtures
+// Handles normal scoring + "force rescore" and is paranoid about Adalo's relation formats 🙃
 
 const { ADALO, adaloFetch, listAll } = require('./_adalo.js');
 
 // -------------------------
 // Helpers
 // -------------------------
-const U = (s) => String(s || '').trim().toUpperCase();  // trim + uppercase
-const relId = (v) => Array.isArray(v) ? (v[0] ?? '') : (v ?? '');
+
+// trim + uppercase
+const U = (s) => String(s || '').trim().toUpperCase();
+
+// RELATION ID EXTRACTOR – handles array, object, JSON string, raw, etc.
+function relId(v) {
+  if (!v) return '';
+
+  // Case 1: Array: [66]
+  if (Array.isArray(v)) return v[0] ?? '';
+
+  // Case 2: Object: { id: 66 }
+  if (typeof v === 'object' && v.id != null) return v.id;
+
+  // Case 3: String numeric or JSON string
+  if (typeof v === 'string') {
+    // Try JSON parse first
+    try {
+      const parsed = JSON.parse(v);
+      if (Array.isArray(parsed)) return parsed[0] ?? '';
+      if (typeof parsed === 'object' && parsed !== null && parsed.id != null) return parsed.id;
+      // If it parses but isn't one of the above, fall through to raw
+    } catch {
+      // not JSON, just a plain string
+    }
+    return v;
+  }
+
+  // Fallback: plain number or something similar
+  return v;
+}
+
 const respond = (status, body) => ({
   statusCode: status,
   headers: { 'Content-Type': 'application/json' },
   body: typeof body === 'string' ? JSON.stringify({ error: body }) : JSON.stringify(body)
 });
-const nameOf = (u) => u?.['Username'] || u?.['Name'] || u?.['Full Name'] || `User ${u?.id ?? ''}`;
+
+const nameOf = (u) =>
+  u?.['Username'] ||
+  u?.['Name'] ||
+  u?.['Full Name'] ||
+  `User ${u?.id ?? ''}`;
 
 // Normalises keys like "Current Week", "current_week", etc.
 function findKey(rec, label) {
@@ -24,7 +61,7 @@ function findKey(rec, label) {
   return null;
 }
 
-// Utility: increment a single user's Current Week by +1 (not used by this handler, but available)
+// Utility: increment a single user's Current Week by +1 (for manual surgery if needed)
 async function incrementUserWeek(uid, usersAll) {
   const user = usersAll.find(u => String(u.id) === String(uid));
   if (!user) return { ok: false, error: 'User not found' };
@@ -46,6 +83,7 @@ async function incrementUserWeek(uid, usersAll) {
 // -------------------------
 // MAIN HANDLER
 // -------------------------
+
 exports.handler = async (event) => {
   try {
     if (event.httpMethod !== 'POST') return respond(405, 'POST only');
@@ -61,8 +99,8 @@ exports.handler = async (event) => {
     // ============================
     // MANUAL OVERRIDE SWITCH
     // ============================
-    // 1) Send { "force": true } in the POST body
-    // 2) Or set env var FORCE_SCORE_WEEK=true to force without changing UI
+    // 1) Send { "force": true } in the POST body  (used by Force Rescore button)
+    // 2) Or set env var FORCE_SCORE_WEEK=true to force without touching the UI
     const FORCE_OVERRIDE = process.env.FORCE_SCORE_WEEK === 'true';
     const allowForce = !!force || FORCE_OVERRIDE;
 
@@ -73,15 +111,17 @@ exports.handler = async (event) => {
       listAll(ADALO.col.users, 5000),
     ]);
 
+    const weekNum = Number(week);
+
     const matches = (matchesAll || [])
-      .filter(m => Number(m['Week']) === Number(week))
+      .filter(m => Number(m['Week']) === weekNum)
       .sort((a, b) => Number(a.id) - Number(b.id));
 
     if (!matches.length) {
       return respond(400, {
         error: `No matches for week ${week}`,
         debug: {
-          week,
+          week: weekNum,
           matchesTotal: matchesAll.length,
           predsTotal: predsAll.length,
           usersTotal: usersAll.length
@@ -90,7 +130,7 @@ exports.handler = async (event) => {
     }
 
     // ---------------------------------
-    // Guard: prevent accidental double-scoring
+    // Guard: prevent accidental double-scoring (unless forced)
     // ---------------------------------
     if (!allowForce) {
       const scoredUsers = [];
@@ -98,7 +138,7 @@ exports.handler = async (event) => {
         const ck = findKey(u, 'Current Week');
         if (!ck) continue;
         const currW = Number(u[ck] || 0);
-        if (currW > Number(week)) {
+        if (currW > weekNum) {
           scoredUsers.push(nameOf(u));
         }
       }
@@ -106,19 +146,19 @@ exports.handler = async (event) => {
       if (scoredUsers.length > 0) {
         return respond(200, {
           ok: true,
-          week,
+          week: weekNum,
           predictionsUpdated: 0,
           usersUpdated: 0,
           fullHouseNames: [],
           blanksNames: [],
           detail: [
-            `Week ${week} appears already scored for at least one user (Current Week > ${week}).`,
+            `Week ${weekNum} appears already scored for at least one user (Current Week > ${weekNum}).`,
             'To rescore anyway, send { "force": true } in the body or set FORCE_SCORE_WEEK=true.'
           ],
           debug: {
-            week,
+            week: weekNum,
             matchesForWeek: matches.length,
-            matchesIds: matches.map(m => m.id),
+            matchIds: matches.map(m => m.id),
             predsTotal: predsAll.length,
             usersTotal: usersAll.length,
             scoredUsersPreview: scoredUsers.slice(0, 5)
@@ -134,7 +174,11 @@ exports.handler = async (event) => {
     const matchIds = new Set(matches.map(m => String(m.id)));
 
     // Predictions belonging to this week (via Match relation)
-    const weekPreds = (predsAll || []).filter(p => matchIds.has(String(relId(p['Match']))));
+    const weekPreds = (predsAll || []).filter(p => {
+      const midRaw = relId(p['Match']);
+      const mid = String(midRaw);
+      return matchIds.has(mid);
+    });
 
     // 2) Recompute & overwrite Points Awarded when needed (idempotent and corrective)
     let predictionsUpdated = 0;
@@ -142,6 +186,7 @@ exports.handler = async (event) => {
       const pick = U(p['Pick']);
       const mid = String(relId(p['Match']));
       const correct = correctByMatch[mid];
+
       // If correct result missing, count as 0 (but typically results are set first)
       const should = (pick && correct && pick === correct) ? 1 : 0;
       const current = (typeof p['Points Awarded'] === 'number') ? Number(p['Points Awarded']) : null;
@@ -158,7 +203,11 @@ exports.handler = async (event) => {
 
     // 3) Reload predictions AFTER fixing to compute final weekly correct
     const predsAfter = await listAll(ADALO.col.predictions, 20000);
-    const weekAfter = predsAfter.filter(p => matchIds.has(String(relId(p['Match']))));
+    const weekAfter = predsAfter.filter(p => {
+      const midRaw = relId(p['Match']);
+      const mid = String(midRaw);
+      return matchIds.has(mid);
+    });
 
     const weeklyCorrectFinalByUser = {};
     for (const p of weekAfter) {
@@ -176,19 +225,19 @@ exports.handler = async (event) => {
       if (!u) continue;
 
       const weeklyCorrectFinal = weeklyCorrectFinalByUser[uid] || 0; // 0..5
-      const bonus = (weeklyCorrectFinal === 5) ? 5 : 0;
-      const fhInc = (weeklyCorrectFinal === 5) ? 1 : 0;
+      const bonus    = (weeklyCorrectFinal === 5) ? 5 : 0;
+      const fhInc    = (weeklyCorrectFinal === 5) ? 1 : 0;
       const blankInc = (weeklyCorrectFinal === 0) ? 1 : 0;
       const pointsToAdd = weeklyCorrectFinal + bonus;
 
-      const newPoints = Number(u['Points'] ?? 0) + pointsToAdd;
-      const newCorrect = Number(u['Correct Results'] ?? 0) + weeklyCorrectFinal;
-      const newIncorrect = Number(u['Incorrect Results'] ?? 0) + (5 - weeklyCorrectFinal);
-      const newFH = Number(u['FH'] ?? 0) + fhInc;
-      const newBlanks = Number(u['Blanks'] ?? 0) + blankInc;
+      const newPoints   = Number(u['Points'] ?? 0) + pointsToAdd;
+      const newCorrect  = Number(u['Correct Results'] ?? 0) + weeklyCorrectFinal;
+      const newIncorrect= Number(u['Incorrect Results'] ?? 0) + (5 - weeklyCorrectFinal);
+      const newFH       = Number(u['FH'] ?? 0) + fhInc;
+      const newBlanks   = Number(u['Blanks'] ?? 0) + blankInc;
 
       const ck = findKey(u, 'Current Week');
-      const currW = ck ? Number(u[ck] ?? week) : Number(week);
+      const currW = ck ? Number(u[ck] ?? weekNum) : weekNum;
 
       const body = {
         'Points': newPoints,
@@ -218,18 +267,18 @@ exports.handler = async (event) => {
     }
 
     const fullHouseNames = updates.filter(u => u.weeklyCorrectFinal === 5).map(u => u.name);
-    const blanksNames = updates.filter(u => u.weeklyCorrectFinal === 0).map(u => u.name);
+    const blanksNames    = updates.filter(u => u.weeklyCorrectFinal === 0).map(u => u.name);
 
     return respond(200, {
       ok: true,
-      week,
+      week: weekNum,
       predictionsUpdated,
       usersUpdated: updates.length,
       fullHouseNames,
       blanksNames,
       detail: updates,
       debug: {
-        week,
+        week: weekNum,
         matchesForWeek: matches.length,
         matchIds: matches.map(m => m.id),
         weekPredsCount: weekPreds.length,
