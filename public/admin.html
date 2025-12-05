@@ -14,6 +14,7 @@
   .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
   .btn{background:#fff;color:#000;border:0;padding:10px 14px;border-radius:8px;font-weight:800;cursor:pointer}
   .btn.small{padding:8px 10px}
+  .btn.danger{background:#ff7676;color:#000;}  /* FORCED RESCORE BUTTON */
   table{width:100%;border-collapse:collapse;margin-top:8px}
   th,td{padding:8px;border-bottom:1px solid #1f1f1f;text-align:left;vertical-align:middle}
   select.result{min-width:120px}
@@ -39,7 +40,11 @@
     <div class="row">
       <button class="btn" id="applyResults">Apply Results & Lock</button>
       <button class="btn" id="scoreWeek">Score Week</button>
+      <button class="btn danger" id="forceScoreWeek" title="Force rescore even if week already scored">Force Rescore Week</button>
     </div>
+    <p style="margin-top:8px;font-size:12px;color:#f5dede">
+      <strong>Force Rescore Week</strong> will ignore safety checks and rescore the selected week. Use only if normal scoring failed.
+    </p>
   </div>
 
   <div class="card">
@@ -102,10 +107,11 @@ function row(match){
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-  const loadBtn = $('load');
+  const loadBtn  = $('load');
   const applyBtn = $('applyResults');
   const scoreBtn = $('scoreWeek');
-  const seedBtn = $('seedBtn');
+  const forceBtn = $('forceScoreWeek');
+  const seedBtn  = $('seedBtn');
 
   // Load matches
   loadBtn.onclick = ()=> withLoading(loadBtn, async ()=>{
@@ -186,14 +192,14 @@ window.addEventListener('DOMContentLoaded', () => {
     setTimeout(()=> setStatus(txt), 600);
   });
 
-  // Score week (banner includes full houses + blanks)
+  // Score week (normal, non-forced)
   scoreBtn.onclick = ()=> withLoading(scoreBtn, async ()=>{
     const secret = ($('secret')?.value || '').trim();
     const week = Number($('week').value);
     const res = await fetch(`${base}/admin-score-week`, {
       method:'POST',
       headers:{'Content-Type':'application/json','x-admin-secret':secret},
-      body: JSON.stringify({ week })
+      body: JSON.stringify({ week })          // <--- normal path, no force
     });
     let message = 'Database updated ✓';
     try {
@@ -218,6 +224,54 @@ window.addEventListener('DOMContentLoaded', () => {
       setTimeout(()=> setStatus(message + '\n' + txt), 600);
     }
   });
+
+  // Force rescore week (sends force:true with ARE YOU SURE)
+  forceBtn.onclick = () => {
+    const week = Number($('week').value);
+    if (!week) {
+      setStatus('Please enter a valid week number before forcing rescore.');
+      return;
+    }
+
+    const sure = window.confirm(
+      `ARE YOU SURE?\n\n` +
+      `This will FORCE RESCORE week ${week} and may change existing user totals.\n` +
+      `Only use this if the normal "Score Week" has failed or missed updates.`
+    );
+    if (!sure) return;
+
+    const secret = ($('secret')?.value || '').trim();
+
+    withLoading(forceBtn, async ()=>{
+      const res = await fetch(`${base}/admin-score-week`, {
+        method:'POST',
+        headers:{'Content-Type':'application/json','x-admin-secret':secret},
+        body: JSON.stringify({ week, force: true })   // <--- FORCE FLAG
+      });
+      let message = 'Database updated ✓ (FORCED RESCORE)';
+      try {
+        const data = await res.json();
+        if (data && data.ok) {
+          const winners = data.fullHouseNames || [];
+          const blanks  = data.blanksNames || [];
+          if (winners.length > 0) {
+            message += `  •  BONUS WEEK WINNER${winners.length>1?'S':''}: ${winners.join(', ')}`;
+          } else {
+            message += `  •  No full houses this week`;
+          }
+          if (blanks.length > 0) {
+            message += `  •  BLANKS: ${blanks.join(', ')}`;
+          }
+        }
+        setStatus(message);
+        setTimeout(()=> setStatus(message + '\n' + JSON.stringify(data, null, 2)), 600);
+      } catch {
+        const txt = await res.text();
+        setStatus(message);
+        setTimeout(()=> setStatus(message + '\n' + txt), 600);
+      }
+    });
+  };
 
   // Build seed table
   const tb = $('seedTbl')?.querySelector('tbody');
