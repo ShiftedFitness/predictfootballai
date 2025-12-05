@@ -1,41 +1,28 @@
 // netlify/functions/admin-score-week.js
-// PredictFootball – score a whole week of fixtures
-// Handles normal scoring + "force rescore" and is paranoid about Adalo's relation formats 🙃
 
 const { ADALO, adaloFetch, listAll } = require('./_adalo.js');
 
-// -------------------------
 // Helpers
-// -------------------------
-
-// trim + uppercase
 const U = (s) => String(s || '').trim().toUpperCase();
 
-// RELATION ID EXTRACTOR – handles array, object, JSON string, raw, etc.
 function relId(v) {
   if (!v) return '';
 
-  // Case 1: Array: [66]
   if (Array.isArray(v)) return v[0] ?? '';
 
-  // Case 2: Object: { id: 66 }
   if (typeof v === 'object' && v.id != null) return v.id;
 
-  // Case 3: String numeric or JSON string
   if (typeof v === 'string') {
-    // Try JSON parse first
     try {
       const parsed = JSON.parse(v);
       if (Array.isArray(parsed)) return parsed[0] ?? '';
       if (typeof parsed === 'object' && parsed !== null && parsed.id != null) return parsed.id;
-      // If it parses but isn't one of the above, fall through to raw
     } catch {
-      // not JSON, just a plain string
+      // not JSON, just a string like "66"
     }
     return v;
   }
 
-  // Fallback: plain number or something similar
   return v;
 }
 
@@ -51,7 +38,6 @@ const nameOf = (u) =>
   u?.['Full Name'] ||
   `User ${u?.id ?? ''}`;
 
-// Normalises keys like "Current Week", "current_week", etc.
 function findKey(rec, label) {
   const want = label.toLowerCase().replace(/\s+/g, '').replace(/_/g, '');
   for (const k of Object.keys(rec)) {
@@ -60,29 +46,6 @@ function findKey(rec, label) {
   }
   return null;
 }
-
-// Utility: increment a single user's Current Week by +1 (for manual surgery if needed)
-async function incrementUserWeek(uid, usersAll) {
-  const user = usersAll.find(u => String(u.id) === String(uid));
-  if (!user) return { ok: false, error: 'User not found' };
-
-  const ck = findKey(user, 'Current Week');
-  if (!ck) return { ok: false, error: 'Current Week field not found on user' };
-
-  const curr = Number(user[ck] || 0);
-  const newVal = curr + 1;
-
-  await adaloFetch(`${ADALO.col.users}/${uid}`, {
-    method: 'PUT',
-    body: JSON.stringify({ [ck]: newVal })
-  });
-
-  return { ok: true, uid, old: curr, new: newVal };
-}
-
-// -------------------------
-// MAIN HANDLER
-// -------------------------
 
 exports.handler = async (event) => {
   try {
@@ -96,22 +59,17 @@ exports.handler = async (event) => {
     const { week, force } = JSON.parse(event.body || '{}');
     if (!week) return respond(400, 'week required');
 
-    // ============================
-    // MANUAL OVERRIDE SWITCH
-    // ============================
-    // 1) Send { "force": true } in the POST body  (used by Force Rescore button)
-    // 2) Or set env var FORCE_SCORE_WEEK=true to force without touching the UI
+    const weekNum = Number(week);
+
+    // Manual override switch
     const FORCE_OVERRIDE = process.env.FORCE_SCORE_WEEK === 'true';
     const allowForce = !!force || FORCE_OVERRIDE;
 
-    // 1) Load all relevant collections
-    const [matchesAll, predsAll, usersAll] = await Promise.all([
-      listAll(ADALO.col.matches, 1000),
-      listAll(ADALO.col.predictions, 20000),
-      listAll(ADALO.col.users, 5000),
+    // 1) Load matches + users
+    const [matchesAll, usersAll] = await Promise.all([
+      listAll(ADALO.col.matches),
+      listAll(ADALO.col.users),
     ]);
-
-    const weekNum = Number(week);
 
     const matches = (matchesAll || [])
       .filter(m => Number(m['Week']) === weekNum)
@@ -119,19 +77,16 @@ exports.handler = async (event) => {
 
     if (!matches.length) {
       return respond(400, {
-        error: `No matches for week ${week}`,
+        error: `No matches for week ${weekNum}`,
         debug: {
           week: weekNum,
           matchesTotal: matchesAll.length,
-          predsTotal: predsAll.length,
           usersTotal: usersAll.length
         }
       });
     }
 
-    // ---------------------------------
-    // Guard: prevent accidental double-scoring (unless forced)
-    // ---------------------------------
+    // 2) Guard: prevent accidental double-scoring (unless forced)
     if (!allowForce) {
       const scoredUsers = [];
       for (const u of usersAll || []) {
@@ -159,7 +114,6 @@ exports.handler = async (event) => {
             week: weekNum,
             matchesForWeek: matches.length,
             matchIds: matches.map(m => m.id),
-            predsTotal: predsAll.length,
             usersTotal: usersAll.length,
             scoredUsersPreview: scoredUsers.slice(0, 5)
           }
@@ -167,31 +121,33 @@ exports.handler = async (event) => {
       }
     }
 
+    // 3) Load ONLY this week's predictions using the Week field
+    const predsPage = await adaloFetch(
+      `${ADALO.col.predictions}?filterKey=Week&filterValue=${encodeURIComponent(weekNum)}`
+    );
+    const predsForWeek = predsPage?.records ?? predsPage ?? [];
+
     // Map matchId -> correct result
     const correctByMatch = Object.fromEntries(
       matches.map(m => [String(m.id), U(m['Correct Result'])])
     );
     const matchIds = new Set(matches.map(m => String(m.id)));
 
-    // Predictions belonging to this week (via Match relation)
-    const weekPreds = (predsAll || []).filter(p => {
-      const midRaw = relId(p['Match']);
-      const mid = String(midRaw);
+    // Filter to predictions that point at matches in this week
+    const weekPreds = predsForWeek.filter(p => {
+      const mid = String(relId(p['Match']));
       return matchIds.has(mid);
     });
 
-    // 2) Recompute & overwrite Points Awarded when needed (idempotent and corrective)
+    // 4) Recompute & overwrite Points Awarded when needed
     let predictionsUpdated = 0;
     for (const p of weekPreds) {
       const pick = U(p['Pick']);
       const mid = String(relId(p['Match']));
       const correct = correctByMatch[mid];
-
-      // If correct result missing, count as 0 (but typically results are set first)
       const should = (pick && correct && pick === correct) ? 1 : 0;
       const current = (typeof p['Points Awarded'] === 'number') ? Number(p['Points Awarded']) : null;
 
-      // Write when missing OR wrong
       if (current === null || current !== should) {
         await adaloFetch(`${ADALO.col.predictions}/${p.id}`, {
           method: 'PUT',
@@ -201,24 +157,16 @@ exports.handler = async (event) => {
       }
     }
 
-    // 3) Reload predictions AFTER fixing to compute final weekly correct
-    const predsAfter = await listAll(ADALO.col.predictions, 20000);
-    const weekAfter = predsAfter.filter(p => {
-      const midRaw = relId(p['Match']);
-      const mid = String(midRaw);
-      return matchIds.has(mid);
-    });
-
+    // 5) Compute weekly totals per user
     const weeklyCorrectFinalByUser = {};
-    for (const p of weekAfter) {
+    for (const p of weekPreds) {
       const uid = String(relId(p['User']));
       const pts = Number(p['Points Awarded'] ?? 0);
       weeklyCorrectFinalByUser[uid] = (weeklyCorrectFinalByUser[uid] || 0) + pts; // 0..5
     }
-    const participatingUserIds = Array.from(new Set(weekAfter.map(p => String(relId(p['User'])))));
+    const participatingUserIds = Object.keys(weeklyCorrectFinalByUser);
 
-    // 4) Update users: add FULL weekly points (correct + bonus) & bump Current Week +1
-    //    ALSO increment FH (full house) and Blanks counters.
+    // 6) Update users: add weekly points, FH, Blanks, bump Current Week
     const updates = [];
     for (const uid of participatingUserIds) {
       const u = usersAll.find(x => String(x.id) === uid);
@@ -281,17 +229,9 @@ exports.handler = async (event) => {
         week: weekNum,
         matchesForWeek: matches.length,
         matchIds: matches.map(m => m.id),
+        predsForWeekCount: predsForWeek.length,
         weekPredsCount: weekPreds.length,
-        weekAfterCount: weekAfter.length,
-        predsTotal: predsAll.length,
-        usersTotal: usersAll.length,
-        sampleWeekPreds: weekPreds.slice(0, 5).map(p => ({
-          id: p.id,
-          pick: p['Pick'],
-          match: relId(p['Match']),
-          user: relId(p['User']),
-          pointsAwarded: p['Points Awarded']
-        }))
+        usersTotal: usersAll.length
       }
     });
 
