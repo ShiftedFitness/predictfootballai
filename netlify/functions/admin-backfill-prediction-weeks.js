@@ -4,11 +4,14 @@
 // using the Week from the related Match record.
 //
 // Only applies to predictions whose Match ID is between 1 and 65.
+// Runs in batches to avoid timeouts.
 //
 // Usage:
 //   POST /.netlify/functions/admin-backfill-prediction-weeks
 //   Headers:
 //     x-admin-secret: YOUR_ADMIN_SECRET
+//   Optional query params:
+//     ?max=200          -> maximum updates this run (default 200)
 //
 // Response:
 //   {
@@ -18,6 +21,7 @@
 //     skippedAlreadyHadWeek: ...,
 //     skippedOutsideRange: ...,
 //     skippedNoMatch: ...,
+//     hitLimit: true/false,
 //     errors: [...]
 //   }
 
@@ -43,7 +47,7 @@ function relId(v) {
       if (Array.isArray(parsed)) return parsed[0] ?? '';
       if (typeof parsed === 'object' && parsed !== null && parsed.id != null) return parsed.id;
     } catch {
-      // plain string like "55"
+      // plain string
     }
     return v;
   }
@@ -61,6 +65,10 @@ exports.handler = async (event) => {
     if (process.env.ADMIN_SECRET && secret !== process.env.ADMIN_SECRET) {
       return respond(401, { error: 'Unauthorised' });
     }
+
+    const q = event.queryStringParameters || {};
+    const maxUpdates = Number(q.max || 200); // how many updates per run
+    const MAX = Number.isNaN(maxUpdates) || maxUpdates <= 0 ? 200 : maxUpdates;
 
     // 1) Load matches + predictions
     const [matchesAll, predsAll] = await Promise.all([
@@ -86,9 +94,15 @@ exports.handler = async (event) => {
     let skippedOutsideRange   = 0;
     let skippedNoMatch        = 0;
     const errors = [];
+    let hitLimit = false;
 
     // 3) For each prediction, if Week missing/0 AND matchId between 1 and 65, set Week
     for (const p of preds) {
+      if (updated >= MAX) {
+        hitLimit = true;
+        break; // stop this run; we'll do more on next call
+      }
+
       const currentWeek = Number(p['Week'] ?? 0);
       if (currentWeek && !Number.isNaN(currentWeek)) {
         skippedAlreadyHadWeek++;
@@ -131,6 +145,8 @@ exports.handler = async (event) => {
       skippedAlreadyHadWeek,
       skippedOutsideRange,
       skippedNoMatch,
+      hitLimit,
+      maxPerRun: MAX,
       errors,
     });
   } catch (e) {
