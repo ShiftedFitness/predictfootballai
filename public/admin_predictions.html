@@ -139,6 +139,7 @@
     <h2>Match Predictions Inspector</h2>
     <p class="muted">
       Enter one or more Match IDs (e.g. <span class="mono">88</span> or <span class="mono">88,89,90</span>) to see all predictions for those fixtures.
+      Prediction IDs are shown so you can edit/delete them via admin tools.
     </p>
 
     <div class="card">
@@ -246,6 +247,7 @@ function renderResults(data){
           <th>Week</th>
           <th>Pick</th>
           <th class="right">Points</th>
+          <th>Prediction ID</th>
         </tr>
       </thead>
       <tbody></tbody>
@@ -268,6 +270,7 @@ function renderResults(data){
         <td>${r.week || '-'}</td>
         <td>${escapeHTML(r.pick || '')}</td>
         <td class="right">${pts} ${badge}</td>
+        <td class="mono">${escapeHTML(r.id || '')}</td>
       `;
       tb.appendChild(tr);
     });
