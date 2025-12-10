@@ -1,8 +1,9 @@
 // netlify/functions/history.js
-const { ADALO, listAll } = require('./_adalo.js');
+const { ADALO, adaloFetch, listAll } = require('./_adalo.js');
 
 // ---------- helpers ----------
 const toKey = (x) => String(x ?? '').trim().toUpperCase(); // HOME/DRAW/AWAY
+
 function getRelId(v) {
   if (!v) return '';
 
@@ -29,12 +30,21 @@ function getRelId(v) {
 }
 
 const sameId = (a,b) => String(a) === String(b);
-const ok = (body) => ({ statusCode: 200, headers: { 'Content-Type': 'application/json', 'Cache-Control':'no-store' }, body: JSON.stringify(body) });
-const fail = (code, msg) => ({ statusCode: code, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ error: msg }) });
+const ok = (body) => ({
+  statusCode: 200,
+  headers: { 'Content-Type': 'application/json', 'Cache-Control':'no-store' },
+  body: JSON.stringify(body)
+});
+const fail = (code, msg) => ({
+  statusCode: code,
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ error: msg })
+});
 
 function displayName(u){
   return u?.['Username'] || u?.['Name'] || u?.['Full Name'] || `User ${u?.id ?? ''}`;
 }
+
 function safePoints(pick, correct, pointsAwarded) {
   if (typeof pointsAwarded === 'number') return pointsAwarded;
   if (!pick || !correct) return 0;
@@ -54,21 +64,19 @@ exports.handler = async (event) => {
     const userId    = String(userIdParam);
     const compareId = String(compareIdQ || '1'); // default AI=1
 
-    // Load data defensively
-    let matchesAll = [], predsAll = [], usersAll = [];
+    // Load matches + users first (these are small enough)
+    let matchesAll = [], usersAll = [];
     try {
-      [matchesAll, predsAll, usersAll] = await Promise.all([
+      [matchesAll, usersAll] = await Promise.all([
         listAll(ADALO.col.matches, 1000),
-        listAll(ADALO.col.predictions, 10000),
-        listAll(ADALO.col.users, 2000)
+        listAll(ADALO.col.users,   2000)
       ]);
     } catch (e) {
-      console.error('Adalo fetch failed', e);
+      console.error('Adalo fetch failed (matches/users)', e);
       return fail(500, 'Failed to fetch data from Adalo – check env vars/IDs');
     }
     matchesAll = matchesAll || [];
-    predsAll   = predsAll || [];
-    usersAll   = usersAll || [];
+    usersAll   = usersAll   || [];
 
     // Weeks present
     const weeksAsc = Array.from(new Set(
@@ -87,7 +95,9 @@ exports.handler = async (event) => {
 
     // Choose currentWeek (from URL or latest)
     let currentWeek = currentWeekQ ? Number(currentWeekQ) : (weeksAsc[weeksAsc.length-1] ?? 1);
-    if (!weeksAsc.includes(currentWeek) && weeksAsc.length) currentWeek = weeksAsc[weeksAsc.length-1];
+    if (!weeksAsc.includes(currentWeek) && weeksAsc.length) {
+      currentWeek = weeksAsc[weeksAsc.length-1];
+    }
 
     // Decide viewWeek
     let viewWeek;
@@ -111,7 +121,33 @@ exports.handler = async (event) => {
 
     // Filter predictions belonging to this week
     const matchIdSet = new Set(matches.map(m => String(m.id)));
-    const weekPreds = predsAll.filter(p => matchIdSet.has(String(getRelId(p['Match']))));
+
+    // 🔥 NEW: first try fetching only this week's predictions via Week filter
+    let weekPreds = [];
+    try {
+      const page = await adaloFetch(
+        `${ADALO.col.predictions}?filterKey=Week&filterValue=${encodeURIComponent(viewWeek)}`
+      );
+      const predsForWeek = page?.records ?? page ?? [];
+      // Restrict to matches in this week, in case other junk exists for same week number
+      weekPreds = predsForWeek.filter(p => matchIdSet.has(String(getRelId(p['Match']))));
+    } catch (e) {
+      console.error('history.js: Week-filtered predictions fetch failed, will fallback to listAll', e);
+      weekPreds = [];
+    }
+
+    // Fallback: if nothing came back (old data without Week set), use legacy listAll + filter
+    if (!weekPreds.length) {
+      try {
+        const predsAll = await listAll(ADALO.col.predictions, 20000);
+        weekPreds = (predsAll || []).filter(p =>
+          matchIdSet.has(String(getRelId(p['Match'])))
+        );
+      } catch (e) {
+        console.error('history.js: fallback listAll(predictions) failed', e);
+        return fail(500, 'Failed to fetch predictions');
+      }
+    }
 
     // Build users list (names) for the dropdown
     let usersList = usersAll.map(u => ({ id: String(u.id), name: displayName(u) }));
@@ -136,18 +172,23 @@ exports.handler = async (event) => {
       const me  = mine.find(p => String(getRelId(p['Match'])) === mid);
       const him = theirs.find(p => String(getRelId(p['Match'])) === mid);
 
-      const myPick  = toKey(me?.['Pick']);
-      const hisPick = toKey(him?.['Pick']);
+      const myPick  = toKey(me?.['Pick'] || '');
+      const hisPick = toKey(him?.['Pick'] || '');
       const correct = correctByMatch[mid] || '';
 
-      const myPt  = safePoints(myPick, correct, typeof me?.['Points Awarded'] === 'number' ? me['Points Awarded'] : undefined);
-      const hisPt = safePoints(hisPick, correct, typeof him?.['Points Awarded'] === 'number' ? him['Points Awarded'] : undefined);
+      const myPt  = safePoints(myPick, correct,
+        typeof me?.['Points Awarded'] === 'number' ? me['Points Awarded'] : undefined
+      );
+      const hisPt = safePoints(hisPick, correct,
+        typeof him?.['Points Awarded'] === 'number' ? him['Points Awarded'] : undefined
+      );
 
       return {
         match_id: m.id,
         fixture: `${m['Home Team']} v ${m['Away Team']}`,
         myPick, hisPick, correct,
-        myPoint: myPt, hisPoint: hisPt,
+        myPoint: myPt,
+        hisPoint: hisPt,
         myCorrect: !!myPick && !!correct && myPick === correct
       };
     });
@@ -174,9 +215,24 @@ exports.handler = async (event) => {
       availableWeeks: weeksDesc,
       weekLocked: isWeekLocked(viewWeek),
       users: usersList,
-      me:      { id: userId,   name: meUser ? displayName(meUser) : `User ${userId}`,   correct: myCorrect, total: myTotal, accuracy: myAcc, points: myPoints },
-      compare: { id: compareId, name: himUser ? displayName(himUser) : (usersList.find(u=>sameId(u.id,compareId))?.name || `User ${compareId}`),
-                 correct: hisCorrect, total: hisTotal, accuracy: hisAcc, points: hisPoints },
+      me:      {
+        id: userId,
+        name: meUser ? displayName(meUser) : `User ${userId}`,
+        correct: myCorrect,
+        total: myTotal,
+        accuracy: myAcc,
+        points: myPoints
+      },
+      compare: {
+        id: compareId,
+        name: himUser
+          ? displayName(himUser)
+          : (usersList.find(u=>sameId(u.id,compareId))?.name || `User ${compareId}`),
+        correct: hisCorrect,
+        total: hisTotal,
+        accuracy: hisAcc,
+        points: hisPoints
+      },
       rows
     });
   } catch (e) {
