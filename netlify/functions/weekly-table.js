@@ -1,9 +1,11 @@
 // netlify/functions/weekly-table.js
+// Returns per-week table used by league_v2.html "Matchweek" tab
+
 const { ADALO, adaloFetch, listAll } = require('./_adalo.js');
 
 const U = (s)=> String(s||'').trim().toUpperCase();
 
-// more robust relation helper
+// robust relation helper
 function relId(v){
   if (!v) return '';
   if (Array.isArray(v)) return v[0] ?? '';
@@ -21,6 +23,17 @@ function relId(v){
   return v;
 }
 
+// helper: is a given week locked?
+function isWeekLocked(wk, matchesAll) {
+  const ms = (matchesAll || []).filter(m => Number(m['Week']) === Number(wk));
+  if (!ms.length) return false;
+  const earliest = ms
+    .map(m => m['Lockout Time'] ? new Date(m['Lockout Time']) : null)
+    .filter(Boolean).sort((a,b)=>a-b)[0];
+  const now = new Date();
+  return (!!earliest && now >= earliest.getTime()) || ms.some(m => m['Locked'] === true);
+}
+
 exports.handler = async (event) => {
   try {
     const q = event.queryStringParameters || {};
@@ -36,7 +49,7 @@ exports.handler = async (event) => {
     const matchesAllSafe = matchesAll || [];
     const usersAllSafe   = usersAll   || [];
 
-    // compute available weeks from matches
+    // all weeks that exist
     const weeksAsc = Array.from(new Set(
       matchesAllSafe
         .map(m => Number(m['Week']))
@@ -44,16 +57,18 @@ exports.handler = async (event) => {
     )).sort((a,b)=>a-b);
     const weeksDesc = [...weeksAsc].reverse();
 
-    // matches for the requested week
+    // only *locked* weeks are "available" to view picks
+    const availableWeeks = weeksDesc.filter(w => isWeekLocked(w, matchesAllSafe));
+
     const matches = matchesAllSafe
       .filter(m => Number(m['Week']) === week)
       .sort((a,b)=> Number(a.id) - Number(b.id));
 
     if (!matches.length) {
-      return json(200, { week, locked:false, rows:[], matches:[], availableWeeks: weeksDesc });
+      return json(200, { week, locked:false, rows:[], matches:[], availableWeeks });
     }
 
-    // 2) Is week past deadline?
+    // 2) Is THIS week past deadline?
     const earliest = matches
       .map(m => m['Lockout Time'] ? new Date(m['Lockout Time']) : null)
       .filter(Boolean).sort((a,b)=>a-b)[0];
@@ -63,6 +78,17 @@ exports.handler = async (event) => {
     const orderIds = matches.map(m => String(m.id));
     const correctById = Object.fromEntries(matches.map(m => [String(m.id), U(m['Correct Result'])]));
     const matchIdSet = new Set(orderIds);
+
+    // If week is NOT locked → do NOT expose picks at all
+    if (!locked) {
+      const matchesOut = matches.map(m => ({
+        id: m.id,
+        home: m['Home Team'],
+        away: m['Away Team'],
+        correct: U(m['Correct Result'])   // you may or may not want to expose results pre-deadline
+      }));
+      return json(200, { week, locked, rows: [], matches: matchesOut, availableWeeks });
+    }
 
     // 4) Pull predictions for THIS week
     let weekPreds = [];
@@ -131,7 +157,7 @@ exports.handler = async (event) => {
       correct: U(m['Correct Result'])   // "HOME" | "DRAW" | "AWAY" | ""
     }));
 
-    return json(200, { week, locked, rows, matches: matchesOut, availableWeeks: weeksDesc });
+    return json(200, { week, locked, rows, matches: matchesOut, availableWeeks });
   } catch (e) {
     console.error('weekly-table error', e);
     return json(500, { error: String(e) });
