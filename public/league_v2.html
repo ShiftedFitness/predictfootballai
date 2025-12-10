@@ -167,10 +167,15 @@ function trWeekly(row, resultSetFlags){
 
 async function loadWeekly(week) {
   const r = await fetch(`${base}/weekly-table?week=${week}`, { cache:'no-store' });
+  if (!r.ok) {
+    alert('Failed to load weekly table');
+    return;
+  }
   const j = await r.json();
 
   // Deadline / availability
-  document.getElementById('lockedMsg').textContent = j.locked ? 'Live (deadline passed)' : 'Not available (deadline not passed)';
+  document.getElementById('lockedMsg').textContent =
+    j.locked ? 'Live (deadline passed)' : 'Not available (deadline not passed)';
 
   // Match map header
   const map = (j.matches || []).map((m,i)=> `Match ${i+1}: ${m.home} v ${m.away}`);
@@ -190,11 +195,19 @@ async function loadWeekly(week) {
     body.appendChild(trWeekly(row, resultSet));
   });
 
-  // Week selector (kept simple; set to current)
+  // Week selector: use availableWeeks from API
   const sel = document.getElementById('weekSel');
   sel.innerHTML = '';
-  const opt = document.createElement('option'); opt.value = week; opt.textContent = `Week ${week}`; opt.selected = true;
-  sel.appendChild(opt);
+  const weeks = j.availableWeeks && j.availableWeeks.length ? j.availableWeeks : [j.week || week];
+
+  weeks.forEach(w => {
+    const opt = document.createElement('option');
+    opt.value = w;
+    opt.textContent = `Week ${w}`;
+    if (Number(w) === Number(j.week || week)) opt.selected = true;
+    sel.appendChild(opt);
+  });
+
   sel.onchange = ()=> loadWeekly(Number(sel.value));
 }
 
