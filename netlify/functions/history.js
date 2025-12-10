@@ -3,7 +3,31 @@ const { ADALO, listAll } = require('./_adalo.js');
 
 // ---------- helpers ----------
 const toKey = (x) => String(x ?? '').trim().toUpperCase(); // HOME/DRAW/AWAY
-const getRelId = (v) => Array.isArray(v) ? (v[0] ?? '') : (v ?? '');
+function getRelId(v) {
+  if (!v) return '';
+
+  // Case 1: Array: [66]
+  if (Array.isArray(v)) return v[0] ?? '';
+
+  // Case 2: Object: { id: 66 }
+  if (typeof v === 'object' && v.id != null) return v.id;
+
+  // Case 3: String numeric or JSON string
+  if (typeof v === 'string') {
+    try {
+      const parsed = JSON.parse(v);
+      if (Array.isArray(parsed)) return parsed[0] ?? '';
+      if (typeof parsed === 'object' && parsed !== null && parsed.id != null) return parsed.id;
+    } catch {
+      // not JSON, just plain string like "66"
+    }
+    return v;
+  }
+
+  // Fallback: number etc.
+  return v;
+}
+
 const sameId = (a,b) => String(a) === String(b);
 const ok = (body) => ({ statusCode: 200, headers: { 'Content-Type': 'application/json', 'Cache-Control':'no-store' }, body: JSON.stringify(body) });
 const fail = (code, msg) => ({ statusCode: code, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ error: msg }) });
