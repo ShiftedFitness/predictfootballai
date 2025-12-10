@@ -21,12 +21,22 @@ async function adaloFetch(path, opts = {}, attempt = 0) {
     }
   });
 
-  if (res.ok) return res.json();
+  if (res.ok) {
+    // Some endpoints (like DELETE) return 204 No Content
+    const text = await res.text();
+    if (!text) return {};
+    try {
+      return JSON.parse(text);
+    } catch {
+      // not JSON, just return raw text wrapper
+      return { raw: text };
+    }
+  }
 
   const RETRYABLE = [429, 500, 502, 503, 504];
   if (RETRYABLE.includes(res.status) && attempt < 3) {
-    const base = 300;
-    const delay = base * Math.pow(2, attempt) + Math.floor(Math.random() * 150);
+    const baseDelay = 300;
+    const delay = baseDelay * Math.pow(2, attempt) + Math.floor(Math.random() * 150);
     await new Promise(r => setTimeout(r, delay));
     return adaloFetch(path, opts, attempt + 1);
   }
@@ -35,23 +45,50 @@ async function adaloFetch(path, opts = {}, attempt = 0) {
   throw new Error(`Adalo ${path} ${res.status}: ${text || res.statusText}`);
 }
 
-// Pull *all* records with pagination (limit 200)
-async function listAll(collectionId, pageSize = 200) {
+/**
+ * Pull records from a collection with pagination.
+ *
+ * Backwards-compatible with old calls:
+ *   listAll(col.matches, 1000)        // maxRecords=1000
+ *   listAll(col.predictions, 20000)   // maxRecords=20000
+ *
+ * New style (optional):
+ *   listAll(col.predictions, 5000, 250) // maxRecords=5000, pageSize=250
+ */
+async function listAll(collectionId, maxRecordsOrPageSize, maybePageSize) {
+  let maxRecords = 2000;
+  let pageSize = 200;
+
+  if (typeof maxRecordsOrPageSize === 'number' && typeof maybePageSize === 'number') {
+    // listAll(col, maxRecords, pageSize)
+    maxRecords = maxRecordsOrPageSize || 2000;
+    pageSize = maybePageSize || 200;
+  } else if (typeof maxRecordsOrPageSize === 'number') {
+    // listAll(col, maxRecords)
+    maxRecords = maxRecordsOrPageSize;
+  }
+
   let all = [];
   let offset = 0;
 
-  while (true) {
-    const page = await adaloFetch(`${collectionId}?limit=${pageSize}&offset=${offset}`);
-    const records = page?.records ?? page ?? [];
-    if (!Array.isArray(records) || records.length === 0) break;
+  while (all.length < maxRecords) {
+    const limit = Math.min(pageSize, maxRecords - all.length);
+    const page = await adaloFetch(`${collectionId}?limit=${limit}&offset=${offset}`);
+    const records = Array.isArray(page?.records) ? page.records :
+                    Array.isArray(page) ? page :
+                    [];
+
+    if (!records.length) break;
 
     all = all.concat(records);
-    if (records.length < pageSize) break;
+
+    if (records.length < limit) break; // last page
     offset += records.length;
 
     // tiny pause to be polite
     await new Promise(r => setTimeout(r, 60));
   }
+
   return all;
 }
 
