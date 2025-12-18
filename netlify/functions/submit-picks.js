@@ -5,10 +5,8 @@ const { ADALO, adaloFetch, listAll } = require('./_adalo.js');
 function relId(v) {
   if (!v) return '';
 
-  // [66]
   if (Array.isArray(v)) return v[0] ?? '';
 
-  // { id: 66 }
   if (typeof v === 'object' && v.id != null) return v.id;
 
   if (typeof v === 'string') {
@@ -17,7 +15,7 @@ function relId(v) {
       if (Array.isArray(parsed)) return parsed[0] ?? '';
       if (typeof parsed === 'object' && parsed !== null && parsed.id != null) return parsed.id;
     } catch {
-      // not JSON, just a string like "66"
+      // not JSON
     }
     return v;
   }
@@ -29,21 +27,33 @@ exports.handler = async (event) => {
   try {
     if (event.httpMethod !== 'POST') return resp(405, 'POST only');
 
-    const { userId, week, picks } = JSON.parse(event.body || '{}');
-    if (!userId || !week || !Array.isArray(picks) || picks.length !== 5) {
+    const body = JSON.parse(event.body || '{}');
+    const userIdRaw = body.userId;
+    const weekRaw = body.week;
+    const picks = body.picks;
+
+    // ✅ Login required: reject missing / invalid userId
+    const userId = String(userIdRaw || '').trim();
+    if (!userId || userId === '0' || userId === 'null' || userId === 'undefined') {
+      return resp(401, 'Login required (valid userId missing)');
+    }
+
+    const weekNum = Number(weekRaw);
+    if (!weekNum || !Array.isArray(picks) || picks.length !== 5) {
       return resp(400, 'userId, week, and 5 picks required');
     }
 
-    const weekNum = Number(week);
-
-    // 1) Fetch matches for this week
-    const matches = (await listAll(ADALO.col.matches))
+    // 1) Fetch matches for this week (matches table is small enough to listAll)
+    const matches = (await listAll(ADALO.col.matches, 2000))
       .filter(m => Number(m['Week']) === weekNum)
       .sort((a, b) => Number(a.id) - Number(b.id));
 
     if (matches.length !== 5) {
       return resp(400, 'Expected 5 matches for this week.');
     }
+
+    // Build set of valid match IDs for safety
+    const matchIdSet = new Set(matches.map(m => String(m.id)));
 
     // 2) Check deadline/lock
     const now = new Date();
@@ -61,15 +71,28 @@ exports.handler = async (event) => {
     }
 
     // 3) Existing predictions for THIS USER in THIS WEEK
-    //    Use filterKey=Week so we don't pull the whole predictions table
-    const predsPage = await adaloFetch(
-      `${ADALO.col.predictions}?filterKey=Week&filterValue=${encodeURIComponent(weekNum)}`
-    );
-    const predsForWeek = predsPage?.records ?? predsPage ?? [];
+    //    Prefer Week filter (fast). Fallback for older data if Week filter returns nothing.
+    let predsForWeek = [];
+    try {
+      const predsPage = await adaloFetch(
+        `${ADALO.col.predictions}?filterKey=Week&filterValue=${encodeURIComponent(weekNum)}`
+      );
+      predsForWeek = predsPage?.records ?? predsPage ?? [];
+    } catch (e) {
+      predsForWeek = [];
+    }
 
-    const mine = predsForWeek.filter(
-      p => String(relId(p['User'])) === String(userId)
-    );
+    // If Week filter returns nothing, fallback to scanning (should be rare now)
+    if (!Array.isArray(predsForWeek) || predsForWeek.length === 0) {
+      const allPreds = await listAll(ADALO.col.predictions, 20000);
+      predsForWeek = allPreds || [];
+    }
+
+    const mine = predsForWeek.filter(p => {
+      const uid = String(relId(p['User']));
+      const mid = String(relId(p['Match']));
+      return uid === userId && matchIdSet.has(mid);
+    });
 
     const byMatchId = Object.fromEntries(
       mine.map(p => [String(relId(p['Match'])), p])
@@ -78,8 +101,12 @@ exports.handler = async (event) => {
     // 4) Upsert predictions (always write Week)
     const results = [];
     for (const p of picks) {
-      const matchId = String(p.match_id);
-      const pickVal = String(p.pick || '').toUpperCase(); // HOME/DRAW/AWAY
+      const matchId = String(p.match_id || '').trim();
+      const pickVal = String(p.pick || '').trim().toUpperCase(); // HOME/DRAW/AWAY
+
+      if (!matchId || !matchIdSet.has(matchId)) {
+        return resp(400, `Invalid match_id ${matchId} for week ${weekNum}`);
+      }
 
       if (!['HOME', 'DRAW', 'AWAY'].includes(pickVal)) {
         return resp(400, 'Pick must be HOME/DRAW/AWAY');
@@ -89,7 +116,7 @@ exports.handler = async (event) => {
         'User': userId,
         'Match': matchId,
         'Pick': pickVal,
-        'Week': weekNum   // 👈 NEW: store week on the prediction
+        'Week': weekNum
       };
 
       const ex = byMatchId[matchId];
@@ -117,7 +144,7 @@ exports.handler = async (event) => {
 function resp(status, body) {
   return {
     statusCode: status,
-    headers: { 'Content-Type':'application/json' },
+    headers: { 'Content-Type':'application/json', 'Cache-Control':'no-store' },
     body: typeof body === 'string'
       ? JSON.stringify({ error: body })
       : JSON.stringify(body)
