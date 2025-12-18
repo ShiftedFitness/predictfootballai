@@ -11,11 +11,12 @@
     .panel { max-width:750px; width:100%; margin:24px 12px; background:#30A278; color:#fff; border-radius:14px; padding:16px; }
     .muted { opacity:.85 }
     pre { white-space:pre-wrap; word-break:break-word; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .btn { display:inline-block; margin-top:10px; background:#fff; color:#000; border:0; padding:10px 14px; border-radius:10px; font-weight:800; cursor:pointer; }
   </style>
 </head>
 <body>
   <div id="picks">
-    <div class="panel" id="status">Loading week…</div>
+    <div class="panel" id="status">Loading…</div>
   </div>
 
   <script src="/picks-widget.js"></script>
@@ -32,11 +33,18 @@
       };
 
       const qs = new URLSearchParams(location.search);
-      const urlWeek  = qs.get('week');
-      const urlUser  = qs.get('userId');
+      const urlWeek = qs.get('week');
+      const urlUser = qs.get('userId');
 
-      // Always pass something; widget will fallback to "0" safely
-      const userId = (urlUser && urlUser !== 'undefined' && urlUser !== 'null') ? urlUser : '0';
+      // ✅ Hard stop if userId is missing/invalid
+      const userIdOk = (urlUser && urlUser !== 'undefined' && urlUser !== 'null' && String(urlUser).trim() !== '');
+      if (!userIdOk) {
+        setStatus(
+          `<strong>You need to log in to see and submit picks.</strong><br/><span class="muted">Please return to the app and log in, then open Picks again.</span>`
+        );
+        return;
+      }
+      const userId = String(urlUser).trim();
 
       // Wait for widget to load
       async function waitForWidget(ms = 8000) {
@@ -50,6 +58,24 @@
 
       // Choose week
       let weekToUse = urlWeek ? Number(urlWeek) : null;
+
+      // Prefer user's Current Week (if you have it)
+      if (!weekToUse) {
+        try {
+          // ✅ You will add/confirm this function exists:
+          // GET /.netlify/functions/get-user?userId=XX  -> { ok:true, user:{ "Current Week": 16, ... } }
+          const r = await fetch(`${FN('get-user')}?userId=${encodeURIComponent(userId)}`, { cache:'no-store' });
+          if (r.ok) {
+            const j = await r.json();
+            const cw = j?.user?.['Current Week'] ?? j?.user?.['Current_Week'] ?? j?.user?.currentWeek;
+            if (cw) weekToUse = Number(cw);
+          }
+        } catch (e) {
+          console.warn('get-user lookup failed', e);
+        }
+      }
+
+      // Fallback to weeks endpoint
       if (!weekToUse) {
         try {
           const r = await fetch(FN('weeks'), { cache:'no-store' });
@@ -58,7 +84,6 @@
           weekToUse = j?.recommendedPickWeek || j?.latest || 1;
         } catch (e) {
           console.warn('weeks lookup failed', e);
-          setStatus('Loading week… (defaulting to Week 1)');
           weekToUse = 1;
         }
       }
