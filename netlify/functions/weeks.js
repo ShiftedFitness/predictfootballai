@@ -3,7 +3,8 @@ const { listAll } = require('./_adalo.js');
 
 exports.handler = async () => {
   try {
-    const matches = await listAll(process.env.ADALO_MATCHES_ID, 200);
+    // ✅ Pull enough matches to cover full season
+    const matches = await listAll(process.env.ADALO_MATCHES_ID, 2000);
 
     const byWeek = {};
     for (const m of (matches || [])) {
@@ -12,6 +13,7 @@ exports.handler = async () => {
       if (!byWeek[w]) byWeek[w] = [];
       byWeek[w].push(m);
     }
+
     const weeks = Object.keys(byWeek).map(n => Number(n)).sort((a,b)=>a-b);
     if (!weeks.length) {
       return json(200, { weeks: [], latest: null, recommendedPickWeek: null, recommendedViewWeek: null });
