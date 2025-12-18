@@ -41,28 +41,36 @@
     .pf-hidden{ display:none !important; }
     .pf-error{ background:#7a1111; border:1px solid #aa3a3a; color:#fff; padding:10px 12px; border-radius:10px; margin:8px 0; white-space:pre-wrap }
   `;
-  const style = document.createElement('style'); style.textContent = css; document.head.appendChild(style);
+  const style = document.createElement('style');
+  style.textContent = css;
+  document.head.appendChild(style);
 
   // === HELPERS ===
   async function j(url, opt) {
     const r = await fetch(url, opt);
     if (!r.ok) {
-      const t = await r.text().catch(()=>String(r.status));
+      const t = await r.text().catch(() => String(r.status));
       throw new Error(`HTTP ${r.status}: ${t}`);
     }
     return r.json();
   }
-  function el(html) { const d=document.createElement('div'); d.innerHTML=html.trim(); return d.firstChild; }
-  function showError(container, msg) { container.appendChild(el(`<div class="pf-error">${msg}</div>`)); }
+  function el(html) {
+    const d = document.createElement('div');
+    d.innerHTML = html.trim();
+    return d.firstChild;
+  }
+  function showError(container, msg) {
+    container.appendChild(el(`<div class="pf-error">${msg}</div>`));
+  }
 
   function formatCountdown(ms) {
     if (ms <= 0) return '00d 00h 00m 00s';
-    const s = Math.floor(ms/1000);
-    const d = Math.floor(s/86400);
-    const h = Math.floor((s%86400)/3600);
-    const m = Math.floor((s%3600)/60);
-    const sec = s%60;
-    const pad = (n)=>String(n).padStart(2,'0');
+    const s = Math.floor(ms / 1000);
+    const d = Math.floor(s / 86400);
+    const h = Math.floor((s % 86400) / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    const sec = s % 60;
+    const pad = (n) => String(n).padStart(2, '0');
     return `${pad(d)}d ${pad(h)}h ${pad(m)}m ${pad(sec)}s`;
   }
 
@@ -71,8 +79,8 @@
     try {
       return new Intl.DateTimeFormat('en-GB', {
         timeZone: 'Europe/London',
-        year:'numeric', month:'short', day:'2-digit',
-        hour:'2-digit', minute:'2-digit'
+        year: 'numeric', month: 'short', day: '2-digit',
+        hour: '2-digit', minute: '2-digit'
       }).format(new Date(date));
     } catch {
       return new Date(date).toLocaleString('en-GB');
@@ -82,14 +90,37 @@
   // === MAIN ===
   async function renderPicks(container, cfg) {
     try {
-      const qs   = new URLSearchParams(location.search);
+      const qs = new URLSearchParams(location.search);
       const base = cfg.base || '/.netlify/functions';
 
-      let week   = String(qs.get('week')   ?? cfg.week);
+      let week = String(qs.get('week') ?? cfg.week);
       let userId = String(qs.get('userId') ?? cfg.userId);
 
-      // Harden userId so get-week won't 400:
-      userId = (userId && userId !== 'undefined' && userId !== 'null') ? userId : '0';
+      // ✅ HARD STOP if not logged in / missing user id
+      const userIdOk =
+        userId &&
+        userId !== 'undefined' &&
+        userId !== 'null' &&
+        String(userId).trim() !== '' &&
+        String(userId).trim() !== '0';
+
+      if (!userIdOk) {
+        container.innerHTML = '';
+        const wrap = el(`
+          <div class="pf-wrap">
+            <div class="pf-card">
+              <h2 style="margin:0 0 6px 0">Login required</h2>
+              <div class="pf-muted">
+                You need to log in to see and submit picks.<br/>
+                Please return to the app, log in, and open Picks again.
+              </div>
+            </div>
+          </div>
+        `);
+        container.appendChild(wrap);
+        return;
+      }
+      userId = String(userId).trim();
 
       container.innerHTML = '';
       const wrap = el(`
@@ -109,7 +140,6 @@
         </div>
       `);
       container.appendChild(wrap);
-      wrap.querySelector('#pf-week').textContent = week;
 
       // Load week + picks
       let data;
@@ -122,8 +152,15 @@
 
       let locked = !!data.locked;
       const matches = (data.matches || []).slice();
+
+      // picks: matchId -> 'HOME'/'DRAW'/'AWAY'
       const picks = {};
-      (data.predictions || []).forEach(p => { picks[p['Match']] = p['Pick'] || ''; });
+      (data.predictions || []).forEach(p => {
+        // predictions coming from get-week should have Match as an id (string/number)
+        const mid = String(p['Match'] ?? p.match_id ?? '').trim();
+        const pk = String(p['Pick'] ?? '').trim().toUpperCase();
+        if (mid) picks[mid] = pk;
+      });
 
       // Deadline
       const deadlines = matches
@@ -133,18 +170,22 @@
       const deadline = deadlines[0] || null;
 
       const deadlineLineEl = wrap.querySelector('#pf-deadline-line');
-      const digitsEl       = wrap.querySelector('#pf-digits');
-      const statusEl       = wrap.querySelector('#pf-status');
-      const matchesEl      = wrap.querySelector('#pf-matches');
-      const actionsEl      = wrap.querySelector('#pf-actions');
-      const summaryEl      = wrap.querySelector('#pf-summary');
+      const digitsEl = wrap.querySelector('#pf-digits');
+      const statusEl = wrap.querySelector('#pf-status');
+      const matchesEl = wrap.querySelector('#pf-matches');
+      const actionsEl = wrap.querySelector('#pf-actions');
+      const summaryEl = wrap.querySelector('#pf-summary');
+
+      // Display chosen week (normalize)
+      wrap.querySelector('#pf-week').textContent = String(data.week || week);
 
       let editMode = !locked;
-      const allChosen = matches.length>0 && matches.every(m => !!picks[m.id]);
+
+      // If user already has all picks chosen for this week, default to preview mode
+      const allChosen = matches.length > 0 && matches.every(m => !!picks[String(m.id)]);
       if (!locked && allChosen) editMode = false;
 
       function renderHeaderVisibility() {
-        // Always show countdown; hide only the absolute line when editing
         if (!locked && editMode) {
           deadlineLineEl.classList.add('pf-hidden');
         } else {
@@ -163,29 +204,34 @@
 
       function renderEdit() {
         statusEl.textContent = '';
-        matchesEl.innerHTML = ''; actionsEl.innerHTML = '';
+        matchesEl.innerHTML = '';
+        actionsEl.innerHTML = '';
+        summaryEl.innerHTML = '';
 
         matches.forEach(m => {
-          const cur = picks[m.id] || '';
+          const mid = String(m.id);
+          const cur = picks[mid] || '';
           const card = el(`<div class="pf-card">
             <div class="pf-teams">${m['Home Team']} v ${m['Away Team']}</div>
             <div class="pf-grid">
               ${['HOME','DRAW','AWAY'].map(opt => `
-                <button class="pf-pick ${cur===opt?'active':''}" data-match="${m.id}" data-val="${opt}">
+                <button class="pf-pick ${cur===opt?'active':''}" data-match="${mid}" data-val="${opt}">
                   <span class="pf-label">${opt}</span><span class="pf-badge">✓</span>
                 </button>
               `).join('')}
             </div>
           </div>`);
-          card.querySelectorAll('.pf-pick').forEach(btn=>{
-            btn.addEventListener('click', ()=>{
-              const mid = btn.getAttribute('data-match');
+
+          card.querySelectorAll('.pf-pick').forEach(btn => {
+            btn.addEventListener('click', () => {
+              const mId = btn.getAttribute('data-match');
               const val = btn.getAttribute('data-val');
-              picks[mid] = val;
-              card.querySelectorAll('.pf-pick').forEach(b=>b.classList.remove('active'));
+              picks[mId] = val;
+              card.querySelectorAll('.pf-pick').forEach(b => b.classList.remove('active'));
               btn.classList.add('active');
             });
           });
+
           matchesEl.appendChild(card);
         });
 
@@ -194,36 +240,49 @@
         btnRow.appendChild(saveBtn);
         actionsEl.appendChild(btnRow);
 
-        saveBtn.addEventListener('click', async ()=>{
-          const payload = matches.map(m => ({ match_id: m.id, pick: picks[m.id] || '' }));
-          if (payload.some(p => !p.pick)) { alert('Choose a pick for all five matches.'); return; }
+        saveBtn.addEventListener('click', async () => {
+          if (!userId || userId === '0') {
+            alert('You need to log in to submit picks.');
+            return;
+          }
+
+          const payload = matches.map(m => ({ match_id: m.id, pick: picks[String(m.id)] || '' }));
+          if (payload.some(p => !p.pick)) {
+            alert('Choose a pick for all five matches.');
+            return;
+          }
 
           saveBtn.disabled = true;
           saveBtn.innerHTML = `<span class="pf-spinner"></span>Saving…`;
-          matchesEl.querySelectorAll('.pf-pick').forEach(b=>b.disabled = true);
+          matchesEl.querySelectorAll('.pf-pick').forEach(b => b.disabled = true);
 
           try {
             await j(`${base}/submit-picks`, {
-              method: 'POST', headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ userId, week: Number(week), picks: payload })
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ userId, week: Number(data.week || week), picks: payload })
             });
             editMode = false;
+            // re-render from current in-memory picks (or you could re-fetch get-week if you prefer)
             render();
           } catch (e) {
             alert('Save failed. Please try again.\n' + e.message);
             saveBtn.disabled = false;
             saveBtn.textContent = 'Save picks';
-            matchesEl.querySelectorAll('.pf-pick').forEach(b=>b.disabled = false);
+            matchesEl.querySelectorAll('.pf-pick').forEach(b => b.disabled = false);
           }
         });
       }
 
       function renderPreView() {
         statusEl.textContent = 'Your saved picks.';
-        matchesEl.innerHTML = ''; actionsEl.innerHTML = '';
+        matchesEl.innerHTML = '';
+        actionsEl.innerHTML = '';
+        summaryEl.innerHTML = '';
 
         matches.forEach(m => {
-          const myPick = picks[m.id] || '(none)';
+          const mid = String(m.id);
+          const myPick = picks[mid] || '(none)';
           const card = el(`<div class="pf-card">
             <div class="pf-row" style="justify-content:space-between">
               <div class="pf-teams">${m['Home Team']} v ${m['Away Team']}</div>
@@ -235,18 +294,20 @@
 
         const btnRow = el(`<div class="pf-btnrow"></div>`);
         const editBtn = el(`<button class="pf-btn secondary" style="font-size:18px;padding:14px 18px;">Edit picks</button>`);
-        editBtn.addEventListener('click', ()=>{ editMode = true; render(); });
+        editBtn.addEventListener('click', () => { editMode = true; render(); });
         btnRow.appendChild(editBtn);
         actionsEl.appendChild(btnRow);
       }
 
       async function renderPost() {
         statusEl.textContent = 'Deadline passed. Picks locked.';
-        matchesEl.innerHTML = ''; actionsEl.innerHTML = ''; summaryEl.innerHTML = '';
+        matchesEl.innerHTML = '';
+        actionsEl.innerHTML = '';
+        summaryEl.innerHTML = '';
 
         let sum;
         try {
-          sum = await j(`${base}/summary?week=${encodeURIComponent(week)}&userId=${encodeURIComponent(userId)}`);
+          sum = await j(`${base}/summary?week=${encodeURIComponent(data.week || week)}&userId=${encodeURIComponent(userId)}`);
         } catch (e) {
           showError(wrap, `Failed to load summary.\n${e.message}`);
           return;
@@ -254,8 +315,10 @@
 
         summaryEl.innerHTML = '<h3 style="margin:0 0 8px">Summary</h3>';
         (sum.perMatch || []).forEach(pm => {
-          const m = matches.find(x => x.id === pm.match_id);
-          const myPick = picks[m.id] || '(none)';
+          const m = matches.find(x => String(x.id) === String(pm.match_id));
+          if (!m) return;
+
+          const myPick = picks[String(m.id)] || '(none)';
           const countsBit = (pm.total != null && pm.count)
             ? `<div class="pf-muted" style="margin-top:6px">(${pm.count.HOME} home, ${pm.count.DRAW} draw, ${pm.count.AWAY} away • total ${pm.total})</div>`
             : '';
@@ -288,12 +351,13 @@
         if (locked) {
           renderPost();
         } else {
-          if (editMode) renderEdit(); else renderPreView();
+          if (editMode) renderEdit();
+          else renderPreView();
         }
       }
 
       function tick() {
-        if (!deadline) { digitsEl.textContent='--'; return; }
+        if (!deadline) { digitsEl.textContent = '--'; return; }
         const diff = new Date(deadline).getTime() - Date.now();
         digitsEl.textContent = formatCountdown(diff);
         if (diff <= 0 && !locked) {
@@ -301,6 +365,7 @@
           render();
         }
       }
+
       tick();
       setInterval(tick, 1000);
 
