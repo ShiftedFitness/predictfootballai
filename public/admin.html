@@ -1,5 +1,22 @@
 <!doctype html>
 <html lang="en">
+<!--
+  PredictFootball – Admin Dashboard
+
+  URL Parameter Authentication:
+    admin.html?ADMIN_SECRET=your_secret_here
+
+  The ADMIN_SECRET query parameter is REQUIRED. Without it, the page shows
+  "Access denied" and no admin functionality is rendered.
+
+  Features:
+    - Load/view matches for any week
+    - Set correct results (HOME/DRAW/AWAY)
+    - Score individual matches or entire weeks
+    - Seed next week's matches
+    - "Latest matchweek" auto-fetch from weeks endpoint
+    - Scoring prevented until all 5 match results are set
+-->
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
@@ -14,90 +31,159 @@
   .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
   .btn{background:#fff;color:#000;border:0;padding:10px 14px;border-radius:8px;font-weight:800;cursor:pointer}
   .btn.small{padding:8px 10px}
-  .btn.danger{background:#ff7676;color:#000;}  /* FORCED RESCORE BUTTON */
+  .btn.danger{background:#ff7676;color:#000;}
+  .btn:disabled{opacity:0.5;cursor:not-allowed}
   table{width:100%;border-collapse:collapse;margin-top:8px}
   th,td{padding:8px;border-bottom:1px solid #1f1f1f;text-align:left;vertical-align:middle}
   select.result{min-width:120px}
   #status{white-space:pre-wrap;margin-top:6px}
-  .right{ text-align:right }
+  .right{text-align:right}
+  .access-denied{text-align:center;padding:60px 20px}
+  .access-denied h1{font-size:2em;margin-bottom:12px}
+  .debug-panel{background:#1a1a1a;border:1px solid #333;border-radius:8px;padding:10px;margin-top:8px;font-size:12px;font-family:monospace}
+  .debug-panel .label{color:#888;margin-bottom:4px}
+  .debug-panel .value{color:#fff;word-break:break-all}
+  .error-banner{background:#ff4444;color:#fff;padding:10px;border-radius:8px;margin-top:8px;font-weight:bold}
+  .warning-banner{background:#ff9800;color:#000;padding:10px;border-radius:8px;margin-top:8px;font-weight:bold}
+  .mode-switch{display:flex;gap:0;margin-bottom:8px}
+  .mode-switch button{background:#222;color:#fff;border:1px solid #333;padding:8px 14px;cursor:pointer}
+  .mode-switch button:first-child{border-radius:8px 0 0 8px}
+  .mode-switch button:last-child{border-radius:0 8px 8px 0}
+  .mode-switch button.active{background:#30A278;border-color:#30A278}
+  @keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <h2>Admin – Results & Scoring</h2>
 
-  <div class="card">
-    <div class="row">
-      <div><label>Admin Secret</label><input id="secret" type="password" placeholder="ADMIN_SECRET"/></div>
-      <div><label>Week</label><input id="week" type="number" min="1" step="1" value="1" /></div>
-      <div><button class="btn" id="load">Load Matches</button></div>
-    </div>
-    <div id="status" style="margin-top:6px;color:#EAEAEA"></div>
-    <div id="matches"></div>
-  </div>
-
-  <div class="card">
-    <div class="row">
-      <button class="btn" id="applyResults">Apply Results & Lock</button>
-      <button class="btn" id="scoreWeek">Score Week</button>
-      <button class="btn danger" id="forceScoreWeek" title="Force rescore even if week already scored">Force Rescore Week</button>
-    </div>
-    <p style="margin-top:8px;font-size:12px;color:#f5dede">
-      <strong>Force Rescore Week</strong> will ignore safety checks and rescore the selected week. Use only if normal scoring failed.
-    </p>
-  </div>
-
-  <div class="card">
-    <h3 style="margin:0 0 8px">Seed Next Week (optional)</h3>
-    <div class="row">
-      <div><label>Next Week</label><input id="nextWeek" type="number" min="1" step="1"/></div>
-      <div><label>Lockout Time</label><input id="nextLock" type="datetime-local"/></div>
-    </div>
-    <table id="seedTbl">
-      <thead><tr><th>#</th><th>Home</th><th>Away</th></tr></thead>
-      <tbody></tbody>
-    </table>
-    <button class="btn" id="seedBtn">Create 5 Matches</button>
-  </div>
-
+<div class="wrap" id="mainWrap">
+  <!-- Content loaded by JS based on auth -->
 </div>
 
 <script>
-const base='/.netlify/functions';
+const base = '/.netlify/functions';
 
-function $(id){
-  const el=document.getElementById(id);
-  if(!el){ console.error(`Missing element #${id}`); }
+// Read ADMIN_SECRET from URL query param (support URL-encoded values like "=" chars)
+function getAdminSecret() {
+  const params = new URLSearchParams(location.search);
+  const raw = params.get('ADMIN_SECRET');
+  if (!raw) return '';
+  try {
+    return decodeURIComponent(raw);
+  } catch {
+    return raw;
+  }
+}
+
+const ADMIN_SECRET = getAdminSecret();
+
+// State
+let currentWeek = 1;
+let latestWeek = null;
+let useLatestMode = false;
+let loadedMatches = [];
+let lastDebugInfo = null;
+
+// Helper: get element by ID
+function $(id) {
+  const el = document.getElementById(id);
+  if (!el) console.error(`Missing element #${id}`);
   return el;
 }
-function setStatus(msg){ const s=$('status'); if(s) s.textContent = msg; }
-function withLoading(btn, fn){
-  if(!btn) return fn();
+
+// Helper: safe fetch with admin secret header + debug info
+async function adminFetch(url, options = {}) {
+  const fullUrl = url.startsWith('http') ? url : `${base}${url}`;
+  const headers = {
+    'Content-Type': 'application/json',
+    'x-admin-secret': ADMIN_SECRET,
+    ...(options.headers || {})
+  };
+
+  const startTime = Date.now();
+  let response, data, errorText;
+
+  try {
+    response = await fetch(fullUrl, { ...options, headers, cache: 'no-store' });
+    const text = await response.text();
+    try {
+      data = JSON.parse(text);
+    } catch {
+      data = { raw: text };
+    }
+
+    lastDebugInfo = {
+      endpoint: fullUrl.replace(base, ''),
+      status: response.status,
+      ok: response.ok,
+      time: Date.now() - startTime,
+      error: response.ok ? null : (data.error || data.raw || `HTTP ${response.status}`)
+    };
+
+    if (!response.ok) {
+      throw new Error(data.error || `HTTP ${response.status}`);
+    }
+
+    return data;
+  } catch (e) {
+    lastDebugInfo = {
+      endpoint: fullUrl.replace(base, ''),
+      status: response?.status || 0,
+      ok: false,
+      time: Date.now() - startTime,
+      error: e.message
+    };
+    throw e;
+  }
+}
+
+// Show status message
+function setStatus(msg) {
+  const s = $('status');
+  if (s) s.textContent = msg;
+}
+
+// Show debug info (safe: never shows secret)
+function showDebugInfo() {
+  const panel = $('debugPanel');
+  if (!panel || !lastDebugInfo) return;
+
+  panel.innerHTML = `
+    <div class="label">Last API Call:</div>
+    <div class="value">Endpoint: ${lastDebugInfo.endpoint}</div>
+    <div class="value">Status: ${lastDebugInfo.status} (${lastDebugInfo.ok ? 'OK' : 'FAILED'})</div>
+    <div class="value">Time: ${lastDebugInfo.time}ms</div>
+    ${lastDebugInfo.error ? `<div class="value" style="color:#ff6666">Error: ${lastDebugInfo.error}</div>` : ''}
+  `;
+}
+
+// Loading button wrapper
+function withLoading(btn, fn) {
+  if (!btn) return fn();
   const orig = btn.innerHTML;
   btn.disabled = true;
-  btn.innerHTML = '<span style="display:inline-block;width:14px;height:14px;border:2px solid rgba(0,0,0,0.35);border-top-color:#000;border-radius:50%;margin-right:8px;vertical-align:-2px;animation:spin .7s linear infinite"></span>Working…';
-  return fn().finally(()=>{ btn.disabled=false; btn.innerHTML=orig; });
-}
-(function addSpinCss(){
-  const s=document.createElement('style');
-  s.textContent='@keyframes spin{to{transform:rotate(360deg)}}';
-  document.head.appendChild(s);
-})();
-
-function resultOptions(val){
-  const up = (val||'').toUpperCase();
-  const opt = t => `<option value="${t}" ${up===t?'selected':''}>${t}</option>`;
-  return opt('HOME') + opt('DRAW') + opt('AWAY');
+  btn.innerHTML = '<span style="display:inline-block;width:14px;height:14px;border:2px solid rgba(0,0,0,0.35);border-top-color:#000;border-radius:50%;margin-right:8px;vertical-align:-2px;animation:spin .7s linear infinite"></span>Working...';
+  return fn().finally(() => {
+    btn.disabled = false;
+    btn.innerHTML = orig;
+  });
 }
 
-// Row template with a per-match "Save & Score" button
-function row(match){
-  return `<tr data-id="${match.id}">
+// Result dropdown options
+function resultOptions(val) {
+  const up = (val || '').toUpperCase();
+  const opt = t => `<option value="${t}" ${up === t ? 'selected' : ''}>${t}</option>`;
+  return '<option value="">--</option>' + opt('HOME') + opt('DRAW') + opt('AWAY');
+}
+
+// Match row template
+function matchRow(match) {
+  const hasResult = ['HOME', 'DRAW', 'AWAY'].includes((match['Correct Result'] || '').toUpperCase());
+  return `<tr data-id="${match.id}" data-has-result="${hasResult}">
     <td>${match.id}</td>
     <td>${match['Home Team']} v ${match['Away Team']}</td>
     <td>
       <select class="result">
-        ${resultOptions(match['Correct Result']||'')}
+        ${resultOptions(match['Correct Result'] || '')}
       </select>
     </td>
     <td class="right">
@@ -106,178 +192,337 @@ function row(match){
   </tr>`;
 }
 
-window.addEventListener('DOMContentLoaded', () => {
-  const loadBtn  = $('load');
+// Check if all matches have results set
+function checkAllResultsSet() {
+  const rows = Array.from(document.querySelectorAll('#matches tbody tr'));
+  const allSet = rows.length === 5 && rows.every(r => {
+    const select = r.querySelector('select.result');
+    return ['HOME', 'DRAW', 'AWAY'].includes((select?.value || '').toUpperCase());
+  });
+
+  const scoreBtn = $('scoreWeek');
+  const forceBtn = $('forceScoreWeek');
+  const warning = $('scoringWarning');
+
+  if (scoreBtn) scoreBtn.disabled = !allSet;
+  if (forceBtn) forceBtn.disabled = !allSet;
+
+  if (warning) {
+    if (!allSet && rows.length > 0) {
+      const missing = rows.filter(r => {
+        const select = r.querySelector('select.result');
+        return !['HOME', 'DRAW', 'AWAY'].includes((select?.value || '').toUpperCase());
+      }).length;
+      warning.style.display = 'block';
+      warning.textContent = `Scoring disabled: Add results for all ${missing} remaining match${missing > 1 ? 'es' : ''} before scoring this week.`;
+    } else {
+      warning.style.display = 'none';
+    }
+  }
+}
+
+// Fetch latest week from weeks endpoint
+async function fetchLatestWeek() {
+  try {
+    const data = await adminFetch('/weeks');
+    latestWeek = data.recommendedPickWeek || data.latest || data.weeks?.[data.weeks.length - 1] || 1;
+    return latestWeek;
+  } catch (e) {
+    setStatus(`Failed to fetch latest week: ${e.message}`);
+    showDebugInfo();
+    return null;
+  }
+}
+
+// Load matches for selected week
+async function loadMatches(week) {
+  const loadBtn = $('load');
+  return withLoading(loadBtn, async () => {
+    try {
+      const data = await adminFetch(`/get-week?week=${encodeURIComponent(week)}`);
+      loadedMatches = data.matches || [];
+      setStatus(`Loaded ${loadedMatches.length} matches for week ${week}`);
+      showDebugInfo();
+
+      $('matches').innerHTML = loadedMatches.length ? `
+        <table>
+          <thead>
+            <tr><th>ID</th><th>Fixture</th><th>Correct Result</th><th class="right">Live Score</th></tr>
+          </thead>
+          <tbody>${loadedMatches.map(matchRow).join('')}</tbody>
+        </table>
+      ` : '<p style="color:#aaa;padding:12px">No matches found for this week.</p>';
+
+      // Listen for result changes to update scoring button state
+      document.querySelectorAll('#matches select.result').forEach(sel => {
+        sel.addEventListener('change', checkAllResultsSet);
+      });
+
+      checkAllResultsSet();
+      $('nextWeek').value = String(week + 1);
+
+    } catch (e) {
+      setStatus(`Failed to load matches: ${e.message}`);
+      showDebugInfo();
+      $('matches').innerHTML = '';
+      loadedMatches = [];
+    }
+  });
+}
+
+// Initialize admin UI
+function initAdminUI() {
+  const wrap = $('mainWrap');
+  wrap.innerHTML = `
+    <h2>Admin – Results & Scoring</h2>
+
+    <div class="card">
+      <div class="mode-switch">
+        <button id="modeSelected" class="active">Selected Week</button>
+        <button id="modeLatest">Latest Matchweek</button>
+      </div>
+      <div class="row">
+        <div id="weekInputWrapper"><label>Week</label><input id="week" type="number" min="1" step="1" value="1" /></div>
+        <div><button class="btn" id="load">Load Matches</button></div>
+      </div>
+      <div id="status" style="margin-top:6px;color:#EAEAEA"></div>
+      <div id="debugPanel" class="debug-panel" style="display:none"></div>
+      <div id="matches"></div>
+    </div>
+
+    <div class="card">
+      <div id="scoringWarning" class="warning-banner" style="display:none"></div>
+      <div class="row" style="margin-top:8px">
+        <button class="btn" id="applyResults">Apply Results & Lock</button>
+        <button class="btn" id="scoreWeek" disabled>Score Week</button>
+        <button class="btn danger" id="forceScoreWeek" disabled title="Force rescore even if week already scored">Force Rescore Week</button>
+      </div>
+      <p style="margin-top:8px;font-size:12px;color:#f5dede">
+        <strong>Force Rescore Week</strong> will ignore safety checks and rescore the selected week. Use only if normal scoring failed.
+      </p>
+      <div><label style="margin-top:8px"><input type="checkbox" id="showDebug"> Show API debug info</label></div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin:0 0 8px">Seed Next Week (optional)</h3>
+      <div class="row">
+        <div><label>Next Week</label><input id="nextWeek" type="number" min="1" step="1"/></div>
+        <div><label>Lockout Time</label><input id="nextLock" type="datetime-local"/></div>
+      </div>
+      <table id="seedTbl">
+        <thead><tr><th>#</th><th>Home</th><th>Away</th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <button class="btn" id="seedBtn">Create 5 Matches</button>
+    </div>
+  `;
+
+  setupEventListeners();
+}
+
+// Show access denied page
+function showAccessDenied() {
+  const wrap = $('mainWrap');
+  wrap.innerHTML = `
+    <div class="access-denied">
+      <h1>Access Denied</h1>
+      <p style="color:#ccc">Admin access requires a valid ADMIN_SECRET in the URL.</p>
+      <p style="color:#888;font-size:14px;margin-top:20px">
+        Usage: admin.html?ADMIN_SECRET=your_secret_here
+      </p>
+    </div>
+  `;
+}
+
+// Setup all event listeners
+function setupEventListeners() {
+  const loadBtn = $('load');
   const applyBtn = $('applyResults');
   const scoreBtn = $('scoreWeek');
   const forceBtn = $('forceScoreWeek');
-  const seedBtn  = $('seedBtn');
+  const seedBtn = $('seedBtn');
+  const modeSelected = $('modeSelected');
+  const modeLatest = $('modeLatest');
+  const showDebugCb = $('showDebug');
+  const weekInput = $('week');
+
+  // Mode switching
+  modeSelected.onclick = () => {
+    useLatestMode = false;
+    modeSelected.classList.add('active');
+    modeLatest.classList.remove('active');
+    $('weekInputWrapper').style.display = '';
+  };
+
+  modeLatest.onclick = async () => {
+    useLatestMode = true;
+    modeLatest.classList.add('active');
+    modeSelected.classList.remove('active');
+    setStatus('Fetching latest matchweek...');
+    const latest = await fetchLatestWeek();
+    if (latest) {
+      weekInput.value = latest;
+      currentWeek = latest;
+      setStatus(`Latest matchweek: ${latest}`);
+      await loadMatches(latest);
+    }
+  };
+
+  // Debug toggle
+  showDebugCb.onchange = () => {
+    $('debugPanel').style.display = showDebugCb.checked ? 'block' : 'none';
+    if (showDebugCb.checked && lastDebugInfo) showDebugInfo();
+  };
 
   // Load matches
-  loadBtn.onclick = ()=> withLoading(loadBtn, async ()=>{
-    const week = Number($('week').value);
-    const res = await fetch(`${base}/get-week?week=${encodeURIComponent(week)}&userId=0`, { cache:'no-store' });
-    const data = await res.json();
-    const m = data.matches || [];
-    setStatus(`Loaded ${m.length} matches`);
-    $('matches').innerHTML = `
-      <table>
-        <thead>
-          <tr><th>ID</th><th>Fixture</th><th>Correct Result</th><th class="right">Live Score</th></tr>
-        </thead>
-        <tbody>${m.map(row).join('')}</tbody>
-      </table>`;
-    $('nextWeek').value = String(week + 1);
-  });
+  loadBtn.onclick = () => {
+    currentWeek = Number(weekInput.value);
+    loadMatches(currentWeek);
+  };
 
-  // Delegate: per-row Save & Score
-  document.addEventListener('click', async (e)=>{
+  // Per-row Save & Score (delegated)
+  document.addEventListener('click', async (e) => {
     const btn = e.target.closest('.score-one');
     if (!btn) return;
+
     const tr = btn.closest('tr');
     const matchId = tr.getAttribute('data-id');
     const select = tr.querySelector('select.result');
     const correct = (select?.value || '').toUpperCase();
-    const week = Number($('week').value);
-    const secret = ($('secret')?.value || '').trim();
+    const week = Number(weekInput.value);
 
-    if (!correct) { setStatus('Pick a correct result first (HOME/DRAW/AWAY)'); return; }
+    if (!['HOME', 'DRAW', 'AWAY'].includes(correct)) {
+      setStatus('Pick a correct result first (HOME/DRAW/AWAY)');
+      return;
+    }
 
-    await withLoading(btn, async ()=>{
-      // 1) Save this one result via admin-set-results
-      const saveRes = await fetch(`${base}/admin-set-results`, {
-        method:'POST',
-        headers:{'Content-Type':'application/json','x-admin-secret':secret},
-        body: JSON.stringify({ week, results: [{ match_id: matchId, correct }] })
-      });
-      const saveTxt = await saveRes.text();
-
-      // 2) Score this match
-      const scoreRes = await fetch(`${base}/score-match`, {
-        method:'POST',
-        headers:{'Content-Type':'application/json','x-admin-secret':secret},
-        body: JSON.stringify({ match_id: matchId })
-      });
-      let message = 'Database updated ✓  •  ';
+    await withLoading(btn, async () => {
       try {
-        const j = await scoreRes.json();
-        message += `Match ${matchId} scored (updated ${j.updated} predictions)`;
-        setStatus(message);
-        setTimeout(()=> setStatus(message + '\n' + JSON.stringify(j, null, 2)), 600);
-      } catch {
-        const txt = await scoreRes.text();
-        message += `Match ${matchId} scored`;
-        setStatus(message);
-        setTimeout(()=> setStatus(message + '\n' + txt + '\n' + saveTxt), 600);
+        // 1) Save result
+        await adminFetch('/admin-set-results', {
+          method: 'POST',
+          body: JSON.stringify({ week, results: [{ match_id: matchId, correct }] })
+        });
+
+        // 2) Score this match
+        const scoreData = await adminFetch('/score-match', {
+          method: 'POST',
+          body: JSON.stringify({ match_id: matchId })
+        });
+
+        tr.setAttribute('data-has-result', 'true');
+        checkAllResultsSet();
+
+        setStatus(`Match ${matchId} saved & scored (updated ${scoreData.updated || 0} predictions)`);
+        showDebugInfo();
+      } catch (e) {
+        setStatus(`Failed to save/score match ${matchId}: ${e.message}`);
+        showDebugInfo();
       }
     });
   });
 
   // Apply results (bulk)
-  applyBtn.onclick = ()=> withLoading(applyBtn, async ()=>{
-    const secret = ($('secret')?.value || '').trim();
-    const week = Number($('week').value);
+  applyBtn.onclick = () => withLoading(applyBtn, async () => {
+    const week = Number(weekInput.value);
     const rows = Array.from(document.querySelectorAll('#matches tbody tr'));
     const results = rows.map(r => ({
       match_id: r.getAttribute('data-id'),
       correct: r.querySelector('select').value
-    }));
-    const res = await fetch(`${base}/admin-set-results`, {
-      method:'POST',
-      headers:{'Content-Type':'application/json','x-admin-secret':secret},
-      body: JSON.stringify({ week, results })
-    });
-    const txt = await res.text();
-    setStatus('Database updated ✓');
-    setTimeout(()=> setStatus(txt), 600);
-  });
+    })).filter(r => ['HOME', 'DRAW', 'AWAY'].includes(r.correct.toUpperCase()));
 
-  // Score week (normal, non-forced)
-  scoreBtn.onclick = ()=> withLoading(scoreBtn, async ()=>{
-    const secret = ($('secret')?.value || '').trim();
-    const week = Number($('week').value);
-    const res = await fetch(`${base}/admin-score-week`, {
-      method:'POST',
-      headers:{'Content-Type':'application/json','x-admin-secret':secret},
-      body: JSON.stringify({ week })          // <--- normal path, no force
-    });
-    let message = 'Database updated ✓';
-    try {
-      const data = await res.json();
-      if (data && data.ok) {
-        const winners = data.fullHouseNames || [];
-        const blanks  = data.blanksNames || [];
-        if (winners.length > 0) {
-          message += `  •  BONUS WEEK WINNER${winners.length>1?'S':''}: ${winners.join(', ')}`;
-        } else {
-          message += `  •  No full houses this week`;
-        }
-        if (blanks.length > 0) {
-          message += `  •  BLANKS: ${blanks.join(', ')}`;
-        }
-      }
-      setStatus(message);
-      setTimeout(()=> setStatus(message + '\n' + JSON.stringify(data, null, 2)), 600);
-    } catch {
-      const txt = await res.text();
-      setStatus(message);
-      setTimeout(()=> setStatus(message + '\n' + txt), 600);
-    }
-  });
-
-  // Force rescore week (sends force:true with ARE YOU SURE)
-  forceBtn.onclick = () => {
-    const week = Number($('week').value);
-    if (!week) {
-      setStatus('Please enter a valid week number before forcing rescore.');
+    if (!results.length) {
+      setStatus('No valid results to apply. Set HOME/DRAW/AWAY for each match.');
       return;
     }
 
-    const sure = window.confirm(
-      `ARE YOU SURE?\n\n` +
-      `This will FORCE RESCORE week ${week} and may change existing user totals.\n` +
-      `Only use this if the normal "Score Week" has failed or missed updates.`
-    );
-    if (!sure) return;
-
-    const secret = ($('secret')?.value || '').trim();
-
-    withLoading(forceBtn, async ()=>{
-      const res = await fetch(`${base}/admin-score-week`, {
-        method:'POST',
-        headers:{'Content-Type':'application/json','x-admin-secret':secret},
-        body: JSON.stringify({ week, force: true })   // <--- FORCE FLAG
+    try {
+      const data = await adminFetch('/admin-set-results', {
+        method: 'POST',
+        body: JSON.stringify({ week, results })
       });
-      let message = 'Database updated ✓ (FORCED RESCORE)';
+
+      rows.forEach(r => {
+        const val = r.querySelector('select').value;
+        if (['HOME', 'DRAW', 'AWAY'].includes(val.toUpperCase())) {
+          r.setAttribute('data-has-result', 'true');
+        }
+      });
+      checkAllResultsSet();
+
+      setStatus(`Results applied: ${data.updated || results.length} matches updated`);
+      showDebugInfo();
+    } catch (e) {
+      setStatus(`Failed to apply results: ${e.message}`);
+      showDebugInfo();
+    }
+  });
+
+  // Score week (normal)
+  scoreBtn.onclick = () => withLoading(scoreBtn, async () => {
+    const week = Number(weekInput.value);
+    try {
+      const data = await adminFetch('/admin-score-week', {
+        method: 'POST',
+        body: JSON.stringify({ week })
+      });
+
+      let message = 'Week scored successfully!';
+      if (data.ok) {
+        const winners = data.fullHouseNames || [];
+        const blanks = data.blanksNames || [];
+        if (winners.length) message += `  |  BONUS: ${winners.join(', ')}`;
+        else message += '  |  No full houses';
+        if (blanks.length) message += `  |  BLANKS: ${blanks.join(', ')}`;
+      }
+      setStatus(message);
+      showDebugInfo();
+    } catch (e) {
+      setStatus(`Scoring failed: ${e.message}`);
+      showDebugInfo();
+    }
+  });
+
+  // Force rescore week
+  forceBtn.onclick = () => {
+    const week = Number(weekInput.value);
+    if (!week) {
+      setStatus('Please enter a valid week number.');
+      return;
+    }
+
+    if (!confirm(`ARE YOU SURE?\n\nThis will FORCE RESCORE week ${week} and may change existing user totals.\nOnly use if normal scoring failed.`)) {
+      return;
+    }
+
+    withLoading(forceBtn, async () => {
       try {
-        const data = await res.json();
-        if (data && data.ok) {
+        const data = await adminFetch('/admin-score-week', {
+          method: 'POST',
+          body: JSON.stringify({ week, force: true })
+        });
+
+        let message = 'Week FORCE RESCORED!';
+        if (data.ok) {
           const winners = data.fullHouseNames || [];
-          const blanks  = data.blanksNames || [];
-          if (winners.length > 0) {
-            message += `  •  BONUS WEEK WINNER${winners.length>1?'S':''}: ${winners.join(', ')}`;
-          } else {
-            message += `  •  No full houses this week`;
-          }
-          if (blanks.length > 0) {
-            message += `  •  BLANKS: ${blanks.join(', ')}`;
-          }
+          const blanks = data.blanksNames || [];
+          if (winners.length) message += `  |  BONUS: ${winners.join(', ')}`;
+          if (blanks.length) message += `  |  BLANKS: ${blanks.join(', ')}`;
         }
         setStatus(message);
-        setTimeout(()=> setStatus(message + '\n' + JSON.stringify(data, null, 2)), 600);
-      } catch {
-        const txt = await res.text();
-        setStatus(message);
-        setTimeout(()=> setStatus(message + '\n' + txt), 600);
+        showDebugInfo();
+      } catch (e) {
+        setStatus(`Force rescore failed: ${e.message}`);
+        showDebugInfo();
       }
     });
   };
 
   // Build seed table
   const tb = $('seedTbl')?.querySelector('tbody');
-  if (tb){
+  if (tb) {
     tb.innerHTML = '';
-    for (let i=1;i<=5;i++){
+    for (let i = 1; i <= 5; i++) {
       const tr = document.createElement('tr');
       tr.innerHTML = `<td>${i}</td><td><input class="home" placeholder="Home ${i}"/></td><td><input class="away" placeholder="Away ${i}"/></td>`;
       tb.appendChild(tr);
@@ -285,27 +530,86 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 
   // Seed next week
-  seedBtn.onclick = ()=> withLoading(seedBtn, async ()=>{
-    const secret = ($('secret')?.value || '').trim();
+  seedBtn.onclick = () => withLoading(seedBtn, async () => {
     const week = Number($('nextWeek').value);
     const dt = $('nextLock')?.value;
-    if (!dt) { setStatus('Please choose a lockout date & time'); return; }
+
+    if (!dt) {
+      setStatus('Please choose a lockout date & time');
+      return;
+    }
+
     const lockoutIso = new Date(dt).toISOString();
     const rows = Array.from(document.querySelectorAll('#seedTbl tbody tr'));
     const fixtures = rows.map(r => ({
       home: r.querySelector('.home').value.trim(),
       away: r.querySelector('.away').value.trim()
     }));
-    if (fixtures.some(f => !f.home || !f.away)) { setStatus('Please fill all 5 fixtures'); return; }
-    const res = await fetch(`${base}/admin-seed-week`, {
-      method:'POST',
-      headers:{'Content-Type':'application/json','x-admin-secret':secret},
-      body: JSON.stringify({ week, lockoutTime: lockoutIso, fixtures })
-    });
-    const txt = await res.text();
-    setStatus('Database updated ✓');
-    setTimeout(()=> setStatus(txt), 600);
+
+    if (fixtures.some(f => !f.home || !f.away)) {
+      setStatus('Please fill all 5 fixtures');
+      return;
+    }
+
+    try {
+      await adminFetch('/admin-seed-week', {
+        method: 'POST',
+        body: JSON.stringify({ week, lockoutTime: lockoutIso, fixtures })
+      });
+      setStatus(`Week ${week} seeded with 5 matches`);
+      showDebugInfo();
+    } catch (e) {
+      setStatus(`Failed to seed week: ${e.message}`);
+      showDebugInfo();
+    }
   });
+}
+
+// Validate secret by making a test API call
+async function validateSecret() {
+  if (!ADMIN_SECRET) return false;
+
+  try {
+    // Try to call weeks endpoint (doesn't need auth) and then a protected endpoint
+    const weeksData = await adminFetch('/weeks');
+    latestWeek = weeksData.recommendedPickWeek || weeksData.latest || 1;
+
+    // Now test actual admin access
+    await adminFetch(`/get-week?week=${latestWeek}`);
+    return true;
+  } catch (e) {
+    // If it fails with 401, the secret is invalid
+    if (lastDebugInfo?.status === 401) return false;
+    // For other errors, we might still have valid auth
+    return true;
+  }
+}
+
+// Initialize on page load
+window.addEventListener('DOMContentLoaded', async () => {
+  if (!ADMIN_SECRET) {
+    showAccessDenied();
+    return;
+  }
+
+  // Show loading state
+  $('mainWrap').innerHTML = '<div style="text-align:center;padding:40px;color:#ccc">Validating access...</div>';
+
+  const isValid = await validateSecret();
+
+  if (!isValid) {
+    showAccessDenied();
+    return;
+  }
+
+  // Valid secret - show admin UI
+  initAdminUI();
+
+  // Set initial week to latest
+  if (latestWeek) {
+    $('week').value = latestWeek;
+    currentWeek = latestWeek;
+  }
 });
 </script>
 </body>

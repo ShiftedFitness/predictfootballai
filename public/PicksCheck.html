@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="en">
+<!--
+  PredictFootball – Picks Check
+
+  URL Parameter Authentication:
+    PicksCheck.html?ADMIN_SECRET=your_secret_here
+
+  The ADMIN_SECRET query parameter is REQUIRED. Without it, the page shows
+  "Access denied" and no content is rendered.
+
+  Purpose:
+    Check which users have NOT submitted picks for a given matchweek.
+    - Auto-loads the current/latest matchweek on page load
+    - Shows total users, submitted count, and outstanding count
+    - Lists all users who haven't submitted picks
+    - Allows selecting any previous week to check historical data
+-->
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>PredictFootball – Picks Check</title>
+<style>
+  body{margin:0;background:#111;color:#fff;font-family:Inter,system-ui,Arial;display:flex;justify-content:center}
+  .wrap{max-width:780px;width:100%;margin:24px 12px;background:#30A278;color:#fff;border-radius:14px;padding:16px}
+  h2{margin:0 0 12px}
+  .card{background:#000;border:1px solid #1a1a1a;border-radius:12px;padding:12px;margin-bottom:12px}
+  label{display:block;margin-bottom:6px;color:#EAEAEA}
+  input,select{background:#0e0e0e;color:#fff;border:1px solid #2a2a2a;border-radius:8px;padding:8px 10px}
+  .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .btn{background:#fff;color:#000;border:0;padding:10px 14px;border-radius:8px;font-weight:800;cursor:pointer}
+  .btn:disabled{opacity:0.5;cursor:not-allowed}
+  .access-denied{text-align:center;padding:60px 20px}
+  .access-denied h1{font-size:2em;margin-bottom:12px}
+  .stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:16px 0}
+  .stat-card{background:#1a1a1a;border-radius:10px;padding:16px;text-align:center}
+  .stat-value{font-size:2em;font-weight:800;margin-bottom:4px}
+  .stat-label{color:#888;font-size:12px;text-transform:uppercase}
+  .stat-card.success .stat-value{color:#4ade80}
+  .stat-card.warning .stat-value{color:#ff9800}
+  .stat-card.danger .stat-value{color:#ff4444}
+  .user-list{margin-top:16px}
+  .user-list h3{margin:0 0 12px;font-size:14px;color:#EAEAEA}
+  .user-chip{display:inline-block;background:#2a2a2a;padding:6px 12px;border-radius:16px;margin:4px;font-size:13px}
+  .user-chip .id{color:#888;margin-left:4px;font-size:11px}
+  .match-breakdown{margin-top:16px}
+  .match-item{background:#1a1a1a;border-radius:8px;padding:12px;margin-bottom:8px}
+  .match-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+  .match-fixture{font-weight:600}
+  .match-status{font-size:12px;padding:4px 8px;border-radius:4px}
+  .match-status.complete{background:#4ade80;color:#000}
+  .match-status.incomplete{background:#ff9800;color:#000}
+  .match-missing{font-size:12px;color:#888;margin-top:6px}
+  #status{white-space:pre-wrap;margin-top:6px;color:#EAEAEA}
+  .loading{text-align:center;padding:40px;color:#ccc}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .spinner{display:inline-block;width:18px;height:18px;border:2px solid rgba(255,255,255,0.35);border-top-color:#fff;border-radius:50%;margin-right:8px;vertical-align:-3px;animation:spin .7s linear infinite}
+  .all-good{background:#1a3a2a;border:1px solid #4ade80;border-radius:10px;padding:24px;text-align:center;margin-top:16px}
+  .all-good h3{color:#4ade80;margin:0 0 8px}
+  .all-good p{color:#888;margin:0}
+</style>
+</head>
+<body>
+
+<div class="wrap" id="mainWrap">
+  <!-- Content loaded by JS based on auth -->
+</div>
+
+<script>
+const base = '/.netlify/functions';
+
+// Read ADMIN_SECRET from URL query param (support URL-encoded values like "=" chars)
+function getAdminSecret() {
+  const params = new URLSearchParams(location.search);
+  const raw = params.get('ADMIN_SECRET');
+  if (!raw) return '';
+  try {
+    return decodeURIComponent(raw);
+  } catch {
+    return raw;
+  }
+}
+
+const ADMIN_SECRET = getAdminSecret();
+
+// State
+let availableWeeks = [];
+let currentWeek = null;
+let latestWeek = null;
+
+// Helper: get element by ID
+function $(id) {
+  const el = document.getElementById(id);
+  return el;
+}
+
+// Helper: safe fetch with admin secret header
+async function adminFetch(url, options = {}) {
+  const fullUrl = url.startsWith('http') ? url : `${base}${url}`;
+  const headers = {
+    'Content-Type': 'application/json',
+    'x-admin-secret': ADMIN_SECRET,
+    ...(options.headers || {})
+  };
+
+  const response = await fetch(fullUrl, { ...options, headers, cache: 'no-store' });
+  const text = await response.text();
+
+  let data;
+  try {
+    data = JSON.parse(text);
+  } catch {
+    data = { raw: text };
+  }
+
+  if (!response.ok) {
+    throw new Error(data.error || `HTTP ${response.status}`);
+  }
+
+  return data;
+}
+
+// Show status message
+function setStatus(msg) {
+  const s = $('status');
+  if (s) s.textContent = msg;
+}
+
+// Loading button wrapper
+function withLoading(btn, fn) {
+  if (!btn) return fn();
+  const orig = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Loading...';
+  return fn().finally(() => {
+    btn.disabled = false;
+    btn.innerHTML = orig;
+  });
+}
+
+// Fetch available weeks
+async function fetchWeeks() {
+  try {
+    const data = await adminFetch('/weeks');
+    availableWeeks = data.weeks || [];
+    latestWeek = data.recommendedPickWeek || data.latest || availableWeeks[availableWeeks.length - 1] || 1;
+    return { weeks: availableWeeks, latest: latestWeek };
+  } catch (e) {
+    setStatus(`Failed to fetch weeks: ${e.message}`);
+    return { weeks: [], latest: 1 };
+  }
+}
+
+// Load picks check data for a week
+async function loadPicksCheck(week) {
+  const checkBtn = $('checkBtn');
+  return withLoading(checkBtn, async () => {
+    try {
+      const data = await adminFetch(`/admin-missing-predictions?week=${week}`);
+      renderResults(data, week);
+      currentWeek = week;
+    } catch (e) {
+      setStatus(`Failed to load picks data: ${e.message}`);
+      $('results').innerHTML = '';
+    }
+  });
+}
+
+// Calculate unique missing users across all matches
+function getUniqueMissingUsers(matches) {
+  const seen = new Map();
+  for (const m of matches) {
+    for (const u of (m.missingUsers || [])) {
+      if (!seen.has(u.id)) {
+        seen.set(u.id, u);
+      }
+    }
+  }
+  return Array.from(seen.values());
+}
+
+// Render results
+function renderResults(data, week) {
+  const resultsDiv = $('results');
+
+  const totalUsers = data.expectedUsers || 0;
+  const matches = data.matches || [];
+  const uniqueMissing = getUniqueMissingUsers(matches);
+  const submittedUsers = totalUsers - uniqueMissing.length;
+  const outstandingUsers = uniqueMissing.length;
+
+  // Determine stat card classes based on completion
+  const completionPct = totalUsers > 0 ? (submittedUsers / totalUsers) * 100 : 0;
+  const outstandingClass = outstandingUsers === 0 ? 'success' : outstandingUsers > 5 ? 'danger' : 'warning';
+
+  let html = `
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value">${totalUsers}</div>
+        <div class="stat-label">Total Users</div>
+      </div>
+      <div class="stat-card success">
+        <div class="stat-value">${submittedUsers}</div>
+        <div class="stat-label">Submitted</div>
+      </div>
+      <div class="stat-card ${outstandingClass}">
+        <div class="stat-value">${outstandingUsers}</div>
+        <div class="stat-label">Outstanding</div>
+      </div>
+    </div>
+  `;
+
+  if (outstandingUsers === 0) {
+    html += `
+      <div class="all-good">
+        <h3>All users have submitted picks!</h3>
+        <p>Week ${week} has 100% participation - no outstanding submissions.</p>
+      </div>
+    `;
+  } else {
+    // Outstanding users list
+    html += `
+      <div class="user-list">
+        <h3>Outstanding Users (${outstandingUsers})</h3>
+        <div class="user-chips">
+          ${uniqueMissing.map(u => `
+            <span class="user-chip">${u.name}<span class="id">#${u.id}</span></span>
+          `).join('')}
+        </div>
+      </div>
+    `;
+
+    // Per-match breakdown
+    html += `
+      <div class="match-breakdown">
+        <h3 style="margin:16px 0 12px;font-size:14px;color:#EAEAEA">Per-Match Breakdown</h3>
+        ${matches.map(m => {
+          const isComplete = m.missingCount === 0;
+          return `
+            <div class="match-item">
+              <div class="match-header">
+                <span class="match-fixture">${m.fixture}</span>
+                <span class="match-status ${isComplete ? 'complete' : 'incomplete'}">
+                  ${m.predictionsCount}/${m.expectedUsers} picks
+                </span>
+              </div>
+              ${!isComplete ? `
+                <div class="match-missing">
+                  Missing: ${m.missingUsers.map(u => u.name).join(', ')}
+                </div>
+              ` : ''}
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+  }
+
+  resultsDiv.innerHTML = html;
+  setStatus(`Week ${week}: ${submittedUsers}/${totalUsers} users submitted (${Math.round(completionPct)}%)`);
+}
+
+// Initialize UI
+function initUI() {
+  const wrap = $('mainWrap');
+  wrap.innerHTML = `
+    <h2>Picks Check</h2>
+    <p style="color:#EAEAEA;margin:0 0 16px">Check which users have not submitted picks for a matchweek.</p>
+
+    <div class="card">
+      <div class="row">
+        <div>
+          <label>Week</label>
+          <select id="weekSelect" style="min-width:120px">
+            <option value="">Loading...</option>
+          </select>
+        </div>
+        <div>
+          <button class="btn" id="checkBtn">Check Picks</button>
+        </div>
+      </div>
+      <div id="status" style="margin-top:6px"></div>
+    </div>
+
+    <div id="results"></div>
+
+    <div class="card" style="margin-top:16px">
+      <p style="margin:0;font-size:12px;color:#888">
+        <strong>Tip:</strong> This page shows unique users who haven't submitted any picks for the selected week.
+        The per-match breakdown shows which specific matches each user is missing.
+      </p>
+    </div>
+  `;
+
+  setupEventListeners();
+}
+
+// Setup event listeners
+function setupEventListeners() {
+  const checkBtn = $('checkBtn');
+  const weekSelect = $('weekSelect');
+
+  checkBtn.onclick = () => {
+    const week = Number(weekSelect.value);
+    if (week) {
+      loadPicksCheck(week);
+    }
+  };
+
+  weekSelect.onchange = () => {
+    const week = Number(weekSelect.value);
+    if (week) {
+      loadPicksCheck(week);
+    }
+  };
+}
+
+// Populate week dropdown
+function populateWeekDropdown(weeks, selectedWeek) {
+  const weekSelect = $('weekSelect');
+  if (!weekSelect) return;
+
+  weekSelect.innerHTML = weeks
+    .slice()
+    .reverse()
+    .map(w => `<option value="${w}" ${w === selectedWeek ? 'selected' : ''}>Week ${w}${w === latestWeek ? ' (Latest)' : ''}</option>`)
+    .join('');
+}
+
+// Show access denied page
+function showAccessDenied() {
+  const wrap = $('mainWrap');
+  wrap.innerHTML = `
+    <div class="access-denied">
+      <h1>Access Denied</h1>
+      <p style="color:#ccc">Admin access requires a valid ADMIN_SECRET in the URL.</p>
+      <p style="color:#888;font-size:14px;margin-top:20px">
+        Usage: PicksCheck.html?ADMIN_SECRET=your_secret_here
+      </p>
+    </div>
+  `;
+}
+
+// Validate secret by making a test API call
+async function validateSecret() {
+  if (!ADMIN_SECRET) return false;
+
+  try {
+    // Test admin access with the missing predictions endpoint
+    await adminFetch('/admin-missing-predictions');
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+// Initialize on page load
+window.addEventListener('DOMContentLoaded', async () => {
+  if (!ADMIN_SECRET) {
+    showAccessDenied();
+    return;
+  }
+
+  // Show loading state
+  $('mainWrap').innerHTML = '<div class="loading"><span class="spinner"></span>Validating access...</div>';
+
+  const isValid = await validateSecret();
+
+  if (!isValid) {
+    showAccessDenied();
+    return;
+  }
+
+  // Valid secret - show UI
+  initUI();
+
+  // Fetch available weeks
+  setStatus('Loading weeks...');
+  const { weeks, latest } = await fetchWeeks();
+
+  if (weeks.length > 0) {
+    populateWeekDropdown(weeks, latest);
+    // Auto-load the latest week
+    await loadPicksCheck(latest);
+  } else {
+    setStatus('No weeks found in the system.');
+  }
+});
+</script>
+</body>
+</html>
