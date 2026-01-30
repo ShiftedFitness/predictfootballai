@@ -176,7 +176,26 @@ function trWeekly(row, resultSetFlags){
 async function loadWeekly(week) {
   debugLog('loadWeekly called with week:', week);
 
-  const r = await fetch(`${base}/weekly-table?week=${week}`, { cache:'no-store' });
+  // Ensure week is a valid number
+  const weekNum = Number(week);
+  if (!weekNum || isNaN(weekNum)) {
+    debugLog('Invalid week, fetching available weeks first...');
+    // Fetch weeks to get a valid default
+    try {
+      const weeksRes = await fetch(`${base}/weeks`, { cache: 'no-store' });
+      if (weeksRes.ok) {
+        const weeksData = await weeksRes.json();
+        const fallbackWeek = weeksData.recommendedViewWeek || weeksData.latest || 1;
+        debugLog('Using fallback week:', fallbackWeek);
+        return loadWeekly(fallbackWeek);
+      }
+    } catch (e) {
+      debugLog('Failed to fetch weeks for fallback:', e);
+    }
+    return; // Can't proceed without a valid week
+  }
+
+  const r = await fetch(`${base}/weekly-table?week=${weekNum}`, { cache:'no-store' });
   if (!r.ok) {
     debugLog('API error:', r.status);
     alert('Failed to load weekly table');
@@ -189,14 +208,14 @@ async function loadWeekly(week) {
 
   // If the requested week isn't in availableWeeks and there are available weeks,
   // reload with the first available week (latest locked week)
-  if (availableWeeks.length > 0 && !availableWeeks.includes(Number(week))) {
+  if (availableWeeks.length > 0 && !availableWeeks.includes(weekNum)) {
     const defaultWeek = availableWeeks[0]; // First = latest (descending order)
     debugLog('Requested week not available, reloading with:', defaultWeek);
     return loadWeekly(defaultWeek);
   }
 
   // Update currentWeek to match what we're actually showing
-  currentWeek = Number(j.week || week);
+  currentWeek = weekNum;
 
   // Deadline / availability
   document.getElementById('lockedMsg').textContent =
@@ -256,31 +275,18 @@ document.getElementById('tabWeekly').onclick = async ()=>{
 
 /* ---------- Weekly Tab Initialization ---------- */
 async function initWeeklyTab() {
-  // If we already have a valid currentWeek from URL or previous load, use it
+  debugLog('initWeeklyTab called, currentWeek:', currentWeek, 'initialized:', weeklyInitialized);
+
+  // If we already have a valid currentWeek from previous load, use it
   if (currentWeek && weeklyInitialized) {
     debugLog('Using cached currentWeek:', currentWeek);
     await loadWeekly(currentWeek);
     return;
   }
 
-  // First time init: determine the best default week
-  if (!currentWeek) {
-    debugLog('No currentWeek set, fetching recommended week...');
-    try {
-      const weeksRes = await fetch(`${base}/weeks`, { cache: 'no-store' });
-      if (weeksRes.ok) {
-        const weeksData = await weeksRes.json();
-        // recommendedViewWeek is the latest locked week
-        currentWeek = weeksData.recommendedViewWeek || weeksData.latest || 1;
-        debugLog('Got recommendedViewWeek:', currentWeek);
-      }
-    } catch (e) {
-      debugLog('Failed to fetch weeks:', e);
-      currentWeek = 1; // fallback
-    }
-  }
-
-  debugLog('Initializing weekly tab with week:', currentWeek);
+  // First time init OR no valid currentWeek: determine the best default week
+  // loadWeekly will handle fetching a valid week if currentWeek is invalid
+  debugLog('Initializing weekly tab, calling loadWeekly with:', currentWeek || 'null (will auto-detect)');
   await loadWeekly(currentWeek);
   weeklyInitialized = true;
 }
