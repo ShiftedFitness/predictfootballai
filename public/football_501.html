@@ -3,497 +3,1181 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
-<title>PredictFootball.ai 501</title>
+<title>Football 501</title>
 <style>
-:root{--bg:#000;--card:#4f8b6e;--ink:#fff;--muted:#cfe5db;--btn:#111;--btnH:#222;--danger:#ff5a5a;--accent:#0b1}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;min-height:100vh;padding:22px}
-.card{max-width:600px;margin:0 auto;background:var(--card);border-radius:22px;padding:22px;box-shadow:0 8px 32px rgba(0,0,0,.5);position:relative}
-h2{margin:0 0 14px;font-size:22px}
-.row{display:flex;gap:10px;flex-wrap:wrap}
-.input{width:100%;display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
-.label{font-size:13px;color:#e8f3ee;font-weight:700}
-input,select,button{width:100%;padding:12px 14px;border:none;border-radius:12px;font-size:16px}
-input,select{background:#f7fffbd8;color:#0c1b15;-webkit-text-fill-color:#0c1b15} /* <-- black text incl. iOS */
-button{background:var(--btn);color:#fff;cursor:pointer;transition:.15s}
-button:hover{background:var(--btnH)}
-.textbtn{background:none;color:#fff;text-decoration:underline;font-size:13px;padding:6px 4px;width:auto}
+:root {
+  --bg: #0a0f0d;
+  --card: #1a3a2a;
+  --card-dark: #0f2a1f;
+  --ink: #fff;
+  --muted: #a8c4b8;
+  --btn: #2d5a45;
+  --btn-hover: #3d7a5a;
+  --danger: #e05555;
+  --accent: #4ade80;
+  --accent-dim: #22c55e;
+  --gold: #fbbf24;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  min-height: 100vh;
+  padding: 16px;
+  line-height: 1.4;
+}
+.card {
+  max-width: 560px;
+  margin: 0 auto;
+  background: var(--card);
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.4);
+}
+h2 { margin: 0 0 16px; font-size: 20px; font-weight: 700; }
+.subtitle { color: var(--muted); font-size: 14px; margin: -12px 0 16px; }
 
-/* sections + game cards */
-.section{background:rgba(0,0,0,.18);border-radius:16px;margin-bottom:14px;overflow:hidden}
-.section-header{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;cursor:pointer}
-.section-title{font-weight:900}
-.chev{opacity:.9}
-.section-body{padding:12px 14px;display:none}
-.section.open .section-body{display:block}
-.game-card{display:flex;align-items:center;justify-content:space-between;gap:10px;background:rgba(0,0,0,.14);border-radius:14px;padding:14px 16px;cursor:pointer;margin-bottom:10px}
-.game-meta{font-size:12px;color:#e8f3ee}
-.stars{color:gold}
-.flagrow{display:inline-flex;gap:6px;align-items:center}
-.badgeNI{display:inline-block;background:#111;color:#fff;font-weight:800;border-radius:10px;padding:2px 6px;font-size:11px;line-height:1}
+/* Form elements */
+.field { margin-bottom: 14px; }
+.field label { display: block; font-size: 13px; color: var(--muted); font-weight: 600; margin-bottom: 6px; }
+input, select {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  font-size: 16px;
+  background: rgba(255,255,255,.95);
+  color: #1a1a1a;
+  transition: border-color .2s;
+}
+input:focus, select:focus { outline: none; border-color: var(--accent); }
+input::placeholder { color: #888; }
 
-/* scoreboard */
-.scores{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0 6px}
-.pill{flex:1 1 45%;background:rgba(0,0,0,.25);border-radius:16px;padding:12px;text-align:center;cursor:pointer}
-.pill.active{background:rgba(255,255,255,.15);outline:2px solid #fff}
-.pill .name{font-weight:700}.pill .num{font-size:30px;font-weight:800}
-.turn{text-align:center;margin:10px 0;font-weight:700}
-.result{min-height:24px;text-align:center;margin:8px 0}
+/* Buttons */
+button {
+  width: 100%;
+  padding: 14px 20px;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .2s;
+}
+.btn-primary { background: var(--accent); color: #0a0f0d; }
+.btn-primary:hover:not(:disabled) { background: var(--accent-dim); }
+.btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+.btn-secondary { background: var(--btn); color: #fff; }
+.btn-secondary:hover:not(:disabled) { background: var(--btn-hover); }
+.btn-danger { background: var(--danger); color: #fff; }
+.btn-text { background: none; color: var(--muted); text-decoration: underline; font-size: 14px; padding: 8px; width: auto; }
+.row-btns { display: flex; gap: 10px; margin-top: 12px; }
+.row-btns button { flex: 1; }
 
-/* inline toast */
-.inline-toast{margin:8px auto 0;width:100%;max-width:560px;background:rgba(0,0,0,.92);color:#fff;border-radius:16px;padding:12px 14px;box-shadow:0 10px 28px rgba(0,0,0,.5);opacity:0;transform:translateY(6px);transition:opacity .25s,transform .25s}
-.inline-toast.show{opacity:1;transform:translateY(0)}
-.toast-row{display:flex;align-items:center;gap:12px}
-.badge{min-width:56px;height:56px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:22px;background:#1f8a5e}
-.toast-body{flex:1}.toast-title{font-weight:800;margin:0 0 4px}.toast-sub{opacity:.85;font-size:13px}
-.toast-meta{display:flex;gap:10px;flex-wrap:wrap;font-size:12px;opacity:.85}
-.toast-meta span{background:rgba(255,255,255,.08);padding:6px 8px;border-radius:9px}
-.hint{margin:6px 0 8px;text-align:center;font-size:13px;color:var(--accent);font-weight:700}
+/* Category sections */
+.section { background: var(--card-dark); border-radius: 14px; margin-bottom: 12px; overflow: hidden; }
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: background .2s;
+}
+.section-header:hover { background: rgba(255,255,255,.03); }
+.section-title { font-weight: 700; font-size: 15px; }
+.chev { opacity: .7; transition: transform .2s; }
+.section.open .chev { transform: rotate(180deg); }
+.section-body { display: none; padding: 8px 12px 12px; }
+.section.open .section-body { display: block; }
 
-/* loaders */
-.loader{display:flex;align-items:center;justify-content:center;height:240px}
-.loader span{font-size:20px;animation:pulse 1.2s infinite}
-@keyframes pulse{0%{opacity:.4}50%{opacity:1}100%{opacity:.4}}
-.randomising{font-size:18px;text-align:center;padding:24px 0;animation:pulse 1s infinite}
-.orderList{margin-top:10px;background:rgba(0,0,0,.25);border-radius:12px;padding:10px 12px}
-.hidden{display:none}
+/* Game cards */
+.game-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255,255,255,.04);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: background .2s, transform .1s;
+}
+.game-card:hover { background: rgba(255,255,255,.08); }
+.game-card:active { transform: scale(.98); }
+.game-card .flag { font-size: 20px; margin-right: 10px; }
+.game-card .title { font-weight: 600; font-size: 14px; }
+.game-card .meta { font-size: 12px; color: var(--muted); margin-top: 3px; }
+.game-card .arrow { opacity: .5; }
+.stars { color: var(--gold); letter-spacing: 1px; }
 
-/* progress modal */
-.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;z-index:1200}
-.modal-backdrop.show{display:flex}
-.modal{width:min(560px,92vw);background:#0f2a21;color:#fff;border-radius:18px;box-shadow:0 18px 40px rgba(0,0,0,.7);padding:16px 16px 14px;transform:translateY(8px);opacity:0;transition:transform .25s ease,opacity .2s ease}
-.modal.show{transform:translateY(0);opacity:1}
-.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
-.modal-title{font-weight:900;font-size:18px}
-.close-btn{background:#2a3e36;border:none;color:#fff;padding:8px 10px;border-radius:10px;cursor:pointer}
-.chain{background:#133a2e;padding:10px 12px;border-radius:12px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;overflow:auto}
-.pick-list{margin-top:10px;display:grid;gap:8px}
-.pick{background:#0c241c;padding:10px;border-radius:10px;display:flex;justify-content:space-between;align-items:center;font-size:14px}
-.pick b{font-weight:800}.pick .meta{opacity:.85;font-size:12px}
-.bust{color:#ff8a8a}
+/* Loading screen with trivia */
+.loading-screen { text-align: center; padding: 20px 0; }
+.loading-spinner {
+  width: 48px; height: 48px;
+  border: 4px solid rgba(255,255,255,.1);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 16px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text { font-size: 16px; margin-bottom: 20px; }
+.ready-badge {
+  display: inline-block;
+  background: var(--accent);
+  color: #0a0f0d;
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  margin-bottom: 16px;
+  animation: pulse 1.5s ease infinite;
+}
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .7; } }
+
+/* Trivia */
+.trivia-box { background: var(--card-dark); border-radius: 14px; padding: 16px; margin-top: 16px; text-align: left; }
+.trivia-q { font-weight: 600; margin-bottom: 12px; font-size: 15px; }
+.trivia-opts { display: flex; flex-direction: column; gap: 8px; }
+.trivia-opt {
+  background: rgba(255,255,255,.06);
+  border: 2px solid transparent;
+  border-radius: 10px;
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: all .2s;
+  font-size: 14px;
+}
+.trivia-opt:hover { background: rgba(255,255,255,.1); }
+.trivia-opt.selected { border-color: var(--accent); background: rgba(74,222,128,.1); }
+.trivia-opt.correct { background: rgba(74,222,128,.3); border-color: var(--accent); }
+.trivia-opt.wrong { background: rgba(224,85,85,.2); border-color: var(--danger); }
+
+/* Order reveal */
+.order-reveal { text-align: center; padding: 20px 0; }
+.order-list {
+  background: var(--card-dark);
+  border-radius: 12px;
+  padding: 14px;
+  margin: 16px 0;
+  font-size: 15px;
+}
+
+/* Scoreboard */
+.scores { display: grid; gap: 10px; margin-bottom: 14px; }
+.scores.p2 { grid-template-columns: 1fr 1fr; }
+.scores.p3 { grid-template-columns: 1fr 1fr 1fr; }
+.scores.p4 { grid-template-columns: 1fr 1fr; }
+.scores.p5, .scores.p6 { grid-template-columns: 1fr 1fr 1fr; }
+.pill {
+  background: var(--card-dark);
+  border-radius: 14px;
+  padding: 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: all .2s;
+  border: 2px solid transparent;
+}
+.pill.active { border-color: var(--accent); background: rgba(74,222,128,.1); }
+.pill .name { font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pill .score { font-size: 28px; font-weight: 800; }
+.turn-info { text-align: center; font-weight: 700; margin-bottom: 12px; font-size: 15px; }
+.hint-bar { text-align: center; font-size: 13px; color: var(--accent); margin-bottom: 12px; padding: 10px; background: rgba(74,222,128,.08); border-radius: 10px; }
+
+/* Selection list (fuzzy matches) */
+.selection-list {
+  background: var(--card-dark);
+  border-radius: 12px;
+  margin-top: 10px;
+  overflow: hidden;
+}
+.selection-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: background .15s;
+  border-bottom: 1px solid rgba(255,255,255,.05);
+}
+.selection-item:last-child { border-bottom: none; }
+.selection-item:hover { background: rgba(255,255,255,.06); }
+.selection-item .name { font-weight: 600; }
+.selection-item .nat { font-size: 12px; color: var(--muted); }
+.selection-item .apps { font-size: 14px; font-weight: 700; color: var(--accent); }
+
+/* Result toast */
+.result { min-height: 20px; text-align: center; margin: 10px 0; font-size: 14px; }
+.inline-toast {
+  background: var(--card-dark);
+  border-radius: 14px;
+  padding: 14px;
+  margin-top: 12px;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: all .25s;
+}
+.inline-toast.show { opacity: 1; transform: translateY(0); }
+.toast-row { display: flex; align-items: center; gap: 12px; }
+.toast-badge {
+  min-width: 52px; height: 52px;
+  background: var(--accent);
+  color: #0a0f0d;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 18px;
+}
+.toast-badge.bust { background: var(--danger); color: #fff; }
+.toast-body { flex: 1; }
+.toast-title { font-weight: 700; font-size: 15px; }
+.toast-sub { color: var(--muted); font-size: 13px; margin-top: 2px; }
+.toast-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.toast-meta span {
+  background: rgba(255,255,255,.06);
+  padding: 5px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+/* Progress modal */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.7);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+}
+.modal-backdrop.show { display: flex; }
+.modal {
+  width: 100%;
+  max-width: 480px;
+  max-height: 80vh;
+  overflow-y: auto;
+  background: var(--card);
+  border-radius: 18px;
+  padding: 20px;
+  transform: translateY(10px);
+  opacity: 0;
+  transition: all .25s;
+}
+.modal.show { transform: translateY(0); opacity: 1; }
+.modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.modal-title { font-weight: 800; font-size: 17px; }
+.close-btn { background: var(--btn); border: none; color: #fff; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 14px; }
+.chain { background: var(--card-dark); padding: 12px; border-radius: 10px; font-family: monospace; font-size: 14px; overflow-x: auto; }
+.pick-list { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+.pick {
+  background: var(--card-dark);
+  padding: 12px;
+  border-radius: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+}
+.pick.bust { border-left: 3px solid var(--danger); }
+.pick b { font-weight: 700; }
+.pick .meta { color: var(--muted); font-size: 12px; }
+
+/* Confirm dialog */
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.7);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+  padding: 16px;
+}
+.confirm-overlay.show { display: flex; }
+.confirm-box {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 340px;
+  text-align: center;
+}
+.confirm-box p { margin: 0 0 20px; font-size: 16px; }
+.confirm-btns { display: flex; gap: 10px; }
+.confirm-btns button { flex: 1; }
+
+.hidden { display: none !important; }
 </style>
 </head>
 <body>
 
-<!-- SETUP -->
+<!-- SETUP CARD -->
 <div class="card" id="setupCard">
+  <!-- Step 1: Number of players -->
   <div id="step1">
-    <h2>1️⃣ Number of players</h2>
-    <div class="input">
-      <label class="label" for="numPlayers">Players</label>
+    <h2>Football 501</h2>
+    <p class="subtitle">Guess players, subtract appearances, hit exactly 0 to win!</p>
+    <div class="field">
+      <label>Number of players</label>
       <select id="numPlayers">
-        <option value="1">1</option><option value="2" selected>2</option>
-        <option value="3">3</option><option value="4">4</option>
-        <option value="5">5</option><option value="6">6</option>
+        <option value="1">1 Player</option>
+        <option value="2" selected>2 Players</option>
+        <option value="3">3 Players</option>
+        <option value="4">4 Players</option>
+        <option value="5">5 Players</option>
+        <option value="6">6 Players</option>
       </select>
     </div>
-    <button id="toStep2">Next</button>
+    <button class="btn-primary" id="toStep2">Continue</button>
   </div>
 
+  <!-- Step 2: Player names -->
   <div id="step2" class="hidden">
-    <h2>2️⃣ Player names</h2>
+    <h2>Player Names</h2>
     <div id="nameFields"></div>
-    <button id="toStep3">Next</button>
+    <button class="btn-primary" id="toStep3">Continue</button>
   </div>
 
+  <!-- Step 3: Choose category -->
   <div id="step3" class="hidden">
-    <h2>3️⃣ Choose game</h2>
+    <h2>Choose Category</h2>
+    <p class="subtitle">Select a category to start your match</p>
 
-    <!-- Sections -->
     <div class="section open" id="sec-country">
-      <div class="section-header" onclick="toggleSec('sec-country')">
-        <div class="section-title">Premier League Players by Country</div><div class="chev">▾</div>
+      <div class="section-header" onclick="toggleSection('sec-country')">
+        <div class="section-title">EPL Players by Country</div>
+        <div class="chev">▼</div>
       </div>
       <div class="section-body" id="countryGames"></div>
     </div>
 
     <div class="section" id="sec-club">
-      <div class="section-header" onclick="toggleSec('sec-club')">
-        <div class="section-title">Premier League Players by Club</div><div class="chev">▸</div>
+      <div class="section-header" onclick="toggleSection('sec-club')">
+        <div class="section-title">EPL Players by Club</div>
+        <div class="chev">▼</div>
       </div>
       <div class="section-body" id="clubGames"></div>
     </div>
-
-    <div class="section" id="sec-competition">
-      <div class="section-header" onclick="toggleSec('sec-competition')">
-        <div class="section-title">Goals by Player by Competition</div><div class="chev">▸</div>
-      </div>
-      <div class="section-body" id="compGames"></div>
-    </div>
-
-    <div class="section" id="sec-other">
-      <div class="section-header" onclick="toggleSec('sec-other')">
-        <div class="section-title">Other</div><div class="chev">▸</div>
-      </div>
-      <div class="section-body" id="otherGames"></div>
-    </div>
   </div>
 
-  <div id="loadingScreen" class="hidden loader"><span>Loading game…</span></div>
+  <!-- Loading screen with trivia -->
+  <div id="loadingScreen" class="hidden loading-screen">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Loading match data...</div>
+    <div id="readyBadge" class="ready-badge hidden">Game Ready!</div>
+    <div id="triviaContainer"></div>
+    <button id="skipTrivia" class="btn-secondary hidden" style="margin-top:16px">Start Match</button>
+  </div>
 
-  <div id="randomisingScreen" class="hidden">
-    <div class="randomising">🎲 Randomising order…</div>
-    <div id="orderList" class="orderList hidden"></div>
-    <button id="beginMatch" class="hidden">Start Match</button>
+  <!-- Order reveal -->
+  <div id="orderScreen" class="hidden order-reveal">
+    <h2>Turn Order</h2>
+    <div id="orderList" class="order-list"></div>
+    <button id="beginMatch" class="btn-primary">Start Match</button>
   </div>
 </div>
 
-<!-- GAMEPLAY -->
+<!-- GAMEPLAY CARD -->
 <div class="card hidden" id="playCard">
-  <div class="scores" id="scoreGrid"></div>
-  <div class="turn" id="turnInfo"></div>
-  <div id="checkoutHint" class="hint hidden"></div>
+  <div id="scoreGrid" class="scores p2"></div>
+  <div id="turnInfo" class="turn-info"></div>
+  <div id="hintBar" class="hint-bar hidden"></div>
 
-  <div class="input" style="margin-top:8px;">
-    <label for="guess" class="label">Your pick</label>
-    <input id="guess" placeholder="Type a player"/>
-  </div>
-  <div class="row">
-    <button id="submit">Submit</button>
-    <button id="end" class="textbtn">End game</button>
+  <div class="field">
+    <label>Your guess</label>
+    <input id="guess" type="text" placeholder="Type a player name..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
   </div>
 
-  <div class="result" id="result"></div>
+  <div id="selectionList" class="selection-list hidden"></div>
+
+  <div class="row-btns">
+    <button id="submitBtn" class="btn-primary" disabled>Submit</button>
+    <button id="endBtn" class="btn-text">End Game</button>
+  </div>
+
+  <div id="result" class="result"></div>
   <div id="inlineToast" class="inline-toast"></div>
 </div>
 
-<!-- PROGRESS MODAL -->
-<div id="modalBack" class="modal-backdrop">
+<!-- Progress Modal -->
+<div id="modalBackdrop" class="modal-backdrop">
   <div id="modal" class="modal">
     <div class="modal-header">
-      <div class="modal-title" id="modalTitle">Progress</div>
+      <div id="modalTitle" class="modal-title">Progress</div>
       <button id="closeModal" class="close-btn">Close</button>
     </div>
-    <div><strong>Checkout chain</strong></div>
-    <div id="chain" class="chain">—</div>
-    <div class="pick-list" id="pickList"></div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:8px">Score chain</div>
+    <div id="chain" class="chain">501</div>
+    <div id="pickList" class="pick-list"></div>
+  </div>
+</div>
+
+<!-- Confirm Dialog -->
+<div id="confirmOverlay" class="confirm-overlay">
+  <div class="confirm-box">
+    <p id="confirmText">Are you sure?</p>
+    <div class="confirm-btns">
+      <button id="confirmNo" class="btn-secondary">Cancel</button>
+      <button id="confirmYes" class="btn-danger">End Game</button>
+    </div>
   </div>
 </div>
 
 <script>
-const API={ start:'/.netlify/functions/start-game', validate:'/.netlify/functions/validate-player', score:'/.netlify/functions/score-round' };
-const TTL=90*60*1000;
+// ============== CONFIGURATION ==============
+const API_BASE = '/.netlify/functions';
+const CACHE_TTL = 90 * 60 * 1000; // 90 minutes
+const DEBOUNCE_MS = 300;
 
-/* ---- GAME CATALOG ----
-collection keys must match backend COLLECTION_MAP in validate-player.js
-*/
-const GAMES = {
+// Categories available (must match backend)
+const CATEGORIES = {
   country: [
-    { title:'Spain — players in PL',     flag:'🇪🇸', collection:'prem_country', filterKey:'Country', filterValue:'Spain',  fieldName:'Matches' },
-    { title:'France — players in PL',    flag:'🇫🇷', collection:'prem_country', filterKey:'Country', filterValue:'France', fieldName:'Matches' },
-    { title:'Brazil — players in PL',    flag:'🇧🇷', collection:'prem_country', filterKey:'Country', filterValue:'Brazil', fieldName:'Matches' },
+    { id: 'country_FRA', title: 'France', flag: '🇫🇷' },
+    { id: 'country_ESP', title: 'Spain', flag: '🇪🇸' },
+    { id: 'country_ARG', title: 'Argentina', flag: '🇦🇷' },
+    { id: 'country_NED', title: 'Netherlands', flag: '🇳🇱' },
+    { id: 'country_POR', title: 'Portugal', flag: '🇵🇹' },
   ],
   club: [
-    /* FIX: filterKey=Club (not Team) */
-    { title:'Man Utd — players in PL',   flag:'🟥',  collection:'prem_club',    filterKey:'Club',    filterValue:'Man Utd',   fieldName:'Matches' },
-    { title:'Sunderland — players in PL',flag:'🔴⚪️',collection:'prem_club',    filterKey:'Club',    filterValue:'Sunderland', fieldName:'Matches' },
+    { id: 'club_Arsenal', title: 'Arsenal', flag: '🔴' },
+    { id: 'club_ManUtd', title: 'Manchester United', flag: '🟥' },
+    { id: 'club_Liverpool', title: 'Liverpool', flag: '🔴' },
+    { id: 'club_Leicester', title: 'Leicester City', flag: '🦊' },
+    { id: 'club_Sunderland', title: 'Sunderland', flag: '🔴⚪' },
   ],
-  competition: [
-    { title:'Champions League — goals since 1992', flag:'🏆', collection:'ucl_goals', fieldName:'Goals' }
-  ],
- other: [
-  {
-    title: "British players in Europe’s Top 5 (ex-EPL) (ENG, SCO, WAL, NI)",
-    flag: "🇬🇧",
-    collection: "british_europe",
-    fieldName: "Matches"
-  }
-]
 };
 
-let playersCache=[], state=null, currentGame=null;
+// ============== STATE ==============
+let state = null;
+let eligiblePlayers = [];
+let currentCategory = null;
+let triviaData = [];
+let triviaIndex = 0;
+let matchDataReady = false;
+let debounceTimer = null;
 
-/* ---------- Setup flow ---------- */
-document.getElementById('toStep2').onclick=()=>{
-  const n=+document.getElementById('numPlayers').value;
-  const wrap=document.getElementById('nameFields'); wrap.innerHTML='';
-  for(let i=1;i<=n;i++){
-    const c=document.createElement('div'); c.className='input';
-    c.innerHTML=`<label class="label">Player ${i}</label><input id="pname${i}" placeholder="Enter name">`;
-    wrap.appendChild(c);
-  }
-  show('step2'); hide('step1');
-};
+// ============== UTILITIES ==============
+function $(id) { return document.getElementById(id); }
+function show(id) { $(id)?.classList.remove('hidden'); }
+function hide(id) { $(id)?.classList.add('hidden'); }
 
-document.getElementById('toStep3').onclick=()=>{
-  const n=+document.getElementById('numPlayers').value;
-  const names=[]; for(let i=1;i<=n;i++){ names.push(document.getElementById(`pname${i}`).value||`Player ${i}`); }
-  window.gameSetup={names};
-  buildGameSections(); show('step3'); hide('step2');
-};
-
-function toggleSec(id){
-  const sec=document.getElementById(id);
-  const open=sec.classList.toggle('open');
-  sec.querySelector('.chev').textContent = open ? '▾' : '▸';
+function normalize(s) {
+  return String(s || '').toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\s.-]/g, '').trim();
 }
 
-/* ---------- Build sections & preload stats ---------- */
-function buildGameSections(){
-  buildSection('countryGames', GAMES.country);
-  buildSection('clubGames', GAMES.club);
-  buildSection('compGames', GAMES.competition);
-  buildSection('otherGames', GAMES.other, true);
-}
-
-function buildSection(containerId, list, isOther=false){
-  const cont=document.getElementById(containerId); cont.innerHTML='';
-  list.forEach(game=>{
-    const el=document.createElement('div'); el.className='game-card';
-    const left = `<div><div><b>${game.flag||''} ${game.title} ${isOther && game.flagsHTML ? game.flagsHTML : ''}</b></div><div class="game-meta" id="info-${hashGame(game)}">Loading…</div></div>`;
-    el.innerHTML=`${left}<div>➤</div>`;
-    el.onclick=()=> chooseGame(game);
-    cont.appendChild(el);
-    preloadStats(game);
-  });
-}
-
-function hashGame(g){ return btoa(`${g.collection}|${g.filterKey||''}|${g.filterValue||''}|${g.fieldName}`).replace(/=+$/,''); }
-
-async function preloadStats(game){
-  const id=`info-${hashGame(game)}`;
-  try{
-    const url = new URL(API.validate, location.origin);
-    url.searchParams.set('fetchAll','1');
-    url.searchParams.set('collection', game.collection);
-    if(game.filterKey)  url.searchParams.set('filterKey', game.filterKey);
-    if(game.filterValue)url.searchParams.set('filterValue', game.filterValue);
-    url.searchParams.set('fieldName', game.fieldName);
-    const res=await fetch(url.toString());
-    const data=await res.json();
-    const total=data.length;
-    const totalVal=data.reduce((a,b)=>a+Number(b[game.fieldName]||b.matches||b.goals||0),0);
-    // Difficulty: base on dataset size (smaller = harder) + small bias per game family
-    const group=(window.gameSetup?.names?.length||2);
-    let base;
-    if(game.collection==='ucl_goals'){ base = 1; }                 // easiest
-    else if(game.collection==='prem_country' && game.filterValue==='Brazil'){ base = 4; } // harder
-    else{
-      base = total>=400?1 : total>=250?2 : total>=150?3 : total>=100?4 : 5;
+function levenshtein(a, b) {
+  const m = a.length, n = b.length;
+  if (!m) return n;
+  if (!n) return m;
+  const d = Array.from({ length: m + 1 }, (_, i) => Array(n + 1).fill(0));
+  for (let i = 0; i <= m; i++) d[i][0] = i;
+  for (let j = 0; j <= n; j++) d[0][j] = j;
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + cost);
     }
-    const groupAdj=Math.min(1, Math.max(0, (group-2)>0 ? 1 : 0));   // more players → +1 star max
-    const diff=Math.min(5, Math.max(1, base + groupAdj));
-    const fmt = n => Number(n||0).toLocaleString('en-GB');
-    document.getElementById(id).innerHTML=
-      `<span class="stars">${'★'.repeat(diff)}${'☆'.repeat(5-diff)}</span> • ${fmt(total)} players • ${fmt(totalVal)} ${game.fieldName.toLowerCase()}`;
-  }catch{ document.getElementById(id).textContent='—'; }
-}
-
-async function chooseGame(game){
-  currentGame = game;
-  hide('step3'); show('loadingScreen');
-  try{
-    playersCache = await fetchAllForGame(game);
-  }catch(e){
-    alert('Failed to load data. Try again.'); show('step3'); hide('loadingScreen'); return;
   }
-  hide('loadingScreen'); show('randomisingScreen');
-  await randomiseOrderAndShow();
+  return d[m][n];
 }
 
-function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
-async function randomiseOrderAndShow(){
-  const names=[...(window.gameSetup?.names||['Player 1','Player 2'])];
-  for(let i=0;i<8;i++){
-    names.sort(()=>Math.random()-0.5);
-    document.querySelector('#randomisingScreen .randomising').textContent='🎲 Randomising order… '+names.join(' • ');
-    await sleep(120);
+function similarity(a, b) {
+  const na = normalize(a), nb = normalize(b);
+  if (!na || !nb) return 0;
+  return 1 - (levenshtein(na, nb) / Math.max(na.length, nb.length));
+}
+
+function formatNum(n) {
+  return Number(n || 0).toLocaleString('en-GB');
+}
+
+function sleep(ms) {
+  return new Promise(r => setTimeout(r, ms));
+}
+
+// ============== CACHING ==============
+function getCacheKey(categoryId) {
+  return `f501_${categoryId}`;
+}
+
+function getCachedData(categoryId) {
+  const key = getCacheKey(categoryId);
+  const tsKey = `${key}_ts`;
+  const cached = localStorage.getItem(key);
+  const ts = parseInt(localStorage.getItem(tsKey) || '0', 10);
+  if (cached && (Date.now() - ts) < CACHE_TTL) {
+    try {
+      return JSON.parse(cached);
+    } catch { }
   }
-  names.sort(()=>Math.random()-0.5);
-  const orderEl=document.getElementById('orderList'); orderEl.classList.remove('hidden');
-  orderEl.innerHTML='<b>Order:</b> '+names.map((n,i)=>`${i+1}. ${n}`).join('&nbsp;&nbsp;');
-  const btn=document.getElementById('beginMatch'); btn.classList.remove('hidden');
-  btn.onclick=()=>beginMatch(names);
+  return null;
 }
 
-async function beginMatch(names){
-  state={
-    players:names,
-    scores:Array(names.length).fill(501),
-    turn:0,
-    used:new Set(),
-    retry:false,
-    historyScores:names.map(()=>[501]),
-    picks:names.map(()=>[])
-  };
-  renderScoreGrid(); updateTurnUI();
-  show('playCard'); hide('setupCard'); document.getElementById('guess').focus();
+function setCachedData(categoryId, data) {
+  const key = getCacheKey(categoryId);
+  localStorage.setItem(key, JSON.stringify(data));
+  localStorage.setItem(`${key}_ts`, String(Date.now()));
 }
 
-/* ---------- Data (per-game cache) ---------- */
-async function fetchAllForGame(game){
-  const key=`players_${game.collection}_${game.filterKey||'ALL'}_${game.filterValue||'ALL'}_${game.fieldName}`;
-  const tsKey=`${key}_ts`;
-  const now=Date.now(), ts=+localStorage.getItem(tsKey)||0;
-  const cached=localStorage.getItem(key);
-  if(cached && (now-ts)<TTL) return JSON.parse(cached);
-  const url = new URL(API.validate, location.origin);
-  url.searchParams.set('fetchAll','1');
-  url.searchParams.set('collection', game.collection);
-  if(game.filterKey)  url.searchParams.set('filterKey', game.filterKey);
-  if(game.filterValue)url.searchParams.set('filterValue', game.filterValue);
-  url.searchParams.set('fieldName', game.fieldName);
-  const res=await fetch(url.toString());
-  const data=await res.json();
-  localStorage.setItem(key, JSON.stringify(data)); localStorage.setItem(tsKey, String(now));
-  return data;
-}
+// ============== SETUP FLOW ==============
+$('toStep2').onclick = () => {
+  const n = parseInt($('numPlayers').value, 10);
+  const wrap = $('nameFields');
+  wrap.innerHTML = '';
+  for (let i = 1; i <= n; i++) {
+    const div = document.createElement('div');
+    div.className = 'field';
+    div.innerHTML = `<label>Player ${i}</label><input id="pname${i}" type="text" placeholder="Enter name" autocomplete="off"/>`;
+    wrap.appendChild(div);
+  }
+  hide('step1');
+  show('step2');
+  $('pname1')?.focus();
+};
 
-/* ---------- Gameplay UI ---------- */
-function renderScoreGrid(){
-  const grid=document.getElementById('scoreGrid'); grid.innerHTML='';
-  state.players.forEach((name,idx)=>{
-    const div=document.createElement('div');
-    div.className='pill'+(idx===state.turn?' active':'');
-    div.innerHTML=`<div class="name">${name}</div><div class="num" id="score_${idx}">${state.scores[idx]}</div>`;
-    div.onclick=()=>openProgressModal(idx);
-    grid.appendChild(div);
+$('toStep3').onclick = () => {
+  const n = parseInt($('numPlayers').value, 10);
+  const names = [];
+  for (let i = 1; i <= n; i++) {
+    const val = $(`pname${i}`)?.value?.trim() || `Player ${i}`;
+    names.push(val);
+  }
+  window.gameSetup = { names };
+  buildCategorySections();
+  hide('step2');
+  show('step3');
+};
+
+function toggleSection(id) {
+  const sec = $(id);
+  const isOpen = sec.classList.toggle('open');
+  // Close others
+  document.querySelectorAll('.section').forEach(s => {
+    if (s.id !== id) s.classList.remove('open');
   });
 }
-function setActivePill(){ document.querySelectorAll('.pill').forEach((el,i)=> el.classList.toggle('active', i===state.turn)); }
-function updateTurnUI(){ document.getElementById('turnInfo').textContent=`${state.players[state.turn]}'s turn`; updateCheckoutHint(); setActivePill(); }
 
-function updateCheckoutHint(){
-  const hint=document.getElementById('checkoutHint'); const remaining=state.scores[state.turn];
-  if(remaining<=0 || playersCache.length===0){ hint.classList.add('hidden'); hint.textContent=''; return; }
-  const getVal = (p)=> Number(p[currentGame.fieldName] ?? p.matches ?? p.goals ?? 0);
-  const available=playersCache.filter(p=>!state.used.has((p.player||'').toLowerCase()));
-  const direct=available.reduce((a,p)=>a+(getVal(p)===remaining?1:0),0);
-  const freq=new Map(); for(const p of available){ const m=getVal(p); if(m>0 && m<=remaining) freq.set(m,(freq.get(m)||0)+1); }
-  let pairs=0; for(const [m,c] of freq.entries()){ const n=remaining-m; if(n<m) continue; if(!freq.has(n)) continue; pairs+= (n===m)? c*(c-1)/2 : c*freq.get(n); }
-  const fmt = n => Number(n||0).toLocaleString('en-GB');
-  hint.innerHTML=`Checkout: <strong>${direct===0?'no':fmt(direct)}</strong> direct · <strong>${pairs>10?'>10':fmt(pairs)}</strong> two-player combos`;
-  hint.classList.remove('hidden');
+function buildCategorySections() {
+  buildSection('countryGames', CATEGORIES.country, 'EPL appearances');
+  buildSection('clubGames', CATEGORIES.club, 'EPL appearances');
 }
 
-/* ---------- Progress modal ---------- */
-function openProgressModal(i){
-  document.getElementById('modalTitle').textContent=`${state.players[i]} — Progress`;
-  document.getElementById('chain').textContent=state.historyScores[i].join(' → ');
-  const list=state.picks[i].slice(0,12).map(p=>`
-    <div class="pick${p.bust?' bust':''}">
-      <div><b>${p.name}</b> <span class="meta">-${p.matches}</span></div>
-      <div class="meta">${p.from} → ${p.to}${p.bust?' (bust)':''}</div>
-    </div>`).join('') || '<div class="pick"><div>No picks yet</div></div>';
-  document.getElementById('pickList').innerHTML=list;
-  const back=document.getElementById('modalBack'); const modal=document.getElementById('modal');
-  back.classList.add('show'); requestAnimationFrame(()=> modal.classList.add('show'));
+function buildSection(containerId, list, subtitle) {
+  const cont = $(containerId);
+  cont.innerHTML = '';
+  list.forEach(cat => {
+    const card = document.createElement('div');
+    card.className = 'game-card';
+    card.innerHTML = `
+      <div style="display:flex;align-items:center">
+        <span class="flag">${cat.flag}</span>
+        <div>
+          <div class="title">${cat.title}</div>
+          <div class="meta" id="meta-${cat.id}">Loading...</div>
+        </div>
+      </div>
+      <div class="arrow">→</div>
+    `;
+    card.onclick = () => chooseCategory(cat);
+    cont.appendChild(card);
+    // Preload stats
+    preloadCategoryStats(cat);
+  });
 }
-function closeModal(){ const back=document.getElementById('modalBack'); const modal=document.getElementById('modal'); modal.classList.remove('show'); setTimeout(()=> back.classList.remove('show'), 160); }
-document.getElementById('closeModal').onclick=closeModal;
-document.getElementById('modalBack').onclick=(e)=>{ if(e.target.id==='modalBack') closeModal(); };
 
-/* ---------- Inline toast ---------- */
-let toastTimer=null;
-function showImpactInline({ canonical, matches, starts, goals, mins }, before, after){
-  const box=document.getElementById('inlineToast');
-  const fmt=n=>Number(n||0).toLocaleString('en-GB');
-  const field=currentGame.fieldName;
-  box.innerHTML=`<div class="toast-row"><div class="badge">-${fmt(matches)}</div>
-    <div class="toast-body"><div class="toast-title">${canonical}</div>
-    <div class="toast-sub">${fmt(before)} → ${fmt(after)}</div>
-    <div class="toast-meta">
-      <span>${field} ${fmt(matches)}</span>
-      ${starts!==undefined?`<span>Starts ${fmt(starts)}</span>`:''}
-      ${goals!==undefined?`<span>Goals ${fmt(goals)}</span>`:''}
-      ${mins!==undefined?`<span>Mins ${fmt(mins)}</span>`:''}
-    </div></div></div>`;
-  box.classList.add('show'); if(toastTimer) clearTimeout(toastTimer); toastTimer=setTimeout(()=> box.classList.remove('show'),5000);
+async function preloadCategoryStats(cat) {
+  const metaEl = $(`meta-${cat.id}`);
+  const cached = getCachedData(cat.id);
+  if (cached) {
+    const count = cached.eligiblePlayers?.length || 0;
+    const total = (cached.eligiblePlayers || []).reduce((a, p) => a + (p.subtractValue || 0), 0);
+    const diff = getDifficulty(count);
+    metaEl.innerHTML = `<span class="stars">${'★'.repeat(diff)}${'☆'.repeat(5 - diff)}</span> ${formatNum(count)} players • ${formatNum(total)} apps`;
+    return;
+  }
+  // Fetch stats (will cache)
+  try {
+    const res = await fetch(`${API_BASE}/match_start`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ categoryId: cat.id }),
+    });
+    const data = await res.json();
+    if (data.eligiblePlayers) {
+      setCachedData(cat.id, data);
+      const count = data.eligiblePlayers.length;
+      const total = data.eligiblePlayers.reduce((a, p) => a + (p.subtractValue || 0), 0);
+      const diff = getDifficulty(count);
+      metaEl.innerHTML = `<span class="stars">${'★'.repeat(diff)}${'☆'.repeat(5 - diff)}</span> ${formatNum(count)} players • ${formatNum(total)} apps`;
+    }
+  } catch {
+    metaEl.textContent = '—';
+  }
 }
-document.getElementById('guess').addEventListener('input',()=> document.getElementById('inlineToast').classList.remove('show'));
 
-/* ---------- Submit / End ---------- */
-document.getElementById('submit').onclick=onSubmit;
-document.getElementById('end').onclick=()=>{ if(confirm('End this match?')) location.reload(); };
+function getDifficulty(count) {
+  if (count >= 400) return 1;
+  if (count >= 250) return 2;
+  if (count >= 150) return 3;
+  if (count >= 100) return 4;
+  return 5;
+}
 
-async function onSubmit(){
-  const input=document.getElementById('guess'); const raw=input.value.trim(); if(!raw) return;
-  const lower=raw.toLowerCase();
+// ============== CATEGORY SELECTION & LOADING ==============
+async function chooseCategory(cat) {
+  currentCategory = cat;
+  matchDataReady = false;
+  triviaIndex = 0;
 
-  if(state.used.has(lower)){
-    if(!state.retry){ state.retry=true; setResult('⚠️ Already used. Try once more.'); input.focus(); return; }
-    state.retry=false; setResult('❌ Duplicate. Turn passes.'); nextTurn(); return;
+  hide('step3');
+  show('loadingScreen');
+  hide('readyBadge');
+  hide('skipTrivia');
+  $('triviaContainer').innerHTML = '';
+
+  // Check cache first
+  const cached = getCachedData(cat.id);
+  if (cached) {
+    eligiblePlayers = cached.eligiblePlayers || [];
+    triviaData = cached.meta?.trivia || [];
+    matchDataReady = true;
+    showReadyState();
+    showTrivia();
+    return;
   }
 
-  // validate for the chosen game
-  let v; 
-  try{
-    const url = new URL(API.validate, location.origin);
-    url.searchParams.set('collection', currentGame.collection);
-    if(currentGame.filterKey)  url.searchParams.set('filterKey', currentGame.filterKey);
-    if(currentGame.filterValue)url.searchParams.set('filterValue', currentGame.filterValue);
-    url.searchParams.set('fieldName', currentGame.fieldName);
-    v=await fetch(url.toString(),{
-      method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({guess:raw})
-    }).then(r=>r.json());
-  }catch(_){ v={valid:false}; }
+  // Fetch data
+  const fetchPromise = (async () => {
+    try {
+      const res = await fetch(`${API_BASE}/match_start`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ categoryId: cat.id }),
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      setCachedData(cat.id, data);
+      eligiblePlayers = data.eligiblePlayers || [];
+      triviaData = data.meta?.trivia || [];
+      matchDataReady = true;
+      showReadyState();
+    } catch (err) {
+      alert('Failed to load match data: ' + err.message);
+      show('step3');
+      hide('loadingScreen');
+    }
+  })();
 
-  if(!v.valid){
-    if(!state.retry){ state.retry=true; setResult('❌ Not found. Try once more.'); input.focus(); return; }
-    state.retry=false; setResult('❌ Not found. Turn passes.'); nextTurn(); return;
+  // Show trivia while loading
+  await sleep(500); // Brief delay before trivia
+  showTrivia();
+  await fetchPromise;
+}
+
+function showReadyState() {
+  show('readyBadge');
+  show('skipTrivia');
+  $('skipTrivia').textContent = 'Start Match';
+}
+
+function showTrivia() {
+  if (!triviaData.length) {
+    // No trivia, just wait for data
+    if (matchDataReady) {
+      proceedToOrderReveal();
+    }
+    return;
   }
 
-  state.retry=false;
-  const canonical=(v.canonical||raw).toLowerCase();
-  if(state.used.has(canonical)){ setResult('⚠️ Already used. Turn passes.'); nextTurn(); return; }
-
-  // score
-  const before=state.scores[state.turn];
-  let s;
-  try{
-    s=await fetch(API.score,{
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({player:state.turn,scores:state.scores,deduct:v.matches})
-    }).then(r=>r.json());
-  }catch(_){ setResult('Error scoring.'); return; }
-
-  // safety: ensure lengths match
-  if(!s || !Array.isArray(s.scores) || s.scores.length !== state.scores.length){
-    const patched=state.scores.slice();
-    if(s && !s.bust){ patched[state.turn]=Math.max(0, state.scores[state.turn]-Number(v.matches||0)); }
-    s={scores:patched,bust:s?.bust||false,win:patched[state.turn]===0,message:s?.message||''};
+  if (triviaIndex >= triviaData.length) {
+    // All trivia done
+    if (matchDataReady) {
+      proceedToOrderReveal();
+    }
+    return;
   }
 
-  if(s.bust){
-    setResult(`💥 Bust! ${v.canonical} has ${Number(v.matches).toLocaleString('en-GB')}. Score stays ${Number(state.scores[state.turn]).toLocaleString('en-GB')}.`);
-    state.picks[state.turn].unshift({name:v.canonical,matches:v.matches,from:before,to:before,bust:true});
-  }else{
-    state.scores=s.scores;
-    const after=state.scores[state.turn];
-    const scoreEl=document.getElementById(`score_${state.turn}`);
-    animateCount(scoreEl, before, after, 850);
-    setResult(s.win ? `🎯 ${state.players[state.turn]} checked out with ${v.canonical} (${Number(v.matches).toLocaleString('en-GB')}).`
-                    : `✅ ${v.canonical}: −${Number(v.matches).toLocaleString('en-GB')}`);
-    state.used.add(canonical);
+  const q = triviaData[triviaIndex];
+  const container = $('triviaContainer');
+  container.innerHTML = `
+    <div class="trivia-box">
+      <div class="trivia-q">${q.q}</div>
+      <div class="trivia-opts">
+        ${q.options.map((opt, i) => `<div class="trivia-opt" data-idx="${i}">${opt}</div>`).join('')}
+      </div>
+    </div>
+  `;
+
+  container.querySelectorAll('.trivia-opt').forEach(el => {
+    el.onclick = () => handleTriviaAnswer(parseInt(el.dataset.idx, 10), q.answer);
+  });
+}
+
+function handleTriviaAnswer(selected, correct) {
+  const opts = $('triviaContainer').querySelectorAll('.trivia-opt');
+  opts.forEach((el, i) => {
+    el.onclick = null;
+    if (i === correct) el.classList.add('correct');
+    else if (i === selected) el.classList.add('wrong');
+  });
+
+  setTimeout(() => {
+    triviaIndex++;
+    showTrivia();
+  }, 1200);
+}
+
+$('skipTrivia').onclick = () => {
+  if (matchDataReady) {
+    proceedToOrderReveal();
+  }
+};
+
+// ============== ORDER REVEAL ==============
+async function proceedToOrderReveal() {
+  hide('loadingScreen');
+  show('orderScreen');
+
+  const names = [...(window.gameSetup?.names || ['Player 1', 'Player 2'])];
+
+  // Randomize order with animation
+  const orderEl = $('orderList');
+  for (let i = 0; i < 8; i++) {
+    names.sort(() => Math.random() - 0.5);
+    orderEl.innerHTML = names.map((n, i) => `<div>${i + 1}. ${n}</div>`).join('');
+    await sleep(100);
+  }
+  names.sort(() => Math.random() - 0.5);
+  orderEl.innerHTML = names.map((n, i) => `<div><strong>${i + 1}.</strong> ${n}</div>`).join('');
+
+  window.gameSetup.orderedNames = names;
+}
+
+$('beginMatch').onclick = () => {
+  const names = window.gameSetup?.orderedNames || window.gameSetup?.names || ['Player 1', 'Player 2'];
+  startMatch(names);
+};
+
+// ============== MATCH START ==============
+function startMatch(names) {
+  state = {
+    players: names,
+    scores: Array(names.length).fill(501),
+    turn: 0,
+    used: new Set(),
+    retry: false,
+    historyScores: names.map(() => [501]),
+    picks: names.map(() => []),
+  };
+
+  hide('setupCard');
+  show('playCard');
+
+  const grid = $('scoreGrid');
+  grid.className = `scores p${names.length}`;
+
+  renderScoreboard();
+  updateTurnUI();
+  $('guess').focus();
+}
+
+// ============== SCOREBOARD ==============
+function renderScoreboard() {
+  const grid = $('scoreGrid');
+  grid.innerHTML = '';
+  state.players.forEach((name, idx) => {
+    const pill = document.createElement('div');
+    pill.className = 'pill' + (idx === state.turn ? ' active' : '');
+    pill.innerHTML = `<div class="name">${name}</div><div class="score" id="score_${idx}">${state.scores[idx]}</div>`;
+    pill.onclick = () => openProgressModal(idx);
+    grid.appendChild(pill);
+  });
+}
+
+function updateTurnUI() {
+  $('turnInfo').textContent = `${state.players[state.turn]}'s turn`;
+  document.querySelectorAll('.pill').forEach((el, i) => {
+    el.classList.toggle('active', i === state.turn);
+  });
+  updateHintBar();
+}
+
+function updateHintBar() {
+  const hintBar = $('hintBar');
+  const remaining = state.scores[state.turn];
+
+  if (remaining <= 0 || eligiblePlayers.length === 0) {
+    hintBar.classList.add('hidden');
+    return;
+  }
+
+  const available = eligiblePlayers.filter(p => !state.used.has(p.normalized));
+  const direct = available.filter(p => p.subtractValue === remaining).length;
+
+  // Count 2-player combos
+  const freq = new Map();
+  for (const p of available) {
+    const v = p.subtractValue;
+    if (v > 0 && v <= remaining) {
+      freq.set(v, (freq.get(v) || 0) + 1);
+    }
+  }
+  let pairs = 0;
+  for (const [m, c] of freq.entries()) {
+    const n = remaining - m;
+    if (n < m) continue;
+    if (!freq.has(n)) continue;
+    pairs += (n === m) ? c * (c - 1) / 2 : c * freq.get(n);
+  }
+
+  hintBar.innerHTML = `Checkout: <strong>${direct || 'no'}</strong> direct • <strong>${pairs > 10 ? '>10' : pairs}</strong> two-player combos`;
+  hintBar.classList.remove('hidden');
+}
+
+// ============== INPUT HANDLING ==============
+const guessInput = $('guess');
+const submitBtn = $('submitBtn');
+
+guessInput.oninput = () => {
+  const val = guessInput.value.trim();
+  submitBtn.disabled = !val;
+  hideSelectionList();
+  hideToast();
+
+  // Debounced fuzzy search
+  clearTimeout(debounceTimer);
+  if (val.length >= 2) {
+    debounceTimer = setTimeout(() => showFuzzyMatches(val), DEBOUNCE_MS);
+  }
+};
+
+guessInput.onkeydown = (e) => {
+  if (e.key === 'Enter' && !submitBtn.disabled) {
+    e.preventDefault();
+    handleSubmit();
+  }
+};
+
+submitBtn.onclick = handleSubmit;
+
+function showFuzzyMatches(input) {
+  const norm = normalize(input);
+  if (norm.length < 2) return;
+
+  // Find matches (exclude already used)
+  const available = eligiblePlayers.filter(p => !state.used.has(p.normalized));
+
+  // Score matches
+  const scored = available.map(p => ({
+    player: p,
+    score: p.normalized.includes(norm) ? 0.95 : similarity(p.normalized, norm),
+    exactStart: p.normalized.startsWith(norm),
+  }));
+
+  // Filter and sort
+  const matches = scored
+    .filter(m => m.score >= 0.5 || m.exactStart)
+    .sort((a, b) => {
+      if (a.exactStart !== b.exactStart) return b.exactStart - a.exactStart;
+      return b.score - a.score;
+    })
+    .slice(0, 5);
+
+  if (matches.length === 0) return;
+
+  // Check for exact match
+  const exact = available.find(p => p.normalized === norm);
+  if (exact) return; // Don't show list for exact matches
+
+  // Show selection list
+  const list = $('selectionList');
+  list.innerHTML = matches.map(m => `
+    <div class="selection-item" data-norm="${m.player.normalized}">
+      <div>
+        <div class="name">${m.player.name}</div>
+        <div class="nat">${m.player.nationality}</div>
+      </div>
+      <div class="apps">${formatNum(m.player.subtractValue)}</div>
+    </div>
+  `).join('');
+
+  list.querySelectorAll('.selection-item').forEach(el => {
+    el.onclick = () => selectPlayer(el.dataset.norm);
+  });
+
+  list.classList.remove('hidden');
+}
+
+function selectPlayer(normalized) {
+  const player = eligiblePlayers.find(p => p.normalized === normalized);
+  if (player) {
+    guessInput.value = player.name;
+    submitBtn.disabled = false;
+    hideSelectionList();
+    handleSubmit();
+  }
+}
+
+function hideSelectionList() {
+  $('selectionList').classList.add('hidden');
+}
+
+// ============== SUBMIT LOGIC ==============
+async function handleSubmit() {
+  const raw = guessInput.value.trim();
+  if (!raw) return;
+
+  submitBtn.disabled = true;
+  hideSelectionList();
+
+  const norm = normalize(raw);
+
+  // Check if already used
+  if (state.used.has(norm)) {
+    if (!state.retry) {
+      state.retry = true;
+      setResult('⚠️ Already used. Try once more.');
+      submitBtn.disabled = false;
+      guessInput.select();
+      return;
+    }
+    state.retry = false;
+    setResult('❌ Duplicate. Turn passes.');
+    nextTurn();
+    return;
+  }
+
+  // Find player in cached list
+  const available = eligiblePlayers.filter(p => !state.used.has(p.normalized));
+
+  // Try exact match first
+  let match = available.find(p => p.normalized === norm);
+
+  // Try contains match
+  if (!match) {
+    match = available.find(p => p.normalized.includes(norm));
+  }
+
+  // Try fuzzy match
+  if (!match) {
+    let best = null;
+    let bestScore = 0;
+    for (const p of available) {
+      const s = similarity(p.normalized, norm);
+      if (s > bestScore) {
+        best = p;
+        bestScore = s;
+      }
+    }
+    if (best && bestScore >= 0.78) {
+      match = best;
+    }
+  }
+
+  if (!match) {
+    if (!state.retry) {
+      state.retry = true;
+      setResult('❌ Not found. Try once more.');
+      submitBtn.disabled = false;
+      guessInput.select();
+      return;
+    }
+    state.retry = false;
+    setResult('❌ Not found. Turn passes.');
+    nextTurn();
+    return;
+  }
+
+  state.retry = false;
+
+  // Double-check not already used (by normalized name)
+  if (state.used.has(match.normalized)) {
+    setResult('⚠️ Already used. Turn passes.');
+    nextTurn();
+    return;
+  }
+
+  // Calculate score
+  const before = state.scores[state.turn];
+  const deduct = match.subtractValue;
+  const after = before - deduct;
+
+  let bust = false;
+  let win = false;
+
+  if (deduct === 0) {
+    bust = true;
+  } else if (after < 0) {
+    bust = true;
+  } else if (after === 0) {
+    win = true;
+  }
+
+  // Record pick
+  state.picks[state.turn].unshift({
+    name: match.name,
+    apps: deduct,
+    from: before,
+    to: bust ? before : after,
+    bust,
+  });
+
+  if (bust) {
+    setResult(`💥 Bust! ${match.name} has ${formatNum(deduct)} apps. Score stays ${formatNum(before)}.`);
+    showToast(match, before, before, true);
+  } else {
+    state.scores[state.turn] = after;
     state.historyScores[state.turn].push(after);
-    state.picks[state.turn].unshift({name:v.canonical,matches:v.matches,from:before,to:after,bust:false});
-    showImpactInline(v, before, after);
+    state.used.add(match.normalized);
+
+    // Animate score
+    animateScore(state.turn, before, after);
+
+    if (win) {
+      setResult(`🎯 ${state.players[state.turn]} wins with ${match.name} (${formatNum(deduct)})!`);
+      showToast(match, before, after, false);
+      setTimeout(() => {
+        if (confirm(`${state.players[state.turn]} wins! Play again?`)) {
+          location.reload();
+        }
+      }, 1500);
+      return;
+    } else {
+      setResult(`✅ ${match.name}: −${formatNum(deduct)}`);
+      showToast(match, before, after, false);
+    }
   }
 
-  if(s.win){ setTimeout(()=>location.reload(), 1200); return; }
   nextTurn();
 }
 
-function nextTurn(){ const input=document.getElementById('guess'); input.value=''; input.focus(); state.turn=(state.turn+1)%state.players.length; renderScoreGrid(); updateTurnUI(); }
-function setResult(msg){ document.getElementById('result').textContent=msg; }
+function nextTurn() {
+  guessInput.value = '';
+  submitBtn.disabled = true;
+  state.turn = (state.turn + 1) % state.players.length;
+  renderScoreboard();
+  updateTurnUI();
+  guessInput.focus();
+}
 
-/* ---------- INIT ---------- */
-(function initNames(){
-  const n=+document.getElementById('numPlayers').value;
-  const wrap=document.getElementById('nameFields');
-  for(let i=1;i<=n;i++){
-    const c=document.createElement('div'); c.className='input';
-    c.innerHTML=`<label class="label">Player ${i}</label><input id="pname${i}" placeholder="Enter name">`;
-    wrap.appendChild(c);
+function setResult(msg) {
+  $('result').textContent = msg;
+}
+
+// ============== TOAST ==============
+let toastTimer = null;
+
+function showToast(player, before, after, isBust) {
+  const toast = $('inlineToast');
+  const o = player.overlay || {};
+  toast.innerHTML = `
+    <div class="toast-row">
+      <div class="toast-badge${isBust ? ' bust' : ''}">${isBust ? '💥' : '-' + formatNum(player.subtractValue)}</div>
+      <div class="toast-body">
+        <div class="toast-title">${player.name}</div>
+        <div class="toast-sub">${formatNum(before)} → ${formatNum(after)}</div>
+        <div class="toast-meta">
+          <span>Apps ${formatNum(o.apps)}</span>
+          ${o.goals ? `<span>Goals ${formatNum(o.goals)}</span>` : ''}
+          ${o.starts ? `<span>Starts ${formatNum(o.starts)}</span>` : ''}
+        </div>
+      </div>
+    </div>
+  `;
+  toast.classList.add('show');
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 5000);
+}
+
+function hideToast() {
+  $('inlineToast').classList.remove('show');
+}
+
+// ============== SCORE ANIMATION ==============
+function animateScore(idx, from, to) {
+  const el = $(`score_${idx}`);
+  if (!el) return;
+  const start = performance.now();
+  const duration = 800;
+  const diff = to - from;
+
+  function step(time) {
+    const progress = Math.min(1, (time - start) / duration);
+    const ease = progress < 0.5 ? 2 * progress * progress : -1 + (4 - 2 * progress) * progress;
+    el.textContent = Math.round(from + diff * ease);
+    if (progress < 1) {
+      requestAnimationFrame(step);
+    } else {
+      el.textContent = to;
+    }
   }
-})();
-function show(id){ document.getElementById(id).classList.remove('hidden'); }
-function hide(id){ document.getElementById(id).classList.add('hidden'); }
-function animateCount(el, from, to, dur=850){
-  const start=performance.now(); const diff=to-from;
-  function step(t){ const p=Math.min(1,(t-start)/dur); const ease=p<.5?2*p*p:-1+(4-2*p)*p; el.textContent=Math.round(from+diff*ease); if(p<1) requestAnimationFrame(step); else el.textContent=String(to); }
   requestAnimationFrame(step);
 }
+
+// ============== PROGRESS MODAL ==============
+function openProgressModal(idx) {
+  $('modalTitle').textContent = `${state.players[idx]} — Progress`;
+  $('chain').textContent = state.historyScores[idx].join(' → ');
+
+  const picks = state.picks[idx];
+  if (picks.length === 0) {
+    $('pickList').innerHTML = '<div class="pick"><div>No picks yet</div></div>';
+  } else {
+    $('pickList').innerHTML = picks.slice(0, 15).map(p => `
+      <div class="pick${p.bust ? ' bust' : ''}">
+        <div><b>${p.name}</b> <span class="meta">-${formatNum(p.apps)}</span></div>
+        <div class="meta">${formatNum(p.from)} → ${formatNum(p.to)}${p.bust ? ' (bust)' : ''}</div>
+      </div>
+    `).join('');
+  }
+
+  $('modalBackdrop').classList.add('show');
+  requestAnimationFrame(() => $('modal').classList.add('show'));
+}
+
+function closeModal() {
+  $('modal').classList.remove('show');
+  setTimeout(() => $('modalBackdrop').classList.remove('show'), 200);
+}
+
+$('closeModal').onclick = closeModal;
+$('modalBackdrop').onclick = (e) => {
+  if (e.target.id === 'modalBackdrop') closeModal();
+};
+
+// ============== END GAME CONFIRMATION ==============
+$('endBtn').onclick = () => {
+  $('confirmOverlay').classList.add('show');
+};
+
+$('confirmNo').onclick = () => {
+  $('confirmOverlay').classList.remove('show');
+};
+
+$('confirmYes').onclick = () => {
+  location.reload();
+};
+
+// ============== INIT ==============
+(function init() {
+  // Pre-populate name fields for default player count
+  const n = parseInt($('numPlayers').value, 10);
+  const wrap = $('nameFields');
+  for (let i = 1; i <= n; i++) {
+    const div = document.createElement('div');
+    div.className = 'field';
+    div.innerHTML = `<label>Player ${i}</label><input id="pname${i}" type="text" placeholder="Enter name" autocomplete="off"/>`;
+    wrap.appendChild(div);
+  }
+})();
 </script>
 </body>
 </html>
