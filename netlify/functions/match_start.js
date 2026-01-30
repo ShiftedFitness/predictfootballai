@@ -40,46 +40,48 @@ const HINTS = {
 };
 
 // Trivia questions (2-4 per category, hardcoded for now)
+// IMPORTANT: Trivia must never name players or reference player-level records,
+// to avoid giving gameplay advantage. Only aggregate stats and general knowledge allowed.
 const TRIVIA = {
   country_FRA: [
-    { q: 'Which French player has the most Premier League appearances?', options: ['Patrice Evra', 'Thierry Henry', 'Sylvain Distin', 'N\'Golo Kanté'], answer: 2 },
-    { q: 'How many French players have won the PL Golden Boot?', options: ['1', '2', '3', '4'], answer: 1 },
+    { q: 'Which decade saw the most French players debut in the Premier League?', options: ['1990s', '2000s', '2010s', '2020s'], answer: 1 },
+    { q: 'True or false: France has had more EPL players than any other non-UK country.', options: ['True', 'False'], answer: 0 },
   ],
   country_ESP: [
-    { q: 'Which Spanish player scored the first EPL goal for Spain?', options: ['Mikel Arteta', 'Albert Ferrer', 'Pepe Reina', 'Cesc Fàbregas'], answer: 1 },
-    { q: 'What club has had the most Spanish players?', options: ['Arsenal', 'Chelsea', 'Man City', 'Liverpool'], answer: 2 },
+    { q: 'Which EPL club historically signed the most Spanish players?', options: ['Arsenal', 'Chelsea', 'Man City', 'Liverpool'], answer: 2 },
+    { q: 'In which decade did Spanish players first become common in the EPL?', options: ['1990s', '2000s', '2010s', '2020s'], answer: 1 },
   ],
   country_ARG: [
-    { q: 'Which Argentine has the most EPL goals?', options: ['Carlos Tevez', 'Sergio Agüero', 'Pablo Zabaleta', 'Juan Pablo Ángel'], answer: 1 },
-    { q: 'How many Argentine players have won the PL?', options: ['5', '10', '15', '20+'], answer: 3 },
+    { q: 'Approximately how many Argentine players have appeared in the Premier League?', options: ['Under 30', '30-50', '50-80', 'Over 80'], answer: 1 },
+    { q: 'Which position have Argentine EPL players most commonly played?', options: ['Goalkeeper', 'Defender', 'Midfielder', 'Forward'], answer: 3 },
   ],
   country_NED: [
-    { q: 'Which Dutch player has the most EPL assists?', options: ['Dennis Bergkamp', 'Arjen Robben', 'Robin van Persie', 'Marc Overmars'], answer: 0 },
-    { q: 'What year did the first Dutch player appear in EPL?', options: ['1992', '1993', '1994', '1995'], answer: 0 },
+    { q: 'What year did the Premier League begin (when Dutch players could first appear)?', options: ['1990', '1992', '1994', '1996'], answer: 1 },
+    { q: 'True or false: Dutch players were among the first foreign imports to the EPL.', options: ['True', 'False'], answer: 0 },
   ],
   country_POR: [
-    { q: 'Which Portuguese player has the most EPL appearances?', options: ['José Fonte', 'Cristiano Ronaldo', 'Rui Patrício', 'Bernardo Silva'], answer: 0 },
-    { q: 'How many Portuguese players have won PL Player of the Month?', options: ['3', '5', '7', '10+'], answer: 3 },
+    { q: 'Which decade saw the biggest influx of Portuguese players to the EPL?', options: ['1990s', '2000s', '2010s', '2020s'], answer: 1 },
+    { q: 'How many EPL clubs have fielded Portuguese players?', options: ['Under 10', '10-15', '15-20', 'Over 20'], answer: 2 },
   ],
   club_Arsenal: [
-    { q: 'Who has the most EPL appearances for Arsenal?', options: ['Tony Adams', 'David Seaman', 'Ray Parlour', 'Thierry Henry'], answer: 0 },
-    { q: 'In what year did Arsenal go unbeaten?', options: ['2002', '2003', '2004', '2005'], answer: 2 },
+    { q: 'In what year did Arsenal go unbeaten in the league?', options: ['2002', '2003', '2004', '2005'], answer: 2 },
+    { q: 'Approximately how many players have made EPL appearances for Arsenal?', options: ['Under 150', '150-200', '200-250', 'Over 250'], answer: 2 },
   ],
   club_ManUtd: [
-    { q: 'Who has the most Man Utd EPL appearances?', options: ['Ryan Giggs', 'Paul Scholes', 'Gary Neville', 'Wayne Rooney'], answer: 0 },
-    { q: 'How many EPL titles has Man Utd won?', options: ['10', '13', '15', '20'], answer: 1 },
+    { q: 'How many EPL titles has Manchester United won?', options: ['10', '13', '15', '20'], answer: 1 },
+    { q: 'In which decade did Man Utd win the most Premier League titles?', options: ['1990s', '2000s', '2010s', '2020s'], answer: 1 },
   ],
   club_Liverpool: [
-    { q: 'Who has the most Liverpool EPL appearances?', options: ['Steven Gerrard', 'Jamie Carragher', 'Sami Hyypiä', 'Jordan Henderson'], answer: 1 },
-    { q: 'What year did Liverpool win their first EPL title?', options: ['2019', '2020', '2021', '2022'], answer: 1 },
+    { q: 'What year did Liverpool win their first Premier League title?', options: ['2019', '2020', '2021', '2022'], answer: 1 },
+    { q: 'Approximately how many different players have made EPL appearances for Liverpool?', options: ['Under 150', '150-200', '200-250', 'Over 250'], answer: 2 },
   ],
   club_Leicester: [
-    { q: 'Who scored the most goals in Leicester\'s title season?', options: ['Riyad Mahrez', 'Jamie Vardy', 'Leonardo Ulloa', 'Shinji Okazaki'], answer: 1 },
-    { q: 'How many points did Leicester get in 2015-16?', options: ['77', '81', '85', '87'], answer: 1 },
+    { q: 'How many points did Leicester get in their 2015-16 title-winning season?', options: ['77', '81', '85', '87'], answer: 1 },
+    { q: 'Before 2016, when was Leicester\'s previous top-flight title?', options: ['1950s', '1960s', '1970s', 'Never'], answer: 3 },
   ],
   club_Sunderland: [
-    { q: 'Who has the most Sunderland EPL appearances?', options: ['John O\'Shea', 'Lee Cattermole', 'Wes Brown', 'Jermain Defoe'], answer: 0 },
-    { q: 'How many EPL seasons did Sunderland have?', options: ['14', '16', '18', '20'], answer: 1 },
+    { q: 'How many EPL seasons has Sunderland competed in?', options: ['14', '16', '18', '20'], answer: 1 },
+    { q: 'In which decade did Sunderland last play in the Premier League?', options: ['1990s', '2000s', '2010s', '2020s'], answer: 2 },
   ],
 };
 
