@@ -134,8 +134,13 @@ button {
   animation: spin 1s linear infinite;
   margin: 0 auto 16px;
 }
+.loading-spinner.ready { animation: none; border-color: var(--accent); background: rgba(74,222,128,.2); }
+.loading-spinner.ready::after { content: '✓'; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); font-size: 24px; color: var(--accent); }
+.loading-screen { position: relative; }
+.loading-spinner-wrap { position: relative; width: 48px; height: 48px; margin: 0 auto 16px; }
 @keyframes spin { to { transform: rotate(360deg); } }
 .loading-text { font-size: 16px; margin-bottom: 20px; }
+.loading-text.ready { color: var(--accent); }
 .ready-badge {
   display: inline-block;
   background: var(--accent);
@@ -147,6 +152,7 @@ button {
   margin-bottom: 16px;
   animation: pulse 1.5s ease infinite;
 }
+.trivia-note { font-size: 11px; color: var(--muted); margin-top: 8px; font-style: italic; }
 @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .7; } }
 
 /* Trivia */
@@ -208,7 +214,23 @@ button {
   50% { transform: scale(1.1); }
 }
 .turn-info { text-align: center; font-weight: 700; margin-bottom: 10px; font-size: 14px; }
-.hint-bar { text-align: center; font-size: 12px; color: var(--accent); margin-bottom: 10px; padding: 8px; background: rgba(74,222,128,.08); border-radius: 10px; }
+.hint-bar { text-align: center; font-size: 12px; color: var(--accent); margin-bottom: 10px; padding: 8px; background: rgba(74,222,128,.08); border-radius: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.hint-bar .hint-text { flex: 1; }
+.coverage-btn { background: rgba(255,255,255,.1); border: none; color: var(--muted); padding: 4px 8px; border-radius: 6px; cursor: pointer; font-size: 11px; transition: all .2s; }
+.coverage-btn:hover { background: rgba(255,255,255,.2); color: #fff; }
+
+/* Coverage modal */
+.coverage-modal { max-width: 380px; }
+.coverage-grid { display: flex; flex-direction: column; gap: 6px; margin: 12px 0; }
+.coverage-row { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+.coverage-label { width: 70px; text-align: right; color: var(--muted); font-size: 11px; }
+.coverage-bar-wrap { flex: 1; background: rgba(255,255,255,.1); border-radius: 4px; height: 20px; overflow: hidden; }
+.coverage-bar { height: 100%; background: var(--accent); border-radius: 4px; transition: width .3s ease; }
+.coverage-count { width: 36px; text-align: right; font-weight: 600; font-size: 12px; }
+.coverage-stats { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.coverage-stat { background: var(--card-dark); padding: 8px 12px; border-radius: 8px; text-align: center; flex: 1; min-width: 80px; }
+.coverage-stat .label { font-size: 10px; color: var(--muted); text-transform: uppercase; }
+.coverage-stat .value { font-size: 16px; font-weight: 700; margin-top: 2px; }
 
 /* Selection list (fuzzy matches) */
 .selection-list {
@@ -380,6 +402,52 @@ button {
 .confirm-btns button { flex: 1; }
 
 .hidden { display: none !important; }
+
+/* Custom game builder */
+.custom-builder { padding: 4px 0; }
+.chip-grid { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; max-height: 200px; overflow-y: auto; }
+.chip {
+  background: rgba(255,255,255,.08);
+  border: 2px solid transparent;
+  border-radius: 20px;
+  padding: 6px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all .2s;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.chip:hover { background: rgba(255,255,255,.12); }
+.chip.selected { border-color: var(--accent); background: rgba(74,222,128,.15); }
+.chip .flag { font-size: 14px; }
+.chip .color-dot-sm { width: 10px; height: 10px; border-radius: 2px; }
+.custom-preview {
+  background: var(--card);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin: 12px 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+.custom-preview strong { color: var(--accent); }
+
+/* Session stats bar */
+.session-bar {
+  background: var(--card-dark);
+  border-radius: 12px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+}
+.session-stat-item { text-align: center; }
+.session-stat-item .label { color: var(--muted); font-size: 10px; text-transform: uppercase; }
+.session-stat-item .value { font-weight: 700; font-size: 16px; }
+.session-stat-item .value.wins { color: var(--accent); }
+.session-stat-item .value.busts { color: var(--danger); }
 </style>
 </head>
 <body>
@@ -467,6 +535,44 @@ button {
       <div class="section-body" id="goalsGames"></div>
     </div>
 
+    <div class="section" id="sec-custom">
+      <div class="section-header" onclick="toggleSection('sec-custom')">
+        <div class="section-title">🎮 Custom Game <span class="section-count">(Build Your Own)</span></div>
+        <div class="chev">▼</div>
+      </div>
+      <div class="section-desc">Create your own game by selecting a metric and filters.</div>
+      <div class="section-body" id="customBuilder">
+        <div class="custom-builder">
+          <div class="field">
+            <label>Metric to subtract</label>
+            <select id="customMetric">
+              <option value="apps" selected>Appearances</option>
+              <option value="goals">Goals</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Filter type</label>
+            <select id="customFilterType">
+              <option value="nationality">By Nationality</option>
+              <option value="club">By Club</option>
+            </select>
+          </div>
+          <div class="field" id="nationalityFilterField">
+            <label>Select nationalities (max 5)</label>
+            <div class="chip-grid" id="nationalityChips"></div>
+          </div>
+          <div class="field hidden" id="clubFilterField">
+            <label>Select clubs (max 5)</label>
+            <div class="chip-grid" id="clubChips"></div>
+          </div>
+          <div id="customPreview" class="custom-preview hidden">
+            <span id="customPreviewText"></span>
+          </div>
+          <button class="btn-primary" id="startCustomGame" disabled>Start Custom Game</button>
+        </div>
+      </div>
+    </div>
+
     <div class="section disabled" id="sec-positions">
       <div class="section-header">
         <div class="section-title">Positions <span class="section-count">(Coming Soon)</span></div>
@@ -482,11 +588,14 @@ button {
   <!-- Loading screen with trivia -->
   <div id="loadingScreen" class="hidden loading-screen">
     <button class="btn-back" id="backFromLoading">← Back</button>
-    <div class="loading-spinner"></div>
-    <div class="loading-text">Loading match data...</div>
+    <div class="loading-spinner-wrap">
+      <div class="loading-spinner" id="loadingSpinner"></div>
+    </div>
+    <div class="loading-text" id="loadingText">Loading match data...</div>
     <div id="readyBadge" class="ready-badge hidden">Game Ready!</div>
     <div id="triviaContainer"></div>
-    <button id="skipTrivia" class="btn-secondary hidden" style="margin-top:16px">Start Match</button>
+    <button id="skipTrivia" class="btn-primary hidden" style="margin-top:16px">Start Match →</button>
+    <div id="triviaNote" class="trivia-note hidden">Trivia is optional — tap Start Match to begin</div>
   </div>
 
   <!-- Order reveal -->
@@ -499,9 +608,34 @@ button {
 
 <!-- GAMEPLAY CARD -->
 <div class="card hidden" id="playCard">
+  <div id="sessionBar" class="session-bar hidden">
+    <div class="session-stat-item">
+      <div class="label">Games</div>
+      <div class="value" id="sessionGames">0</div>
+    </div>
+    <div class="session-stat-item">
+      <div class="label">Wins</div>
+      <div class="value wins" id="sessionWins">0</div>
+    </div>
+    <div class="session-stat-item">
+      <div class="label">Busts</div>
+      <div class="value busts" id="sessionBusts">0</div>
+    </div>
+    <div class="session-stat-item">
+      <div class="label">Picks</div>
+      <div class="value" id="sessionPicks">0</div>
+    </div>
+    <div class="session-stat-item">
+      <div class="label">Total</div>
+      <div class="value" id="sessionTotal">0</div>
+    </div>
+  </div>
   <div id="scoreGrid" class="scores p2"></div>
   <div id="turnInfo" class="turn-info"></div>
-  <div id="hintBar" class="hint-bar hidden"></div>
+  <div id="hintBar" class="hint-bar hidden">
+    <span class="hint-text" id="hintText"></span>
+    <button class="coverage-btn" id="coverageBtn" title="View pick distribution">ⓘ</button>
+  </div>
 
   <div class="field">
     <label id="guessLabel">Your guess</label>
@@ -548,6 +682,17 @@ button {
   </div>
 </div>
 
+<!-- Coverage Modal -->
+<div id="coverageBackdrop" class="modal-backdrop">
+  <div id="coverageModal" class="modal coverage-modal">
+    <div class="modal-header">
+      <div class="modal-title">Pick Distribution</div>
+      <button id="closeCoverage" class="close-btn">Close</button>
+    </div>
+    <div id="coverageContent"></div>
+  </div>
+</div>
+
 <script>
 // ============== CONFIGURATION ==============
 const API_BASE = '/.netlify/functions';
@@ -582,7 +727,13 @@ const CATEGORIES = {
     { id: 'club_Arsenal', title: 'Arsenal', color: '#EF0107' },
     { id: 'club_AstonVilla', title: 'Aston Villa', color: '#670E36' },
     { id: 'club_Blackburn', title: 'Blackburn', color: '#009EE0' },
+    { id: 'club_Bolton', title: 'Bolton', color: '#263C7F' },
+    { id: 'club_Bournemouth', title: 'Bournemouth', color: '#DA291C' },
+    { id: 'club_Brighton', title: 'Brighton', color: '#0057B8' },
+    { id: 'club_Burnley', title: 'Burnley', color: '#6C1D45' },
+    { id: 'club_Charlton', title: 'Charlton', color: '#D4021D' },
     { id: 'club_Chelsea', title: 'Chelsea', color: '#034694' },
+    { id: 'club_Coventry', title: 'Coventry', color: '#27A9E1' },
     { id: 'club_CrystalPalace', title: 'Crystal Palace', color: '#1B458F' },
     { id: 'club_Everton', title: 'Everton', color: '#003399' },
     { id: 'club_Fulham', title: 'Fulham', color: '#000000' },
@@ -593,10 +744,18 @@ const CATEGORIES = {
     { id: 'club_ManUtd', title: 'Man Utd', color: '#DA291C' },
     { id: 'club_Middlesbrough', title: 'Middlesbrough', color: '#E11B22' },
     { id: 'club_Newcastle', title: 'Newcastle', color: '#241F20' },
+    { id: 'club_Norwich', title: 'Norwich', color: '#00A650' },
+    { id: 'club_NottmForest', title: 'Nottm Forest', color: '#DD0000' },
     { id: 'club_Southampton', title: 'Southampton', color: '#D71920' },
+    { id: 'club_Stoke', title: 'Stoke', color: '#E03A3E' },
     { id: 'club_Tottenham', title: 'Spurs', color: '#132257' },
     { id: 'club_Sunderland', title: 'Sunderland', color: '#EB172B' },
+    { id: 'club_Watford', title: 'Watford', color: '#FBEC5D' },
+    { id: 'club_WestBrom', title: 'West Brom', color: '#122F67' },
     { id: 'club_WestHam', title: 'West Ham', color: '#7A263A' },
+    { id: 'club_Wigan', title: 'Wigan', color: '#0033A0' },
+    { id: 'club_Wimbledon', title: 'Wimbledon', color: '#00008B' },
+    { id: 'club_Wolves', title: 'Wolves', color: '#FDB913' },
   ],
   goals: [
     { id: 'goals_overall', title: 'All EPL Goals', flag: '⚽' },
@@ -618,6 +777,44 @@ let triviaData = [];
 let triviaIndex = 0;
 let matchDataReady = false;
 let debounceTimer = null;
+
+// Session stats (persists across games in same session)
+let sessionStats = {
+  games: 0,
+  wins: 0,
+  busts: 0,
+  picks: 0,
+  totalValue: 0,
+};
+
+// Fallback trivia questions when API doesn't return any
+const FALLBACK_TRIVIA = [
+  {
+    q: "Which player has the most Premier League appearances of all time?",
+    options: ["Ryan Giggs", "Gareth Barry", "Frank Lampard", "James Milner"],
+    answer: 1
+  },
+  {
+    q: "Who holds the record for most Premier League goals?",
+    options: ["Wayne Rooney", "Andrew Cole", "Alan Shearer", "Sergio Agüero"],
+    answer: 2
+  },
+  {
+    q: "Which club won the first Premier League title in 1992-93?",
+    options: ["Arsenal", "Liverpool", "Manchester United", "Blackburn"],
+    answer: 2
+  },
+  {
+    q: "How many teams competed in the original 1992 Premier League?",
+    options: ["18", "20", "22", "24"],
+    answer: 2
+  },
+  {
+    q: "Which goalkeeper has kept the most Premier League clean sheets?",
+    options: ["David Seaman", "Peter Schmeichel", "Petr Čech", "Edwin van der Sar"],
+    answer: 2
+  }
+];
 
 // ============== UTILITIES ==============
 function $(id) { return document.getElementById(id); }
@@ -654,6 +851,42 @@ function similarity(a, b) {
 
 function formatNum(n) {
   return Number(n || 0).toLocaleString('en-GB');
+}
+
+function updateSessionUI() {
+  $('sessionGames').textContent = sessionStats.games;
+  $('sessionWins').textContent = sessionStats.wins;
+  $('sessionBusts').textContent = sessionStats.busts;
+  $('sessionPicks').textContent = sessionStats.picks;
+  $('sessionTotal').textContent = formatNum(sessionStats.totalValue);
+
+  // Show session bar after first game completes
+  if (sessionStats.games > 0) {
+    $('sessionBar').classList.remove('hidden');
+  }
+}
+
+function recordPick(value, isBust) {
+  sessionStats.picks++;
+  if (!isBust) {
+    sessionStats.totalValue += value;
+  }
+  if (isBust) {
+    sessionStats.busts++;
+  }
+  updateSessionUI();
+}
+
+function recordWin() {
+  sessionStats.wins++;
+  sessionStats.games++;
+  updateSessionUI();
+}
+
+function recordGameEnd() {
+  // Called when game ends without a win (end game button)
+  sessionStats.games++;
+  updateSessionUI();
 }
 
 function sleep(ms) {
@@ -755,6 +988,14 @@ $('backFromLoading').onclick = () => {
   hide('loadingScreen');
   show('step3');
   matchDataReady = false;
+  // Reset loading screen state
+  $('loadingSpinner').classList.remove('ready');
+  $('loadingSpinner').style.animation = '';
+  $('loadingText').textContent = 'Loading match data...';
+  $('loadingText').classList.remove('ready');
+  hide('readyBadge');
+  hide('skipTrivia');
+  hide('triviaNote');
 };
 
 function toggleSection(id) {
@@ -888,15 +1129,24 @@ async function chooseCategory(cat) {
 }
 
 function showReadyState() {
+  // Stop spinner and show ready state
+  const spinner = $('loadingSpinner');
+  spinner.classList.add('ready');
+  spinner.style.animation = 'none';
+
+  $('loadingText').textContent = 'Ready to play!';
+  $('loadingText').classList.add('ready');
+
   show('readyBadge');
   show('skipTrivia');
-  $('skipTrivia').textContent = 'Start Match';
+  show('triviaNote');
+  $('skipTrivia').textContent = 'Start Match →';
 }
 
 function showTrivia() {
+  // If no trivia from API, use fallback
   if (!triviaData.length) {
-    if (matchDataReady) proceedToOrderReveal();
-    return;
+    triviaData = [FALLBACK_TRIVIA[Math.floor(Math.random() * FALLBACK_TRIVIA.length)]];
   }
 
   if (triviaIndex >= triviaData.length) {
@@ -981,6 +1231,11 @@ function startMatch(names) {
   hide('setupCard');
   show('playCard');
 
+  // Show session bar if there are previous games
+  if (sessionStats.games > 0) {
+    $('sessionBar').classList.remove('hidden');
+  }
+
   const grid = $('scoreGrid');
   grid.className = `scores p${names.length}`;
 
@@ -1013,6 +1268,7 @@ function updateTurnUI() {
 
 function updateHintBar() {
   const hintBar = $('hintBar');
+  const hintText = $('hintText');
   const remaining = state.scores[state.turn];
 
   if (remaining <= 0 || eligiblePlayers.length === 0) {
@@ -1038,9 +1294,84 @@ function updateHintBar() {
     pairs += (n === m) ? c * (c - 1) / 2 : c * freq.get(n);
   }
 
-  hintBar.innerHTML = `Checkout: <strong>${direct || 'no'}</strong> direct • <strong>${pairs > 10 ? '>10' : pairs}</strong> two-player combos`;
+  hintText.innerHTML = `Checkout: <strong>${direct || 'no'}</strong> direct • <strong>${pairs > 10 ? '>10' : pairs}</strong> two-player combos`;
   hintBar.classList.remove('hidden');
 }
+
+// ============== COVERAGE MODAL ==============
+const COVERAGE_BUCKETS = [
+  { min: 1, max: 10, label: '1–10' },
+  { min: 11, max: 25, label: '11–25' },
+  { min: 26, max: 50, label: '26–50' },
+  { min: 51, max: 100, label: '51–100' },
+  { min: 101, max: 200, label: '101–200' },
+  { min: 201, max: 300, label: '201–300' },
+  { min: 301, max: Infinity, label: '301+' },
+];
+
+function openCoverageModal() {
+  const available = eligiblePlayers.filter(p => !state.used.has(p.normalized));
+  const remaining = state.scores[state.turn];
+
+  // Calculate bucket counts
+  const buckets = COVERAGE_BUCKETS.map(b => ({
+    ...b,
+    count: available.filter(p => p.subtractValue >= b.min && p.subtractValue <= b.max).length,
+  }));
+
+  const maxCount = Math.max(...buckets.map(b => b.count), 1);
+  const direct = available.filter(p => p.subtractValue === remaining).length;
+  const smallest = available.length ? Math.min(...available.map(p => p.subtractValue)) : 0;
+  const largest = available.length ? Math.max(...available.map(p => p.subtractValue)) : 0;
+
+  const metricLabel = currentMeta?.metricLabel || 'Apps';
+
+  const content = $('coverageContent');
+  content.innerHTML = `
+    <div style="font-size:12px;color:var(--muted);margin-bottom:8px">
+      ${formatNum(available.length)} players remaining • ${metricLabel} distribution
+    </div>
+    <div class="coverage-grid">
+      ${buckets.map(b => `
+        <div class="coverage-row">
+          <div class="coverage-label">${b.label}</div>
+          <div class="coverage-bar-wrap">
+            <div class="coverage-bar" style="width:${(b.count / maxCount) * 100}%"></div>
+          </div>
+          <div class="coverage-count">${b.count}</div>
+        </div>
+      `).join('')}
+    </div>
+    <div class="coverage-stats">
+      <div class="coverage-stat">
+        <div class="label">Direct</div>
+        <div class="value" style="color:var(--accent)">${direct}</div>
+      </div>
+      <div class="coverage-stat">
+        <div class="label">Smallest</div>
+        <div class="value">${formatNum(smallest)}</div>
+      </div>
+      <div class="coverage-stat">
+        <div class="label">Largest</div>
+        <div class="value">${formatNum(largest)}</div>
+      </div>
+    </div>
+  `;
+
+  $('coverageBackdrop').classList.add('show');
+  requestAnimationFrame(() => $('coverageModal').classList.add('show'));
+}
+
+function closeCoverageModal() {
+  $('coverageModal').classList.remove('show');
+  setTimeout(() => $('coverageBackdrop').classList.remove('show'), 200);
+}
+
+$('coverageBtn').onclick = openCoverageModal;
+$('closeCoverage').onclick = closeCoverageModal;
+$('coverageBackdrop').onclick = (e) => {
+  if (e.target.id === 'coverageBackdrop') closeCoverageModal();
+};
 
 // ============== INPUT HANDLING ==============
 const guessInput = $('guess');
@@ -1231,6 +1562,7 @@ async function handleSubmit() {
     setResult(`💥 Bust! ${match.name} has ${formatNum(deduct)} ${metricLabel.toLowerCase()}. Score stays ${formatNum(before)}.`);
     showToast(match, before, before, 'bust');
     showEffect('bust');
+    recordPick(deduct, true);
     const pill = $(`pill_${state.turn}`);
     pill?.classList.add('bust-anim');
     setTimeout(() => pill?.classList.remove('bust-anim'), 500);
@@ -1241,17 +1573,20 @@ async function handleSubmit() {
 
     animateScore(state.turn, before, after);
 
+    recordPick(deduct, false);
+
     if (win) {
       const winnerName = state.players[state.turn];
       const turnsText = state.turnCount === 1 ? '1 turn' : `${state.turnCount} turns`;
       setResult(`🎯 ${winnerName} wins with ${match.name} (${formatNum(deduct)})!`);
       showToast(match, before, after, 'win');
       showEffect('win');
+      recordWin();
       const pill = $(`pill_${state.turn}`);
       pill?.classList.add('win-anim');
       setTimeout(() => {
         if (confirm(`🏆 ${winnerName} wins in ${turnsText}! Play again?`)) {
-          location.reload();
+          playAgain();
         }
       }, 1500);
       return;
@@ -1412,12 +1747,245 @@ $('confirmNo').onclick = () => {
 };
 
 $('confirmYes').onclick = () => {
-  location.reload();
+  recordGameEnd();
+  playAgain();
+};
+
+function playAgain() {
+  // Reset game state but keep session stats
+  hide('playCard');
+  show('setupCard');
+  hide('orderScreen');
+  show('step3');
+
+  // Reset loading screen state
+  $('loadingSpinner').classList.remove('ready');
+  $('loadingSpinner').style.animation = '';
+  $('loadingText').textContent = 'Loading match data...';
+  $('loadingText').classList.remove('ready');
+  hide('readyBadge');
+  hide('skipTrivia');
+  hide('triviaNote');
+
+  // Clear selection states
+  customSelectedNats.clear();
+  customSelectedClubs.clear();
+  document.querySelectorAll('#nationalityChips .chip, #clubChips .chip').forEach(c => c.classList.remove('selected'));
+  $('customPreview').classList.add('hidden');
+  $('startCustomGame').disabled = true;
+
+  state = null;
+  eligiblePlayers = [];
+  currentCategory = null;
+  currentMeta = null;
+  matchDataReady = false;
+}
+
+// ============== CUSTOM GAME BUILDER ==============
+const NATIONALITY_OPTIONS = [
+  { code: 'ENG', name: 'England', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿' },
+  { code: 'FRA', name: 'France', flag: '🇫🇷' },
+  { code: 'ESP', name: 'Spain', flag: '🇪🇸' },
+  { code: 'GER', name: 'Germany', flag: '🇩🇪' },
+  { code: 'ITA', name: 'Italy', flag: '🇮🇹' },
+  { code: 'BRA', name: 'Brazil', flag: '🇧🇷' },
+  { code: 'ARG', name: 'Argentina', flag: '🇦🇷' },
+  { code: 'NED', name: 'Netherlands', flag: '🇳🇱' },
+  { code: 'POR', name: 'Portugal', flag: '🇵🇹' },
+  { code: 'BEL', name: 'Belgium', flag: '🇧🇪' },
+  { code: 'IRL', name: 'Ireland', flag: '🇮🇪' },
+  { code: 'SCO', name: 'Scotland', flag: '🏴󠁧󠁢󠁳󠁣󠁴󠁿' },
+  { code: 'WAL', name: 'Wales', flag: '🏴󠁧󠁢󠁷󠁬󠁳󠁿' },
+  { code: 'NGA', name: 'Nigeria', flag: '🇳🇬' },
+  { code: 'GHA', name: 'Ghana', flag: '🇬🇭' },
+  { code: 'CIV', name: 'Ivory Coast', flag: '🇨🇮' },
+  { code: 'SEN', name: 'Senegal', flag: '🇸🇳' },
+  { code: 'AUS', name: 'Australia', flag: '🇦🇺' },
+  { code: 'USA', name: 'USA', flag: '🇺🇸' },
+  { code: 'JAM', name: 'Jamaica', flag: '🇯🇲' },
+];
+
+const CLUB_OPTIONS = [
+  { id: 'Arsenal', name: 'Arsenal', color: '#EF0107' },
+  { id: 'Aston Villa', name: 'Aston Villa', color: '#670E36' },
+  { id: 'Chelsea', name: 'Chelsea', color: '#034694' },
+  { id: 'Everton', name: 'Everton', color: '#003399' },
+  { id: 'Liverpool', name: 'Liverpool', color: '#C8102E' },
+  { id: 'Manchester City', name: 'Man City', color: '#6CABDD' },
+  { id: 'Manchester United', name: 'Man Utd', color: '#DA291C' },
+  { id: 'Newcastle United', name: 'Newcastle', color: '#241F20' },
+  { id: 'Tottenham Hotspur', name: 'Spurs', color: '#132257' },
+  { id: 'West Ham United', name: 'West Ham', color: '#7A263A' },
+  { id: 'Leicester City', name: 'Leicester', color: '#003090' },
+  { id: 'Southampton', name: 'Southampton', color: '#D71920' },
+  { id: 'Fulham', name: 'Fulham', color: '#000000' },
+  { id: 'Crystal Palace', name: 'Crystal Palace', color: '#1B458F' },
+  { id: 'Blackburn Rovers', name: 'Blackburn', color: '#009EE0' },
+  { id: 'Leeds United', name: 'Leeds', color: '#FFCD00' },
+];
+
+let customSelectedNats = new Set();
+let customSelectedClubs = new Set();
+
+function initCustomBuilder() {
+  // Build nationality chips
+  const natContainer = $('nationalityChips');
+  natContainer.innerHTML = NATIONALITY_OPTIONS.map(n => `
+    <div class="chip" data-code="${n.code}">
+      <span class="flag">${n.flag}</span>
+      <span>${n.name}</span>
+    </div>
+  `).join('');
+
+  natContainer.querySelectorAll('.chip').forEach(chip => {
+    chip.onclick = () => toggleChip(chip, 'nationality');
+  });
+
+  // Build club chips
+  const clubContainer = $('clubChips');
+  clubContainer.innerHTML = CLUB_OPTIONS.map(c => `
+    <div class="chip" data-id="${c.id}">
+      <div class="color-dot-sm" style="background:${c.color}"></div>
+      <span>${c.name}</span>
+    </div>
+  `).join('');
+
+  clubContainer.querySelectorAll('.chip').forEach(chip => {
+    chip.onclick = () => toggleChip(chip, 'club');
+  });
+
+  // Filter type change
+  $('customFilterType').onchange = () => {
+    const type = $('customFilterType').value;
+    if (type === 'nationality') {
+      show('nationalityFilterField');
+      hide('clubFilterField');
+    } else {
+      hide('nationalityFilterField');
+      show('clubFilterField');
+    }
+    updateCustomPreview();
+  };
+
+  $('customMetric').onchange = updateCustomPreview;
+}
+
+function toggleChip(chip, type) {
+  const maxSelection = 5;
+  const set = type === 'nationality' ? customSelectedNats : customSelectedClubs;
+  const key = type === 'nationality' ? chip.dataset.code : chip.dataset.id;
+
+  if (chip.classList.contains('selected')) {
+    chip.classList.remove('selected');
+    set.delete(key);
+  } else {
+    if (set.size >= maxSelection) {
+      return; // Max reached
+    }
+    chip.classList.add('selected');
+    set.add(key);
+  }
+  updateCustomPreview();
+}
+
+function updateCustomPreview() {
+  const metric = $('customMetric').value;
+  const filterType = $('customFilterType').value;
+  const selected = filterType === 'nationality' ? customSelectedNats : customSelectedClubs;
+
+  const previewEl = $('customPreview');
+  const previewText = $('customPreviewText');
+  const startBtn = $('startCustomGame');
+
+  if (selected.size === 0) {
+    previewEl.classList.add('hidden');
+    startBtn.disabled = true;
+    return;
+  }
+
+  previewEl.classList.remove('hidden');
+  startBtn.disabled = false;
+
+  const metricLabel = metric === 'apps' ? 'Appearances' : 'Goals';
+  const items = Array.from(selected);
+  let filterLabel = '';
+
+  if (filterType === 'nationality') {
+    const names = items.map(code => NATIONALITY_OPTIONS.find(n => n.code === code)?.name || code);
+    filterLabel = names.join(', ');
+  } else {
+    const names = items.map(id => CLUB_OPTIONS.find(c => c.id === id)?.name || id);
+    filterLabel = names.join(', ');
+  }
+
+  previewText.innerHTML = `<strong>${metricLabel}</strong> from players: ${filterLabel}`;
+}
+
+$('startCustomGame').onclick = async () => {
+  const metric = $('customMetric').value;
+  const filterType = $('customFilterType').value;
+  const selected = filterType === 'nationality' ? Array.from(customSelectedNats) : Array.from(customSelectedClubs);
+
+  if (selected.length === 0) return;
+
+  // Build custom category object
+  const customCat = {
+    id: 'custom_' + Date.now(),
+    title: 'Custom Game',
+    flag: '🎮',
+    isCustom: true,
+    metric,
+    filterType,
+    filters: selected,
+  };
+
+  currentCategory = customCat;
+  matchDataReady = false;
+  triviaIndex = 0;
+
+  hide('step3');
+  show('loadingScreen');
+  hide('readyBadge');
+  hide('skipTrivia');
+  hide('triviaNote');
+  $('triviaContainer').innerHTML = '';
+  $('loadingSpinner').classList.remove('ready');
+  $('loadingSpinner').style.animation = '';
+  $('loadingText').textContent = 'Building custom game...';
+  $('loadingText').classList.remove('ready');
+
+  try {
+    const res = await fetch(`${API_BASE}/match_start`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        categoryId: 'custom',
+        customConfig: {
+          metric,
+          filterType,
+          filters: selected,
+        },
+      }),
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+
+    eligiblePlayers = data.eligiblePlayers || [];
+    currentMeta = data.meta || {};
+    triviaData = data.meta?.trivia || [];
+    matchDataReady = true;
+    showReadyState();
+    showTrivia();
+  } catch (err) {
+    alert('Failed to load custom game: ' + err.message);
+    show('step3');
+    hide('loadingScreen');
+  }
 };
 
 // ============== INIT ==============
 (function init() {
-  // No pre-initialization needed - mode selection handles the flow
+  initCustomBuilder();
 })();
 </script>
 </body>

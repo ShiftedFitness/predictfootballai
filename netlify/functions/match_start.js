@@ -31,26 +31,40 @@ const COUNTRY_CATEGORIES = {
 
 // Club categories for apps mode - use exact DB values
 // Map: categoryId -> { club: DB value, label: display name }
-// Note: Man Utd - DB may use "Manchester United" or "Manchester Utd" - we try both
+// Note: Some clubs may have variant spellings in DB - we try altClub if primary fails
 const CLUB_CATEGORIES = {
   club_Arsenal: { club: 'Arsenal', label: 'Arsenal' },
-  club_ManUtd: { club: 'Manchester United', altClub: 'Manchester Utd', label: 'Man Utd' },
-  club_Liverpool: { club: 'Liverpool', label: 'Liverpool' },
-  club_Chelsea: { club: 'Chelsea', label: 'Chelsea' },
-  club_ManCity: { club: 'Manchester City', label: 'Man City' },
-  club_Tottenham: { club: 'Tottenham Hotspur', altClub: 'Spurs', label: 'Spurs' },
-  club_Everton: { club: 'Everton', label: 'Everton' },
-  club_Newcastle: { club: 'Newcastle United', altClub: 'Newcastle Utd', label: 'Newcastle' },
   club_AstonVilla: { club: 'Aston Villa', label: 'Aston Villa' },
-  club_WestHam: { club: 'West Ham United', altClub: 'West Ham Utd', label: 'West Ham' },
-  club_Southampton: { club: 'Southampton', label: 'Southampton' },
-  club_Leicester: { club: 'Leicester City', label: 'Leicester' },
-  club_Fulham: { club: 'Fulham', label: 'Fulham' },
   club_Blackburn: { club: 'Blackburn Rovers', label: 'Blackburn' },
+  club_Bolton: { club: 'Bolton Wanderers', altClub: 'Bolton', label: 'Bolton' },
+  club_Bournemouth: { club: 'AFC Bournemouth', altClub: 'Bournemouth', label: 'Bournemouth' },
+  club_Brighton: { club: 'Brighton & Hove Albion', altClub: 'Brighton', label: 'Brighton' },
+  club_Burnley: { club: 'Burnley', label: 'Burnley' },
+  club_Charlton: { club: 'Charlton Athletic', altClub: 'Charlton', label: 'Charlton' },
+  club_Chelsea: { club: 'Chelsea', label: 'Chelsea' },
+  club_Coventry: { club: 'Coventry City', altClub: 'Coventry', label: 'Coventry' },
   club_CrystalPalace: { club: 'Crystal Palace', label: 'Crystal Palace' },
-  club_Sunderland: { club: 'Sunderland', label: 'Sunderland' },
-  club_Middlesbrough: { club: 'Middlesbrough', label: 'Middlesbrough' },
+  club_Everton: { club: 'Everton', label: 'Everton' },
+  club_Fulham: { club: 'Fulham', label: 'Fulham' },
   club_Leeds: { club: 'Leeds United', altClub: 'Leeds Utd', label: 'Leeds' },
+  club_Leicester: { club: 'Leicester City', label: 'Leicester' },
+  club_Liverpool: { club: 'Liverpool', label: 'Liverpool' },
+  club_ManCity: { club: 'Manchester City', label: 'Man City' },
+  club_ManUtd: { club: 'Manchester United', altClub: 'Manchester Utd', label: 'Man Utd' },
+  club_Middlesbrough: { club: 'Middlesbrough', label: 'Middlesbrough' },
+  club_Newcastle: { club: 'Newcastle United', altClub: 'Newcastle Utd', label: 'Newcastle' },
+  club_Norwich: { club: 'Norwich City', altClub: 'Norwich', label: 'Norwich' },
+  club_NottmForest: { club: 'Nottingham Forest', altClub: "Nott'm Forest", label: 'Nottm Forest' },
+  club_Southampton: { club: 'Southampton', label: 'Southampton' },
+  club_Stoke: { club: 'Stoke City', altClub: 'Stoke', label: 'Stoke' },
+  club_Sunderland: { club: 'Sunderland', label: 'Sunderland' },
+  club_Tottenham: { club: 'Tottenham Hotspur', altClub: 'Spurs', label: 'Spurs' },
+  club_Watford: { club: 'Watford', label: 'Watford' },
+  club_WestBrom: { club: 'West Bromwich Albion', altClub: 'West Brom', label: 'West Brom' },
+  club_WestHam: { club: 'West Ham United', altClub: 'West Ham Utd', label: 'West Ham' },
+  club_Wigan: { club: 'Wigan Athletic', altClub: 'Wigan', label: 'Wigan' },
+  club_Wimbledon: { club: 'Wimbledon', altClub: 'Wimbledon FC', label: 'Wimbledon' },
+  club_Wolves: { club: 'Wolverhampton Wanderers', altClub: 'Wolves', label: 'Wolves' },
 };
 
 // Goals categories - subtract goals_total instead of apps_total
@@ -106,23 +120,37 @@ const HINTS = {
   country_BEL: 'Belgian players became prominent in the EPL from the 2010s onwards.',
   country_GER: 'German players have increasingly featured in the Premier League.',
   club_Arsenal: 'The Gunners have featured over 200 players in Premier League history.',
-  club_ManUtd: 'Manchester United have the most Premier League titles.',
-  club_Liverpool: 'Liverpool FC has seen many legendary players across all eras.',
-  club_Chelsea: 'Chelsea have been a dominant force since the 2000s.',
-  club_ManCity: 'Manchester City transformed into a powerhouse in the 2010s.',
-  club_Tottenham: 'Spurs have had many talented players over the decades.',
-  club_Everton: 'Everton are one of the founding members of the Premier League.',
-  club_Newcastle: 'The Magpies have passionate fans and a rich history.',
   club_AstonVilla: 'Aston Villa are one of England\'s most historic clubs.',
-  club_WestHam: 'The Hammers have produced many academy talents.',
-  club_Southampton: 'Saints are known for developing young players.',
-  club_Leicester: 'From survival specialists to champions in 2016.',
-  club_Fulham: 'Fulham have yo-yoed between divisions over the years.',
   club_Blackburn: 'Blackburn won the Premier League in 1995.',
+  club_Bolton: 'Bolton were Premier League regulars in the 2000s under Sam Allardyce.',
+  club_Bournemouth: 'The Cherries rose from League Two to the Premier League.',
+  club_Brighton: 'Brighton achieved Premier League promotion in 2017.',
+  club_Burnley: 'Burnley have punched above their weight in recent seasons.',
+  club_Charlton: 'Charlton had notable Premier League spells in the late 90s/2000s.',
+  club_Chelsea: 'Chelsea have been a dominant force since the 2000s.',
+  club_Coventry: 'Coventry were founding members of the Premier League in 1992.',
   club_CrystalPalace: 'Palace have been a consistent top-flight presence.',
-  club_Sunderland: 'The Black Cats have had many dramatic seasons.',
-  club_Middlesbrough: 'Boro have had memorable European campaigns.',
+  club_Everton: 'Everton are one of the founding members of the Premier League.',
+  club_Fulham: 'Fulham have yo-yoed between divisions over the years.',
   club_Leeds: 'Leeds were dominant in the early 2000s before their fall.',
+  club_Leicester: 'From survival specialists to champions in 2016.',
+  club_Liverpool: 'Liverpool FC has seen many legendary players across all eras.',
+  club_ManCity: 'Manchester City transformed into a powerhouse in the 2010s.',
+  club_ManUtd: 'Manchester United have the most Premier League titles.',
+  club_Middlesbrough: 'Boro have had memorable European campaigns.',
+  club_Newcastle: 'The Magpies have passionate fans and a rich history.',
+  club_Norwich: 'Norwich are known for developing young talent.',
+  club_NottmForest: 'Forest won back-to-back European Cups before the EPL era.',
+  club_Southampton: 'Saints are known for developing young players.',
+  club_Stoke: 'Stoke spent a decade in the Premier League from 2008.',
+  club_Sunderland: 'The Black Cats have had many dramatic seasons.',
+  club_Tottenham: 'Spurs have had many talented players over the decades.',
+  club_Watford: 'Watford have had several Premier League stints.',
+  club_WestBrom: 'West Brom are known for their great escapes and relegation battles.',
+  club_WestHam: 'The Hammers have produced many academy talents.',
+  club_Wigan: 'Wigan won the FA Cup in 2013 while in the Premier League.',
+  club_Wimbledon: 'The original Wimbledon were founding Premier League members.',
+  club_Wolves: 'Wolves returned to the top flight in 2018 after a long absence.',
   goals_overall: 'Score goals from any Premier League player.',
   goals_Arsenal: 'Arsenal have had many prolific goal scorers.',
   goals_Chelsea: 'Chelsea have featured numerous deadly strikers.',
@@ -903,6 +931,157 @@ exports.handler = async (event) => {
       });
 
       console.log('[match_start] Found', eligiblePlayers.length, 'players for continent', cat.name);
+    }
+
+    // ============================================================
+    // CUSTOM GAME (user-built filters)
+    // ============================================================
+    else if (categoryId === 'custom' && body.customConfig) {
+      const { metric: customMetric, filterType, filters } = body.customConfig;
+
+      if (!filters || filters.length === 0) {
+        return respond(400, { error: 'Custom game requires at least one filter' });
+      }
+
+      metric = customMetric === 'goals' ? 'goals_total' : 'apps_total';
+      metricLabel = customMetric === 'goals' ? 'Goals' : 'Apps';
+      categoryName = 'Custom Game';
+      categoryFlag = '🎮';
+
+      console.log('[match_start] Custom game:', { metric: customMetric, filterType, filters });
+
+      if (filterType === 'nationality') {
+        // Filter by nationality codes
+        const { data: pctData, error: pctError } = await supabase
+          .from('player_competition_totals')
+          .select(`
+            player_id,
+            apps_total,
+            goals_total,
+            mins_total,
+            starts_total,
+            players!inner (
+              player_id,
+              name,
+              normalized_name,
+              nationality
+            )
+          `)
+          .eq('competition', 'EPL')
+          .in('players.nationality', filters)
+          .gt(metric, 0);
+
+        if (pctError) {
+          console.error('[match_start] Supabase error:', pctError);
+          return respond(500, { error: pctError.message });
+        }
+
+        const playerIds = (pctData || []).map(r => r.player_id);
+        let clubsMap = {};
+
+        if (playerIds.length > 0) {
+          const { data: clubData } = await supabase
+            .from('player_club_totals')
+            .select('player_id, club')
+            .eq('competition', 'EPL')
+            .in('player_id', playerIds);
+
+          (clubData || []).forEach(r => {
+            if (!clubsMap[r.player_id]) clubsMap[r.player_id] = [];
+            if (!clubsMap[r.player_id].includes(r.club)) {
+              clubsMap[r.player_id].push(r.club);
+            }
+          });
+        }
+
+        eligiblePlayers = (pctData || []).map(row => {
+          const clubs = clubsMap[row.player_id] || [];
+          return {
+            playerId: row.player_id,
+            name: row.players.name,
+            normalized: row.players.normalized_name || normalize(row.players.name),
+            nationality: row.players.nationality,
+            subtractValue: customMetric === 'goals' ? row.goals_total : row.apps_total,
+            overlay: {
+              apps: row.apps_total,
+              goals: row.goals_total,
+              mins: row.mins_total,
+              starts: row.starts_total,
+            },
+            clubs: clubs.slice(0, 5),
+            clubCount: clubs.length,
+          };
+        });
+
+        console.log('[match_start] Custom (nationality) found', eligiblePlayers.length, 'players');
+      } else if (filterType === 'club') {
+        // Filter by clubs - need to query each club and merge
+        const allPlayers = [];
+        const playerMap = new Map();
+
+        for (const clubName of filters) {
+          const { data: clubData, error: clubError } = await supabase
+            .from('player_club_totals')
+            .select(`
+              player_id,
+              club,
+              apps_total,
+              goals_total,
+              mins_total,
+              starts_total,
+              players!inner (
+                player_id,
+                name,
+                normalized_name,
+                nationality
+              )
+            `)
+            .eq('competition', 'EPL')
+            .eq('club', clubName)
+            .gt(metric, 0);
+
+          if (clubError) {
+            console.error('[match_start] Supabase error for club', clubName, ':', clubError);
+            continue;
+          }
+
+          (clubData || []).forEach(row => {
+            const existing = playerMap.get(row.player_id);
+            const value = customMetric === 'goals' ? row.goals_total : row.apps_total;
+            if (existing) {
+              // Sum values across clubs
+              existing.subtractValue += value;
+              existing.overlay.apps += row.apps_total;
+              existing.overlay.goals += row.goals_total;
+              if (!existing.clubs.includes(row.club)) {
+                existing.clubs.push(row.club);
+              }
+            } else {
+              playerMap.set(row.player_id, {
+                playerId: row.player_id,
+                name: row.players.name,
+                normalized: row.players.normalized_name || normalize(row.players.name),
+                nationality: row.players.nationality,
+                subtractValue: value,
+                overlay: {
+                  apps: row.apps_total,
+                  goals: row.goals_total,
+                  mins: row.mins_total,
+                  starts: row.starts_total,
+                  club: row.club,
+                },
+                clubs: [row.club],
+                clubCount: 1,
+              });
+            }
+          });
+        }
+
+        eligiblePlayers = Array.from(playerMap.values());
+        eligiblePlayers.forEach(p => p.clubCount = p.clubs.length);
+
+        console.log('[match_start] Custom (club) found', eligiblePlayers.length, 'players');
+      }
     }
 
     // ============================================================
