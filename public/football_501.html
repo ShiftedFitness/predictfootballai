@@ -118,6 +118,7 @@ button {
 .game-card:hover { background: rgba(255,255,255,.08); }
 .game-card:active { transform: scale(.98); }
 .game-card .flag { font-size: 18px; margin-right: 10px; }
+.game-card .color-dot { width: 18px; height: 18px; border-radius: 4px; margin-right: 10px; flex-shrink: 0; }
 .game-card .title { font-weight: 600; font-size: 13px; }
 .game-card .meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
 .game-card .arrow { opacity: .5; font-size: 14px; }
@@ -435,8 +436,17 @@ button {
         <div class="section-title">Countries <span class="section-count" id="countCountry">(0)</span></div>
         <div class="chev">▼</div>
       </div>
-      <div class="section-desc">Player appearances by country in Premier League history (up to 2024/25 season).</div>
+      <div class="section-desc">Player appearances by country in Premier League history (up to 2024/25 season).<br><span style="color:var(--gold)">★</span> difficulty: more stars = harder (smaller player pool)</div>
       <div class="section-body" id="countryGames"></div>
+    </div>
+
+    <div class="section" id="sec-continent">
+      <div class="section-header" onclick="toggleSection('sec-continent')">
+        <div class="section-title">Continents <span class="section-count" id="countContinent">(0)</span></div>
+        <div class="chev">▼</div>
+      </div>
+      <div class="section-desc">Player appearances grouped by continental region (up to 2024/25 season).<br><span style="color:var(--gold)">★</span> difficulty: more stars = harder (smaller player pool)</div>
+      <div class="section-body" id="continentGames"></div>
     </div>
 
     <div class="section" id="sec-club">
@@ -444,7 +454,7 @@ button {
         <div class="section-title">Clubs (Apps) <span class="section-count" id="countClub">(0)</span></div>
         <div class="chev">▼</div>
       </div>
-      <div class="section-desc">Player appearances for each club in Premier League history (up to 2024/25 season).</div>
+      <div class="section-desc">Player appearances for each club in Premier League history (up to 2024/25 season).<br><span style="color:var(--gold)">★</span> difficulty: more stars = harder (smaller player pool)</div>
       <div class="section-body" id="clubGames"></div>
     </div>
 
@@ -453,7 +463,7 @@ button {
         <div class="section-title">Goals <span class="section-count" id="countGoals">(0)</span></div>
         <div class="chev">▼</div>
       </div>
-      <div class="section-desc">Total Premier League goals (overall and by club) (up to 2024/25 season).</div>
+      <div class="section-desc">Total Premier League goals (overall and by club) (up to 2024/25 season).<br><span style="color:var(--gold)">★</span> difficulty: more stars = harder (smaller player pool)</div>
       <div class="section-body" id="goalsGames"></div>
     </div>
 
@@ -545,50 +555,57 @@ const CACHE_TTL = 90 * 60 * 1000; // 90 minutes
 const DEBOUNCE_MS = 300;
 
 // ============== CATEGORIES (must match backend) ==============
+// Sorted alphabetically by title
 const CATEGORIES = {
   country: [
-    { id: 'country_FRA', title: 'France', flag: '🇫🇷' },
-    { id: 'country_ESP', title: 'Spain', flag: '🇪🇸' },
     { id: 'country_ARG', title: 'Argentina', flag: '🇦🇷' },
-    { id: 'country_NED', title: 'Netherlands', flag: '🇳🇱' },
-    { id: 'country_POR', title: 'Portugal', flag: '🇵🇹' },
+    { id: 'country_BEL', title: 'Belgium', flag: '🇧🇪' },
+    { id: 'country_DEN', title: 'Denmark', flag: '🇩🇰' },
+    { id: 'country_FRA', title: 'France', flag: '🇫🇷' },
+    { id: 'country_GER', title: 'Germany', flag: '🇩🇪' },
     { id: 'country_IRL', title: 'Ireland', flag: '🇮🇪' },
-    { id: 'country_SCO', title: 'Scotland', flag: '🏴󠁧󠁢󠁳󠁣󠁴󠁿' },
-    { id: 'country_WAL', title: 'Wales', flag: '🏴󠁧󠁢󠁷󠁬󠁳󠁿' },
+    { id: 'country_NED', title: 'Netherlands', flag: '🇳🇱' },
     { id: 'country_NIR', title: 'N. Ireland', flag: '🇬🇧' },
     { id: 'country_NOR', title: 'Norway', flag: '🇳🇴' },
-    { id: 'country_DEN', title: 'Denmark', flag: '🇩🇰' },
-    { id: 'country_BEL', title: 'Belgium', flag: '🇧🇪' },
-    { id: 'country_GER', title: 'Germany', flag: '🇩🇪' },
+    { id: 'country_POR', title: 'Portugal', flag: '🇵🇹' },
+    { id: 'country_SCO', title: 'Scotland', flag: '🏴󠁧󠁢󠁳󠁣󠁴󠁿' },
+    { id: 'country_ESP', title: 'Spain', flag: '🇪🇸' },
+    { id: 'country_WAL', title: 'Wales', flag: '🏴󠁧󠁢󠁷󠁬󠁳󠁿' },
+  ],
+  continent: [
+    { id: 'continent_AFRICA', title: 'Africa', flag: '🌍' },
+    { id: 'continent_ASIA_OCEANIA', title: 'Asia & Oceania', flag: '🌏' },
+    { id: 'continent_CONCACAF', title: 'CONCACAF', flag: '🌎' },
+    { id: 'continent_SOUTH_AMERICA', title: 'South America (excl. BRA/ARG)', flag: '🌎' },
   ],
   club: [
-    { id: 'club_Arsenal', title: 'Arsenal', flag: '⚽' },
-    { id: 'club_ManUtd', title: 'Man Utd', flag: '⚽' },
-    { id: 'club_Liverpool', title: 'Liverpool', flag: '⚽' },
-    { id: 'club_Chelsea', title: 'Chelsea', flag: '⚽' },
-    { id: 'club_ManCity', title: 'Man City', flag: '⚽' },
-    { id: 'club_Tottenham', title: 'Spurs', flag: '⚽' },
-    { id: 'club_Everton', title: 'Everton', flag: '⚽' },
-    { id: 'club_Newcastle', title: 'Newcastle', flag: '⚽' },
-    { id: 'club_AstonVilla', title: 'Aston Villa', flag: '⚽' },
-    { id: 'club_WestHam', title: 'West Ham', flag: '⚽' },
-    { id: 'club_Southampton', title: 'Southampton', flag: '⚽' },
-    { id: 'club_Leicester', title: 'Leicester', flag: '⚽' },
-    { id: 'club_Fulham', title: 'Fulham', flag: '⚽' },
-    { id: 'club_Blackburn', title: 'Blackburn', flag: '⚽' },
-    { id: 'club_CrystalPalace', title: 'Crystal Palace', flag: '⚽' },
-    { id: 'club_Sunderland', title: 'Sunderland', flag: '⚽' },
-    { id: 'club_Middlesbrough', title: 'Middlesbrough', flag: '⚽' },
-    { id: 'club_Leeds', title: 'Leeds', flag: '⚽' },
+    { id: 'club_Arsenal', title: 'Arsenal', color: '#EF0107' },
+    { id: 'club_AstonVilla', title: 'Aston Villa', color: '#670E36' },
+    { id: 'club_Blackburn', title: 'Blackburn', color: '#009EE0' },
+    { id: 'club_Chelsea', title: 'Chelsea', color: '#034694' },
+    { id: 'club_CrystalPalace', title: 'Crystal Palace', color: '#1B458F' },
+    { id: 'club_Everton', title: 'Everton', color: '#003399' },
+    { id: 'club_Fulham', title: 'Fulham', color: '#000000' },
+    { id: 'club_Leeds', title: 'Leeds', color: '#FFCD00' },
+    { id: 'club_Leicester', title: 'Leicester', color: '#003090' },
+    { id: 'club_Liverpool', title: 'Liverpool', color: '#C8102E' },
+    { id: 'club_ManCity', title: 'Man City', color: '#6CABDD' },
+    { id: 'club_ManUtd', title: 'Man Utd', color: '#DA291C' },
+    { id: 'club_Middlesbrough', title: 'Middlesbrough', color: '#E11B22' },
+    { id: 'club_Newcastle', title: 'Newcastle', color: '#241F20' },
+    { id: 'club_Southampton', title: 'Southampton', color: '#D71920' },
+    { id: 'club_Tottenham', title: 'Spurs', color: '#132257' },
+    { id: 'club_Sunderland', title: 'Sunderland', color: '#EB172B' },
+    { id: 'club_WestHam', title: 'West Ham', color: '#7A263A' },
   ],
   goals: [
     { id: 'goals_overall', title: 'All EPL Goals', flag: '⚽' },
-    { id: 'goals_Arsenal', title: 'Arsenal Goals', flag: '⚽' },
-    { id: 'goals_Chelsea', title: 'Chelsea Goals', flag: '⚽' },
-    { id: 'goals_ManUtd', title: 'Man Utd Goals', flag: '⚽' },
-    { id: 'goals_Liverpool', title: 'Liverpool Goals', flag: '⚽' },
-    { id: 'goals_Tottenham', title: 'Spurs Goals', flag: '⚽' },
-    { id: 'goals_ManCity', title: 'Man City Goals', flag: '⚽' },
+    { id: 'goals_Arsenal', title: 'Arsenal Goals', color: '#EF0107' },
+    { id: 'goals_Chelsea', title: 'Chelsea Goals', color: '#034694' },
+    { id: 'goals_Liverpool', title: 'Liverpool Goals', color: '#C8102E' },
+    { id: 'goals_ManCity', title: 'Man City Goals', color: '#6CABDD' },
+    { id: 'goals_ManUtd', title: 'Man Utd Goals', color: '#DA291C' },
+    { id: 'goals_Tottenham', title: 'Spurs Goals', color: '#132257' },
   ],
 };
 
@@ -655,7 +672,15 @@ function getCachedData(categoryId) {
   const ts = parseInt(localStorage.getItem(tsKey) || '0', 10);
   if (cached && (Date.now() - ts) < CACHE_TTL) {
     try {
-      return JSON.parse(cached);
+      const data = JSON.parse(cached);
+      // Cache bust: if cached data has 0 players, force refetch
+      if (!data.eligiblePlayers || data.eligiblePlayers.length === 0) {
+        console.log('[cache] Busting cache for', categoryId, '- had 0 players');
+        localStorage.removeItem(key);
+        localStorage.removeItem(tsKey);
+        return null;
+      }
+      return data;
     } catch { }
   }
   return null;
@@ -740,6 +765,7 @@ function toggleSection(id) {
 
 function buildCategorySections() {
   buildSection('countryGames', CATEGORIES.country, 'countCountry');
+  buildSection('continentGames', CATEGORIES.continent, 'countContinent');
   buildSection('clubGames', CATEGORIES.club, 'countClub');
   buildSection('goalsGames', CATEGORIES.goals, 'countGoals');
 }
@@ -752,9 +778,13 @@ function buildSection(containerId, list, countId) {
   list.forEach(cat => {
     const card = document.createElement('div');
     card.className = 'game-card';
+    // Use color dot for clubs, flag emoji for others
+    const iconHtml = cat.color
+      ? `<div class="color-dot" style="background:${cat.color}"></div>`
+      : `<span class="flag">${cat.flag}</span>`;
     card.innerHTML = `
       <div style="display:flex;align-items:center">
-        <span class="flag">${cat.flag}</span>
+        ${iconHtml}
         <div>
           <div class="title">${cat.title}</div>
           <div class="meta" id="meta-${cat.id}">Loading...</div>

@@ -30,36 +30,62 @@ const COUNTRY_CATEGORIES = {
 };
 
 // Club categories for apps mode - use exact DB values
-// Map: categoryId -> { club: DB value, label: display name, flag }
+// Map: categoryId -> { club: DB value, label: display name }
+// Note: Man Utd - DB may use "Manchester United" or "Manchester Utd" - we try both
 const CLUB_CATEGORIES = {
-  club_Arsenal: { club: 'Arsenal', label: 'Arsenal', flag: '🔴' },
-  club_ManUtd: { club: 'Manchester Utd', label: 'Man Utd', flag: '🔴' },
-  club_Liverpool: { club: 'Liverpool', label: 'Liverpool', flag: '🔴' },
-  club_Chelsea: { club: 'Chelsea', label: 'Chelsea', flag: '🔵' },
-  club_ManCity: { club: 'Manchester City', label: 'Man City', flag: '🩵' },
-  club_Tottenham: { club: 'Tottenham Hotspur', label: 'Spurs', flag: '⚪' },
-  club_Everton: { club: 'Everton', label: 'Everton', flag: '🔵' },
-  club_Newcastle: { club: 'Newcastle United', label: 'Newcastle', flag: '⬛' },
-  club_AstonVilla: { club: 'Aston Villa', label: 'Aston Villa', flag: '🟣' },
-  club_WestHam: { club: 'West Ham United', label: 'West Ham', flag: '🟤' },
-  club_Southampton: { club: 'Southampton', label: 'Southampton', flag: '🔴' },
-  club_Leicester: { club: 'Leicester City', label: 'Leicester', flag: '🦊' },
-  club_Fulham: { club: 'Fulham', label: 'Fulham', flag: '⚪' },
-  club_Blackburn: { club: 'Blackburn Rovers', label: 'Blackburn', flag: '🔵' },
-  club_CrystalPalace: { club: 'Crystal Palace', label: 'Crystal Palace', flag: '🔴🔵' },
-  club_Sunderland: { club: 'Sunderland', label: 'Sunderland', flag: '🔴⚪' },
-  club_Middlesbrough: { club: 'Middlesbrough', label: 'Middlesbrough', flag: '🔴' },
-  club_Leeds: { club: 'Leeds United', label: 'Leeds', flag: '⚪' },
+  club_Arsenal: { club: 'Arsenal', label: 'Arsenal' },
+  club_ManUtd: { club: 'Manchester United', altClub: 'Manchester Utd', label: 'Man Utd' },
+  club_Liverpool: { club: 'Liverpool', label: 'Liverpool' },
+  club_Chelsea: { club: 'Chelsea', label: 'Chelsea' },
+  club_ManCity: { club: 'Manchester City', label: 'Man City' },
+  club_Tottenham: { club: 'Tottenham Hotspur', altClub: 'Spurs', label: 'Spurs' },
+  club_Everton: { club: 'Everton', label: 'Everton' },
+  club_Newcastle: { club: 'Newcastle United', altClub: 'Newcastle Utd', label: 'Newcastle' },
+  club_AstonVilla: { club: 'Aston Villa', label: 'Aston Villa' },
+  club_WestHam: { club: 'West Ham United', altClub: 'West Ham Utd', label: 'West Ham' },
+  club_Southampton: { club: 'Southampton', label: 'Southampton' },
+  club_Leicester: { club: 'Leicester City', label: 'Leicester' },
+  club_Fulham: { club: 'Fulham', label: 'Fulham' },
+  club_Blackburn: { club: 'Blackburn Rovers', label: 'Blackburn' },
+  club_CrystalPalace: { club: 'Crystal Palace', label: 'Crystal Palace' },
+  club_Sunderland: { club: 'Sunderland', label: 'Sunderland' },
+  club_Middlesbrough: { club: 'Middlesbrough', label: 'Middlesbrough' },
+  club_Leeds: { club: 'Leeds United', altClub: 'Leeds Utd', label: 'Leeds' },
 };
 
 // Goals categories - subtract goals_total instead of apps_total
 const GOALS_CLUB_CATEGORIES = {
-  goals_Arsenal: { club: 'Arsenal', label: 'Arsenal', flag: '🔴' },
-  goals_Chelsea: { club: 'Chelsea', label: 'Chelsea', flag: '🔵' },
-  goals_ManUtd: { club: 'Manchester Utd', label: 'Man Utd', flag: '🔴' },
-  goals_Liverpool: { club: 'Liverpool', label: 'Liverpool', flag: '🔴' },
-  goals_Tottenham: { club: 'Tottenham Hotspur', label: 'Spurs', flag: '⚪' },
-  goals_ManCity: { club: 'Manchester City', label: 'Man City', flag: '🩵' },
+  goals_Arsenal: { club: 'Arsenal', label: 'Arsenal' },
+  goals_Chelsea: { club: 'Chelsea', label: 'Chelsea' },
+  goals_ManUtd: { club: 'Manchester United', altClub: 'Manchester Utd', label: 'Man Utd' },
+  goals_Liverpool: { club: 'Liverpool', label: 'Liverpool' },
+  goals_Tottenham: { club: 'Tottenham Hotspur', altClub: 'Spurs', label: 'Spurs' },
+  goals_ManCity: { club: 'Manchester City', label: 'Man City' },
+};
+
+// Continental groupings - nationality code sets
+const CONTINENT_CATEGORIES = {
+  continent_CONCACAF: {
+    name: 'CONCACAF',
+    flag: '🌎',
+    codes: ['USA', 'CAN', 'MEX', 'CRC', 'JAM', 'TRI', 'HON', 'PAN', 'GUA', 'SLV', 'HAI', 'CUB', 'DOM', 'BER', 'ANT', 'CUR', 'MTQ', 'GLP'],
+  },
+  continent_ASIA_OCEANIA: {
+    name: 'Asia & Oceania',
+    flag: '🌏',
+    codes: ['AUS', 'NZL', 'JPN', 'KOR', 'CHN', 'IRN', 'IRQ', 'SAU', 'UAE', 'QAT', 'IND', 'THA', 'MAS', 'SIN', 'PHI', 'VIE', 'IDN', 'HKG', 'TPE', 'ISR', 'JOR', 'KUW', 'LBN', 'OMA', 'BHR', 'SYR', 'UZB', 'KAZ', 'TJK', 'KGZ', 'TKM', 'AFG', 'PAK', 'BGD', 'SRI', 'MYA', 'CAM', 'LAO', 'PRK', 'FIJ', 'PNG', 'SAM', 'TON', 'VAN', 'SOL', 'NCL', 'GUM', 'TAH'],
+  },
+  continent_SOUTH_AMERICA: {
+    name: 'South America (excl. BRA/ARG)',
+    flag: '🌎',
+    // Explicitly excludes BRA and ARG
+    codes: ['URU', 'CHI', 'COL', 'PER', 'ECU', 'PAR', 'VEN', 'BOL', 'GUY', 'SUR'],
+  },
+  continent_AFRICA: {
+    name: 'Africa',
+    flag: '🌍',
+    codes: ['NGA', 'GHA', 'CIV', 'SEN', 'CMR', 'MAR', 'ALG', 'TUN', 'EGY', 'RSA', 'COD', 'MLI', 'BFA', 'GUI', 'ZIM', 'ZAM', 'KEN', 'UGA', 'TAN', 'ETH', 'GAB', 'CGO', 'TOG', 'BEN', 'NIG', 'SLE', 'LBR', 'GAM', 'ANG', 'MOZ', 'NAM', 'BOT', 'MAW', 'LES', 'SWZ', 'MTN', 'SUD', 'SSD', 'ERI', 'SOM', 'DJI', 'COM', 'MRI', 'MDG', 'SEY', 'CPV', 'STP', 'GNB', 'GNQ', 'CAF', 'RWA', 'BDI', 'LBA', 'CHA'],
+  },
 };
 
 // ============================================================
@@ -106,6 +132,10 @@ const HINTS = {
   goals_ManCity: 'City have assembled world-class attacking talent.',
   other_2clubs: 'Players who have represented 2 or more Premier League clubs.',
   other_3clubs: 'Players who have journeyed through 3 or more Premier League clubs.',
+  continent_CONCACAF: 'Players from North America, Central America, and the Caribbean.',
+  continent_ASIA_OCEANIA: 'Players from Asia and Oceania, including Australia and Japan.',
+  continent_SOUTH_AMERICA: 'South American players excluding Argentina and Brazil.',
+  continent_AFRICA: 'African players from across the continent.',
 };
 
 // ============================================================
@@ -178,6 +208,18 @@ const TRIVIA = {
   ],
   other_3clubs: [
     { q: 'Approximately what percentage of EPL players have played for 3+ clubs?', options: ['Under 10%', '10-20%', '20-30%', 'Over 30%'], answer: 1 },
+  ],
+  continent_CONCACAF: [
+    { q: 'Which CONCACAF country has produced the most EPL players?', options: ['USA', 'Canada', 'Mexico', 'Jamaica'], answer: 3 },
+  ],
+  continent_ASIA_OCEANIA: [
+    { q: 'Which Asian or Oceanian country has the most EPL representatives?', options: ['Japan', 'South Korea', 'Australia', 'China'], answer: 2 },
+  ],
+  continent_SOUTH_AMERICA: [
+    { q: 'Which South American country (excl. Brazil/Argentina) has produced the most EPL players?', options: ['Colombia', 'Uruguay', 'Chile', 'Peru'], answer: 0 },
+  ],
+  continent_AFRICA: [
+    { q: 'Which African country has produced the most Premier League players?', options: ['Nigeria', 'Ghana', 'Ivory Coast', 'Senegal'], answer: 0 },
   ],
 };
 
@@ -341,11 +383,13 @@ exports.handler = async (event) => {
     else if (categoryId && CLUB_CATEGORIES[categoryId]) {
       const cat = CLUB_CATEGORIES[categoryId];
       categoryName = cat.label;
-      categoryFlag = cat.flag;
+      categoryFlag = '⚽';
 
-      console.log('[match_start] Fetching club data for:', cat.club);
+      // Try primary club name first, then altClub if 0 results
+      let clubToUse = cat.club;
+      console.log('[match_start] Fetching club data for:', clubToUse);
 
-      const { data, error } = await supabase
+      let { data, error } = await supabase
         .from('player_club_totals')
         .select(`
           player_id,
@@ -362,12 +406,85 @@ exports.handler = async (event) => {
           )
         `)
         .eq('competition', 'EPL')
-        .eq('club', cat.club)
+        .eq('club', clubToUse)
         .gt('apps_total', 0);
 
       if (error) {
         console.error('[match_start] Supabase error:', error);
         return respond(500, { error: error.message });
+      }
+
+      // If 0 results and altClub exists, try altClub
+      if ((!data || data.length === 0) && cat.altClub) {
+        console.log('[match_start] Primary club returned 0, trying altClub:', cat.altClub);
+        clubToUse = cat.altClub;
+        const altResult = await supabase
+          .from('player_club_totals')
+          .select(`
+            player_id,
+            club,
+            apps_total,
+            goals_total,
+            mins_total,
+            starts_total,
+            players!inner (
+              player_id,
+              name,
+              normalized_name,
+              nationality
+            )
+          `)
+          .eq('competition', 'EPL')
+          .eq('club', cat.altClub)
+          .gt('apps_total', 0);
+
+        if (!altResult.error) {
+          data = altResult.data;
+        }
+      }
+
+      // DEBUG: If still 0 results for ManUtd, query what club names contain 'Man'
+      if ((!data || data.length === 0) && categoryId === 'club_ManUtd') {
+        console.log('[match_start] DEBUG: ManUtd still 0 results. Checking DB for club names containing "Man"...');
+        const { data: debugData } = await supabase
+          .from('player_club_totals')
+          .select('club')
+          .eq('competition', 'EPL')
+          .ilike('club', '%Man%')
+          .limit(20);
+        const uniqueClubs = [...new Set((debugData || []).map(r => r.club))];
+        console.log('[match_start] DEBUG: Clubs containing "Man":', uniqueClubs);
+
+        // Try exact match with first result if found
+        const manUtdVariant = uniqueClubs.find(c => c.toLowerCase().includes('united') || c.toLowerCase().includes('utd'));
+        if (manUtdVariant) {
+          console.log('[match_start] DEBUG: Trying DB variant:', manUtdVariant);
+          const variantResult = await supabase
+            .from('player_club_totals')
+            .select(`
+              player_id,
+              club,
+              apps_total,
+              goals_total,
+              mins_total,
+              starts_total,
+              players!inner (
+                player_id,
+                name,
+                normalized_name,
+                nationality
+              )
+            `)
+            .eq('competition', 'EPL')
+            .eq('club', manUtdVariant)
+            .gt('apps_total', 0);
+
+          if (!variantResult.error && variantResult.data && variantResult.data.length > 0) {
+            data = variantResult.data;
+            clubToUse = manUtdVariant;
+            console.log('[match_start] DEBUG: Found', data.length, 'players using variant:', manUtdVariant);
+          }
+        }
       }
 
       // Get all clubs for these players
@@ -426,7 +543,7 @@ exports.handler = async (event) => {
         };
       });
 
-      console.log('[match_start] Found', eligiblePlayers.length, 'players for club', cat.club);
+      console.log('[match_start] Found', eligiblePlayers.length, 'players for club', clubToUse);
     }
 
     // ============================================================
@@ -509,13 +626,15 @@ exports.handler = async (event) => {
     else if (categoryId && GOALS_CLUB_CATEGORIES[categoryId]) {
       const cat = GOALS_CLUB_CATEGORIES[categoryId];
       categoryName = `${cat.label} Goals`;
-      categoryFlag = cat.flag;
+      categoryFlag = '⚽';
       metric = 'goals_total';
       metricLabel = 'Goals';
 
-      console.log('[match_start] Fetching goals data for club:', cat.club);
+      // Try primary club name first, then altClub if 0 results
+      let clubToUse = cat.club;
+      console.log('[match_start] Fetching goals data for club:', clubToUse);
 
-      const { data, error } = await supabase
+      let { data, error } = await supabase
         .from('player_club_totals')
         .select(`
           player_id,
@@ -532,12 +651,41 @@ exports.handler = async (event) => {
           )
         `)
         .eq('competition', 'EPL')
-        .eq('club', cat.club)
+        .eq('club', clubToUse)
         .gt('goals_total', 0);
 
       if (error) {
         console.error('[match_start] Supabase error:', error);
         return respond(500, { error: error.message });
+      }
+
+      // If 0 results and altClub exists, try altClub
+      if ((!data || data.length === 0) && cat.altClub) {
+        console.log('[match_start] Primary club (goals) returned 0, trying altClub:', cat.altClub);
+        clubToUse = cat.altClub;
+        const altResult = await supabase
+          .from('player_club_totals')
+          .select(`
+            player_id,
+            club,
+            apps_total,
+            goals_total,
+            mins_total,
+            starts_total,
+            players!inner (
+              player_id,
+              name,
+              normalized_name,
+              nationality
+            )
+          `)
+          .eq('competition', 'EPL')
+          .eq('club', cat.altClub)
+          .gt('goals_total', 0);
+
+        if (!altResult.error) {
+          data = altResult.data;
+        }
       }
 
       const playerIds = (data || []).map(r => r.player_id);
@@ -578,7 +726,7 @@ exports.handler = async (event) => {
         };
       });
 
-      console.log('[match_start] Found', eligiblePlayers.length, 'players with goals for', cat.club);
+      console.log('[match_start] Found', eligiblePlayers.length, 'players with goals for', clubToUse);
     }
 
     // ============================================================
@@ -665,11 +813,105 @@ exports.handler = async (event) => {
     }
 
     // ============================================================
+    // CONTINENTAL GROUPINGS (apps mode, multi-nationality filter)
+    // ============================================================
+    else if (categoryId && CONTINENT_CATEGORIES[categoryId]) {
+      const cat = CONTINENT_CATEGORIES[categoryId];
+      categoryName = cat.name;
+      categoryFlag = cat.flag;
+
+      console.log('[match_start] Fetching continental data for:', cat.name, 'with', cat.codes.length, 'nationality codes');
+
+      // Get player competition totals for players matching any of the nationality codes
+      const { data: pctData, error: pctError } = await supabase
+        .from('player_competition_totals')
+        .select(`
+          player_id,
+          apps_total,
+          goals_total,
+          mins_total,
+          starts_total,
+          players!inner (
+            player_id,
+            name,
+            normalized_name,
+            nationality
+          )
+        `)
+        .eq('competition', 'EPL')
+        .in('players.nationality', cat.codes)
+        .gt('apps_total', 0);
+
+      if (pctError) {
+        console.error('[match_start] Supabase error:', pctError);
+        return respond(500, { error: pctError.message });
+      }
+
+      // Get clubs for each player
+      const playerIds = (pctData || []).map(r => r.player_id);
+      let clubsMap = {};
+      let seasonsMap = {};
+
+      if (playerIds.length > 0) {
+        const { data: clubData } = await supabase
+          .from('player_club_totals')
+          .select('player_id, club')
+          .eq('competition', 'EPL')
+          .in('player_id', playerIds);
+
+        (clubData || []).forEach(r => {
+          if (!clubsMap[r.player_id]) clubsMap[r.player_id] = [];
+          if (!clubsMap[r.player_id].includes(r.club)) {
+            clubsMap[r.player_id].push(r.club);
+          }
+        });
+
+        const { data: seasonData } = await supabase
+          .from('player_season_stats')
+          .select('player_id, season')
+          .eq('competition', 'EPL')
+          .in('player_id', playerIds);
+
+        const seasonSets = {};
+        (seasonData || []).forEach(r => {
+          if (!seasonSets[r.player_id]) seasonSets[r.player_id] = new Set();
+          seasonSets[r.player_id].add(r.season);
+        });
+        for (const pid in seasonSets) {
+          seasonsMap[pid] = seasonSets[pid].size;
+        }
+      }
+
+      eligiblePlayers = (pctData || []).map(row => {
+        const clubs = clubsMap[row.player_id] || [];
+        return {
+          playerId: row.player_id,
+          name: row.players.name,
+          normalized: row.players.normalized_name || normalize(row.players.name),
+          nationality: row.players.nationality,
+          subtractValue: row.apps_total,
+          overlay: {
+            apps: row.apps_total,
+            goals: row.goals_total,
+            mins: row.mins_total,
+            starts: row.starts_total,
+          },
+          clubs: clubs.slice(0, 5),
+          clubCount: clubs.length,
+          seasonsCount: seasonsMap[row.player_id] || null,
+        };
+      });
+
+      console.log('[match_start] Found', eligiblePlayers.length, 'players for continent', cat.name);
+    }
+
+    // ============================================================
     // UNKNOWN CATEGORY
     // ============================================================
     else {
       const allCategories = [
         ...Object.keys(COUNTRY_CATEGORIES),
+        ...Object.keys(CONTINENT_CATEGORIES),
         ...Object.keys(CLUB_CATEGORIES),
         ...Object.keys(GOALS_CLUB_CATEGORIES),
         'goals_overall',
