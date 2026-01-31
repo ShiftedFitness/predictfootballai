@@ -99,6 +99,8 @@ button {
 .section.open .section-body { display: block; }
 .section.disabled .section-header { opacity: .5; cursor: not-allowed; }
 .section.disabled .section-body { display: none; }
+.section-desc { display: none; font-size: 12px; color: var(--muted); padding: 0 16px 8px; line-height: 1.4; }
+.section.open .section-desc { display: block; }
 .disabled-note { font-size: 12px; color: var(--muted); padding: 12px; text-align: center; }
 
 /* Game cards */
@@ -383,14 +385,27 @@ button {
 
 <!-- SETUP CARD -->
 <div class="card" id="setupCard">
-  <!-- Step 1: Number of players -->
+  <!-- Step 1: Game Mode Selection -->
   <div id="step1">
     <h2>Football 501</h2>
     <p class="subtitle">Guess players, subtract their stats, hit exactly 0 to win!</p>
     <div class="field">
+      <label>Choose game mode</label>
+    </div>
+    <div class="row-btns" style="margin-top: 8px;">
+      <button class="btn-primary" id="singlePlayerBtn">Single Player</button>
+      <button class="btn-secondary" id="multiplayerBtn">Multiplayer</button>
+    </div>
+  </div>
+
+  <!-- Step 1b: Multiplayer count -->
+  <div id="step1b" class="hidden">
+    <button class="btn-back" id="backToStep1Mode">← Back</button>
+    <h2>Multiplayer</h2>
+    <p class="subtitle">Select number of players</p>
+    <div class="field">
       <label>Number of players</label>
       <select id="numPlayers">
-        <option value="1">1 Player</option>
         <option value="2" selected>2 Players</option>
         <option value="3">3 Players</option>
         <option value="4">4 Players</option>
@@ -420,6 +435,7 @@ button {
         <div class="section-title">Countries <span class="section-count" id="countCountry">(0)</span></div>
         <div class="chev">▼</div>
       </div>
+      <div class="section-desc">Player appearances by country in Premier League history (up to 2024/25 season).</div>
       <div class="section-body" id="countryGames"></div>
     </div>
 
@@ -428,23 +444,17 @@ button {
         <div class="section-title">Clubs (Apps) <span class="section-count" id="countClub">(0)</span></div>
         <div class="chev">▼</div>
       </div>
+      <div class="section-desc">Player appearances for each club in Premier League history (up to 2024/25 season).</div>
       <div class="section-body" id="clubGames"></div>
     </div>
 
     <div class="section" id="sec-goals">
       <div class="section-header" onclick="toggleSection('sec-goals')">
-        <div class="section-title">Goals ⚽ <span class="section-count" id="countGoals">(0)</span></div>
+        <div class="section-title">Goals <span class="section-count" id="countGoals">(0)</span></div>
         <div class="chev">▼</div>
       </div>
+      <div class="section-desc">Total Premier League goals (overall and by club) (up to 2024/25 season).</div>
       <div class="section-body" id="goalsGames"></div>
-    </div>
-
-    <div class="section" id="sec-other">
-      <div class="section-header" onclick="toggleSection('sec-other')">
-        <div class="section-title">Other <span class="section-count" id="countOther">(0)</span></div>
-        <div class="chev">▼</div>
-      </div>
-      <div class="section-body" id="otherGames"></div>
     </div>
 
     <div class="section disabled" id="sec-positions">
@@ -452,6 +462,7 @@ button {
         <div class="section-title">Positions <span class="section-count">(Coming Soon)</span></div>
         <div class="chev">▼</div>
       </div>
+      <div class="section-desc">Coming soon — requires position data.</div>
       <div class="section-body">
         <div class="disabled-note">Position data not yet available. Check back soon!</div>
       </div>
@@ -551,37 +562,33 @@ const CATEGORIES = {
     { id: 'country_GER', title: 'Germany', flag: '🇩🇪' },
   ],
   club: [
-    { id: 'club_Arsenal', title: 'Arsenal', flag: '🔴' },
-    { id: 'club_ManUtd', title: 'Man Utd', flag: '🔴' },
-    { id: 'club_Liverpool', title: 'Liverpool', flag: '🔴' },
-    { id: 'club_Chelsea', title: 'Chelsea', flag: '🔵' },
-    { id: 'club_ManCity', title: 'Man City', flag: '🩵' },
-    { id: 'club_Tottenham', title: 'Spurs', flag: '⚪' },
-    { id: 'club_Everton', title: 'Everton', flag: '🔵' },
-    { id: 'club_Newcastle', title: 'Newcastle', flag: '⬛' },
-    { id: 'club_AstonVilla', title: 'Aston Villa', flag: '🟣' },
-    { id: 'club_WestHam', title: 'West Ham', flag: '🟤' },
-    { id: 'club_Southampton', title: 'Southampton', flag: '🔴' },
-    { id: 'club_Leicester', title: 'Leicester', flag: '🦊' },
-    { id: 'club_Fulham', title: 'Fulham', flag: '⚪' },
-    { id: 'club_Blackburn', title: 'Blackburn', flag: '🔵' },
-    { id: 'club_CrystalPalace', title: 'Crystal Palace', flag: '🔴🔵' },
-    { id: 'club_Sunderland', title: 'Sunderland', flag: '🔴⚪' },
-    { id: 'club_Middlesbrough', title: 'Middlesbrough', flag: '🔴' },
-    { id: 'club_Leeds', title: 'Leeds', flag: '⚪' },
+    { id: 'club_Arsenal', title: 'Arsenal', flag: '⚽' },
+    { id: 'club_ManUtd', title: 'Man Utd', flag: '⚽' },
+    { id: 'club_Liverpool', title: 'Liverpool', flag: '⚽' },
+    { id: 'club_Chelsea', title: 'Chelsea', flag: '⚽' },
+    { id: 'club_ManCity', title: 'Man City', flag: '⚽' },
+    { id: 'club_Tottenham', title: 'Spurs', flag: '⚽' },
+    { id: 'club_Everton', title: 'Everton', flag: '⚽' },
+    { id: 'club_Newcastle', title: 'Newcastle', flag: '⚽' },
+    { id: 'club_AstonVilla', title: 'Aston Villa', flag: '⚽' },
+    { id: 'club_WestHam', title: 'West Ham', flag: '⚽' },
+    { id: 'club_Southampton', title: 'Southampton', flag: '⚽' },
+    { id: 'club_Leicester', title: 'Leicester', flag: '⚽' },
+    { id: 'club_Fulham', title: 'Fulham', flag: '⚽' },
+    { id: 'club_Blackburn', title: 'Blackburn', flag: '⚽' },
+    { id: 'club_CrystalPalace', title: 'Crystal Palace', flag: '⚽' },
+    { id: 'club_Sunderland', title: 'Sunderland', flag: '⚽' },
+    { id: 'club_Middlesbrough', title: 'Middlesbrough', flag: '⚽' },
+    { id: 'club_Leeds', title: 'Leeds', flag: '⚽' },
   ],
   goals: [
     { id: 'goals_overall', title: 'All EPL Goals', flag: '⚽' },
-    { id: 'goals_Arsenal', title: 'Arsenal Goals', flag: '🔴' },
-    { id: 'goals_Chelsea', title: 'Chelsea Goals', flag: '🔵' },
-    { id: 'goals_ManUtd', title: 'Man Utd Goals', flag: '🔴' },
-    { id: 'goals_Liverpool', title: 'Liverpool Goals', flag: '🔴' },
-    { id: 'goals_Tottenham', title: 'Spurs Goals', flag: '⚪' },
-    { id: 'goals_ManCity', title: 'Man City Goals', flag: '🩵' },
-  ],
-  other: [
-    { id: 'other_2clubs', title: '2+ PL Clubs', flag: '🔄' },
-    { id: 'other_3clubs', title: '3+ PL Clubs', flag: '🔄' },
+    { id: 'goals_Arsenal', title: 'Arsenal Goals', flag: '⚽' },
+    { id: 'goals_Chelsea', title: 'Chelsea Goals', flag: '⚽' },
+    { id: 'goals_ManUtd', title: 'Man Utd Goals', flag: '⚽' },
+    { id: 'goals_Liverpool', title: 'Liverpool Goals', flag: '⚽' },
+    { id: 'goals_Tottenham', title: 'Spurs Goals', flag: '⚽' },
+    { id: 'goals_ManCity', title: 'Man City Goals', flag: '⚽' },
   ],
 };
 
@@ -661,6 +668,26 @@ function setCachedData(categoryId, data) {
 }
 
 // ============== SETUP FLOW ==============
+
+// Single Player: skip directly to categories
+$('singlePlayerBtn').onclick = () => {
+  window.gameSetup = { names: ['You'], isSinglePlayer: true };
+  buildCategorySections();
+  hide('step1');
+  show('step3');
+};
+
+// Multiplayer: go to player count selection
+$('multiplayerBtn').onclick = () => {
+  hide('step1');
+  show('step1b');
+};
+
+$('backToStep1Mode').onclick = () => {
+  hide('step1b');
+  show('step1');
+};
+
 $('toStep2').onclick = () => {
   const n = parseInt($('numPlayers').value, 10);
   const wrap = $('nameFields');
@@ -671,14 +698,14 @@ $('toStep2').onclick = () => {
     div.innerHTML = `<label>Player ${i}</label><input id="pname${i}" type="text" placeholder="Enter name" autocomplete="off"/>`;
     wrap.appendChild(div);
   }
-  hide('step1');
+  hide('step1b');
   show('step2');
   $('pname1')?.focus();
 };
 
 $('backToStep1').onclick = () => {
   hide('step2');
-  show('step1');
+  show('step1b');
 };
 
 $('toStep3').onclick = () => {
@@ -715,7 +742,6 @@ function buildCategorySections() {
   buildSection('countryGames', CATEGORIES.country, 'countCountry');
   buildSection('clubGames', CATEGORIES.club, 'countClub');
   buildSection('goalsGames', CATEGORIES.goals, 'countGoals');
-  buildSection('otherGames', CATEGORIES.other, 'countOther');
 }
 
 function buildSection(containerId, list, countId) {
@@ -915,6 +941,7 @@ function startMatch(names) {
     players: names,
     scores: Array(names.length).fill(501),
     turn: 0,
+    turnCount: 1,
     used: new Set(),
     retry: false,
     historyScores: names.map(() => [501]),
@@ -947,7 +974,7 @@ function renderScoreboard() {
 }
 
 function updateTurnUI() {
-  $('turnInfo').textContent = `${state.players[state.turn]}'s turn`;
+  $('turnInfo').innerHTML = `<span style="color:var(--accent)">Turn ${state.turnCount}</span> &nbsp;—&nbsp; ${state.players[state.turn]}'s turn`;
   document.querySelectorAll('.pill').forEach((el, i) => {
     el.classList.toggle('active', i === state.turn);
   });
@@ -1185,13 +1212,15 @@ async function handleSubmit() {
     animateScore(state.turn, before, after);
 
     if (win) {
-      setResult(`🎯 ${state.players[state.turn]} wins with ${match.name} (${formatNum(deduct)})!`);
+      const winnerName = state.players[state.turn];
+      const turnsText = state.turnCount === 1 ? '1 turn' : `${state.turnCount} turns`;
+      setResult(`🎯 ${winnerName} wins with ${match.name} (${formatNum(deduct)})!`);
       showToast(match, before, after, 'win');
       showEffect('win');
       const pill = $(`pill_${state.turn}`);
       pill?.classList.add('win-anim');
       setTimeout(() => {
-        if (confirm(`🏆 ${state.players[state.turn]} wins! Play again?`)) {
+        if (confirm(`🏆 ${winnerName} wins in ${turnsText}! Play again?`)) {
           location.reload();
         }
       }, 1500);
@@ -1209,6 +1238,7 @@ function nextTurn() {
   guessInput.value = '';
   submitBtn.disabled = true;
   state.turn = (state.turn + 1) % state.players.length;
+  state.turnCount++;
   renderScoreboard();
   updateTurnUI();
   guessInput.focus();
@@ -1357,14 +1387,7 @@ $('confirmYes').onclick = () => {
 
 // ============== INIT ==============
 (function init() {
-  const n = parseInt($('numPlayers').value, 10);
-  const wrap = $('nameFields');
-  for (let i = 1; i <= n; i++) {
-    const div = document.createElement('div');
-    div.className = 'field';
-    div.innerHTML = `<label>Player ${i}</label><input id="pname${i}" type="text" placeholder="Enter name" autocomplete="off"/>`;
-    wrap.appendChild(div);
-  }
+  // No pre-initialization needed - mode selection handles the flow
 })();
 </script>
 </body>

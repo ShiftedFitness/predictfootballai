@@ -33,7 +33,7 @@ const COUNTRY_CATEGORIES = {
 // Map: categoryId -> { club: DB value, label: display name, flag }
 const CLUB_CATEGORIES = {
   club_Arsenal: { club: 'Arsenal', label: 'Arsenal', flag: '🔴' },
-  club_ManUtd: { club: 'Manchester United', label: 'Man Utd', flag: '🔴' },
+  club_ManUtd: { club: 'Manchester Utd', label: 'Man Utd', flag: '🔴' },
   club_Liverpool: { club: 'Liverpool', label: 'Liverpool', flag: '🔴' },
   club_Chelsea: { club: 'Chelsea', label: 'Chelsea', flag: '🔵' },
   club_ManCity: { club: 'Manchester City', label: 'Man City', flag: '🩵' },
@@ -56,7 +56,7 @@ const CLUB_CATEGORIES = {
 const GOALS_CLUB_CATEGORIES = {
   goals_Arsenal: { club: 'Arsenal', label: 'Arsenal', flag: '🔴' },
   goals_Chelsea: { club: 'Chelsea', label: 'Chelsea', flag: '🔵' },
-  goals_ManUtd: { club: 'Manchester United', label: 'Man Utd', flag: '🔴' },
+  goals_ManUtd: { club: 'Manchester Utd', label: 'Man Utd', flag: '🔴' },
   goals_Liverpool: { club: 'Liverpool', label: 'Liverpool', flag: '🔴' },
   goals_Tottenham: { club: 'Tottenham Hotspur', label: 'Spurs', flag: '⚪' },
   goals_ManCity: { club: 'Manchester City', label: 'Man City', flag: '🩵' },
@@ -689,6 +689,11 @@ exports.handler = async (event) => {
     eligiblePlayers.sort((a, b) => b.subtractValue - a.subtractValue);
 
     console.log('[match_start] Returning', eligiblePlayers.length, 'eligible players');
+
+    // Warn if 0 players returned (possible DB mismatch)
+    if (eligiblePlayers.length === 0) {
+      console.warn('[match_start] WARNING: 0 players returned for categoryId:', categoryId, '- check DB values match');
+    }
 
     return respond(200, {
       meta: {
