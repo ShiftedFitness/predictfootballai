@@ -17,6 +17,7 @@
   --accent: #4ade80;
   --accent-dim: #22c55e;
   --gold: #fbbf24;
+  --used: #666;
 }
 * { box-sizing: border-box; }
 body {
@@ -65,6 +66,7 @@ button {
   font-weight: 700;
   cursor: pointer;
   transition: all .2s;
+  min-height: 48px;
 }
 .btn-primary { background: var(--accent); color: #0a0f0d; }
 .btn-primary:hover:not(:disabled) { background: var(--accent-dim); }
@@ -72,12 +74,14 @@ button {
 .btn-secondary { background: var(--btn); color: #fff; }
 .btn-secondary:hover:not(:disabled) { background: var(--btn-hover); }
 .btn-danger { background: var(--danger); color: #fff; }
-.btn-text { background: none; color: var(--muted); text-decoration: underline; font-size: 14px; padding: 8px; width: auto; }
+.btn-text { background: none; color: var(--muted); text-decoration: underline; font-size: 14px; padding: 8px; width: auto; min-height: auto; }
+.btn-back { background: var(--card-dark); color: var(--muted); margin-bottom: 12px; font-size: 14px; padding: 10px 16px; }
+.btn-back:hover { background: var(--btn); color: #fff; }
 .row-btns { display: flex; gap: 10px; margin-top: 12px; }
 .row-btns button { flex: 1; }
 
 /* Category sections */
-.section { background: var(--card-dark); border-radius: 14px; margin-bottom: 12px; overflow: hidden; }
+.section { background: var(--card-dark); border-radius: 14px; margin-bottom: 10px; overflow: hidden; }
 .section-header {
   display: flex;
   align-items: center;
@@ -87,11 +91,15 @@ button {
   transition: background .2s;
 }
 .section-header:hover { background: rgba(255,255,255,.03); }
-.section-title { font-weight: 700; font-size: 15px; }
-.chev { opacity: .7; transition: transform .2s; }
+.section-title { font-weight: 700; font-size: 15px; display: flex; align-items: center; gap: 8px; }
+.section-count { font-size: 12px; color: var(--muted); font-weight: 400; }
+.chev { opacity: .7; transition: transform .2s; font-size: 12px; }
 .section.open .chev { transform: rotate(180deg); }
 .section-body { display: none; padding: 8px 12px 12px; }
 .section.open .section-body { display: block; }
+.section.disabled .section-header { opacity: .5; cursor: not-allowed; }
+.section.disabled .section-body { display: none; }
+.disabled-note { font-size: 12px; color: var(--muted); padding: 12px; text-align: center; }
 
 /* Game cards */
 .game-card {
@@ -100,18 +108,18 @@ button {
   justify-content: space-between;
   background: rgba(255,255,255,.04);
   border-radius: 12px;
-  padding: 14px 16px;
-  margin-bottom: 8px;
+  padding: 12px 14px;
+  margin-bottom: 6px;
   cursor: pointer;
   transition: background .2s, transform .1s;
 }
 .game-card:hover { background: rgba(255,255,255,.08); }
 .game-card:active { transform: scale(.98); }
-.game-card .flag { font-size: 20px; margin-right: 10px; }
-.game-card .title { font-weight: 600; font-size: 14px; }
-.game-card .meta { font-size: 12px; color: var(--muted); margin-top: 3px; }
-.game-card .arrow { opacity: .5; }
-.stars { color: var(--gold); letter-spacing: 1px; }
+.game-card .flag { font-size: 18px; margin-right: 10px; }
+.game-card .title { font-weight: 600; font-size: 13px; }
+.game-card .meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.game-card .arrow { opacity: .5; font-size: 14px; }
+.stars { color: var(--gold); letter-spacing: 1px; font-size: 10px; }
 
 /* Loading screen with trivia */
 .loading-screen { text-align: center; padding: 20px 0; }
@@ -167,7 +175,8 @@ button {
 }
 
 /* Scoreboard */
-.scores { display: grid; gap: 10px; margin-bottom: 14px; }
+.scores { display: grid; gap: 8px; margin-bottom: 14px; }
+.scores.p1 { grid-template-columns: 1fr; }
 .scores.p2 { grid-template-columns: 1fr 1fr; }
 .scores.p3 { grid-template-columns: 1fr 1fr 1fr; }
 .scores.p4 { grid-template-columns: 1fr 1fr; }
@@ -175,17 +184,28 @@ button {
 .pill {
   background: var(--card-dark);
   border-radius: 14px;
-  padding: 12px;
+  padding: 10px;
   text-align: center;
   cursor: pointer;
   transition: all .2s;
   border: 2px solid transparent;
 }
 .pill.active { border-color: var(--accent); background: rgba(74,222,128,.1); }
-.pill .name { font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.pill .score { font-size: 28px; font-weight: 800; }
-.turn-info { text-align: center; font-weight: 700; margin-bottom: 12px; font-size: 15px; }
-.hint-bar { text-align: center; font-size: 13px; color: var(--accent); margin-bottom: 12px; padding: 10px; background: rgba(74,222,128,.08); border-radius: 10px; }
+.pill .name { font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pill .score { font-size: 26px; font-weight: 800; }
+.pill.bust-anim { animation: shake .4s ease; }
+.pill.win-anim { animation: celebrate .6s ease; }
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-4px); }
+  40%, 80% { transform: translateX(4px); }
+}
+@keyframes celebrate {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+.turn-info { text-align: center; font-weight: 700; margin-bottom: 10px; font-size: 14px; }
+.hint-bar { text-align: center; font-size: 12px; color: var(--accent); margin-bottom: 10px; padding: 8px; background: rgba(74,222,128,.08); border-radius: 10px; }
 
 /* Selection list (fuzzy matches) */
 .selection-list {
@@ -193,35 +213,50 @@ button {
   border-radius: 12px;
   margin-top: 10px;
   overflow: hidden;
+  max-height: 280px;
+  overflow-y: auto;
 }
 .selection-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 16px;
+  padding: 12px 14px;
   cursor: pointer;
   transition: background .15s;
   border-bottom: 1px solid rgba(255,255,255,.05);
 }
 .selection-item:last-child { border-bottom: none; }
-.selection-item:hover { background: rgba(255,255,255,.06); }
-.selection-item .name { font-weight: 600; }
-.selection-item .nat { font-size: 12px; color: var(--muted); }
-/* Note: apps class removed from selection items - stats only shown after commit */
+.selection-item:hover:not(.used) { background: rgba(255,255,255,.06); }
+.selection-item .info { flex: 1; }
+.selection-item .name { font-weight: 600; font-size: 14px; }
+.selection-item .nat { font-size: 11px; color: var(--muted); }
+.selection-item.used { opacity: .5; cursor: not-allowed; }
+.selection-item.used .name { color: var(--used); text-decoration: line-through; }
+.used-badge {
+  font-size: 9px;
+  background: var(--danger);
+  color: #fff;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
 
 /* Result toast */
-.result { min-height: 20px; text-align: center; margin: 10px 0; font-size: 14px; }
+.result { min-height: 18px; text-align: center; margin: 8px 0; font-size: 13px; }
 .inline-toast {
   background: var(--card-dark);
   border-radius: 14px;
   padding: 14px;
-  margin-top: 12px;
+  margin-top: 10px;
   opacity: 0;
   transform: translateY(8px);
   transition: all .25s;
 }
 .inline-toast.show { opacity: 1; transform: translateY(0); }
-.toast-row { display: flex; align-items: center; gap: 12px; }
+.inline-toast.bust-effect { border: 2px solid var(--danger); }
+.inline-toast.win-effect { border: 2px solid var(--gold); background: rgba(251,191,36,.1); }
+.toast-row { display: flex; align-items: flex-start; gap: 12px; }
 .toast-badge {
   min-width: 52px; height: 52px;
   background: var(--accent);
@@ -231,19 +266,48 @@ button {
   align-items: center;
   justify-content: center;
   font-weight: 800;
-  font-size: 18px;
+  font-size: 16px;
+  flex-shrink: 0;
 }
-.toast-badge.bust { background: var(--danger); color: #fff; }
-.toast-body { flex: 1; }
+.toast-badge.bust { background: var(--danger); color: #fff; font-size: 24px; }
+.toast-badge.win { background: var(--gold); color: #000; font-size: 20px; }
+.toast-body { flex: 1; min-width: 0; }
 .toast-title { font-weight: 700; font-size: 15px; }
-.toast-sub { color: var(--muted); font-size: 13px; margin-top: 2px; }
-.toast-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.toast-sub { color: var(--muted); font-size: 12px; margin-top: 2px; }
+.toast-clubs { font-size: 11px; color: var(--muted); margin-top: 4px; }
+.toast-meta { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
 .toast-meta span {
   background: rgba(255,255,255,.06);
-  padding: 5px 8px;
-  border-radius: 6px;
-  font-size: 11px;
+  padding: 4px 7px;
+  border-radius: 5px;
+  font-size: 10px;
   color: var(--muted);
+}
+
+/* Bust/Win overlays */
+.effect-overlay {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  pointer-events: none;
+}
+.effect-overlay.show { display: flex; }
+.effect-text {
+  font-size: 48px;
+  font-weight: 900;
+  text-transform: uppercase;
+  animation: effectPop .5s ease-out forwards;
+  opacity: 0;
+}
+.effect-text.bust { color: var(--danger); text-shadow: 0 4px 20px rgba(224,85,85,.5); }
+.effect-text.win { color: var(--gold); text-shadow: 0 4px 20px rgba(251,191,36,.5); }
+@keyframes effectPop {
+  0% { transform: scale(0.5); opacity: 0; }
+  50% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(1); opacity: 0; }
 }
 
 /* Progress modal */
@@ -274,20 +338,20 @@ button {
 .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
 .modal-title { font-weight: 800; font-size: 17px; }
 .close-btn { background: var(--btn); border: none; color: #fff; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 14px; }
-.chain { background: var(--card-dark); padding: 12px; border-radius: 10px; font-family: monospace; font-size: 14px; overflow-x: auto; }
+.chain { background: var(--card-dark); padding: 12px; border-radius: 10px; font-family: monospace; font-size: 13px; overflow-x: auto; word-break: break-all; }
 .pick-list { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
 .pick {
   background: var(--card-dark);
-  padding: 12px;
+  padding: 10px;
   border-radius: 10px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 14px;
+  font-size: 13px;
 }
 .pick.bust { border-left: 3px solid var(--danger); }
 .pick b { font-weight: 700; }
-.pick .meta { color: var(--muted); font-size: 12px; }
+.pick .meta { color: var(--muted); font-size: 11px; }
 
 /* Confirm dialog */
 .confirm-overlay {
@@ -322,7 +386,7 @@ button {
   <!-- Step 1: Number of players -->
   <div id="step1">
     <h2>Football 501</h2>
-    <p class="subtitle">Guess players, subtract appearances, hit exactly 0 to win!</p>
+    <p class="subtitle">Guess players, subtract their stats, hit exactly 0 to win!</p>
     <div class="field">
       <label>Number of players</label>
       <select id="numPlayers">
@@ -339,6 +403,7 @@ button {
 
   <!-- Step 2: Player names -->
   <div id="step2" class="hidden">
+    <button class="btn-back" id="backToStep1">← Back</button>
     <h2>Player Names</h2>
     <div id="nameFields"></div>
     <button class="btn-primary" id="toStep3">Continue</button>
@@ -346,12 +411,13 @@ button {
 
   <!-- Step 3: Choose category -->
   <div id="step3" class="hidden">
+    <button class="btn-back" id="backToStep2">← Back</button>
     <h2>Choose Category</h2>
-    <p class="subtitle">Select a category to start your match</p>
+    <p class="subtitle">Select a game mode to start</p>
 
-    <div class="section open" id="sec-country">
+    <div class="section" id="sec-country">
       <div class="section-header" onclick="toggleSection('sec-country')">
-        <div class="section-title">EPL Players by Country</div>
+        <div class="section-title">Countries <span class="section-count" id="countCountry">(0)</span></div>
         <div class="chev">▼</div>
       </div>
       <div class="section-body" id="countryGames"></div>
@@ -359,15 +425,42 @@ button {
 
     <div class="section" id="sec-club">
       <div class="section-header" onclick="toggleSection('sec-club')">
-        <div class="section-title">EPL Players by Club</div>
+        <div class="section-title">Clubs (Apps) <span class="section-count" id="countClub">(0)</span></div>
         <div class="chev">▼</div>
       </div>
       <div class="section-body" id="clubGames"></div>
+    </div>
+
+    <div class="section" id="sec-goals">
+      <div class="section-header" onclick="toggleSection('sec-goals')">
+        <div class="section-title">Goals ⚽ <span class="section-count" id="countGoals">(0)</span></div>
+        <div class="chev">▼</div>
+      </div>
+      <div class="section-body" id="goalsGames"></div>
+    </div>
+
+    <div class="section" id="sec-other">
+      <div class="section-header" onclick="toggleSection('sec-other')">
+        <div class="section-title">Other <span class="section-count" id="countOther">(0)</span></div>
+        <div class="chev">▼</div>
+      </div>
+      <div class="section-body" id="otherGames"></div>
+    </div>
+
+    <div class="section disabled" id="sec-positions">
+      <div class="section-header">
+        <div class="section-title">Positions <span class="section-count">(Coming Soon)</span></div>
+        <div class="chev">▼</div>
+      </div>
+      <div class="section-body">
+        <div class="disabled-note">Position data not yet available. Check back soon!</div>
+      </div>
     </div>
   </div>
 
   <!-- Loading screen with trivia -->
   <div id="loadingScreen" class="hidden loading-screen">
+    <button class="btn-back" id="backFromLoading">← Back</button>
     <div class="loading-spinner"></div>
     <div class="loading-text">Loading match data...</div>
     <div id="readyBadge" class="ready-badge hidden">Game Ready!</div>
@@ -390,7 +483,7 @@ button {
   <div id="hintBar" class="hint-bar hidden"></div>
 
   <div class="field">
-    <label>Your guess</label>
+    <label id="guessLabel">Your guess</label>
     <input id="guess" type="text" placeholder="Type a player name..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
   </div>
 
@@ -405,6 +498,11 @@ button {
   <div id="inlineToast" class="inline-toast"></div>
 </div>
 
+<!-- Effect Overlay -->
+<div id="effectOverlay" class="effect-overlay">
+  <div id="effectText" class="effect-text"></div>
+</div>
+
 <!-- Progress Modal -->
 <div id="modalBackdrop" class="modal-backdrop">
   <div id="modal" class="modal">
@@ -412,7 +510,7 @@ button {
       <div id="modalTitle" class="modal-title">Progress</div>
       <button id="closeModal" class="close-btn">Close</button>
     </div>
-    <div style="font-size:13px;color:var(--muted);margin-bottom:8px">Score chain</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Score chain</div>
     <div id="chain" class="chain">501</div>
     <div id="pickList" class="pick-list"></div>
   </div>
@@ -421,7 +519,7 @@ button {
 <!-- Confirm Dialog -->
 <div id="confirmOverlay" class="confirm-overlay">
   <div class="confirm-box">
-    <p id="confirmText">Are you sure?</p>
+    <p id="confirmText">End this game?</p>
     <div class="confirm-btns">
       <button id="confirmNo" class="btn-secondary">Cancel</button>
       <button id="confirmYes" class="btn-danger">End Game</button>
@@ -435,7 +533,7 @@ const API_BASE = '/.netlify/functions';
 const CACHE_TTL = 90 * 60 * 1000; // 90 minutes
 const DEBOUNCE_MS = 300;
 
-// Categories available (must match backend)
+// ============== CATEGORIES (must match backend) ==============
 const CATEGORIES = {
   country: [
     { id: 'country_FRA', title: 'France', flag: '🇫🇷' },
@@ -443,13 +541,47 @@ const CATEGORIES = {
     { id: 'country_ARG', title: 'Argentina', flag: '🇦🇷' },
     { id: 'country_NED', title: 'Netherlands', flag: '🇳🇱' },
     { id: 'country_POR', title: 'Portugal', flag: '🇵🇹' },
+    { id: 'country_IRL', title: 'Ireland', flag: '🇮🇪' },
+    { id: 'country_SCO', title: 'Scotland', flag: '🏴󠁧󠁢󠁳󠁣󠁴󠁿' },
+    { id: 'country_WAL', title: 'Wales', flag: '🏴󠁧󠁢󠁷󠁬󠁳󠁿' },
+    { id: 'country_NIR', title: 'N. Ireland', flag: '🇬🇧' },
+    { id: 'country_NOR', title: 'Norway', flag: '🇳🇴' },
+    { id: 'country_DEN', title: 'Denmark', flag: '🇩🇰' },
+    { id: 'country_BEL', title: 'Belgium', flag: '🇧🇪' },
+    { id: 'country_GER', title: 'Germany', flag: '🇩🇪' },
   ],
   club: [
     { id: 'club_Arsenal', title: 'Arsenal', flag: '🔴' },
-    { id: 'club_ManUtd', title: 'Manchester United', flag: '🟥' },
+    { id: 'club_ManUtd', title: 'Man Utd', flag: '🔴' },
     { id: 'club_Liverpool', title: 'Liverpool', flag: '🔴' },
-    { id: 'club_Leicester', title: 'Leicester City', flag: '🦊' },
+    { id: 'club_Chelsea', title: 'Chelsea', flag: '🔵' },
+    { id: 'club_ManCity', title: 'Man City', flag: '🩵' },
+    { id: 'club_Tottenham', title: 'Spurs', flag: '⚪' },
+    { id: 'club_Everton', title: 'Everton', flag: '🔵' },
+    { id: 'club_Newcastle', title: 'Newcastle', flag: '⬛' },
+    { id: 'club_AstonVilla', title: 'Aston Villa', flag: '🟣' },
+    { id: 'club_WestHam', title: 'West Ham', flag: '🟤' },
+    { id: 'club_Southampton', title: 'Southampton', flag: '🔴' },
+    { id: 'club_Leicester', title: 'Leicester', flag: '🦊' },
+    { id: 'club_Fulham', title: 'Fulham', flag: '⚪' },
+    { id: 'club_Blackburn', title: 'Blackburn', flag: '🔵' },
+    { id: 'club_CrystalPalace', title: 'Crystal Palace', flag: '🔴🔵' },
     { id: 'club_Sunderland', title: 'Sunderland', flag: '🔴⚪' },
+    { id: 'club_Middlesbrough', title: 'Middlesbrough', flag: '🔴' },
+    { id: 'club_Leeds', title: 'Leeds', flag: '⚪' },
+  ],
+  goals: [
+    { id: 'goals_overall', title: 'All EPL Goals', flag: '⚽' },
+    { id: 'goals_Arsenal', title: 'Arsenal Goals', flag: '🔴' },
+    { id: 'goals_Chelsea', title: 'Chelsea Goals', flag: '🔵' },
+    { id: 'goals_ManUtd', title: 'Man Utd Goals', flag: '🔴' },
+    { id: 'goals_Liverpool', title: 'Liverpool Goals', flag: '🔴' },
+    { id: 'goals_Tottenham', title: 'Spurs Goals', flag: '⚪' },
+    { id: 'goals_ManCity', title: 'Man City Goals', flag: '🩵' },
+  ],
+  other: [
+    { id: 'other_2clubs', title: '2+ PL Clubs', flag: '🔄' },
+    { id: 'other_3clubs', title: '3+ PL Clubs', flag: '🔄' },
   ],
 };
 
@@ -457,6 +589,7 @@ const CATEGORIES = {
 let state = null;
 let eligiblePlayers = [];
 let currentCategory = null;
+let currentMeta = null;
 let triviaData = [];
 let triviaIndex = 0;
 let matchDataReady = false;
@@ -543,6 +676,11 @@ $('toStep2').onclick = () => {
   $('pname1')?.focus();
 };
 
+$('backToStep1').onclick = () => {
+  hide('step2');
+  show('step1');
+};
+
 $('toStep3').onclick = () => {
   const n = parseInt($('numPlayers').value, 10);
   const names = [];
@@ -556,23 +694,35 @@ $('toStep3').onclick = () => {
   show('step3');
 };
 
+$('backToStep2').onclick = () => {
+  hide('step3');
+  show('step2');
+};
+
+$('backFromLoading').onclick = () => {
+  hide('loadingScreen');
+  show('step3');
+  matchDataReady = false;
+};
+
 function toggleSection(id) {
   const sec = $(id);
-  const isOpen = sec.classList.toggle('open');
-  // Close others
-  document.querySelectorAll('.section').forEach(s => {
-    if (s.id !== id) s.classList.remove('open');
-  });
+  if (sec.classList.contains('disabled')) return;
+  sec.classList.toggle('open');
 }
 
 function buildCategorySections() {
-  buildSection('countryGames', CATEGORIES.country, 'EPL appearances');
-  buildSection('clubGames', CATEGORIES.club, 'EPL appearances');
+  buildSection('countryGames', CATEGORIES.country, 'countCountry');
+  buildSection('clubGames', CATEGORIES.club, 'countClub');
+  buildSection('goalsGames', CATEGORIES.goals, 'countGoals');
+  buildSection('otherGames', CATEGORIES.other, 'countOther');
 }
 
-function buildSection(containerId, list, subtitle) {
+function buildSection(containerId, list, countId) {
   const cont = $(containerId);
   cont.innerHTML = '';
+  $(countId).textContent = `(${list.length})`;
+
   list.forEach(cat => {
     const card = document.createElement('div');
     card.className = 'game-card';
@@ -588,22 +738,23 @@ function buildSection(containerId, list, subtitle) {
     `;
     card.onclick = () => chooseCategory(cat);
     cont.appendChild(card);
-    // Preload stats
     preloadCategoryStats(cat);
   });
 }
 
 async function preloadCategoryStats(cat) {
   const metaEl = $(`meta-${cat.id}`);
+  if (!metaEl) return;
+
   const cached = getCachedData(cat.id);
   if (cached) {
     const count = cached.eligiblePlayers?.length || 0;
-    const total = (cached.eligiblePlayers || []).reduce((a, p) => a + (p.subtractValue || 0), 0);
+    const metric = cached.meta?.metricLabel || 'Apps';
     const diff = getDifficulty(count);
-    metaEl.innerHTML = `<span class="stars">${'★'.repeat(diff)}${'☆'.repeat(5 - diff)}</span> ${formatNum(count)} players • ${formatNum(total)} apps`;
+    metaEl.innerHTML = `<span class="stars">${'★'.repeat(diff)}${'☆'.repeat(5 - diff)}</span> ${formatNum(count)} players`;
     return;
   }
-  // Fetch stats (will cache)
+
   try {
     const res = await fetch(`${API_BASE}/match_start`, {
       method: 'POST',
@@ -614,9 +765,8 @@ async function preloadCategoryStats(cat) {
     if (data.eligiblePlayers) {
       setCachedData(cat.id, data);
       const count = data.eligiblePlayers.length;
-      const total = data.eligiblePlayers.reduce((a, p) => a + (p.subtractValue || 0), 0);
       const diff = getDifficulty(count);
-      metaEl.innerHTML = `<span class="stars">${'★'.repeat(diff)}${'☆'.repeat(5 - diff)}</span> ${formatNum(count)} players • ${formatNum(total)} apps`;
+      metaEl.innerHTML = `<span class="stars">${'★'.repeat(diff)}${'☆'.repeat(5 - diff)}</span> ${formatNum(count)} players`;
     }
   } catch {
     metaEl.textContent = '—';
@@ -643,10 +793,10 @@ async function chooseCategory(cat) {
   hide('skipTrivia');
   $('triviaContainer').innerHTML = '';
 
-  // Check cache first
   const cached = getCachedData(cat.id);
   if (cached) {
     eligiblePlayers = cached.eligiblePlayers || [];
+    currentMeta = cached.meta || {};
     triviaData = cached.meta?.trivia || [];
     matchDataReady = true;
     showReadyState();
@@ -654,7 +804,6 @@ async function chooseCategory(cat) {
     return;
   }
 
-  // Fetch data
   const fetchPromise = (async () => {
     try {
       const res = await fetch(`${API_BASE}/match_start`, {
@@ -666,18 +815,18 @@ async function chooseCategory(cat) {
       if (data.error) throw new Error(data.error);
       setCachedData(cat.id, data);
       eligiblePlayers = data.eligiblePlayers || [];
+      currentMeta = data.meta || {};
       triviaData = data.meta?.trivia || [];
       matchDataReady = true;
       showReadyState();
     } catch (err) {
-      alert('Failed to load match data: ' + err.message);
+      alert('Failed to load: ' + err.message);
       show('step3');
       hide('loadingScreen');
     }
   })();
 
-  // Show trivia while loading
-  await sleep(500); // Brief delay before trivia
+  await sleep(500);
   showTrivia();
   await fetchPromise;
 }
@@ -690,18 +839,12 @@ function showReadyState() {
 
 function showTrivia() {
   if (!triviaData.length) {
-    // No trivia, just wait for data
-    if (matchDataReady) {
-      proceedToOrderReveal();
-    }
+    if (matchDataReady) proceedToOrderReveal();
     return;
   }
 
   if (triviaIndex >= triviaData.length) {
-    // All trivia done
-    if (matchDataReady) {
-      proceedToOrderReveal();
-    }
+    if (matchDataReady) proceedToOrderReveal();
     return;
   }
 
@@ -736,9 +879,7 @@ function handleTriviaAnswer(selected, correct) {
 }
 
 $('skipTrivia').onclick = () => {
-  if (matchDataReady) {
-    proceedToOrderReveal();
-  }
+  if (matchDataReady) proceedToOrderReveal();
 };
 
 // ============== ORDER REVEAL ==============
@@ -748,7 +889,6 @@ async function proceedToOrderReveal() {
 
   const names = [...(window.gameSetup?.names || ['Player 1', 'Player 2'])];
 
-  // Randomize order with animation
   const orderEl = $('orderList');
   for (let i = 0; i < 8; i++) {
     names.sort(() => Math.random() - 0.5);
@@ -768,6 +908,9 @@ $('beginMatch').onclick = () => {
 
 // ============== MATCH START ==============
 function startMatch(names) {
+  const metricLabel = currentMeta?.metricLabel || 'Apps';
+  $('guessLabel').textContent = `Your guess (−${metricLabel})`;
+
   state = {
     players: names,
     scores: Array(names.length).fill(501),
@@ -796,6 +939,7 @@ function renderScoreboard() {
   state.players.forEach((name, idx) => {
     const pill = document.createElement('div');
     pill.className = 'pill' + (idx === state.turn ? ' active' : '');
+    pill.id = `pill_${idx}`;
     pill.innerHTML = `<div class="name">${name}</div><div class="score" id="score_${idx}">${state.scores[idx]}</div>`;
     pill.onclick = () => openProgressModal(idx);
     grid.appendChild(pill);
@@ -822,7 +966,6 @@ function updateHintBar() {
   const available = eligiblePlayers.filter(p => !state.used.has(p.normalized));
   const direct = available.filter(p => p.subtractValue === remaining).length;
 
-  // Count 2-player combos
   const freq = new Map();
   for (const p of available) {
     const v = p.subtractValue;
@@ -852,7 +995,6 @@ guessInput.oninput = () => {
   hideSelectionList();
   hideToast();
 
-  // Debounced fuzzy search
   clearTimeout(debounceTimer);
   if (val.length >= 2) {
     debounceTimer = setTimeout(() => showFuzzyMatches(val), DEBOUNCE_MS);
@@ -872,44 +1014,49 @@ function showFuzzyMatches(input) {
   const norm = normalize(input);
   if (norm.length < 2) return;
 
-  // Find matches (exclude already used)
-  const available = eligiblePlayers.filter(p => !state.used.has(p.normalized));
-
-  // Score matches
-  const scored = available.map(p => ({
+  // Include ALL players (used and available) for display
+  const scored = eligiblePlayers.map(p => ({
     player: p,
+    isUsed: state.used.has(p.normalized),
     score: p.normalized.includes(norm) ? 0.95 : similarity(p.normalized, norm),
     exactStart: p.normalized.startsWith(norm),
   }));
 
-  // Filter and sort
   const matches = scored
     .filter(m => m.score >= 0.5 || m.exactStart)
     .sort((a, b) => {
+      // Sort by: available first, then by score
+      if (a.isUsed !== b.isUsed) return a.isUsed ? 1 : -1;
       if (a.exactStart !== b.exactStart) return b.exactStart - a.exactStart;
       return b.score - a.score;
     })
-    .slice(0, 5);
+    .slice(0, 6);
 
   if (matches.length === 0) return;
 
-  // Check for exact match
-  const exact = available.find(p => p.normalized === norm);
-  if (exact) return; // Don't show list for exact matches
+  // Check for exact match among available
+  const exactAvailable = eligiblePlayers.find(p => p.normalized === norm && !state.used.has(p.normalized));
+  if (exactAvailable) return;
 
-  // Show selection list (no stats shown - only revealed after commit)
   const list = $('selectionList');
   list.innerHTML = matches.map(m => `
-    <div class="selection-item" data-norm="${m.player.normalized}">
-      <div>
+    <div class="selection-item${m.isUsed ? ' used' : ''}" data-norm="${m.player.normalized}" data-used="${m.isUsed}">
+      <div class="info">
         <div class="name">${m.player.name}</div>
         <div class="nat">${m.player.nationality}</div>
       </div>
+      ${m.isUsed ? '<span class="used-badge">Used</span>' : ''}
     </div>
   `).join('');
 
   list.querySelectorAll('.selection-item').forEach(el => {
-    el.onclick = () => selectPlayer(el.dataset.norm);
+    el.onclick = () => {
+      if (el.dataset.used === 'true') {
+        setResult('⚠️ Already used this match!');
+        return;
+      }
+      selectPlayer(el.dataset.norm);
+    };
   });
 
   list.classList.remove('hidden');
@@ -939,7 +1086,6 @@ async function handleSubmit() {
 
   const norm = normalize(raw);
 
-  // Check if already used
   if (state.used.has(norm)) {
     if (!state.retry) {
       state.retry = true;
@@ -954,18 +1100,14 @@ async function handleSubmit() {
     return;
   }
 
-  // Find player in cached list
   const available = eligiblePlayers.filter(p => !state.used.has(p.normalized));
 
-  // Try exact match first
   let match = available.find(p => p.normalized === norm);
 
-  // Try contains match
   if (!match) {
     match = available.find(p => p.normalized.includes(norm));
   }
 
-  // Try fuzzy match
   if (!match) {
     let best = null;
     let bestScore = 0;
@@ -997,14 +1139,12 @@ async function handleSubmit() {
 
   state.retry = false;
 
-  // Double-check not already used (by normalized name)
   if (state.used.has(match.normalized)) {
     setResult('⚠️ Already used. Turn passes.');
     nextTurn();
     return;
   }
 
-  // Calculate score
   const before = state.scores[state.turn];
   const deduct = match.subtractValue;
   const after = before - deduct;
@@ -1020,38 +1160,45 @@ async function handleSubmit() {
     win = true;
   }
 
-  // Record pick
+  const metricLabel = currentMeta?.metricLabel || 'Apps';
+
   state.picks[state.turn].unshift({
     name: match.name,
-    apps: deduct,
+    value: deduct,
     from: before,
     to: bust ? before : after,
     bust,
   });
 
   if (bust) {
-    setResult(`💥 Bust! ${match.name} has ${formatNum(deduct)} apps. Score stays ${formatNum(before)}.`);
-    showToast(match, before, before, true);
+    setResult(`💥 Bust! ${match.name} has ${formatNum(deduct)} ${metricLabel.toLowerCase()}. Score stays ${formatNum(before)}.`);
+    showToast(match, before, before, 'bust');
+    showEffect('bust');
+    const pill = $(`pill_${state.turn}`);
+    pill?.classList.add('bust-anim');
+    setTimeout(() => pill?.classList.remove('bust-anim'), 500);
   } else {
     state.scores[state.turn] = after;
     state.historyScores[state.turn].push(after);
     state.used.add(match.normalized);
 
-    // Animate score
     animateScore(state.turn, before, after);
 
     if (win) {
       setResult(`🎯 ${state.players[state.turn]} wins with ${match.name} (${formatNum(deduct)})!`);
-      showToast(match, before, after, false);
+      showToast(match, before, after, 'win');
+      showEffect('win');
+      const pill = $(`pill_${state.turn}`);
+      pill?.classList.add('win-anim');
       setTimeout(() => {
-        if (confirm(`${state.players[state.turn]} wins! Play again?`)) {
+        if (confirm(`🏆 ${state.players[state.turn]} wins! Play again?`)) {
           location.reload();
         }
       }, 1500);
       return;
     } else {
       setResult(`✅ ${match.name}: −${formatNum(deduct)}`);
-      showToast(match, before, after, false);
+      showToast(match, before, after, 'normal');
     }
   }
 
@@ -1071,29 +1218,71 @@ function setResult(msg) {
   $('result').textContent = msg;
 }
 
+// ============== EFFECT OVERLAY ==============
+function showEffect(type) {
+  const overlay = $('effectOverlay');
+  const text = $('effectText');
+  text.className = 'effect-text ' + type;
+  text.textContent = type === 'bust' ? 'BUST!' : 'CHECKOUT!';
+  overlay.classList.add('show');
+  setTimeout(() => overlay.classList.remove('show'), 600);
+}
+
 // ============== TOAST ==============
 let toastTimer = null;
 
-function showToast(player, before, after, isBust) {
+function showToast(player, before, after, type) {
   const toast = $('inlineToast');
   const o = player.overlay || {};
+  const metricLabel = currentMeta?.metricLabel || 'Apps';
+
+  // Build clubs display
+  let clubsHtml = '';
+  if (player.clubs && player.clubs.length > 0) {
+    const displayClubs = player.clubs.slice(0, 3);
+    const moreCount = player.clubCount - 3;
+    clubsHtml = `<div class="toast-clubs">Clubs: ${displayClubs.join(', ')}${moreCount > 0 ? ` +${moreCount} more` : ''}</div>`;
+  }
+
+  // Build seasons display
+  let seasonsHtml = '';
+  if (player.seasonsCount) {
+    seasonsHtml = `<span>Seasons: ${player.seasonsCount}</span>`;
+  }
+
+  let badgeClass = '';
+  let badgeContent = '-' + formatNum(player.subtractValue);
+  if (type === 'bust') {
+    badgeClass = ' bust';
+    badgeContent = '💥';
+  } else if (type === 'win') {
+    badgeClass = ' win';
+    badgeContent = '🎯';
+  }
+
+  toast.className = 'inline-toast';
+  if (type === 'bust') toast.classList.add('bust-effect');
+  if (type === 'win') toast.classList.add('win-effect');
+
   toast.innerHTML = `
     <div class="toast-row">
-      <div class="toast-badge${isBust ? ' bust' : ''}">${isBust ? '💥' : '-' + formatNum(player.subtractValue)}</div>
+      <div class="toast-badge${badgeClass}">${badgeContent}</div>
       <div class="toast-body">
         <div class="toast-title">${player.name}</div>
         <div class="toast-sub">${formatNum(before)} → ${formatNum(after)}</div>
+        ${clubsHtml}
         <div class="toast-meta">
-          <span>Apps ${formatNum(o.apps)}</span>
-          ${o.goals ? `<span>Goals ${formatNum(o.goals)}</span>` : ''}
+          <span>${metricLabel} ${formatNum(o[currentMeta?.metric === 'goals_total' ? 'goals' : 'apps'] || player.subtractValue)}</span>
+          ${o.goals && currentMeta?.metric !== 'goals_total' ? `<span>Goals ${formatNum(o.goals)}</span>` : ''}
           ${o.starts ? `<span>Starts ${formatNum(o.starts)}</span>` : ''}
+          ${seasonsHtml}
         </div>
       </div>
     </div>
   `;
   toast.classList.add('show');
   if (toastTimer) clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => toast.classList.remove('show'), 5000);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 6000);
 }
 
 function hideToast() {
@@ -1127,12 +1316,13 @@ function openProgressModal(idx) {
   $('chain').textContent = state.historyScores[idx].join(' → ');
 
   const picks = state.picks[idx];
+  const metricLabel = currentMeta?.metricLabel || 'Apps';
   if (picks.length === 0) {
     $('pickList').innerHTML = '<div class="pick"><div>No picks yet</div></div>';
   } else {
     $('pickList').innerHTML = picks.slice(0, 15).map(p => `
       <div class="pick${p.bust ? ' bust' : ''}">
-        <div><b>${p.name}</b> <span class="meta">-${formatNum(p.apps)}</span></div>
+        <div><b>${p.name}</b> <span class="meta">-${formatNum(p.value)}</span></div>
         <div class="meta">${formatNum(p.from)} → ${formatNum(p.to)}${p.bust ? ' (bust)' : ''}</div>
       </div>
     `).join('');
@@ -1167,7 +1357,6 @@ $('confirmYes').onclick = () => {
 
 // ============== INIT ==============
 (function init() {
-  // Pre-populate name fields for default player count
   const n = parseInt($('numPlayers').value, 10);
   const wrap = $('nameFields');
   for (let i = 1; i <= n; i++) {
