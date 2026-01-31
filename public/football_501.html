@@ -214,10 +214,27 @@ button {
   50% { transform: scale(1.1); }
 }
 .turn-info { text-align: center; font-weight: 700; margin-bottom: 10px; font-size: 14px; }
-.hint-bar { text-align: center; font-size: 12px; color: var(--accent); margin-bottom: 10px; padding: 8px; background: rgba(74,222,128,.08); border-radius: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; }
-.hint-bar .hint-text { flex: 1; }
-.coverage-btn { background: rgba(255,255,255,.1); border: none; color: var(--muted); padding: 4px 8px; border-radius: 6px; cursor: pointer; font-size: 11px; transition: all .2s; }
-.coverage-btn:hover { background: rgba(255,255,255,.2); color: #fff; }
+.hint-bar { font-size: 12px; color: var(--accent); margin-bottom: 10px; padding: 8px 10px; background: rgba(74,222,128,.08); border-radius: 10px; display: flex; align-items: center; gap: 8px; }
+.hint-bar .hint-text { flex: 1; text-align: center; }
+.coverage-btn {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  flex-shrink: 0;
+  background: rgba(255,255,255,.1);
+  border: 1px solid rgba(255,255,255,.15);
+  color: var(--muted);
+  padding: 0;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all .2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.coverage-btn:hover { background: rgba(255,255,255,.2); color: #fff; border-color: rgba(255,255,255,.25); }
+.coverage-btn:active { transform: scale(.95); }
 
 /* Coverage modal */
 .coverage-modal { max-width: 380px; }
@@ -431,6 +448,9 @@ button {
   color: var(--muted);
 }
 .custom-preview strong { color: var(--accent); }
+.custom-warning { background: rgba(224,85,85,.15); border: 1px solid var(--danger); border-radius: 8px; padding: 8px 12px; margin: 8px 0; font-size: 12px; color: var(--danger); }
+.chip-action { background: none; border: none; color: var(--muted); font-size: 11px; cursor: pointer; padding: 2px 6px; margin-left: 8px; text-decoration: underline; }
+.chip-action:hover { color: var(--accent); }
 
 /* Session stats bar */
 .session-bar {
@@ -540,7 +560,7 @@ button {
         <div class="section-title">🎮 Custom Game <span class="section-count">(Build Your Own)</span></div>
         <div class="chev">▼</div>
       </div>
-      <div class="section-desc">Create your own game by selecting a metric and filters.</div>
+      <div class="section-desc">Create your own game by selecting a metric and filters. Use both for intersection.</div>
       <div class="section-body" id="customBuilder">
         <div class="custom-builder">
           <div class="field">
@@ -550,25 +570,19 @@ button {
               <option value="goals">Goals</option>
             </select>
           </div>
-          <div class="field">
-            <label>Filter type</label>
-            <select id="customFilterType">
-              <option value="nationality">By Nationality</option>
-              <option value="club">By Club</option>
-            </select>
-          </div>
           <div class="field" id="nationalityFilterField">
-            <label>Select nationalities (max 5)</label>
+            <label>Filter by nationality (optional, max 5) <button type="button" class="chip-action" id="clearNats">Clear</button></label>
             <div class="chip-grid" id="nationalityChips"></div>
           </div>
-          <div class="field hidden" id="clubFilterField">
-            <label>Select clubs (max 5)</label>
+          <div class="field" id="clubFilterField">
+            <label>Filter by club (optional, max 5) <button type="button" class="chip-action" id="clearClubs">Clear</button></label>
             <div class="chip-grid" id="clubChips"></div>
           </div>
           <div id="customPreview" class="custom-preview hidden">
             <span id="customPreviewText"></span>
           </div>
-          <button class="btn-primary" id="startCustomGame" disabled>Start Custom Game</button>
+          <div id="customWarning" class="custom-warning hidden"></div>
+          <button class="btn-primary" id="startCustomGame">Start Custom Game</button>
         </div>
       </div>
     </div>
@@ -634,7 +648,7 @@ button {
   <div id="turnInfo" class="turn-info"></div>
   <div id="hintBar" class="hint-bar hidden">
     <span class="hint-text" id="hintText"></span>
-    <button class="coverage-btn" id="coverageBtn" title="View pick distribution">ⓘ</button>
+    <button class="coverage-btn" id="coverageBtn" title="Coverage" aria-label="Coverage">?</button>
   </div>
 
   <div class="field">
@@ -1214,6 +1228,16 @@ $('beginMatch').onclick = () => {
 
 // ============== MATCH START ==============
 function startMatch(names) {
+  // Ensure clean UI state before starting
+  closeAllModals();
+  $('guess').value = '';
+  $('submitBtn').disabled = true;
+  $('result').textContent = '';
+  $('selectionList').innerHTML = '';
+  $('selectionList').classList.add('hidden');
+  $('inlineToast').classList.remove('show', 'bust-effect', 'win-effect');
+  $('inlineToast').innerHTML = '';
+
   const metricLabel = currentMeta?.metricLabel || 'Apps';
   $('guessLabel').textContent = `Your guess (−${metricLabel})`;
 
@@ -1737,6 +1761,81 @@ $('modalBackdrop').onclick = (e) => {
   if (e.target.id === 'modalBackdrop') closeModal();
 };
 
+// ============== MODAL MANAGEMENT ==============
+function closeAllModals() {
+  // Close confirm overlay
+  $('confirmOverlay').classList.remove('show');
+
+  // Close progress modal
+  $('modal').classList.remove('show');
+  $('modalBackdrop').classList.remove('show');
+
+  // Close coverage modal
+  $('coverageModal').classList.remove('show');
+  $('coverageBackdrop').classList.remove('show');
+
+  // Close effect overlay
+  $('effectOverlay').classList.remove('show');
+}
+
+function resetMatchState() {
+  // Close all modals first
+  closeAllModals();
+
+  // Reset game state variables
+  state = null;
+  eligiblePlayers = [];
+  currentCategory = null;
+  currentMeta = null;
+  triviaData = [];
+  triviaIndex = 0;
+  matchDataReady = false;
+
+  // Clear debounce timer
+  if (debounceTimer) {
+    clearTimeout(debounceTimer);
+    debounceTimer = null;
+  }
+
+  // Clear toast timer
+  if (toastTimer) {
+    clearTimeout(toastTimer);
+    toastTimer = null;
+  }
+
+  // Reset UI elements
+  $('guess').value = '';
+  $('submitBtn').disabled = true;
+  $('result').textContent = '';
+  $('selectionList').innerHTML = '';
+  $('selectionList').classList.add('hidden');
+  $('inlineToast').classList.remove('show', 'bust-effect', 'win-effect');
+  $('inlineToast').innerHTML = '';
+  $('hintBar').classList.add('hidden');
+  $('hintText').innerHTML = '';
+  $('scoreGrid').innerHTML = '';
+  $('turnInfo').innerHTML = '';
+  $('chain').textContent = '501';
+  $('pickList').innerHTML = '';
+  $('triviaContainer').innerHTML = '';
+
+  // Reset loading screen state
+  $('loadingSpinner').classList.remove('ready');
+  $('loadingSpinner').style.animation = '';
+  $('loadingText').textContent = 'Loading match data...';
+  $('loadingText').classList.remove('ready');
+  hide('readyBadge');
+  hide('skipTrivia');
+  hide('triviaNote');
+
+  // Reset custom builder selections
+  customSelectedNats.clear();
+  customSelectedClubs.clear();
+  document.querySelectorAll('#nationalityChips .chip, #clubChips .chip').forEach(c => c.classList.remove('selected'));
+  $('customPreview').classList.add('hidden');
+  $('startCustomGame').disabled = true;
+}
+
 // ============== END GAME CONFIRMATION ==============
 $('endBtn').onclick = () => {
   $('confirmOverlay').classList.add('show');
@@ -1752,33 +1851,14 @@ $('confirmYes').onclick = () => {
 };
 
 function playAgain() {
-  // Reset game state but keep session stats
+  // Full reset of match state (keeps session stats)
+  resetMatchState();
+
+  // Navigate to category selection
   hide('playCard');
   show('setupCard');
   hide('orderScreen');
   show('step3');
-
-  // Reset loading screen state
-  $('loadingSpinner').classList.remove('ready');
-  $('loadingSpinner').style.animation = '';
-  $('loadingText').textContent = 'Loading match data...';
-  $('loadingText').classList.remove('ready');
-  hide('readyBadge');
-  hide('skipTrivia');
-  hide('triviaNote');
-
-  // Clear selection states
-  customSelectedNats.clear();
-  customSelectedClubs.clear();
-  document.querySelectorAll('#nationalityChips .chip, #clubChips .chip').forEach(c => c.classList.remove('selected'));
-  $('customPreview').classList.add('hidden');
-  $('startCustomGame').disabled = true;
-
-  state = null;
-  eligiblePlayers = [];
-  currentCategory = null;
-  currentMeta = null;
-  matchDataReady = false;
 }
 
 // ============== CUSTOM GAME BUILDER ==============
@@ -1854,16 +1934,18 @@ function initCustomBuilder() {
     chip.onclick = () => toggleChip(chip, 'club');
   });
 
-  // Filter type change
-  $('customFilterType').onchange = () => {
-    const type = $('customFilterType').value;
-    if (type === 'nationality') {
-      show('nationalityFilterField');
-      hide('clubFilterField');
-    } else {
-      hide('nationalityFilterField');
-      show('clubFilterField');
-    }
+  // Clear buttons
+  $('clearNats').onclick = (e) => {
+    e.stopPropagation();
+    customSelectedNats.clear();
+    document.querySelectorAll('#nationalityChips .chip').forEach(c => c.classList.remove('selected'));
+    updateCustomPreview();
+  };
+
+  $('clearClubs').onclick = (e) => {
+    e.stopPropagation();
+    customSelectedClubs.clear();
+    document.querySelectorAll('#clubChips .chip').forEach(c => c.classList.remove('selected'));
     updateCustomPreview();
   };
 
@@ -1890,53 +1972,66 @@ function toggleChip(chip, type) {
 
 function updateCustomPreview() {
   const metric = $('customMetric').value;
-  const filterType = $('customFilterType').value;
-  const selected = filterType === 'nationality' ? customSelectedNats : customSelectedClubs;
-
   const previewEl = $('customPreview');
   const previewText = $('customPreviewText');
-  const startBtn = $('startCustomGame');
+  const warningEl = $('customWarning');
 
-  if (selected.size === 0) {
-    previewEl.classList.add('hidden');
-    startBtn.disabled = true;
+  const hasNats = customSelectedNats.size > 0;
+  const hasClubs = customSelectedClubs.size > 0;
+
+  // Hide warning by default
+  warningEl.classList.add('hidden');
+
+  if (!hasNats && !hasClubs) {
+    // No filters = all EPL players
+    previewEl.classList.remove('hidden');
+    const metricLabel = metric === 'apps' ? 'Appearances' : 'Goals';
+    previewText.innerHTML = `<strong>${metricLabel}</strong> from <strong>all EPL players</strong>`;
     return;
   }
 
   previewEl.classList.remove('hidden');
-  startBtn.disabled = false;
 
   const metricLabel = metric === 'apps' ? 'Appearances' : 'Goals';
-  const items = Array.from(selected);
-  let filterLabel = '';
+  let filterParts = [];
 
-  if (filterType === 'nationality') {
-    const names = items.map(code => NATIONALITY_OPTIONS.find(n => n.code === code)?.name || code);
-    filterLabel = names.join(', ');
-  } else {
-    const names = items.map(id => CLUB_OPTIONS.find(c => c.id === id)?.name || id);
-    filterLabel = names.join(', ');
+  if (hasNats) {
+    const natNames = Array.from(customSelectedNats).map(code =>
+      NATIONALITY_OPTIONS.find(n => n.code === code)?.name || code
+    );
+    filterParts.push(`Nationality: ${natNames.join(', ')}`);
   }
 
-  previewText.innerHTML = `<strong>${metricLabel}</strong> from players: ${filterLabel}`;
+  if (hasClubs) {
+    const clubNames = Array.from(customSelectedClubs).map(id =>
+      CLUB_OPTIONS.find(c => c.id === id)?.name || id
+    );
+    filterParts.push(`Club: ${clubNames.join(', ')}`);
+  }
+
+  const modeText = hasNats && hasClubs ? ' (intersection)' : '';
+  previewText.innerHTML = `<strong>${metricLabel}</strong>${modeText}<br>${filterParts.join('<br>')}`;
+}
+
+function getCustomCacheKey() {
+  const metric = $('customMetric').value;
+  const nats = Array.from(customSelectedNats).sort().join(',');
+  const clubs = Array.from(customSelectedClubs).sort().join(',');
+  return `custom_${metric}_n${nats}_c${clubs}`;
 }
 
 $('startCustomGame').onclick = async () => {
   const metric = $('customMetric').value;
-  const filterType = $('customFilterType').value;
-  const selected = filterType === 'nationality' ? Array.from(customSelectedNats) : Array.from(customSelectedClubs);
-
-  if (selected.length === 0) return;
+  const nationalities = Array.from(customSelectedNats);
+  const clubs = Array.from(customSelectedClubs);
 
   // Build custom category object
+  const cacheKey = getCustomCacheKey();
   const customCat = {
-    id: 'custom_' + Date.now(),
+    id: cacheKey,
     title: 'Custom Game',
     flag: '🎮',
     isCustom: true,
-    metric,
-    filterType,
-    filters: selected,
   };
 
   currentCategory = customCat;
@@ -1954,21 +2049,34 @@ $('startCustomGame').onclick = async () => {
   $('loadingText').textContent = 'Building custom game...';
   $('loadingText').classList.remove('ready');
 
+  // Check cache first
+  const cached = getCachedData(cacheKey);
+  if (cached) {
+    eligiblePlayers = cached.eligiblePlayers || [];
+    currentMeta = cached.meta || {};
+    triviaData = cached.meta?.trivia || [];
+    matchDataReady = true;
+    showReadyState();
+    showTrivia();
+    return;
+  }
+
   try {
     const res = await fetch(`${API_BASE}/match_start`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         categoryId: 'custom',
-        customConfig: {
-          metric,
-          filterType,
-          filters: selected,
-        },
+        metric: metric === 'goals' ? 'goals_total' : 'apps_total',
+        nationalities: nationalities.length > 0 ? nationalities : null,
+        clubs: clubs.length > 0 ? clubs : null,
       }),
     });
     const data = await res.json();
     if (data.error) throw new Error(data.error);
+
+    // Cache the result
+    setCachedData(cacheKey, data);
 
     eligiblePlayers = data.eligiblePlayers || [];
     currentMeta = data.meta || {};

@@ -934,24 +934,29 @@ exports.handler = async (event) => {
     }
 
     // ============================================================
-    // CUSTOM GAME (user-built filters)
+    // CUSTOM GAME (user-built filters with intersection support)
     // ============================================================
-    else if (categoryId === 'custom' && body.customConfig) {
-      const { metric: customMetric, filterType, filters } = body.customConfig;
+    else if (categoryId === 'custom') {
+      // New format: { metric, nationalities, clubs }
+      const customMetric = body.metric || 'apps_total';
+      const nationalities = body.nationalities || null; // array or null
+      const clubs = body.clubs || null; // array or null
 
-      if (!filters || filters.length === 0) {
-        return respond(400, { error: 'Custom game requires at least one filter' });
-      }
-
-      metric = customMetric === 'goals' ? 'goals_total' : 'apps_total';
-      metricLabel = customMetric === 'goals' ? 'Goals' : 'Apps';
+      metric = customMetric;
+      metricLabel = customMetric === 'goals_total' ? 'Goals' : 'Apps';
       categoryName = 'Custom Game';
       categoryFlag = '🎮';
 
-      console.log('[match_start] Custom game:', { metric: customMetric, filterType, filters });
+      const hasNatFilter = nationalities && nationalities.length > 0;
+      const hasClubFilter = clubs && clubs.length > 0;
 
-      if (filterType === 'nationality') {
-        // Filter by nationality codes
+      console.log('[match_start] Custom game:', { metric: customMetric, nationalities, clubs });
+
+      // Case 1: No filters - all EPL players
+      if (!hasNatFilter && !hasClubFilter) {
+        console.log('[match_start] Custom: no filters, fetching all EPL players');
+        const metricCol = customMetric === 'goals_total' ? 'goals_total' : 'apps_total';
+
         const { data: pctData, error: pctError } = await supabase
           .from('player_competition_totals')
           .select(`
@@ -968,8 +973,7 @@ exports.handler = async (event) => {
             )
           `)
           .eq('competition', 'EPL')
-          .in('players.nationality', filters)
-          .gt(metric, 0);
+          .gt(metricCol, 0);
 
         if (pctError) {
           console.error('[match_start] Supabase error:', pctError);
@@ -995,31 +999,105 @@ exports.handler = async (event) => {
         }
 
         eligiblePlayers = (pctData || []).map(row => {
-          const clubs = clubsMap[row.player_id] || [];
+          const playerClubs = clubsMap[row.player_id] || [];
           return {
             playerId: row.player_id,
             name: row.players.name,
             normalized: row.players.normalized_name || normalize(row.players.name),
             nationality: row.players.nationality,
-            subtractValue: customMetric === 'goals' ? row.goals_total : row.apps_total,
+            subtractValue: customMetric === 'goals_total' ? row.goals_total : row.apps_total,
             overlay: {
               apps: row.apps_total,
               goals: row.goals_total,
               mins: row.mins_total,
               starts: row.starts_total,
             },
-            clubs: clubs.slice(0, 5),
-            clubCount: clubs.length,
+            clubs: playerClubs.slice(0, 5),
+            clubCount: playerClubs.length,
+          };
+        });
+
+        console.log('[match_start] Custom (all EPL) found', eligiblePlayers.length, 'players');
+      }
+
+      // Case 2: Only nationality filter
+      else if (hasNatFilter && !hasClubFilter) {
+        console.log('[match_start] Custom: nationality filter only');
+        const metricCol = customMetric === 'goals_total' ? 'goals_total' : 'apps_total';
+
+        const { data: pctData, error: pctError } = await supabase
+          .from('player_competition_totals')
+          .select(`
+            player_id,
+            apps_total,
+            goals_total,
+            mins_total,
+            starts_total,
+            players!inner (
+              player_id,
+              name,
+              normalized_name,
+              nationality
+            )
+          `)
+          .eq('competition', 'EPL')
+          .in('players.nationality', nationalities)
+          .gt(metricCol, 0);
+
+        if (pctError) {
+          console.error('[match_start] Supabase error:', pctError);
+          return respond(500, { error: pctError.message });
+        }
+
+        const playerIds = (pctData || []).map(r => r.player_id);
+        let clubsMap = {};
+
+        if (playerIds.length > 0) {
+          const { data: clubData } = await supabase
+            .from('player_club_totals')
+            .select('player_id, club')
+            .eq('competition', 'EPL')
+            .in('player_id', playerIds);
+
+          (clubData || []).forEach(r => {
+            if (!clubsMap[r.player_id]) clubsMap[r.player_id] = [];
+            if (!clubsMap[r.player_id].includes(r.club)) {
+              clubsMap[r.player_id].push(r.club);
+            }
+          });
+        }
+
+        eligiblePlayers = (pctData || []).map(row => {
+          const playerClubs = clubsMap[row.player_id] || [];
+          return {
+            playerId: row.player_id,
+            name: row.players.name,
+            normalized: row.players.normalized_name || normalize(row.players.name),
+            nationality: row.players.nationality,
+            subtractValue: customMetric === 'goals_total' ? row.goals_total : row.apps_total,
+            overlay: {
+              apps: row.apps_total,
+              goals: row.goals_total,
+              mins: row.mins_total,
+              starts: row.starts_total,
+            },
+            clubs: playerClubs.slice(0, 5),
+            clubCount: playerClubs.length,
           };
         });
 
         console.log('[match_start] Custom (nationality) found', eligiblePlayers.length, 'players');
-      } else if (filterType === 'club') {
-        // Filter by clubs - need to query each club and merge
-        const allPlayers = [];
+      }
+
+      // Case 3: Only club filter OR both filters (intersection)
+      else {
+        console.log('[match_start] Custom: club filter', hasNatFilter ? 'with nationality intersection' : 'only');
+        const metricCol = customMetric === 'goals_total' ? 'goals_total' : 'apps_total';
+
+        // Get all players who played for any of the specified clubs
         const playerMap = new Map();
 
-        for (const clubName of filters) {
+        for (const clubName of clubs) {
           const { data: clubData, error: clubError } = await supabase
             .from('player_club_totals')
             .select(`
@@ -1038,7 +1116,7 @@ exports.handler = async (event) => {
             `)
             .eq('competition', 'EPL')
             .eq('club', clubName)
-            .gt(metric, 0);
+            .gt(metricCol, 0);
 
           if (clubError) {
             console.error('[match_start] Supabase error for club', clubName, ':', clubError);
@@ -1046,8 +1124,13 @@ exports.handler = async (event) => {
           }
 
           (clubData || []).forEach(row => {
+            // If nationality filter is active, check nationality
+            if (hasNatFilter && !nationalities.includes(row.players.nationality)) {
+              return; // Skip this player - doesn't match nationality filter
+            }
+
             const existing = playerMap.get(row.player_id);
-            const value = customMetric === 'goals' ? row.goals_total : row.apps_total;
+            const value = customMetric === 'goals_total' ? row.goals_total : row.apps_total;
             if (existing) {
               // Sum values across clubs
               existing.subtractValue += value;
@@ -1080,7 +1163,7 @@ exports.handler = async (event) => {
         eligiblePlayers = Array.from(playerMap.values());
         eligiblePlayers.forEach(p => p.clubCount = p.clubs.length);
 
-        console.log('[match_start] Custom (club) found', eligiblePlayers.length, 'players');
+        console.log('[match_start] Custom (club' + (hasNatFilter ? '+nationality' : '') + ') found', eligiblePlayers.length, 'players');
       }
     }
 
