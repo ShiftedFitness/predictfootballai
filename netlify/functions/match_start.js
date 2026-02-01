@@ -290,9 +290,9 @@ exports.handler = async (event) => {
 
   try {
     const body = JSON.parse(event.body || '{}');
-    const { categoryId, datasetVersion = 'epl_v1' } = body;
+    const { categoryId, datasetVersion = 'epl_v1', previewOnly = false } = body;
 
-    console.log('[match_start] Request:', { categoryId, datasetVersion });
+    console.log('[match_start] Request:', { categoryId, datasetVersion, previewOnly });
 
     // Initialize Supabase client
     if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
@@ -1192,11 +1192,28 @@ exports.handler = async (event) => {
     eligiblePlayers = eligiblePlayers.filter(p => p.subtractValue > 0);
     eligiblePlayers.sort((a, b) => b.subtractValue - a.subtractValue);
 
-    console.log('[match_start] Returning', eligiblePlayers.length, 'eligible players');
+    console.log('[match_start] Returning', eligiblePlayers.length, 'eligible players', previewOnly ? '(preview only)' : '');
 
     // Warn if 0 players returned (possible DB mismatch)
     if (eligiblePlayers.length === 0) {
       console.warn('[match_start] WARNING: 0 players returned for categoryId:', categoryId, '- check DB values match');
+    }
+
+    // For preview mode, return only the count (more efficient)
+    if (previewOnly) {
+      return respond(200, {
+        meta: {
+          categoryId,
+          categoryName,
+          categoryFlag,
+          competition: 'EPL',
+          metric,
+          metricLabel,
+          eligibleCount: eligiblePlayers.length,
+          datasetVersion,
+        },
+        eligibleCount: eligiblePlayers.length,
+      });
     }
 
     return respond(200, {

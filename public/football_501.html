@@ -468,6 +468,143 @@ button {
 .session-stat-item .value { font-weight: 700; font-size: 16px; }
 .session-stat-item .value.wins { color: var(--accent); }
 .session-stat-item .value.busts { color: var(--danger); }
+
+/* Gameplay Options step */
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--card-dark);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+}
+.toggle-info { flex: 1; margin-right: 12px; }
+.toggle-label { font-weight: 600; font-size: 14px; }
+.toggle-desc { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.toggle-switch {
+  position: relative;
+  width: 48px;
+  height: 28px;
+  background: rgba(255,255,255,.15);
+  border-radius: 14px;
+  cursor: pointer;
+  transition: background .2s;
+  flex-shrink: 0;
+}
+.toggle-switch.on { background: var(--accent); }
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  background: #fff;
+  border-radius: 50%;
+  top: 3px;
+  left: 3px;
+  transition: transform .2s;
+}
+.toggle-switch.on::after { transform: translateX(20px); }
+
+/* Timer display */
+.timer-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 8px 12px;
+  margin-bottom: 10px;
+  background: var(--card-dark);
+  border-radius: 10px;
+  font-size: 14px;
+}
+.timer-bar.hidden { display: none; }
+.timer-display {
+  font-weight: 800;
+  font-size: 22px;
+  font-variant-numeric: tabular-nums;
+  min-width: 40px;
+  text-align: center;
+}
+.timer-display.urgent { color: var(--gold); animation: timerPulse 1s ease infinite; }
+.timer-display.critical { color: var(--danger); animation: timerPulse .5s ease infinite; }
+@keyframes timerPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .6; }
+}
+.timer-pause-btn {
+  background: rgba(255,255,255,.1);
+  border: 1px solid rgba(255,255,255,.2);
+  color: var(--muted);
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all .2s;
+}
+.timer-pause-btn:hover { background: rgba(255,255,255,.2); color: #fff; }
+.timer-paused-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.6);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 900;
+}
+.timer-paused-overlay.show { display: flex; }
+.timer-paused-box {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 24px;
+  text-align: center;
+  max-width: 300px;
+}
+.timer-paused-box h3 { margin: 0 0 8px; font-size: 18px; }
+.timer-paused-box p { margin: 0 0 16px; color: var(--muted); font-size: 14px; }
+
+/* Show suggestions button */
+.show-suggestions-btn {
+  width: 100%;
+  padding: 10px 16px;
+  background: var(--card-dark);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 10px;
+  color: var(--muted);
+  font-size: 13px;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: all .2s;
+}
+.show-suggestions-btn:hover { background: rgba(255,255,255,.08); color: #fff; }
+.show-suggestions-btn.active { border-color: var(--accent); color: var(--accent); }
+
+/* Custom builder enhancements */
+.chip-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.chip-header label { margin: 0; }
+.selection-count { font-size: 11px; color: var(--accent); font-weight: 600; }
+.selection-count.max { color: var(--gold); }
+.live-preview {
+  background: rgba(74,222,128,.08);
+  border: 1px solid rgba(74,222,128,.2);
+  border-radius: 10px;
+  padding: 12px;
+  margin: 10px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.live-preview.warning { background: rgba(224,85,85,.1); border-color: rgba(224,85,85,.3); }
+.live-preview-text { font-size: 13px; }
+.live-preview-text strong { color: var(--accent); }
+.live-preview.warning .live-preview-text strong { color: var(--danger); }
+.live-preview-diff { display: flex; align-items: center; gap: 4px; }
+.live-preview-diff .stars { font-size: 12px; }
 </style>
 </head>
 <body>
@@ -510,7 +647,32 @@ button {
     <button class="btn-back" id="backToStep1">← Back</button>
     <h2>Player Names</h2>
     <div id="nameFields"></div>
-    <button class="btn-primary" id="toStep3">Continue</button>
+    <button class="btn-primary" id="toStepOptions">Continue</button>
+  </div>
+
+  <!-- Step 2b: Gameplay Options -->
+  <div id="stepOptions" class="hidden">
+    <button class="btn-back" id="backToStep2Options">← Back</button>
+    <h2>Gameplay Options</h2>
+    <p class="subtitle">Customize your game experience</p>
+
+    <div class="toggle-row">
+      <div class="toggle-info">
+        <div class="toggle-label">Player Timer (30s)</div>
+        <div class="toggle-desc">Each turn has a 30-second countdown. Run out of time and forfeit your turn!</div>
+      </div>
+      <div class="toggle-switch" id="timerToggle" data-on="false"></div>
+    </div>
+
+    <div class="toggle-row">
+      <div class="toggle-info">
+        <div class="toggle-label">Player Suggestions</div>
+        <div class="toggle-desc">Show matching players as you type. Turn off for a harder challenge.</div>
+      </div>
+      <div class="toggle-switch on" id="suggestionsToggle" data-on="true"></div>
+    </div>
+
+    <button class="btn-primary" id="toStep3" style="margin-top: 16px;">Continue</button>
   </div>
 
   <!-- Step 3: Choose category -->
@@ -571,18 +733,32 @@ button {
             </select>
           </div>
           <div class="field" id="nationalityFilterField">
-            <label>Filter by nationality (optional, max 5) <button type="button" class="chip-action" id="clearNats">Clear</button></label>
+            <div class="chip-header">
+              <label>Filter by nationality (optional, max 5) <button type="button" class="chip-action" id="clearNats">Clear</button></label>
+              <span class="selection-count" id="natSelectionCount">0/5</span>
+            </div>
             <div class="chip-grid" id="nationalityChips"></div>
           </div>
           <div class="field" id="clubFilterField">
-            <label>Filter by club (optional, max 5) <button type="button" class="chip-action" id="clearClubs">Clear</button></label>
+            <div class="chip-header">
+              <label>Filter by club (optional, max 5) <button type="button" class="chip-action" id="clearClubs">Clear</button></label>
+              <span class="selection-count" id="clubSelectionCount">0/5</span>
+            </div>
             <div class="chip-grid" id="clubChips"></div>
+          </div>
+          <div id="livePreview" class="live-preview hidden">
+            <div class="live-preview-text">
+              <span id="livePreviewText">Loading...</span>
+            </div>
+            <div class="live-preview-diff">
+              <span class="stars" id="livePreviewStars"></span>
+            </div>
           </div>
           <div id="customPreview" class="custom-preview hidden">
             <span id="customPreviewText"></span>
           </div>
           <div id="customWarning" class="custom-warning hidden"></div>
-          <button class="btn-primary" id="startCustomGame">Start Custom Game</button>
+          <button class="btn-primary" id="startCustomGame" disabled>Start Custom Game</button>
         </div>
       </div>
     </div>
@@ -622,6 +798,10 @@ button {
 
 <!-- GAMEPLAY CARD -->
 <div class="card hidden" id="playCard">
+  <div id="timerBar" class="timer-bar hidden">
+    <span class="timer-display" id="timerDisplay">30</span>
+    <button class="timer-pause-btn" id="timerPauseBtn">⏸ Pause</button>
+  </div>
   <div id="sessionBar" class="session-bar hidden">
     <div class="session-stat-item">
       <div class="label">Games</div>
@@ -657,6 +837,7 @@ button {
   </div>
 
   <div id="selectionList" class="selection-list hidden"></div>
+  <button id="showSuggestionsBtn" class="show-suggestions-btn hidden">Show suggestions</button>
 
   <div class="row-btns">
     <button id="submitBtn" class="btn-primary" disabled>Submit</button>
@@ -704,6 +885,15 @@ button {
       <button id="closeCoverage" class="close-btn">Close</button>
     </div>
     <div id="coverageContent"></div>
+  </div>
+</div>
+
+<!-- Timer Paused Overlay -->
+<div id="timerPausedOverlay" class="timer-paused-overlay">
+  <div class="timer-paused-box">
+    <h3>⏸ Game Paused</h3>
+    <p>Timer is paused. Resume when you're ready.</p>
+    <button class="btn-primary" id="timerResumeBtn">Resume</button>
   </div>
 </div>
 
@@ -791,6 +981,18 @@ let triviaData = [];
 let triviaIndex = 0;
 let matchDataReady = false;
 let debounceTimer = null;
+
+// Gameplay settings
+let gameplaySettings = {
+  timerEnabled: false,
+  suggestionsEnabled: true,
+};
+
+// Timer state
+let timerInterval = null;
+let timerSeconds = 30;
+let timerPaused = false;
+let pendingMatches = []; // For on-demand suggestions
 
 // Session stats (persists across games in same session)
 let sessionStats = {
@@ -941,12 +1143,11 @@ function setCachedData(categoryId, data) {
 
 // ============== SETUP FLOW ==============
 
-// Single Player: skip directly to categories
+// Single Player: go to gameplay options
 $('singlePlayerBtn').onclick = () => {
   window.gameSetup = { names: ['You'], isSinglePlayer: true };
-  buildCategorySections();
   hide('step1');
-  show('step3');
+  show('stepOptions');
 };
 
 // Multiplayer: go to player count selection
@@ -980,7 +1181,8 @@ $('backToStep1').onclick = () => {
   show('step1b');
 };
 
-$('toStep3').onclick = () => {
+// From step2 (names) to stepOptions (gameplay options)
+$('toStepOptions').onclick = () => {
   const n = parseInt($('numPlayers').value, 10);
   const names = [];
   for (let i = 1; i <= n; i++) {
@@ -988,14 +1190,45 @@ $('toStep3').onclick = () => {
     names.push(val);
   }
   window.gameSetup = { names };
-  buildCategorySections();
   hide('step2');
+  show('stepOptions');
+};
+
+// Back from stepOptions to step2 (multiplayer) or step1 (single player)
+$('backToStep2Options').onclick = () => {
+  hide('stepOptions');
+  if (window.gameSetup?.isSinglePlayer) {
+    show('step1');
+  } else {
+    show('step2');
+  }
+};
+
+// Toggle handlers for gameplay options
+$('timerToggle').onclick = function() {
+  const isOn = this.dataset.on === 'true';
+  this.dataset.on = (!isOn).toString();
+  this.classList.toggle('on', !isOn);
+  gameplaySettings.timerEnabled = !isOn;
+};
+
+$('suggestionsToggle').onclick = function() {
+  const isOn = this.dataset.on === 'true';
+  this.dataset.on = (!isOn).toString();
+  this.classList.toggle('on', !isOn);
+  gameplaySettings.suggestionsEnabled = !isOn;
+};
+
+// From stepOptions to step3 (categories)
+$('toStep3').onclick = () => {
+  buildCategorySections();
+  hide('stepOptions');
   show('step3');
 };
 
 $('backToStep2').onclick = () => {
   hide('step3');
-  show('step2');
+  show('stepOptions');
 };
 
 $('backFromLoading').onclick = () => {
@@ -1015,7 +1248,25 @@ $('backFromLoading').onclick = () => {
 function toggleSection(id) {
   const sec = $(id);
   if (sec.classList.contains('disabled')) return;
+
+  const isOpening = !sec.classList.contains('open');
+
+  // If opening, close all other sections (accordion behavior)
+  if (isOpening) {
+    const allSections = document.querySelectorAll('#step3 .section:not(.disabled)');
+    allSections.forEach(s => {
+      if (s.id !== id) {
+        s.classList.remove('open');
+      }
+    });
+  }
+
   sec.classList.toggle('open');
+
+  // If opening custom section, update preview
+  if (isOpening && id === 'sec-custom') {
+    updateCustomPreview();
+  }
 }
 
 function buildCategorySections() {
@@ -1230,11 +1481,14 @@ $('beginMatch').onclick = () => {
 function startMatch(names) {
   // Ensure clean UI state before starting
   closeAllModals();
+  stopTimer();
   $('guess').value = '';
+  $('guess').disabled = false;
   $('submitBtn').disabled = true;
   $('result').textContent = '';
   $('selectionList').innerHTML = '';
   $('selectionList').classList.add('hidden');
+  hideSuggestionsButton();
   $('inlineToast').classList.remove('show', 'bust-effect', 'win-effect');
   $('inlineToast').innerHTML = '';
 
@@ -1265,6 +1519,7 @@ function startMatch(names) {
 
   renderScoreboard();
   updateTurnUI();
+  startTimer();
   $('guess').focus();
 }
 
@@ -1384,6 +1639,9 @@ function openCoverageModal() {
 
   $('coverageBackdrop').classList.add('show');
   requestAnimationFrame(() => $('coverageModal').classList.add('show'));
+
+  // Auto-pause timer when modal opens
+  autoPauseIfTimerActive();
 }
 
 function closeCoverageModal() {
@@ -1406,10 +1664,18 @@ guessInput.oninput = () => {
   submitBtn.disabled = !val;
   hideSelectionList();
   hideToast();
+  hideSuggestionsButton();
 
   clearTimeout(debounceTimer);
   if (val.length >= 2) {
-    debounceTimer = setTimeout(() => showFuzzyMatches(val), DEBOUNCE_MS);
+    debounceTimer = setTimeout(() => {
+      if (gameplaySettings.suggestionsEnabled) {
+        showFuzzyMatches(val);
+      } else {
+        // Store matches for on-demand display
+        computeFuzzyMatches(val);
+      }
+    }, DEBOUNCE_MS);
   }
 };
 
@@ -1421,6 +1687,57 @@ guessInput.onkeydown = (e) => {
 };
 
 submitBtn.onclick = handleSubmit;
+
+// Show suggestions button handler
+$('showSuggestionsBtn').onclick = () => {
+  if (pendingMatches.length > 0) {
+    renderSuggestionList(pendingMatches);
+    $('showSuggestionsBtn').classList.add('active');
+  }
+};
+
+function hideSuggestionsButton() {
+  const btn = $('showSuggestionsBtn');
+  btn.classList.add('hidden');
+  btn.classList.remove('active');
+  pendingMatches = [];
+}
+
+function computeFuzzyMatches(input) {
+  const norm = normalize(input);
+  if (norm.length < 2) return;
+
+  const scored = eligiblePlayers.map(p => ({
+    player: p,
+    isUsed: state.used.has(p.normalized),
+    score: p.normalized.includes(norm) ? 0.95 : similarity(p.normalized, norm),
+    exactStart: p.normalized.startsWith(norm),
+  }));
+
+  const matches = scored
+    .filter(m => m.score >= 0.5 || m.exactStart)
+    .sort((a, b) => {
+      if (a.isUsed !== b.isUsed) return a.isUsed ? 1 : -1;
+      if (a.exactStart !== b.exactStart) return b.exactStart - a.exactStart;
+      return b.score - a.score;
+    })
+    .slice(0, 6);
+
+  // Check for exact match among available
+  const exactAvailable = eligiblePlayers.find(p => p.normalized === norm && !state.used.has(p.normalized));
+  if (exactAvailable) {
+    pendingMatches = [];
+    hideSuggestionsButton();
+    return;
+  }
+
+  if (matches.length > 0) {
+    pendingMatches = matches;
+    const btn = $('showSuggestionsBtn');
+    btn.textContent = `Show suggestions (${matches.length} match${matches.length !== 1 ? 'es' : ''})`;
+    btn.classList.remove('hidden');
+  }
+}
 
 function showFuzzyMatches(input) {
   const norm = normalize(input);
@@ -1450,6 +1767,10 @@ function showFuzzyMatches(input) {
   const exactAvailable = eligiblePlayers.find(p => p.normalized === norm && !state.used.has(p.normalized));
   if (exactAvailable) return;
 
+  renderSuggestionList(matches);
+}
+
+function renderSuggestionList(matches) {
   const list = $('selectionList');
   list.innerHTML = matches.map(m => `
     <div class="selection-item${m.isUsed ? ' used' : ''}" data-norm="${m.player.normalized}" data-used="${m.isUsed}">
@@ -1626,10 +1947,12 @@ async function handleSubmit() {
 function nextTurn() {
   guessInput.value = '';
   submitBtn.disabled = true;
+  hideSuggestionsButton();
   state.turn = (state.turn + 1) % state.players.length;
   state.turnCount++;
   renderScoreboard();
   updateTurnUI();
+  startTimer(); // Reset timer for next turn
   guessInput.focus();
 }
 
@@ -1708,6 +2031,118 @@ function hideToast() {
   $('inlineToast').classList.remove('show');
 }
 
+// ============== TIMER LOGIC ==============
+function startTimer() {
+  if (!gameplaySettings.timerEnabled) return;
+
+  timerSeconds = 30;
+  timerPaused = false;
+  updateTimerDisplay();
+  $('timerBar').classList.remove('hidden');
+  $('timerPauseBtn').textContent = '⏸ Pause';
+
+  clearInterval(timerInterval);
+  timerInterval = setInterval(() => {
+    if (timerPaused) return;
+
+    timerSeconds--;
+    updateTimerDisplay();
+
+    if (timerSeconds <= 0) {
+      clearInterval(timerInterval);
+      handleTimerExpired();
+    }
+  }, 1000);
+}
+
+function stopTimer() {
+  clearInterval(timerInterval);
+  timerInterval = null;
+  $('timerBar').classList.add('hidden');
+}
+
+function pauseTimer() {
+  if (!gameplaySettings.timerEnabled || !timerInterval) return;
+
+  timerPaused = true;
+  $('timerPauseBtn').textContent = '▶ Resume';
+  $('timerPausedOverlay').classList.add('show');
+
+  // Disable input and submit
+  $('guess').disabled = true;
+  $('submitBtn').disabled = true;
+  $('selectionList').classList.add('hidden');
+  hideSuggestionsButton();
+}
+
+function resumeTimer() {
+  if (!gameplaySettings.timerEnabled) return;
+
+  timerPaused = false;
+  $('timerPauseBtn').textContent = '⏸ Pause';
+  $('timerPausedOverlay').classList.remove('show');
+
+  // Re-enable input
+  $('guess').disabled = false;
+  $('submitBtn').disabled = !$('guess').value.trim();
+  $('guess').focus();
+}
+
+function updateTimerDisplay() {
+  const display = $('timerDisplay');
+  display.textContent = timerSeconds;
+
+  // Remove urgency classes
+  display.classList.remove('urgent', 'critical');
+
+  // Add urgency classes based on time remaining
+  if (timerSeconds <= 5) {
+    display.classList.add('critical');
+  } else if (timerSeconds <= 10) {
+    display.classList.add('urgent');
+  }
+}
+
+function handleTimerExpired() {
+  if (!state) return;
+
+  const isSinglePlayer = window.gameSetup?.isSinglePlayer;
+
+  if (isSinglePlayer) {
+    // Single player: game ends
+    stopTimer();
+    showEffect('bust');
+    setTimeout(() => {
+      recordGameEnd();
+      alert("⏱️ Time's up! Game over.");
+      playAgain();
+    }, 600);
+  } else {
+    // Multiplayer: forfeit turn
+    setResult("⏱️ Time's up! Turn forfeited.");
+    nextTurn();
+  }
+}
+
+// Timer pause button handler
+$('timerPauseBtn').onclick = () => {
+  if (timerPaused) {
+    resumeTimer();
+  } else {
+    pauseTimer();
+  }
+};
+
+// Timer resume button in overlay
+$('timerResumeBtn').onclick = resumeTimer;
+
+// Auto-pause timer when modals open
+function autoPauseIfTimerActive() {
+  if (gameplaySettings.timerEnabled && timerInterval && !timerPaused) {
+    pauseTimer();
+  }
+}
+
 // ============== SCORE ANIMATION ==============
 function animateScore(idx, from, to) {
   const el = $(`score_${idx}`);
@@ -1749,6 +2184,9 @@ function openProgressModal(idx) {
 
   $('modalBackdrop').classList.add('show');
   requestAnimationFrame(() => $('modal').classList.add('show'));
+
+  // Auto-pause timer when modal opens
+  autoPauseIfTimerActive();
 }
 
 function closeModal() {
@@ -1781,6 +2219,11 @@ function closeAllModals() {
 function resetMatchState() {
   // Close all modals first
   closeAllModals();
+
+  // Stop timer
+  stopTimer();
+  $('timerPausedOverlay').classList.remove('show');
+  $('guess').disabled = false;
 
   // Reset game state variables
   state = null;
@@ -1839,6 +2282,7 @@ function resetMatchState() {
 // ============== END GAME CONFIRMATION ==============
 $('endBtn').onclick = () => {
   $('confirmOverlay').classList.add('show');
+  autoPauseIfTimerActive();
 };
 
 $('confirmNo').onclick = () => {
@@ -1863,49 +2307,106 @@ function playAgain() {
 
 // ============== CUSTOM GAME BUILDER ==============
 const NATIONALITY_OPTIONS = [
+  // UK & Ireland
   { code: 'ENG', name: 'England', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿' },
+  { code: 'SCO', name: 'Scotland', flag: '🏴󠁧󠁢󠁳󠁣󠁴󠁿' },
+  { code: 'WAL', name: 'Wales', flag: '🏴󠁧󠁢󠁷󠁬󠁳󠁿' },
+  { code: 'NIR', name: 'N. Ireland', flag: '🇬🇧' },
+  { code: 'IRL', name: 'Ireland', flag: '🇮🇪' },
+  // Europe
   { code: 'FRA', name: 'France', flag: '🇫🇷' },
   { code: 'ESP', name: 'Spain', flag: '🇪🇸' },
   { code: 'GER', name: 'Germany', flag: '🇩🇪' },
   { code: 'ITA', name: 'Italy', flag: '🇮🇹' },
-  { code: 'BRA', name: 'Brazil', flag: '🇧🇷' },
-  { code: 'ARG', name: 'Argentina', flag: '🇦🇷' },
   { code: 'NED', name: 'Netherlands', flag: '🇳🇱' },
   { code: 'POR', name: 'Portugal', flag: '🇵🇹' },
   { code: 'BEL', name: 'Belgium', flag: '🇧🇪' },
-  { code: 'IRL', name: 'Ireland', flag: '🇮🇪' },
-  { code: 'SCO', name: 'Scotland', flag: '🏴󠁧󠁢󠁳󠁣󠁴󠁿' },
-  { code: 'WAL', name: 'Wales', flag: '🏴󠁧󠁢󠁷󠁬󠁳󠁿' },
+  { code: 'DEN', name: 'Denmark', flag: '🇩🇰' },
+  { code: 'NOR', name: 'Norway', flag: '🇳🇴' },
+  { code: 'SWE', name: 'Sweden', flag: '🇸🇪' },
+  { code: 'SUI', name: 'Switzerland', flag: '🇨🇭' },
+  { code: 'AUT', name: 'Austria', flag: '🇦🇹' },
+  { code: 'CRO', name: 'Croatia', flag: '🇭🇷' },
+  { code: 'SRB', name: 'Serbia', flag: '🇷🇸' },
+  { code: 'POL', name: 'Poland', flag: '🇵🇱' },
+  { code: 'CZE', name: 'Czech Rep.', flag: '🇨🇿' },
+  { code: 'UKR', name: 'Ukraine', flag: '🇺🇦' },
+  { code: 'GRE', name: 'Greece', flag: '🇬🇷' },
+  { code: 'TUR', name: 'Turkey', flag: '🇹🇷' },
+  // South America
+  { code: 'BRA', name: 'Brazil', flag: '🇧🇷' },
+  { code: 'ARG', name: 'Argentina', flag: '🇦🇷' },
+  { code: 'COL', name: 'Colombia', flag: '🇨🇴' },
+  { code: 'URU', name: 'Uruguay', flag: '🇺🇾' },
+  { code: 'CHI', name: 'Chile', flag: '🇨🇱' },
+  { code: 'ECU', name: 'Ecuador', flag: '🇪🇨' },
+  // Africa
   { code: 'NGA', name: 'Nigeria', flag: '🇳🇬' },
   { code: 'GHA', name: 'Ghana', flag: '🇬🇭' },
   { code: 'CIV', name: 'Ivory Coast', flag: '🇨🇮' },
   { code: 'SEN', name: 'Senegal', flag: '🇸🇳' },
-  { code: 'AUS', name: 'Australia', flag: '🇦🇺' },
+  { code: 'CMR', name: 'Cameroon', flag: '🇨🇲' },
+  { code: 'EGY', name: 'Egypt', flag: '🇪🇬' },
+  { code: 'MAR', name: 'Morocco', flag: '🇲🇦' },
+  { code: 'ALG', name: 'Algeria', flag: '🇩🇿' },
+  { code: 'RSA', name: 'South Africa', flag: '🇿🇦' },
+  // Other regions
   { code: 'USA', name: 'USA', flag: '🇺🇸' },
+  { code: 'CAN', name: 'Canada', flag: '🇨🇦' },
+  { code: 'MEX', name: 'Mexico', flag: '🇲🇽' },
   { code: 'JAM', name: 'Jamaica', flag: '🇯🇲' },
+  { code: 'AUS', name: 'Australia', flag: '🇦🇺' },
+  { code: 'NZL', name: 'New Zealand', flag: '🇳🇿' },
+  { code: 'JPN', name: 'Japan', flag: '🇯🇵' },
+  { code: 'KOR', name: 'South Korea', flag: '🇰🇷' },
 ];
 
 const CLUB_OPTIONS = [
+  // Big Six + traditional top clubs
   { id: 'Arsenal', name: 'Arsenal', color: '#EF0107' },
-  { id: 'Aston Villa', name: 'Aston Villa', color: '#670E36' },
   { id: 'Chelsea', name: 'Chelsea', color: '#034694' },
-  { id: 'Everton', name: 'Everton', color: '#003399' },
   { id: 'Liverpool', name: 'Liverpool', color: '#C8102E' },
   { id: 'Manchester City', name: 'Man City', color: '#6CABDD' },
   { id: 'Manchester United', name: 'Man Utd', color: '#DA291C' },
-  { id: 'Newcastle United', name: 'Newcastle', color: '#241F20' },
   { id: 'Tottenham Hotspur', name: 'Spurs', color: '#132257' },
+  // Other current/recent PL clubs
+  { id: 'Aston Villa', name: 'Aston Villa', color: '#670E36' },
+  { id: 'Everton', name: 'Everton', color: '#003399' },
+  { id: 'Newcastle United', name: 'Newcastle', color: '#241F20' },
   { id: 'West Ham United', name: 'West Ham', color: '#7A263A' },
   { id: 'Leicester City', name: 'Leicester', color: '#003090' },
   { id: 'Southampton', name: 'Southampton', color: '#D71920' },
-  { id: 'Fulham', name: 'Fulham', color: '#000000' },
   { id: 'Crystal Palace', name: 'Crystal Palace', color: '#1B458F' },
+  { id: 'Brighton', name: 'Brighton', color: '#0057B8' },
+  { id: 'Fulham', name: 'Fulham', color: '#000000' },
+  { id: 'Bournemouth', name: 'Bournemouth', color: '#DA291C' },
+  { id: 'Brentford', name: 'Brentford', color: '#E30613' },
+  { id: 'Nottingham Forest', name: 'Nottm Forest', color: '#DD0000' },
+  { id: 'Wolves', name: 'Wolves', color: '#FDB913' },
+  // Historic clubs
   { id: 'Blackburn Rovers', name: 'Blackburn', color: '#009EE0' },
   { id: 'Leeds United', name: 'Leeds', color: '#FFCD00' },
+  { id: 'Sunderland', name: 'Sunderland', color: '#EB172B' },
+  { id: 'Middlesbrough', name: 'Middlesbrough', color: '#E11B22' },
+  { id: 'Bolton Wanderers', name: 'Bolton', color: '#263C7F' },
+  { id: 'Burnley', name: 'Burnley', color: '#6C1D45' },
+  { id: 'Stoke City', name: 'Stoke', color: '#E03A3E' },
+  { id: 'West Bromwich Albion', name: 'West Brom', color: '#122F67' },
+  { id: 'Norwich City', name: 'Norwich', color: '#00A650' },
+  { id: 'Watford', name: 'Watford', color: '#FBEC5D' },
+  { id: 'Wigan Athletic', name: 'Wigan', color: '#0033A0' },
+  { id: 'Charlton Athletic', name: 'Charlton', color: '#D4021D' },
+  { id: 'Coventry City', name: 'Coventry', color: '#27A9E1' },
+  { id: 'Sheffield Wednesday', name: 'Sheff Wed', color: '#0066B3' },
+  { id: 'Sheffield United', name: 'Sheff Utd', color: '#EE2737' },
+  { id: 'Derby County', name: 'Derby', color: '#000000' },
+  { id: 'Wimbledon', name: 'Wimbledon', color: '#00008B' },
+  { id: 'Ipswich Town', name: 'Ipswich', color: '#0033A0' },
 ];
 
 let customSelectedNats = new Set();
 let customSelectedClubs = new Set();
+let livePreviewDebounce = null;
 
 function initCustomBuilder() {
   // Build nationality chips
@@ -1939,6 +2440,7 @@ function initCustomBuilder() {
     e.stopPropagation();
     customSelectedNats.clear();
     document.querySelectorAll('#nationalityChips .chip').forEach(c => c.classList.remove('selected'));
+    updateSelectionCounts();
     updateCustomPreview();
   };
 
@@ -1946,10 +2448,14 @@ function initCustomBuilder() {
     e.stopPropagation();
     customSelectedClubs.clear();
     document.querySelectorAll('#clubChips .chip').forEach(c => c.classList.remove('selected'));
+    updateSelectionCounts();
     updateCustomPreview();
   };
 
   $('customMetric').onchange = updateCustomPreview;
+
+  // Initial update
+  updateSelectionCounts();
 }
 
 function toggleChip(chip, type) {
@@ -1967,7 +2473,19 @@ function toggleChip(chip, type) {
     chip.classList.add('selected');
     set.add(key);
   }
+  updateSelectionCounts();
   updateCustomPreview();
+}
+
+function updateSelectionCounts() {
+  const natCount = $('natSelectionCount');
+  const clubCount = $('clubSelectionCount');
+
+  natCount.textContent = `${customSelectedNats.size}/5`;
+  natCount.classList.toggle('max', customSelectedNats.size >= 5);
+
+  clubCount.textContent = `${customSelectedClubs.size}/5`;
+  clubCount.classList.toggle('max', customSelectedClubs.size >= 5);
 }
 
 function updateCustomPreview() {
@@ -1975,6 +2493,7 @@ function updateCustomPreview() {
   const previewEl = $('customPreview');
   const previewText = $('customPreviewText');
   const warningEl = $('customWarning');
+  const startBtn = $('startCustomGame');
 
   const hasNats = customSelectedNats.size > 0;
   const hasClubs = customSelectedClubs.size > 0;
@@ -1982,35 +2501,87 @@ function updateCustomPreview() {
   // Hide warning by default
   warningEl.classList.add('hidden');
 
-  if (!hasNats && !hasClubs) {
-    // No filters = all EPL players
-    previewEl.classList.remove('hidden');
-    const metricLabel = metric === 'apps' ? 'Appearances' : 'Goals';
-    previewText.innerHTML = `<strong>${metricLabel}</strong> from <strong>all EPL players</strong>`;
-    return;
-  }
-
+  // Update description preview
   previewEl.classList.remove('hidden');
-
   const metricLabel = metric === 'apps' ? 'Appearances' : 'Goals';
-  let filterParts = [];
 
-  if (hasNats) {
-    const natNames = Array.from(customSelectedNats).map(code =>
-      NATIONALITY_OPTIONS.find(n => n.code === code)?.name || code
-    );
-    filterParts.push(`Nationality: ${natNames.join(', ')}`);
+  if (!hasNats && !hasClubs) {
+    previewText.innerHTML = `<strong>${metricLabel}</strong> from <strong>all EPL players</strong>`;
+  } else {
+    let filterParts = [];
+
+    if (hasNats) {
+      const natNames = Array.from(customSelectedNats).map(code =>
+        NATIONALITY_OPTIONS.find(n => n.code === code)?.name || code
+      );
+      filterParts.push(`Nationality: ${natNames.join(', ')}`);
+    }
+
+    if (hasClubs) {
+      const clubNames = Array.from(customSelectedClubs).map(id =>
+        CLUB_OPTIONS.find(c => c.id === id)?.name || id
+      );
+      filterParts.push(`Club: ${clubNames.join(', ')}`);
+    }
+
+    const modeText = hasNats && hasClubs ? ' (intersection)' : '';
+    previewText.innerHTML = `<strong>${metricLabel}</strong>${modeText}<br>${filterParts.join('<br>')}`;
   }
 
-  if (hasClubs) {
-    const clubNames = Array.from(customSelectedClubs).map(id =>
-      CLUB_OPTIONS.find(c => c.id === id)?.name || id
-    );
-    filterParts.push(`Club: ${clubNames.join(', ')}`);
-  }
+  // Debounced live preview fetch
+  clearTimeout(livePreviewDebounce);
+  livePreviewDebounce = setTimeout(() => fetchLivePreview(), 400);
+}
 
-  const modeText = hasNats && hasClubs ? ' (intersection)' : '';
-  previewText.innerHTML = `<strong>${metricLabel}</strong>${modeText}<br>${filterParts.join('<br>')}`;
+async function fetchLivePreview() {
+  const metric = $('customMetric').value;
+  const nationalities = Array.from(customSelectedNats);
+  const clubs = Array.from(customSelectedClubs);
+
+  const livePreviewEl = $('livePreview');
+  const livePreviewText = $('livePreviewText');
+  const livePreviewStars = $('livePreviewStars');
+  const warningEl = $('customWarning');
+  const startBtn = $('startCustomGame');
+
+  livePreviewEl.classList.remove('hidden', 'warning');
+  livePreviewText.innerHTML = 'Checking player count...';
+  livePreviewStars.innerHTML = '';
+
+  try {
+    const res = await fetch(`${API_BASE}/match_start`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        categoryId: 'custom',
+        metric: metric === 'goals' ? 'goals_total' : 'apps_total',
+        nationalities: nationalities.length > 0 ? nationalities : null,
+        clubs: clubs.length > 0 ? clubs : null,
+        previewOnly: true,
+      }),
+    });
+    const data = await res.json();
+
+    const count = data.eligibleCount || data.eligiblePlayers?.length || 0;
+    const diff = getDifficulty(count);
+
+    if (count === 0) {
+      livePreviewEl.classList.add('warning');
+      livePreviewText.innerHTML = `<strong>0</strong> eligible players`;
+      livePreviewStars.innerHTML = '';
+      warningEl.textContent = 'No players match these filters. Try different combinations.';
+      warningEl.classList.remove('hidden');
+      startBtn.disabled = true;
+    } else {
+      livePreviewText.innerHTML = `<strong>${formatNum(count)}</strong> eligible players`;
+      livePreviewStars.innerHTML = `${'★'.repeat(diff)}${'☆'.repeat(5 - diff)}`;
+      warningEl.classList.add('hidden');
+      startBtn.disabled = false;
+    }
+  } catch (err) {
+    livePreviewText.innerHTML = 'Could not fetch preview';
+    startBtn.disabled = false; // Allow trying anyway
+  }
 }
 
 function getCustomCacheKey() {
