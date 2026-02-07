@@ -452,6 +452,79 @@ button {
 .chip-action { background: none; border: none; color: var(--muted); font-size: 11px; cursor: pointer; padding: 2px 6px; margin-left: 8px; text-decoration: underline; }
 .chip-action:hover { color: var(--accent); }
 
+/* Competition dividers */
+.competition-divider {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent);
+  margin: 24px 0 12px;
+  padding-left: 4px;
+  border-left: 3px solid var(--accent);
+  padding-bottom: 4px;
+}
+
+/* Chat builder */
+.chat-builder { padding: 4px 0; }
+.chat-builder textarea {
+  width: 100%;
+  background: var(--card-dark);
+  border: 1px solid rgba(255,255,255,.15);
+  border-radius: 10px;
+  color: var(--fg);
+  padding: 12px 14px;
+  font-size: 14px;
+  resize: vertical;
+  min-height: 60px;
+  font-family: inherit;
+}
+.chat-builder textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.chat-builder textarea::placeholder { color: var(--muted); }
+.chat-preview {
+  background: var(--card);
+  border: 1px solid var(--accent);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin: 12px 0;
+}
+.chat-preview-header {
+  font-size: 11px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+.chat-preview-content .preview-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+.chat-preview-content .preview-row .label { color: var(--muted); }
+.chat-preview-content .preview-row .value { font-weight: 600; }
+.chat-preview-content .preview-row .value.eligible { color: var(--accent); }
+.chat-preview-content .preview-row .value.low { color: var(--danger); }
+.chat-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+.chat-buttons .btn-secondary {
+  flex: 1;
+  background: rgba(255,255,255,.1);
+  border: 1px solid rgba(255,255,255,.2);
+  color: var(--fg);
+  padding: 10px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all .2s;
+}
+.chat-buttons .btn-secondary:hover { background: rgba(255,255,255,.15); }
+.chat-buttons .btn-primary { flex: 2; }
+
 /* Session stats bar */
 .session-bar {
   background: var(--card-dark);
@@ -717,60 +790,171 @@ button {
       <div class="section-body" id="goalsGames"></div>
     </div>
 
-    <div class="section" id="sec-custom">
-      <div class="section-header" onclick="toggleSection('sec-custom')">
-        <div class="section-title">🎮 Custom Game <span class="section-count">(Build Your Own)</span></div>
+    <div class="section" id="sec-positions">
+      <div class="section-header" onclick="toggleSection('sec-positions')">
+        <div class="section-title">Positions (EPL Apps) <span class="section-count" id="countPositions">(0)</span></div>
         <div class="chev">▼</div>
       </div>
-      <div class="section-desc">Create your own game by selecting a metric and filters. Use both for intersection.</div>
-      <div class="section-body" id="customBuilder">
-        <div class="custom-builder">
+      <div class="section-desc">Player appearances by position in Premier League history.<br><span style="color:var(--gold)">★</span> difficulty: more stars = harder (smaller player pool)</div>
+      <div class="section-body" id="positionGames"></div>
+    </div>
+
+    <div class="section" id="sec-age">
+      <div class="section-header" onclick="toggleSection('sec-age')">
+        <div class="section-title">Age (EPL Apps) <span class="section-count" id="countAge">(0)</span></div>
+        <div class="chev">▼</div>
+      </div>
+      <div class="section-desc">Player appearances by age bucket in Premier League history.<br><span style="color:var(--gold)">★</span> difficulty: more stars = harder (smaller player pool)</div>
+      <div class="section-body" id="ageGames"></div>
+    </div>
+
+    <div class="section" id="sec-chat-epl">
+      <div class="section-header" onclick="toggleSection('sec-chat-epl')">
+        <div class="section-title">💬 EPL Chat Builder <span class="section-count">(New!)</span></div>
+        <div class="chev">▼</div>
+      </div>
+      <div class="section-desc">Describe your game in natural language. Example: "English and Dutch players for Man Utd and Liverpool by appearances"</div>
+      <div class="section-body" id="chatBuilderEPL">
+        <div class="chat-builder">
           <div class="field">
-            <label>Metric to subtract</label>
-            <select id="customMetric">
-              <option value="apps" selected>Appearances</option>
-              <option value="goals">Goals</option>
-            </select>
+            <label>Describe your game</label>
+            <textarea id="chatInputEPL" placeholder="e.g. French and Spanish players who played for Arsenal and Chelsea by goals" rows="3"></textarea>
           </div>
-          <div class="field" id="nationalityFilterField">
-            <div class="chip-header">
-              <label>Filter by nationality (optional, max 5) <button type="button" class="chip-action" id="clearNats">Clear</button></label>
-              <span class="selection-count" id="natSelectionCount">0/5</span>
-            </div>
-            <div class="chip-grid" id="nationalityChips"></div>
+          <div id="chatPreviewEPL" class="chat-preview hidden">
+            <div class="chat-preview-header">Proposed Game:</div>
+            <div id="chatPreviewContentEPL"></div>
           </div>
-          <div class="field" id="clubFilterField">
-            <div class="chip-header">
-              <label>Filter by club (optional, max 5) <button type="button" class="chip-action" id="clearClubs">Clear</button></label>
-              <span class="selection-count" id="clubSelectionCount">0/5</span>
-            </div>
-            <div class="chip-grid" id="clubChips"></div>
+          <div id="chatWarningEPL" class="custom-warning hidden"></div>
+          <div class="chat-buttons">
+            <button class="btn-secondary" id="previewChatEPL">Preview</button>
+            <button class="btn-primary" id="startChatEPL" disabled>Start Game</button>
           </div>
-          <div id="livePreview" class="live-preview hidden">
-            <div class="live-preview-text">
-              <span id="livePreviewText">Loading...</span>
-            </div>
-            <div class="live-preview-diff">
-              <span class="stars" id="livePreviewStars"></span>
-            </div>
-          </div>
-          <div id="customPreview" class="custom-preview hidden">
-            <span id="customPreviewText"></span>
-          </div>
-          <div id="customWarning" class="custom-warning hidden"></div>
-          <button class="btn-primary" id="startCustomGame" disabled>Start Custom Game</button>
         </div>
       </div>
     </div>
 
-    <div class="section disabled" id="sec-positions">
-      <div class="section-header">
-        <div class="section-title">Positions <span class="section-count">(Coming Soon)</span></div>
+    <h3 class="competition-divider">Champions League</h3>
+
+    <div class="section" id="sec-ucl-apps">
+      <div class="section-header" onclick="toggleSection('sec-ucl-apps')">
+        <div class="section-title">UCL Appearances (Nationality) <span class="section-count" id="countUCLApps">(0)</span></div>
         <div class="chev">▼</div>
       </div>
-      <div class="section-desc">Coming soon — requires position data.</div>
-      <div class="section-body">
-        <div class="disabled-note">Position data not yet available. Check back soon!</div>
+      <div class="section-desc">Champions League appearances by nationality.<br><span style="color:var(--gold)">★</span> difficulty: more stars = harder</div>
+      <div class="section-body" id="uclAppsGames"></div>
+    </div>
+
+    <div class="section" id="sec-ucl-goals">
+      <div class="section-header" onclick="toggleSection('sec-ucl-goals')">
+        <div class="section-title">UCL Goals (Nationality) <span class="section-count" id="countUCLGoals">(0)</span></div>
+        <div class="chev">▼</div>
+      </div>
+      <div class="section-desc">Champions League goals by nationality.<br><span style="color:var(--gold)">★</span> difficulty: more stars = harder</div>
+      <div class="section-body" id="uclGoalsGames"></div>
+    </div>
+
+    <div class="section" id="sec-ucl-clubs">
+      <div class="section-header" onclick="toggleSection('sec-ucl-clubs')">
+        <div class="section-title">UCL Appearances (Club) <span class="section-count" id="countUCLClubs">(0)</span></div>
+        <div class="chev">▼</div>
+      </div>
+      <div class="section-desc">Champions League appearances by club.<br><span style="color:var(--gold)">★</span> difficulty: more stars = harder</div>
+      <div class="section-body" id="uclClubsGames"></div>
+    </div>
+
+    <h3 class="competition-divider">La Liga</h3>
+
+    <div class="section" id="sec-laliga-apps">
+      <div class="section-header" onclick="toggleSection('sec-laliga-apps')">
+        <div class="section-title">La Liga Apps (Top 25 Clubs) <span class="section-count" id="countLaLigaApps">(0)</span></div>
+        <div class="chev">▼</div>
+      </div>
+      <div class="section-desc">Player appearances by club in La Liga history.<br><span style="color:var(--gold)">★</span> difficulty: more stars = harder</div>
+      <div class="section-body" id="laligaAppsGames"></div>
+    </div>
+
+    <div class="section" id="sec-laliga-goals">
+      <div class="section-header" onclick="toggleSection('sec-laliga-goals')">
+        <div class="section-title">La Liga Goals (Top 25 Clubs) <span class="section-count" id="countLaLigaGoals">(0)</span></div>
+        <div class="chev">▼</div>
+      </div>
+      <div class="section-desc">Player goals by club in La Liga history.<br><span style="color:var(--gold)">★</span> difficulty: more stars = harder</div>
+      <div class="section-body" id="laligaGoalsGames"></div>
+    </div>
+
+    <h3 class="competition-divider">Serie A</h3>
+
+    <div class="section" id="sec-seriea-apps">
+      <div class="section-header" onclick="toggleSection('sec-seriea-apps')">
+        <div class="section-title">Serie A Apps (Top 25 Clubs) <span class="section-count" id="countSerieAApps">(0)</span></div>
+        <div class="chev">▼</div>
+      </div>
+      <div class="section-desc">Player appearances by club in Serie A history.<br><span style="color:var(--gold)">★</span> difficulty: more stars = harder</div>
+      <div class="section-body" id="serieaAppsGames"></div>
+    </div>
+
+    <div class="section" id="sec-seriea-goals">
+      <div class="section-header" onclick="toggleSection('sec-seriea-goals')">
+        <div class="section-title">Serie A Goals (Top 25 Clubs) <span class="section-count" id="countSerieAGoals">(0)</span></div>
+        <div class="chev">▼</div>
+      </div>
+      <div class="section-desc">Player goals by club in Serie A history.<br><span style="color:var(--gold)">★</span> difficulty: more stars = harder</div>
+      <div class="section-body" id="serieaGoalsGames"></div>
+    </div>
+
+    <h3 class="competition-divider">Bundesliga</h3>
+
+    <div class="section" id="sec-bundesliga-apps">
+      <div class="section-header" onclick="toggleSection('sec-bundesliga-apps')">
+        <div class="section-title">Bundesliga Apps (Top 25 Clubs) <span class="section-count" id="countBundesligaApps">(0)</span></div>
+        <div class="chev">▼</div>
+      </div>
+      <div class="section-desc">Player appearances by club in Bundesliga history.<br><span style="color:var(--gold)">★</span> difficulty: more stars = harder</div>
+      <div class="section-body" id="bundesligaAppsGames"></div>
+    </div>
+
+    <div class="section" id="sec-bundesliga-goals">
+      <div class="section-header" onclick="toggleSection('sec-bundesliga-goals')">
+        <div class="section-title">Bundesliga Goals (Top 25 Clubs) <span class="section-count" id="countBundesligaGoals">(0)</span></div>
+        <div class="chev">▼</div>
+      </div>
+      <div class="section-desc">Player goals by club in Bundesliga history.<br><span style="color:var(--gold)">★</span> difficulty: more stars = harder</div>
+      <div class="section-body" id="bundesligaGoalsGames"></div>
+    </div>
+
+    <h3 class="competition-divider">Special</h3>
+
+    <div class="section" id="sec-big5-british">
+      <div class="section-header" onclick="toggleSection('sec-big5-british')">
+        <div class="section-title">Big 5 British (ex EPL) <span class="section-count" id="countBig5British">(2)</span></div>
+        <div class="chev">▼</div>
+      </div>
+      <div class="section-desc">British players in top 5 leagues (La Liga, Serie A, Bundesliga, Ligue 1) excluding EPL.<br><span style="color:var(--gold)">★</span> difficulty: more stars = harder</div>
+      <div class="section-body" id="big5BritishGames"></div>
+    </div>
+
+    <div class="section" id="sec-chat-global">
+      <div class="section-header" onclick="toggleSection('sec-chat-global')">
+        <div class="section-title">💬 Global Chat Builder <span class="section-count">(New!)</span></div>
+        <div class="chev">▼</div>
+      </div>
+      <div class="section-desc">Build a custom game across any competition. Example: "Spanish players in La Liga for Real Madrid and Barcelona by goals"</div>
+      <div class="section-body" id="chatBuilderGlobal">
+        <div class="chat-builder">
+          <div class="field">
+            <label>Describe your game (include competition)</label>
+            <textarea id="chatInputGlobal" placeholder="e.g. German players in Bundesliga for Bayern Munich and Dortmund by appearances" rows="3"></textarea>
+          </div>
+          <div id="chatPreviewGlobal" class="chat-preview hidden">
+            <div class="chat-preview-header">Proposed Game:</div>
+            <div id="chatPreviewContentGlobal"></div>
+          </div>
+          <div id="chatWarningGlobal" class="custom-warning hidden"></div>
+          <div class="chat-buttons">
+            <button class="btn-secondary" id="previewChatGlobal">Preview</button>
+            <button class="btn-primary" id="startChatGlobal" disabled>Start Game</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -904,15 +1088,19 @@ const CACHE_TTL = 90 * 60 * 1000; // 90 minutes
 const DEBOUNCE_MS = 300;
 
 // ============== CATEGORIES (must match backend) ==============
-// Sorted alphabetically by title
+// Sorted alphabetically by title within each group
 const CATEGORIES = {
+  // EPL Countries
   country: [
     { id: 'country_ARG', title: 'Argentina', flag: '🇦🇷' },
     { id: 'country_BEL', title: 'Belgium', flag: '🇧🇪' },
+    { id: 'country_BRA', title: 'Brazil', flag: '🇧🇷' },
     { id: 'country_DEN', title: 'Denmark', flag: '🇩🇰' },
+    { id: 'country_ENG', title: 'England', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿' },
     { id: 'country_FRA', title: 'France', flag: '🇫🇷' },
     { id: 'country_GER', title: 'Germany', flag: '🇩🇪' },
     { id: 'country_IRL', title: 'Ireland', flag: '🇮🇪' },
+    { id: 'country_ITA', title: 'Italy', flag: '🇮🇹' },
     { id: 'country_NED', title: 'Netherlands', flag: '🇳🇱' },
     { id: 'country_NIR', title: 'N. Ireland', flag: '🇬🇧' },
     { id: 'country_NOR', title: 'Norway', flag: '🇳🇴' },
@@ -921,26 +1109,31 @@ const CATEGORIES = {
     { id: 'country_ESP', title: 'Spain', flag: '🇪🇸' },
     { id: 'country_WAL', title: 'Wales', flag: '🏴󠁧󠁢󠁷󠁬󠁳󠁿' },
   ],
+  // EPL Continents
   continent: [
     { id: 'continent_AFRICA', title: 'Africa', flag: '🌍' },
     { id: 'continent_ASIA_OCEANIA', title: 'Asia & Oceania', flag: '🌏' },
     { id: 'continent_CONCACAF', title: 'CONCACAF', flag: '🌎' },
     { id: 'continent_SOUTH_AMERICA', title: 'South America (excl. BRA/ARG)', flag: '🌎' },
   ],
+  // EPL Clubs
   club: [
     { id: 'club_Arsenal', title: 'Arsenal', color: '#EF0107' },
     { id: 'club_AstonVilla', title: 'Aston Villa', color: '#670E36' },
     { id: 'club_Blackburn', title: 'Blackburn', color: '#009EE0' },
     { id: 'club_Bolton', title: 'Bolton', color: '#263C7F' },
     { id: 'club_Bournemouth', title: 'Bournemouth', color: '#DA291C' },
+    { id: 'club_Brentford', title: 'Brentford', color: '#E30613' },
     { id: 'club_Brighton', title: 'Brighton', color: '#0057B8' },
     { id: 'club_Burnley', title: 'Burnley', color: '#6C1D45' },
     { id: 'club_Charlton', title: 'Charlton', color: '#D4021D' },
     { id: 'club_Chelsea', title: 'Chelsea', color: '#034694' },
     { id: 'club_Coventry', title: 'Coventry', color: '#27A9E1' },
     { id: 'club_CrystalPalace', title: 'Crystal Palace', color: '#1B458F' },
+    { id: 'club_Derby', title: 'Derby', color: '#000000' },
     { id: 'club_Everton', title: 'Everton', color: '#003399' },
     { id: 'club_Fulham', title: 'Fulham', color: '#000000' },
+    { id: 'club_Ipswich', title: 'Ipswich', color: '#0033A0' },
     { id: 'club_Leeds', title: 'Leeds', color: '#FFCD00' },
     { id: 'club_Leicester', title: 'Leicester', color: '#003090' },
     { id: 'club_Liverpool', title: 'Liverpool', color: '#C8102E' },
@@ -950,10 +1143,16 @@ const CATEGORIES = {
     { id: 'club_Newcastle', title: 'Newcastle', color: '#241F20' },
     { id: 'club_Norwich', title: 'Norwich', color: '#00A650' },
     { id: 'club_NottmForest', title: 'Nottm Forest', color: '#DD0000' },
+    { id: 'club_Portsmouth', title: 'Portsmouth', color: '#001489' },
+    { id: 'club_QPR', title: 'QPR', color: '#1D5BA4' },
+    { id: 'club_Reading', title: 'Reading', color: '#004494' },
+    { id: 'club_SheffUtd', title: 'Sheff Utd', color: '#EE2737' },
+    { id: 'club_SheffWed', title: 'Sheff Wed', color: '#0066B3' },
     { id: 'club_Southampton', title: 'Southampton', color: '#D71920' },
     { id: 'club_Stoke', title: 'Stoke', color: '#E03A3E' },
-    { id: 'club_Tottenham', title: 'Spurs', color: '#132257' },
     { id: 'club_Sunderland', title: 'Sunderland', color: '#EB172B' },
+    { id: 'club_Swansea', title: 'Swansea', color: '#000000' },
+    { id: 'club_Tottenham', title: 'Spurs', color: '#132257' },
     { id: 'club_Watford', title: 'Watford', color: '#FBEC5D' },
     { id: 'club_WestBrom', title: 'West Brom', color: '#122F67' },
     { id: 'club_WestHam', title: 'West Ham', color: '#7A263A' },
@@ -961,15 +1160,89 @@ const CATEGORIES = {
     { id: 'club_Wimbledon', title: 'Wimbledon', color: '#00008B' },
     { id: 'club_Wolves', title: 'Wolves', color: '#FDB913' },
   ],
+  // EPL Goals (expanded)
   goals: [
     { id: 'goals_overall', title: 'All EPL Goals', flag: '⚽' },
     { id: 'goals_Arsenal', title: 'Arsenal Goals', color: '#EF0107' },
+    { id: 'goals_AstonVilla', title: 'Aston Villa Goals', color: '#670E36' },
     { id: 'goals_Chelsea', title: 'Chelsea Goals', color: '#034694' },
+    { id: 'goals_Everton', title: 'Everton Goals', color: '#003399' },
+    { id: 'goals_Leeds', title: 'Leeds Goals', color: '#FFCD00' },
+    { id: 'goals_Leicester', title: 'Leicester Goals', color: '#003090' },
     { id: 'goals_Liverpool', title: 'Liverpool Goals', color: '#C8102E' },
     { id: 'goals_ManCity', title: 'Man City Goals', color: '#6CABDD' },
     { id: 'goals_ManUtd', title: 'Man Utd Goals', color: '#DA291C' },
+    { id: 'goals_Newcastle', title: 'Newcastle Goals', color: '#241F20' },
+    { id: 'goals_Southampton', title: 'Southampton Goals', color: '#D71920' },
+    { id: 'goals_Sunderland', title: 'Sunderland Goals', color: '#EB172B' },
     { id: 'goals_Tottenham', title: 'Spurs Goals', color: '#132257' },
+    { id: 'goals_WestHam', title: 'West Ham Goals', color: '#7A263A' },
   ],
+  // EPL Positions
+  position: [
+    { id: 'epl_position_GK', title: 'Goalkeepers', flag: '🧤' },
+    { id: 'epl_position_DF', title: 'Defenders', flag: '🛡️' },
+    { id: 'epl_position_MF', title: 'Midfielders', flag: '⚙️' },
+    { id: 'epl_position_FW', title: 'Forwards', flag: '⚡' },
+  ],
+  // EPL Age buckets
+  age: [
+    { id: 'epl_age_u19', title: 'Age 19 and Below', flag: '👶' },
+    { id: 'epl_age_u21', title: 'Age 21 and Below', flag: '🧒' },
+    { id: 'epl_age_35plus', title: 'Age 35 and Above', flag: '👴' },
+  ],
+  // UCL Appearances by nationality
+  uclApps: [
+    { id: 'ucl_country_ALL', title: 'All Nationalities', flag: '🌍' },
+    { id: 'ucl_country_ARG', title: 'Argentine', flag: '🇦🇷' },
+    { id: 'ucl_country_BRA', title: 'Brazilian', flag: '🇧🇷' },
+    { id: 'ucl_country_ENG', title: 'English', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿' },
+    { id: 'ucl_country_FRA', title: 'French', flag: '🇫🇷' },
+    { id: 'ucl_country_GER', title: 'German', flag: '🇩🇪' },
+    { id: 'ucl_country_ITA', title: 'Italian', flag: '🇮🇹' },
+    { id: 'ucl_country_NED', title: 'Dutch', flag: '🇳🇱' },
+    { id: 'ucl_country_POR', title: 'Portuguese', flag: '🇵🇹' },
+    { id: 'ucl_country_ESP', title: 'Spanish', flag: '🇪🇸' },
+  ],
+  // UCL Goals by nationality
+  uclGoals: [
+    { id: 'ucl_goals_ALL', title: 'All UCL Goals', flag: '⚽' },
+    { id: 'ucl_goals_ENG', title: 'English Goals', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿' },
+    { id: 'ucl_goals_FRA', title: 'French Goals', flag: '🇫🇷' },
+    { id: 'ucl_goals_ESP', title: 'Spanish Goals', flag: '🇪🇸' },
+    { id: 'ucl_goals_ITA', title: 'Italian Goals', flag: '🇮🇹' },
+    { id: 'ucl_goals_NED', title: 'Dutch Goals', flag: '🇳🇱' },
+  ],
+  // UCL Clubs
+  uclClubs: [
+    { id: 'ucl_club_ACMilan', title: 'AC Milan', color: '#AC1A2F' },
+    { id: 'ucl_club_Arsenal', title: 'Arsenal', color: '#EF0107' },
+    { id: 'ucl_club_Barcelona', title: 'Barcelona', color: '#A50044' },
+    { id: 'ucl_club_Bayern', title: 'Bayern Munich', color: '#DC052D' },
+    { id: 'ucl_club_Chelsea', title: 'Chelsea', color: '#034694' },
+    { id: 'ucl_club_Inter', title: 'Inter Milan', color: '#010E80' },
+    { id: 'ucl_club_Juventus', title: 'Juventus', color: '#000000' },
+    { id: 'ucl_club_Liverpool', title: 'Liverpool', color: '#C8102E' },
+    { id: 'ucl_club_ManCity', title: 'Man City', color: '#6CABDD' },
+    { id: 'ucl_club_ManUtd', title: 'Man Utd', color: '#DA291C' },
+    { id: 'ucl_club_PSG', title: 'PSG', color: '#004170' },
+    { id: 'ucl_club_RealMadrid', title: 'Real Madrid', color: '#FEBE10' },
+  ],
+  // Big 5 British
+  big5British: [
+    { id: 'big5_british_apps', title: 'Big 5 British (Apps)', flag: '🇬🇧' },
+    { id: 'big5_british_goals', title: 'Big 5 British (Goals)', flag: '🇬🇧' },
+  ],
+};
+
+// Dynamic categories loaded from API
+let dynamicCategories = {
+  laligaApps: [],
+  laligaGoals: [],
+  serieaApps: [],
+  serieaGoals: [],
+  bundesligaApps: [],
+  bundesligaGoals: [],
 };
 
 // ============== STATE ==============
@@ -1270,10 +1543,68 @@ function toggleSection(id) {
 }
 
 function buildCategorySections() {
+  // EPL sections
   buildSection('countryGames', CATEGORIES.country, 'countCountry');
   buildSection('continentGames', CATEGORIES.continent, 'countContinent');
   buildSection('clubGames', CATEGORIES.club, 'countClub');
   buildSection('goalsGames', CATEGORIES.goals, 'countGoals');
+  buildSection('positionGames', CATEGORIES.position, 'countPositions');
+  buildSection('ageGames', CATEGORIES.age, 'countAge');
+
+  // UCL sections
+  buildSection('uclAppsGames', CATEGORIES.uclApps, 'countUCLApps');
+  buildSection('uclGoalsGames', CATEGORIES.uclGoals, 'countUCLGoals');
+  buildSection('uclClubsGames', CATEGORIES.uclClubs, 'countUCLClubs');
+
+  // Big 5 British
+  buildSection('big5BritishGames', CATEGORIES.big5British, 'countBig5British');
+
+  // Load dynamic categories for other leagues
+  loadDynamicLeagueCategories();
+}
+
+async function loadDynamicLeagueCategories() {
+  // Load top clubs for La Liga, Serie A, Bundesliga
+  const leagues = [
+    { comp: 'La Liga', appsContainer: 'laligaAppsGames', goalsContainer: 'laligaGoalsGames', countApps: 'countLaLigaApps', countGoals: 'countLaLigaGoals', prefix: 'laliga', flag: '🇪🇸' },
+    { comp: 'Serie A', appsContainer: 'serieaAppsGames', goalsContainer: 'serieaGoalsGames', countApps: 'countSerieAApps', countGoals: 'countSerieAGoals', prefix: 'seriea', flag: '🇮🇹' },
+    { comp: 'Bundesliga', appsContainer: 'bundesligaAppsGames', goalsContainer: 'bundesligaGoalsGames', countApps: 'countBundesligaApps', countGoals: 'countBundesligaGoals', prefix: 'bundesliga', flag: '🇩🇪' },
+  ];
+
+  for (const league of leagues) {
+    try {
+      const res = await fetch(`${API_BASE}/match_start`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ categoryId: 'get_top_clubs', competition: league.comp, limit: 25 }),
+      });
+      const data = await res.json();
+
+      if (data.clubs && data.clubs.length > 0) {
+        // Build apps categories
+        const appsCategories = data.clubs.map(c => ({
+          id: `${league.prefix}_club_${c.club.replace(/\s+/g, '_')}`,
+          title: c.club,
+          flag: league.flag,
+          playerCount: c.count,
+        }));
+
+        // Build goals categories
+        const goalsCategories = data.clubs.map(c => ({
+          id: `${league.prefix}_goals_${c.club.replace(/\s+/g, '_')}`,
+          title: `${c.club} Goals`,
+          flag: '⚽',
+        }));
+
+        buildSection(league.appsContainer, appsCategories, league.countApps);
+        buildSection(league.goalsContainer, goalsCategories, league.countGoals);
+      }
+    } catch (err) {
+      console.warn(`Failed to load ${league.comp} clubs:`, err);
+      $(league.appsContainer).innerHTML = '<div class="disabled-note">Could not load clubs. Check back later.</div>';
+      $(league.goalsContainer).innerHTML = '<div class="disabled-note">Could not load clubs. Check back later.</div>';
+    }
+  }
 }
 
 function buildSection(containerId, list, countId) {
@@ -2662,9 +2993,199 @@ $('startCustomGame').onclick = async () => {
   }
 };
 
+// ============== CHAT BUILDER ==============
+let chatBuilderState = {
+  epl: { text: '', parsed: null, count: 0 },
+  global: { text: '', parsed: null, count: 0 },
+};
+
+function initChatBuilder() {
+  // EPL Chat Builder
+  const chatInputEPL = $('chatInputEPL');
+  const previewBtnEPL = $('previewChatEPL');
+  const startBtnEPL = $('startChatEPL');
+
+  if (chatInputEPL) {
+    chatInputEPL.oninput = () => {
+      chatBuilderState.epl.text = chatInputEPL.value;
+      startBtnEPL.disabled = true;
+      $('chatPreviewEPL').classList.add('hidden');
+      $('chatWarningEPL').classList.add('hidden');
+    };
+  }
+
+  if (previewBtnEPL) {
+    previewBtnEPL.onclick = () => previewChatGame('epl');
+  }
+
+  if (startBtnEPL) {
+    startBtnEPL.onclick = () => startChatGame('epl');
+  }
+
+  // Global Chat Builder
+  const chatInputGlobal = $('chatInputGlobal');
+  const previewBtnGlobal = $('previewChatGlobal');
+  const startBtnGlobal = $('startChatGlobal');
+
+  if (chatInputGlobal) {
+    chatInputGlobal.oninput = () => {
+      chatBuilderState.global.text = chatInputGlobal.value;
+      startBtnGlobal.disabled = true;
+      $('chatPreviewGlobal').classList.add('hidden');
+      $('chatWarningGlobal').classList.add('hidden');
+    };
+  }
+
+  if (previewBtnGlobal) {
+    previewBtnGlobal.onclick = () => previewChatGame('global');
+  }
+
+  if (startBtnGlobal) {
+    startBtnGlobal.onclick = () => startChatGame('global');
+  }
+}
+
+async function previewChatGame(type) {
+  const inputEl = $(type === 'epl' ? 'chatInputEPL' : 'chatInputGlobal');
+  const previewEl = $(type === 'epl' ? 'chatPreviewEPL' : 'chatPreviewGlobal');
+  const previewContentEl = $(type === 'epl' ? 'chatPreviewContentEPL' : 'chatPreviewContentGlobal');
+  const warningEl = $(type === 'epl' ? 'chatWarningEPL' : 'chatWarningGlobal');
+  const startBtn = $(type === 'epl' ? 'startChatEPL' : 'startChatGlobal');
+
+  const text = inputEl.value.trim();
+  if (!text) {
+    warningEl.textContent = 'Please describe your game first.';
+    warningEl.classList.remove('hidden');
+    return;
+  }
+
+  previewEl.classList.remove('hidden');
+  previewContentEl.innerHTML = '<div class="preview-row"><span class="label">Analyzing...</span></div>';
+  warningEl.classList.add('hidden');
+  startBtn.disabled = true;
+
+  try {
+    const res = await fetch(`${API_BASE}/match_start`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        categoryId: 'chat_builder',
+        text: text,
+        previewOnly: true,
+      }),
+    });
+    const data = await res.json();
+
+    if (data.error) {
+      warningEl.textContent = data.error;
+      warningEl.classList.remove('hidden');
+      previewEl.classList.add('hidden');
+      return;
+    }
+
+    const count = data.eligibleCount || 0;
+    const parsed = data.parsed || {};
+    const diff = getDifficulty(count);
+
+    chatBuilderState[type] = { text, parsed, count };
+
+    // Build preview content
+    let previewHtml = `
+      <div class="preview-row"><span class="label">Metric:</span><span class="value">${parsed.metric === 'goals_total' ? 'Goals' : 'Appearances'}</span></div>
+      <div class="preview-row"><span class="label">Competition:</span><span class="value">${parsed.competition || 'EPL'}</span></div>
+    `;
+
+    if (parsed.nationalities && parsed.nationalities.length > 0) {
+      previewHtml += `<div class="preview-row"><span class="label">Nationalities:</span><span class="value">${parsed.nationalities.join(', ')}</span></div>`;
+    }
+
+    if (parsed.clubs && parsed.clubs.length > 0) {
+      previewHtml += `<div class="preview-row"><span class="label">Clubs:</span><span class="value">${parsed.clubs.join(', ')}</span></div>`;
+    }
+
+    const countClass = count < 40 ? 'low' : 'eligible';
+    previewHtml += `<div class="preview-row"><span class="label">Eligible Players:</span><span class="value ${countClass}">${formatNum(count)}</span></div>`;
+    previewHtml += `<div class="preview-row"><span class="label">Difficulty:</span><span class="value">${'★'.repeat(diff)}${'☆'.repeat(5 - diff)}</span></div>`;
+
+    previewContentEl.innerHTML = previewHtml;
+
+    // Check feasibility
+    if (count === 0) {
+      warningEl.textContent = 'No players match your criteria. Try broader filters.';
+      warningEl.classList.remove('hidden');
+      startBtn.disabled = true;
+    } else if (count < 40) {
+      warningEl.textContent = `Only ${count} players found. This may be too niche for a good game. Consider adding more nationalities or clubs.`;
+      warningEl.classList.remove('hidden');
+      startBtn.disabled = false; // Allow anyway
+    } else {
+      startBtn.disabled = false;
+    }
+
+  } catch (err) {
+    warningEl.textContent = 'Failed to preview: ' + err.message;
+    warningEl.classList.remove('hidden');
+    previewEl.classList.add('hidden');
+  }
+}
+
+async function startChatGame(type) {
+  const state = chatBuilderState[type];
+  if (!state.text || state.count === 0) return;
+
+  const cacheKey = `chat_${type}_${normalize(state.text).slice(0, 50)}`;
+  const customCat = {
+    id: cacheKey,
+    title: type === 'epl' ? 'EPL Chat Game' : 'Global Chat Game',
+    flag: '💬',
+    isCustom: true,
+  };
+
+  currentCategory = customCat;
+  matchDataReady = false;
+  triviaIndex = 0;
+
+  hide('step3');
+  show('loadingScreen');
+  hide('readyBadge');
+  hide('skipTrivia');
+  hide('triviaNote');
+  $('triviaContainer').innerHTML = '';
+  $('loadingSpinner').classList.remove('ready');
+  $('loadingSpinner').style.animation = '';
+  $('loadingText').textContent = 'Building chat game...';
+  $('loadingText').classList.remove('ready');
+
+  try {
+    const res = await fetch(`${API_BASE}/match_start`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        categoryId: 'chat_builder',
+        text: state.text,
+      }),
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+
+    setCachedData(cacheKey, data);
+    eligiblePlayers = data.eligiblePlayers || [];
+    currentMeta = data.meta || {};
+    triviaData = data.meta?.trivia || [];
+    matchDataReady = true;
+    showReadyState();
+    showTrivia();
+  } catch (err) {
+    alert('Failed to start chat game: ' + err.message);
+    show('step3');
+    hide('loadingScreen');
+  }
+}
+
 // ============== INIT ==============
 (function init() {
   initCustomBuilder();
+  initChatBuilder();
 })();
 </script>
 </body>

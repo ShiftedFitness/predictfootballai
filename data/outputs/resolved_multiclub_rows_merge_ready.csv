@@ -1,0 +1,591 @@
+player_uid,player_name_raw,player_name_used_for_search,player_name,nationality,season,competition,club,appearances,goals,minutes,starts,sub_appearances,sportmonks_player_id,sportmonks_season_id,sportmonks_team_id,confidence_score,resolution_source,resolved_type
+alex oxlade-chamberlain|eng eng|1994,Alex Oxlade-Chamberlain,Alex Oxlade-Chamberlain,Alex Oxlade-Chamberlain,ENG,2017/18,Premier League,Liverpool,32,3,1484,14,18,850,6397,8,0.90,sportmonks,multi_club_split
+alex oxlade-chamberlain|eng eng|1994,Alex Oxlade-Chamberlain,Alex Oxlade-Chamberlain,Alex Oxlade-Chamberlain,ENG,2017/18,Premier League,Arsenal,3,,242,3,0,850,6397,19,0.90,sportmonks,multi_club_split
+robert snodgrass|sct sco|1988,Robert Snodgrass,Robert Snodgrass,Robert Snodgrass,SCO,2016/17,Premier League,West Ham United,15,,837,8,7,870,13,1,0.60,sportmonks,multi_club_split
+robert snodgrass|sct sco|1988,Robert Snodgrass,Robert Snodgrass,Robert Snodgrass,SCO,2016/17,Premier League,Hull City,20,7,1712,19,1,870,13,22,0.60,sportmonks,multi_club_split
+saido berahino|bi bdi|1994,Saido Berahino,Saido Berahino,Saido Berahino,BDI,2016/17,Premier League,West Bromwich Albion,4,,245,3,1,1178,13,10,0.60,sportmonks,multi_club_split
+saido berahino|bi bdi|1994,Saido Berahino,Saido Berahino,Saido Berahino,BDI,2016/17,Premier League,Stoke City,13,,721,8,5,1178,13,26,0.60,sportmonks,multi_club_split
+morgan schneiderlin|fr fra|1990,Morgan Schneiderlin,Morgan Schneiderlin,Morgan Schneiderlin,FRA,2016/17,Premier League,Everton,14,1,1059,12,2,967,13,13,0.90,sportmonks,multi_club_split
+morgan schneiderlin|fr fra|1990,Morgan Schneiderlin,Morgan Schneiderlin,Morgan Schneiderlin,FRA,2016/17,Premier League,Manchester United,3,,11,,,967,13,14,0.90,sportmonks,multi_club_split
+costel pantilimon|ro rou|1987,Costel Pantilimon,Costel Pantilimon,Costel Pantilimon,ROU,2015/16,Premier League,Sunderland,17,,1530,17,0,1215,10,3,1.00,sportmonks,single_club_apps_only
+adla¨ne guedioura|dz alg|1986,AdlÃ¨ne Guedioura,Adlene Guedioura,Adlène Guedioura,ALG,2016/17,Premier League,Middlesbrough,5,,135,,,682,13,7,0.53,sportmonks,multi_club_split
+adla¨ne guedioura|dz alg|1986,AdlÃ¨ne Guedioura,Adlene Guedioura,Adlène Guedioura,ALG,2016/17,Premier League,Watford,12,,723,9,3,682,13,25,0.53,sportmonks,multi_club_split
+kevin wimmer|at aut|1993,Kevin Wimmer,Kevin Wimmer,Kevin Wimmer,AUT,2017/18,Premier League,Stoke City,17,,1321,14,3,1019,6397,26,0.60,sportmonks,single_club_apps_only
+ryan bennett|eng eng|1990,Ryan Bennett,Ryan Bennett,Ryan Bennett,ENG,2019/20,Premier League,Wolverhampton Wanderers,11,,606,7,4,898,16036,29,1.00,sportmonks,multi_club_split
+ryan bennett|eng eng|1990,Ryan Bennett,Ryan Bennett,Ryan Bennett,ENG,2019/20,Premier League,Leicester City,5,,330,3,2,898,16036,42,1.00,sportmonks,multi_club_split
+bryan oviedo|cr crc|1990,Bryan Oviedo,Bryan Oviedo,Bryan Oviedo,CRC,2016/17,Premier League,Sunderland,10,,849,10,0,1256,13,3,1.00,sportmonks,multi_club_split
+bryan oviedo|cr crc|1990,Bryan Oviedo,Bryan Oviedo,Bryan Oviedo,CRC,2016/17,Premier League,Everton,6,,477,6,0,1256,13,13,1.00,sportmonks,multi_club_split
+jordon mutch|eng eng|1992,Jordon Mutch,Jordon Mutch,Jordon Mutch,ENG,2014/15,Premier League,Queens Park Rangers,9,,519,6,3,1059,12,47,0.90,sportmonks,multi_club_split
+jordon mutch|eng eng|1992,Jordon Mutch,Jordon Mutch,Jordon Mutch,ENG,2014/15,Premier League,Crystal Palace,7,,333,4,3,1059,12,51,0.90,sportmonks,multi_club_split
+andros townsend|eng eng|1991,Andros Townsend,Andros Townsend,Andros Townsend,ENG,2015/16,Premier League,Tottenham Hotspur,3,,64,,,1249,10,6,1.00,sportmonks,multi_club_split
+andros townsend|eng eng|1991,Andros Townsend,Andros Townsend,Andros Townsend,ENG,2015/16,Premier League,Newcastle United,13,4,1089,12,1,1249,10,20,1.00,sportmonks,multi_club_split
+ryan mason|eng eng|1991,Ryan Mason,Ryan Mason,Ryan Mason,ENG,2016/17,Premier League,Hull City,16,1,929,11,5,938,13,22,1.00,sportmonks,single_club_apps_only
+islam slimani|dz alg|1988,Islam Slimani,Islam Slimani,Islam Slimani,ALG,2017/18,Premier League,Newcastle United,4,,130,1,3,4833,6397,20,0.70,sportmonks,multi_club_split
+islam slimani|dz alg|1988,Islam Slimani,Islam Slimani,Islam Slimani,ALG,2017/18,Premier League,Leicester City,12,1,241,2,10,4833,6397,42,0.70,sportmonks,multi_club_split
+robert huth|de ger|1985,Robert Huth,Robert Huth,Robert Huth,GER,2014/15,Premier League,Stoke City,1,,3,,,238,12,26,0.60,sportmonks,multi_club_split
+robert huth|de ger|1985,Robert Huth,Robert Huth,Robert Huth,GER,2014/15,Premier League,Leicester City,14,1,1180,14,0,238,12,42,0.60,sportmonks,multi_club_split
+daniel sturridge|eng eng|1990,Daniel Sturridge,Daniel Sturridge,Daniel Sturridge,ENG,2017/18,Premier League,Liverpool,9,2,431,5,4,622,6397,8,0.90,sportmonks,multi_club_split
+daniel sturridge|eng eng|1990,Daniel Sturridge,Daniel Sturridge,Daniel Sturridge,ENG,2017/18,Premier League,West Bromwich Albion,6,,116,2,4,622,6397,10,0.90,sportmonks,multi_club_split
+danny simpson|eng eng|1987,Danny Simpson,Danny Simpson,Danny Simpson,ENG,2014/15,Premier League,Leicester City,14,,1185,13,1,1027,12,42,1.00,sportmonks,multi_club_split
+danny simpson|eng eng|1987,Danny Simpson,Danny Simpson,Danny Simpson,ENG,2014/15,Premier League,Queens Park Rangers,1,,68,1,0,1027,12,47,1.00,sportmonks,multi_club_split
+mohamed diama©|sn sen|1987,Mohamed DiamÃ©,Mohamed Diame,Mohamed Diamé,SEN,2014/15,Premier League,West Ham United,3,,54,,,493,12,1,0.64,sportmonks,multi_club_split
+mohamed diama©|sn sen|1987,Mohamed DiamÃ©,Mohamed Diame,Mohamed Diamé,SEN,2014/15,Premier League,Hull City,12,4,879,10,2,493,12,22,0.64,sportmonks,multi_club_split
+kyle naughton|eng eng|1989,Kyle Naughton,Kyle Naughton,Kyle Naughton,ENG,2014/15,Premier League,Tottenham Hotspur,5,,326,5,0,1194,12,6,0.90,sportmonks,multi_club_split
+kyle naughton|eng eng|1989,Kyle Naughton,Kyle Naughton,Kyle Naughton,ENG,2014/15,Premier League,Swansea City,10,,858,10,0,1194,12,30,0.90,sportmonks,multi_club_split
+yannick bolasie|cd cod|1989,Yannick Bolasie,Yannick Bolasie,Yannick Bolasie,COD,2016/17,Premier League,Everton,13,1,1028,12,1,1123,13,13,0.70,sportmonks,multi_club_split
+yannick bolasie|cd cod|1989,Yannick Bolasie,Yannick Bolasie,Yannick Bolasie,COD,2016/17,Premier League,Crystal Palace,1,,24,,,1123,13,51,0.70,sportmonks,multi_club_split
+patrick bamford|eng eng|1994,Patrick Bamford,Patrick Bamford,Patrick Bamford,ENG,2016/17,Premier League,Middlesbrough,8,1,281,2,6,1175,13,7,0.90,sportmonks,multi_club_split
+patrick bamford|eng eng|1994,Patrick Bamford,Patrick Bamford,Patrick Bamford,ENG,2016/17,Premier League,Burnley,6,,34,,,1175,13,27,0.90,sportmonks,multi_club_split
+leonardo ulloa|ar arg|1986,Leonardo Ulloa,Leonardo Ulloa,Leonardo Ulloa,ARG,2017/18,Premier League,Leicester City,4,,19,,,910,6397,42,1.00,sportmonks,multi_club_split
+leonardo ulloa|ar arg|1986,Leonardo Ulloa,Leonardo Ulloa,Leonardo Ulloa,ARG,2017/18,Premier League,Brighton & Hove Albion,10,1,262,2,8,910,6397,78,1.00,sportmonks,multi_club_split
+yaya sanogo|fr fra|1993,Yaya Sanogo,Yaya Sanogo,Yaya Sanogo,FRA,2014/15,Premier League,Arsenal,3,,139,2,1,936,12,19,1.00,sportmonks,multi_club_split
+yaya sanogo|fr fra|1993,Yaya Sanogo,Yaya Sanogo,Yaya Sanogo,FRA,2014/15,Premier League,Crystal Palace,10,,316,3,7,936,12,51,1.00,sportmonks,multi_club_split
+kenedy|br bra|1996,Kenedy,Kenedy,Kenedy,BRA,2017/18,Premier League,Newcastle United,13,2,1030,13,0,4265,6397,20,1.00,sportmonks,single_club_apps_only
+nathan dyer|eng eng|1988,Nathan Dyer,Nathan Dyer,Nathan Dyer,ENG,2015/16,Premier League,Swansea City,1,,18,,,818,10,30,0.90,sportmonks,multi_club_split
+nathan dyer|eng eng|1988,Nathan Dyer,Nathan Dyer,Nathan Dyer,ENG,2015/16,Premier League,Leicester City,12,1,210,,,818,10,42,0.90,sportmonks,multi_club_split
+patrick bamford|eng eng|1994,Patrick Bamford,Patrick Bamford,Patrick Bamford,ENG,2015/16,Premier League,Norwich City,7,,236,2,5,1175,10,33,0.90,sportmonks,multi_club_split
+patrick bamford|eng eng|1994,Patrick Bamford,Patrick Bamford,Patrick Bamford,ENG,2015/16,Premier League,Crystal Palace,6,,118,,,1175,10,51,0.90,sportmonks,multi_club_split
+kyle walker-peters|eng eng|1997,Kyle Walker-Peters,Kyle Walker-Peters,Kyle Walker-Peters,ENG,2019/20,Premier League,Tottenham Hotspur,3,,242,3,0,4659,16036,6,1.00,sportmonks,multi_club_split
+kyle walker-peters|eng eng|1997,Kyle Walker-Peters,Kyle Walker-Peters,Kyle Walker-Peters,ENG,2019/20,Premier League,Southampton,10,,702,7,3,4659,16036,65,1.00,sportmonks,multi_club_split
+nathan aka©|nl ned|1995,Nathan AkÃ©,Nathan Ake,Nathan Aké,NED,2016/17,Premier League,Chelsea,2,,98,1,1,1869,13,18,0.63,sportmonks,multi_club_split
+nathan aka©|nl ned|1995,Nathan AkÃ©,Nathan Ake,Nathan Aké,NED,2016/17,Premier League,AFC Bournemouth,10,3,733,8,2,1869,13,52,0.63,sportmonks,multi_club_split
+scott sinclair|eng eng|1989,Scott Sinclair,Scott Sinclair,Scott Sinclair,ENG,2014/15,Premier League,Manchester City,2,,3,,,180,12,9,1.00,sportmonks,multi_club_split
+scott sinclair|eng eng|1989,Scott Sinclair,Scott Sinclair,Scott Sinclair,ENG,2014/15,Premier League,Aston Villa,9,1,461,5,4,180,12,15,1.00,sportmonks,multi_club_split
+mauro za¡rate|ar arg|1987,Mauro ZÃ¡rate,Mauro Zarate,Mauro Zárate,ARG,2014/15,Premier League,West Ham United,7,2,415,5,2,1286,12,1,0.94,sportmonks,multi_club_split
+mauro za¡rate|ar arg|1987,Mauro ZÃ¡rate,Mauro Zarate,Mauro Zárate,ARG,2014/15,Premier League,Queens Park Rangers,4,,71,,,1286,12,47,0.94,sportmonks,multi_club_split
+eliaquim mangala|fr fra|1991,Eliaquim Mangala,Eliaquim Mangala,Eliaquim Mangala,FRA,2017/18,Premier League,Manchester City,9,,483,4,5,1480,6397,9,1.00,sportmonks,multi_club_split
+eliaquim mangala|fr fra|1991,Eliaquim Mangala,Eliaquim Mangala,Eliaquim Mangala,FRA,2017/18,Premier League,Everton,2,,135,2,0,1480,6397,13,1.00,sportmonks,multi_club_split
+jason puncheon|eng eng|1986,Jason Puncheon,Jason Puncheon,Jason Puncheon,ENG,2018/19,Premier League,Crystal Palace,5,,11,,,790,12962,51,1.00,sportmonks,multi_club_split
+jason puncheon|eng eng|1986,Jason Puncheon,Jason Puncheon,Jason Puncheon,ENG,2018/19,Premier League,Huddersfield Town,5,,383,5,0,790,12962,251,1.00,sportmonks,multi_club_split
+cenk tosun|tr tur|1991,Cenk Tosun,Cenk Tosun,Cenk Tosun,TUR,2019/20,Premier League,Everton,5,1,290,2,3,45863,16036,13,0.70,sportmonks,multi_club_split
+cenk tosun|tr tur|1991,Cenk Tosun,Cenk Tosun,Cenk Tosun,TUR,2019/20,Premier League,Crystal Palace,5,1,176,2,3,45863,16036,51,0.70,sportmonks,multi_club_split
+georges-ka©vin n'koudou|cm cmr|1995,Georges-KÃ©vin N'Koudou,Georges-Kevin N'Koudou,Georges-Kévin N'Koudou,CMR,2017/18,Premier League,Tottenham Hotspur,1,,1,,,4913,6397,6,0.97,sportmonks,multi_club_split
+georges-ka©vin n'koudou|cm cmr|1995,Georges-KÃ©vin N'Koudou,Georges-Kevin N'Koudou,Georges-Kévin N'Koudou,CMR,2017/18,Premier League,Burnley,8,,224,2,6,4913,6397,27,0.97,sportmonks,multi_club_split
+tariq lamptey|gh gha|2001,Tariq Lamptey,Tariq Lamptey,Tariq Lamptey,GHA,2019/20,Premier League,Chelsea,1,,31,,,9308200,16036,18,0.90,sportmonks,multi_club_split
+tariq lamptey|gh gha|2001,Tariq Lamptey,Tariq Lamptey,Tariq Lamptey,GHA,2019/20,Premier League,Brighton & Hove Albion,8,,591,7,1,9308200,16036,78,0.90,sportmonks,multi_club_split
+steven caulker|sl sle|1992,Steven Caulker,Steven Caulker,Steven Caulker,SLE,2015/16,Premier League,Liverpool,3,,4,,,1056,10,8,0.90,sportmonks,multi_club_split
+steven caulker|sl sle|1992,Steven Caulker,Steven Caulker,Steven Caulker,SLE,2015/16,Premier League,Southampton,3,,145,1,2,1056,10,65,0.90,sportmonks,multi_club_split
+mark schwarzer|au aus|1973,Mark Schwarzer,Mark Schwarzer,Mark Schwarzer,AUS,2014/15,Premier League,Leicester City,6,,540,6,0,231,12,42,0.90,sportmonks,single_club_apps_only
+danny drinkwater|eng eng|1990,Danny Drinkwater,Danny Drinkwater,Danny Drinkwater,ENG,2019/20,Premier League,Aston Villa,4,,263,4,0,921,16036,15,1.00,sportmonks,multi_club_split
+danny drinkwater|eng eng|1990,Danny Drinkwater,Danny Drinkwater,Danny Drinkwater,ENG,2019/20,Premier League,Burnley,1,,59,1,0,921,16036,27,1.00,sportmonks,multi_club_split
+marc wilson|ie irl|1988,Marc Wilson,Marc Wilson,Marc Wilson,IRL,2016/17,Premier League,West Bromwich Albion,4,,256,3,1,400,13,10,0.60,sportmonks,single_club_apps_only
+brendan galloway|zw zim|1996,Brendan Galloway,Brendan Galloway,Brendan Galloway,ZIM,2016/17,Premier League,West Bromwich Albion,3,,248,3,0,1254,13,10,0.70,sportmonks,single_club_apps_only
+alex pritchard|eng eng|1993,Alex Pritchard,Alex Pritchard,Alex Pritchard,ENG,2015/16,Premier League,Tottenham Hotspur,1,,5,,,2829,10,6,1.00,sportmonks,multi_club_split
+alex pritchard|eng eng|1993,Alex Pritchard,Alex Pritchard,Alex Pritchard,ENG,2015/16,Premier League,West Bromwich Albion,2,,61,,,2829,10,10,1.00,sportmonks,multi_club_split
+kenedy|br bra|1996,Kenedy,Kenedy,Kenedy,BRA,2016/17,Premier League,Chelsea,1,,75,1,0,4265,13,18,1.00,sportmonks,multi_club_split
+kenedy|br bra|1996,Kenedy,Kenedy,Kenedy,BRA,2016/17,Premier League,Watford,1,,15,,,4265,13,25,1.00,sportmonks,multi_club_split
+josa© fonte|pt por|1984,JosÃ© Fonte,Jose Fonte,José Fonte,POR,2016/17,Premier League,West Ham United,16,,1405,16,0,1166,13,1,0.53,sportmonks,multi_club_split
+josa© fonte|pt por|1984,JosÃ© Fonte,Jose Fonte,José Fonte,POR,2016/17,Premier League,Southampton,17,,1530,17,0,1166,13,65,0.53,sportmonks,multi_club_split
+patrick van aanholt|nl ned|1991,Patrick van Aanholt,Patrick van Aanholt,Patrick van Aanholt,NED,2016/17,Premier League,Sunderland,21,3,1784,20,1,712,13,3,0.60,sportmonks,multi_club_split
+patrick van aanholt|nl ned|1991,Patrick van Aanholt,Patrick van Aanholt,Patrick van Aanholt,NED,2016/17,Premier League,Crystal Palace,11,2,714,8,3,712,13,51,0.60,sportmonks,multi_club_split
+joleon lescott|eng eng|1983,Joleon Lescott,Joleon Lescott,Joleon Lescott,ENG,2015/16,Premier League,West Bromwich Albion,2,,180,2,0,302,10,10,0.90,sportmonks,multi_club_split
+joleon lescott|eng eng|1983,Joleon Lescott,Joleon Lescott,Joleon Lescott,ENG,2015/16,Premier League,Aston Villa,30,1,2631,30,0,302,10,15,0.90,sportmonks,multi_club_split
+tom cleverley|eng eng|1990,Tom Cleverley,Tom Cleverley,Tom Cleverley,ENG,2014/15,Premier League,Manchester United,1,,90,1,0,1272,12,14,0.90,sportmonks,multi_club_split
+tom cleverley|eng eng|1990,Tom Cleverley,Tom Cleverley,Tom Cleverley,ENG,2014/15,Premier League,Aston Villa,31,3,2520,31,0,1272,12,15,0.90,sportmonks,multi_club_split
+allan nyom|cm cmr|1988,Allan Nyom,Allan Nyom,Allan Nyom,CMR,2016/17,Premier League,West Bromwich Albion,32,,2638,29,3,1281,13,10,1.00,sportmonks,single_club_apps_only
+alexis sa¡nchez|cl chi|1989,Alexis SÃ¡nchez,Alexis Sanchez,Alexis Sánchez,CHI,2017/18,Premier League,Manchester United,12,2,1048,12,0,1300,6397,14,0.55,sportmonks,multi_club_split
+alexis sa¡nchez|cl chi|1989,Alexis SÃ¡nchez,Alexis Sanchez,Alexis Sánchez,CHI,2017/18,Premier League,Arsenal,19,7,1507,17,2,1300,6397,19,0.55,sportmonks,multi_club_split
+jonjo shelvey|eng eng|1992,Jonjo Shelvey,Jonjo Shelvey,Jonjo Shelvey,ENG,2015/16,Premier League,Newcastle United,15,,1048,11,4,819,10,20,1.00,sportmonks,multi_club_split
+jonjo shelvey|eng eng|1992,Jonjo Shelvey,Jonjo Shelvey,Jonjo Shelvey,ENG,2015/16,Premier League,Swansea City,16,1,1221,14,2,819,10,30,1.00,sportmonks,multi_club_split
+andra© ayew|gh gha|1990,AndrÃ© Ayew,Andre Ayew,André Ayew,GHA,2017/18,Premier League,West Ham United,18,3,891,9,9,1309,6397,1,0.83,sportmonks,multi_club_split
+andra© ayew|gh gha|1990,AndrÃ© Ayew,Andre Ayew,André Ayew,GHA,2017/18,Premier League,Swansea City,12,,951,10,2,1309,6397,30,0.83,sportmonks,multi_club_split
+wilfried bony|ci civ|1989,Wilfried Bony,Wilfried Bony,Wilfried Bony,CIV,2014/15,Premier League,Manchester City,10,2,296,2,8,828,12,9,0.90,sportmonks,multi_club_split
+wilfried bony|ci civ|1989,Wilfried Bony,Wilfried Bony,Wilfried Bony,CIV,2014/15,Premier League,Swansea City,20,9,1302,16,4,828,12,30,0.90,sportmonks,multi_club_split
+olivier giroud|fr fra|1987,Olivier Giroud,Olivier Giroud,Olivier Giroud,FRA,2017/18,Premier League,Chelsea,13,3,610,6,7,798,6397,18,0.90,sportmonks,multi_club_split
+olivier giroud|fr fra|1987,Olivier Giroud,Olivier Giroud,Olivier Giroud,FRA,2017/18,Premier League,Arsenal,16,4,373,1,15,798,6397,19,0.90,sportmonks,multi_club_split
+aaron lennon|eng eng|1987,Aaron Lennon,Aaron Lennon,Aaron Lennon,ENG,2017/18,Premier League,Everton,15,,794,9,6,244,6397,13,1.00,sportmonks,multi_club_split
+aaron lennon|eng eng|1987,Aaron Lennon,Aaron Lennon,Aaron Lennon,ENG,2017/18,Premier League,Burnley,14,,1124,13,1,244,6397,27,1.00,sportmonks,multi_club_split
+jack wilshere|eng eng|1992,Jack Wilshere,Jack Wilshere,Jack Wilshere,ENG,2016/17,Premier League,Arsenal,2,,37,,,717,13,19,0.91,sportmonks,multi_club_split
+jack wilshere|eng eng|1992,Jack Wilshere,Jack Wilshere,Jack Wilshere,ENG,2016/17,Premier League,AFC Bournemouth,27,,1912,22,5,717,13,52,0.91,sportmonks,multi_club_split
+michael dawson|eng eng|1984,Michael Dawson,Michael Dawson,Michael Dawson,ENG,2014/15,Premier League,Hull City,28,1,2434,28,0,259,12,22,0.90,sportmonks,single_club_apps_only
+tom cleverley|eng eng|1990,Tom Cleverley,Tom Cleverley,Tom Cleverley,ENG,2016/17,Premier League,Everton,10,,403,4,6,1272,13,13,0.90,sportmonks,multi_club_split
+tom cleverley|eng eng|1990,Tom Cleverley,Tom Cleverley,Tom Cleverley,ENG,2016/17,Premier League,Watford,17,,1441,16,1,1272,13,25,0.90,sportmonks,multi_club_split
+jack cork|eng eng|1989,Jack Cork,Jack Cork,Jack Cork,ENG,2014/15,Premier League,Swansea City,15,1,1325,15,0,1156,12,30,1.00,sportmonks,multi_club_split
+jack cork|eng eng|1989,Jack Cork,Jack Cork,Jack Cork,ENG,2014/15,Premier League,Southampton,12,2,476,5,7,1156,12,65,1.00,sportmonks,multi_club_split
+danny welbeck|eng eng|1991,Danny Welbeck,Danny Welbeck,Danny Welbeck,ENG,2014/15,Premier League,Manchester United,2,,44,,,627,12,14,0.90,sportmonks,multi_club_split
+danny welbeck|eng eng|1991,Danny Welbeck,Danny Welbeck,Danny Welbeck,ENG,2014/15,Premier League,Arsenal,25,4,1665,18,7,627,12,19,0.90,sportmonks,multi_club_split
+darren fletcher|sct sco|1984,Darren Fletcher,Darren Fletcher,Darren Fletcher,SCO,2014/15,Premier League,West Bromwich Albion,15,1,1350,15,0,604,12,10,0.70,sportmonks,multi_club_split
+darren fletcher|sct sco|1984,Darren Fletcher,Darren Fletcher,Darren Fletcher,SCO,2014/15,Premier League,Manchester United,11,,364,4,7,604,12,14,0.70,sportmonks,multi_club_split
+henrikh mkhitaryan|am arm|1989,Henrikh Mkhitaryan,Henrikh Mkhitaryan,Henrikh Mkhitaryan,ARM,2017/18,Premier League,Manchester United,15,1,929,11,4,1835,6397,14,0.70,sportmonks,multi_club_split
+henrikh mkhitaryan|am arm|1989,Henrikh Mkhitaryan,Henrikh Mkhitaryan,Henrikh Mkhitaryan,ARM,2017/18,Premier League,Arsenal,11,2,796,9,2,1835,6397,19,0.70,sportmonks,multi_club_split
+virgil van dijk|nl ned|1991,Virgil van Dijk,Virgil van Dijk,Virgil van Dijk,NED,2017/18,Premier League,Liverpool,14,,1260,14,0,1743,6397,8,0.70,sportmonks,multi_club_split
+virgil van dijk|nl ned|1991,Virgil van Dijk,Virgil van Dijk,Virgil van Dijk,NED,2017/18,Premier League,Southampton,12,,993,11,1,1743,6397,65,0.70,sportmonks,multi_club_split
+calum chambers|eng eng|1995,Calum Chambers,Calum Chambers,Calum Chambers,ENG,2016/17,Premier League,Middlesbrough,24,1,2160,24,0,1177,13,7,1.00,sportmonks,multi_club_split
+calum chambers|eng eng|1995,Calum Chambers,Calum Chambers,Calum Chambers,ENG,2016/17,Premier League,Arsenal,1,1,90,1,0,1177,13,19,1.00,sportmonks,multi_club_split
+enner valencia|ec ecu|1990,Enner Valencia,Enner Valencia,Enner Valencia,ECU,2016/17,Premier League,West Ham United,3,,213,3,0,1244,13,1,0.90,sportmonks,multi_club_split
+enner valencia|ec ecu|1990,Enner Valencia,Enner Valencia,Enner Valencia,ECU,2016/17,Premier League,Everton,21,3,706,5,16,1244,13,13,0.90,sportmonks,multi_club_split
+aaron lennon|eng eng|1987,Aaron Lennon,Aaron Lennon,Aaron Lennon,ENG,2014/15,Premier League,Tottenham Hotspur,9,,276,3,6,244,12,6,1.00,sportmonks,multi_club_split
+aaron lennon|eng eng|1987,Aaron Lennon,Aaron Lennon,Aaron Lennon,ENG,2014/15,Premier League,Everton,14,2,1071,12,2,244,12,13,1.00,sportmonks,multi_club_split
+youna¨s kaboul|fr fra|1986,YounÃ¨s Kaboul,Younes Kaboul,Younès Kaboul,FRA,2016/17,Premier League,Sunderland,1,,90,1,0,73,13,3,0.94,sportmonks,multi_club_split
+youna¨s kaboul|fr fra|1986,YounÃ¨s Kaboul,Younes Kaboul,Younès Kaboul,FRA,2016/17,Premier League,Watford,22,2,1825,22,0,73,13,25,0.94,sportmonks,multi_club_split
+steven naismith|sct sco|1987,Steven Naismith,Steven Naismith,Steven Naismith,SCO,2015/16,Premier League,Everton,10,3,451,4,6,912,10,13,0.60,sportmonks,multi_club_split
+steven naismith|sct sco|1987,Steven Naismith,Steven Naismith,Steven Naismith,SCO,2015/16,Premier League,Norwich City,13,1,880,11,2,912,10,33,0.60,sportmonks,multi_club_split
+danny rose|eng eng|1990,Danny Rose,Danny Rose,Danny Rose,ENG,2019/20,Premier League,Tottenham Hotspur,12,,894,10,2,1271,16036,6,1.00,sportmonks,multi_club_split
+danny rose|eng eng|1990,Danny Rose,Danny Rose,Danny Rose,ENG,2019/20,Premier League,Newcastle United,11,,865,10,1,1271,16036,20,1.00,sportmonks,multi_club_split
+michael keane|eng eng|1993,Michael Keane,Michael Keane,Michael Keane,ENG,2014/15,Premier League,Manchester United,1,,46,,,881,12,14,1.00,sportmonks,multi_club_split
+michael keane|eng eng|1993,Michael Keane,Michael Keane,Michael Keane,ENG,2014/15,Premier League,Burnley,21,,1594,17,4,881,12,27,1.00,sportmonks,multi_club_split
+andy king|wls wal|1989,Andy King,Andy King,Andy King,WAL,2017/18,Premier League,Swansea City,11,2,719,9,2,956,6397,30,0.60,sportmonks,multi_club_split
+andy king|wls wal|1989,Andy King,Andy King,Andy King,WAL,2017/18,Premier League,Leicester City,11,1,534,5,6,956,6397,42,0.60,sportmonks,multi_club_split
+lewis grabban|eng eng|1988,Lewis Grabban,Lewis Grabban,Lewis Grabban,ENG,2015/16,Premier League,Norwich City,6,1,250,3,3,1118,10,33,1.00,sportmonks,multi_club_split
+lewis grabban|eng eng|1988,Lewis Grabban,Lewis Grabban,Lewis Grabban,ENG,2015/16,Premier League,AFC Bournemouth,15,,568,4,11,1118,10,52,1.00,sportmonks,multi_club_split
+loa¯c ra©my|fr fra|1987,LoÃ¯c RÃ©my,Loic Remy,Loïc Rémy,FRA,2014/15,Premier League,Chelsea,19,7,665,6,13,1063,12,18,0.85,sportmonks,multi_club_split
+loa¯c ra©my|fr fra|1987,LoÃ¯c RÃ©my,Loic Remy,Loïc Rémy,FRA,2014/15,Premier League,Queens Park Rangers,2,,180,2,0,1063,12,47,0.85,sportmonks,multi_club_split
+ca©dric soares|pt por|1992,CÃ©dric Soares,Cedric Soares,Cédric Soares,POR,2019/20,Premier League,Arsenal,5,1,250,3,2,1362,16036,19,0.54,sportmonks,multi_club_split
+ca©dric soares|pt por|1992,CÃ©dric Soares,Cedric Soares,Cédric Soares,POR,2019/20,Premier League,Southampton,16,,1310,16,0,1362,16036,65,0.54,sportmonks,multi_club_split
+victor moses|ng nga|1991,Victor Moses,Victor Moses,Victor Moses,NGA,2015/16,Premier League,West Ham United,21,1,982,13,8,496,10,1,0.90,sportmonks,single_club_apps_only
+glenn murray|eng eng|1984,Glenn Murray,Glenn Murray,Glenn Murray,ENG,2015/16,Premier League,Crystal Palace,2,,128,2,0,1129,10,51,0.90,sportmonks,multi_club_split
+glenn murray|eng eng|1984,Glenn Murray,Glenn Murray,Glenn Murray,ENG,2015/16,Premier League,AFC Bournemouth,19,3,669,6,13,1129,10,52,0.90,sportmonks,multi_club_split
+theo walcott|eng eng|1989,Theo Walcott,Theo Walcott,Theo Walcott,ENG,2017/18,Premier League,Everton,14,3,1153,13,1,53,6397,13,1.00,sportmonks,multi_club_split
+theo walcott|eng eng|1989,Theo Walcott,Theo Walcott,Theo Walcott,ENG,2017/18,Premier League,Arsenal,6,,63,,,53,6397,19,1.00,sportmonks,multi_club_split
+jeffrey schlupp|gh gha|1993,Jeffrey Schlupp,Jeffrey Schlupp,Jeffrey Schlupp,GHA,2016/17,Premier League,Leicester City,4,,139,1,3,927,13,42,0.90,sportmonks,multi_club_split
+jeffrey schlupp|gh gha|1993,Jeffrey Schlupp,Jeffrey Schlupp,Jeffrey Schlupp,GHA,2016/17,Premier League,Crystal Palace,15,,997,11,4,927,13,51,0.90,sportmonks,multi_club_split
+nathaniel clyne|eng eng|1991,Nathaniel Clyne,Nathaniel Clyne,Nathaniel Clyne,ENG,2018/19,Premier League,Liverpool,4,,108,1,3,1202,12962,8,1.00,sportmonks,multi_club_split
+nathaniel clyne|eng eng|1991,Nathaniel Clyne,Nathaniel Clyne,Nathaniel Clyne,ENG,2018/19,Premier League,AFC Bournemouth,14,,1146,13,1,1202,12962,52,1.00,sportmonks,multi_club_split
+tom carroll|eng eng|1992,Tom Carroll,Tom Carroll,Tom Carroll,ENG,2016/17,Premier League,Tottenham Hotspur,1,,1,,,1021,13,6,1.00,sportmonks,multi_club_split
+tom carroll|eng eng|1992,Tom Carroll,Tom Carroll,Tom Carroll,ENG,2016/17,Premier League,Swansea City,17,1,1390,16,1,1021,13,30,1.00,sportmonks,multi_club_split
+oumar niasse|sn sen|1990,Oumar Niasse,Oumar Niasse,Oumar Niasse,SEN,2018/19,Premier League,Everton,5,,58,,,4607,12962,13,0.70,sportmonks,multi_club_split
+oumar niasse|sn sen|1990,Oumar Niasse,Oumar Niasse,Oumar Niasse,SEN,2018/19,Premier League,Cardiff City,13,,940,12,1,4607,12962,69,0.70,sportmonks,multi_club_split
+jake livermore|eng eng|1990,Jake Livermore,Jake Livermore,Jake Livermore,ENG,2016/17,Premier League,West Bromwich Albion,16,,1303,15,1,1083,13,10,0.90,sportmonks,multi_club_split
+jake livermore|eng eng|1990,Jake Livermore,Jake Livermore,Jake Livermore,ENG,2016/17,Premier League,Hull City,21,1,1723,20,1,1083,13,22,0.90,sportmonks,multi_club_split
+george boyd|sct sco|1986,George Boyd,George Boyd,George Boyd,SCO,2014/15,Premier League,Hull City,1,,9,,,1378,12,22,0.60,sportmonks,multi_club_split
+george boyd|sct sco|1986,George Boyd,George Boyd,George Boyd,SCO,2014/15,Premier League,Burnley,35,5,3014,35,0,1378,12,27,0.60,sportmonks,multi_club_split
+danny ings|eng eng|1992,Danny Ings,Danny Ings,Danny Ings,ENG,2022/23,Premier League,West Ham United,17,2,771,7,10,1450,19734,1,1.00,sportmonks,multi_club_split
+danny ings|eng eng|1992,Danny Ings,Danny Ings,Danny Ings,ENG,2022/23,Premier League,Aston Villa,18,6,819,8,10,1450,19734,15,1.00,sportmonks,multi_club_split
+brennan johnson|wls wal|2001,Brennan Johnson,Brennan Johnson,Brennan Johnson,WAL,2023/24,Premier League,Tottenham Hotspur,32,5,2091,23,9,25930790,21646,6,0.70,sportmonks,multi_club_split
+brennan johnson|wls wal|2001,Brennan Johnson,Brennan Johnson,Brennan Johnson,WAL,2023/24,Premier League,Nottingham Forest,3,,239,3,0,25930790,21646,63,0.70,sportmonks,multi_club_split
+chris wood|nz nzl|1992,Chris Wood,Chris Wood,Chris Wood,NZL,2021/22,Premier League,Newcastle United,17,2,1328,15,2,914,18378,20,0.90,sportmonks,multi_club_split
+chris wood|nz nzl|1992,Chris Wood,Chris Wood,Chris Wood,NZL,2021/22,Premier League,Burnley,17,3,1378,17,0,914,18378,27,0.90,sportmonks,multi_club_split
+robert snodgrass|sct sco|1988,Robert Snodgrass,Robert Snodgrass,Robert Snodgrass,SCO,2020/21,Premier League,West Ham United,3,,4,,,870,17420,1,0.60,sportmonks,multi_club_split
+robert snodgrass|sct sco|1988,Robert Snodgrass,Robert Snodgrass,Robert Snodgrass,SCO,2020/21,Premier League,West Bromwich Albion,8,,527,6,2,870,17420,10,0.60,sportmonks,multi_club_split
+willy boly|ci civ|1991,Willy Boly,Willy Boly,Willy Boly,CIV,2022/23,Premier League,Nottingham Forest,11,,687,9,2,95348,19734,63,0.70,sportmonks,single_club_apps_only
+anwar el ghazi|nl ned|1995,Anwar El Ghazi,Anwar El Ghazi,Anwar El Ghazi,NED,2021/22,Premier League,Everton,2,,11,,,25354,18378,13,0.70,sportmonks,multi_club_split
+anwar el ghazi|nl ned|1995,Anwar El Ghazi,Anwar El Ghazi,Anwar El Ghazi,NED,2021/22,Premier League,Aston Villa,9,1,383,4,5,25354,18378,15,0.70,sportmonks,multi_club_split
+ca©dric soares|pt por|1992,CÃ©dric Soares,Cedric Soares,Cédric Soares,POR,2022/23,Premier League,Fulham,6,,196,2,4,1362,19734,11,0.54,sportmonks,multi_club_split
+ca©dric soares|pt por|1992,CÃ©dric Soares,Cedric Soares,Cédric Soares,POR,2022/23,Premier League,Arsenal,2,,28,,,1362,19734,19,0.54,sportmonks,multi_club_split
+dale stephens|eng eng|1989,Dale Stephens,Dale Stephens,Dale Stephens,ENG,2020/21,Premier League,Burnley,7,,259,3,4,2723,17420,27,1.00,sportmonks,single_club_apps_only
+sam johnstone|eng eng|1993,Sam Johnstone,Sam Johnstone,Sam Johnstone,ENG,2024/25,Premier League,Wolverhampton Wanderers,7,,630,7,0,1008,23614,29,1.00,sportmonks,single_club_apps_only
+odsonne adouard|fr fra|1998,Odsonne Ãdouard,Odsonne Edouard,Odsonne Édouard,FRA,2024/25,Premier League,Leicester City,4,,26,,,96792,23614,42,0.95,sportmonks,multi_club_split
+odsonne adouard|fr fra|1998,Odsonne Ãdouard,Odsonne Edouard,Odsonne Édouard,FRA,2024/25,Premier League,Crystal Palace,2,,115,1,1,96792,23614,51,0.95,sportmonks,multi_club_split
+ayden heaven|eng eng|2007,Ayden Heaven,Ayden Heaven,Ayden Heaven,ENG,2024/25,Premier League,Manchester United,4,,170,2,2,37676786,23614,14,0.90,sportmonks,single_club_apps_only
+martin daºbravka|sk svk|1989,Martin DÃºbravka,Martin Dubravka,Martin Dúbravka,SVK,2022/23,Premier League,Newcastle United,2,,156,1,1,80889,19734,20,0.65,sportmonks,single_club_apps_only
+neto|br bra|1989,Neto,Neto,Neto,BRA,2024/25,Premier League,AFC Bournemouth,2,,180,2,0,128798,23614,52,1.00,sportmonks,single_club_apps_only
+andrey santos|br bra|2004,Andrey Santos,Andrey Santos,Andrey Santos,BRA,2023/24,Premier League,Nottingham Forest,1,,7,,,37562129,21646,63,1.00,sportmonks,single_club_apps_only
+daniel james|wls wal|1998,Daniel James,Daniel James,Daniel James,WAL,2021/22,Premier League,Manchester United,2,,128,2,0,5149,18378,14,0.60,sportmonks,multi_club_split
+daniel james|wls wal|1998,Daniel James,Daniel James,Daniel James,WAL,2021/22,Premier League,Leeds United,32,4,2374,29,3,5149,18378,71,0.60,sportmonks,multi_club_split
+cole palmer|eng eng|2002,Cole Palmer,Cole Palmer,Cole Palmer,ENG,2023/24,Premier League,Manchester City,1,,10,,,28912747,21646,9,1.00,sportmonks,multi_club_split
+cole palmer|eng eng|2002,Cole Palmer,Cole Palmer,Cole Palmer,ENG,2023/24,Premier League,Chelsea,33,22,2618,29,4,28912747,21646,18,1.00,sportmonks,multi_club_split
+matt targett|eng eng|1996,Matt Targett,Matt Targett,Matt Targett,ENG,2021/22,Premier League,Aston Villa,17,1,1434,17,0,1387,18378,15,0.90,sportmonks,multi_club_split
+matt targett|eng eng|1996,Matt Targett,Matt Targett,Matt Targett,ENG,2021/22,Premier League,Newcastle United,16,,1440,16,0,1387,18378,20,0.90,sportmonks,multi_club_split
+anthony gordon|eng eng|2001,Anthony Gordon,Anthony Gordon,Anthony Gordon,ENG,2022/23,Premier League,Everton,16,3,1096,12,4,9611543,19734,13,1.00,sportmonks,multi_club_split
+anthony gordon|eng eng|2001,Anthony Gordon,Anthony Gordon,Anthony Gordon,ENG,2022/23,Premier League,Newcastle United,16,1,481,4,12,9611543,19734,20,1.00,sportmonks,multi_club_split
+jorginho|it ita|1992,Jorginho,Jorginho,Jorginho,ITA,2022/23,Premier League,Chelsea,18,2,1282,15,3,129511,19734,18,0.90,sportmonks,multi_club_split
+jorginho|it ita|1992,Jorginho,Jorginho,Jorginho,ITA,2022/23,Premier League,Arsenal,14,,853,9,5,129511,19734,19,0.90,sportmonks,multi_club_split
+alex iwobi|ng nga|1996,Alex Iwobi,Alex Iwobi,Alex Iwobi,NGA,2023/24,Premier League,Fulham,30,5,2202,25,5,1881,21646,11,1.00,sportmonks,multi_club_split
+alex iwobi|ng nga|1996,Alex Iwobi,Alex Iwobi,Alex Iwobi,NGA,2023/24,Premier League,Everton,2,,140,2,0,1881,21646,13,1.00,sportmonks,multi_club_split
+neal maupay|fr fra|1997,Neal Maupay,Neal Maupay,Neal Maupay,FRA,2023/24,Premier League,Everton,2,,112,1,1,95776,21646,13,0.90,sportmonks,multi_club_split
+neal maupay|fr fra|1997,Neal Maupay,Neal Maupay,Neal Maupay,FRA,2023/24,Premier League,Brentford,29,6,1341,13,16,95776,21646,236,0.90,sportmonks,multi_club_split
+james mcatee|eng eng|2003,James Mcatee,James Mcatee,James Mcatee,ENG,2023/24,Premier League,Manchester City,1,,1,,,28575676,21646,9,0.90,sportmonks,multi_club_split
+james mcatee|eng eng|2003,James Mcatee,James Mcatee,James Mcatee,ENG,2023/24,Premier League,Sheffield United,30,3,1838,20,10,28575676,21646,21,0.90,sportmonks,multi_club_split
+jordan ayew|gh gha|1992,Jordan Ayew,Jordan Ayew,Jordan Ayew,GHA,2024/25,Premier League,Leicester City,30,5,1658,19,11,1038,23614,42,0.90,sportmonks,multi_club_split
+jordan ayew|gh gha|1992,Jordan Ayew,Jordan Ayew,Jordan Ayew,GHA,2024/25,Premier League,Crystal Palace,1,,20,,,1038,23614,51,0.90,sportmonks,multi_club_split
+ruben loftus-cheek|eng eng|1996,Ruben Loftus-Cheek,Ruben Loftus-Cheek,Ruben Loftus-Cheek,ENG,2020/21,Premier League,Fulham,30,1,1912,21,9,1953,17420,11,1.00,sportmonks,multi_club_split
+ruben loftus-cheek|eng eng|1996,Ruben Loftus-Cheek,Ruben Loftus-Cheek,Ruben Loftus-Cheek,ENG,2020/21,Premier League,Chelsea,1,,61,1,0,1953,17420,18,1.00,sportmonks,multi_club_split
+cameron archer|eng eng|2001,Cameron Archer,Cameron Archer,Cameron Archer,ENG,2023/24,Premier League,Aston Villa,1,,15,,,28912777,21646,15,1.00,sportmonks,multi_club_split
+cameron archer|eng eng|2001,Cameron Archer,Cameron Archer,Cameron Archer,ENG,2023/24,Premier League,Sheffield United,29,4,1838,21,8,28912777,21646,21,1.00,sportmonks,multi_club_split
+aaron ramsdale|eng eng|1998,Aaron Ramsdale,Aaron Ramsdale,Aaron Ramsdale,ENG,2024/25,Premier League,Southampton,30,,2700,30,0,9438,23614,65,1.00,sportmonks,single_club_apps_only
+joachim andersen|dk den|1996,Joachim Andersen,Joachim Andersen,Joachim Andersen,DEN,2024/25,Premier League,Fulham,29,,2584,29,0,25284,23614,11,0.70,sportmonks,multi_club_split
+joachim andersen|dk den|1996,Joachim Andersen,Joachim Andersen,Joachim Andersen,DEN,2024/25,Premier League,Crystal Palace,1,,90,1,0,25284,23614,51,0.70,sportmonks,multi_club_split
+lucas digne|fr fra|1993,Lucas Digne,Lucas Digne,Lucas Digne,FRA,2021/22,Premier League,Everton,13,,1170,13,0,95368,18378,13,1.00,sportmonks,multi_club_split
+lucas digne|fr fra|1993,Lucas Digne,Lucas Digne,Lucas Digne,FRA,2021/22,Premier League,Aston Villa,16,,1272,16,0,95368,18378,15,1.00,sportmonks,multi_club_split
+eddie nketiah|eng eng|1999,Eddie Nketiah,Eddie Nketiah,Eddie Nketiah,ENG,2024/25,Premier League,Crystal Palace,29,3,1030,9,20,539961,23614,51,1.00,sportmonks,single_club_apps_only
+dan burn|eng eng|1992,Dan Burn,Dan Burn,Dan Burn,ENG,2021/22,Premier League,Newcastle United,16,,1440,16,0,2815,18378,20,1.00,sportmonks,multi_club_split
+dan burn|eng eng|1992,Dan Burn,Dan Burn,Dan Burn,ENG,2021/22,Premier League,Brighton & Hove Albion,13,1,1023,12,1,2815,18378,78,1.00,sportmonks,multi_club_split
+neal maupay|fr fra|1997,Neal Maupay,Neal Maupay,Neal Maupay,FRA,2022/23,Premier League,Everton,27,1,1114,11,16,95776,19734,13,0.90,sportmonks,single_club_apps_only
+ross barkley|eng eng|1994,Ross Barkley,Ross Barkley,Ross Barkley,ENG,2020/21,Premier League,Aston Villa,24,3,1537,18,6,968,17420,15,0.90,sportmonks,multi_club_split
+ross barkley|eng eng|1994,Ross Barkley,Ross Barkley,Ross Barkley,ENG,2020/21,Premier League,Chelsea,2,,40,,,968,17420,18,0.90,sportmonks,multi_club_split
+brandon williams|eng eng|2001,Brandon Williams,Brandon Williams,Brandon Williams,ENG,2021/22,Premier League,Norwich City,26,,2121,23,3,4536527,18378,33,0.90,sportmonks,single_club_apps_only
+ainsley maitland-niles|eng eng|1998,Ainsley Maitland-Niles,Ainsley Maitland-Niles,Ainsley Maitland-Niles,ENG,2020/21,Premier League,West Bromwich Albion,15,,1233,14,1,4344,17420,10,0.90,sportmonks,multi_club_split
+ainsley maitland-niles|eng eng|1998,Ainsley Maitland-Niles,Ainsley Maitland-Niles,Ainsley Maitland-Niles,ENG,2020/21,Premier League,Arsenal,11,,486,5,6,4344,17420,19,0.90,sportmonks,multi_club_split
+sergio reguila³n|es esp|1997,Sergio ReguilÃ³n,Sergio Reguilon,Sergio Reguilón,ESP,2023/24,Premier League,Manchester United,9,,429,4,5,380886,21646,14,0.85,sportmonks,multi_club_split
+sergio reguila³n|es esp|1997,Sergio ReguilÃ³n,Sergio Reguilon,Sergio Reguilón,ESP,2023/24,Premier League,Brentford,16,,1122,14,2,380886,21646,236,0.85,sportmonks,multi_club_split
+craig dawson|eng eng|1990,Craig Dawson,Craig Dawson,Craig Dawson,ENG,2022/23,Premier League,West Ham United,8,,720,8,0,1183,19734,1,1.00,sportmonks,multi_club_split
+craig dawson|eng eng|1990,Craig Dawson,Craig Dawson,Craig Dawson,ENG,2022/23,Premier League,Wolverhampton Wanderers,17,1,1417,17,0,1183,19734,29,1.00,sportmonks,multi_club_split
+chris wood|nz nzl|1992,Chris Wood,Chris Wood,Chris Wood,NZL,2022/23,Premier League,Newcastle United,18,2,439,4,14,914,19734,20,0.90,sportmonks,multi_club_split
+chris wood|nz nzl|1992,Chris Wood,Chris Wood,Chris Wood,NZL,2022/23,Premier League,Nottingham Forest,7,1,376,5,2,914,19734,63,0.90,sportmonks,multi_club_split
+trevoh chalobah|eng eng|1999,Trevoh Chalobah,Trevoh Chalobah,Trevoh Chalobah,ENG,2024/25,Premier League,Chelsea,13,,918,11,2,537117,23614,18,1.00,sportmonks,multi_club_split
+trevoh chalobah|eng eng|1999,Trevoh Chalobah,Trevoh Chalobah,Trevoh Chalobah,ENG,2024/25,Premier League,Crystal Palace,12,3,1063,12,0,537117,23614,51,1.00,sportmonks,multi_club_split
+julio enciso|py par|2004,Julio Enciso,Julio Enciso,Julio Enciso,PAR,2024/25,Premier League,Brighton & Hove Albion,12,,289,2,10,29419594,23614,78,0.70,sportmonks,multi_club_split
+julio enciso|py par|2004,Julio Enciso,Julio Enciso,Julio Enciso,PAR,2024/25,Premier League,Ipswich Town,13,2,878,12,1,29419594,23614,116,0.70,sportmonks,multi_club_split
+marcus rashford|eng eng|1998,Marcus Rashford,Marcus Rashford,Marcus Rashford,ENG,2024/25,Premier League,Manchester United,15,4,983,12,3,1878,23614,14,0.90,sportmonks,multi_club_split
+marcus rashford|eng eng|1998,Marcus Rashford,Marcus Rashford,Marcus Rashford,ENG,2024/25,Premier League,Aston Villa,10,2,442,4,6,1878,23614,15,0.90,sportmonks,multi_club_split
+conor coady|eng eng|1993,Conor Coady,Conor Coady,Conor Coady,ENG,2022/23,Premier League,Everton,24,1,2096,23,1,3043,19734,13,1.00,sportmonks,single_club_apps_only
+james ward-prowse|eng eng|1995,James Ward-Prowse,James Ward-Prowse,James Ward-Prowse,ENG,2024/25,Premier League,West Ham United,15,1,1042,12,3,1155,23614,1,0.90,sportmonks,multi_club_split
+james ward-prowse|eng eng|1995,James Ward-Prowse,James Ward-Prowse,James Ward-Prowse,ENG,2024/25,Premier League,Nottingham Forest,9,,399,5,4,1155,23614,63,0.90,sportmonks,multi_club_split
+leander dendoncker|be bel|1995,Leander Dendoncker,Leander Dendoncker,Leander Dendoncker,BEL,2022/23,Premier League,Aston Villa,20,,689,7,13,62423,19734,15,1.00,sportmonks,multi_club_split
+leander dendoncker|be bel|1995,Leander Dendoncker,Leander Dendoncker,Leander Dendoncker,BEL,2022/23,Premier League,Wolverhampton Wanderers,4,,213,2,2,62423,19734,29,1.00,sportmonks,multi_club_split
+daniel james|wls wal|1998,Daniel James,Daniel James,Daniel James,WAL,2022/23,Premier League,Fulham,20,2,612,5,15,5149,19734,11,0.60,sportmonks,multi_club_split
+daniel james|wls wal|1998,Daniel James,Daniel James,Daniel James,WAL,2022/23,Premier League,Leeds United,4,,199,2,2,5149,19734,71,0.60,sportmonks,multi_club_split
+kurt zouma|fr fra|1995,Kurt Zouma,Kurt Zouma,Kurt Zouma,FRA,2021/22,Premier League,West Ham United,24,1,2080,24,0,1316,18378,1,0.90,sportmonks,single_club_apps_only
+jan bednarek|pl pol|1996,Jan Bednarek,Jan Bednarek,Jan Bednarek,POL,2022/23,Premier League,Aston Villa,3,,99,1,2,155138,19734,15,0.70,sportmonks,multi_club_split
+jan bednarek|pl pol|1996,Jan Bednarek,Jan Bednarek,Jan Bednarek,POL,2022/23,Premier League,Southampton,20,,1674,20,0,155138,19734,65,0.70,sportmonks,multi_club_split
+theo walcott|eng eng|1989,Theo Walcott,Theo Walcott,Theo Walcott,ENG,2020/21,Premier League,Everton,1,,12,,,53,17420,13,1.00,sportmonks,multi_club_split
+theo walcott|eng eng|1989,Theo Walcott,Theo Walcott,Theo Walcott,ENG,2020/21,Premier League,Southampton,21,3,1629,20,1,53,17420,65,1.00,sportmonks,multi_club_split
+evan ferguson|ie irl|2005,Evan Ferguson,Evan Ferguson,Evan Ferguson,IRL,2024/25,Premier League,West Ham United,8,,151,1,7,37253456,23614,1,0.60,sportmonks,multi_club_split
+evan ferguson|ie irl|2005,Evan Ferguson,Evan Ferguson,Evan Ferguson,IRL,2024/25,Premier League,Brighton & Hove Albion,13,1,243,2,11,37253456,23614,78,0.60,sportmonks,multi_club_split
+armando broja|al alb|2002,Armando Broja,Armando Broja,Armando Broja,ALB,2023/24,Premier League,Fulham,8,,116,,,23697427,21646,11,0.90,sportmonks,multi_club_split
+armando broja|al alb|2002,Armando Broja,Armando Broja,Armando Broja,ALB,2023/24,Premier League,Chelsea,13,1,464,6,7,23697427,21646,18,0.90,sportmonks,multi_club_split
+joe willock|eng eng|2000,Joe Willock,Joe Willock,Joe Willock,ENG,2020/21,Premier League,Arsenal,7,,235,2,5,1494447,17420,19,0.90,sportmonks,multi_club_split
+joe willock|eng eng|2000,Joe Willock,Joe Willock,Joe Willock,ENG,2020/21,Premier League,Newcastle United,14,8,980,11,3,1494447,17420,20,0.90,sportmonks,multi_club_split
+dele alli|eng eng|1996,Dele Alli,Dele Alli,Dele Alli,ENG,2021/22,Premier League,Tottenham Hotspur,10,1,658,8,2,922,18378,6,1.00,sportmonks,multi_club_split
+dele alli|eng eng|1996,Dele Alli,Dele Alli,Dele Alli,ENG,2021/22,Premier League,Everton,11,,330,1,10,922,18378,13,1.00,sportmonks,multi_club_split
+diogo jota|pt por|1997,Diogo Jota,Diogo Jota,Diogo Jota,POR,2020/21,Premier League,Liverpool,18,9,1039,11,7,159917,17420,8,0.60,sportmonks,single_club_apps_only
+matheus nunes|pt por|1999,Matheus Nunes,Matheus Nunes,Matheus Nunes,POR,2023/24,Premier League,Manchester City,17,,661,7,10,21781428,21646,9,0.60,sportmonks,multi_club_split
+matheus nunes|pt por|1999,Matheus Nunes,Matheus Nunes,Matheus Nunes,POR,2023/24,Premier League,Wolverhampton Wanderers,2,,180,2,0,21781428,21646,29,0.60,sportmonks,multi_club_split
+takumi minamino|jp jpn|1995,Takumi Minamino,Takumi Minamino,Takumi Minamino,JPN,2020/21,Premier League,Liverpool,9,1,287,2,7,52671,17420,8,1.00,sportmonks,multi_club_split
+takumi minamino|jp jpn|1995,Takumi Minamino,Takumi Minamino,Takumi Minamino,JPN,2020/21,Premier League,Southampton,10,2,717,9,1,52671,17420,65,1.00,sportmonks,multi_club_split
+dean henderson|eng eng|1997,Dean Henderson,Dean Henderson,Dean Henderson,ENG,2023/24,Premier League,Crystal Palace,18,,1620,18,0,12647,21646,51,1.00,sportmonks,single_club_apps_only
+wesley fofana|fr fra|2001,Wesley Fofana,Wesley Fofana,Wesley Fofana,FRA,2022/23,Premier League,Chelsea,15,1,1185,12,3,11311795,19734,18,0.90,sportmonks,multi_club_split
+wesley fofana|fr fra|2001,Wesley Fofana,Wesley Fofana,Wesley Fofana,FRA,2022/23,Premier League,Leicester City,2,,180,2,0,11311795,19734,42,0.90,sportmonks,multi_club_split
+jack stephens|eng eng|1994,Jack Stephens,Jack Stephens,Jack Stephens,ENG,2022/23,Premier League,AFC Bournemouth,15,,1172,13,2,1393,19734,52,1.00,sportmonks,multi_club_split
+jack stephens|eng eng|1994,Jack Stephens,Jack Stephens,Jack Stephens,ENG,2022/23,Premier League,Southampton,2,,45,,,1393,19734,65,1.00,sportmonks,multi_club_split
+carlos alcaraz|ar arg|2003,Carlos Alcaraz,Carlos Alcaraz,Carlos Alcaraz,ARG,2024/25,Premier League,Everton,15,2,761,7,8,37410255,23614,13,0.90,sportmonks,multi_club_split
+carlos alcaraz|ar arg|2003,Carlos Alcaraz,Carlos Alcaraz,Carlos Alcaraz,ARG,2024/25,Premier League,Southampton,1,,9,,,37410255,23614,65,0.90,sportmonks,multi_club_split
+james garner|eng eng|2001,James Garner,James Garner,James Garner,ENG,2022/23,Premier League,Everton,16,,795,7,9,4536524,19734,13,1.00,sportmonks,single_club_apps_only
+jesse lingard|eng eng|1993,Jesse Lingard,Jesse Lingard,Jesse Lingard,ENG,2020/21,Premier League,West Ham United,16,9,1426,16,0,820,17420,1,0.90,sportmonks,single_club_apps_only
+albert sambi lokonga|be bel|2000,Albert Sambi Lokonga,Albert Sambi Lokonga,Albert Sambi Lokonga,BEL,2022/23,Premier League,Arsenal,6,,196,2,4,538907,19734,19,0.90,sportmonks,multi_club_split
+albert sambi lokonga|be bel|2000,Albert Sambi Lokonga,Albert Sambi Lokonga,Albert Sambi Lokonga,BEL,2022/23,Premier League,Crystal Palace,9,,536,6,3,538907,19734,51,0.90,sportmonks,multi_club_split
+donny van de beek|nl ned|1997,Donny van de Beek,Donny van de Beek,Donny van de Beek,NED,2021/22,Premier League,Everton,7,1,483,5,2,26031,18378,13,0.70,sportmonks,multi_club_split
+donny van de beek|nl ned|1997,Donny van de Beek,Donny van de Beek,Donny van de Beek,NED,2021/22,Premier League,Manchester United,8,1,68,,,26031,18378,14,0.70,sportmonks,multi_club_split
+mathew ryan|au aus|1992,Mathew Ryan,Mathew Ryan,Mathew Ryan,AUS,2020/21,Premier League,Arsenal,3,,270,3,0,62317,17420,19,1.00,sportmonks,multi_club_split
+mathew ryan|au aus|1992,Mathew Ryan,Mathew Ryan,Mathew Ryan,AUS,2020/21,Premier League,Brighton & Hove Albion,11,,990,11,0,62317,17420,78,1.00,sportmonks,multi_club_split
+billy gilmour|sct sco|2001,Billy Gilmour,Billy Gilmour,Billy Gilmour,SCO,2022/23,Premier League,Brighton & Hove Albion,14,,508,7,7,6599973,19734,78,0.70,sportmonks,single_club_apps_only
+axel disasi|fr fra|1998,Axel Disasi,Axel Disasi,Axel Disasi,FRA,2024/25,Premier League,Aston Villa,7,,488,5,2,100385,23614,15,1.00,sportmonks,multi_club_split
+axel disasi|fr fra|1998,Axel Disasi,Axel Disasi,Axel Disasi,FRA,2024/25,Premier League,Chelsea,6,1,364,4,2,100385,23614,18,1.00,sportmonks,multi_club_split
+calum chambers|eng eng|1995,Calum Chambers,Calum Chambers,Calum Chambers,ENG,2021/22,Premier League,Aston Villa,11,1,829,9,2,1177,18378,15,1.00,sportmonks,multi_club_split
+calum chambers|eng eng|1995,Calum Chambers,Calum Chambers,Calum Chambers,ENG,2021/22,Premier League,Arsenal,2,,171,2,0,1177,18378,19,1.00,sportmonks,multi_club_split
+kalvin phillips|eng eng|1996,Kalvin Phillips,Kalvin Phillips,Kalvin Phillips,ENG,2023/24,Premier League,West Ham United,8,,307,3,5,3354,21646,1,0.90,sportmonks,multi_club_split
+kalvin phillips|eng eng|1996,Kalvin Phillips,Kalvin Phillips,Kalvin Phillips,ENG,2023/24,Premier League,Manchester City,4,,89,,,3354,21646,9,0.90,sportmonks,multi_club_split
+reiss nelson|eng eng|2000,Reiss Nelson,Reiss Nelson,Reiss Nelson,ENG,2024/25,Premier League,Fulham,11,1,486,5,6,537759,23614,11,0.90,sportmonks,multi_club_split
+reiss nelson|eng eng|2000,Reiss Nelson,Reiss Nelson,Reiss Nelson,ENG,2024/25,Premier League,Arsenal,1,,2,,,537759,23614,19,0.90,sportmonks,multi_club_split
+jonjo shelvey|eng eng|1992,Jonjo Shelvey,Jonjo Shelvey,Jonjo Shelvey,ENG,2022/23,Premier League,Newcastle United,3,,34,,,819,19734,20,1.00,sportmonks,multi_club_split
+jonjo shelvey|eng eng|1992,Jonjo Shelvey,Jonjo Shelvey,Jonjo Shelvey,ENG,2022/23,Premier League,Nottingham Forest,8,,542,6,2,819,19734,63,1.00,sportmonks,multi_club_split
+morgan gibbs-white|eng eng|2000,Morgan Gibbs-White,Morgan Gibbs-White,Morgan Gibbs-White,ENG,2022/23,Premier League,Wolverhampton Wanderers,2,,180,2,0,7926,19734,29,1.00,sportmonks,multi_club_split
+morgan gibbs-white|eng eng|2000,Morgan Gibbs-White,Morgan Gibbs-White,Morgan Gibbs-White,ENG,2022/23,Premier League,Nottingham Forest,35,5,2978,34,1,7926,19734,63,1.00,sportmonks,multi_club_split
+moussa sissoko|fr fra|1990,Moussa Sissoko,Moussa Sissoko,Moussa Sissoko,FRA,2021/22,Premier League,Watford,36,2,3221,36,0,1380,18378,25,0.90,sportmonks,single_club_apps_only
+leandro trossard|be bel|1995,Leandro Trossard,Leandro Trossard,Leandro Trossard,BEL,2022/23,Premier League,Arsenal,20,1,929,10,10,61780,19734,19,0.90,sportmonks,multi_club_split
+leandro trossard|be bel|1995,Leandro Trossard,Leandro Trossard,Leandro Trossard,BEL,2022/23,Premier League,Brighton & Hove Albion,16,7,1326,16,0,61780,19734,78,0.90,sportmonks,multi_club_split
+pascal chimbonda|fr fra|1979,Pascal Chimbonda,Pascal Chimbonda,Pascal Chimbonda,FRA,2006/07,Premier League,Tottenham Hotspur,33,1,2915,33,0,67,8,6,0.70,sportmonks,multi_club_split
+pascal chimbonda|fr fra|1979,Pascal Chimbonda,Pascal Chimbonda,Pascal Chimbonda,FRA,2006/07,Premier League,Wigan Athletic,1,,14,,,67,8,17,0.70,sportmonks,multi_club_split
+jermaine jenas|eng eng|1983,Jermaine Jenas,Jermaine Jenas,Jermaine Jenas,ENG,2005/06,Premier League,Tottenham Hotspur,30,5,2580,30,0,82,1586,6,1.00,sportmonks,multi_club_split
+jermaine jenas|eng eng|1983,Jermaine Jenas,Jermaine Jenas,Jermaine Jenas,ENG,2005/06,Premier League,Newcastle United,4,,337,3,1,82,1586,20,1.00,sportmonks,multi_club_split
+steve kabba|eng eng|1981,Steve Kabba,Steve Kabba,Steve Kabba,ENG,2006/07,Premier League,Sheffield United,7,,115,,,3793,8,21,1.00,sportmonks,multi_club_split
+steve kabba|eng eng|1981,Steve Kabba,Steve Kabba,Steve Kabba,ENG,2006/07,Premier League,Watford,11,,618,6,5,3793,8,25,1.00,sportmonks,multi_club_split
+wayne routledge|eng eng|1985,Wayne Routledge,Wayne Routledge,Wayne Routledge,ENG,2005/06,Premier League,Portsmouth,13,,434,3,10,680,1586,5,1.00,sportmonks,multi_club_split
+wayne routledge|eng eng|1985,Wayne Routledge,Wayne Routledge,Wayne Routledge,ENG,2005/06,Premier League,Tottenham Hotspur,3,,168,2,1,680,1586,6,1.00,sportmonks,multi_club_split
+david thompson|eng eng|1978,David Thompson,David Thompson,David Thompson,ENG,2005/06,Premier League,Blackburn Rovers,6,,184,2,4,280,1586,2,0.90,sportmonks,multi_club_split
+david thompson|eng eng|1978,David Thompson,David Thompson,David Thompson,ENG,2005/06,Premier League,Wigan Athletic,10,2,628,7,3,280,1586,17,0.90,sportmonks,multi_club_split
+calum davenport|eng eng|1983,Calum Davenport,Calum Davenport,Calum Davenport,ENG,2006/07,Premier League,West Ham United,6,,529,5,1,149,8,1,1.00,sportmonks,multi_club_split
+calum davenport|eng eng|1983,Calum Davenport,Calum Davenport,Calum Davenport,ENG,2006/07,Premier League,Tottenham Hotspur,10,1,711,8,2,149,8,6,1.00,sportmonks,multi_club_split
+stephen warnock|eng eng|1982,Stephen Warnock,Stephen Warnock,Stephen Warnock,ENG,2006/07,Premier League,Blackburn Rovers,13,1,1168,13,0,249,8,2,0.90,sportmonks,multi_club_split
+stephen warnock|eng eng|1982,Stephen Warnock,Stephen Warnock,Stephen Warnock,ENG,2006/07,Premier League,Liverpool,1,,54,1,0,249,8,8,0.90,sportmonks,multi_club_split
+kieran richardson|eng eng|1985,Kieran Richardson,Kieran Richardson,Kieran Richardson,ENG,2004/05,Premier League,West Bromwich Albion,12,3,,11,1,22,24255,10,0.90,sportmonks,multi_club_split
+kieran richardson|eng eng|1985,Kieran Richardson,Kieran Richardson,Kieran Richardson,ENG,2004/05,Premier League,Manchester United,2,,,,,22,24255,14,0.90,sportmonks,multi_club_split
+javier mascherano|ar arg|1984,Javier Mascherano,Javier Mascherano,Javier Mascherano,ARG,2006/07,Premier League,West Ham United,5,,235,3,2,648,8,1,1.00,sportmonks,multi_club_split
+javier mascherano|ar arg|1984,Javier Mascherano,Javier Mascherano,Javier Mascherano,ARG,2006/07,Premier League,Liverpool,7,,617,7,0,648,8,8,1.00,sportmonks,multi_club_split
+salif diao|sn sen|1977,Salif Diao,Salif Diao,Salif Diao,SEN,2004/05,Premier League,Liverpool,8,,,4,4,708,24255,8,0.70,sportmonks,multi_club_split
+salif diao|sn sen|1977,Salif Diao,Salif Diao,Salif Diao,SEN,2004/05,Premier League,Birmingham City,2,,,2,0,708,24255,12,0.70,sportmonks,multi_club_split
+svetoslav todorov|bg bul|1979,Svetoslav Todorov,Svetoslav Todorov,Svetoslav Todorov,BUL,2006/07,Premier League,Portsmouth,4,2,101,1,3,1485241,8,5,0.60,sportmonks,multi_club_split
+svetoslav todorov|bg bul|1979,Svetoslav Todorov,Svetoslav Todorov,Svetoslav Todorov,BUL,2006/07,Premier League,Wigan Athletic,5,,225,2,3,1485241,8,17,0.60,sportmonks,multi_club_split
+calum davenport|eng eng|1983,Calum Davenport,Calum Davenport,Calum Davenport,ENG,2004/05,Premier League,Tottenham Hotspur,1,,,,,149,24255,6,1.00,sportmonks,multi_club_split
+calum davenport|eng eng|1983,Calum Davenport,Calum Davenport,Calum Davenport,ENG,2004/05,Premier League,Southampton,7,,,5,2,149,24255,65,1.00,sportmonks,multi_club_split
+sander westerveld|nl ned|1975,Sander Westerveld,Sander Westerveld,Sander Westerveld,NED,2005/06,Premier League,Portsmouth,6,,540,6,0,288328,1586,5,0.60,sportmonks,multi_club_split
+sander westerveld|nl ned|1975,Sander Westerveld,Sander Westerveld,Sander Westerveld,NED,2005/06,Premier League,Everton,2,,180,2,0,288328,1586,13,0.60,sportmonks,multi_club_split
+jon otsemobor|eng eng|1983,Jon Otsemobor,Jon Otsemobor,Jon Otsemobor,ENG,2003/04,Premier League,Liverpool,4,,,4,0,4781,24256,8,1.00,sportmonks,single_club_apps_only
+olivier bernard|fr fra|1980,Olivier Bernard,Olivier Bernard,Olivier Bernard,FRA,2004/05,Premier League,Newcastle United,21,,,19,2,37522793,24255,20,0.90,sportmonks,multi_club_split
+olivier bernard|fr fra|1980,Olivier Bernard,Olivier Bernard,Olivier Bernard,FRA,2004/05,Premier League,Southampton,13,,,12,1,37522793,24255,65,0.90,sportmonks,multi_club_split
+kevin kilbane|ie irl|1977,Kevin Kilbane,Kevin Kilbane,Kevin Kilbane,IRL,2006/07,Premier League,Everton,2,,97,2,0,337,8,13,0.70,sportmonks,multi_club_split
+kevin kilbane|ie irl|1977,Kevin Kilbane,Kevin Kilbane,Kevin Kilbane,IRL,2006/07,Premier League,Wigan Athletic,31,1,2359,26,5,337,8,17,0.70,sportmonks,multi_club_split
+marcus bent|eng eng|1978,Marcus Bent,Marcus Bent,Marcus Bent,ENG,2005/06,Premier League,Charlton Athletic,13,2,982,12,1,111,1586,4,1.00,sportmonks,multi_club_split
+marcus bent|eng eng|1978,Marcus Bent,Marcus Bent,Marcus Bent,ENG,2005/06,Premier League,Everton,18,1,810,7,11,111,1586,13,1.00,sportmonks,multi_club_split
+lucas neill|au aus|1978,Lucas Neill,Lucas Neill,Lucas Neill,AUS,2006/07,Premier League,West Ham United,11,,932,11,0,181,8,1,1.00,sportmonks,multi_club_split
+lucas neill|au aus|1978,Lucas Neill,Lucas Neill,Lucas Neill,AUS,2006/07,Premier League,Blackburn Rovers,20,,1795,20,0,181,8,2,1.00,sportmonks,multi_club_split
+james milner|eng eng|1986,James Milner,James Milner,James Milner,ENG,2005/06,Premier League,Aston Villa,27,1,2338,27,0,197,1586,15,1.00,sportmonks,multi_club_split
+james milner|eng eng|1986,James Milner,James Milner,James Milner,ENG,2005/06,Premier League,Newcastle United,3,,131,1,2,197,1586,20,1.00,sportmonks,multi_club_split
+jamie redknapp|eng eng|1973,Jamie Redknapp,Jamie Redknapp,Jamie Redknapp,ENG,2004/05,Premier League,Tottenham Hotspur,14,,,9,5,37468437,24255,6,1.00,sportmonks,multi_club_split
+jamie redknapp|eng eng|1973,Jamie Redknapp,Jamie Redknapp,Jamie Redknapp,ENG,2004/05,Premier League,Southampton,16,,,16,0,37468437,24255,65,1.00,sportmonks,multi_club_split
+simon davies|wls wal|1980,Simon Davies,Simon Davies,Simon Davies,WAL,2006/07,Premier League,Fulham,14,2,1238,14,0,373,8,11,0.60,sportmonks,multi_club_split
+simon davies|wls wal|1980,Simon Davies,Simon Davies,Simon Davies,WAL,2006/07,Premier League,Everton,15,,1108,13,2,373,8,13,0.60,sportmonks,multi_club_split
+danny murphy|eng eng|1977,Danny Murphy,Danny Murphy,Danny Murphy,ENG,2005/06,Premier League,Charlton Athletic,18,4,1510,17,1,331,1586,4,1.00,sportmonks,multi_club_split
+danny murphy|eng eng|1977,Danny Murphy,Danny Murphy,Danny Murphy,ENG,2005/06,Premier League,Tottenham Hotspur,10,,295,2,8,331,1586,6,1.00,sportmonks,multi_club_split
+alan stubbs|eng eng|1972,Alan Stubbs,Alan Stubbs,Alan Stubbs,ENG,2005/06,Premier League,Sunderland,10,1,739,8,2,300,1586,3,0.90,sportmonks,multi_club_split
+alan stubbs|eng eng|1972,Alan Stubbs,Alan Stubbs,Alan Stubbs,ENG,2005/06,Premier League,Everton,13,,1139,13,0,300,1586,13,0.90,sportmonks,multi_club_split
+martin taylor|eng eng|1980,Martin Taylor,Martin Taylor,Martin Taylor,ENG,2003/04,Premier League,Blackburn Rovers,11,,,10,1,1914,24256,2,0.90,sportmonks,multi_club_split
+martin taylor|eng eng|1980,Martin Taylor,Martin Taylor,Martin Taylor,ENG,2003/04,Premier League,Birmingham City,11,1,,10,1,1914,24256,12,0.90,sportmonks,multi_club_split
+james beattie|eng eng|1978,James Beattie,James Beattie,James Beattie,ENG,2004/05,Premier League,Everton,11,1,,7,4,6971047,24255,13,1.00,sportmonks,multi_club_split
+james beattie|eng eng|1978,James Beattie,James Beattie,James Beattie,ENG,2004/05,Premier League,Southampton,11,3,,11,0,6971047,24255,65,1.00,sportmonks,multi_club_split
+ben thatcher|wls wal|1976,Ben Thatcher,Ben Thatcher,Ben Thatcher,WAL,2006/07,Premier League,Charlton Athletic,10,,,10,0,655,8,4,0.60,sportmonks,multi_club_split
+ben thatcher|wls wal|1976,Ben Thatcher,Ben Thatcher,Ben Thatcher,WAL,2006/07,Premier League,Manchester City,11,,990,11,0,655,8,9,0.60,sportmonks,multi_club_split
+djimi traora©|ml mli|1980,Djimi TraorÃ©,Djimi Traore,Djimi Traoré,MLI,2006/07,Premier League,Charlton Athletic,11,,797,11,0,99,8,4,0.94,sportmonks,multi_club_split
+djimi traora©|ml mli|1980,Djimi TraorÃ©,Djimi Traore,Djimi Traoré,MLI,2006/07,Premier League,Portsmouth,10,,808,10,0,99,8,5,0.94,sportmonks,multi_club_split
+gary doherty|ie irl|1980,Gary Doherty,Gary Doherty,Gary Doherty,IRL,2004/05,Premier League,Tottenham Hotspur,1,,,,,5176,24255,6,0.70,sportmonks,multi_club_split
+gary doherty|ie irl|1980,Gary Doherty,Gary Doherty,Gary Doherty,IRL,2004/05,Premier League,Norwich City,20,2,,17,3,5176,24255,33,0.70,sportmonks,multi_club_split
+david thompson|eng eng|1978,David Thompson,David Thompson,David Thompson,ENG,2006/07,Premier League,Portsmouth,11,,420,5,6,280,8,5,0.90,sportmonks,multi_club_split
+david thompson|eng eng|1978,David Thompson,David Thompson,David Thompson,ENG,2006/07,Premier League,Bolton Wanderers,8,,285,3,5,280,8,16,0.90,sportmonks,multi_club_split
+pedro mendes|pt por|1979,Pedro Mendes,Pedro Mendes,Pedro Mendes,POR,2005/06,Premier League,Portsmouth,14,3,1221,14,0,303,1586,5,0.70,sportmonks,multi_club_split
+pedro mendes|pt por|1979,Pedro Mendes,Pedro Mendes,Pedro Mendes,POR,2005/06,Premier League,Tottenham Hotspur,6,,266,3,3,303,1586,6,0.70,sportmonks,multi_club_split
+manuel fernandes|pt por|1986,Manuel Fernandes,Manuel Fernandes,Manuel Fernandes,POR,2006/07,Premier League,Portsmouth,10,,593,7,3,3818,8,5,0.70,sportmonks,multi_club_split
+manuel fernandes|pt por|1986,Manuel Fernandes,Manuel Fernandes,Manuel Fernandes,POR,2006/07,Premier League,Everton,9,2,718,8,1,3818,8,13,0.70,sportmonks,multi_club_split
+dean kiely|ie irl|1971,Dean Kiely,Dean Kiely,Dean Kiely,IRL,2005/06,Premier League,Charlton Athletic,3,,270,3,0,3941,1586,4,0.60,sportmonks,multi_club_split
+dean kiely|ie irl|1971,Dean Kiely,Dean Kiely,Dean Kiely,IRL,2005/06,Premier League,Portsmouth,15,,,15,0,3941,1586,5,0.60,sportmonks,multi_club_split
+robbie fowler|eng eng|1975,Robbie Fowler,Robbie Fowler,Robbie Fowler,ENG,2005/06,Premier League,Liverpool,14,5,772,9,5,2,1586,8,1.00,sportmonks,multi_club_split
+robbie fowler|eng eng|1975,Robbie Fowler,Robbie Fowler,Robbie Fowler,ENG,2005/06,Premier League,Manchester City,4,1,60,,,2,1586,9,1.00,sportmonks,multi_club_split
+darren bent|eng eng|1984,Darren Bent,Darren Bent,Darren Bent,ENG,2010/11,Premier League,Sunderland,20,8,1750,20,0,27,2,3,1.00,sportmonks,multi_club_split
+darren bent|eng eng|1984,Darren Bent,Darren Bent,Darren Bent,ENG,2010/11,Premier League,Aston Villa,16,9,1400,16,0,27,2,15,1.00,sportmonks,multi_club_split
+hayden mullins|eng eng|1979,Hayden Mullins,Hayden Mullins,Hayden Mullins,ENG,2008/09,Premier League,West Ham United,17,1,663,5,12,128,6,1,1.00,sportmonks,multi_club_split
+hayden mullins|eng eng|1979,Hayden Mullins,Hayden Mullins,Hayden Mullins,ENG,2008/09,Premier League,Portsmouth,17,,1346,15,2,128,6,5,1.00,sportmonks,multi_club_split
+stephen kelly|ie irl|1984,Stephen Kelly,Stephen Kelly,Stephen Kelly,IRL,2012/13,Premier League,Fulham,2,,105,,,583,7,11,0.60,sportmonks,multi_club_split
+stephen kelly|ie irl|1984,Stephen Kelly,Stephen Kelly,Stephen Kelly,IRL,2012/13,Premier League,Reading,16,,1424,16,0,583,7,23,0.60,sportmonks,multi_club_split
+kenwyne jones|tt tri|1985,Kenwyne Jones,Kenwyne Jones,Kenwyne Jones,TRI,2013/14,Premier League,Stoke City,7,,380,4,3,372,3,26,0.60,sportmonks,multi_club_split
+kenwyne jones|tt tri|1985,Kenwyne Jones,Kenwyne Jones,Kenwyne Jones,TRI,2013/14,Premier League,Cardiff City,11,1,583,6,5,372,3,69,0.60,sportmonks,multi_club_split
+bradley orr|eng eng|1983,Bradley Orr,Bradley Orr,Bradley Orr,ENG,2011/12,Premier League,Blackburn Rovers,12,,955,10,2,1055,9,2,0.90,sportmonks,multi_club_split
+bradley orr|eng eng|1983,Bradley Orr,Bradley Orr,Bradley Orr,ENG,2011/12,Premier League,Queens Park Rangers,6,,328,2,4,1055,9,47,0.90,sportmonks,multi_club_split
+ryan bertrand|eng eng|1990,Ryan Bertrand,Ryan Bertrand,Ryan Bertrand,ENG,2013/14,Premier League,Aston Villa,16,,1391,16,0,1350,3,15,0.90,sportmonks,multi_club_split
+ryan bertrand|eng eng|1990,Ryan Bertrand,Ryan Bertrand,Ryan Bertrand,ENG,2013/14,Premier League,Chelsea,1,,64,1,0,1350,3,18,0.90,sportmonks,multi_club_split
+joe cole|eng eng|1982,Joe Cole,Joe Cole,Joe Cole,ENG,2012/13,Premier League,West Ham United,11,2,619,7,4,565,7,1,0.90,sportmonks,multi_club_split
+joe cole|eng eng|1982,Joe Cole,Joe Cole,Joe Cole,ENG,2012/13,Premier League,Liverpool,6,1,165,,,565,7,8,0.90,sportmonks,multi_club_split
+nedum onuoha|eng eng|1987,Nedum Onuoha,Nedum Onuoha,Nedum Onuoha,ENG,2011/12,Premier League,Manchester City,1,,9,,,139,9,9,0.90,sportmonks,multi_club_split
+nedum onuoha|eng eng|1987,Nedum Onuoha,Nedum Onuoha,Nedum Onuoha,ENG,2011/12,Premier League,Queens Park Rangers,16,,1440,16,0,139,9,47,0.90,sportmonks,multi_club_split
+andros townsend|eng eng|1991,Andros Townsend,Andros Townsend,Andros Townsend,ENG,2012/13,Premier League,Tottenham Hotspur,5,,28,,,1249,7,6,1.00,sportmonks,multi_club_split
+andros townsend|eng eng|1991,Andros Townsend,Andros Townsend,Andros Townsend,ENG,2012/13,Premier League,Queens Park Rangers,12,2,1019,12,0,1249,7,47,1.00,sportmonks,multi_club_split
+george mccartney|nir nir|1981,George McCartney,George McCartney,George McCartney,NIR,2008/09,Premier League,West Ham United,1,,30,,,132,6,1,0.70,sportmonks,multi_club_split
+george mccartney|nir nir|1981,George McCartney,George McCartney,George McCartney,NIR,2008/09,Premier League,Sunderland,16,,1346,16,0,132,6,3,0.70,sportmonks,multi_club_split
+paul stalteri|ca can|1978,Paul Stalteri,Paul Stalteri,Paul Stalteri,CAN,2007/08,Premier League,Tottenham Hotspur,3,,235,3,0,76,14,6,0.90,sportmonks,multi_club_split
+paul stalteri|ca can|1978,Paul Stalteri,Paul Stalteri,Paul Stalteri,CAN,2007/08,Premier League,Fulham,13,,1136,13,0,76,14,11,0.90,sportmonks,multi_club_split
+ma¡rton fa¼la¶p|hu hun|1983,MÃ¡rton FÃ¼lÃ¶p,Marton Fulop,Márton Fülöp,HUN,2009/10,Premier League,Sunderland,13,,1103,12,1,351,11,3,0.84,sportmonks,multi_club_split
+ma¡rton fa¼la¶p|hu hun|1983,MÃ¡rton FÃ¼lÃ¶p,Marton Fulop,Márton Fülöp,HUN,2009/10,Premier League,Manchester City,3,,270,3,0,351,11,9,0.84,sportmonks,multi_club_split
+alan stubbs|eng eng|1972,Alan Stubbs,Alan Stubbs,Alan Stubbs,ENG,2007/08,Premier League,Everton,8,1,562,7,1,300,14,13,0.90,sportmonks,multi_club_split
+alan stubbs|eng eng|1972,Alan Stubbs,Alan Stubbs,Alan Stubbs,ENG,2007/08,Premier League,Derby County,8,,647,8,0,300,14,24,0.90,sportmonks,multi_club_split
+pascal chimbonda|fr fra|1979,Pascal Chimbonda,Pascal Chimbonda,Pascal Chimbonda,FRA,2008/09,Premier League,Sunderland,13,,1170,13,0,67,6,3,0.70,sportmonks,multi_club_split
+pascal chimbonda|fr fra|1979,Pascal Chimbonda,Pascal Chimbonda,Pascal Chimbonda,FRA,2008/09,Premier League,Tottenham Hotspur,3,,128,1,2,67,6,6,0.70,sportmonks,multi_club_split
+steven pienaar|za rsa|1982,Steven Pienaar,Steven Pienaar,Steven Pienaar,RSA,2011/12,Premier League,Tottenham Hotspur,2,,14,,,292,9,6,0.70,sportmonks,multi_club_split
+steven pienaar|za rsa|1982,Steven Pienaar,Steven Pienaar,Steven Pienaar,RSA,2011/12,Premier League,Everton,14,4,1239,14,0,292,9,13,0.70,sportmonks,multi_club_split
+kyle walker|eng eng|1990,Kyle Walker,Kyle Walker,Kyle Walker,ENG,2010/11,Premier League,Tottenham Hotspur,1,,3,,,911,2,6,1.00,sportmonks,multi_club_split
+kyle walker|eng eng|1990,Kyle Walker,Kyle Walker,Kyle Walker,ENG,2010/11,Premier League,Aston Villa,15,1,1338,15,0,911,2,15,1.00,sportmonks,multi_club_split
+paul konchesky|eng eng|1981,Paul Konchesky,Paul Konchesky,Paul Konchesky,ENG,2010/11,Premier League,Liverpool,15,,1251,15,0,97,2,8,1.00,sportmonks,multi_club_split
+paul konchesky|eng eng|1981,Paul Konchesky,Paul Konchesky,Paul Konchesky,ENG,2010/11,Premier League,Fulham,1,,90,1,0,97,2,11,1.00,sportmonks,multi_club_split
+jermaine pennant|eng eng|1983,Jermaine Pennant,Jermaine Pennant,Jermaine Pennant,ENG,2008/09,Premier League,Portsmouth,13,,764,9,4,15,6,5,1.00,sportmonks,multi_club_split
+jermaine pennant|eng eng|1983,Jermaine Pennant,Jermaine Pennant,Jermaine Pennant,ENG,2008/09,Premier League,Liverpool,3,,156,2,1,15,6,8,1.00,sportmonks,multi_club_split
+steve sidwell|eng eng|1983,Steve Sidwell,Steve Sidwell,Steve Sidwell,ENG,2010/11,Premier League,Fulham,12,2,941,10,2,170,2,11,0.90,sportmonks,multi_club_split
+steve sidwell|eng eng|1983,Steve Sidwell,Steve Sidwell,Steve Sidwell,ENG,2010/11,Premier League,Aston Villa,4,,118,1,3,170,2,15,0.90,sportmonks,multi_club_split
+robbie keane|ie irl|1980,Robbie Keane,Robbie Keane,Robbie Keane,IRL,2010/11,Premier League,West Ham United,9,2,483,5,4,92,2,1,0.53,sportmonks,multi_club_split
+robbie keane|ie irl|1980,Robbie Keane,Robbie Keane,Robbie Keane,IRL,2010/11,Premier League,Tottenham Hotspur,7,,223,2,5,92,2,6,0.53,sportmonks,multi_club_split
+calum davenport|eng eng|1983,Calum Davenport,Calum Davenport,Calum Davenport,ENG,2008/09,Premier League,West Ham United,7,1,630,7,0,149,6,1,1.00,sportmonks,multi_club_split
+calum davenport|eng eng|1983,Calum Davenport,Calum Davenport,Calum Davenport,ENG,2008/09,Premier League,Sunderland,8,,686,7,1,149,6,3,1.00,sportmonks,multi_club_split
+jack wilshere|eng eng|1992,Jack Wilshere,Jack Wilshere,Jack Wilshere,ENG,2009/10,Premier League,Bolton Wanderers,14,1,1091,13,1,717,11,16,0.91,sportmonks,multi_club_split
+jack wilshere|eng eng|1992,Jack Wilshere,Jack Wilshere,Jack Wilshere,ENG,2009/10,Premier League,Arsenal,1,,,,,717,11,19,0.91,sportmonks,multi_club_split
+david bentley|eng eng|1985,David Bentley,David Bentley,David Bentley,ENG,2010/11,Premier League,Tottenham Hotspur,2,,102,1,1,242,2,6,0.81,sportmonks,multi_club_split
+david bentley|eng eng|1985,David Bentley,David Bentley,David Bentley,ENG,2010/11,Premier League,Birmingham City,13,,819,9,4,242,2,12,0.81,sportmonks,multi_club_split
+kieran richardson|eng eng|1985,Kieran Richardson,Kieran Richardson,Kieran Richardson,ENG,2012/13,Premier League,Sunderland,1,,90,1,0,22,7,3,0.90,sportmonks,multi_club_split
+kieran richardson|eng eng|1985,Kieran Richardson,Kieran Richardson,Kieran Richardson,ENG,2012/13,Premier League,Fulham,14,1,826,12,2,22,7,11,0.90,sportmonks,multi_club_split
+sa©bastien bassong|cm cmr|1986,SÃ©bastien Bassong,Sebastien Bassong,Sébastien Bassong,CMR,2011/12,Premier League,Tottenham Hotspur,5,,223,1,4,306,9,6,0.96,sportmonks,multi_club_split
+sa©bastien bassong|cm cmr|1986,SÃ©bastien Bassong,Sebastien Bassong,Sébastien Bassong,CMR,2011/12,Premier League,Wolverhampton Wanderers,9,,684,9,0,306,9,29,0.96,sportmonks,multi_club_split
+craig gardner|eng eng|1987,Craig Gardner,Craig Gardner,Craig Gardner,ENG,2009/10,Premier League,Birmingham City,13,1,899,10,3,521,11,12,0.90,sportmonks,multi_club_split
+craig gardner|eng eng|1987,Craig Gardner,Craig Gardner,Craig Gardner,ENG,2009/10,Premier League,Aston Villa,1,,4,,,521,11,15,0.90,sportmonks,multi_club_split
+tal ben haim|il isr|1982,Tal Ben Haim,Tal Ben Haim,Tal Ben Haim,ISR,2008/09,Premier League,Sunderland,5,,437,5,0,555,6,3,0.70,sportmonks,multi_club_split
+tal ben haim|il isr|1982,Tal Ben Haim,Tal Ben Haim,Tal Ben Haim,ISR,2008/09,Premier League,Manchester City,9,,765,8,1,555,6,9,0.70,sportmonks,multi_club_split
+eia°ur gua°johnsen|is isl|1979,EiÃ°ur GuÃ°johnsen,Eiður Guðjohnsen,Eiður Guðjohnsen,ISL,2010/11,Premier League,Fulham,10,,407,4,6,3654,2,11,0.81,sportmonks,multi_club_split
+eia°ur gua°johnsen|is isl|1979,EiÃ°ur GuÃ°johnsen,Eiður Guðjohnsen,Eiður Guðjohnsen,ISL,2010/11,Premier League,Stoke City,4,,65,,,3654,2,26,0.81,sportmonks,multi_club_split
+gary cahill|eng eng|1986,Gary Cahill,Gary Cahill,Gary Cahill,ENG,2007/08,Premier League,Aston Villa,1,,44,,,334,14,15,0.90,sportmonks,multi_club_split
+gary cahill|eng eng|1986,Gary Cahill,Gary Cahill,Gary Cahill,ENG,2007/08,Premier League,Bolton Wanderers,13,,1149,13,0,334,14,16,0.90,sportmonks,multi_club_split
+wilfried zaha|ci civ|1993,Wilfried Zaha,Wilfried Zaha,Wilfried Zaha,CIV,2013/14,Premier League,Manchester United,2,,28,,,1108,3,14,0.90,sportmonks,multi_club_split
+wilfried zaha|ci civ|1993,Wilfried Zaha,Wilfried Zaha,Wilfried Zaha,CIV,2013/14,Premier League,Cardiff City,12,,582,5,7,1108,3,69,0.90,sportmonks,multi_club_split
+fa¡bio|br bra|1990,FÃ¡bio,Fabio,Fábio,BRA,2013/14,Premier League,Manchester United,1,,90,1,0,625,3,14,0.87,sportmonks,multi_club_split
+fa¡bio|br bra|1990,FÃ¡bio,Fabio,Fábio,BRA,2013/14,Premier League,Cardiff City,13,,1002,13,0,625,3,69,0.87,sportmonks,multi_club_split
+jermaine jenas|eng eng|1983,Jermaine Jenas,Jermaine Jenas,Jermaine Jenas,ENG,2012/13,Premier League,Tottenham Hotspur,1,,14,,,82,7,6,1.00,sportmonks,multi_club_split
+jermaine jenas|eng eng|1983,Jermaine Jenas,Jermaine Jenas,Jermaine Jenas,ENG,2012/13,Premier League,Queens Park Rangers,12,2,809,8,4,82,7,47,1.00,sportmonks,multi_club_split
+scott sinclair|eng eng|1989,Scott Sinclair,Scott Sinclair,Scott Sinclair,ENG,2012/13,Premier League,Manchester City,11,,190,2,9,180,7,9,1.00,sportmonks,multi_club_split
+scott sinclair|eng eng|1989,Scott Sinclair,Scott Sinclair,Scott Sinclair,ENG,2012/13,Premier League,Swansea City,1,1,13,,,180,7,30,1.00,sportmonks,multi_club_split
+gaa«l kakuta|cd cod|1991,GaÃ«l Kakuta,Gael Kakuta,Gaël Kakuta,COD,2010/11,Premier League,Fulham,7,1,231,2,5,3665,2,11,0.63,sportmonks,multi_club_split
+gaa«l kakuta|cd cod|1991,GaÃ«l Kakuta,Gael Kakuta,Gaël Kakuta,COD,2010/11,Premier League,Chelsea,5,,120,1,4,3665,2,18,0.63,sportmonks,multi_club_split
+yossi benayoun|il isr|1980,Yossi Benayoun,Yossi Benayoun,Yossi Benayoun,ISR,2012/13,Premier League,West Ham United,6,,314,4,2,141,7,1,0.70,sportmonks,multi_club_split
+yossi benayoun|il isr|1980,Yossi Benayoun,Yossi Benayoun,Yossi Benayoun,ISR,2012/13,Premier League,Chelsea,6,,52,,,141,7,18,0.70,sportmonks,multi_club_split
+nicky shorey|eng eng|1981,Nicky Shorey,Nicky Shorey,Nicky Shorey,ENG,2009/10,Premier League,Fulham,9,,810,9,0,189,11,11,1.00,sportmonks,multi_club_split
+nicky shorey|eng eng|1981,Nicky Shorey,Nicky Shorey,Nicky Shorey,ENG,2009/10,Premier League,Aston Villa,3,,270,3,0,189,11,15,1.00,sportmonks,multi_club_split
+stephen ireland|ie irl|1987,Stephen Ireland,Stephen Ireland,Stephen Ireland,IRL,2010/11,Premier League,Aston Villa,10,,504,6,4,118,2,15,0.60,sportmonks,multi_club_split
+stephen ireland|ie irl|1987,Stephen Ireland,Stephen Ireland,Stephen Ireland,IRL,2010/11,Premier League,Newcastle United,2,,49,,,118,2,20,0.60,sportmonks,multi_club_split
+carlos vela|mx mex|1989,Carlos Vela,Carlos Vela,Carlos Vela,MEX,2010/11,Premier League,West Bromwich Albion,8,2,315,3,5,731,2,10,0.70,sportmonks,multi_club_split
+carlos vela|mx mex|1989,Carlos Vela,Carlos Vela,Carlos Vela,MEX,2010/11,Premier League,Arsenal,4,1,60,,,731,2,19,0.70,sportmonks,multi_club_split
+darron gibson|ie irl|1988,Darron Gibson,Darron Gibson,Darron Gibson,IRL,2011/12,Premier League,Everton,11,1,930,11,0,1431,9,13,0.60,sportmonks,multi_club_split
+darron gibson|ie irl|1988,Darron Gibson,Darron Gibson,Darron Gibson,IRL,2011/12,Premier League,Manchester United,1,,90,1,0,1431,9,14,0.60,sportmonks,multi_club_split
+emmanuel frimpong|gh gha|1992,Emmanuel Frimpong,Emmanuel Frimpong,Emmanuel Frimpong,GHA,2011/12,Premier League,Arsenal,6,,216,3,3,939,9,19,1.00,sportmonks,multi_club_split
+emmanuel frimpong|gh gha|1992,Emmanuel Frimpong,Emmanuel Frimpong,Emmanuel Frimpong,GHA,2011/12,Premier League,Wolverhampton Wanderers,5,,294,5,0,939,9,29,1.00,sportmonks,multi_club_split
+fraizer campbell|eng eng|1988,Fraizer Campbell,Fraizer Campbell,Fraizer Campbell,ENG,2008/09,Premier League,Tottenham Hotspur,10,1,276,1,9,313,6,6,0.90,sportmonks,multi_club_split
+fraizer campbell|eng eng|1988,Fraizer Campbell,Fraizer Campbell,Fraizer Campbell,ENG,2008/09,Premier League,Manchester United,1,,80,1,0,313,6,14,0.90,sportmonks,multi_club_split
+roque santa cruz|py par|1982,Roque Santa Cruz,Roque Santa Cruz,Roque Santa Cruz,PAR,2010/11,Premier League,Blackburn Rovers,9,,540,7,2,205,2,2,0.60,sportmonks,multi_club_split
+roque santa cruz|py par|1982,Roque Santa Cruz,Roque Santa Cruz,Roque Santa Cruz,PAR,2010/11,Premier League,Manchester City,1,,24,,,205,2,9,0.60,sportmonks,multi_club_split
+andy reid|ie irl|1982,Andy Reid,Andy Reid,Andy Reid,IRL,2010/11,Premier League,Sunderland,2,,12,,,115,2,3,0.70,sportmonks,multi_club_split
+andy reid|ie irl|1982,Andy Reid,Andy Reid,Andy Reid,IRL,2010/11,Premier League,Blackpool,5,,189,2,3,115,2,28,0.70,sportmonks,multi_club_split
+josh mceachran|eng eng|1993,Josh McEachran,Josh McEachran,Josh McEachran,ENG,2011/12,Premier League,Chelsea,2,,13,,,1308,9,18,1.00,sportmonks,multi_club_split
+josh mceachran|eng eng|1993,Josh McEachran,Josh McEachran,Josh McEachran,ENG,2011/12,Premier League,Swansea City,4,,126,1,3,1308,9,30,1.00,sportmonks,multi_club_split
+ryan nelsen|nz nzl|1978,Ryan Nelsen,Ryan Nelsen,Ryan Nelsen,NZL,2011/12,Premier League,Blackburn Rovers,1,,90,1,0,752051,9,2,0.90,sportmonks,multi_club_split
+ryan nelsen|nz nzl|1978,Ryan Nelsen,Ryan Nelsen,Ryan Nelsen,NZL,2011/12,Premier League,Tottenham Hotspur,5,,111,,,752051,9,6,0.90,sportmonks,multi_club_split
+jona¡s gutia©rrez|ar arg|1983,JonÃ¡s GutiÃ©rrez,Jonas Gutierrez,Jonás Gutiérrez,ARG,2013/14,Premier League,Newcastle United,2,,63,1,1,667,3,20,0.91,sportmonks,multi_club_split
+jona¡s gutia©rrez|ar arg|1983,JonÃ¡s GutiÃ©rrez,Jonas Gutierrez,Jonás Gutiérrez,ARG,2013/14,Premier League,Norwich City,4,,197,2,2,667,3,33,0.91,sportmonks,multi_club_split
+carlo cudicini|it ita|1974,Carlo Cudicini,Carlo Cudicini,Carlo Cudicini,ITA,2008/09,Premier League,Tottenham Hotspur,4,,360,4,0,304,6,6,0.90,sportmonks,multi_club_split
+carlo cudicini|it ita|1974,Carlo Cudicini,Carlo Cudicini,Carlo Cudicini,ITA,2008/09,Premier League,Chelsea,2,,180,2,0,304,6,18,0.90,sportmonks,multi_club_split
+federico macheda|it ita|1992,Federico Macheda,Federico Macheda,Federico Macheda,ITA,2011/12,Premier League,Manchester United,3,,44,,,750,9,14,0.90,sportmonks,multi_club_split
+federico macheda|it ita|1992,Federico Macheda,Federico Macheda,Federico Macheda,ITA,2011/12,Premier League,Queens Park Rangers,3,,33,,,750,9,47,0.90,sportmonks,multi_club_split
+harry kane|eng eng|1993,Harry Kane,Harry Kane,Harry Kane,ENG,2012/13,Premier League,Tottenham Hotspur,1,,4,,,997,7,6,1.00,sportmonks,multi_club_split
+harry kane|eng eng|1993,Harry Kane,Harry Kane,Harry Kane,ENG,2012/13,Premier League,Norwich City,3,,134,1,2,997,7,33,1.00,sportmonks,multi_club_split
+wayne routledge|eng eng|1985,Wayne Routledge,Wayne Routledge,Wayne Routledge,ENG,2007/08,Premier League,Tottenham Hotspur,2,,103,1,1,680,14,6,1.00,sportmonks,multi_club_split
+wayne routledge|eng eng|1985,Wayne Routledge,Wayne Routledge,Wayne Routledge,ENG,2007/08,Premier League,Aston Villa,1,,4,,,680,14,15,1.00,sportmonks,multi_club_split
+emile heskey|eng eng|1978,Emile Heskey,Emile Heskey,Emile Heskey,ENG,2008/09,Premier League,Aston Villa,14,2,921,11,3,151,6,15,1.00,sportmonks,multi_club_split
+emile heskey|eng eng|1978,Emile Heskey,Emile Heskey,Emile Heskey,ENG,2008/09,Premier League,Wigan Athletic,20,3,1604,20,0,151,6,17,1.00,sportmonks,multi_club_split
+anton ferdinand|eng eng|1985,Anton Ferdinand,Anton Ferdinand,Anton Ferdinand,ENG,2011/12,Premier League,Sunderland,3,,270,3,0,136,9,3,1.00,sportmonks,multi_club_split
+anton ferdinand|eng eng|1985,Anton Ferdinand,Anton Ferdinand,Anton Ferdinand,ENG,2011/12,Premier League,Queens Park Rangers,31,,2750,31,0,136,9,47,1.00,sportmonks,multi_club_split
+marlon king|jm jam|1980,Marlon King,Marlon King,Marlon King,JAM,2008/09,Premier League,Middlesbrough,13,2,842,9,4,321,6,7,0.70,sportmonks,multi_club_split
+marlon king|jm jam|1980,Marlon King,Marlon King,Marlon King,JAM,2008/09,Premier League,Hull City,20,5,1553,19,1,321,6,22,0.70,sportmonks,multi_club_split
+james milner|eng eng|1986,James Milner,James Milner,James Milner,ENG,2010/11,Premier League,Manchester City,32,,2048,23,9,197,2,9,1.00,sportmonks,multi_club_split
+james milner|eng eng|1986,James Milner,James Milner,James Milner,ENG,2010/11,Premier League,Aston Villa,1,1,85,1,0,197,2,15,1.00,sportmonks,multi_club_split
+michael turner|eng eng|1984,Michael Turner,Michael Turner,Michael Turner,ENG,2009/10,Premier League,Sunderland,29,1,2550,29,0,130,11,3,0.90,sportmonks,multi_club_split
+michael turner|eng eng|1984,Michael Turner,Michael Turner,Michael Turner,ENG,2009/10,Premier League,Hull City,4,,360,4,0,130,11,22,0.90,sportmonks,multi_club_split
+romelu lukaku|be bel|1993,Romelu Lukaku,Romelu Lukaku,Romelu Lukaku,BEL,2013/14,Premier League,Everton,31,15,2561,29,2,995,3,13,1.00,sportmonks,multi_club_split
+romelu lukaku|be bel|1993,Romelu Lukaku,Romelu Lukaku,Romelu Lukaku,BEL,2013/14,Premier League,Chelsea,2,,40,,,995,3,18,1.00,sportmonks,multi_club_split
+peter crouch|eng eng|1981,Peter Crouch,Peter Crouch,Peter Crouch,ENG,2011/12,Premier League,Tottenham Hotspur,1,,90,1,0,239,9,6,1.00,sportmonks,multi_club_split
+peter crouch|eng eng|1981,Peter Crouch,Peter Crouch,Peter Crouch,ENG,2011/12,Premier League,Stoke City,32,10,2689,31,1,239,9,26,1.00,sportmonks,multi_club_split
+joey barton|eng eng|1983,Joey Barton,Joey Barton,Joey Barton,ENG,2011/12,Premier League,Newcastle United,2,,180,2,0,658,9,20,0.90,sportmonks,multi_club_split
+joey barton|eng eng|1983,Joey Barton,Joey Barton,Joey Barton,ENG,2011/12,Premier League,Queens Park Rangers,31,3,2673,31,0,658,9,47,0.90,sportmonks,multi_club_split
+robbie keane|ie irl|1980,Robbie Keane,Robbie Keane,Robbie Keane,IRL,2008/09,Premier League,Tottenham Hotspur,14,5,1257,14,0,92,6,6,0.53,sportmonks,multi_club_split
+robbie keane|ie irl|1980,Robbie Keane,Robbie Keane,Robbie Keane,IRL,2008/09,Premier League,Liverpool,18,5,1175,15,3,92,6,8,0.53,sportmonks,multi_club_split
+david nugent|eng eng|1985,David Nugent,David Nugent,David Nugent,ENG,2009/10,Premier League,Portsmouth,3,,28,,,365,11,5,1.00,sportmonks,multi_club_split
+david nugent|eng eng|1985,David Nugent,David Nugent,David Nugent,ENG,2009/10,Premier League,Burnley,30,6,1875,20,10,365,11,27,1.00,sportmonks,multi_club_split
+sylvain distin|fr fra|1978,Sylvain Distin,Sylvain Distin,Sylvain Distin,FRA,2009/10,Premier League,Portsmouth,3,,270,3,0,392,11,5,0.90,sportmonks,multi_club_split
+sylvain distin|fr fra|1978,Sylvain Distin,Sylvain Distin,Sylvain Distin,FRA,2009/10,Premier League,Everton,29,,2590,29,0,392,11,13,0.90,sportmonks,multi_club_split
+wilson palacios|hn hon|1984,Wilson Palacios,Wilson Palacios,Wilson Palacios,HON,2008/09,Premier League,Tottenham Hotspur,11,,963,11,0,154,6,6,0.70,sportmonks,multi_club_split
+wilson palacios|hn hon|1984,Wilson Palacios,Wilson Palacios,Wilson Palacios,HON,2008/09,Premier League,Wigan Athletic,21,,1839,21,0,154,6,17,0.70,sportmonks,multi_club_split
+nicolas anelka|fr fra|1979,Nicolas Anelka,Nicolas Anelka,Nicolas Anelka,FRA,2007/08,Premier League,Bolton Wanderers,18,10,1609,18,0,71,14,16,1.00,sportmonks,multi_club_split
+nicolas anelka|fr fra|1979,Nicolas Anelka,Nicolas Anelka,Nicolas Anelka,FRA,2007/08,Premier League,Chelsea,14,1,964,10,4,71,14,18,1.00,sportmonks,multi_club_split
+dimitar berbatov|bg bul|1981,Dimitar Berbatov,Dimitar Berbatov,Dimitar Berbatov,BUL,2008/09,Premier League,Tottenham Hotspur,1,,25,,,30,6,6,0.70,sportmonks,multi_club_split
+dimitar berbatov|bg bul|1981,Dimitar Berbatov,Dimitar Berbatov,Dimitar Berbatov,BUL,2008/09,Premier League,Manchester United,31,9,2543,29,2,30,6,14,0.70,sportmonks,multi_club_split
+mousa demba©la©|be bel|1987,Mousa DembÃ©lÃ©,Mousa Dembele,Mousa Dembélé,BEL,2012/13,Premier League,Tottenham Hotspur,30,1,2210,26,4,852,7,6,0.89,sportmonks,multi_club_split
+mousa demba©la©|be bel|1987,Mousa DembÃ©lÃ©,Mousa Dembele,Mousa Dembélé,BEL,2012/13,Premier League,Fulham,2,,180,2,0,852,7,11,0.89,sportmonks,multi_club_split
+stephen warnock|eng eng|1982,Stephen Warnock,Stephen Warnock,Stephen Warnock,ENG,2009/10,Premier League,Blackburn Rovers,1,,90,1,0,249,11,2,0.90,sportmonks,multi_club_split
+stephen warnock|eng eng|1982,Stephen Warnock,Stephen Warnock,Stephen Warnock,ENG,2009/10,Premier League,Aston Villa,30,,2594,30,0,249,11,15,0.90,sportmonks,multi_club_split
+samir nasri|fr fra|1987,Samir Nasri,Samir Nasri,Samir Nasri,FRA,2011/12,Premier League,Manchester City,30,5,2174,26,4,45,9,9,1.00,sportmonks,multi_club_split
+samir nasri|fr fra|1987,Samir Nasri,Samir Nasri,Samir Nasri,FRA,2011/12,Premier League,Arsenal,1,,90,1,0,45,9,19,1.00,sportmonks,multi_club_split
+kevin nolan|eng eng|1982,Kevin Nolan,Kevin Nolan,Kevin Nolan,ENG,2008/09,Premier League,Bolton Wanderers,20,,1774,20,0,446,6,16,1.00,sportmonks,multi_club_split
+kevin nolan|eng eng|1982,Kevin Nolan,Kevin Nolan,Kevin Nolan,ENG,2008/09,Premier League,Newcastle United,11,,791,10,1,446,6,20,1.00,sportmonks,multi_club_split
+charles n'zogbia|fr fra|1986,Charles N'Zogbia,Charles N'Zogbia,Charles N'Zogbia,FRA,2008/09,Premier League,Wigan Athletic,13,,,13,0,162,6,17,1.00,sportmonks,multi_club_split
+charles n'zogbia|fr fra|1986,Charles N'Zogbia,Charles N'Zogbia,Charles N'Zogbia,FRA,2008/09,Premier League,Newcastle United,18,1,1318,14,4,162,6,20,1.00,sportmonks,multi_club_split
+zat knight|eng eng|1980,Zat Knight,Zat Knight,Zat Knight,ENG,2007/08,Premier League,Fulham,4,,327,4,0,330,14,11,1.00,sportmonks,multi_club_split
+zat knight|eng eng|1980,Zat Knight,Zat Knight,Zat Knight,ENG,2007/08,Premier League,Aston Villa,27,1,2127,25,2,330,14,15,1.00,sportmonks,multi_club_split
+glen johnson|eng eng|1985,Glen Johnson,Glen Johnson,Glen Johnson,ENG,2007/08,Premier League,Portsmouth,29,1,2566,29,0,293,14,5,0.90,sportmonks,multi_club_split
+glen johnson|eng eng|1985,Glen Johnson,Glen Johnson,Glen Johnson,ENG,2007/08,Premier League,Chelsea,2,,149,1,1,293,14,18,0.90,sportmonks,multi_club_split
+yakubu aiyegbeni|ng nga|1983,Yakubu Aiyegbeni,Yakubu Aiyegbeni,Yakubu Aiyegbeni,NGA,2007/08,Premier League,Middlesbrough,2,,156,2,0,192,14,7,0.90,sportmonks,multi_club_split
+yakubu aiyegbeni|ng nga|1983,Yakubu Aiyegbeni,Yakubu Aiyegbeni,Yakubu Aiyegbeni,NGA,2007/08,Premier League,Everton,29,15,2164,26,3,192,14,13,0.90,sportmonks,multi_club_split
+mikel arteta|es esp|1982,Mikel Arteta,Mikel Arteta,Mikel Arteta,ESP,2011/12,Premier League,Everton,2,1,125,1,1,307,9,13,1.00,sportmonks,multi_club_split
+mikel arteta|es esp|1982,Mikel Arteta,Mikel Arteta,Mikel Arteta,ESP,2011/12,Premier League,Arsenal,29,6,2474,29,0,307,9,19,1.00,sportmonks,multi_club_split
+jermain defoe|eng eng|1983,Jermain Defoe,Jermain Defoe,Jermain Defoe,ENG,2007/08,Premier League,Portsmouth,12,8,1066,12,0,31,14,5,0.90,sportmonks,multi_club_split
+jermain defoe|eng eng|1983,Jermain Defoe,Jermain Defoe,Jermain Defoe,ENG,2007/08,Premier League,Tottenham Hotspur,19,4,523,3,16,31,14,6,0.90,sportmonks,multi_club_split
+shane long|ie irl|1987,Shane Long,Shane Long,Shane Long,IRL,2013/14,Premier League,West Bromwich Albion,15,3,1037,11,4,722,3,10,0.70,sportmonks,multi_club_split
+shane long|ie irl|1987,Shane Long,Shane Long,Shane Long,IRL,2013/14,Premier League,Hull City,15,4,1209,15,0,722,3,22,0.70,sportmonks,multi_club_split
+peter odemwingie|ng nga|1981,Peter Odemwingie,Peter Odemwingie,Peter Odemwingie,NGA,2013/14,Premier League,Stoke City,15,6,1295,15,0,759,3,26,1.00,sportmonks,multi_club_split
+peter odemwingie|ng nga|1981,Peter Odemwingie,Peter Odemwingie,Peter Odemwingie,NGA,2013/14,Premier League,Cardiff City,15,1,801,11,4,759,3,69,1.00,sportmonks,multi_club_split
+james collins|wls wal|1984,James Collins,James Collins,James Collins,WAL,2009/10,Premier League,West Ham United,3,,270,3,0,538,11,1,0.60,sportmonks,multi_club_split
+james collins|wls wal|1984,James Collins,James Collins,James Collins,WAL,2009/10,Premier League,Aston Villa,27,1,2368,26,1,538,11,15,0.60,sportmonks,multi_club_split
+raul meireles|pt por|1983,Raul Meireles,Raul Meireles,Raul Meireles,POR,2011/12,Premier League,Liverpool,2,,33,,,959,9,8,0.67,sportmonks,multi_club_split
+raul meireles|pt por|1983,Raul Meireles,Raul Meireles,Raul Meireles,POR,2011/12,Premier League,Chelsea,28,2,1936,23,5,959,9,18,0.67,sportmonks,multi_club_split
+youna¨s kaboul|fr fra|1986,YounÃ¨s Kaboul,Younes Kaboul,Younès Kaboul,FRA,2009/10,Premier League,Portsmouth,19,3,1710,19,0,73,11,5,0.94,sportmonks,multi_club_split
+youna¨s kaboul|fr fra|1986,YounÃ¨s Kaboul,Younes Kaboul,Younès Kaboul,FRA,2009/10,Premier League,Tottenham Hotspur,10,,786,8,2,73,11,6,0.94,sportmonks,multi_club_split
+cameron jerome|eng eng|1987,Cameron Jerome,Cameron Jerome,Cameron Jerome,ENG,2013/14,Premier League,Stoke City,1,,4,,,608,3,26,0.90,sportmonks,multi_club_split
+cameron jerome|eng eng|1987,Cameron Jerome,Cameron Jerome,Cameron Jerome,ENG,2013/14,Premier League,Crystal Palace,28,2,1756,20,8,608,3,51,0.90,sportmonks,multi_club_split
+danny higginbotham|gi gib|1979,Danny Higginbotham,Danny Higginbotham,Danny Higginbotham,GIB,2008/09,Premier League,Sunderland,2,,119,1,1,456,6,3,0.90,sportmonks,multi_club_split
+danny higginbotham|gi gib|1979,Danny Higginbotham,Danny Higginbotham,Danny Higginbotham,GIB,2008/09,Premier League,Stoke City,28,1,2464,28,0,456,6,26,0.90,sportmonks,multi_club_split
+gary cahill|eng eng|1986,Gary Cahill,Gary Cahill,Gary Cahill,ENG,2011/12,Premier League,Bolton Wanderers,19,2,1710,19,0,334,9,16,0.90,sportmonks,multi_club_split
+gary cahill|eng eng|1986,Gary Cahill,Gary Cahill,Gary Cahill,ENG,2011/12,Premier League,Chelsea,10,1,855,9,1,334,9,18,0.90,sportmonks,multi_club_split
+bobby zamora|eng eng|1981,Bobby Zamora,Bobby Zamora,Bobby Zamora,ENG,2011/12,Premier League,Fulham,15,5,1188,14,1,91,9,11,1.00,sportmonks,multi_club_split
+bobby zamora|eng eng|1981,Bobby Zamora,Bobby Zamora,Bobby Zamora,ENG,2011/12,Premier League,Queens Park Rangers,14,2,1191,14,0,91,9,47,1.00,sportmonks,multi_club_split
+nicklas bendtner|dk den|1988,Nicklas Bendtner,Nicklas Bendtner,Nicklas Bendtner,DEN,2011/12,Premier League,Sunderland,28,8,2230,25,3,49,9,3,0.70,sportmonks,multi_club_split
+nicklas bendtner|dk den|1988,Nicklas Bendtner,Nicklas Bendtner,Nicklas Bendtner,DEN,2011/12,Premier League,Arsenal,1,,10,,,49,9,19,0.70,sportmonks,multi_club_split
+ki sung-yueng|kr kor|1989,Ki Sung-yueng,Ki Sung-yueng,Ki Sung-yueng,KOR,2013/14,Premier League,Sunderland,27,3,2185,25,2,813,3,3,0.52,sportmonks,multi_club_split
+ki sung-yueng|kr kor|1989,Ki Sung-yueng,Ki Sung-yueng,Ki Sung-yueng,KOR,2013/14,Premier League,Swansea City,1,,14,,,813,3,30,0.52,sportmonks,multi_club_split
+juan mata|es esp|1988,Juan Mata,Juan Mata,Juan Mata,ESP,2013/14,Premier League,Manchester United,15,6,1229,14,1,846,3,14,1.00,sportmonks,multi_club_split
+juan mata|es esp|1988,Juan Mata,Juan Mata,Juan Mata,ESP,2013/14,Premier League,Chelsea,13,,832,11,2,846,3,18,1.00,sportmonks,multi_club_split
+sta©phane sessa¨gnon|bj ben|1984,StÃ©phane SessÃ¨gnon,Stephane Sessegnon,Stéphane Sessègnon,BEN,2013/14,Premier League,Sunderland,2,,,2,0,774,3,3,0.62,sportmonks,multi_club_split
+sta©phane sessa¨gnon|bj ben|1984,StÃ©phane SessÃ¨gnon,Stephane Sessegnon,Stéphane Sessègnon,BEN,2013/14,Premier League,West Bromwich Albion,26,5,1961,23,3,774,3,10,0.62,sportmonks,multi_club_split
+jamie o'hara|eng eng|1987,Jamie O'Hara,Jamie O'Hara,Jamie O'Hara,ENG,2009/10,Premier League,Portsmouth,26,2,2255,25,1,258,11,5,0.90,sportmonks,multi_club_split
+jamie o'hara|eng eng|1987,Jamie O'Hara,Jamie O'Hara,Jamie O'Hara,ENG,2009/10,Premier League,Tottenham Hotspur,2,,10,,,258,11,6,0.90,sportmonks,multi_club_split
+jonathan woodgate|eng eng|1980,Jonathan Woodgate,Jonathan Woodgate,Jonathan Woodgate,ENG,2007/08,Premier League,Tottenham Hotspur,12,1,1067,12,0,284,14,6,1.00,sportmonks,multi_club_split
+jonathan woodgate|eng eng|1980,Jonathan Woodgate,Jonathan Woodgate,Jonathan Woodgate,ENG,2007/08,Premier League,Middlesbrough,16,,1375,16,0,284,14,7,1.00,sportmonks,multi_club_split
+danny collins|wls wal|1981,Danny Collins,Danny Collins,Danny Collins,WAL,2009/10,Premier League,Sunderland,3,,270,3,0,23,11,3,0.60,sportmonks,multi_club_split
+danny collins|wls wal|1981,Danny Collins,Danny Collins,Danny Collins,WAL,2009/10,Premier League,Stoke City,25,,2079,22,3,23,11,26,0.60,sportmonks,multi_club_split
+shaun wright-phillips|eng eng|1982,Shaun Wright-Phillips,Shaun Wright-Phillips,Shaun Wright-Phillips,ENG,2008/09,Premier League,Manchester City,27,5,2425,27,0,247,6,9,0.90,sportmonks,multi_club_split
+shaun wright-phillips|eng eng|1982,Shaun Wright-Phillips,Shaun Wright-Phillips,Shaun Wright-Phillips,ENG,2008/09,Premier League,Chelsea,1,,12,,,247,6,18,0.90,sportmonks,multi_club_split
+robbie savage|wls wal|1975,Robbie Savage,Robbie Savage,Robbie Savage,WAL,2007/08,Premier League,Blackburn Rovers,12,,808,10,2,213,14,2,0.60,sportmonks,multi_club_split
+robbie savage|wls wal|1975,Robbie Savage,Robbie Savage,Robbie Savage,WAL,2007/08,Premier League,Derby County,16,,1353,16,0,213,14,24,0.60,sportmonks,multi_club_split
+papa bouba diop|sn sen|1978,Papa Bouba Diop,Papa Bouba Diop,Papa Bouba Diop,SEN,2007/08,Premier League,Portsmouth,25,,2174,25,0,386,14,5,0.54,sportmonks,multi_club_split
+papa bouba diop|sn sen|1978,Papa Bouba Diop,Papa Bouba Diop,Papa Bouba Diop,SEN,2007/08,Premier League,Fulham,2,,17,,,386,14,11,0.54,sportmonks,multi_club_split
+matthew etherington|eng eng|1982,Matthew Etherington,Matthew Etherington,Matthew Etherington,ENG,2008/09,Premier League,West Ham United,13,2,733,8,5,123,6,1,0.90,sportmonks,multi_club_split
+matthew etherington|eng eng|1982,Matthew Etherington,Matthew Etherington,Matthew Etherington,ENG,2008/09,Premier League,Stoke City,14,,1089,12,2,123,6,26,0.90,sportmonks,multi_club_split
+jermain defoe|eng eng|1983,Jermain Defoe,Jermain Defoe,Jermain Defoe,ENG,2008/09,Premier League,Portsmouth,19,8,1498,17,2,31,6,5,0.90,sportmonks,multi_club_split
+jermain defoe|eng eng|1983,Jermain Defoe,Jermain Defoe,Jermain Defoe,ENG,2008/09,Premier League,Tottenham Hotspur,8,3,560,6,2,31,6,6,0.90,sportmonks,multi_club_split
+lewis holtby|de ger|1991,Lewis Holtby,Lewis Holtby,Lewis Holtby,GER,2013/14,Premier League,Tottenham Hotspur,13,1,568,6,7,1246,3,6,0.60,sportmonks,multi_club_split
+lewis holtby|de ger|1991,Lewis Holtby,Lewis Holtby,Lewis Holtby,GER,2013/14,Premier League,Fulham,13,1,923,11,2,1246,3,11,0.60,sportmonks,multi_club_split
+kevin kilbane|ie irl|1977,Kevin Kilbane,Kevin Kilbane,Kevin Kilbane,IRL,2008/09,Premier League,Wigan Athletic,10,,263,3,7,337,6,17,0.70,sportmonks,multi_club_split
+kevin kilbane|ie irl|1977,Kevin Kilbane,Kevin Kilbane,Kevin Kilbane,IRL,2008/09,Premier League,Hull City,16,,1315,15,1,337,6,22,0.70,sportmonks,multi_club_split
+steven pienaar|za rsa|1982,Steven Pienaar,Steven Pienaar,Steven Pienaar,RSA,2010/11,Premier League,Tottenham Hotspur,8,,493,5,3,292,2,6,0.70,sportmonks,multi_club_split
+steven pienaar|za rsa|1982,Steven Pienaar,Steven Pienaar,Steven Pienaar,RSA,2010/11,Premier League,Everton,18,1,1575,18,0,292,2,13,0.70,sportmonks,multi_club_split
+andy carroll|eng eng|1989,Andy Carroll,Andy Carroll,Andy Carroll,ENG,2010/11,Premier League,Liverpool,7,2,448,5,2,746,2,8,1.00,sportmonks,multi_club_split
+andy carroll|eng eng|1989,Andy Carroll,Andy Carroll,Andy Carroll,ENG,2010/11,Premier League,Newcastle United,19,11,1625,18,1,746,2,20,1.00,sportmonks,multi_club_split
+andy carroll|eng eng|1989,Andy Carroll,Andy Carroll,Andy Carroll,ENG,2012/13,Premier League,West Ham United,24,7,1939,22,2,746,7,1,1.00,sportmonks,multi_club_split
+andy carroll|eng eng|1989,Andy Carroll,Andy Carroll,Andy Carroll,ENG,2012/13,Premier League,Liverpool,2,,19,,,746,7,8,1.00,sportmonks,multi_club_split
+daniel sturridge|eng eng|1990,Daniel Sturridge,Daniel Sturridge,Daniel Sturridge,ENG,2010/11,Premier League,Bolton Wanderers,12,8,973,11,1,622,2,16,0.90,sportmonks,multi_club_split
+daniel sturridge|eng eng|1990,Daniel Sturridge,Daniel Sturridge,Daniel Sturridge,ENG,2010/11,Premier League,Chelsea,13,,146,,,622,2,18,0.90,sportmonks,multi_club_split
+luke young|eng eng|1979,Luke Young,Luke Young,Luke Young,ENG,2011/12,Premier League,Aston Villa,2,,146,2,0,100,9,15,1.00,sportmonks,multi_club_split
+luke young|eng eng|1979,Luke Young,Luke Young,Luke Young,ENG,2011/12,Premier League,Queens Park Rangers,23,2,2032,23,0,100,9,47,1.00,sportmonks,multi_club_split
+victor anichebe|ng nga|1988,Victor Anichebe,Victor Anichebe,Victor Anichebe,NGA,2013/14,Premier League,West Bromwich Albion,24,3,1215,11,13,288,3,10,1.00,sportmonks,multi_club_split
+victor anichebe|ng nga|1988,Victor Anichebe,Victor Anichebe,Victor Anichebe,NGA,2013/14,Premier League,Everton,1,,,,,288,3,13,1.00,sportmonks,multi_club_split
+mido|eg egy|1983,Mido,Mido,Mido,EGY,2008/09,Premier League,Middlesbrough,13,4,611,5,8,101,6,7,1.00,sportmonks,multi_club_split
+mido|eg egy|1983,Mido,Mido,Mido,EGY,2008/09,Premier League,Wigan Athletic,12,2,760,10,2,101,6,17,1.00,sportmonks,multi_club_split
+armand traora©|sn sen|1990,Armand TraorÃ©,Armand Traore,Armand Traoré,SEN,2011/12,Premier League,Arsenal,1,,90,1,0,1053,9,19,0.54,sportmonks,multi_club_split
+armand traora©|sn sen|1990,Armand TraorÃ©,Armand Traore,Armand Traoré,SEN,2011/12,Premier League,Queens Park Rangers,23,,1618,18,5,1053,9,47,0.54,sportmonks,multi_club_split
+james mcfadden|sct sco|1983,James McFadden,James McFadden,James McFadden,SCO,2007/08,Premier League,Birmingham City,13,4,1013,11,2,412,14,12,0.70,sportmonks,multi_club_split
+james mcfadden|sct sco|1983,James McFadden,James McFadden,James McFadden,SCO,2007/08,Premier League,Everton,12,2,470,5,7,412,14,13,0.70,sportmonks,multi_club_split
+craig bellamy|wls wal|1979,Craig Bellamy,Craig Bellamy,Craig Bellamy,WAL,2008/09,Premier League,West Ham United,16,5,1235,13,3,68,6,1,0.70,sportmonks,multi_club_split
+craig bellamy|wls wal|1979,Craig Bellamy,Craig Bellamy,Craig Bellamy,WAL,2008/09,Premier League,Manchester City,8,2,631,7,1,68,6,9,0.70,sportmonks,multi_club_split
+victor moses|ng nga|1991,Victor Moses,Victor Moses,Victor Moses,NGA,2012/13,Premier League,Wigan Athletic,1,,90,1,0,496,7,17,0.90,sportmonks,multi_club_split
+victor moses|ng nga|1991,Victor Moses,Victor Moses,Victor Moses,NGA,2012/13,Premier League,Chelsea,23,1,1125,12,11,496,7,18,0.90,sportmonks,multi_club_split
+wilson palacios|hn hon|1984,Wilson Palacios,Wilson Palacios,Wilson Palacios,HON,2007/08,Premier League,Birmingham City,7,,352,4,3,154,14,12,0.70,sportmonks,multi_club_split
+wilson palacios|hn hon|1984,Wilson Palacios,Wilson Palacios,Wilson Palacios,HON,2007/08,Premier League,Wigan Athletic,16,,1393,16,0,154,14,17,0.70,sportmonks,multi_club_split
+abdoulaye faye|sn sen|1978,Abdoulaye Faye,Abdoulaye Faye,Abdoulaye Faye,SEN,2007/08,Premier League,Bolton Wanderers,1,,90,1,0,434,14,16,0.70,sportmonks,multi_club_split
+abdoulaye faye|sn sen|1978,Abdoulaye Faye,Abdoulaye Faye,Abdoulaye Faye,SEN,2007/08,Premier League,Newcastle United,22,1,1656,20,2,434,14,20,0.70,sportmonks,multi_club_split
+ryan taylor|eng eng|1985,Ryan Taylor,Ryan Taylor,Ryan Taylor,ENG,2008/09,Premier League,Wigan Athletic,12,2,897,11,1,756,6,17,0.90,sportmonks,multi_club_split
+ryan taylor|eng eng|1985,Ryan Taylor,Ryan Taylor,Ryan Taylor,ENG,2008/09,Premier League,Newcastle United,10,,750,8,2,756,6,20,0.90,sportmonks,multi_club_split
+daniel sturridge|eng eng|1990,Daniel Sturridge,Daniel Sturridge,Daniel Sturridge,ENG,2012/13,Premier League,Liverpool,14,10,1091,11,3,622,7,8,0.90,sportmonks,multi_club_split
+daniel sturridge|eng eng|1990,Daniel Sturridge,Daniel Sturridge,Daniel Sturridge,ENG,2012/13,Premier League,Chelsea,7,1,161,1,6,622,7,18,0.90,sportmonks,multi_club_split
+henri camara|sn sen|1977,Henri Camara,Henri Camara,Henri Camara,SEN,2008/09,Premier League,Wigan Athletic,17,2,413,3,14,397,6,17,0.70,sportmonks,multi_club_split
+henri camara|sn sen|1977,Henri Camara,Henri Camara,Henri Camara,SEN,2008/09,Premier League,Stoke City,4,,94,,,397,6,26,0.70,sportmonks,multi_club_split
+ja´|br bra|1987,JÃ´,Jo,Jô,BRA,2008/09,Premier League,Manchester City,9,1,590,6,3,327,6,9,0.73,sportmonks,multi_club_split
+ja´|br bra|1987,JÃ´,Jo,Jô,BRA,2008/09,Premier League,Everton,11,5,447,10,1,327,6,13,0.73,sportmonks,multi_club_split
+paul mcshane|ie irl|1986,Paul McShane,Paul McShane,Paul McShane,IRL,2008/09,Premier League,Sunderland,3,,64,,,37,6,3,0.70,sportmonks,multi_club_split
+paul mcshane|ie irl|1986,Paul McShane,Paul McShane,Paul McShane,IRL,2008/09,Premier League,Hull City,17,1,1367,17,0,37,6,22,0.70,sportmonks,multi_club_split
+yossi benayoun|il isr|1980,Yossi Benayoun,Yossi Benayoun,Yossi Benayoun,ISR,2011/12,Premier League,Chelsea,1,,1,,,141,9,18,0.70,sportmonks,multi_club_split
+yossi benayoun|il isr|1980,Yossi Benayoun,Yossi Benayoun,Yossi Benayoun,ISR,2011/12,Premier League,Arsenal,19,4,902,10,9,141,9,19,0.70,sportmonks,multi_club_split
+john carew|no nor|1980,John Carew,John Carew,John Carew,NOR,2010/11,Premier League,Aston Villa,10,,539,6,4,375,2,15,0.90,sportmonks,multi_club_split
+john carew|no nor|1980,John Carew,John Carew,John Carew,NOR,2010/11,Premier League,Stoke City,10,1,616,7,3,375,2,26,0.90,sportmonks,multi_club_split
+joleon lescott|eng eng|1983,Joleon Lescott,Joleon Lescott,Joleon Lescott,ENG,2009/10,Premier League,Manchester City,18,1,1565,17,1,302,11,9,0.90,sportmonks,multi_club_split
+joleon lescott|eng eng|1983,Joleon Lescott,Joleon Lescott,Joleon Lescott,ENG,2009/10,Premier League,Everton,1,,90,1,0,302,11,13,0.90,sportmonks,multi_club_split
+alan hutton|sct sco|1985,Alan Hutton,Alan Hutton,Alan Hutton,SCO,2009/10,Premier League,Sunderland,11,,944,11,0,1103,11,3,0.60,sportmonks,multi_club_split
+alan hutton|sct sco|1985,Alan Hutton,Alan Hutton,Alan Hutton,SCO,2009/10,Premier League,Tottenham Hotspur,8,,231,1,7,1103,11,6,0.60,sportmonks,multi_club_split
+lassana diarra|fr fra|1985,Lassana Diarra,Lassana Diarra,Lassana Diarra,FRA,2007/08,Premier League,Portsmouth,12,1,1002,11,1,571,14,5,1.00,sportmonks,multi_club_split
+lassana diarra|fr fra|1985,Lassana Diarra,Lassana Diarra,Lassana Diarra,FRA,2007/08,Premier League,Arsenal,7,,369,4,3,571,14,19,1.00,sportmonks,multi_club_split
+marouane fellaini|be bel|1988,Marouane Fellaini,Marouane Fellaini,Marouane Fellaini,BEL,2013/14,Premier League,Everton,3,,,3,0,420,3,13,0.90,sportmonks,multi_club_split
+marouane fellaini|be bel|1988,Marouane Fellaini,Marouane Fellaini,Marouane Fellaini,BEL,2013/14,Premier League,Manchester United,16,,1105,12,4,420,3,14,0.90,sportmonks,multi_club_split
+jimmy bullard|eng eng|1979,Jimmy Bullard,Jimmy Bullard,Jimmy Bullard,ENG,2008/09,Premier League,Fulham,18,2,1554,18,0,308,6,11,0.90,sportmonks,multi_club_split
+jimmy bullard|eng eng|1979,Jimmy Bullard,Jimmy Bullard,Jimmy Bullard,ENG,2008/09,Premier League,Hull City,1,,37,,,308,6,22,0.90,sportmonks,multi_club_split
+james milner|eng eng|1986,James Milner,James Milner,James Milner,ENG,2008/09,Premier League,Aston Villa,36,3,2878,31,5,197,6,15,1.00,sportmonks,multi_club_split
+james milner|eng eng|1986,James Milner,James Milner,James Milner,ENG,2008/09,Premier League,Newcastle United,2,,180,2,0,197,6,20,1.00,sportmonks,multi_club_split
+richard dunne|ie irl|1980,Richard Dunne,Richard Dunne,Richard Dunne,IRL,2009/10,Premier League,Manchester City,2,,180,2,0,172,11,9,0.60,sportmonks,multi_club_split
+richard dunne|ie irl|1980,Richard Dunne,Richard Dunne,Richard Dunne,IRL,2009/10,Premier League,Aston Villa,35,3,3132,35,0,172,11,15,0.60,sportmonks,multi_club_split
+fernando torres|es esp|1984,Fernando Torres,Fernando Torres,Fernando Torres,ESP,2010/11,Premier League,Liverpool,23,9,1895,22,1,492,2,8,1.00,sportmonks,multi_club_split
+fernando torres|es esp|1984,Fernando Torres,Fernando Torres,Fernando Torres,ESP,2010/11,Premier League,Chelsea,14,1,762,8,6,492,2,18,1.00,sportmonks,multi_club_split

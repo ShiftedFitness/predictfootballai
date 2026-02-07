@@ -1,0 +1,34 @@
+player_uid,player_name,season,original_apps,resolved_sum_apps,difference,clubs_breakdown,confidence_score
+dwight yorke|tt tri|1972,Dwight Yorke,2004/05,17,11,6,"Blackburn Rovers(4), Birmingham City(7)",0.60
+mark pembridge|wls wal|1971,Mark Pembridge,2003/04,16,11,5,"Fulham(7), Everton(4)",0.60
+michael brown|eng eng|1977,Michael Brown,2005/06,16,14,2,"Tottenham Hotspur(8), Fulham(6)",1.00
+michael bridges|eng eng|1979,Michael Bridges,2003/04,16,6,10,Newcastle United(6),0.90
+steve howey|eng eng|1972,Steve Howey,2003/04,16,14,2,"Bolton Wanderers(2), Leicester City(12)",0.90
+david unsworth|eng eng|1974,David Unsworth,2006/07,15,12,3,"Wigan Athletic(7), Sheffield United(5)",0.90
+celestine babayaro|ng nga|1979,Celestine Babayaro,2004/05,11,4,7,Chelsea(4),0.90
+eric djemba-djemba|cm cmr|1981,Eric Djemba-Djemba,2004/05,11,5,6,Manchester United(5),1.00
+noa© pamarot|fr fra|1979,Noé Pamarot,2005/06,10,6,4,"Portsmouth(4), Tottenham Hotspur(2)",0.93
+matt jansen|eng eng|1978,Matt Jansen,2005/06,10,7,3,"Blackburn Rovers(4), Bolton Wanderers(3)",0.90
+mikael forssell|fi fin|1981,Mikael Forssell,2004/05,5,3,2,"Birmingham City(2), Chelsea(1)",1.00
+louis saha|fr fra|1979,Louis Saha,2003/04,33,10,23,Fulham(10),0.90
+paul konchesky|eng eng|1981,Paul Konchesky,2003/04,33,15,18,Charlton Athletic(15),1.00
+ashley young|eng eng|1985,Ashley Young,2006/07,33,31,2,"Aston Villa(11), Watford(20)",1.00
+nigel quashie|sct sco|1978,Nigel Quashie,2004/05,32,19,13,"Portsmouth(6), Southampton(13)",0.70
+scott parker|eng eng|1981,Scott Parker,2003/04,31,19,12,"Charlton Athletic(8), Chelsea(11)",0.90
+lomana lualua|cd cod|1981,Lomana LuaLua,2003/04,29,11,18,"Portsmouth(8), Newcastle United(3)",0.60
+amdy faye|sn sen|1977,Amdy Faye,2004/05,29,25,4,"Portsmouth(20), Newcastle United(5)",0.70
+john curtis|eng eng|1979,John Curtis,2003/04,27,21,6,"Portsmouth(6), Leicester City(15)",0.90
+robbie savage|wls wal|1975,Robbie Savage,2004/05,27,18,9,"Blackburn Rovers(9), Birmingham City(9)",0.60
+paul jones|wls wal|1967,Paul Jones,2003/04,26,13,13,"Liverpool(2), Wolverhampton Wanderers(3), Southampton(8)",0.70
+kevin campbell|eng eng|1970,Kevin Campbell,2004/05,22,12,10,"West Bromwich Albion(7), Everton(5)",1.00
+jermaine pennant|eng eng|1983,Jermaine Pennant,2004/05,19,10,9,"Birmingham City(6), Arsenal(4)",1.00
+steven caldwell|sct sco|1981,Steven Caldwell,2003/04,18,5,13,Newcastle United(5),0.60
+wayne bridge|eng eng|1981,Wayne Bridge,2010/11,18,16,2,"West Ham United(15), Manchester City(1)",0.90
+johan djourou|ch sui|1987,Johan Djourou,2007/08,15,13,2,"Birmingham City(12), Arsenal(1)",0.70
+demba ba|sn sen|1985,Demba Ba,2012/13,34,28,6,"Chelsea(8), Newcastle United(20)",0.70
+danny graham|eng eng|1986,Danny Graham,2012/13,31,29,2,"Sunderland(13), Swansea City(16)",0.90
+louis saha|fr fra|1979,Louis Saha,2011/12,28,23,5,"Tottenham Hotspur(5), Everton(18)",0.90
+gary o'neil|eng eng|1983,Gary O'Neil,2007/08,28,3,25,"Portsmouth(2), Middlesbrough(1)",1.00
+michael brown|eng eng|1977,Michael Brown,2009/10,26,24,2,"Portsmouth(22), Wigan Athletic(2)",1.00
+wayne bridge|eng eng|1981,Wayne Bridge,2008/09,22,18,4,"Manchester City(12), Chelsea(6)",0.90
+shay given|ie irl|1976,Shay Given,2008/09,37,25,12,"Manchester City(3), Newcastle United(22)",0.70
