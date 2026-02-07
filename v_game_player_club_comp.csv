@@ -1,0 +1,19 @@
+view_name,view_definition
+v_game_player_club_comp," SELECT t.player_uid,
+    p.player_name,
+    p.nationality_norm,
+    t.competition_id,
+    c.competition_name,
+    t.club_id,
+    cl.club_name,
+    t.appearances,
+    t.goals,
+    t.assists,
+    t.minutes,
+    t.seasons,
+    t.first_season_start_year,
+    t.last_season_start_year
+   FROM (((player_club_total_competition t
+     JOIN players p USING (player_uid))
+     JOIN competitions c ON ((c.competition_id = t.competition_id)))
+     JOIN clubs cl ON ((cl.club_id = t.club_id)));"
