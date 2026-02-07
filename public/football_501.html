@@ -506,6 +506,47 @@ button {
 .chat-preview-content .preview-row .value { font-weight: 600; }
 .chat-preview-content .preview-row .value.eligible { color: var(--accent); }
 .chat-preview-content .preview-row .value.low { color: var(--danger); }
+.chat-proposal {
+  background: var(--card);
+  border: 1px solid var(--accent);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin: 12px 0;
+}
+.chat-proposal-header {
+  font-size: 11px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+.chat-proposal-content .proposal-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+.chat-proposal-content .proposal-row .label { color: var(--muted); }
+.chat-proposal-content .proposal-row .value { font-weight: 600; }
+.chat-proposal-feasibility {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255,255,255,.1);
+}
+.feasibility-ok { color: var(--accent); }
+.feasibility-warn { color: var(--gold); }
+.feasibility-fail { color: var(--danger); }
+.feasibility-stars { color: var(--gold); margin-left: 8px; }
+.feasibility-suggestion { font-size: 12px; color: var(--muted); margin-top: 6px; }
+.chat-warning {
+  background: rgba(224,85,85,.15);
+  border: 1px solid var(--danger);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin: 10px 0;
+  font-size: 13px;
+  color: var(--danger);
+}
 .chat-buttons {
   display: flex;
   gap: 10px;
@@ -754,6 +795,8 @@ button {
     <h2>Choose Category</h2>
     <p class="subtitle">Select a game mode to start</p>
 
+    <h3 class="competition-divider">Premier League</h3>
+
     <div class="section" id="sec-country">
       <div class="section-header" onclick="toggleSection('sec-country')">
         <div class="section-title">Countries <span class="section-count" id="countCountry">(0)</span></div>
@@ -810,24 +853,25 @@ button {
 
     <div class="section" id="sec-chat-epl">
       <div class="section-header" onclick="toggleSection('sec-chat-epl')">
-        <div class="section-title">💬 EPL Chat Builder <span class="section-count">(New!)</span></div>
+        <div class="section-title">💬 Build Your Own <span class="section-count">(EPL)</span></div>
         <div class="chev">▼</div>
       </div>
-      <div class="section-desc">Describe your game in natural language. Example: "English and Dutch players for Man Utd and Liverpool by appearances"</div>
+      <div class="section-desc">Type what you want and we'll try to build it.</div>
       <div class="section-body" id="chatBuilderEPL">
         <div class="chat-builder">
           <div class="field">
             <label>Describe your game</label>
-            <textarea id="chatInputEPL" placeholder="e.g. French and Spanish players who played for Arsenal and Chelsea by goals" rows="3"></textarea>
+            <textarea id="chatInputEPL" placeholder="e.g. English players who played for Sunderland, Man Utd, Liverpool and Spurs by appearances" rows="3"></textarea>
           </div>
-          <div id="chatPreviewEPL" class="chat-preview hidden">
-            <div class="chat-preview-header">Proposed Game:</div>
-            <div id="chatPreviewContentEPL"></div>
+          <div id="chatProposalEPL" class="chat-proposal hidden">
+            <div class="chat-proposal-header">Proposed Game</div>
+            <div class="chat-proposal-content" id="chatProposalContentEPL"></div>
+            <div class="chat-proposal-feasibility" id="chatFeasibilityEPL"></div>
           </div>
-          <div id="chatWarningEPL" class="custom-warning hidden"></div>
+          <div id="chatWarningEPL" class="chat-warning hidden"></div>
           <div class="chat-buttons">
-            <button class="btn-secondary" id="previewChatEPL">Preview</button>
-            <button class="btn-primary" id="startChatEPL" disabled>Start Game</button>
+            <button class="btn-primary" id="submitChatEPL">Build</button>
+            <button class="btn-primary" id="startChatEPL" disabled style="display:none">Start Game</button>
           </div>
         </div>
       </div>
@@ -935,24 +979,25 @@ button {
 
     <div class="section" id="sec-chat-global">
       <div class="section-header" onclick="toggleSection('sec-chat-global')">
-        <div class="section-title">💬 Global Chat Builder <span class="section-count">(New!)</span></div>
+        <div class="section-title">💬 Build Your Own <span class="section-count">(Any League)</span></div>
         <div class="chev">▼</div>
       </div>
-      <div class="section-desc">Build a custom game across any competition. Example: "Spanish players in La Liga for Real Madrid and Barcelona by goals"</div>
+      <div class="section-desc">Type what you want and we'll try to build it. Include the league name (La Liga, Serie A, etc.).</div>
       <div class="section-body" id="chatBuilderGlobal">
         <div class="chat-builder">
           <div class="field">
             <label>Describe your game (include competition)</label>
             <textarea id="chatInputGlobal" placeholder="e.g. German players in Bundesliga for Bayern Munich and Dortmund by appearances" rows="3"></textarea>
           </div>
-          <div id="chatPreviewGlobal" class="chat-preview hidden">
-            <div class="chat-preview-header">Proposed Game:</div>
-            <div id="chatPreviewContentGlobal"></div>
+          <div id="chatProposalGlobal" class="chat-proposal hidden">
+            <div class="chat-proposal-header">Proposed Game</div>
+            <div class="chat-proposal-content" id="chatProposalContentGlobal"></div>
+            <div class="chat-proposal-feasibility" id="chatFeasibilityGlobal"></div>
           </div>
-          <div id="chatWarningGlobal" class="custom-warning hidden"></div>
+          <div id="chatWarningGlobal" class="chat-warning hidden"></div>
           <div class="chat-buttons">
-            <button class="btn-secondary" id="previewChatGlobal">Preview</button>
-            <button class="btn-primary" id="startChatGlobal" disabled>Start Game</button>
+            <button class="btn-primary" id="submitChatGlobal">Build</button>
+            <button class="btn-primary" id="startChatGlobal" disabled style="display:none">Start Game</button>
           </div>
         </div>
       </div>
@@ -2995,27 +3040,77 @@ $('startCustomGame').onclick = async () => {
 
 // ============== CHAT BUILDER ==============
 let chatBuilderState = {
-  epl: { text: '', parsed: null, count: 0 },
-  global: { text: '', parsed: null, count: 0 },
+  epl: { text: '', parsed: null, count: 0, difficulty: '', proposal: null },
+  global: { text: '', parsed: null, count: 0, difficulty: '', proposal: null },
 };
+
+// Local cache for chat builder feasibility
+const chatFeasibilityCache = new Map();
+const CHAT_CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
+
+function getChatCacheKey(type, text) {
+  return `chat_${type}_${text.toLowerCase().replace(/\s+/g, '_').slice(0, 100)}`;
+}
+
+function getCachedFeasibility(key) {
+  const cached = chatFeasibilityCache.get(key);
+  if (!cached) return null;
+  if (Date.now() - cached.timestamp > CHAT_CACHE_TTL) {
+    chatFeasibilityCache.delete(key);
+    return null;
+  }
+  return cached.data;
+}
+
+function setCachedFeasibility(key, data) {
+  chatFeasibilityCache.set(key, { data, timestamp: Date.now() });
+  // Also persist to localStorage
+  try {
+    localStorage.setItem(`f501_chat_${key}`, JSON.stringify({ data, timestamp: Date.now() }));
+  } catch (e) {}
+}
+
+function loadCachedFeasibilityFromStorage(key) {
+  try {
+    const stored = localStorage.getItem(`f501_chat_${key}`);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (Date.now() - parsed.timestamp < CHAT_CACHE_TTL) {
+        chatFeasibilityCache.set(key, parsed);
+        return parsed.data;
+      }
+    }
+  } catch (e) {}
+  return null;
+}
 
 function initChatBuilder() {
   // EPL Chat Builder
   const chatInputEPL = $('chatInputEPL');
-  const previewBtnEPL = $('previewChatEPL');
+  const submitBtnEPL = $('submitChatEPL');
   const startBtnEPL = $('startChatEPL');
 
   if (chatInputEPL) {
     chatInputEPL.oninput = () => {
       chatBuilderState.epl.text = chatInputEPL.value;
+      // Reset state when input changes
+      $('chatProposalEPL')?.classList.add('hidden');
+      $('chatWarningEPL')?.classList.add('hidden');
+      startBtnEPL.style.display = 'none';
       startBtnEPL.disabled = true;
-      $('chatPreviewEPL').classList.add('hidden');
-      $('chatWarningEPL').classList.add('hidden');
+      submitBtnEPL.style.display = '';
+    };
+    // Allow Enter to submit
+    chatInputEPL.onkeydown = (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        buildChatGame('epl');
+      }
     };
   }
 
-  if (previewBtnEPL) {
-    previewBtnEPL.onclick = () => previewChatGame('epl');
+  if (submitBtnEPL) {
+    submitBtnEPL.onclick = () => buildChatGame('epl');
   }
 
   if (startBtnEPL) {
@@ -3024,20 +3119,28 @@ function initChatBuilder() {
 
   // Global Chat Builder
   const chatInputGlobal = $('chatInputGlobal');
-  const previewBtnGlobal = $('previewChatGlobal');
+  const submitBtnGlobal = $('submitChatGlobal');
   const startBtnGlobal = $('startChatGlobal');
 
   if (chatInputGlobal) {
     chatInputGlobal.oninput = () => {
       chatBuilderState.global.text = chatInputGlobal.value;
+      $('chatProposalGlobal')?.classList.add('hidden');
+      $('chatWarningGlobal')?.classList.add('hidden');
+      startBtnGlobal.style.display = 'none';
       startBtnGlobal.disabled = true;
-      $('chatPreviewGlobal').classList.add('hidden');
-      $('chatWarningGlobal').classList.add('hidden');
+      submitBtnGlobal.style.display = '';
+    };
+    chatInputGlobal.onkeydown = (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        buildChatGame('global');
+      }
     };
   }
 
-  if (previewBtnGlobal) {
-    previewBtnGlobal.onclick = () => previewChatGame('global');
+  if (submitBtnGlobal) {
+    submitBtnGlobal.onclick = () => buildChatGame('global');
   }
 
   if (startBtnGlobal) {
@@ -3045,11 +3148,13 @@ function initChatBuilder() {
   }
 }
 
-async function previewChatGame(type) {
+async function buildChatGame(type) {
   const inputEl = $(type === 'epl' ? 'chatInputEPL' : 'chatInputGlobal');
-  const previewEl = $(type === 'epl' ? 'chatPreviewEPL' : 'chatPreviewGlobal');
-  const previewContentEl = $(type === 'epl' ? 'chatPreviewContentEPL' : 'chatPreviewContentGlobal');
+  const proposalEl = $(type === 'epl' ? 'chatProposalEPL' : 'chatProposalGlobal');
+  const proposalContentEl = $(type === 'epl' ? 'chatProposalContentEPL' : 'chatProposalContentGlobal');
+  const feasibilityEl = $(type === 'epl' ? 'chatFeasibilityEPL' : 'chatFeasibilityGlobal');
   const warningEl = $(type === 'epl' ? 'chatWarningEPL' : 'chatWarningGlobal');
+  const submitBtn = $(type === 'epl' ? 'submitChatEPL' : 'submitChatGlobal');
   const startBtn = $(type === 'epl' ? 'startChatEPL' : 'startChatGlobal');
 
   const text = inputEl.value.trim();
@@ -3059,74 +3164,116 @@ async function previewChatGame(type) {
     return;
   }
 
-  previewEl.classList.remove('hidden');
-  previewContentEl.innerHTML = '<div class="preview-row"><span class="label">Analyzing...</span></div>';
+  // Show loading state
+  proposalEl.classList.remove('hidden');
+  proposalContentEl.innerHTML = '<div class="proposal-row"><span class="label">Analyzing your request...</span></div>';
+  feasibilityEl.innerHTML = '';
   warningEl.classList.add('hidden');
-  startBtn.disabled = true;
+  submitBtn.disabled = true;
 
-  try {
-    const res = await fetch(`${API_BASE}/match_start`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        categoryId: 'chat_builder',
-        text: text,
-        previewOnly: true,
-      }),
-    });
-    const data = await res.json();
+  // Check cache first
+  const cacheKey = getChatCacheKey(type, text);
+  let data = getCachedFeasibility(cacheKey) || loadCachedFeasibilityFromStorage(cacheKey);
 
-    if (data.error) {
-      warningEl.textContent = data.error;
+  if (!data) {
+    try {
+      const res = await fetch(`${API_BASE}/match_start`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          categoryId: 'chat_builder',
+          text: text,
+          mode: 'preview',
+        }),
+      });
+      data = await res.json();
+
+      if (data.error) {
+        warningEl.textContent = data.error;
+        warningEl.classList.remove('hidden');
+        proposalEl.classList.add('hidden');
+        submitBtn.disabled = false;
+        return;
+      }
+
+      // Cache the result
+      setCachedFeasibility(cacheKey, data);
+    } catch (err) {
+      warningEl.textContent = 'Failed to analyze: ' + err.message;
       warningEl.classList.remove('hidden');
-      previewEl.classList.add('hidden');
+      proposalEl.classList.add('hidden');
+      submitBtn.disabled = false;
       return;
     }
-
-    const count = data.eligibleCount || 0;
-    const parsed = data.parsed || {};
-    const diff = getDifficulty(count);
-
-    chatBuilderState[type] = { text, parsed, count };
-
-    // Build preview content
-    let previewHtml = `
-      <div class="preview-row"><span class="label">Metric:</span><span class="value">${parsed.metric === 'goals_total' ? 'Goals' : 'Appearances'}</span></div>
-      <div class="preview-row"><span class="label">Competition:</span><span class="value">${parsed.competition || 'EPL'}</span></div>
-    `;
-
-    if (parsed.nationalities && parsed.nationalities.length > 0) {
-      previewHtml += `<div class="preview-row"><span class="label">Nationalities:</span><span class="value">${parsed.nationalities.join(', ')}</span></div>`;
-    }
-
-    if (parsed.clubs && parsed.clubs.length > 0) {
-      previewHtml += `<div class="preview-row"><span class="label">Clubs:</span><span class="value">${parsed.clubs.join(', ')}</span></div>`;
-    }
-
-    const countClass = count < 40 ? 'low' : 'eligible';
-    previewHtml += `<div class="preview-row"><span class="label">Eligible Players:</span><span class="value ${countClass}">${formatNum(count)}</span></div>`;
-    previewHtml += `<div class="preview-row"><span class="label">Difficulty:</span><span class="value">${'★'.repeat(diff)}${'☆'.repeat(5 - diff)}</span></div>`;
-
-    previewContentEl.innerHTML = previewHtml;
-
-    // Check feasibility
-    if (count === 0) {
-      warningEl.textContent = 'No players match your criteria. Try broader filters.';
-      warningEl.classList.remove('hidden');
-      startBtn.disabled = true;
-    } else if (count < 40) {
-      warningEl.textContent = `Only ${count} players found. This may be too niche for a good game. Consider adding more nationalities or clubs.`;
-      warningEl.classList.remove('hidden');
-      startBtn.disabled = false; // Allow anyway
-    } else {
-      startBtn.disabled = false;
-    }
-
-  } catch (err) {
-    warningEl.textContent = 'Failed to preview: ' + err.message;
-    warningEl.classList.remove('hidden');
-    previewEl.classList.add('hidden');
   }
+
+  const count = data.player_count || data.eligibleCount || 0;
+  const parsed = data.parsed || data.proposal || {};
+  const difficulty = data.difficulty || (count >= 40 ? 'easy' : count >= 20 ? 'hard' : 'not_feasible');
+  const diffStars = getDifficulty(count);
+
+  chatBuilderState[type] = { text, parsed, count, difficulty, proposal: data };
+
+  // Build proposal content
+  let proposalHtml = `
+    <div class="proposal-row"><span class="label">Competition:</span><span class="value">${parsed.competition || 'Premier League'}</span></div>
+    <div class="proposal-row"><span class="label">Metric:</span><span class="value">${parsed.metric === 'goals' ? 'Goals' : 'Appearances'}</span></div>
+  `;
+
+  if (parsed.nationalities && parsed.nationalities.length > 0) {
+    proposalHtml += `<div class="proposal-row"><span class="label">Nationalities:</span><span class="value">${parsed.nationalities.join(', ')}</span></div>`;
+  }
+
+  if (parsed.clubs && parsed.clubs.length > 0) {
+    proposalHtml += `<div class="proposal-row"><span class="label">Clubs:</span><span class="value">${parsed.clubs.join(', ')}</span></div>`;
+  }
+
+  proposalContentEl.innerHTML = proposalHtml;
+
+  // Build feasibility section
+  let feasibilityHtml = '';
+  const stars = '★'.repeat(diffStars) + '☆'.repeat(5 - diffStars);
+
+  if (difficulty === 'not_feasible' || count < 20) {
+    feasibilityHtml = `
+      <div class="feasibility-fail">
+        <strong>${count} players found</strong> - Not enough for a good game
+        <span class="feasibility-stars">${stars}</span>
+      </div>
+      <div class="feasibility-suggestion">
+        Try broadening your criteria: add more clubs, remove a nationality filter, or try a different competition.
+      </div>
+    `;
+    startBtn.style.display = 'none';
+    startBtn.disabled = true;
+    submitBtn.disabled = false;
+    submitBtn.style.display = '';
+  } else if (difficulty === 'hard' || count < 40) {
+    feasibilityHtml = `
+      <div class="feasibility-warn">
+        <strong>${count} players found</strong> - Hard mode!
+        <span class="feasibility-stars">${stars}</span>
+      </div>
+      <div class="feasibility-suggestion">
+        This is a challenging game. Consider adding more clubs or nationalities for an easier experience.
+      </div>
+    `;
+    submitBtn.style.display = 'none';
+    startBtn.style.display = '';
+    startBtn.disabled = false;
+  } else {
+    feasibilityHtml = `
+      <div class="feasibility-ok">
+        <strong>${count} players found</strong> - Ready to play!
+        <span class="feasibility-stars">${stars}</span>
+      </div>
+    `;
+    submitBtn.style.display = 'none';
+    startBtn.style.display = '';
+    startBtn.disabled = false;
+  }
+
+  feasibilityEl.innerHTML = feasibilityHtml;
 }
 
 async function startChatGame(type) {
@@ -3188,5 +3335,8 @@ async function startChatGame(type) {
   initChatBuilder();
 })();
 </script>
+<footer style="text-align:center;padding:16px;font-size:11px;color:var(--muted);opacity:0.6;">
+  Build: 2025-02-07-1800 | Football 501 v2
+</footer>
 </body>
 </html>
