@@ -3085,10 +3085,14 @@ function loadCachedFeasibilityFromStorage(key) {
 }
 
 function initChatBuilder() {
+  console.log('[chat] init started');
+
   // EPL Chat Builder
   const chatInputEPL = $('chatInputEPL');
   const submitBtnEPL = $('submitChatEPL');
   const startBtnEPL = $('startChatEPL');
+
+  console.log('[chat] EPL elements:', { chatInputEPL: !!chatInputEPL, submitBtnEPL: !!submitBtnEPL, startBtnEPL: !!startBtnEPL });
 
   if (chatInputEPL) {
     chatInputEPL.oninput = () => {
@@ -3096,21 +3100,31 @@ function initChatBuilder() {
       // Reset state when input changes
       $('chatProposalEPL')?.classList.add('hidden');
       $('chatWarningEPL')?.classList.add('hidden');
-      startBtnEPL.style.display = 'none';
-      startBtnEPL.disabled = true;
-      submitBtnEPL.style.display = '';
+      if (startBtnEPL) {
+        startBtnEPL.style.display = 'none';
+        startBtnEPL.disabled = true;
+      }
+      if (submitBtnEPL) {
+        submitBtnEPL.style.display = '';
+        submitBtnEPL.disabled = false;
+      }
     };
     // Allow Enter to submit
     chatInputEPL.onkeydown = (e) => {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
+        console.log('[chat] Enter key pressed');
         buildChatGame('epl');
       }
     };
   }
 
   if (submitBtnEPL) {
-    submitBtnEPL.onclick = () => buildChatGame('epl');
+    submitBtnEPL.onclick = () => {
+      console.log('[chat] submit EPL clicked');
+      buildChatGame('epl');
+    };
+    console.log('[chat] EPL submit handler attached');
   }
 
   if (startBtnEPL) {
@@ -3122,30 +3136,44 @@ function initChatBuilder() {
   const submitBtnGlobal = $('submitChatGlobal');
   const startBtnGlobal = $('startChatGlobal');
 
+  console.log('[chat] Global elements:', { chatInputGlobal: !!chatInputGlobal, submitBtnGlobal: !!submitBtnGlobal, startBtnGlobal: !!startBtnGlobal });
+
   if (chatInputGlobal) {
     chatInputGlobal.oninput = () => {
       chatBuilderState.global.text = chatInputGlobal.value;
       $('chatProposalGlobal')?.classList.add('hidden');
       $('chatWarningGlobal')?.classList.add('hidden');
-      startBtnGlobal.style.display = 'none';
-      startBtnGlobal.disabled = true;
-      submitBtnGlobal.style.display = '';
+      if (startBtnGlobal) {
+        startBtnGlobal.style.display = 'none';
+        startBtnGlobal.disabled = true;
+      }
+      if (submitBtnGlobal) {
+        submitBtnGlobal.style.display = '';
+        submitBtnGlobal.disabled = false;
+      }
     };
     chatInputGlobal.onkeydown = (e) => {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
+        console.log('[chat] Enter key pressed (global)');
         buildChatGame('global');
       }
     };
   }
 
   if (submitBtnGlobal) {
-    submitBtnGlobal.onclick = () => buildChatGame('global');
+    submitBtnGlobal.onclick = () => {
+      console.log('[chat] submit Global clicked');
+      buildChatGame('global');
+    };
+    console.log('[chat] Global submit handler attached');
   }
 
   if (startBtnGlobal) {
     startBtnGlobal.onclick = () => startChatGame('global');
   }
+
+  console.log('[chat] init complete');
 }
 
 async function buildChatGame(type) {
