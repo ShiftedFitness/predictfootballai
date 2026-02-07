@@ -1,6 +1,7 @@
 // netlify/functions/match_start.js
 // Supabase-backed match start API for Football 501
 // Supports multiple competitions: EPL, UCL, La Liga, Serie A, Bundesliga, Ligue 1
+// FIXED: Uses player_uid (not player_id), separate queries (no embedded joins)
 
 const { createClient } = require('@supabase/supabase-js');
 
@@ -8,16 +9,43 @@ const SUPABASE_URL = process.env.Supabase_Project_URL;
 const SUPABASE_SERVICE_KEY = process.env.Supabase_Service_Role;
 
 // ============================================================
+// IN-MEMORY CACHE (45-minute TTL for preview/difficulty queries)
+// ============================================================
+const cache = new Map();
+const CACHE_TTL_MS = 45 * 60 * 1000; // 45 minutes
+
+function getCached(key) {
+  const entry = cache.get(key);
+  if (!entry) return null;
+  if (Date.now() - entry.timestamp > CACHE_TTL_MS) {
+    cache.delete(key);
+    return null;
+  }
+  return entry.data;
+}
+
+function setCache(key, data) {
+  cache.set(key, { data, timestamp: Date.now() });
+}
+
+// ============================================================
 // COMPETITION MAPPING
+// DB stores full names like "Premier League", not "EPL"
 // ============================================================
 const COMPETITIONS = {
-  EPL: { code: 'EPL', name: 'Premier League', aliases: ['premier league', 'epl', 'pl', 'prem'] },
-  UCL: { code: 'UCL', name: 'Champions League', aliases: ['champions league', 'ucl', 'cl'] },
-  LALIGA: { code: 'La Liga', name: 'La Liga', aliases: ['la liga', 'laliga', 'spain', 'spanish league'] },
-  SERIEA: { code: 'Serie A', name: 'Serie A', aliases: ['serie a', 'seriea', 'italy', 'italian league'] },
-  BUNDESLIGA: { code: 'Bundesliga', name: 'Bundesliga', aliases: ['bundesliga', 'germany', 'german league'] },
-  LIGUE1: { code: 'Ligue 1', name: 'Ligue 1', aliases: ['ligue 1', 'ligue1', 'france', 'french league'] },
+  EPL: { dbName: 'Premier League', displayName: 'Premier League', aliases: ['premier league', 'epl', 'pl', 'prem'] },
+  UCL: { dbName: 'Champions League', displayName: 'Champions League', aliases: ['champions league', 'ucl', 'cl'] },
+  LALIGA: { dbName: 'La Liga', displayName: 'La Liga', aliases: ['la liga', 'laliga', 'spain', 'spanish league'] },
+  SERIEA: { dbName: 'Serie A', displayName: 'Serie A', aliases: ['serie a', 'seriea', 'italy', 'italian league'] },
+  BUNDESLIGA: { dbName: 'Bundesliga', displayName: 'Bundesliga', aliases: ['bundesliga', 'germany', 'german league'] },
+  LIGUE1: { dbName: 'Ligue 1', displayName: 'Ligue 1', aliases: ['ligue 1', 'ligue1', 'france', 'french league'] },
 };
+
+// Helper to get DB competition name from category code
+function getCompetitionDbName(code) {
+  const comp = COMPETITIONS[code];
+  return comp ? comp.dbName : code;
+}
 
 // British nationality codes
 const BRITISH_CODES = ['ENG', 'SCO', 'WAL', 'NIR'];
@@ -72,13 +100,6 @@ const EPL_POSITION_CATEGORIES = {
   epl_position_DF: { position: 'DF', name: 'Defenders', flag: '🛡️', competition: 'EPL' },
   epl_position_MF: { position: 'MF', name: 'Midfielders', flag: '⚙️', competition: 'EPL' },
   epl_position_FW: { position: 'FW', name: 'Forwards', flag: '⚡', competition: 'EPL' },
-};
-
-// EPL Age categories
-const EPL_AGE_CATEGORIES = {
-  epl_age_u19: { age: 'u19', name: 'Age 19 and Below', flag: '👶', competition: 'EPL' },
-  epl_age_u21: { age: 'u21', name: 'Age 21 and Below', flag: '🧒', competition: 'EPL' },
-  epl_age_35plus: { age: '35plus', name: 'Age 35 and Above', flag: '👴', competition: 'EPL' },
 };
 
 // EPL Club categories (expanded to top clubs)
@@ -183,12 +204,6 @@ const UCL_CLUB_CATEGORIES = {
   ucl_club_ACMilan: { club: 'AC Milan', altClub: 'Milan', label: 'AC Milan', competition: 'UCL' },
   ucl_club_Inter: { club: 'Inter Milan', altClub: 'Inter', label: 'Inter Milan', competition: 'UCL' },
   ucl_club_PSG: { club: 'Paris Saint-Germain', altClub: 'PSG', label: 'PSG', competition: 'UCL' },
-};
-
-// Big 5 (ex EPL) British Players
-const BIG5_BRITISH_CATEGORIES = {
-  big5_british_apps: { name: 'Big 5 British (Apps)', flag: '🇬🇧', metric: 'apps' },
-  big5_british_goals: { name: 'Big 5 British (Goals)', flag: '🇬🇧', metric: 'goals' },
 };
 
 // ============================================================
@@ -347,6 +362,29 @@ function normalize(s) {
     .replace(/[^a-z0-9\s.-]/g, '').trim();
 }
 
+// Parse nationality from DB format (e.g., "eng ENG" -> "ENG")
+function parseNationality(natString) {
+  if (!natString) return '';
+  const parts = String(natString).trim().split(/\s+/);
+  // Take the uppercase part if available
+  for (const part of parts) {
+    if (part === part.toUpperCase() && part.length === 3) {
+      return part;
+    }
+  }
+  // Fallback to uppercase of last part
+  return parts[parts.length - 1].toUpperCase();
+}
+
+// Check if nationality matches filter (handles both single code and arrays)
+function matchesNationality(playerNat, filter) {
+  const parsed = parseNationality(playerNat);
+  if (Array.isArray(filter)) {
+    return filter.includes(parsed);
+  }
+  return parsed === filter;
+}
+
 function respond(status, body) {
   return {
     statusCode: status,
@@ -377,17 +415,17 @@ function parseChatQuery(text) {
   const normalized = text.toLowerCase();
 
   // Determine metric
-  let metric = 'apps_total';
+  let metric = 'appearances';
   if (/goals?|scor/.test(normalized)) {
-    metric = 'goals_total';
+    metric = 'goals';
   }
 
-  // Determine competition
-  let competition = 'EPL'; // Default
+  // Determine competition (default to Premier League)
+  let competition = 'Premier League';
   for (const [key, comp] of Object.entries(COMPETITIONS)) {
     for (const alias of comp.aliases) {
       if (normalized.includes(alias)) {
-        competition = comp.code;
+        competition = comp.dbName;
         break;
       }
     }
@@ -418,298 +456,353 @@ function parseChatQuery(text) {
 }
 
 // ============================================================
-// DATA FETCHING HELPERS
+// DATA FETCHING HELPERS (Option 2: Separate queries, no embedded joins)
 // ============================================================
-async function fetchPlayersByCompetitionAndNationality(supabase, competition, nationalityCodes, metric = 'apps_total') {
-  const metricCol = metric === 'goals_total' ? 'goals_total' : 'apps_total';
-  const isMultiNat = Array.isArray(nationalityCodes);
 
+// Fetch players from player_competition_totals with optional nationality filter
+async function fetchPlayersByCompetitionAndNationality(supabase, competition, nationalityCodes, metric = 'appearances') {
+  const competitionDbName = getCompetitionDbName(competition);
+  const metricCol = metric === 'goals' ? 'goals' : 'appearances';
+
+  // Step 1: Fetch from player_competition_totals (no join)
   let query = supabase
     .from('player_competition_totals')
-    .select(`
-      player_id,
-      apps_total,
-      goals_total,
-      mins_total,
-      starts_total,
-      players!inner (
-        player_id,
-        name,
-        normalized_name,
-        nationality
-      )
-    `)
-    .eq('competition', competition)
+    .select('player_uid, appearances, goals, minutes, starts')
+    .eq('competition', competitionDbName)
     .gt(metricCol, 0);
 
-  if (isMultiNat && nationalityCodes.length > 0) {
-    query = query.in('players.nationality', nationalityCodes);
-  } else if (nationalityCodes && !isMultiNat) {
-    query = query.eq('players.nationality', nationalityCodes);
+  const { data: totalsData, error: totalsError } = await query;
+  if (totalsError) {
+    console.error('[fetchPlayersByCompetitionAndNationality] totals error:', totalsError);
+    throw totalsError;
   }
 
-  const { data, error } = await query;
-  if (error) throw error;
+  if (!totalsData || totalsData.length === 0) {
+    return [];
+  }
 
-  // Get clubs for these players
-  const playerIds = (data || []).map(r => r.player_id);
-  const clubsMap = await getClubsForPlayers(supabase, playerIds, competition);
-  const seasonsMap = await getSeasonsForPlayers(supabase, playerIds, competition);
+  // Step 2: Get unique player_uids
+  const playerUids = [...new Set(totalsData.map(r => r.player_uid))];
 
-  return (data || []).map(row => ({
-    playerId: row.player_id,
-    name: row.players.name,
-    normalized: row.players.normalized_name || normalize(row.players.name),
-    nationality: row.players.nationality,
-    subtractValue: metric === 'goals_total' ? row.goals_total : row.apps_total,
-    overlay: {
-      apps: row.apps_total,
-      goals: row.goals_total,
-      mins: row.mins_total,
-      starts: row.starts_total,
-    },
-    clubs: (clubsMap[row.player_id] || []).slice(0, 5),
-    clubCount: (clubsMap[row.player_id] || []).length,
-    seasonsCount: seasonsMap[row.player_id] || null,
-  }));
+  // Step 3: Fetch player info separately (batched if needed)
+  const batchSize = 500;
+  const playerInfoMap = new Map();
+
+  for (let i = 0; i < playerUids.length; i += batchSize) {
+    const batch = playerUids.slice(i, i + batchSize);
+    const { data: playersData, error: playersError } = await supabase
+      .from('players')
+      .select('player_uid, player_name, normalized_player_name, nationality, position')
+      .in('player_uid', batch);
+
+    if (playersError) {
+      console.error('[fetchPlayersByCompetitionAndNationality] players error:', playersError);
+      continue;
+    }
+
+    (playersData || []).forEach(p => {
+      playerInfoMap.set(p.player_uid, p);
+    });
+  }
+
+  // Step 4: Join in JavaScript and filter by nationality
+  const result = [];
+  const hasNatFilter = nationalityCodes && (Array.isArray(nationalityCodes) ? nationalityCodes.length > 0 : true);
+
+  for (const row of totalsData) {
+    const playerInfo = playerInfoMap.get(row.player_uid);
+    if (!playerInfo) continue;
+
+    // Apply nationality filter
+    if (hasNatFilter && !matchesNationality(playerInfo.nationality, nationalityCodes)) {
+      continue;
+    }
+
+    const subtractValue = metric === 'goals' ? row.goals : row.appearances;
+
+    result.push({
+      playerId: row.player_uid,
+      name: playerInfo.player_name,
+      normalized: playerInfo.normalized_player_name || normalize(playerInfo.player_name),
+      nationality: parseNationality(playerInfo.nationality),
+      subtractValue,
+      overlay: {
+        apps: row.appearances,
+        goals: row.goals,
+        mins: row.minutes,
+        starts: row.starts,
+      },
+      clubs: [],
+      clubCount: 0,
+      seasonsCount: null,
+    });
+  }
+
+  // Step 5: Optionally fetch clubs (for display)
+  if (result.length > 0 && result.length <= 2000) {
+    const clubsMap = await getClubsForPlayers(supabase, result.map(r => r.playerId), competitionDbName);
+    result.forEach(r => {
+      r.clubs = (clubsMap[r.playerId] || []).slice(0, 5);
+      r.clubCount = (clubsMap[r.playerId] || []).length;
+    });
+  }
+
+  return result;
 }
 
-async function fetchPlayersByClub(supabase, competition, clubName, altClubName, metric = 'apps_total') {
-  const metricCol = metric === 'goals_total' ? 'goals_total' : 'apps_total';
+// Fetch players from player_club_totals for a specific club
+async function fetchPlayersByClub(supabase, competition, clubName, altClubName, metric = 'appearances') {
+  const competitionDbName = getCompetitionDbName(competition);
+  const metricCol = metric === 'goals' ? 'goals' : 'appearances';
 
-  let { data, error } = await supabase
+  // Try primary club name
+  let { data: totalsData, error: totalsError } = await supabase
     .from('player_club_totals')
-    .select(`
-      player_id,
-      club,
-      apps_total,
-      goals_total,
-      mins_total,
-      starts_total,
-      players!inner (
-        player_id,
-        name,
-        normalized_name,
-        nationality
-      )
-    `)
-    .eq('competition', competition)
+    .select('player_uid, club, appearances, goals, minutes, starts')
+    .eq('competition', competitionDbName)
     .eq('club', clubName)
     .gt(metricCol, 0);
 
-  if (error) throw error;
+  if (totalsError) {
+    console.error('[fetchPlayersByClub] totals error:', totalsError);
+    throw totalsError;
+  }
 
-  // Try alt club if no results
-  if ((!data || data.length === 0) && altClubName) {
+  // Try alt club name if no results
+  if ((!totalsData || totalsData.length === 0) && altClubName) {
     const altResult = await supabase
       .from('player_club_totals')
-      .select(`
-        player_id,
-        club,
-        apps_total,
-        goals_total,
-        mins_total,
-        starts_total,
-        players!inner (
-          player_id,
-          name,
-          normalized_name,
-          nationality
-        )
-      `)
-      .eq('competition', competition)
+      .select('player_uid, club, appearances, goals, minutes, starts')
+      .eq('competition', competitionDbName)
       .eq('club', altClubName)
       .gt(metricCol, 0);
 
     if (!altResult.error && altResult.data) {
-      data = altResult.data;
+      totalsData = altResult.data;
     }
   }
 
-  // Get all clubs for these players
-  const playerIds = (data || []).map(r => r.player_id);
-  const clubsMap = await getClubsForPlayers(supabase, playerIds, competition);
-  const seasonsMap = await getSeasonsForPlayers(supabase, playerIds, competition);
+  if (!totalsData || totalsData.length === 0) {
+    return [];
+  }
 
-  return (data || []).map(row => {
-    const clubs = clubsMap[row.player_id] || [row.club];
+  // Fetch player info
+  const playerUids = [...new Set(totalsData.map(r => r.player_uid))];
+  const playerInfoMap = new Map();
+
+  const batchSize = 500;
+  for (let i = 0; i < playerUids.length; i += batchSize) {
+    const batch = playerUids.slice(i, i + batchSize);
+    const { data: playersData } = await supabase
+      .from('players')
+      .select('player_uid, player_name, normalized_player_name, nationality, position')
+      .in('player_uid', batch);
+
+    (playersData || []).forEach(p => {
+      playerInfoMap.set(p.player_uid, p);
+    });
+  }
+
+  // Get all clubs for these players
+  const clubsMap = await getClubsForPlayers(supabase, playerUids, competitionDbName);
+
+  // Join in JavaScript
+  return totalsData.map(row => {
+    const playerInfo = playerInfoMap.get(row.player_uid) || {};
+    const allClubs = clubsMap[row.player_uid] || [row.club];
+
     return {
-      playerId: row.player_id,
-      name: row.players.name,
-      normalized: row.players.normalized_name || normalize(row.players.name),
-      nationality: row.players.nationality,
-      subtractValue: metric === 'goals_total' ? row.goals_total : row.apps_total,
+      playerId: row.player_uid,
+      name: playerInfo.player_name || 'Unknown',
+      normalized: playerInfo.normalized_player_name || normalize(playerInfo.player_name || ''),
+      nationality: parseNationality(playerInfo.nationality),
+      subtractValue: metric === 'goals' ? row.goals : row.appearances,
       overlay: {
-        apps: row.apps_total,
-        goals: row.goals_total,
-        mins: row.mins_total,
-        starts: row.starts_total,
+        apps: row.appearances,
+        goals: row.goals,
+        mins: row.minutes,
+        starts: row.starts,
         club: row.club,
       },
-      clubs: clubs.slice(0, 5),
-      clubCount: clubs.length,
-      seasonsCount: seasonsMap[row.player_id] || null,
+      clubs: allClubs.slice(0, 5),
+      clubCount: allClubs.length,
+      seasonsCount: null,
     };
   });
 }
 
-async function getClubsForPlayers(supabase, playerIds, competition) {
-  if (!playerIds || playerIds.length === 0) return {};
-
-  const { data } = await supabase
-    .from('player_club_totals')
-    .select('player_id, club')
-    .eq('competition', competition)
-    .in('player_id', playerIds);
+// Get all clubs for a set of players in a competition
+async function getClubsForPlayers(supabase, playerUids, competitionDbName) {
+  if (!playerUids || playerUids.length === 0) return {};
 
   const clubsMap = {};
-  (data || []).forEach(r => {
-    if (!clubsMap[r.player_id]) clubsMap[r.player_id] = [];
-    if (!clubsMap[r.player_id].includes(r.club)) {
-      clubsMap[r.player_id].push(r.club);
-    }
-  });
+  const batchSize = 500;
+
+  for (let i = 0; i < playerUids.length; i += batchSize) {
+    const batch = playerUids.slice(i, i + batchSize);
+    const { data } = await supabase
+      .from('player_club_totals')
+      .select('player_uid, club')
+      .eq('competition', competitionDbName)
+      .in('player_uid', batch);
+
+    (data || []).forEach(r => {
+      if (!clubsMap[r.player_uid]) clubsMap[r.player_uid] = [];
+      if (!clubsMap[r.player_uid].includes(r.club)) {
+        clubsMap[r.player_uid].push(r.club);
+      }
+    });
+  }
+
   return clubsMap;
 }
 
-async function getSeasonsForPlayers(supabase, playerIds, competition) {
-  if (!playerIds || playerIds.length === 0) return {};
+// Fetch players by position
+async function fetchPlayersByPosition(supabase, competition, position, metric = 'appearances') {
+  const competitionDbName = getCompetitionDbName(competition);
+  const metricCol = metric === 'goals' ? 'goals' : 'appearances';
 
-  const { data } = await supabase
-    .from('player_season_stats')
-    .select('player_id, season')
-    .eq('competition', competition)
-    .in('player_id', playerIds);
+  // Step 1: Fetch from player_competition_totals
+  const { data: totalsData, error: totalsError } = await supabase
+    .from('player_competition_totals')
+    .select('player_uid, appearances, goals, minutes, starts')
+    .eq('competition', competitionDbName)
+    .gt(metricCol, 0);
 
-  const seasonSets = {};
-  (data || []).forEach(r => {
-    if (!seasonSets[r.player_id]) seasonSets[r.player_id] = new Set();
-    seasonSets[r.player_id].add(r.season);
-  });
+  if (totalsError) throw totalsError;
+  if (!totalsData || totalsData.length === 0) return [];
 
-  const result = {};
-  for (const pid in seasonSets) {
-    result[pid] = seasonSets[pid].size;
+  // Step 2: Fetch players with the desired position
+  const playerUids = [...new Set(totalsData.map(r => r.player_uid))];
+  const playerInfoMap = new Map();
+
+  const batchSize = 500;
+  for (let i = 0; i < playerUids.length; i += batchSize) {
+    const batch = playerUids.slice(i, i + batchSize);
+    const { data: playersData } = await supabase
+      .from('players')
+      .select('player_uid, player_name, normalized_player_name, nationality, position')
+      .in('player_uid', batch)
+      .eq('position', position);
+
+    (playersData || []).forEach(p => {
+      playerInfoMap.set(p.player_uid, p);
+    });
   }
+
+  // Step 3: Join and filter
+  const result = [];
+  for (const row of totalsData) {
+    const playerInfo = playerInfoMap.get(row.player_uid);
+    if (!playerInfo) continue;
+
+    result.push({
+      playerId: row.player_uid,
+      name: playerInfo.player_name,
+      normalized: playerInfo.normalized_player_name || normalize(playerInfo.player_name),
+      nationality: parseNationality(playerInfo.nationality),
+      subtractValue: metric === 'goals' ? row.goals : row.appearances,
+      overlay: {
+        apps: row.appearances,
+        goals: row.goals,
+        mins: row.minutes,
+        starts: row.starts,
+        position: playerInfo.position,
+      },
+      clubs: [],
+      clubCount: 0,
+    });
+  }
+
+  // Fetch clubs
+  if (result.length > 0 && result.length <= 2000) {
+    const clubsMap = await getClubsForPlayers(supabase, result.map(r => r.playerId), competitionDbName);
+    result.forEach(r => {
+      r.clubs = (clubsMap[r.playerId] || []).slice(0, 5);
+      r.clubCount = (clubsMap[r.playerId] || []).length;
+    });
+  }
+
   return result;
 }
 
-async function fetchPlayersByPosition(supabase, competition, position, metric = 'apps_total') {
-  const metricCol = metric === 'goals_total' ? 'goals_total' : 'apps_total';
-
-  // Try to find position in player_season_stats or players table
-  const { data, error } = await supabase
-    .from('player_competition_totals')
-    .select(`
-      player_id,
-      apps_total,
-      goals_total,
-      mins_total,
-      starts_total,
-      players!inner (
-        player_id,
-        name,
-        normalized_name,
-        nationality,
-        position
-      )
-    `)
-    .eq('competition', competition)
-    .eq('players.position', position)
-    .gt(metricCol, 0);
-
-  if (error) throw error;
-
-  const playerIds = (data || []).map(r => r.player_id);
-  const clubsMap = await getClubsForPlayers(supabase, playerIds, competition);
-
-  return (data || []).map(row => ({
-    playerId: row.player_id,
-    name: row.players.name,
-    normalized: row.players.normalized_name || normalize(row.players.name),
-    nationality: row.players.nationality,
-    subtractValue: metric === 'goals_total' ? row.goals_total : row.apps_total,
-    overlay: {
-      apps: row.apps_total,
-      goals: row.goals_total,
-      mins: row.mins_total,
-      starts: row.starts_total,
-      position: row.players.position,
-    },
-    clubs: (clubsMap[row.player_id] || []).slice(0, 5),
-    clubCount: (clubsMap[row.player_id] || []).length,
-  }));
-}
-
-async function fetchBig5BritishPlayers(supabase, metric = 'apps_total') {
-  const metricCol = metric === 'goals_total' ? 'goals_total' : 'apps_total';
+// Fetch British players in Big 5 leagues (ex EPL)
+async function fetchBig5BritishPlayers(supabase, metric = 'appearances') {
   const competitions = ['La Liga', 'Serie A', 'Bundesliga', 'Ligue 1'];
+  const metricCol = metric === 'goals' ? 'goals' : 'appearances';
+
+  // First, get all British players
+  const { data: britishPlayers } = await supabase
+    .from('players')
+    .select('player_uid, player_name, normalized_player_name, nationality')
+    .or(BRITISH_CODES.map(c => `nationality.ilike.%${c}%`).join(','));
+
+  if (!britishPlayers || britishPlayers.length === 0) return [];
+
+  const britishUids = britishPlayers.map(p => p.player_uid);
+  const playerInfoMap = new Map();
+  britishPlayers.forEach(p => playerInfoMap.set(p.player_uid, p));
 
   const allPlayers = new Map();
 
   for (const comp of competitions) {
-    const { data } = await supabase
-      .from('player_competition_totals')
-      .select(`
-        player_id,
-        competition,
-        apps_total,
-        goals_total,
-        mins_total,
-        starts_total,
-        players!inner (
-          player_id,
-          name,
-          normalized_name,
-          nationality
-        )
-      `)
-      .eq('competition', comp)
-      .in('players.nationality', BRITISH_CODES)
-      .gt(metricCol, 0);
+    // Fetch totals for British players in this competition
+    const batchSize = 500;
+    for (let i = 0; i < britishUids.length; i += batchSize) {
+      const batch = britishUids.slice(i, i + batchSize);
+      const { data } = await supabase
+        .from('player_competition_totals')
+        .select('player_uid, appearances, goals, minutes, starts')
+        .eq('competition', comp)
+        .in('player_uid', batch)
+        .gt(metricCol, 0);
 
-    (data || []).forEach(row => {
-      const existing = allPlayers.get(row.player_id);
-      if (existing) {
-        existing.subtractValue += metric === 'goals_total' ? row.goals_total : row.apps_total;
-        existing.overlay.apps += row.apps_total;
-        existing.overlay.goals += row.goals_total;
-        if (!existing.competitions.includes(comp)) {
-          existing.competitions.push(comp);
+      (data || []).forEach(row => {
+        const existing = allPlayers.get(row.player_uid);
+        const value = metric === 'goals' ? row.goals : row.appearances;
+
+        if (existing) {
+          existing.subtractValue += value;
+          existing.overlay.apps += row.appearances;
+          existing.overlay.goals += row.goals;
+          if (!existing.competitions.includes(comp)) {
+            existing.competitions.push(comp);
+          }
+        } else {
+          const playerInfo = playerInfoMap.get(row.player_uid) || {};
+          allPlayers.set(row.player_uid, {
+            playerId: row.player_uid,
+            name: playerInfo.player_name || 'Unknown',
+            normalized: playerInfo.normalized_player_name || normalize(playerInfo.player_name || ''),
+            nationality: parseNationality(playerInfo.nationality),
+            subtractValue: value,
+            overlay: {
+              apps: row.appearances,
+              goals: row.goals,
+              mins: row.minutes,
+              starts: row.starts,
+            },
+            competitions: [comp],
+            clubs: [],
+            clubCount: 0,
+          });
         }
-      } else {
-        allPlayers.set(row.player_id, {
-          playerId: row.player_id,
-          name: row.players.name,
-          normalized: row.players.normalized_name || normalize(row.players.name),
-          nationality: row.players.nationality,
-          subtractValue: metric === 'goals_total' ? row.goals_total : row.apps_total,
-          overlay: {
-            apps: row.apps_total,
-            goals: row.goals_total,
-            mins: row.mins_total,
-            starts: row.starts_total,
-          },
-          competitions: [comp],
-          clubs: [],
-          clubCount: 0,
-        });
-      }
-    });
+      });
+    }
   }
 
   return Array.from(allPlayers.values());
 }
 
-async function fetchDynamicTopClubs(supabase, competition, limit = 25, metric = 'apps') {
-  // Get clubs ordered by player count or total goals
-  const orderCol = metric === 'goals' ? 'goals_total' : 'apps_total';
+// Fetch top clubs in a competition
+async function fetchDynamicTopClubs(supabase, competition, limit = 25) {
+  const competitionDbName = getCompetitionDbName(competition);
 
   const { data, error } = await supabase
     .from('player_club_totals')
     .select('club')
-    .eq('competition', competition)
-    .gt('apps_total', 0);
+    .eq('competition', competitionDbName)
+    .gt('appearances', 0);
 
   if (error || !data) return [];
 
@@ -749,12 +842,22 @@ exports.handler = async (event) => {
       return respond(500, { error: 'Server configuration error' });
     }
 
+    // Check cache for preview requests
+    if (previewOnly) {
+      const cacheKey = `preview_${categoryId}_${JSON.stringify(body)}`;
+      const cached = getCached(cacheKey);
+      if (cached) {
+        console.log('[match_start] Cache hit for preview:', categoryId);
+        return respond(200, cached);
+      }
+    }
+
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
     let eligiblePlayers = [];
     let categoryName = '';
     let categoryFlag = '';
-    let metric = 'apps_total';
+    let metric = 'appearances';
     let metricLabel = 'Apps';
     let competition = 'EPL';
 
@@ -768,7 +871,7 @@ exports.handler = async (event) => {
       competition = cat.competition;
 
       eligiblePlayers = await fetchPlayersByCompetitionAndNationality(
-        supabase, competition, cat.code, 'apps_total'
+        supabase, competition, cat.code, 'appearances'
       );
     }
 
@@ -782,7 +885,7 @@ exports.handler = async (event) => {
       competition = cat.competition;
 
       eligiblePlayers = await fetchPlayersByCompetitionAndNationality(
-        supabase, competition, cat.codes, 'apps_total'
+        supabase, competition, cat.codes, 'appearances'
       );
     }
 
@@ -796,7 +899,7 @@ exports.handler = async (event) => {
       competition = cat.competition;
 
       eligiblePlayers = await fetchPlayersByPosition(
-        supabase, competition, cat.position, 'apps_total'
+        supabase, competition, cat.position, 'appearances'
       );
     }
 
@@ -810,7 +913,7 @@ exports.handler = async (event) => {
       competition = cat.competition;
 
       eligiblePlayers = await fetchPlayersByClub(
-        supabase, competition, cat.club, cat.altClub, 'apps_total'
+        supabase, competition, cat.club, cat.altClub, 'appearances'
       );
     }
 
@@ -821,18 +924,18 @@ exports.handler = async (event) => {
       const cat = EPL_GOALS_CATEGORIES[categoryId];
       categoryName = cat.label;
       categoryFlag = '⚽';
-      metric = 'goals_total';
+      metric = 'goals';
       metricLabel = 'Goals';
       competition = cat.competition;
 
       if (cat.club) {
         eligiblePlayers = await fetchPlayersByClub(
-          supabase, competition, cat.club, cat.altClub, 'goals_total'
+          supabase, competition, cat.club, cat.altClub, 'goals'
         );
       } else {
         // All EPL goals
         eligiblePlayers = await fetchPlayersByCompetitionAndNationality(
-          supabase, competition, null, 'goals_total'
+          supabase, competition, null, 'goals'
         );
       }
     }
@@ -848,7 +951,7 @@ exports.handler = async (event) => {
 
       const nationalityFilter = cat.code || null;
       eligiblePlayers = await fetchPlayersByCompetitionAndNationality(
-        supabase, competition, nationalityFilter, 'apps_total'
+        supabase, competition, nationalityFilter, 'appearances'
       );
     }
 
@@ -859,13 +962,13 @@ exports.handler = async (event) => {
       const cat = UCL_GOALS_CATEGORIES[categoryId];
       categoryName = cat.name;
       categoryFlag = cat.flag;
-      metric = 'goals_total';
+      metric = 'goals';
       metricLabel = 'Goals';
       competition = 'UCL';
 
       const nationalityFilter = cat.code || null;
       eligiblePlayers = await fetchPlayersByCompetitionAndNationality(
-        supabase, competition, nationalityFilter, 'goals_total'
+        supabase, competition, nationalityFilter, 'goals'
       );
     }
 
@@ -879,7 +982,7 @@ exports.handler = async (event) => {
       competition = 'UCL';
 
       eligiblePlayers = await fetchPlayersByClub(
-        supabase, competition, cat.club, cat.altClub, 'apps_total'
+        supabase, competition, cat.club, cat.altClub, 'appearances'
       );
     }
 
@@ -890,60 +993,60 @@ exports.handler = async (event) => {
       const clubName = categoryId.replace('laliga_club_', '').replace(/_/g, ' ');
       categoryName = clubName;
       categoryFlag = '🇪🇸';
-      competition = 'La Liga';
+      competition = 'LALIGA';
 
-      eligiblePlayers = await fetchPlayersByClub(supabase, competition, clubName, null, 'apps_total');
+      eligiblePlayers = await fetchPlayersByClub(supabase, competition, clubName, null, 'appearances');
     }
 
     else if (categoryId && categoryId.startsWith('laliga_goals_')) {
       const clubName = categoryId.replace('laliga_goals_', '').replace(/_/g, ' ');
       categoryName = `${clubName} Goals`;
       categoryFlag = '🇪🇸';
-      metric = 'goals_total';
+      metric = 'goals';
       metricLabel = 'Goals';
-      competition = 'La Liga';
+      competition = 'LALIGA';
 
-      eligiblePlayers = await fetchPlayersByClub(supabase, competition, clubName, null, 'goals_total');
+      eligiblePlayers = await fetchPlayersByClub(supabase, competition, clubName, null, 'goals');
     }
 
     else if (categoryId && categoryId.startsWith('seriea_club_')) {
       const clubName = categoryId.replace('seriea_club_', '').replace(/_/g, ' ');
       categoryName = clubName;
       categoryFlag = '🇮🇹';
-      competition = 'Serie A';
+      competition = 'SERIEA';
 
-      eligiblePlayers = await fetchPlayersByClub(supabase, competition, clubName, null, 'apps_total');
+      eligiblePlayers = await fetchPlayersByClub(supabase, competition, clubName, null, 'appearances');
     }
 
     else if (categoryId && categoryId.startsWith('seriea_goals_')) {
       const clubName = categoryId.replace('seriea_goals_', '').replace(/_/g, ' ');
       categoryName = `${clubName} Goals`;
       categoryFlag = '🇮🇹';
-      metric = 'goals_total';
+      metric = 'goals';
       metricLabel = 'Goals';
-      competition = 'Serie A';
+      competition = 'SERIEA';
 
-      eligiblePlayers = await fetchPlayersByClub(supabase, competition, clubName, null, 'goals_total');
+      eligiblePlayers = await fetchPlayersByClub(supabase, competition, clubName, null, 'goals');
     }
 
     else if (categoryId && categoryId.startsWith('bundesliga_club_')) {
       const clubName = categoryId.replace('bundesliga_club_', '').replace(/_/g, ' ');
       categoryName = clubName;
       categoryFlag = '🇩🇪';
-      competition = 'Bundesliga';
+      competition = 'BUNDESLIGA';
 
-      eligiblePlayers = await fetchPlayersByClub(supabase, competition, clubName, null, 'apps_total');
+      eligiblePlayers = await fetchPlayersByClub(supabase, competition, clubName, null, 'appearances');
     }
 
     else if (categoryId && categoryId.startsWith('bundesliga_goals_')) {
       const clubName = categoryId.replace('bundesliga_goals_', '').replace(/_/g, ' ');
       categoryName = `${clubName} Goals`;
       categoryFlag = '🇩🇪';
-      metric = 'goals_total';
+      metric = 'goals';
       metricLabel = 'Goals';
-      competition = 'Bundesliga';
+      competition = 'BUNDESLIGA';
 
-      eligiblePlayers = await fetchPlayersByClub(supabase, competition, clubName, null, 'goals_total');
+      eligiblePlayers = await fetchPlayersByClub(supabase, competition, clubName, null, 'goals');
     }
 
     // ============================================================
@@ -954,17 +1057,17 @@ exports.handler = async (event) => {
       categoryFlag = '🇬🇧';
       competition = 'Big 5 (ex EPL)';
 
-      eligiblePlayers = await fetchBig5BritishPlayers(supabase, 'apps_total');
+      eligiblePlayers = await fetchBig5BritishPlayers(supabase, 'appearances');
     }
 
     else if (categoryId === 'big5_british_goals') {
       categoryName = 'Big 5 British (Goals)';
       categoryFlag = '🇬🇧';
-      metric = 'goals_total';
+      metric = 'goals';
       metricLabel = 'Goals';
       competition = 'Big 5 (ex EPL)';
 
-      eligiblePlayers = await fetchBig5BritishPlayers(supabase, 'goals_total');
+      eligiblePlayers = await fetchBig5BritishPlayers(supabase, 'goals');
     }
 
     // ============================================================
@@ -974,7 +1077,7 @@ exports.handler = async (event) => {
       const comp = body.competition || 'La Liga';
       const limit = body.limit || 25;
 
-      const topClubs = await fetchDynamicTopClubs(supabase, comp, limit, 'apps');
+      const topClubs = await fetchDynamicTopClubs(supabase, comp, limit);
 
       return respond(200, {
         competition: comp,
@@ -986,13 +1089,13 @@ exports.handler = async (event) => {
     // CUSTOM GAME (with intersection support)
     // ============================================================
     else if (categoryId === 'custom') {
-      const customMetric = body.metric || 'apps_total';
+      const customMetric = body.metric === 'goals' || body.metric === 'goals_total' ? 'goals' : 'appearances';
       const nationalities = body.nationalities || null;
       const clubs = body.clubs || null;
       const customCompetition = body.competition || 'EPL';
 
       metric = customMetric;
-      metricLabel = customMetric === 'goals_total' ? 'Goals' : 'Apps';
+      metricLabel = customMetric === 'goals' ? 'Goals' : 'Apps';
       categoryName = 'Custom Game';
       categoryFlag = '🎮';
       competition = customCompetition;
@@ -1012,7 +1115,8 @@ exports.handler = async (event) => {
         );
       } else {
         // Club filter (with optional nationality intersection)
-        const metricCol = customMetric === 'goals_total' ? 'goals_total' : 'apps_total';
+        const competitionDbName = getCompetitionDbName(competition);
+        const metricCol = customMetric === 'goals' ? 'goals' : 'appearances';
         const playerMap = new Map();
 
         for (const clubName of clubs) {
@@ -1020,54 +1124,54 @@ exports.handler = async (event) => {
 
           const { data, error } = await supabase
             .from('player_club_totals')
-            .select(`
-              player_id,
-              club,
-              apps_total,
-              goals_total,
-              mins_total,
-              starts_total,
-              players!inner (
-                player_id,
-                name,
-                normalized_name,
-                nationality
-              )
-            `)
-            .eq('competition', competition)
+            .select('player_uid, club, appearances, goals, minutes, starts')
+            .eq('competition', competitionDbName)
             .eq('club', resolvedClub)
             .gt(metricCol, 0);
 
           if (error) continue;
 
+          // Get player info for these
+          const uids = (data || []).map(r => r.player_uid);
+          const { data: playersData } = await supabase
+            .from('players')
+            .select('player_uid, player_name, normalized_player_name, nationality')
+            .in('player_uid', uids);
+
+          const playerInfoMap = new Map();
+          (playersData || []).forEach(p => playerInfoMap.set(p.player_uid, p));
+
           (data || []).forEach(row => {
+            const playerInfo = playerInfoMap.get(row.player_uid) || {};
+            const parsedNat = parseNationality(playerInfo.nationality);
+
             // Check nationality filter
-            if (hasNatFilter && !nationalities.includes(row.players.nationality)) {
+            if (hasNatFilter && !nationalities.includes(parsedNat)) {
               return;
             }
 
-            const value = customMetric === 'goals_total' ? row.goals_total : row.apps_total;
-            const existing = playerMap.get(row.player_id);
+            const value = customMetric === 'goals' ? row.goals : row.appearances;
+            const existing = playerMap.get(row.player_uid);
 
             if (existing) {
               existing.subtractValue += value;
-              existing.overlay.apps += row.apps_total;
-              existing.overlay.goals += row.goals_total;
+              existing.overlay.apps += row.appearances;
+              existing.overlay.goals += row.goals;
               if (!existing.clubs.includes(row.club)) {
                 existing.clubs.push(row.club);
               }
             } else {
-              playerMap.set(row.player_id, {
-                playerId: row.player_id,
-                name: row.players.name,
-                normalized: row.players.normalized_name || normalize(row.players.name),
-                nationality: row.players.nationality,
+              playerMap.set(row.player_uid, {
+                playerId: row.player_uid,
+                name: playerInfo.player_name || 'Unknown',
+                normalized: playerInfo.normalized_player_name || normalize(playerInfo.player_name || ''),
+                nationality: parsedNat,
                 subtractValue: value,
                 overlay: {
-                  apps: row.apps_total,
-                  goals: row.goals_total,
-                  mins: row.mins_total,
-                  starts: row.starts_total,
+                  apps: row.appearances,
+                  goals: row.goals,
+                  mins: row.minutes,
+                  starts: row.starts,
                 },
                 clubs: [row.club],
                 clubCount: 1,
@@ -1089,8 +1193,9 @@ exports.handler = async (event) => {
       const parsed = parseChatQuery(chatText);
 
       metric = parsed.metric;
-      metricLabel = parsed.metric === 'goals_total' ? 'Goals' : 'Apps';
-      competition = parsed.competition;
+      metricLabel = parsed.metric === 'goals' ? 'Goals' : 'Apps';
+      // Map competition back to code for internal use
+      competition = Object.keys(COMPETITIONS).find(k => COMPETITIONS[k].dbName === parsed.competition) || 'EPL';
       categoryName = 'Chat Built Game';
       categoryFlag = '💬';
 
@@ -1107,35 +1212,37 @@ exports.handler = async (event) => {
         );
       } else {
         // Handle club filter with optional nationality intersection
-        const metricCol = parsed.metric === 'goals_total' ? 'goals_total' : 'apps_total';
+        const competitionDbName = parsed.competition;
+        const metricCol = parsed.metric === 'goals' ? 'goals' : 'appearances';
         const playerMap = new Map();
 
         for (const clubName of parsed.clubs) {
           const { data } = await supabase
             .from('player_club_totals')
-            .select(`
-              player_id,
-              club,
-              apps_total,
-              goals_total,
-              players!inner (
-                player_id,
-                name,
-                normalized_name,
-                nationality
-              )
-            `)
-            .eq('competition', competition)
+            .select('player_uid, club, appearances, goals')
+            .eq('competition', competitionDbName)
             .eq('club', clubName)
             .gt(metricCol, 0);
 
+          const uids = (data || []).map(r => r.player_uid);
+          const { data: playersData } = await supabase
+            .from('players')
+            .select('player_uid, player_name, normalized_player_name, nationality')
+            .in('player_uid', uids);
+
+          const playerInfoMap = new Map();
+          (playersData || []).forEach(p => playerInfoMap.set(p.player_uid, p));
+
           (data || []).forEach(row => {
-            if (hasNatFilter && !parsed.nationalities.includes(row.players.nationality)) {
+            const playerInfo = playerInfoMap.get(row.player_uid) || {};
+            const parsedNat = parseNationality(playerInfo.nationality);
+
+            if (hasNatFilter && !parsed.nationalities.includes(parsedNat)) {
               return;
             }
 
-            const value = parsed.metric === 'goals_total' ? row.goals_total : row.apps_total;
-            const existing = playerMap.get(row.player_id);
+            const value = parsed.metric === 'goals' ? row.goals : row.appearances;
+            const existing = playerMap.get(row.player_uid);
 
             if (existing) {
               existing.subtractValue += value;
@@ -1143,13 +1250,13 @@ exports.handler = async (event) => {
                 existing.clubs.push(row.club);
               }
             } else {
-              playerMap.set(row.player_id, {
-                playerId: row.player_id,
-                name: row.players.name,
-                normalized: row.players.normalized_name || normalize(row.players.name),
-                nationality: row.players.nationality,
+              playerMap.set(row.player_uid, {
+                playerId: row.player_uid,
+                name: playerInfo.player_name || 'Unknown',
+                normalized: playerInfo.normalized_player_name || normalize(playerInfo.player_name || ''),
+                nationality: parsedNat,
                 subtractValue: value,
-                overlay: { apps: row.apps_total, goals: row.goals_total },
+                overlay: { apps: row.appearances, goals: row.goals },
                 clubs: [row.club],
                 clubCount: 1,
               });
@@ -1162,12 +1269,12 @@ exports.handler = async (event) => {
 
       // Return parsed query info for preview mode
       if (previewOnly) {
-        return respond(200, {
+        const response = {
           meta: {
             categoryId: 'chat_builder',
             categoryName,
             categoryFlag,
-            competition,
+            competition: parsed.competition,
             metric,
             metricLabel,
             eligibleCount: eligiblePlayers.length,
@@ -1175,7 +1282,13 @@ exports.handler = async (event) => {
           },
           eligibleCount: eligiblePlayers.length,
           parsed,
-        });
+        };
+
+        // Cache preview response
+        const cacheKey = `preview_${categoryId}_${JSON.stringify(body)}`;
+        setCache(cacheKey, response);
+
+        return respond(200, response);
       }
     }
 
@@ -1192,7 +1305,7 @@ exports.handler = async (event) => {
         categoryFlag = cat.flag;
         competition = 'EPL';
         eligiblePlayers = await fetchPlayersByCompetitionAndNationality(
-          supabase, competition, cat.code, 'apps_total'
+          supabase, competition, cat.code, 'appearances'
         );
       }
     }
@@ -1206,7 +1319,7 @@ exports.handler = async (event) => {
         categoryFlag = cat.flag;
         competition = 'EPL';
         eligiblePlayers = await fetchPlayersByCompetitionAndNationality(
-          supabase, competition, cat.codes, 'apps_total'
+          supabase, competition, cat.codes, 'appearances'
         );
       }
     }
@@ -1218,7 +1331,7 @@ exports.handler = async (event) => {
       categoryFlag = '⚽';
       competition = 'EPL';
       eligiblePlayers = await fetchPlayersByClub(
-        supabase, competition, cat.club, cat.altClub, 'apps_total'
+        supabase, competition, cat.club, cat.altClub, 'appearances'
       );
     }
 
@@ -1227,17 +1340,17 @@ exports.handler = async (event) => {
       const cat = EPL_GOALS_CATEGORIES[categoryId];
       categoryName = cat.label;
       categoryFlag = '⚽';
-      metric = 'goals_total';
+      metric = 'goals';
       metricLabel = 'Goals';
       competition = 'EPL';
 
       if (cat.club) {
         eligiblePlayers = await fetchPlayersByClub(
-          supabase, competition, cat.club, cat.altClub, 'goals_total'
+          supabase, competition, cat.club, cat.altClub, 'goals'
         );
       } else {
         eligiblePlayers = await fetchPlayersByCompetitionAndNationality(
-          supabase, competition, null, 'goals_total'
+          supabase, competition, null, 'goals'
         );
       }
     }
@@ -1260,37 +1373,34 @@ exports.handler = async (event) => {
 
     console.log('[match_start] Returning', eligiblePlayers.length, 'eligible players');
 
-    if (previewOnly) {
-      return respond(200, {
-        meta: {
-          categoryId,
-          categoryName,
-          categoryFlag,
-          competition,
-          metric,
-          metricLabel,
-          eligibleCount: eligiblePlayers.length,
-          datasetVersion,
-        },
-        eligibleCount: eligiblePlayers.length,
-      });
-    }
-
-    return respond(200, {
+    const responseData = {
       meta: {
         categoryId,
         categoryName,
         categoryFlag,
-        competition,
+        competition: getCompetitionDbName(competition),
         metric,
         metricLabel,
         eligibleCount: eligiblePlayers.length,
         datasetVersion,
-        hintBlurb: HINTS[categoryId] || null,
-        trivia: TRIVIA[categoryId] || [],
       },
-      eligiblePlayers,
-    });
+    };
+
+    if (previewOnly) {
+      responseData.eligibleCount = eligiblePlayers.length;
+
+      // Cache preview response
+      const cacheKey = `preview_${categoryId}_${JSON.stringify(body)}`;
+      setCache(cacheKey, responseData);
+
+      return respond(200, responseData);
+    }
+
+    responseData.meta.hintBlurb = HINTS[categoryId] || null;
+    responseData.meta.trivia = TRIVIA[categoryId] || [];
+    responseData.eligiblePlayers = eligiblePlayers;
+
+    return respond(200, responseData);
 
   } catch (err) {
     console.error('[match_start] Error:', err);

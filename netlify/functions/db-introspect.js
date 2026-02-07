@@ -1,6 +1,5 @@
 // netlify/functions/db-introspect.js
-// Introspection endpoint to verify Supabase schema structure
-// Only runs in development/admin mode
+// Schema introspection utility - outputs actual column names for key tables
 
 const { createClient } = require('@supabase/supabase-js');
 
@@ -24,15 +23,6 @@ exports.handler = async (event) => {
     return respond(200, { ok: true });
   }
 
-  // Basic security - require admin token
-  const qs = event.queryStringParameters || {};
-  const adminToken = qs.token || '';
-  const expectedToken = process.env.ADMIN_TOKEN || 'dev';
-
-  if (adminToken !== expectedToken && process.env.NODE_ENV === 'production') {
-    return respond(403, { error: 'Unauthorized' });
-  }
-
   if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
     return respond(500, { error: 'Missing Supabase credentials' });
   }
@@ -40,166 +30,99 @@ exports.handler = async (event) => {
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
   const results = {};
 
+  const tablesToInspect = [
+    'players',
+    'clubs',
+    'competitions',
+    'player_season_stats',
+    'player_club_totals',
+    'player_competition_totals',
+    'player_club_competition_totals',
+    'player_club_total_competition',
+    'player_totals',
+    'season_stats_staging'
+  ];
+
   try {
-    // 1. Get list of all tables
-    const { data: tables, error: tablesError } = await supabase
-      .rpc('get_tables', {})
-      .catch(() => ({ data: null, error: { message: 'RPC not available' } }));
-
-    // Try information_schema instead if RPC fails
-    const { data: schemaData, error: schemaError } = await supabase
-      .from('information_schema.tables')
-      .select('table_name')
-      .eq('table_schema', 'public')
-      .limit(50);
-
-    // Get columns for key tables
-    const tablesToInspect = [
-      'players',
-      'clubs',
-      'competitions',
-      'player_season_stats',
-      'player_club_totals',
-      'player_competition_totals',
-      'player_club_totals_competition',
-      'season_stats_staging'
-    ];
-
+    // Query information_schema for column info using RPC
     for (const tableName of tablesToInspect) {
-      try {
-        // Get columns via select with limit 0
-        const { data, error } = await supabase
-          .from(tableName)
-          .select('*')
-          .limit(1);
+      // Use a simple select with limit 1 to get column structure
+      const { data, error } = await supabase
+        .from(tableName)
+        .select('*')
+        .limit(1);
 
-        if (error) {
-          results[tableName] = { exists: false, error: error.message };
-        } else {
-          const sampleRow = data && data[0];
-          results[tableName] = {
-            exists: true,
-            columns: sampleRow ? Object.keys(sampleRow) : [],
-            sample: sampleRow || null
-          };
-        }
-      } catch (e) {
-        results[tableName] = { exists: false, error: e.message };
+      if (error) {
+        results[tableName] = {
+          exists: false,
+          error: error.message,
+          code: error.code
+        };
+      } else {
+        const sampleRow = data && data[0];
+        results[tableName] = {
+          exists: true,
+          columns: sampleRow ? Object.keys(sampleRow) : [],
+          sampleRow: sampleRow || null,
+          rowCount: data ? data.length : 0
+        };
       }
     }
 
-    // 2. Get distinct competition values
+    // Get sample data from key tables to understand structure
+    // Players table - get nationality values
     try {
-      const { data: compData } = await supabase
-        .from('player_season_stats')
-        .select('competition')
-        .limit(1000);
-
-      if (compData) {
-        const uniqueComps = [...new Set(compData.map(r => r.competition))].filter(Boolean);
-        results.competition_values = uniqueComps;
-      }
-    } catch (e) {
-      results.competition_values = { error: e.message };
-    }
-
-    // 3. Get distinct nationality values (sample)
-    try {
-      const { data: natData } = await supabase
+      const { data: playerSample } = await supabase
         .from('players')
-        .select('nationality')
-        .limit(2000);
-
-      if (natData) {
-        const uniqueNats = [...new Set(natData.map(r => r.nationality))].filter(Boolean).sort();
-        results.nationality_values = uniqueNats;
-      }
+        .select('*')
+        .limit(5);
+      results.players_sample = playerSample;
     } catch (e) {
-      results.nationality_values = { error: e.message };
+      results.players_sample_error = e.message;
     }
 
-    // 4. Get distinct club values (sample)
+    // Get competition values
     try {
-      const { data: clubData } = await supabase
+      const { data: compSample } = await supabase
+        .from('competitions')
+        .select('*')
+        .limit(20);
+      results.competitions_sample = compSample;
+    } catch (e) {
+      results.competitions_sample_error = e.message;
+    }
+
+    // Get club samples
+    try {
+      const { data: clubSample } = await supabase
+        .from('clubs')
+        .select('*')
+        .limit(10);
+      results.clubs_sample = clubSample;
+    } catch (e) {
+      results.clubs_sample_error = e.message;
+    }
+
+    // Get player_club_totals sample to see structure
+    try {
+      const { data: pctSample } = await supabase
         .from('player_club_totals')
-        .select('club, competition')
-        .limit(5000);
-
-      if (clubData) {
-        // Group by competition
-        const clubsByComp = {};
-        for (const row of clubData) {
-          const comp = row.competition || 'unknown';
-          if (!clubsByComp[comp]) clubsByComp[comp] = new Set();
-          clubsByComp[comp].add(row.club);
-        }
-        // Convert sets to sorted arrays
-        for (const comp in clubsByComp) {
-          clubsByComp[comp] = [...clubsByComp[comp]].sort();
-        }
-        results.clubs_by_competition = clubsByComp;
-      }
+        .select('*')
+        .limit(5);
+      results.player_club_totals_sample = pctSample;
     } catch (e) {
-      results.clubs_by_competition = { error: e.message };
+      results.player_club_totals_sample_error = e.message;
     }
 
-    // 5. Count players per competition
+    // Get player_competition_totals sample
     try {
-      const { data: countData } = await supabase
+      const { data: pcompSample } = await supabase
         .from('player_competition_totals')
-        .select('competition, player_id')
-        .limit(10000);
-
-      if (countData) {
-        const countByComp = {};
-        for (const row of countData) {
-          const comp = row.competition || 'unknown';
-          countByComp[comp] = (countByComp[comp] || 0) + 1;
-        }
-        results.player_count_by_competition = countByComp;
-      }
-    } catch (e) {
-      results.player_count_by_competition = { error: e.message };
-    }
-
-    // 6. Check for position data
-    try {
-      const { data: posData } = await supabase
-        .from('players')
         .select('*')
-        .limit(1);
-
-      if (posData && posData[0]) {
-        const columns = Object.keys(posData[0]);
-        results.player_position_columns = columns.filter(c =>
-          c.toLowerCase().includes('position') ||
-          c.toLowerCase().includes('pos') ||
-          c.toLowerCase().includes('role')
-        );
-      }
+        .limit(5);
+      results.player_competition_totals_sample = pcompSample;
     } catch (e) {
-      results.player_position_columns = { error: e.message };
-    }
-
-    // 7. Check for age data
-    try {
-      const { data: ageData } = await supabase
-        .from('player_season_stats')
-        .select('*')
-        .limit(1);
-
-      if (ageData && ageData[0]) {
-        const columns = Object.keys(ageData[0]);
-        results.age_related_columns = columns.filter(c =>
-          c.toLowerCase().includes('age') ||
-          c.toLowerCase().includes('birth') ||
-          c.toLowerCase().includes('u19') ||
-          c.toLowerCase().includes('u21') ||
-          c.toLowerCase().includes('35')
-        );
-      }
-    } catch (e) {
-      results.age_related_columns = { error: e.message };
+      results.player_competition_totals_sample_error = e.message;
     }
 
     return respond(200, {

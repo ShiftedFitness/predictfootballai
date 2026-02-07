@@ -12,7 +12,7 @@ This document describes how the Football 501 game app connects to the Supabase d
 |-------|-------------|
 | `players` | Master player table with demographics |
 | `clubs` | Club/team reference table |
-| `competitions` | Competition reference (EPL, UCL, La Liga, etc.) |
+| `competitions` | Competition reference |
 | `player_season_stats` | Per-season player statistics (fact table) |
 
 ### Rollup Tables (Materialized Views)
@@ -25,36 +25,46 @@ This document describes how the Football 501 game app connects to the Supabase d
 ### Key Columns
 
 #### `players` table
-- `player_id` (PK) - Unique player identifier
-- `name` - Display name
-- `normalized_name` - Lowercase, accent-stripped name for matching
-- `nationality` - 3-letter country code (e.g., 'ENG', 'FRA')
+- `player_uid` (PK) - Unique player identifier (format: "name|nationality|birth_year")
+- `player_name` - Display name
+- `normalized_player_name` - Lowercase, accent-stripped name for matching
+- `nationality` - Format: "eng ENG" (lowercase then uppercase 3-letter code)
 - `position` - Position bucket (GK, DF, MF, FW)
 
 #### `player_competition_totals` table
-- `player_id` (FK) - References players
-- `competition` - Competition code (e.g., 'EPL', 'UCL', 'La Liga')
-- `apps_total` - Total appearances
-- `goals_total` - Total goals
-- `mins_total` - Total minutes
-- `starts_total` - Total starts
+- `player_uid` (FK) - References players
+- `competition` - Full competition name (e.g., 'Premier League', 'Champions League')
+- `appearances` - Total appearances
+- `goals` - Total goals
+- `minutes` - Total minutes
+- `starts` - Total starts
 
 #### `player_club_totals` table
-- `player_id` (FK) - References players
+- `player_uid` (FK) - References players
 - `club` - Club name
-- `competition` - Competition code
-- `apps_total`, `goals_total`, `mins_total`, `starts_total` - Aggregated stats
+- `competition` - Full competition name
+- `appearances`, `goals`, `minutes`, `starts` - Aggregated stats
 
 ## Competition Identifiers
 
-| Competition | Code | Description |
-|-------------|------|-------------|
-| Premier League | `EPL` | English Premier League |
-| Champions League | `UCL` | UEFA Champions League |
-| La Liga | `La Liga` | Spanish top flight |
-| Serie A | `Serie A` | Italian top flight |
-| Bundesliga | `Bundesliga` | German top flight |
-| Ligue 1 | `Ligue 1` | French top flight |
+**IMPORTANT:** The database stores full competition names, NOT codes.
+
+| Competition | DB Value | Display Code |
+|-------------|----------|--------------|
+| Premier League | `Premier League` | EPL |
+| Champions League | `Champions League` | UCL |
+| La Liga | `La Liga` | LALIGA |
+| Serie A | `Serie A` | SERIEA |
+| Bundesliga | `Bundesliga` | BUNDESLIGA |
+| Ligue 1 | `Ligue 1` | LIGUE1 |
+
+## Nationality Format
+
+The `nationality` column uses a mixed format like "eng ENG" where:
+- First part is lowercase (e.g., "eng")
+- Second part is the 3-letter code in uppercase (e.g., "ENG")
+
+The backend parses this to extract the uppercase code for filtering.
 
 ## Category to Query Mapping
 
@@ -64,13 +74,18 @@ Format: `country_{CODE}` or `epl_country_{CODE}`
 
 Example query for French players in EPL:
 ```sql
-SELECT pct.*, p.name, p.nationality
-FROM player_competition_totals pct
-JOIN players p ON pct.player_id = p.player_id
-WHERE pct.competition = 'EPL'
-  AND p.nationality = 'FRA'
-  AND pct.apps_total > 0
-ORDER BY pct.apps_total DESC;
+-- Step 1: Get totals
+SELECT player_uid, appearances, goals, minutes, starts
+FROM player_competition_totals
+WHERE competition = 'Premier League'
+  AND appearances > 0;
+
+-- Step 2: Get player info (separate query)
+SELECT player_uid, player_name, normalized_player_name, nationality, position
+FROM players
+WHERE player_uid IN (...);
+
+-- Step 3: Join in JavaScript and filter by nationality
 ```
 
 ### EPL Continent Categories
@@ -89,20 +104,18 @@ Format: `club_{ClubName}`
 
 Example query for Arsenal players:
 ```sql
-SELECT pct.*, p.name, p.nationality
-FROM player_club_totals pct
-JOIN players p ON pct.player_id = p.player_id
-WHERE pct.competition = 'EPL'
-  AND pct.club = 'Arsenal'
-  AND pct.apps_total > 0
-ORDER BY pct.apps_total DESC;
+SELECT player_uid, club, appearances, goals, minutes, starts
+FROM player_club_totals
+WHERE competition = 'Premier League'
+  AND club = 'Arsenal'
+  AND appearances > 0;
 ```
 
 ### EPL Goals Categories
 
 Format: `goals_{ClubName}` or `goals_overall`
 
-Uses `goals_total` instead of `apps_total` for the subtract value.
+Uses `goals` instead of `appearances` for the subtract value.
 
 ### EPL Position Categories
 
@@ -110,7 +123,7 @@ Format: `epl_position_{POSITION}`
 
 Positions: GK, DF, MF, FW
 
-Requires `position` column in players table.
+Filters players by `position` column in players table.
 
 ### UCL Categories
 
@@ -118,7 +131,7 @@ Requires `position` column in players table.
 - `ucl_country_ALL` - All nationalities
 
 #### UCL Goals: `ucl_goals_{CODE}`
-- Uses `goals_total` as subtract value
+- Uses `goals` as subtract value
 
 #### UCL Club: `ucl_club_{ClubName}`
 
@@ -147,7 +160,7 @@ Queries players with British nationalities (ENG, SCO, WAL, NIR) across:
 Format: `custom`
 
 Accepts parameters:
-- `metric`: 'apps_total' or 'goals_total'
+- `metric`: 'appearances' or 'goals'
 - `nationalities`: array of nationality codes (optional)
 - `clubs`: array of club names (optional)
 - `competition`: competition code (default: 'EPL')
@@ -164,6 +177,25 @@ Parses:
 - Competition
 - Nationalities (from text)
 - Clubs (from text)
+
+## Architecture Notes
+
+### No Foreign Key Relationships
+The Supabase database does NOT have foreign key constraints between tables. This means:
+- PostgREST embedded joins (`table!inner(...)`) will fail
+- The backend uses **separate queries** and joins data in JavaScript
+- Each fetch is done independently, then merged by `player_uid`
+
+### Caching
+
+**Backend (In-Memory):**
+- 45-minute TTL cache for preview requests
+- Cache key format: `preview_{categoryId}_{bodyHash}`
+
+**Frontend (localStorage):**
+- 90-minute TTL cache for category data
+- Cache key format: `f501_{categoryId}`
+- Cache includes `eligiblePlayers` array and `meta` object
 
 ## Frontend-Backend Communication
 
@@ -184,14 +216,14 @@ Parses:
     "categoryId": "club_Arsenal",
     "categoryName": "Arsenal",
     "categoryFlag": "...",
-    "competition": "EPL",
-    "metric": "apps_total",
+    "competition": "Premier League",
+    "metric": "appearances",
     "metricLabel": "Apps",
     "eligibleCount": 215
   },
   "eligiblePlayers": [
     {
-      "playerId": "abc123",
+      "playerId": "thierry henry|fra fra|1977",
       "name": "Thierry Henry",
       "normalized": "thierry henry",
       "nationality": "FRA",
@@ -202,19 +234,13 @@ Parses:
         "mins": 20000,
         "starts": 220
       },
-      "clubs": ["Arsenal", "Monaco"],
-      "clubCount": 2,
-      "seasonsCount": 8
+      "clubs": ["Arsenal"],
+      "clubCount": 1,
+      "seasonsCount": null
     }
   ]
 }
 ```
-
-## Caching
-
-- Frontend caches category data in localStorage with 90-minute TTL
-- Cache key format: `f501_{categoryId}`
-- Cache includes `eligiblePlayers` array and `meta` object
 
 ## Adding New Categories
 
@@ -228,3 +254,14 @@ Parses:
 - `public/football_501.html` - Single-page app UI
 - `netlify/functions/match_start.js` - Backend API for match generation
 - `netlify/functions/db-introspect.js` - Schema introspection utility
+
+## Troubleshooting
+
+### "column players_1.player_id does not exist"
+The database uses `player_uid`, not `player_id`. Update all queries accordingly.
+
+### "Could not find a relationship between tables"
+PostgREST embedded joins require FK constraints. Use separate queries instead:
+1. Query the totals table for `player_uid` and stats
+2. Query the `players` table for player info
+3. Join the results in JavaScript
