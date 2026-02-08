@@ -453,17 +453,28 @@ exports.handler = async (event) => {
       if (isCorrect) correct++;
 
       // Find rank and stats of user's pick in that bucket
+      // Also check adjacent bucket (MID↔FWD) since search allows cross-position picks
       let userRank = null;
       let userStatValue = null;
-      if (pick.playerId && bucketRankings[bucket]) {
-        const found = bucketRankings[bucket].find(r => r.playerId === pick.playerId);
-        if (found) {
-          userRank = found.rank;
-          userStatValue = found.appearances != null ? {
-            appearances: found.appearances,
-            goals: found.goals,
-            score: found.score,
-          } : null;
+      let userRankBucket = null;
+      if (pick.playerId) {
+        const bucketsToCheck = [bucket];
+        if (bucket === 'FWD') bucketsToCheck.push('MID');
+        else if (bucket === 'MID') bucketsToCheck.push('FWD');
+
+        for (const checkBucket of bucketsToCheck) {
+          if (!bucketRankings[checkBucket]) continue;
+          const found = bucketRankings[checkBucket].find(r => r.playerId === pick.playerId);
+          if (found) {
+            userRank = found.rank;
+            userRankBucket = checkBucket;
+            userStatValue = found.appearances != null ? {
+              appearances: found.appearances,
+              goals: found.goals,
+              score: found.score,
+            } : null;
+            break;
+          }
         }
       }
 
@@ -475,6 +486,7 @@ exports.handler = async (event) => {
         correct: !!isCorrect,
         userPick: pick.playerId,
         userRank,
+        userRankBucket: userRankBucket || bucket,
         userStatValue,
         bucketTotal,
         // Only reveal if requested (after 3 attempts or explicit reveal)

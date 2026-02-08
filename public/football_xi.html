@@ -350,6 +350,8 @@ body {
 .suggestion-meta { font-size: 12px; color: var(--muted); }
 .suggestion-nat { font-size: 11px; color: var(--muted); margin-left: 6px; }
 .no-results { text-align: center; color: var(--muted); padding: 20px; font-size: 13px; }
+.search-loading { text-align: center; padding: 20px; }
+.search-loading .spinner { width: 24px; height: 24px; }
 
 /* ====== SCORE BANNER (inline above pitch after scoring) ====== */
 .score-banner {
@@ -594,8 +596,8 @@ body {
     </div>
 
     <!-- Performance info tab (shown when objective=performance) -->
-    <div id="perfInfoTab" class="hidden">
-      <button class="info-tab" onclick="showPerfInfo()">? How scores work</button>
+    <div id="perfInfoTab" class="hidden" style="margin-bottom:10px;">
+      <button class="info-tab" onclick="showPerfInfo()">&#9432; How are scores calculated?</button>
     </div>
 
     <div style="display:flex;gap:8px;align-items:center;">
@@ -617,37 +619,40 @@ body {
         <button class="modal-close" id="modalClose">&times;</button>
       </div>
       <input type="text" class="search-input" id="searchInput" placeholder="Type player name..." autocomplete="off"/>
+      <div class="search-loading hidden" id="searchLoading"><span class="spinner"></span></div>
       <ul class="suggestion-list" id="suggestionList"></ul>
       <div class="no-results hidden" id="noResults">No players found matching your search.</div>
+    </div>
+  </div>
+
+  <!-- ====== SLOT DETAIL OVERLAY (tap a scored slot to see stats) ====== -->
+  <div id="slotDetailOverlay" class="info-overlay hidden">
+    <div class="info-modal" style="padding:20px;">
+      <div id="slotDetailContent"></div>
+      <button class="info-close" onclick="hideSlotDetail()">Close</button>
     </div>
   </div>
 
   <!-- ====== PERFORMANCE INFO OVERLAY ====== -->
   <div id="perfInfoOverlay" class="info-overlay hidden">
     <div class="info-modal">
-      <h3>Performance Scores Explained</h3>
-      <p>Performance scores rank players based on position-weighted stats normalised across each position group.</p>
+      <h3>How Performance Scores Work</h3>
+      <p>Every player gets an effectiveness score based on what matters most for their position:</p>
 
       <h4>Forwards &amp; Midfielders</h4>
-      <ul>
-        <li><code>(goals&times;4 + assists&times;3 + (G+A)&times;1) / per90</code></li>
-        <li>Multiplied by <code>&radic;appearances</code> for volume</li>
-      </ul>
+      <p>Scored on goals and assists per 90 minutes. The more goals and assists you contribute per game, the higher your score.</p>
 
       <h4>Defenders</h4>
-      <ul>
-        <li><code>(tackles+interceptions&times;0.08 + assists&times;2 + goals&times;2) / per90</code></li>
-        <li>Multiplied by <code>&radic;appearances</code></li>
-      </ul>
+      <p>Scored on tackles, interceptions, and defensive contributions per 90 minutes. Goals and assists from defence also count.</p>
 
       <h4>Goalkeepers</h4>
-      <ul>
-        <li><code>(CS%&times;5 + save%&times;4 &minus; GA/90&times;2)</code></li>
-        <li>Multiplied by <code>&radic;appearances</code></li>
-      </ul>
+      <p>Scored on clean sheet percentage and save percentage, minus goals conceded per 90 minutes.</p>
 
-      <h4>Normalisation</h4>
-      <p>Raw scores are converted to Z-scores within each position group &mdash; the final score tells you how many standard deviations above (or below) average a player is compared to others in the same position.</p>
+      <h4>Longevity bonus</h4>
+      <p>Players who have completed more 90-minute matches get a bonus &mdash; consistency and longevity are rewarded.</p>
+
+      <h4>Final score</h4>
+      <p>Everyone in the same position is compared against each other. A higher score means the player is more effective than their peers. A score of 0 is average, positive is above average, negative is below.</p>
 
       <button class="info-close" onclick="hidePerfInfo()">Got it</button>
     </div>
@@ -873,7 +878,12 @@ function renderPitch() {
         ${contextHtml}
       `;
 
-      if (!isLocked) {
+      if (lastResults && lastResults.find(res => res.slotIdx === slot.idx)) {
+        // Scored slot — tap to see detail
+        el.style.cursor = 'pointer';
+        el.style.pointerEvents = 'auto';
+        el.onclick = (e) => { e.stopPropagation(); showSlotDetail(slot.idx); };
+      } else if (!isLocked) {
         el.onclick = () => openSearchModal(slot.idx);
       }
 
@@ -884,8 +894,7 @@ function renderPitch() {
 
 /**
  * Build inline context text for a slot after scoring.
- * For correct: "1st DEF · 455 apps" or "1st DEF · 2.34"
- * For wrong: "10th DEF · not in top 4"
+ * Just shows rank — tap slot for full details.
  */
 function buildSlotContext(r, slot) {
   if (!r.userRank) return '';
@@ -893,29 +902,59 @@ function buildSlotContext(r, slot) {
   const rankStr = ordinal(r.userRank);
 
   if (r.correct) {
-    // Show rank + stat
-    let statStr = '';
-    if (selectedObjective === 'performance' && r.userStatValue?.score != null) {
-      statStr = r.userStatValue.score.toFixed(2);
-    } else if (selectedObjective === 'goals' && r.userStatValue?.goals != null) {
-      statStr = r.userStatValue.goals + ' gls';
-    } else if (r.userStatValue?.appearances != null) {
-      statStr = r.userStatValue.appearances + ' apps';
-    }
-    return `<div class="slot-context">${rankStr} ${slot.bucket}${statStr ? ' · ' + statStr : ''}</div>`;
+    return `<div class="slot-context">${rankStr} ${slot.bucket}</div>`;
   } else {
-    // Wrong — show rank and that they needed top N
-    let statStr = '';
-    if (selectedObjective === 'performance' && r.userStatValue?.score != null) {
-      statStr = ' · ' + r.userStatValue.score.toFixed(2);
-    } else if (selectedObjective === 'goals' && r.userStatValue?.goals != null) {
-      statStr = ' · ' + r.userStatValue.goals + ' gls';
-    } else if (r.userStatValue?.appearances != null) {
-      statStr = ' · ' + r.userStatValue.appearances + ' apps';
-    }
-    return `<div class="slot-context">${rankStr}${statStr} (top ${bucketSlotCount})</div>`;
+    return `<div class="slot-context">${rankStr} (need top ${bucketSlotCount})</div>`;
   }
 }
+
+/**
+ * Show slot detail overlay with full stats when tapping a scored slot.
+ */
+function showSlotDetail(slotIdx) {
+  const slot = slots.find(s => s.idx === slotIdx);
+  if (!slot || !lastResults) return;
+  const r = lastResults.find(res => res.slotIdx === slotIdx);
+  if (!r) return;
+
+  const playerName = slot.player ? escHtml(slot.player.name) : 'Empty';
+  const bucketSlotCount = slots.filter(s => s.bucket === slot.bucket).length;
+  const rankStr = r.userRank ? ordinal(r.userRank) : '?';
+
+  let statLine = '';
+  if (r.userStatValue) {
+    if (selectedObjective === 'performance' && r.userStatValue.score != null) {
+      statLine = `Score: ${r.userStatValue.score.toFixed(2)}`;
+    } else if (selectedObjective === 'goals' && r.userStatValue.goals != null) {
+      statLine = `${r.userStatValue.goals} goals · ${r.userStatValue.appearances || '?'} apps`;
+    } else if (r.userStatValue.appearances != null) {
+      statLine = `${r.userStatValue.appearances} appearances`;
+    }
+  }
+
+  const statusColor = r.correct ? 'var(--accent)' : 'var(--danger)';
+  const statusText = r.correct
+    ? `${rankStr} highest ${r.userRankBucket || slot.bucket} — in the best XI`
+    : `${rankStr} highest ${r.userRankBucket || slot.bucket} — needed top ${bucketSlotCount}`;
+
+  $('slotDetailContent').innerHTML = `
+    <div style="text-align:center;margin-bottom:12px;">
+      <div style="font-size:18px;font-weight:700;">${playerName}</div>
+      <div style="font-size:13px;color:var(--muted);margin-top:4px;">${slot.label} — ${slot.bucket}</div>
+    </div>
+    <div style="text-align:center;padding:12px;border-radius:10px;background:var(--card-dark);margin-bottom:8px;">
+      <div style="font-size:15px;font-weight:700;color:${statusColor};">${statusText}</div>
+      ${statLine ? `<div style="font-size:13px;color:var(--muted);margin-top:6px;">${statLine}</div>` : ''}
+    </div>
+  `;
+  $('slotDetailOverlay').classList.remove('hidden');
+}
+function hideSlotDetail() {
+  $('slotDetailOverlay').classList.add('hidden');
+}
+$('slotDetailOverlay').onclick = (e) => {
+  if (e.target === $('slotDetailOverlay')) hideSlotDetail();
+};
 
 function truncName(name) {
   if (!name) return '';
@@ -996,8 +1035,14 @@ async function doSearch() {
   if (!slot || query.length < 2) {
     $('suggestionList').innerHTML = '';
     $('noResults').classList.add('hidden');
+    $('searchLoading').classList.add('hidden');
     return;
   }
+
+  // Show loading spinner
+  $('suggestionList').innerHTML = '';
+  $('noResults').classList.add('hidden');
+  $('searchLoading').classList.remove('hidden');
 
   try {
     const res = await fetch(`${API_BASE}/xi_start`, {
@@ -1011,6 +1056,8 @@ async function doSearch() {
       }),
     });
     const data = await res.json();
+
+    $('searchLoading').classList.add('hidden');
 
     if (data.error) {
       $('suggestionList').innerHTML = '';
@@ -1051,6 +1098,7 @@ async function doSearch() {
 
   } catch (err) {
     console.error('Search error:', err);
+    $('searchLoading').classList.add('hidden');
     $('noResults').textContent = 'Search failed. Try again.';
     $('noResults').classList.remove('hidden');
   }

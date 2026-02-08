@@ -270,7 +270,7 @@ async function searchPlayers(supabase, query, positionBucket, scope, competition
     if (!player) continue;
 
     const displayName = fixMojibake(player.player_name);
-    const normalizedName = normalize(player.player_name);
+    const normalizedName = normalize(displayName);
 
     if (!normalizedName.includes(normalizedQuery)) continue;
 
