@@ -1455,8 +1455,44 @@ function getCachedData(categoryId) {
 
 function setCachedData(categoryId, data) {
   const key = getCacheKey(categoryId);
-  localStorage.setItem(key, JSON.stringify(data));
-  localStorage.setItem(`${key}_ts`, String(Date.now()));
+  try {
+    localStorage.setItem(key, JSON.stringify(data));
+    localStorage.setItem(`${key}_ts`, String(Date.now()));
+  } catch (e) {
+    // Quota exceeded — clear old caches and retry once
+    console.warn('[cache] Storage quota exceeded, clearing old entries');
+    clearExpiredCache();
+    try {
+      localStorage.setItem(key, JSON.stringify(data));
+      localStorage.setItem(`${key}_ts`, String(Date.now()));
+    } catch (e2) {
+      console.warn('[cache] Still over quota, skipping cache');
+    }
+  }
+}
+
+function clearExpiredCache() {
+  const now = Date.now();
+  const keysToRemove = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k && k.startsWith('f501_') && k.endsWith('_ts')) {
+      const ts = parseInt(localStorage.getItem(k) || '0', 10);
+      if (now - ts > CACHE_TTL) {
+        keysToRemove.push(k);
+        keysToRemove.push(k.replace('_ts', ''));
+      }
+    }
+    if (k && k.startsWith('f501_chat_')) {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(k));
+        if (parsed && parsed.timestamp && now - parsed.timestamp > 86400000) {
+          keysToRemove.push(k);
+        }
+      } catch (e) { keysToRemove.push(k); }
+    }
+  }
+  keysToRemove.forEach(k => localStorage.removeItem(k));
 }
 
 // ============== SETUP FLOW ==============
@@ -3365,7 +3401,7 @@ async function startChatGame(type) {
 })();
 </script>
 <footer style="text-align:center;padding:16px;font-size:11px;color:var(--muted);opacity:0.6;">
-  Build: 2026-02-08-0100 | Football 501 v3
+  Build: 2026-02-08-0200 | Football 501 v3.1
 </footer>
 </body>
 </html>

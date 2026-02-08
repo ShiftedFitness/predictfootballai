@@ -15,7 +15,7 @@ function respond(status, body) {
   return {
     statusCode: status,
     headers: {
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/json; charset=utf-8',
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Headers': 'Content-Type',
     },
@@ -30,6 +30,26 @@ function normalize(s) {
   return String(s || '').toLowerCase()
     .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
     .replace(/[^a-z0-9\s.-]/g, '').trim();
+}
+
+/**
+ * Fix mojibake player names (UTF-8 bytes stored as Latin-1).
+ * e.g. "Cesc FÃ bregas" → "Cesc Fàbregas"
+ */
+function fixMojibake(str) {
+  if (!str) return str;
+  try {
+    // Detect mojibake: Ã followed by another char is a common sign
+    if (/[\xC3\xC2]/.test(str)) {
+      // Convert each char to its Latin-1 byte, then decode as UTF-8
+      const bytes = new Uint8Array([...str].map(c => c.charCodeAt(0)));
+      const decoded = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+      return decoded;
+    }
+  } catch (e) {
+    // If decoding fails, return original
+  }
+  return str;
 }
 
 // ============================================================
@@ -115,7 +135,7 @@ const CLUB_CATS = {
   club_WestHam: { club: 'West Ham United', aliases: ['West Ham'], label: 'West Ham' },
   club_Wigan: { club: 'Wigan Athletic', label: 'Wigan' },
   club_Wimbledon: { club: 'Wimbledon', label: 'Wimbledon' },
-  club_Wolves: { club: 'Wolverhampton Wanderers', aliases: ['Wolves'], label: 'Wolves' },
+  club_Wolves: { club: 'Wolves', aliases: ['Wolverhampton Wanderers'], label: 'Wolves' },
 };
 
 const GOALS_CATS = {
@@ -188,11 +208,11 @@ const POSITION_CATS = {
   epl_position_FW: { bucket: 'FWD', name: 'Forwards', flag: '⚡' },
 };
 
-// Age bucket categories
+// Age bucket categories — use age column directly (is_u19/u21/35plus are all NULL)
 const AGE_CATS = {
-  epl_age_u19: { field: 'is_u19', name: 'Age 19 and Below', flag: '👶' },
-  epl_age_u21: { field: 'is_u21', name: 'Age 21 and Below', flag: '🧒' },
-  epl_age_35plus: { field: 'is_35plus', name: 'Age 35 and Above', flag: '👴' },
+  epl_age_u19: { maxAge: 19, name: 'Age 19 and Below', flag: '👶' },
+  epl_age_u21: { maxAge: 21, name: 'Age 21 and Below', flag: '🧒' },
+  epl_age_35plus: { minAge: 35, name: 'Age 35 and Above', flag: '👴' },
 };
 
 // Chat builder aliases
@@ -205,7 +225,7 @@ const CLUB_ALIASES = {
   'west ham': 'West Ham United', 'aston villa': 'Aston Villa',
   'leeds': 'Leeds United', 'leicester': 'Leicester City',
   'southampton': 'Southampton', 'sunderland': 'Sunderland',
-  'wolves': 'Wolverhampton Wanderers', 'brighton': 'Brighton & Hove Albion',
+  'wolves': 'Wolves', 'wolverhampton': 'Wolves', 'brighton': 'Brighton & Hove Albion',
   'bournemouth': 'Bournemouth',
   'real madrid': 'Real Madrid', 'barcelona': 'Barcelona', 'bayern': 'Bayern Munich',
   'juventus': 'Juventus', 'ac milan': 'Milan', 'milan': 'Milan', 'inter': 'Inter',
@@ -300,9 +320,10 @@ async function fetchFromView(supabase, competitionName, clubName = null, nationa
         existing.clubs.push(row.club_name);
       }
     } else {
+      const displayName = fixMojibake(row.player_name);
       playerMap.set(row.player_uid, {
         playerId: row.player_uid,
-        name: row.player_name,
+        name: displayName,
         normalized: normalize(row.player_name),
         nationality: nat,
         subtractValue: value,
@@ -367,9 +388,10 @@ async function fetchFromViewMultiComp(supabase, competitionNames, nationalityCod
         existing.clubs.push(row.club_name);
       }
     } else {
+      const displayName = fixMojibake(row.player_name);
       playerMap.set(row.player_uid, {
         playerId: row.player_uid,
-        name: row.player_name,
+        name: displayName,
         normalized: normalize(row.player_name),
         nationality: nat,
         subtractValue: value,
@@ -459,7 +481,7 @@ async function fetchByPosition(supabase, competitionName, positionBucket, metric
     if (value <= 0) continue;
     result.push({
       playerId: uid,
-      name: player.player_name,
+      name: fixMojibake(player.player_name),
       normalized: normalize(player.player_name),
       nationality: (player.nationality_norm || '').toUpperCase(),
       subtractValue: value,
@@ -476,8 +498,8 @@ async function fetchByPosition(supabase, competitionName, positionBucket, metric
 /**
  * Fetch age-bucket players from player_season_stats.
  */
-async function fetchByAgeBucket(supabase, competitionName, ageField, metric = 'appearances') {
-  console.log('[fetchByAgeBucket]', { competitionName, ageField });
+async function fetchByAgeBucket(supabase, competitionName, ageCat, metric = 'appearances') {
+  console.log('[fetchByAgeBucket]', { competitionName, ageCat });
 
   const { data: compData, error: compErr } = await supabase
     .from('competitions')
@@ -487,12 +509,22 @@ async function fetchByAgeBucket(supabase, competitionName, ageField, metric = 'a
 
   if (compErr || !compData) return [];
 
-  const { data: stats, error: statsErr } = await supabase
+  // Use age column directly since is_u19/u21/35plus are all NULL
+  let query = supabase
     .from('player_season_stats')
     .select('player_uid, appearances, goals, assists, minutes')
     .eq('competition_id', compData.competition_id)
-    .eq(ageField, true)
+    .not('age', 'is', null)
     .gt(metric === 'goals' ? 'goals' : 'appearances', 0);
+
+  if (ageCat.maxAge) {
+    query = query.lte('age', ageCat.maxAge);
+  }
+  if (ageCat.minAge) {
+    query = query.gte('age', ageCat.minAge);
+  }
+
+  const { data: stats, error: statsErr } = await query;
 
   if (statsErr || !stats || stats.length === 0) return [];
 
@@ -539,7 +571,7 @@ async function fetchByAgeBucket(supabase, competitionName, ageField, metric = 'a
     if (value <= 0) continue;
     result.push({
       playerId: uid,
-      name: player.player_name,
+      name: fixMojibake(player.player_name),
       normalized: normalize(player.player_name),
       nationality: (player.nationality_norm || '').toUpperCase(),
       subtractValue: value,
@@ -579,7 +611,7 @@ async function getTopClubs(supabase, competitionName, limit = 25) {
 
   const clubs = Array.from(clubMap.entries())
     .map(([club, players]) => ({ club, count: players.size }))
-    .sort((a, b) => b.count - a.count)
+    .sort((a, b) => b.count - a.count || a.club.localeCompare(b.club))
     .slice(0, limit);
 
   return clubs;
@@ -731,7 +763,7 @@ exports.handler = async (event) => {
       const cat = AGE_CATS[categoryId];
       categoryName = cat.name;
       categoryFlag = cat.flag;
-      players = await fetchByAgeBucket(supabase, 'Premier League', cat.field, 'appearances');
+      players = await fetchByAgeBucket(supabase, 'Premier League', cat, 'appearances');
     }
 
     // ============================================================
