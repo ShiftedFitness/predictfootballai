@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>Starting XI</title>
+<style>
+:root {
+  --bg: #0a0f0d;
+  --card: #1a3a2a;
+  --card-dark: #0f2a1f;
+  --ink: #fff;
+  --muted: #a8c4b8;
+  --btn: #2d5a45;
+  --btn-hover: #3d7a5a;
+  --danger: #e05555;
+  --accent: #4ade80;
+  --accent-dim: #22c55e;
+  --gold: #fbbf24;
+  --pitch: #2d6a3f;
+  --pitch-line: rgba(255,255,255,0.25);
+  --slot-empty: rgba(255,255,255,0.12);
+  --slot-correct: #22c55e;
+  --slot-wrong: #e05555;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  min-height: 100vh;
+  padding: 12px;
+  line-height: 1.4;
+}
+
+/* ====== LAYOUT ====== */
+.container { max-width: 480px; margin: 0 auto; }
+
+.header {
+  text-align: center;
+  padding: 16px 0 8px;
+}
+.header h1 {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+.header h1 span { color: var(--accent); }
+.header .subtitle {
+  color: var(--muted);
+  font-size: 13px;
+  margin-top: 4px;
+}
+.back-link {
+  display: inline-block;
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+.back-link:hover { color: var(--accent); }
+
+/* ====== CARDS ====== */
+.card {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+.card h2 { font-size: 17px; font-weight: 700; margin-bottom: 12px; }
+.card h3 { font-size: 15px; font-weight: 600; margin-bottom: 8px; color: var(--muted); }
+
+/* ====== STEP 1: SETUP ====== */
+.option-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.option-btn {
+  background: var(--card-dark);
+  border: 2px solid transparent;
+  border-radius: 12px;
+  padding: 12px 10px;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s;
+}
+.option-btn:hover { border-color: var(--accent-dim); background: var(--btn); }
+.option-btn.selected { border-color: var(--accent); background: var(--btn); }
+.option-btn .emoji { font-size: 20px; display: block; margin-bottom: 4px; }
+.option-btn .desc { font-size: 11px; color: var(--muted); font-weight: 400; margin-top: 4px; }
+.option-btn.wide { grid-column: 1 / -1; }
+
+.formation-grid {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.formation-btn {
+  background: var(--card-dark);
+  border: 2px solid transparent;
+  border-radius: 10px;
+  padding: 10px 16px;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+  letter-spacing: 0.5px;
+}
+.formation-btn:hover { border-color: var(--accent-dim); }
+.formation-btn.selected { border-color: var(--accent); background: var(--btn); }
+
+.go-btn {
+  width: 100%;
+  padding: 16px;
+  border: none;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.5px;
+}
+.go-btn.primary {
+  background: var(--accent);
+  color: #000;
+}
+.go-btn.primary:hover { background: var(--accent-dim); }
+.go-btn:disabled {
+  background: var(--btn);
+  color: var(--muted);
+  cursor: not-allowed;
+}
+.go-btn.secondary {
+  background: var(--btn);
+  color: var(--ink);
+  margin-top: 10px;
+}
+.go-btn.secondary:hover { background: var(--btn-hover); }
+
+/* ====== STEP 2: PITCH ====== */
+.pitch-container {
+  position: relative;
+  width: 100%;
+  padding-top: 140%;
+  background: var(--pitch);
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+/* Pitch markings */
+.pitch-container::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  border: 2px solid var(--pitch-line);
+  border-radius: 16px;
+}
+.pitch-center-line {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--pitch-line);
+}
+.pitch-center-circle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 80px;
+  height: 80px;
+  border: 1px solid var(--pitch-line);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+.pitch-box-top {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 55%;
+  height: 16%;
+  border: 1px solid var(--pitch-line);
+  border-top: none;
+}
+.pitch-box-bottom {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 55%;
+  height: 16%;
+  border: 1px solid var(--pitch-line);
+  border-bottom: none;
+}
+
+/* Player slots */
+.slot {
+  position: absolute;
+  width: 62px;
+  transform: translateX(-50%);
+  text-align: center;
+  cursor: pointer;
+  z-index: 2;
+}
+.slot-circle {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--slot-empty);
+  border: 2px solid rgba(255,255,255,0.3);
+  margin: 0 auto 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  transition: all 0.2s;
+}
+.slot.filled .slot-circle {
+  background: var(--btn);
+  border-color: var(--accent);
+  color: var(--ink);
+}
+.slot.correct .slot-circle {
+  background: var(--slot-correct);
+  border-color: var(--slot-correct);
+  color: #000;
+}
+.slot.wrong .slot-circle {
+  background: var(--slot-wrong);
+  border-color: var(--slot-wrong);
+  color: #fff;
+}
+.slot.locked { cursor: default; pointer-events: none; }
+.slot-name {
+  font-size: 9px;
+  font-weight: 600;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 72px;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+}
+.slot-role {
+  font-size: 8px;
+  color: rgba(255,255,255,0.6);
+  font-weight: 500;
+}
+.slot:hover .slot-circle { transform: scale(1.08); }
+
+/* ====== PLAYER SEARCH MODAL ====== */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 100;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+.modal {
+  background: var(--card);
+  border-radius: 20px 20px 0 0;
+  width: 100%;
+  max-width: 480px;
+  max-height: 75vh;
+  padding: 20px;
+  overflow-y: auto;
+}
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.modal-header h3 { font-size: 16px; font-weight: 700; }
+.modal-close {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 24px;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+.search-input {
+  width: 100%;
+  padding: 14px 16px;
+  background: var(--card-dark);
+  border: 2px solid transparent;
+  border-radius: 12px;
+  color: var(--ink);
+  font-size: 15px;
+  outline: none;
+  margin-bottom: 8px;
+}
+.search-input:focus { border-color: var(--accent); }
+.search-input::placeholder { color: var(--muted); }
+.suggestion-list {
+  list-style: none;
+}
+.suggestion-item {
+  padding: 12px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.1s;
+}
+.suggestion-item:hover { background: var(--btn); }
+.suggestion-name { font-weight: 600; font-size: 14px; }
+.suggestion-meta { font-size: 12px; color: var(--muted); }
+.suggestion-nat { font-size: 11px; color: var(--muted); margin-left: 6px; }
+.no-results { text-align: center; color: var(--muted); padding: 20px; font-size: 13px; }
+
+/* ====== STEP 3: RESULTS ====== */
+.score-banner {
+  text-align: center;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+.score-big {
+  font-size: 48px;
+  font-weight: 800;
+  color: var(--accent);
+}
+.score-label {
+  font-size: 15px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+.attempt-badge {
+  display: inline-block;
+  background: var(--btn);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 8px;
+}
+
+.result-list {
+  list-style: none;
+  margin-bottom: 16px;
+}
+.result-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 10px;
+  margin-bottom: 6px;
+  gap: 12px;
+}
+.result-item.correct { background: rgba(34,197,94,0.12); }
+.result-item.wrong { background: rgba(224,85,85,0.12); }
+.result-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.result-item.correct .result-icon { background: var(--slot-correct); color: #000; }
+.result-item.wrong .result-icon { background: var(--slot-wrong); color: #fff; }
+.result-info { flex: 1; }
+.result-slot { font-size: 11px; color: var(--muted); font-weight: 600; }
+.result-player { font-size: 14px; font-weight: 600; }
+.result-answer { font-size: 12px; color: var(--muted); font-style: italic; }
+
+.hidden { display: none !important; }
+
+/* ====== LOADING ====== */
+.spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--muted);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ====== SCOPE INFO BADGE ====== */
+.scope-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--card-dark);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+.scope-badge .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+/* ====== RESPONSIVE ====== */
+@media (max-width: 360px) {
+  .slot { width: 52px; }
+  .slot-circle { width: 40px; height: 40px; font-size: 10px; }
+  .slot-name { font-size: 8px; max-width: 56px; }
+  .option-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <a href="football_501.html" class="back-link">← Back to Football 501</a>
+
+  <div class="header">
+    <h1>Starting <span>XI</span></h1>
+    <div class="subtitle">Pick the best Starting XI. Can you beat the algorithm?</div>
+  </div>
+
+  <!-- ====== STEP 1: SETUP ====== -->
+  <div id="step1">
+    <div class="card">
+      <h2>Choose Scope</h2>
+      <div class="option-grid" id="scopeGrid"></div>
+    </div>
+
+    <div class="card">
+      <h2>Choose Formation</h2>
+      <div class="formation-grid" id="formationGrid"></div>
+    </div>
+
+    <div class="card">
+      <h2>Choose Objective</h2>
+      <div class="option-grid" id="objectiveGrid"></div>
+    </div>
+
+    <button class="go-btn primary" id="startGameBtn" disabled>Start Challenge</button>
+  </div>
+
+  <!-- ====== STEP 2: PITCH + PICKS ====== -->
+  <div id="step2" class="hidden">
+    <div class="scope-badge" id="gameBadge"></div>
+
+    <div class="pitch-container" id="pitchContainer">
+      <div class="pitch-center-line"></div>
+      <div class="pitch-center-circle"></div>
+      <div class="pitch-box-top"></div>
+      <div class="pitch-box-bottom"></div>
+      <!-- Slots rendered dynamically -->
+    </div>
+
+    <div style="display:flex;gap:8px;">
+      <button class="go-btn primary" id="submitXIBtn" disabled style="flex:1">GO — Submit XI</button>
+      <button class="go-btn secondary" id="resetBtn" style="flex:0 0 auto;padding:16px 20px;">Reset</button>
+    </div>
+    <div id="feedbackBar" class="hidden" style="text-align:center;padding:12px;margin-top:10px;border-radius:12px;font-weight:600;font-size:14px;"></div>
+  </div>
+
+  <!-- ====== STEP 3: RESULTS ====== -->
+  <div id="step3" class="hidden">
+    <div class="card">
+      <div class="score-banner">
+        <div class="score-big" id="scoreBig">0/11</div>
+        <div class="score-label" id="scoreLabel">Correct picks</div>
+        <div class="attempt-badge" id="attemptBadge">Attempt 1</div>
+      </div>
+      <ul class="result-list" id="resultList"></ul>
+      <button class="go-btn primary" id="retryBtn">Try Again (swap wrong picks)</button>
+      <button class="go-btn secondary" id="revealBtn">Reveal All Answers</button>
+      <button class="go-btn secondary" id="newGameBtn">Start New Challenge</button>
+    </div>
+  </div>
+
+  <!-- ====== PLAYER SEARCH MODAL ====== -->
+  <div id="searchModal" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="modalTitle">Pick a Player</h3>
+        <button class="modal-close" id="modalClose">×</button>
+      </div>
+      <input type="text" class="search-input" id="searchInput" placeholder="Type player name..." autocomplete="off"/>
+      <ul class="suggestion-list" id="suggestionList"></ul>
+      <div class="no-results hidden" id="noResults">No players found matching your search.</div>
+    </div>
+  </div>
+</div>
+
+<footer style="text-align:center;padding:16px;font-size:11px;color:var(--muted);opacity:0.6;">
+  Build: 2026-02-08 | Starting XI v1.0
+</footer>
+
+<script>
+// ============================================================
+// STARTING XI — CLIENT
+// ============================================================
+
+const API_BASE = '/.netlify/functions';
+const $ = id => document.getElementById(id);
+
+// ============================================================
+// STATE
+// ============================================================
+let gameConfig = null;    // { scopes, formations, objectives } from server
+let selectedScope = null;
+let selectedFormation = null;
+let selectedObjective = null;
+let slots = [];           // current formation slots with player picks
+let attempts = 0;
+let lockedSlots = new Set();  // slot indices that are correct & locked
+let activeSlotIdx = null;     // which slot the search modal is for
+let searchDebounce = null;
+
+// ============================================================
+// INIT
+// ============================================================
+async function init() {
+  try {
+    const res = await fetch(`${API_BASE}/xi_start`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'get_scopes' }),
+    });
+    gameConfig = await res.json();
+    renderSetup();
+  } catch (err) {
+    console.error('Failed to load game config:', err);
+    $('step1').innerHTML = '<div class="card"><p style="color:var(--danger)">Failed to load. Please refresh.</p></div>';
+  }
+}
+
+// ============================================================
+// STEP 1: SETUP RENDERING
+// ============================================================
+function renderSetup() {
+  // Scopes
+  const scopeGrid = $('scopeGrid');
+  scopeGrid.innerHTML = '';
+  for (const scope of gameConfig.scopes) {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn' + (scope.type === 'league' ? ' wide' : '');
+    btn.innerHTML = `
+      <span class="emoji">${scope.type === 'league' ? '🏆' : '🏟️'}</span>
+      ${scope.label}
+    `;
+    btn.onclick = () => selectScope(scope.id, btn);
+    scopeGrid.appendChild(btn);
+  }
+
+  // Formations
+  const formGrid = $('formationGrid');
+  formGrid.innerHTML = '';
+  for (const fm of gameConfig.formations) {
+    const btn = document.createElement('button');
+    btn.className = 'formation-btn';
+    btn.textContent = fm.label;
+    btn.onclick = () => selectFormation(fm.id, btn);
+    formGrid.appendChild(btn);
+  }
+
+  // Objectives
+  const objGrid = $('objectiveGrid');
+  objGrid.innerHTML = '';
+  for (const obj of gameConfig.objectives) {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn wide';
+    btn.innerHTML = `
+      <span class="emoji">${obj.id === 'appearances' ? '📊' : obj.id === 'goals' ? '⚽' : '🌟'}</span>
+      ${obj.label}
+      <div class="desc">${obj.description}</div>
+    `;
+    btn.onclick = () => selectObjective(obj.id, btn);
+    objGrid.appendChild(btn);
+  }
+
+  $('startGameBtn').onclick = startGame;
+}
+
+function selectScope(id, btn) {
+  selectedScope = id;
+  document.querySelectorAll('#scopeGrid .option-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  checkReady();
+}
+
+function selectFormation(id, btn) {
+  selectedFormation = id;
+  document.querySelectorAll('#formationGrid .formation-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  checkReady();
+}
+
+function selectObjective(id, btn) {
+  selectedObjective = id;
+  document.querySelectorAll('#objectiveGrid .option-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  checkReady();
+}
+
+function checkReady() {
+  $('startGameBtn').disabled = !(selectedScope && selectedFormation && selectedObjective);
+}
+
+// ============================================================
+// STEP 2: START GAME — RENDER PITCH
+// ============================================================
+function startGame() {
+  const fm = gameConfig.formations.find(f => f.id === selectedFormation);
+  if (!fm) return;
+
+  slots = fm.slots.map(s => ({
+    ...s,
+    player: null,
+  }));
+  attempts = 0;
+  lockedSlots = new Set();
+
+  // Show game badge
+  const scopeLabel = gameConfig.scopes.find(s => s.id === selectedScope)?.label || '';
+  const objLabel = gameConfig.objectives.find(o => o.id === selectedObjective)?.label || '';
+  $('gameBadge').innerHTML = `<span class="dot"></span> ${scopeLabel} · ${selectedFormation} · ${objLabel}`;
+
+  $('step1').classList.add('hidden');
+  $('step2').classList.remove('hidden');
+  $('step3').classList.add('hidden');
+  $('feedbackBar').classList.add('hidden');
+
+  renderPitch();
+  updateSubmitBtn();
+
+  $('submitXIBtn').onclick = submitXI;
+  $('resetBtn').onclick = resetPicks;
+}
+
+function renderPitch() {
+  const container = $('pitchContainer');
+  // Remove old slots
+  container.querySelectorAll('.slot').forEach(el => el.remove());
+
+  // Compute layout positions
+  const rows = {};
+  for (const slot of slots) {
+    if (!rows[slot.row]) rows[slot.row] = [];
+    rows[slot.row].push(slot);
+  }
+
+  const rowKeys = Object.keys(rows).sort((a, b) => Number(a) - Number(b));
+  const totalRows = rowKeys.length;
+
+  for (let ri = 0; ri < totalRows; ri++) {
+    const rowSlots = rows[rowKeys[ri]];
+    const count = rowSlots.length;
+    // Vertical position: GK at bottom, FWD at top
+    const yPct = 88 - (ri / (totalRows - 1)) * 76;
+
+    for (let ci = 0; ci < count; ci++) {
+      const slot = rowSlots[ci];
+      const xPct = count === 1 ? 50 : 15 + (ci / (count - 1)) * 70;
+
+      const el = document.createElement('div');
+      el.className = 'slot' + (slot.player ? ' filled' : '') + (lockedSlots.has(slot.idx) ? ' locked correct' : '');
+      el.style.left = xPct + '%';
+      el.style.top = yPct + '%';
+      el.dataset.idx = slot.idx;
+
+      const isLocked = lockedSlots.has(slot.idx);
+
+      el.innerHTML = `
+        <div class="slot-circle">${slot.player ? slot.player.nationality || '✓' : slot.label}</div>
+        <div class="slot-name">${slot.player ? truncName(slot.player.name) : ''}</div>
+        <div class="slot-role">${slot.label}</div>
+      `;
+
+      if (!isLocked) {
+        el.onclick = () => openSearchModal(slot.idx);
+      }
+
+      container.appendChild(el);
+    }
+  }
+}
+
+function truncName(name) {
+  if (!name) return '';
+  // Show surname or truncated name
+  const parts = name.split(' ');
+  if (parts.length > 1) {
+    return parts[parts.length - 1];
+  }
+  return name.length > 10 ? name.slice(0, 9) + '…' : name;
+}
+
+function updateSubmitBtn() {
+  const allFilled = slots.every(s => s.player !== null || lockedSlots.has(s.idx));
+  $('submitXIBtn').disabled = !allFilled;
+}
+
+function resetPicks() {
+  for (const slot of slots) {
+    if (!lockedSlots.has(slot.idx)) {
+      slot.player = null;
+    }
+  }
+  renderPitch();
+  updateSubmitBtn();
+  $('feedbackBar').classList.add('hidden');
+}
+
+// ============================================================
+// PLAYER SEARCH MODAL
+// ============================================================
+function openSearchModal(slotIdx) {
+  activeSlotIdx = slotIdx;
+  const slot = slots.find(s => s.idx === slotIdx);
+  if (!slot) return;
+
+  $('modalTitle').textContent = `Pick ${slot.label} — ${slot.bucket}`;
+  $('searchInput').value = '';
+  $('suggestionList').innerHTML = '';
+  $('noResults').classList.add('hidden');
+  $('searchModal').classList.remove('hidden');
+
+  setTimeout(() => $('searchInput').focus(), 100);
+}
+
+$('modalClose').onclick = closeModal;
+$('searchModal').onclick = (e) => {
+  if (e.target === $('searchModal')) closeModal();
+};
+
+function closeModal() {
+  $('searchModal').classList.add('hidden');
+  activeSlotIdx = null;
+}
+
+$('searchInput').addEventListener('input', () => {
+  clearTimeout(searchDebounce);
+  searchDebounce = setTimeout(doSearch, 300);
+});
+
+async function doSearch() {
+  const query = $('searchInput').value.trim();
+  const slot = slots.find(s => s.idx === activeSlotIdx);
+  if (!slot || query.length < 2) {
+    $('suggestionList').innerHTML = '';
+    $('noResults').classList.add('hidden');
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/xi_start`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'search_players',
+        query,
+        positionBucket: slot.bucket,
+        scopeId: selectedScope,
+      }),
+    });
+    const data = await res.json();
+
+    if (data.error) {
+      $('suggestionList').innerHTML = '';
+      $('noResults').textContent = data.error;
+      $('noResults').classList.remove('hidden');
+      return;
+    }
+
+    const players = data.players || [];
+
+    // Filter out already-picked players (in other slots)
+    const pickedIds = new Set(
+      slots.filter(s => s.player && s.idx !== activeSlotIdx).map(s => s.player.playerId)
+    );
+    const filtered = players.filter(p => !pickedIds.has(p.playerId));
+
+    if (filtered.length === 0) {
+      $('suggestionList').innerHTML = '';
+      $('noResults').textContent = 'No players found matching your search.';
+      $('noResults').classList.remove('hidden');
+      return;
+    }
+
+    $('noResults').classList.add('hidden');
+    $('suggestionList').innerHTML = filtered.map(p => `
+      <li class="suggestion-item" data-pid="${p.playerId}" data-name="${escHtml(p.name)}" data-nat="${p.nationality}" data-apps="${p.appearances}" data-goals="${p.goals}">
+        <div>
+          <span class="suggestion-name">${escHtml(p.name)}</span>
+          <span class="suggestion-nat">${p.nationality}</span>
+        </div>
+        <span class="suggestion-meta">${p.appearances} apps · ${p.goals} gls</span>
+      </li>
+    `).join('');
+
+    // Click handlers
+    $('suggestionList').querySelectorAll('.suggestion-item').forEach(li => {
+      li.onclick = () => selectPlayer(li);
+    });
+
+  } catch (err) {
+    console.error('Search error:', err);
+    $('noResults').textContent = 'Search failed. Try again.';
+    $('noResults').classList.remove('hidden');
+  }
+}
+
+function selectPlayer(li) {
+  const slot = slots.find(s => s.idx === activeSlotIdx);
+  if (!slot) return;
+
+  slot.player = {
+    playerId: li.dataset.pid,
+    name: li.dataset.name,
+    nationality: li.dataset.nat,
+    appearances: parseInt(li.dataset.apps) || 0,
+    goals: parseInt(li.dataset.goals) || 0,
+  };
+
+  closeModal();
+  renderPitch();
+  updateSubmitBtn();
+}
+
+function escHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+// ============================================================
+// SUBMIT XI — SCORE
+// ============================================================
+async function submitXI() {
+  const btn = $('submitXIBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Evaluating...';
+
+  attempts++;
+
+  const picks = slots.map(s => ({
+    slotIdx: s.idx,
+    playerId: s.player ? s.player.playerId : null,
+  }));
+
+  try {
+    const res = await fetch(`${API_BASE}/xi_score`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        scopeId: selectedScope,
+        formation: selectedFormation,
+        objective: selectedObjective,
+        picks,
+        reveal: false,
+      }),
+    });
+    const data = await res.json();
+
+    if (data.error) {
+      alert('Error: ' + data.error);
+      btn.disabled = false;
+      btn.textContent = 'GO — Submit XI';
+      return;
+    }
+
+    // Process results
+    processResults(data);
+
+  } catch (err) {
+    alert('Scoring failed: ' + err.message);
+    btn.disabled = false;
+    btn.textContent = 'GO — Submit XI';
+  }
+}
+
+function processResults(data) {
+  const { correct, total, results } = data;
+
+  // Lock correct picks
+  for (const r of results) {
+    if (r.correct) {
+      lockedSlots.add(r.slotIdx);
+    }
+  }
+
+  if (correct === total) {
+    // Perfect score!
+    showResults(data, false);
+    return;
+  }
+
+  // Mark slots on pitch
+  const container = $('pitchContainer');
+  for (const r of results) {
+    const slotEl = container.querySelector(`.slot[data-idx="${r.slotIdx}"]`);
+    if (!slotEl) continue;
+
+    if (r.correct) {
+      slotEl.classList.add('correct', 'locked');
+      slotEl.classList.remove('wrong');
+    } else {
+      slotEl.classList.add('wrong');
+      slotEl.classList.remove('correct');
+    }
+  }
+
+  // Show feedback
+  const fb = $('feedbackBar');
+  fb.style.background = correct >= 8 ? 'rgba(34,197,94,0.15)' : correct >= 4 ? 'rgba(251,191,36,0.15)' : 'rgba(224,85,85,0.15)';
+  fb.style.color = correct >= 8 ? 'var(--accent)' : correct >= 4 ? 'var(--gold)' : 'var(--danger)';
+  fb.textContent = `${correct}/${total} correct — Attempt ${attempts}`;
+  fb.classList.remove('hidden');
+
+  // If 3+ attempts, show full results with reveal option
+  if (attempts >= 3) {
+    showResults(data, false);
+    return;
+  }
+
+  // Allow retry
+  $('submitXIBtn').disabled = false;
+  $('submitXIBtn').textContent = 'GO — Submit XI';
+
+  // Clear wrong picks for retry
+  for (const r of results) {
+    if (!r.correct) {
+      const slot = slots.find(s => s.idx === r.slotIdx);
+      if (slot) slot.player = null;
+    }
+  }
+
+  renderPitch();
+  updateSubmitBtn();
+}
+
+function showResults(data, revealed) {
+  $('step2').classList.add('hidden');
+  $('step3').classList.remove('hidden');
+
+  const { correct, total, results } = data;
+
+  $('scoreBig').textContent = `${correct}/${total}`;
+  $('scoreBig').style.color = correct === total ? 'var(--gold)' : correct >= 8 ? 'var(--accent)' : correct >= 4 ? 'var(--gold)' : 'var(--danger)';
+  $('scoreLabel').textContent = correct === total ? '🎉 Perfect Score!' : 'Correct picks';
+  $('attemptBadge').textContent = `Attempt ${attempts}`;
+
+  // Build result list
+  const listEl = $('resultList');
+  listEl.innerHTML = '';
+  for (const r of results) {
+    const slot = slots.find(s => s.idx === r.slotIdx);
+    const li = document.createElement('li');
+    li.className = `result-item ${r.correct ? 'correct' : 'wrong'}`;
+
+    const userPlayer = slot?.player;
+    let answerHtml = '';
+    if (r.answer && !r.correct) {
+      answerHtml = `<div class="result-answer">Answer: ${escHtml(r.answer.name)} (${r.answer.appearances} apps, ${r.answer.goals} gls)</div>`;
+    }
+
+    li.innerHTML = `
+      <div class="result-icon">${r.correct ? '✓' : '✗'}</div>
+      <div class="result-info">
+        <div class="result-slot">${slot?.label || 'Slot ' + r.slotIdx} — ${slot?.bucket || ''}</div>
+        <div class="result-player">${userPlayer ? escHtml(userPlayer.name) : 'Empty'}</div>
+        ${answerHtml}
+      </div>
+    `;
+    listEl.appendChild(li);
+  }
+
+  // Button visibility
+  const canRetry = correct < total && attempts < 5;
+  $('retryBtn').classList.toggle('hidden', !canRetry || correct === total);
+  $('revealBtn').classList.toggle('hidden', revealed || correct === total);
+
+  $('retryBtn').onclick = () => {
+    // Clear wrong picks and go back to pitch
+    for (const r of results) {
+      if (!r.correct) {
+        const slot = slots.find(s => s.idx === r.slotIdx);
+        if (slot) slot.player = null;
+      }
+    }
+    $('step3').classList.add('hidden');
+    $('step2').classList.remove('hidden');
+    $('feedbackBar').classList.add('hidden');
+    $('submitXIBtn').textContent = 'GO — Submit XI';
+    renderPitch();
+    updateSubmitBtn();
+  };
+
+  $('revealBtn').onclick = async () => {
+    await revealAnswers();
+  };
+
+  $('newGameBtn').onclick = () => {
+    $('step3').classList.add('hidden');
+    $('step1').classList.remove('hidden');
+    selectedScope = null;
+    selectedFormation = null;
+    selectedObjective = null;
+    slots = [];
+    attempts = 0;
+    lockedSlots = new Set();
+    document.querySelectorAll('.option-btn.selected, .formation-btn.selected').forEach(b => b.classList.remove('selected'));
+    $('startGameBtn').disabled = true;
+  };
+}
+
+async function revealAnswers() {
+  const btn = $('revealBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Revealing...';
+
+  const picks = slots.map(s => ({
+    slotIdx: s.idx,
+    playerId: s.player ? s.player.playerId : null,
+  }));
+
+  try {
+    const res = await fetch(`${API_BASE}/xi_score`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        scopeId: selectedScope,
+        formation: selectedFormation,
+        objective: selectedObjective,
+        picks,
+        reveal: true,
+      }),
+    });
+    const data = await res.json();
+
+    if (data.error) {
+      alert('Error: ' + data.error);
+      btn.disabled = false;
+      btn.textContent = 'Reveal All Answers';
+      return;
+    }
+
+    showResults(data, true);
+  } catch (err) {
+    alert('Failed to reveal: ' + err.message);
+    btn.disabled = false;
+    btn.textContent = 'Reveal All Answers';
+  }
+}
+
+// ============================================================
+// BOOT
+// ============================================================
+init();
+</script>
+</body>
+</html>
