@@ -174,9 +174,9 @@ BEGIN
   -- DEF: defensive score (fallback to availability + contributions)
   UPDATE player_performance_scores
   SET raw_score = (
-    (CASE WHEN COALESCE(tackles_interceptions, 0) > 0 THEN tackles_interceptions
-          WHEN COALESCE(tackles_won, 0) + COALESCE(interceptions, 0) > 0 THEN tackles_won + interceptions
-          ELSE 0 END)::numeric * 0.08
+    ((CASE WHEN COALESCE(tackles_interceptions, 0) > 0 THEN tackles_interceptions
+           WHEN COALESCE(tackles_won, 0) + COALESCE(interceptions, 0) > 0 THEN tackles_won + interceptions
+           ELSE 0 END)::numeric * 0.08
      + assists * 2.0
      + goals * 2.0)
     / GREATEST(minutes::numeric / 90.0, 1.0)
