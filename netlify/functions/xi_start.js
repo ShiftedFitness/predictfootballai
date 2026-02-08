@@ -30,6 +30,25 @@ function respond(status, body) {
 }
 
 /**
+ * Fetch all rows from a Supabase query, paginating past the 1000-row default.
+ * queryFn: a function that accepts (offset, limit) and returns a Supabase query builder.
+ */
+async function fetchAll(queryFn) {
+  const PAGE = 1000;
+  let all = [];
+  let offset = 0;
+  while (true) {
+    const { data, error } = await queryFn().range(offset, offset + PAGE - 1);
+    if (error) throw error;
+    if (!data || data.length === 0) break;
+    all = all.concat(data);
+    if (data.length < PAGE) break;
+    offset += PAGE;
+  }
+  return all;
+}
+
+/**
  * Fix mojibake: re-decode UTF-8 bytes stored as Latin-1
  */
 function fixMojibake(str) {
@@ -181,19 +200,27 @@ async function searchPlayers(supabase, query, positionBucket, scope, competition
   if (positionBucket === 'FWD') bucketsToSearch.push('MID');
   else if (positionBucket === 'MID') bucketsToSearch.push('FWD');
 
-  let dbQuery = supabase
-    .from('player_season_stats')
-    .select('player_uid, appearances, goals, assists, minutes')
-    .eq('competition_id', competitionId)
-    .in('position_bucket', bucketsToSearch)
-    .gt('appearances', 0);
+  const buildQuery = () => {
+    let q = supabase
+      .from('player_season_stats')
+      .select('player_uid, appearances, goals, assists, minutes')
+      .eq('competition_id', competitionId)
+      .in('position_bucket', bucketsToSearch)
+      .gt('appearances', 0);
+    if (scope.type === 'club' && scope.clubId) {
+      q = q.eq('club_id', scope.clubId);
+    }
+    return q;
+  };
 
-  if (scope.type === 'club' && scope.clubId) {
-    dbQuery = dbQuery.eq('club_id', scope.clubId);
+  let stats;
+  try {
+    stats = await fetchAll(buildQuery);
+  } catch (err) {
+    console.error('[searchPlayers] fetchAll error:', err);
+    return [];
   }
-
-  const { data: stats, error } = await dbQuery;
-  if (error || !stats || stats.length === 0) return [];
+  if (!stats || stats.length === 0) return [];
 
   // Aggregate by player_uid
   const aggMap = new Map();
@@ -340,19 +367,27 @@ async function computeBestXI(supabase, scope, formation, objective) {
     const metric = objective === 'goals' ? 'goals' : 'appearances';
 
     for (const [bucket, count] of Object.entries(bucketCounts)) {
-      let query = supabase
-        .from('player_season_stats')
-        .select('player_uid, appearances, goals, assists, minutes')
-        .eq('competition_id', competitionId)
-        .eq('position_bucket', bucket)
-        .gt('appearances', 0);
+      const buildBucketQuery = () => {
+        let q = supabase
+          .from('player_season_stats')
+          .select('player_uid, appearances, goals, assists, minutes')
+          .eq('competition_id', competitionId)
+          .eq('position_bucket', bucket)
+          .gt('appearances', 0);
+        if (scope.type === 'club' && scope.clubId) {
+          q = q.eq('club_id', scope.clubId);
+        }
+        return q;
+      };
 
-      if (scope.type === 'club' && scope.clubId) {
-        query = query.eq('club_id', scope.clubId);
+      let stats;
+      try {
+        stats = await fetchAll(buildBucketQuery);
+      } catch (err) {
+        console.error(`[computeBestXI] fetchAll error for ${bucket}:`, err);
+        continue;
       }
-
-      const { data: stats, error } = await query;
-      if (error || !stats) continue;
+      if (!stats) continue;
 
       // Aggregate by player
       const aggMap = new Map();

@@ -23,6 +23,25 @@ function respond(status, body) {
   };
 }
 
+/**
+ * Fetch all rows from a Supabase query, paginating past the 1000-row default.
+ * queryFn: a function that returns a fresh Supabase query builder.
+ */
+async function fetchAll(queryFn) {
+  const PAGE = 1000;
+  let all = [];
+  let offset = 0;
+  while (true) {
+    const { data, error } = await queryFn().range(offset, offset + PAGE - 1);
+    if (error) throw error;
+    if (!data || data.length === 0) break;
+    all = all.concat(data);
+    if (data.length < PAGE) break;
+    offset += PAGE;
+  }
+  return all;
+}
+
 function fixMojibake(str) {
   if (!str) return str;
   try {
@@ -151,18 +170,26 @@ async function computeBestXI(supabase, scope, formation, objective) {
     const metric = objective === 'goals' ? 'goals' : 'appearances';
 
     for (const [bucket, count] of Object.entries(bucketCounts)) {
-      let query = supabase
-        .from('player_season_stats')
-        .select('player_uid, appearances, goals, assists, minutes')
-        .eq('competition_id', competitionId)
-        .eq('position_bucket', bucket)
-        .gt('appearances', 0);
+      const buildBucketQuery = () => {
+        let q = supabase
+          .from('player_season_stats')
+          .select('player_uid, appearances, goals, assists, minutes')
+          .eq('competition_id', competitionId)
+          .eq('position_bucket', bucket)
+          .gt('appearances', 0);
+        if (scope.type === 'club' && scope.clubId) {
+          q = q.eq('club_id', scope.clubId);
+        }
+        return q;
+      };
 
-      if (scope.type === 'club' && scope.clubId) {
-        query = query.eq('club_id', scope.clubId);
+      let stats;
+      try {
+        stats = await fetchAll(buildBucketQuery);
+      } catch (err) {
+        console.error(`[computeBestXI] fetchAll error for ${bucket}:`, err);
+        bestByBucket[bucket] = []; continue;
       }
-
-      const { data: stats } = await query;
       if (!stats) { bestByBucket[bucket] = []; continue; }
 
       // Aggregate
@@ -323,35 +350,57 @@ exports.handler = async (event) => {
 
     if (objective === 'performance') {
       for (const bucket of uniqueBuckets) {
-        let query = supabase
-          .from('player_performance_scores')
-          .select('player_uid, performance_score')
-          .eq('position_bucket', bucket)
-          .eq('scope_type', scope.type);
-        if (scope.type === 'club' && scope.clubId) {
-          query = query.eq('scope_id', scope.clubId);
-        } else {
-          query = query.is('scope_id', null);
-        }
-        query = query.order('performance_score', { ascending: false });
-        const { data } = await query;
-        if (data) {
-          bucketRankings[bucket] = data.map((r, i) => ({ playerId: r.player_uid, rank: i + 1 }));
+        const buildPerfQuery = () => {
+          let q = supabase
+            .from('player_performance_scores')
+            .select('player_uid, performance_score, appearances, goals')
+            .eq('position_bucket', bucket)
+            .eq('scope_type', scope.type);
+          if (scope.type === 'club' && scope.clubId) {
+            q = q.eq('scope_id', scope.clubId);
+          } else {
+            q = q.is('scope_id', null);
+          }
+          q = q.order('performance_score', { ascending: false });
+          return q;
+        };
+        try {
+          const data = await fetchAll(buildPerfQuery);
+          if (data) {
+            bucketRankings[bucket] = data.map((r, i) => ({
+              playerId: r.player_uid,
+              rank: i + 1,
+              score: parseFloat(r.performance_score) || 0,
+              appearances: r.appearances,
+              goals: r.goals,
+            }));
+          }
+        } catch (err) {
+          console.error(`[xi_score] rankings fetchAll error for ${bucket}:`, err);
         }
       }
     } else {
       const metric = objective === 'goals' ? 'goals' : 'appearances';
       for (const bucket of uniqueBuckets) {
-        let query = supabase
-          .from('player_season_stats')
-          .select('player_uid, appearances, goals, minutes')
-          .eq('competition_id', competitionId)
-          .eq('position_bucket', bucket)
-          .gt('appearances', 0);
-        if (scope.type === 'club' && scope.clubId) {
-          query = query.eq('club_id', scope.clubId);
+        const buildRankQuery = () => {
+          let q = supabase
+            .from('player_season_stats')
+            .select('player_uid, appearances, goals, minutes')
+            .eq('competition_id', competitionId)
+            .eq('position_bucket', bucket)
+            .gt('appearances', 0);
+          if (scope.type === 'club' && scope.clubId) {
+            q = q.eq('club_id', scope.clubId);
+          }
+          return q;
+        };
+        let stats;
+        try {
+          stats = await fetchAll(buildRankQuery);
+        } catch (err) {
+          console.error(`[xi_score] rankings fetchAll error for ${bucket}:`, err);
+          continue;
         }
-        const { data: stats } = await query;
         if (!stats) continue;
 
         const aggMap = new Map();
@@ -378,7 +427,13 @@ exports.handler = async (event) => {
           if (d !== 0) return d;
           return b.appearances - a.appearances;
         });
-        bucketRankings[bucket] = eligible.map((p, i) => ({ playerId: p.player_uid, rank: i + 1 }));
+        bucketRankings[bucket] = eligible.map((p, i) => ({
+          playerId: p.player_uid,
+          rank: i + 1,
+          appearances: p.appearances,
+          goals: p.goals,
+          minutes: p.minutes,
+        }));
       }
     }
 
@@ -397,11 +452,19 @@ exports.handler = async (event) => {
 
       if (isCorrect) correct++;
 
-      // Find rank of user's pick in that bucket
+      // Find rank and stats of user's pick in that bucket
       let userRank = null;
+      let userStatValue = null;
       if (pick.playerId && bucketRankings[bucket]) {
         const found = bucketRankings[bucket].find(r => r.playerId === pick.playerId);
-        if (found) userRank = found.rank;
+        if (found) {
+          userRank = found.rank;
+          userStatValue = found.appearances != null ? {
+            appearances: found.appearances,
+            goals: found.goals,
+            score: found.score,
+          } : null;
+        }
       }
 
       // Count how many eligible players in that bucket
@@ -412,6 +475,7 @@ exports.handler = async (event) => {
         correct: !!isCorrect,
         userPick: pick.playerId,
         userRank,
+        userStatValue,
         bucketTotal,
         // Only reveal if requested (after 3 attempts or explicit reveal)
         answer: reveal ? (bestSlot.player ? {

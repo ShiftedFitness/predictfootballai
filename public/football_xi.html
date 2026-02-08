@@ -93,6 +93,15 @@ body {
 .option-btn:hover { border-color: var(--accent-dim); background: var(--btn); }
 .option-btn.selected { border-color: var(--accent); background: var(--btn); }
 .option-btn .emoji { font-size: 20px; display: block; margin-bottom: 4px; }
+.option-btn .color-dot {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  vertical-align: middle;
+  margin-bottom: 4px;
+  border: 1px solid rgba(255,255,255,0.2);
+}
 .option-btn .desc { font-size: 11px; color: var(--muted); font-weight: 400; margin-top: 4px; }
 .option-btn.wide { grid-column: 1 / -1; }
 
@@ -206,7 +215,7 @@ body {
 /* Player slots */
 .slot {
   position: absolute;
-  width: 62px;
+  width: 72px;
   transform: translateX(-50%);
   text-align: center;
   cursor: pointer;
@@ -258,6 +267,22 @@ body {
   color: rgba(255,255,255,0.6);
   font-weight: 500;
 }
+/* Inline result context shown below slot after scoring */
+.slot-context {
+  font-size: 7.5px;
+  font-weight: 600;
+  line-height: 1.2;
+  margin-top: 1px;
+  padding: 2px 4px;
+  border-radius: 4px;
+  white-space: nowrap;
+  max-width: 80px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+}
+.slot.correct .slot-context { color: var(--accent); }
+.slot.wrong .slot-context { color: #fca5a5; }
 .slot:hover .slot-circle { transform: scale(1.08); }
 
 /* ====== PLAYER SEARCH MODAL ====== */
@@ -326,7 +351,7 @@ body {
 .suggestion-nat { font-size: 11px; color: var(--muted); margin-left: 6px; }
 .no-results { text-align: center; color: var(--muted); padding: 20px; font-size: 13px; }
 
-/* ====== STEP 3: RESULTS ====== */
+/* ====== SCORE BANNER (inline above pitch after scoring) ====== */
 .score-banner {
   text-align: center;
   padding: 20px;
@@ -351,37 +376,6 @@ body {
   color: var(--muted);
   margin-top: 8px;
 }
-
-.result-list {
-  list-style: none;
-  margin-bottom: 16px;
-}
-.result-item {
-  display: flex;
-  align-items: center;
-  padding: 10px 12px;
-  border-radius: 10px;
-  margin-bottom: 6px;
-  gap: 12px;
-}
-.result-item.correct { background: rgba(34,197,94,0.12); }
-.result-item.wrong { background: rgba(224,85,85,0.12); }
-.result-icon {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  flex-shrink: 0;
-}
-.result-item.correct .result-icon { background: var(--slot-correct); color: #000; }
-.result-item.wrong .result-icon { background: var(--slot-wrong); color: #fff; }
-.result-info { flex: 1; }
-.result-slot { font-size: 11px; color: var(--muted); font-weight: 600; }
-.result-player { font-size: 14px; font-weight: 600; }
-.result-answer { font-size: 12px; color: var(--muted); font-style: italic; }
 
 .hidden { display: none !important; }
 
@@ -458,11 +452,90 @@ body {
   background: var(--accent);
 }
 
+/* ====== PERFORMANCE INFO OVERLAY ====== */
+.info-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.8);
+  z-index: 150;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.info-modal {
+  background: var(--card);
+  border-radius: 20px;
+  width: 100%;
+  max-width: 480px;
+  max-height: 80vh;
+  padding: 24px;
+  overflow-y: auto;
+}
+.info-modal h3 {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: var(--accent);
+}
+.info-modal h4 {
+  font-size: 14px;
+  font-weight: 700;
+  margin-top: 16px;
+  margin-bottom: 6px;
+  color: var(--gold);
+}
+.info-modal p, .info-modal li {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+.info-modal ul {
+  padding-left: 18px;
+  margin-bottom: 8px;
+}
+.info-modal code {
+  background: var(--card-dark);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+  color: var(--ink);
+}
+.info-close {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 12px;
+  background: var(--btn);
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 16px;
+}
+.info-close:hover { background: var(--btn-hover); }
+.info-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--card-dark);
+  border: 1px solid var(--accent-dim);
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent);
+  cursor: pointer;
+  margin-top: 8px;
+}
+.info-tab:hover { background: var(--btn); }
+
 /* ====== RESPONSIVE ====== */
 @media (max-width: 360px) {
-  .slot { width: 52px; }
+  .slot { width: 58px; }
   .slot-circle { width: 40px; height: 40px; font-size: 10px; }
   .slot-name { font-size: 8px; max-width: 56px; }
+  .slot-context { font-size: 7px; max-width: 60px; }
   .option-grid { grid-template-columns: 1fr; }
 }
 </style>
@@ -470,7 +543,7 @@ body {
 <body>
 
 <div class="container">
-  <a href="football_501.html" class="back-link">← Back to Football 501</a>
+  <a href="football_501.html" class="back-link">&larr; Back to Football 501</a>
 
   <div class="header">
     <h1>Starting <span>XI</span></h1>
@@ -501,6 +574,17 @@ body {
   <div id="step2" class="hidden">
     <div class="scope-badge" id="gameBadge"></div>
 
+    <!-- Score banner shown inline after scoring -->
+    <div id="scoreBanner" class="hidden">
+      <div class="card" style="padding:14px;">
+        <div style="text-align:center;">
+          <span id="scoreBig" style="font-size:36px;font-weight:800;color:var(--accent);">0/11</span>
+          <span id="scoreLabel" style="font-size:14px;color:var(--muted);margin-left:8px;">Correct picks</span>
+          <span id="attemptBadge" class="attempt-badge" style="margin-left:8px;">Attempt 1</span>
+        </div>
+      </div>
+    </div>
+
     <div class="pitch-container" id="pitchContainer">
       <div class="pitch-center-line"></div>
       <div class="pitch-center-circle"></div>
@@ -509,23 +593,16 @@ body {
       <!-- Slots rendered dynamically -->
     </div>
 
+    <!-- Performance info tab (shown when objective=performance) -->
+    <div id="perfInfoTab" class="hidden">
+      <button class="info-tab" onclick="showPerfInfo()">? How scores work</button>
+    </div>
+
     <div style="display:flex;gap:8px;align-items:center;">
-      <button class="go-btn primary" id="submitXIBtn" disabled style="flex:0 0 auto;padding:10px 18px;font-size:13px;">GO — Submit XI</button>
+      <button class="go-btn primary" id="submitXIBtn" disabled style="flex:0 0 auto;padding:10px 18px;font-size:13px;">GO &mdash; Submit XI</button>
       <button class="go-btn secondary" id="resetBtn" style="flex:1;padding:10px 14px;font-size:13px;margin-top:0;">Reset</button>
     </div>
-    <div id="feedbackBar" class="hidden" style="text-align:center;padding:12px;margin-top:10px;border-radius:12px;font-weight:600;font-size:14px;"></div>
-    <div id="rankContext" class="hidden" style="margin-top:8px;padding:10px 14px;border-radius:12px;background:var(--card-dark);font-size:12px;color:var(--muted);line-height:1.6;"></div>
-  </div>
-
-  <!-- ====== STEP 3: RESULTS ====== -->
-  <div id="step3" class="hidden">
-    <div class="card">
-      <div class="score-banner">
-        <div class="score-big" id="scoreBig">0/11</div>
-        <div class="score-label" id="scoreLabel">Correct picks</div>
-        <div class="attempt-badge" id="attemptBadge">Attempt 1</div>
-      </div>
-      <ul class="result-list" id="resultList"></ul>
+    <div id="actionBtns" class="hidden" style="margin-top:10px;">
       <button class="go-btn primary" id="retryBtn">Try Again (swap wrong picks)</button>
       <button class="go-btn secondary" id="revealBtn">Reveal All Answers</button>
       <button class="go-btn secondary" id="newGameBtn">Start New Challenge</button>
@@ -537,17 +614,48 @@ body {
     <div class="modal">
       <div class="modal-header">
         <h3 id="modalTitle">Pick a Player</h3>
-        <button class="modal-close" id="modalClose">×</button>
+        <button class="modal-close" id="modalClose">&times;</button>
       </div>
       <input type="text" class="search-input" id="searchInput" placeholder="Type player name..." autocomplete="off"/>
       <ul class="suggestion-list" id="suggestionList"></ul>
       <div class="no-results hidden" id="noResults">No players found matching your search.</div>
     </div>
   </div>
+
+  <!-- ====== PERFORMANCE INFO OVERLAY ====== -->
+  <div id="perfInfoOverlay" class="info-overlay hidden">
+    <div class="info-modal">
+      <h3>Performance Scores Explained</h3>
+      <p>Performance scores rank players based on position-weighted stats normalised across each position group.</p>
+
+      <h4>Forwards &amp; Midfielders</h4>
+      <ul>
+        <li><code>(goals&times;4 + assists&times;3 + (G+A)&times;1) / per90</code></li>
+        <li>Multiplied by <code>&radic;appearances</code> for volume</li>
+      </ul>
+
+      <h4>Defenders</h4>
+      <ul>
+        <li><code>(tackles+interceptions&times;0.08 + assists&times;2 + goals&times;2) / per90</code></li>
+        <li>Multiplied by <code>&radic;appearances</code></li>
+      </ul>
+
+      <h4>Goalkeepers</h4>
+      <ul>
+        <li><code>(CS%&times;5 + save%&times;4 &minus; GA/90&times;2)</code></li>
+        <li>Multiplied by <code>&radic;appearances</code></li>
+      </ul>
+
+      <h4>Normalisation</h4>
+      <p>Raw scores are converted to Z-scores within each position group &mdash; the final score tells you how many standard deviations above (or below) average a player is compared to others in the same position.</p>
+
+      <button class="info-close" onclick="hidePerfInfo()">Got it</button>
+    </div>
+  </div>
 </div>
 
 <footer style="text-align:center;padding:16px;font-size:11px;color:var(--muted);opacity:0.6;">
-  Build: 2026-02-08 | Starting XI v1.0
+  Build: 2026-02-08 | Starting XI v1.1
 </footer>
 
 <script>
@@ -557,6 +665,17 @@ body {
 
 const API_BASE = '/.netlify/functions';
 const $ = id => document.getElementById(id);
+
+// ============================================================
+// CLUB COLOURS (matching 501 game mode)
+// ============================================================
+const CLUB_COLOURS = {
+  'club_sunderland': '#EB172B',
+  'club_manutd': '#DA291C',
+  'club_arsenal': '#EF0107',
+  'club_liverpool': '#C8102E',
+  'club_chelsea': '#034694',
+};
 
 // ============================================================
 // STATE
@@ -570,6 +689,7 @@ let attempts = 0;
 let lockedSlots = new Set();  // slot indices that are correct & locked
 let activeSlotIdx = null;     // which slot the search modal is for
 let searchDebounce = null;
+let lastResults = null;       // last scoring results for rendering context on pitch
 
 // ============================================================
 // INIT
@@ -599,10 +719,18 @@ function renderSetup() {
   for (const scope of gameConfig.scopes) {
     const btn = document.createElement('button');
     btn.className = 'option-btn' + (scope.type === 'league' ? ' wide' : '');
-    btn.innerHTML = `
-      <span class="emoji">${scope.type === 'league' ? '🏆' : '🏟️'}</span>
-      ${scope.label}
-    `;
+    const colour = CLUB_COLOURS[scope.id];
+    if (scope.type === 'league') {
+      btn.innerHTML = `
+        <span class="emoji">&#127942;</span>
+        ${scope.label}
+      `;
+    } else {
+      btn.innerHTML = `
+        <span class="color-dot" style="background:${colour || '#555'}"></span>
+        ${scope.label}
+      `;
+    }
     btn.onclick = () => selectScope(scope.id, btn);
     scopeGrid.appendChild(btn);
   }
@@ -625,7 +753,7 @@ function renderSetup() {
     const btn = document.createElement('button');
     btn.className = 'option-btn wide';
     btn.innerHTML = `
-      <span class="emoji">${obj.id === 'appearances' ? '📊' : obj.id === 'goals' ? '⚽' : '🌟'}</span>
+      <span class="emoji">${obj.id === 'appearances' ? '&#128202;' : obj.id === 'goals' ? '&#9917;' : '&#127775;'}</span>
       ${obj.label}
       <div class="desc">${obj.description}</div>
     `;
@@ -674,16 +802,20 @@ function startGame() {
   }));
   attempts = 0;
   lockedSlots = new Set();
+  lastResults = null;
 
   // Show game badge
   const scopeLabel = gameConfig.scopes.find(s => s.id === selectedScope)?.label || '';
   const objLabel = gameConfig.objectives.find(o => o.id === selectedObjective)?.label || '';
-  $('gameBadge').innerHTML = `<span class="dot"></span> ${scopeLabel} · ${selectedFormation} · ${objLabel}`;
+  $('gameBadge').innerHTML = `<span class="dot"></span> ${scopeLabel} &middot; ${selectedFormation} &middot; ${objLabel}`;
 
   $('step1').classList.add('hidden');
   $('step2').classList.remove('hidden');
-  $('step3').classList.add('hidden');
-  $('feedbackBar').classList.add('hidden');
+  $('scoreBanner').classList.add('hidden');
+  $('actionBtns').classList.add('hidden');
+
+  // Show perf info tab when objective is performance
+  $('perfInfoTab').classList.toggle('hidden', selectedObjective !== 'performance');
 
   renderPitch();
   updateSubmitBtn();
@@ -725,10 +857,20 @@ function renderPitch() {
 
       const isLocked = lockedSlots.has(slot.idx);
 
+      // Build context line if we have results for this slot
+      let contextHtml = '';
+      if (lastResults) {
+        const r = lastResults.find(res => res.slotIdx === slot.idx);
+        if (r) {
+          contextHtml = buildSlotContext(r, slot);
+        }
+      }
+
       el.innerHTML = `
-        <div class="slot-circle">${slot.player ? slot.player.nationality || '✓' : slot.label}</div>
+        <div class="slot-circle">${slot.player ? slot.player.nationality || '&#10003;' : slot.label}</div>
         <div class="slot-name">${slot.player ? truncName(slot.player.name) : ''}</div>
         <div class="slot-role">${slot.label}</div>
+        ${contextHtml}
       `;
 
       if (!isLocked) {
@@ -740,6 +882,41 @@ function renderPitch() {
   }
 }
 
+/**
+ * Build inline context text for a slot after scoring.
+ * For correct: "1st DEF · 455 apps" or "1st DEF · 2.34"
+ * For wrong: "10th DEF · not in top 4"
+ */
+function buildSlotContext(r, slot) {
+  if (!r.userRank) return '';
+  const bucketSlotCount = slots.filter(s => s.bucket === slot.bucket).length;
+  const rankStr = ordinal(r.userRank);
+
+  if (r.correct) {
+    // Show rank + stat
+    let statStr = '';
+    if (selectedObjective === 'performance' && r.userStatValue?.score != null) {
+      statStr = r.userStatValue.score.toFixed(2);
+    } else if (selectedObjective === 'goals' && r.userStatValue?.goals != null) {
+      statStr = r.userStatValue.goals + ' gls';
+    } else if (r.userStatValue?.appearances != null) {
+      statStr = r.userStatValue.appearances + ' apps';
+    }
+    return `<div class="slot-context">${rankStr} ${slot.bucket}${statStr ? ' · ' + statStr : ''}</div>`;
+  } else {
+    // Wrong — show rank and that they needed top N
+    let statStr = '';
+    if (selectedObjective === 'performance' && r.userStatValue?.score != null) {
+      statStr = ' · ' + r.userStatValue.score.toFixed(2);
+    } else if (selectedObjective === 'goals' && r.userStatValue?.goals != null) {
+      statStr = ' · ' + r.userStatValue.goals + ' gls';
+    } else if (r.userStatValue?.appearances != null) {
+      statStr = ' · ' + r.userStatValue.appearances + ' apps';
+    }
+    return `<div class="slot-context">${rankStr}${statStr} (top ${bucketSlotCount})</div>`;
+  }
+}
+
 function truncName(name) {
   if (!name) return '';
   // Show surname or truncated name
@@ -747,7 +924,7 @@ function truncName(name) {
   if (parts.length > 1) {
     return parts[parts.length - 1];
   }
-  return name.length > 10 ? name.slice(0, 9) + '…' : name;
+  return name.length > 10 ? name.slice(0, 9) + '\u2026' : name;
 }
 
 function updateSubmitBtn() {
@@ -761,11 +938,25 @@ function resetPicks() {
       slot.player = null;
     }
   }
+  lastResults = null;
   renderPitch();
   updateSubmitBtn();
-  $('feedbackBar').classList.add('hidden');
-  $('rankContext').classList.add('hidden');
+  $('scoreBanner').classList.add('hidden');
+  $('actionBtns').classList.add('hidden');
 }
+
+// ============================================================
+// PERFORMANCE INFO OVERLAY
+// ============================================================
+function showPerfInfo() {
+  $('perfInfoOverlay').classList.remove('hidden');
+}
+function hidePerfInfo() {
+  $('perfInfoOverlay').classList.add('hidden');
+}
+$('perfInfoOverlay').onclick = (e) => {
+  if (e.target === $('perfInfoOverlay')) hidePerfInfo();
+};
 
 // ============================================================
 // PLAYER SEARCH MODAL
@@ -775,7 +966,7 @@ function openSearchModal(slotIdx) {
   const slot = slots.find(s => s.idx === slotIdx);
   if (!slot) return;
 
-  $('modalTitle').textContent = `Pick ${slot.label} — ${slot.bucket}`;
+  $('modalTitle').textContent = `Pick ${slot.label} \u2014 ${slot.bucket}`;
   $('searchInput').value = '';
   $('suggestionList').innerHTML = '';
   $('noResults').classList.add('hidden');
@@ -940,7 +1131,7 @@ async function submitXI() {
     if (data.error) {
       alert('Error: ' + data.error);
       btn.disabled = false;
-      btn.textContent = 'GO — Submit XI';
+      btn.textContent = 'GO \u2014 Submit XI';
       return;
     }
 
@@ -951,7 +1142,7 @@ async function submitXI() {
     hideScoringOverlay();
     alert('Scoring failed: ' + err.message);
     btn.disabled = false;
-    btn.textContent = 'GO — Submit XI';
+    btn.textContent = 'GO \u2014 Submit XI';
   }
 }
 
@@ -960,6 +1151,9 @@ function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 async function processResults(data) {
   const { correct, total, results } = data;
 
+  // Store results for rendering context on pitch
+  lastResults = results;
+
   // Lock correct picks
   for (const r of results) {
     if (r.correct) {
@@ -967,37 +1161,47 @@ async function processResults(data) {
     }
   }
 
-  if (correct === total) {
-    // Animate all correct then show results
-    await animateSlotResults(results);
-    showResults(data, false);
-    return;
-  }
-
   // Animate slots one by one
   await animateSlotResults(results);
 
-  // Show feedback
-  const fb = $('feedbackBar');
-  fb.style.background = correct >= 8 ? 'rgba(34,197,94,0.15)' : correct >= 4 ? 'rgba(251,191,36,0.15)' : 'rgba(224,85,85,0.15)';
-  fb.style.color = correct >= 8 ? 'var(--accent)' : correct >= 4 ? 'var(--gold)' : 'var(--danger)';
-  fb.textContent = `${correct}/${total} correct — Attempt ${attempts}`;
-  fb.classList.remove('hidden');
+  // Re-render pitch with context info in each slot
+  renderPitch();
 
-  // Show rank context for wrong picks
-  showRankContext(results);
+  // Show score banner inline
+  $('scoreBig').textContent = `${correct}/${total}`;
+  $('scoreBig').style.color = correct === total ? 'var(--gold)' : correct >= 8 ? 'var(--accent)' : correct >= 4 ? 'var(--gold)' : 'var(--danger)';
+  $('scoreLabel').textContent = correct === total ? 'Perfect Score!' : 'Correct picks';
+  $('attemptBadge').textContent = `Attempt ${attempts}`;
+  $('scoreBanner').classList.remove('hidden');
 
-  // If 3+ attempts, show full results with reveal option
-  if (attempts >= 3) {
-    showResults(data, false);
+  if (correct === total) {
+    // Perfect — show new game button
+    $('actionBtns').classList.remove('hidden');
+    $('retryBtn').classList.add('hidden');
+    $('revealBtn').classList.add('hidden');
+    $('newGameBtn').classList.remove('hidden');
+    $('submitXIBtn').classList.add('hidden');
+    $('resetBtn').classList.add('hidden');
+    setupActionHandlers(data);
     return;
   }
 
-  // Allow retry
-  $('submitXIBtn').disabled = false;
-  $('submitXIBtn').textContent = 'GO — Submit XI';
+  // If 3+ attempts, offer reveal
+  if (attempts >= 3) {
+    $('actionBtns').classList.remove('hidden');
+    $('retryBtn').classList.remove('hidden');
+    $('revealBtn').classList.remove('hidden');
+    $('newGameBtn').classList.remove('hidden');
+    $('submitXIBtn').classList.add('hidden');
+    $('resetBtn').classList.add('hidden');
+    setupActionHandlers(data);
+    return;
+  }
 
-  // Clear wrong picks for retry
+  // Allow retry — clear wrong picks
+  $('submitXIBtn').disabled = false;
+  $('submitXIBtn').textContent = 'GO \u2014 Submit XI';
+
   for (const r of results) {
     if (!r.correct) {
       const slot = slots.find(s => s.idx === r.slotIdx);
@@ -1007,6 +1211,45 @@ async function processResults(data) {
 
   renderPitch();
   updateSubmitBtn();
+}
+
+function setupActionHandlers(data) {
+  const { results } = data;
+
+  $('retryBtn').onclick = () => {
+    // Clear wrong picks and continue on pitch
+    for (const r of results) {
+      if (!r.correct) {
+        const slot = slots.find(s => s.idx === r.slotIdx);
+        if (slot) slot.player = null;
+      }
+    }
+    lastResults = null;
+    $('actionBtns').classList.add('hidden');
+    $('submitXIBtn').classList.remove('hidden');
+    $('resetBtn').classList.remove('hidden');
+    $('submitXIBtn').textContent = 'GO \u2014 Submit XI';
+    renderPitch();
+    updateSubmitBtn();
+  };
+
+  $('revealBtn').onclick = async () => {
+    await revealAnswers();
+  };
+
+  $('newGameBtn').onclick = () => {
+    $('step2').classList.add('hidden');
+    $('step1').classList.remove('hidden');
+    selectedScope = null;
+    selectedFormation = null;
+    selectedObjective = null;
+    slots = [];
+    attempts = 0;
+    lockedSlots = new Set();
+    lastResults = null;
+    document.querySelectorAll('.option-btn.selected, .formation-btn.selected').forEach(b => b.classList.remove('selected'));
+    $('startGameBtn').disabled = true;
+  };
 }
 
 async function animateSlotResults(results) {
@@ -1034,109 +1277,6 @@ function ordinal(n) {
   const s = ['th','st','nd','rd'];
   const v = n % 100;
   return n + (s[(v - 20) % 10] || s[v] || s[0]);
-}
-
-function showRankContext(results) {
-  const rc = $('rankContext');
-  const wrongWithRank = results.filter(r => !r.correct && r.userRank);
-  if (wrongWithRank.length === 0) {
-    rc.classList.add('hidden');
-    return;
-  }
-
-  const lines = wrongWithRank.map(r => {
-    const slot = slots.find(s => s.idx === r.slotIdx);
-    const playerName = slot?.player ? truncName(slot.player.name) : '?';
-    // Count how many slots the best XI uses for that bucket
-    const bucketSlotCount = slots.filter(s => s.bucket === slot?.bucket).length;
-    const needed = ordinal(bucketSlotCount);
-    return `<span style="color:var(--ink);">${playerName}</span> was ${ordinal(r.userRank)} highest (needed top ${bucketSlotCount})`;
-  });
-
-  rc.innerHTML = lines.join('<br>');
-  rc.classList.remove('hidden');
-}
-
-function showResults(data, revealed) {
-  $('step2').classList.add('hidden');
-  $('step3').classList.remove('hidden');
-
-  const { correct, total, results } = data;
-
-  $('scoreBig').textContent = `${correct}/${total}`;
-  $('scoreBig').style.color = correct === total ? 'var(--gold)' : correct >= 8 ? 'var(--accent)' : correct >= 4 ? 'var(--gold)' : 'var(--danger)';
-  $('scoreLabel').textContent = correct === total ? '🎉 Perfect Score!' : 'Correct picks';
-  $('attemptBadge').textContent = `Attempt ${attempts}`;
-
-  // Build result list
-  const listEl = $('resultList');
-  listEl.innerHTML = '';
-  for (const r of results) {
-    const slot = slots.find(s => s.idx === r.slotIdx);
-    const li = document.createElement('li');
-    li.className = `result-item ${r.correct ? 'correct' : 'wrong'}`;
-
-    const userPlayer = slot?.player;
-    let answerHtml = '';
-    if (r.answer && !r.correct) {
-      answerHtml = `<div class="result-answer">Answer: ${escHtml(r.answer.name)} (${r.answer.appearances} apps, ${r.answer.goals} gls)</div>`;
-    }
-    let rankHtml = '';
-    if (!r.correct && r.userRank) {
-      const bucketSlotCount = slots.filter(s => s.bucket === slot?.bucket).length;
-      rankHtml = `<div class="result-answer">Your pick was ${ordinal(r.userRank)} highest (needed top ${bucketSlotCount})</div>`;
-    }
-
-    li.innerHTML = `
-      <div class="result-icon">${r.correct ? '✓' : '✗'}</div>
-      <div class="result-info">
-        <div class="result-slot">${slot?.label || 'Slot ' + r.slotIdx} — ${slot?.bucket || ''}</div>
-        <div class="result-player">${userPlayer ? escHtml(userPlayer.name) : 'Empty'}</div>
-        ${rankHtml}
-        ${answerHtml}
-      </div>
-    `;
-    listEl.appendChild(li);
-  }
-
-  // Button visibility
-  const canRetry = correct < total && attempts < 5;
-  $('retryBtn').classList.toggle('hidden', !canRetry || correct === total);
-  $('revealBtn').classList.toggle('hidden', revealed || correct === total);
-
-  $('retryBtn').onclick = () => {
-    // Clear wrong picks and go back to pitch
-    for (const r of results) {
-      if (!r.correct) {
-        const slot = slots.find(s => s.idx === r.slotIdx);
-        if (slot) slot.player = null;
-      }
-    }
-    $('step3').classList.add('hidden');
-    $('step2').classList.remove('hidden');
-    $('feedbackBar').classList.add('hidden');
-    $('rankContext').classList.add('hidden');
-    $('submitXIBtn').textContent = 'GO — Submit XI';
-    renderPitch();
-    updateSubmitBtn();
-  };
-
-  $('revealBtn').onclick = async () => {
-    await revealAnswers();
-  };
-
-  $('newGameBtn').onclick = () => {
-    $('step3').classList.add('hidden');
-    $('step1').classList.remove('hidden');
-    selectedScope = null;
-    selectedFormation = null;
-    selectedObjective = null;
-    slots = [];
-    attempts = 0;
-    lockedSlots = new Set();
-    document.querySelectorAll('.option-btn.selected, .formation-btn.selected').forEach(b => b.classList.remove('selected'));
-    $('startGameBtn').disabled = true;
-  };
 }
 
 async function revealAnswers() {
@@ -1170,7 +1310,32 @@ async function revealAnswers() {
       return;
     }
 
-    showResults(data, true);
+    // For wrong slots, replace the player with the correct answer
+    for (const r of data.results) {
+      if (!r.correct && r.answer) {
+        const slot = slots.find(s => s.idx === r.slotIdx);
+        if (slot) {
+          slot.player = {
+            playerId: r.answer.playerId,
+            name: r.answer.name,
+            nationality: r.answer.nationality || '',
+            appearances: r.answer.appearances,
+            goals: r.answer.goals,
+          };
+          lockedSlots.add(r.slotIdx);
+        }
+      }
+    }
+
+    lastResults = data.results;
+    renderPitch();
+
+    // Update score banner
+    $('scoreBig').textContent = `${data.correct}/${data.total}`;
+    $('scoreLabel').textContent = 'Answers revealed';
+    $('retryBtn').classList.add('hidden');
+    $('revealBtn').classList.add('hidden');
+
   } catch (err) {
     alert('Failed to reveal: ' + err.message);
     btn.disabled = false;
