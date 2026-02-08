@@ -966,6 +966,26 @@ button {
       <div class="section-body" id="bundesligaGoalsGames"></div>
     </div>
 
+    <h3 class="competition-divider">Ligue 1</h3>
+
+    <div class="section" id="sec-ligue1-apps">
+      <div class="section-header" onclick="toggleSection('sec-ligue1-apps')">
+        <div class="section-title">Ligue 1 Apps (Top 25 Clubs) <span class="section-count" id="countLigue1Apps">(0)</span></div>
+        <div class="chev">▼</div>
+      </div>
+      <div class="section-desc">Player appearances by club in Ligue 1 history.<br><span style="color:var(--gold)">★</span> difficulty: more stars = harder</div>
+      <div class="section-body" id="ligue1AppsGames"></div>
+    </div>
+
+    <div class="section" id="sec-ligue1-goals">
+      <div class="section-header" onclick="toggleSection('sec-ligue1-goals')">
+        <div class="section-title">Ligue 1 Goals (Top 25 Clubs) <span class="section-count" id="countLigue1Goals">(0)</span></div>
+        <div class="chev">▼</div>
+      </div>
+      <div class="section-desc">Player goals by club in Ligue 1 history.<br><span style="color:var(--gold)">★</span> difficulty: more stars = harder</div>
+      <div class="section-body" id="ligue1GoalsGames"></div>
+    </div>
+
     <h3 class="competition-divider">Special</h3>
 
     <div class="section" id="sec-big5-british">
@@ -1650,6 +1670,7 @@ async function loadDynamicLeagueCategories() {
     { comp: 'La Liga', appsContainer: 'laligaAppsGames', goalsContainer: 'laligaGoalsGames', countApps: 'countLaLigaApps', countGoals: 'countLaLigaGoals', prefix: 'laliga', flag: '🇪🇸' },
     { comp: 'Serie A', appsContainer: 'serieaAppsGames', goalsContainer: 'serieaGoalsGames', countApps: 'countSerieAApps', countGoals: 'countSerieAGoals', prefix: 'seriea', flag: '🇮🇹' },
     { comp: 'Bundesliga', appsContainer: 'bundesligaAppsGames', goalsContainer: 'bundesligaGoalsGames', countApps: 'countBundesligaApps', countGoals: 'countBundesligaGoals', prefix: 'bundesliga', flag: '🇩🇪' },
+    { comp: 'Ligue 1', appsContainer: 'ligue1AppsGames', goalsContainer: 'ligue1GoalsGames', countApps: 'countLigue1Apps', countGoals: 'countLigue1Goals', prefix: 'ligue1', flag: '🇫🇷' },
   ];
 
   for (const league of leagues) {
@@ -3401,7 +3422,7 @@ async function startChatGame(type) {
 })();
 </script>
 <footer style="text-align:center;padding:16px;font-size:11px;color:var(--muted);opacity:0.6;">
-  Build: 2026-02-08-0200 | Football 501 v3.1
+  Build: 2026-02-08-0400 | Football 501 v3.2
 </footer>
 </body>
 </html>

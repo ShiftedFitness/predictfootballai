@@ -250,6 +250,49 @@ const NAT_ALIASES = {
 };
 
 // ============================================================
+// CURATED LEAGUE CLUB LISTS (top 25, in display order)
+// Club names must match DB club_name values exactly
+// ============================================================
+const LALIGA_CLUBS = [
+  'Athletic Club', 'Valencia', 'Barcelona', 'Real Madrid', 'Atlético Madrid',
+  'Sevilla', 'Real Sociedad', 'Espanyol', 'Real Betis', 'Celta Vigo',
+  'Villarreal', 'Dep La Coruña', 'Osasuna', 'Mallorca', 'Valladolid',
+  'Getafe', 'Zaragoza', 'Rayo Vallecano', 'Racing Sant', 'Málaga',
+  'Alavés', 'Levante', 'Sporting Gijón', 'Granada', 'Tenerife',
+];
+
+const BUNDESLIGA_CLUBS = [
+  'Bayern Munich', 'Dortmund', 'Leverkusen', 'Werder Bremen', 'Stuttgart',
+  'Gladbach', 'Schalke 04', 'Wolfsburg', 'Eintracht Frankfurt', 'Hamburger SV',
+  'Freiburg', 'Hertha BSC', 'Köln', 'Mainz 05', 'Hoffenheim',
+  'Bochum', 'Hannover 96', 'Nürnberg', 'Augsburg', 'Kaiserslautern',
+  'Arminia', 'Hansa Rostock', '1860 Munich', 'RB Leipzig', 'MSV Duisburg',
+];
+
+const SERIEA_CLUBS = [
+  'Lazio', 'Inter', 'Milan', 'Roma', 'Udinese',
+  'Juventus', 'Fiorentina', 'Atalanta', 'Cagliari', 'Sampdoria',
+  'Bologna', 'Napoli', 'Parma', 'Torino', 'Genoa',
+  'Chievo', 'Empoli', 'Lecce', 'Hellas Verona', 'Palermo',
+  'Sassuolo', 'Brescia', 'Siena', 'Reggina', 'Catania',
+];
+
+const LIGUE1_CLUBS = [
+  'Rennes', 'Lyon', 'Paris Saint-Germain', 'Marseille', 'Monaco',
+  'Lille', 'Bordeaux', 'Nice', 'Nantes', 'Montpellier',
+  'Toulouse', 'Saint-Étienne', 'Lens', 'Strasbourg', 'Auxerre',
+  'Metz', 'Lorient', 'Bastia', 'Sochaux', 'Guingamp',
+  'Nancy', 'Reims', 'Caen', 'Troyes', 'Angers',
+];
+
+const CURATED_LEAGUE_CLUBS = {
+  'La Liga': LALIGA_CLUBS,
+  'Bundesliga': BUNDESLIGA_CLUBS,
+  'Serie A': SERIEA_CLUBS,
+  'Ligue 1': LIGUE1_CLUBS,
+};
+
+// ============================================================
 // DATA FETCHING - ALL via v_game_player_club_comp view
 // (player_competition_totals table is empty)
 // ============================================================
@@ -687,10 +730,18 @@ exports.handler = async (event) => {
     let competition = 'Premier League';
 
     // ============================================================
-    // GET TOP CLUBS (for dynamic league category cards)
+    // GET TOP CLUBS (for league category cards)
+    // Uses curated lists for non-EPL leagues, dynamic for EPL
     // ============================================================
     if (categoryId === 'get_top_clubs') {
       const comp = body.competition || 'Premier League';
+      const curated = CURATED_LEAGUE_CLUBS[comp];
+      if (curated) {
+        // Return curated list as { club, count } objects (count not needed but keeps format consistent)
+        const clubs = curated.map((club, i) => ({ club, count: curated.length - i }));
+        return respond(200, { clubs });
+      }
+      // Fallback to dynamic query for EPL or any unlisted league
       const limit = body.limit || 25;
       const clubs = await getTopClubs(supabase, comp, limit);
       return respond(200, { clubs });
