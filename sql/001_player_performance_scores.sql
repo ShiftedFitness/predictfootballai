@@ -87,10 +87,10 @@ BEGIN
     pss.player_uid,
     p.player_name,
     p.nationality_norm,
-    SUM(pss.appearances)::integer,
-    SUM(pss.goals)::integer,
-    SUM(pss.assists)::integer,
-    SUM(pss.minutes)::integer,
+    SUM(COALESCE(pss.appearances, 0))::integer,
+    SUM(COALESCE(pss.goals, 0))::integer,
+    SUM(COALESCE(pss.assists, 0))::integer,
+    SUM(COALESCE(pss.minutes, 0))::integer,
     SUM(COALESCE(pss.clean_sheets, 0))::integer,
     SUM(COALESCE(pss.saves, 0))::integer,
     SUM(COALESCE(pss.goals_against, 0))::integer,
@@ -110,7 +110,7 @@ BEGIN
   WHERE pss.competition_id = epl_comp_id
     AND pss.position_bucket IS NOT NULL
   GROUP BY pss.position_bucket, pss.player_uid, p.player_name, p.nationality_norm
-  HAVING SUM(pss.appearances) >= 40;  -- league min threshold
+  HAVING SUM(COALESCE(pss.appearances, 0)) >= 40;  -- league min threshold
 
   -- ============================================================
   -- STEP B: Insert raw aggregated stats for CLUB scopes
@@ -131,10 +131,10 @@ BEGIN
     pss.player_uid,
     p.player_name,
     p.nationality_norm,
-    SUM(pss.appearances)::integer,
-    SUM(pss.goals)::integer,
-    SUM(pss.assists)::integer,
-    SUM(pss.minutes)::integer,
+    SUM(COALESCE(pss.appearances, 0))::integer,
+    SUM(COALESCE(pss.goals, 0))::integer,
+    SUM(COALESCE(pss.assists, 0))::integer,
+    SUM(COALESCE(pss.minutes, 0))::integer,
     SUM(COALESCE(pss.clean_sheets, 0))::integer,
     SUM(COALESCE(pss.saves, 0))::integer,
     SUM(COALESCE(pss.goals_against, 0))::integer,
@@ -157,7 +157,7 @@ BEGIN
       WHERE club_name IN ('Sunderland', 'Manchester United', 'Arsenal', 'Liverpool', 'Chelsea')
     )
   GROUP BY pss.club_id, pss.position_bucket, pss.player_uid, p.player_name, p.nationality_norm
-  HAVING SUM(pss.appearances) >= 20;  -- club min threshold
+  HAVING SUM(COALESCE(pss.appearances, 0)) >= 20;  -- club min threshold
 
   -- ============================================================
   -- STEP C: Compute raw_score based on position bucket
