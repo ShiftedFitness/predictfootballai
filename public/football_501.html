@@ -2647,12 +2647,12 @@ function resetMatchState() {
   hide('skipTrivia');
   hide('triviaNote');
 
-  // Reset custom builder selections
+  // Reset custom builder selections (elements may not exist yet)
   customSelectedNats.clear();
   customSelectedClubs.clear();
   document.querySelectorAll('#nationalityChips .chip, #clubChips .chip').forEach(c => c.classList.remove('selected'));
-  $('customPreview').classList.add('hidden');
-  $('startCustomGame').disabled = true;
+  $('customPreview')?.classList.add('hidden');
+  if ($('startCustomGame')) $('startCustomGame').disabled = true;
 }
 
 // ============== END GAME CONFIRMATION ==============
@@ -2787,6 +2787,7 @@ let livePreviewDebounce = null;
 function initCustomBuilder() {
   // Build nationality chips
   const natContainer = $('nationalityChips');
+  if (!natContainer) return; // Custom builder HTML not present
   natContainer.innerHTML = NATIONALITY_OPTIONS.map(n => `
     <div class="chip" data-code="${n.code}">
       <span class="flag">${n.flag}</span>
@@ -2967,7 +2968,7 @@ function getCustomCacheKey() {
   return `custom_${metric}_n${nats}_c${clubs}`;
 }
 
-$('startCustomGame').onclick = async () => {
+if ($('startCustomGame')) $('startCustomGame').onclick = async () => {
   const metric = $('customMetric').value;
   const nationalities = Array.from(customSelectedNats);
   const clubs = Array.from(customSelectedClubs);

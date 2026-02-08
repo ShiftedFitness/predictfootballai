@@ -162,16 +162,16 @@ const UCL_GOALS_CATS = {
 
 // UCL club categories
 const UCL_CLUB_CATS = {
-  ucl_club_ACMilan: { club: 'AC Milan', label: 'AC Milan' },
-  ucl_club_Arsenal: { club: 'Arsenal', label: 'Arsenal' },
+  ucl_club_ACMilan: { club: 'Milan', aliases: ['AC Milan'], label: 'AC Milan' },
+  ucl_club_Arsenal: { club: 'eng Arsenal', aliases: ['Arsenal'], label: 'Arsenal' },
   ucl_club_Barcelona: { club: 'Barcelona', label: 'Barcelona' },
   ucl_club_Bayern: { club: 'Bayern Munich', label: 'Bayern Munich' },
-  ucl_club_Chelsea: { club: 'Chelsea', label: 'Chelsea' },
-  ucl_club_Inter: { club: 'Inter Milan', label: 'Inter Milan' },
+  ucl_club_Chelsea: { club: 'eng Chelsea', aliases: ['Chelsea'], label: 'Chelsea' },
+  ucl_club_Inter: { club: 'Inter', aliases: ['Inter Milan'], label: 'Inter Milan' },
   ucl_club_Juventus: { club: 'Juventus', label: 'Juventus' },
-  ucl_club_Liverpool: { club: 'Liverpool', label: 'Liverpool' },
-  ucl_club_ManCity: { club: 'Manchester City', aliases: ['Man City'], label: 'Man City' },
-  ucl_club_ManUtd: { club: 'Manchester United', aliases: ['Manchester Utd'], label: 'Man Utd' },
+  ucl_club_Liverpool: { club: 'eng Liverpool', aliases: ['Liverpool'], label: 'Liverpool' },
+  ucl_club_ManCity: { club: 'eng Manchester City', aliases: ['Manchester City', 'Man City'], label: 'Man City' },
+  ucl_club_ManUtd: { club: 'eng Manchester Utd', aliases: ['Manchester United', 'Manchester Utd'], label: 'Man Utd' },
   ucl_club_PSG: { club: 'Paris Saint-Germain', label: 'PSG' },
   ucl_club_RealMadrid: { club: 'Real Madrid', label: 'Real Madrid' },
 };
@@ -208,9 +208,9 @@ const CLUB_ALIASES = {
   'wolves': 'Wolverhampton Wanderers', 'brighton': 'Brighton & Hove Albion',
   'bournemouth': 'Bournemouth',
   'real madrid': 'Real Madrid', 'barcelona': 'Barcelona', 'bayern': 'Bayern Munich',
-  'juventus': 'Juventus', 'ac milan': 'AC Milan', 'inter': 'Inter Milan',
-  'psg': 'Paris Saint-Germain', 'dortmund': 'Borussia Dortmund',
-  'atletico': 'Atletico Madrid', 'napoli': 'Napoli', 'roma': 'Roma',
+  'juventus': 'Juventus', 'ac milan': 'Milan', 'milan': 'Milan', 'inter': 'Inter',
+  'psg': 'Paris Saint-Germain', 'dortmund': 'Dortmund',
+  'atletico': 'Atlético Madrid', 'napoli': 'Napoli', 'roma': 'Roma',
   'lazio': 'Lazio', 'sevilla': 'Sevilla', 'valencia': 'Valencia',
 };
 
@@ -838,7 +838,7 @@ exports.handler = async (event) => {
     else if (categoryId === 'custom') {
       categoryName = 'Custom Game';
       categoryFlag = '🎮';
-      const reqMetric = (body.metric || 'apps_total').includes('goals') ? 'goals' : 'appearances';
+      const reqMetric = (body.metric || 'appearances').includes('goals') ? 'goals' : 'appearances';
       metric = reqMetric;
       metricLabel = reqMetric === 'goals' ? 'Goals' : 'Apps';
 
