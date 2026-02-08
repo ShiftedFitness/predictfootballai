@@ -52,13 +52,6 @@ const FORMATIONS = {
     { idx: 5, bucket: 'MID' }, { idx: 6, bucket: 'MID' }, { idx: 7, bucket: 'MID' },
     { idx: 8, bucket: 'FWD' }, { idx: 9, bucket: 'FWD' }, { idx: 10, bucket: 'FWD' },
   ]},
-  '4-2-3-1': { slots: [
-    { idx: 0, bucket: 'GK' }, { idx: 1, bucket: 'DEF' }, { idx: 2, bucket: 'DEF' },
-    { idx: 3, bucket: 'DEF' }, { idx: 4, bucket: 'DEF' },
-    { idx: 5, bucket: 'MID' }, { idx: 6, bucket: 'MID' },
-    { idx: 7, bucket: 'MID' }, { idx: 8, bucket: 'MID' }, { idx: 9, bucket: 'MID' },
-    { idx: 10, bucket: 'FWD' },
-  ]},
   '3-5-2': { slots: [
     { idx: 0, bucket: 'GK' }, { idx: 1, bucket: 'DEF' }, { idx: 2, bucket: 'DEF' }, { idx: 3, bucket: 'DEF' },
     { idx: 4, bucket: 'MID' }, { idx: 5, bucket: 'MID' }, { idx: 6, bucket: 'MID' },
@@ -322,6 +315,73 @@ exports.handler = async (event) => {
       if (slot.player) bestByBucket[slot.bucket].add(slot.player.playerId);
     }
 
+    // Compute full rankings per bucket for context on wrong picks
+    const competitionId = await getEplCompId(supabase);
+    const formationDef = FORMATIONS[formation];
+    const uniqueBuckets = [...new Set(formationDef.slots.map(s => s.bucket))];
+    const bucketRankings = {};
+
+    if (objective === 'performance') {
+      for (const bucket of uniqueBuckets) {
+        let query = supabase
+          .from('player_performance_scores')
+          .select('player_uid, performance_score')
+          .eq('position_bucket', bucket)
+          .eq('scope_type', scope.type);
+        if (scope.type === 'club' && scope.clubId) {
+          query = query.eq('scope_id', scope.clubId);
+        } else {
+          query = query.is('scope_id', null);
+        }
+        query = query.order('performance_score', { ascending: false });
+        const { data } = await query;
+        if (data) {
+          bucketRankings[bucket] = data.map((r, i) => ({ playerId: r.player_uid, rank: i + 1 }));
+        }
+      }
+    } else {
+      const metric = objective === 'goals' ? 'goals' : 'appearances';
+      for (const bucket of uniqueBuckets) {
+        let query = supabase
+          .from('player_season_stats')
+          .select('player_uid, appearances, goals, minutes')
+          .eq('competition_id', competitionId)
+          .eq('position_bucket', bucket)
+          .gt('appearances', 0);
+        if (scope.type === 'club' && scope.clubId) {
+          query = query.eq('club_id', scope.clubId);
+        }
+        const { data: stats } = await query;
+        if (!stats) continue;
+
+        const aggMap = new Map();
+        for (const row of stats) {
+          const e = aggMap.get(row.player_uid);
+          if (e) {
+            e.appearances += row.appearances || 0;
+            e.goals += row.goals || 0;
+            e.minutes += row.minutes || 0;
+          } else {
+            aggMap.set(row.player_uid, {
+              player_uid: row.player_uid,
+              appearances: row.appearances || 0,
+              goals: row.goals || 0,
+              minutes: row.minutes || 0,
+            });
+          }
+        }
+
+        const minApps = scope.type === 'club' ? MIN_APPS_CLUB : MIN_APPS_LEAGUE;
+        let eligible = Array.from(aggMap.values()).filter(p => p.appearances >= minApps);
+        eligible.sort((a, b) => {
+          const d = (b[metric] || 0) - (a[metric] || 0);
+          if (d !== 0) return d;
+          return b.appearances - a.appearances;
+        });
+        bucketRankings[bucket] = eligible.map((p, i) => ({ playerId: p.player_uid, rank: i + 1 }));
+      }
+    }
+
     const results = [];
     let correct = 0;
 
@@ -337,10 +397,22 @@ exports.handler = async (event) => {
 
       if (isCorrect) correct++;
 
+      // Find rank of user's pick in that bucket
+      let userRank = null;
+      if (pick.playerId && bucketRankings[bucket]) {
+        const found = bucketRankings[bucket].find(r => r.playerId === pick.playerId);
+        if (found) userRank = found.rank;
+      }
+
+      // Count how many eligible players in that bucket
+      const bucketTotal = bucketRankings[bucket] ? bucketRankings[bucket].length : null;
+
       results.push({
         slotIdx: pick.slotIdx,
         correct: !!isCorrect,
         userPick: pick.playerId,
+        userRank,
+        bucketTotal,
         // Only reveal if requested (after 3 attempts or explicit reveal)
         answer: reveal ? (bestSlot.player ? {
           playerId: bestSlot.player.playerId,

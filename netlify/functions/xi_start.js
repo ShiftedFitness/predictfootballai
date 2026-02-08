@@ -90,22 +90,6 @@ const FORMATIONS = {
       { idx: 10, role: 'RW', bucket: 'FWD', label: 'RW',  row: 3 },
     ],
   },
-  '4-2-3-1': {
-    label: '4-2-3-1',
-    slots: [
-      { idx: 0, role: 'GK',   bucket: 'GK',  label: 'GK',   row: 0 },
-      { idx: 1, role: 'LB',   bucket: 'DEF', label: 'LB',   row: 1 },
-      { idx: 2, role: 'CB',   bucket: 'DEF', label: 'CB',   row: 1 },
-      { idx: 3, role: 'CB',   bucket: 'DEF', label: 'CB',   row: 1 },
-      { idx: 4, role: 'RB',   bucket: 'DEF', label: 'RB',   row: 1 },
-      { idx: 5, role: 'CDM',  bucket: 'MID', label: 'CDM',  row: 2 },
-      { idx: 6, role: 'CDM',  bucket: 'MID', label: 'CDM',  row: 2 },
-      { idx: 7, role: 'LAM',  bucket: 'MID', label: 'LAM',  row: 3 },
-      { idx: 8, role: 'CAM',  bucket: 'MID', label: 'CAM',  row: 3 },
-      { idx: 9, role: 'RAM',  bucket: 'MID', label: 'RAM',  row: 3 },
-      { idx: 10, role: 'ST',  bucket: 'FWD', label: 'ST',   row: 4 },
-    ],
-  },
   '3-5-2': {
     label: '3-5-2',
     slots: [
@@ -192,11 +176,16 @@ async function searchPlayers(supabase, query, positionBucket, scope, competition
   const normalizedQuery = normalize(query);
   if (!normalizedQuery || normalizedQuery.length < 2) return [];
 
+  // Allow multi-position players: FWD slots also search MID, MID slots also search FWD
+  const bucketsToSearch = [positionBucket];
+  if (positionBucket === 'FWD') bucketsToSearch.push('MID');
+  else if (positionBucket === 'MID') bucketsToSearch.push('FWD');
+
   let dbQuery = supabase
     .from('player_season_stats')
     .select('player_uid, appearances, goals, assists, minutes')
     .eq('competition_id', competitionId)
-    .eq('position_bucket', positionBucket)
+    .in('position_bucket', bucketsToSearch)
     .gt('appearances', 0);
 
   if (scope.type === 'club' && scope.clubId) {

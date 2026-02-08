@@ -267,15 +267,16 @@ body {
   background: rgba(0,0,0,0.7);
   z-index: 100;
   display: flex;
-  align-items: flex-end;
+  align-items: flex-start;
   justify-content: center;
+  padding-top: 15vh;
 }
 .modal {
   background: var(--card);
-  border-radius: 20px 20px 0 0;
+  border-radius: 20px;
   width: 100%;
   max-width: 480px;
-  max-height: 75vh;
+  max-height: 60vh;
   padding: 20px;
   overflow-y: auto;
 }
@@ -396,6 +397,48 @@ body {
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
+/* ====== SCORING OVERLAY ====== */
+.scoring-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.75);
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+.scoring-overlay .scoring-spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid var(--muted);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+.scoring-overlay .scoring-text {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* ====== SLOT ANIMATIONS ====== */
+@keyframes slotCorrect {
+  0% { transform: translateX(-50%) scale(1); }
+  40% { transform: translateX(-50%) scale(1.25); }
+  100% { transform: translateX(-50%) scale(1); }
+}
+@keyframes slotWrong {
+  0%, 100% { transform: translateX(-50%); }
+  20% { transform: translateX(calc(-50% + 6px)); }
+  40% { transform: translateX(calc(-50% - 6px)); }
+  60% { transform: translateX(calc(-50% + 3px)); }
+  80% { transform: translateX(calc(-50% - 3px)); }
+}
+.slot.anim-correct { animation: slotCorrect 0.5s ease; }
+.slot.anim-wrong { animation: slotWrong 0.4s ease; }
+
 /* ====== SCOPE INFO BADGE ====== */
 .scope-badge {
   display: inline-flex;
@@ -466,11 +509,12 @@ body {
       <!-- Slots rendered dynamically -->
     </div>
 
-    <div style="display:flex;gap:8px;">
-      <button class="go-btn primary" id="submitXIBtn" disabled style="flex:1">GO — Submit XI</button>
-      <button class="go-btn secondary" id="resetBtn" style="flex:0 0 auto;padding:16px 20px;">Reset</button>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <button class="go-btn primary" id="submitXIBtn" disabled style="flex:0 0 auto;padding:10px 18px;font-size:13px;">GO — Submit XI</button>
+      <button class="go-btn secondary" id="resetBtn" style="flex:1;padding:10px 14px;font-size:13px;margin-top:0;">Reset</button>
     </div>
     <div id="feedbackBar" class="hidden" style="text-align:center;padding:12px;margin-top:10px;border-radius:12px;font-weight:600;font-size:14px;"></div>
+    <div id="rankContext" class="hidden" style="margin-top:8px;padding:10px 14px;border-radius:12px;background:var(--card-dark);font-size:12px;color:var(--muted);line-height:1.6;"></div>
   </div>
 
   <!-- ====== STEP 3: RESULTS ====== -->
@@ -720,6 +764,7 @@ function resetPicks() {
   renderPitch();
   updateSubmitBtn();
   $('feedbackBar').classList.add('hidden');
+  $('rankContext').classList.add('hidden');
 }
 
 // ============================================================
@@ -805,7 +850,6 @@ async function doSearch() {
           <span class="suggestion-name">${escHtml(p.name)}</span>
           <span class="suggestion-nat">${p.nationality}</span>
         </div>
-        <span class="suggestion-meta">${p.appearances} apps · ${p.goals} gls</span>
       </li>
     `).join('');
 
@@ -847,10 +891,28 @@ function escHtml(str) {
 // ============================================================
 // SUBMIT XI — SCORE
 // ============================================================
+function showScoringOverlay() {
+  const overlay = document.createElement('div');
+  overlay.className = 'scoring-overlay';
+  overlay.id = 'scoringOverlay';
+  overlay.innerHTML = `
+    <div class="scoring-spinner"></div>
+    <div class="scoring-text">Checking your XI...</div>
+  `;
+  document.body.appendChild(overlay);
+}
+
+function hideScoringOverlay() {
+  const overlay = $('scoringOverlay');
+  if (overlay) overlay.remove();
+}
+
 async function submitXI() {
   const btn = $('submitXIBtn');
   btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span> Evaluating...';
+  btn.textContent = 'Checking...';
+
+  showScoringOverlay();
 
   attempts++;
 
@@ -873,6 +935,8 @@ async function submitXI() {
     });
     const data = await res.json();
 
+    hideScoringOverlay();
+
     if (data.error) {
       alert('Error: ' + data.error);
       btn.disabled = false;
@@ -880,17 +944,20 @@ async function submitXI() {
       return;
     }
 
-    // Process results
-    processResults(data);
+    // Process results with animation
+    await processResults(data);
 
   } catch (err) {
+    hideScoringOverlay();
     alert('Scoring failed: ' + err.message);
     btn.disabled = false;
     btn.textContent = 'GO — Submit XI';
   }
 }
 
-function processResults(data) {
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+async function processResults(data) {
   const { correct, total, results } = data;
 
   // Lock correct picks
@@ -901,25 +968,14 @@ function processResults(data) {
   }
 
   if (correct === total) {
-    // Perfect score!
+    // Animate all correct then show results
+    await animateSlotResults(results);
     showResults(data, false);
     return;
   }
 
-  // Mark slots on pitch
-  const container = $('pitchContainer');
-  for (const r of results) {
-    const slotEl = container.querySelector(`.slot[data-idx="${r.slotIdx}"]`);
-    if (!slotEl) continue;
-
-    if (r.correct) {
-      slotEl.classList.add('correct', 'locked');
-      slotEl.classList.remove('wrong');
-    } else {
-      slotEl.classList.add('wrong');
-      slotEl.classList.remove('correct');
-    }
-  }
+  // Animate slots one by one
+  await animateSlotResults(results);
 
   // Show feedback
   const fb = $('feedbackBar');
@@ -927,6 +983,9 @@ function processResults(data) {
   fb.style.color = correct >= 8 ? 'var(--accent)' : correct >= 4 ? 'var(--gold)' : 'var(--danger)';
   fb.textContent = `${correct}/${total} correct — Attempt ${attempts}`;
   fb.classList.remove('hidden');
+
+  // Show rank context for wrong picks
+  showRankContext(results);
 
   // If 3+ attempts, show full results with reveal option
   if (attempts >= 3) {
@@ -948,6 +1007,54 @@ function processResults(data) {
 
   renderPitch();
   updateSubmitBtn();
+}
+
+async function animateSlotResults(results) {
+  const container = $('pitchContainer');
+  for (const r of results) {
+    const slotEl = container.querySelector(`.slot[data-idx="${r.slotIdx}"]`);
+    if (!slotEl) continue;
+
+    if (r.correct) {
+      slotEl.classList.add('correct', 'locked', 'anim-correct');
+      slotEl.classList.remove('wrong');
+    } else {
+      slotEl.classList.add('wrong', 'anim-wrong');
+      slotEl.classList.remove('correct');
+    }
+
+    await sleep(120);
+  }
+  // Wait for last animation to finish
+  await sleep(400);
+}
+
+function ordinal(n) {
+  if (!n) return '';
+  const s = ['th','st','nd','rd'];
+  const v = n % 100;
+  return n + (s[(v - 20) % 10] || s[v] || s[0]);
+}
+
+function showRankContext(results) {
+  const rc = $('rankContext');
+  const wrongWithRank = results.filter(r => !r.correct && r.userRank);
+  if (wrongWithRank.length === 0) {
+    rc.classList.add('hidden');
+    return;
+  }
+
+  const lines = wrongWithRank.map(r => {
+    const slot = slots.find(s => s.idx === r.slotIdx);
+    const playerName = slot?.player ? truncName(slot.player.name) : '?';
+    // Count how many slots the best XI uses for that bucket
+    const bucketSlotCount = slots.filter(s => s.bucket === slot?.bucket).length;
+    const needed = ordinal(bucketSlotCount);
+    return `<span style="color:var(--ink);">${playerName}</span> was ${ordinal(r.userRank)} highest (needed top ${bucketSlotCount})`;
+  });
+
+  rc.innerHTML = lines.join('<br>');
+  rc.classList.remove('hidden');
 }
 
 function showResults(data, revealed) {
@@ -974,12 +1081,18 @@ function showResults(data, revealed) {
     if (r.answer && !r.correct) {
       answerHtml = `<div class="result-answer">Answer: ${escHtml(r.answer.name)} (${r.answer.appearances} apps, ${r.answer.goals} gls)</div>`;
     }
+    let rankHtml = '';
+    if (!r.correct && r.userRank) {
+      const bucketSlotCount = slots.filter(s => s.bucket === slot?.bucket).length;
+      rankHtml = `<div class="result-answer">Your pick was ${ordinal(r.userRank)} highest (needed top ${bucketSlotCount})</div>`;
+    }
 
     li.innerHTML = `
       <div class="result-icon">${r.correct ? '✓' : '✗'}</div>
       <div class="result-info">
         <div class="result-slot">${slot?.label || 'Slot ' + r.slotIdx} — ${slot?.bucket || ''}</div>
         <div class="result-player">${userPlayer ? escHtml(userPlayer.name) : 'Empty'}</div>
+        ${rankHtml}
         ${answerHtml}
       </div>
     `;
@@ -1002,6 +1115,7 @@ function showResults(data, revealed) {
     $('step3').classList.add('hidden');
     $('step2').classList.remove('hidden');
     $('feedbackBar').classList.add('hidden');
+    $('rankContext').classList.add('hidden');
     $('submitXIBtn').textContent = 'GO — Submit XI';
     renderPitch();
     updateSubmitBtn();
