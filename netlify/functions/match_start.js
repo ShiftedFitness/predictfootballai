@@ -215,10 +215,11 @@ const AGE_CATS = {
   epl_age_35plus: { minAge: 35, name: 'Age 35 and Above', flag: '👴' },
 };
 
-// Chat builder aliases
+// Chat builder aliases — maps lowercase shorthand → DB club_name
 const CLUB_ALIASES = {
-  'man utd': 'Manchester United', 'man united': 'Manchester United', 'united': 'Manchester United',
-  'man city': 'Manchester City', 'city': 'Manchester City',
+  // EPL
+  'man utd': 'Manchester United', 'man united': 'Manchester United', 'manchester united': 'Manchester United', 'mufc': 'Manchester United',
+  'man city': 'Manchester City', 'manchester city': 'Manchester City', 'mcfc': 'Manchester City',
   'spurs': 'Tottenham Hotspur', 'tottenham': 'Tottenham Hotspur',
   'arsenal': 'Arsenal', 'liverpool': 'Liverpool', 'chelsea': 'Chelsea',
   'everton': 'Everton', 'newcastle': 'Newcastle United',
@@ -226,12 +227,69 @@ const CLUB_ALIASES = {
   'leeds': 'Leeds United', 'leicester': 'Leicester City',
   'southampton': 'Southampton', 'sunderland': 'Sunderland',
   'wolves': 'Wolves', 'wolverhampton': 'Wolves', 'brighton': 'Brighton & Hove Albion',
-  'bournemouth': 'Bournemouth',
-  'real madrid': 'Real Madrid', 'barcelona': 'Barcelona', 'bayern': 'Bayern Munich',
-  'juventus': 'Juventus', 'ac milan': 'Milan', 'milan': 'Milan', 'inter': 'Inter',
-  'psg': 'Paris Saint-Germain', 'dortmund': 'Dortmund',
-  'atletico': 'Atlético Madrid', 'napoli': 'Napoli', 'roma': 'Roma',
-  'lazio': 'Lazio', 'sevilla': 'Sevilla', 'valencia': 'Valencia',
+  'bournemouth': 'Bournemouth', 'crystal palace': 'Crystal Palace',
+  'fulham': 'Fulham', 'burnley': 'Burnley', 'watford': 'Watford',
+  'west brom': 'West Bromwich Albion', 'west bromwich': 'West Bromwich Albion',
+  'norwich': 'Norwich City', 'sheffield united': 'Sheffield United',
+  'nottingham forest': 'Nottingham Forest', 'nottm forest': 'Nottingham Forest',
+  'stoke': 'Stoke City', 'swansea': 'Swansea City',
+  'middlesbrough': 'Middlesbrough', 'coventry': 'Coventry City',
+  'blackburn': 'Blackburn Rovers', 'bolton': 'Bolton Wanderers',
+  'wigan': 'Wigan Athletic', 'ipswich': 'Ipswich Town',
+  'derby': 'Derby County', 'huddersfield': 'Huddersfield Town',
+  'charlton': 'Charlton Athletic', 'hull': 'Hull City',
+  'reading': 'Reading', 'portsmouth': 'Portsmouth',
+  'birmingham': 'Birmingham City', 'cardiff': 'Cardiff City',
+  'qpr': 'Queens Park Rangers', 'brentford': 'Brentford',
+  // La Liga
+  'real madrid': 'Real Madrid', 'barcelona': 'Barcelona', 'barca': 'Barcelona',
+  'atletico': 'Atlético Madrid', 'atletico madrid': 'Atlético Madrid',
+  'sevilla': 'Sevilla', 'valencia': 'Valencia',
+  'real sociedad': 'Real Sociedad', 'sociedad': 'Real Sociedad',
+  'villarreal': 'Villarreal', 'real betis': 'Real Betis', 'betis': 'Real Betis',
+  'athletic bilbao': 'Athletic Club', 'athletic club': 'Athletic Club', 'bilbao': 'Athletic Club',
+  'espanyol': 'Espanyol', 'celta vigo': 'Celta Vigo', 'celta': 'Celta Vigo',
+  'getafe': 'Getafe', 'osasuna': 'Osasuna', 'mallorca': 'Mallorca',
+  'rayo vallecano': 'Rayo Vallecano', 'rayo': 'Rayo Vallecano',
+  'granada': 'Granada', 'levante': 'Levante', 'alaves': 'Alavés',
+  'malaga': 'Málaga', 'zaragoza': 'Zaragoza', 'valladolid': 'Valladolid',
+  // Bundesliga
+  'bayern': 'Bayern Munich', 'bayern munich': 'Bayern Munich', 'bayern munchen': 'Bayern Munich',
+  'dortmund': 'Dortmund', 'borussia dortmund': 'Dortmund',
+  'leverkusen': 'Leverkusen', 'bayer leverkusen': 'Leverkusen',
+  'gladbach': 'Gladbach', 'monchengladbach': 'Gladbach', 'borussia monchengladbach': 'Gladbach',
+  'schalke': 'Schalke 04', 'schalke 04': 'Schalke 04',
+  'wolfsburg': 'Wolfsburg', 'werder bremen': 'Werder Bremen', 'bremen': 'Werder Bremen',
+  'stuttgart': 'Stuttgart', 'eintracht frankfurt': 'Eintracht Frankfurt', 'frankfurt': 'Eintracht Frankfurt',
+  'hoffenheim': 'Hoffenheim', 'freiburg': 'Freiburg', 'augsburg': 'Augsburg',
+  'hertha': 'Hertha BSC', 'hertha berlin': 'Hertha BSC',
+  'koln': 'Köln', 'cologne': 'Köln', 'mainz': 'Mainz 05',
+  'hamburger': 'Hamburger SV', 'hamburg': 'Hamburger SV', 'hsv': 'Hamburger SV',
+  'rb leipzig': 'RB Leipzig', 'leipzig': 'RB Leipzig',
+  'hannover': 'Hannover 96', 'nurnberg': 'Nürnberg',
+  'bochum': 'Bochum', 'kaiserslautern': 'Kaiserslautern',
+  // Serie A
+  'juventus': 'Juventus', 'juve': 'Juventus',
+  'ac milan': 'Milan', 'milan': 'Milan',
+  'inter': 'Inter', 'inter milan': 'Inter', 'internazionale': 'Inter',
+  'napoli': 'Napoli', 'roma': 'Roma', 'as roma': 'Roma',
+  'lazio': 'Lazio', 'fiorentina': 'Fiorentina',
+  'atalanta': 'Atalanta', 'torino': 'Torino',
+  'sampdoria': 'Sampdoria', 'bologna': 'Bologna',
+  'udinese': 'Udinese', 'genoa': 'Genoa', 'cagliari': 'Cagliari',
+  'parma': 'Parma', 'sassuolo': 'Sassuolo', 'empoli': 'Empoli',
+  'palermo': 'Palermo', 'lecce': 'Lecce', 'hellas verona': 'Hellas Verona', 'verona': 'Hellas Verona',
+  // Ligue 1
+  'psg': 'Paris Saint-Germain', 'paris saint germain': 'Paris Saint-Germain', 'paris': 'Paris Saint-Germain',
+  'marseille': 'Marseille', 'olympique marseille': 'Marseille', 'om': 'Marseille',
+  'lyon': 'Lyon', 'olympique lyon': 'Lyon', 'ol': 'Lyon',
+  'monaco': 'Monaco', 'lille': 'Lille',
+  'rennes': 'Rennes', 'ogc nice': 'Nice', 'nantes': 'Nantes',
+  'bordeaux': 'Bordeaux', 'montpellier': 'Montpellier',
+  'saint etienne': 'Saint-Étienne', 'st etienne': 'Saint-Étienne',
+  'lens': 'Lens', 'strasbourg': 'Strasbourg', 'toulouse': 'Toulouse',
+  'auxerre': 'Auxerre', 'metz': 'Metz', 'lorient': 'Lorient',
+  'reims': 'Reims', 'angers': 'Angers', 'caen': 'Caen',
 };
 
 const NAT_ALIASES = {
@@ -240,13 +298,72 @@ const NAT_ALIASES = {
   'spanish': 'ESP', 'spain': 'ESP',
   'german': 'GER', 'germany': 'GER',
   'italian': 'ITA', 'italy': 'ITA',
-  'dutch': 'NED', 'netherlands': 'NED',
+  'dutch': 'NED', 'netherlands': 'NED', 'holland': 'NED',
   'portuguese': 'POR', 'portugal': 'POR',
   'brazilian': 'BRA', 'brazil': 'BRA',
-  'argentine': 'ARG', 'argentina': 'ARG',
+  'argentine': 'ARG', 'argentina': 'ARG', 'argentinian': 'ARG',
   'scottish': 'SCO', 'scotland': 'SCO',
   'welsh': 'WAL', 'wales': 'WAL',
   'irish': 'IRL', 'ireland': 'IRL',
+  'austrian': 'AUT', 'austria': 'AUT',
+  'belgian': 'BEL', 'belgium': 'BEL',
+  'swedish': 'SWE', 'sweden': 'SWE',
+  'norwegian': 'NOR', 'norway': 'NOR',
+  'danish': 'DEN', 'denmark': 'DEN',
+  'finnish': 'FIN', 'finland': 'FIN',
+  'swiss': 'SUI', 'switzerland': 'SUI',
+  'turkish': 'TUR', 'turkey': 'TUR',
+  'greek': 'GRE', 'greece': 'GRE',
+  'polish': 'POL', 'poland': 'POL',
+  'czech': 'CZE', 'czech republic': 'CZE', 'czechia': 'CZE',
+  'croatian': 'CRO', 'croatia': 'CRO',
+  'serbian': 'SRB', 'serbia': 'SRB',
+  'romanian': 'ROU', 'romania': 'ROU',
+  'hungarian': 'HUN', 'hungary': 'HUN',
+  'bulgarian': 'BUL', 'bulgaria': 'BUL',
+  'ukrainian': 'UKR', 'ukraine': 'UKR',
+  'russian': 'RUS', 'russia': 'RUS',
+  'american': 'USA', 'usa': 'USA', 'united states': 'USA',
+  'canadian': 'CAN', 'canada': 'CAN',
+  'mexican': 'MEX', 'mexico': 'MEX',
+  'colombian': 'COL', 'colombia': 'COL',
+  'uruguayan': 'URU', 'uruguay': 'URU',
+  'chilean': 'CHI', 'chile': 'CHI',
+  'paraguayan': 'PAR', 'paraguay': 'PAR',
+  'peruvian': 'PER', 'peru': 'PER',
+  'japanese': 'JPN', 'japan': 'JPN',
+  'south korean': 'KOR', 'korean': 'KOR', 'korea': 'KOR',
+  'australian': 'AUS', 'australia': 'AUS',
+  'nigerian': 'NGA', 'nigeria': 'NGA',
+  'ghanaian': 'GHA', 'ghana': 'GHA',
+  'senegalese': 'SEN', 'senegal': 'SEN',
+  'cameroonian': 'CMR', 'cameroon': 'CMR',
+  'ivorian': 'CIV', 'ivory coast': 'CIV', "cote d'ivoire": 'CIV',
+  'egyptian': 'EGY', 'egypt': 'EGY',
+  'moroccan': 'MAR', 'morocco': 'MAR',
+  'algerian': 'ALG', 'algeria': 'ALG',
+  'tunisian': 'TUN', 'tunisia': 'TUN',
+  'south african': 'RSA', 'south africa': 'RSA',
+  'jamaican': 'JAM', 'jamaica': 'JAM',
+  'northern irish': 'NIR', 'northern ireland': 'NIR',
+  'icelandic': 'ISL', 'iceland': 'ISL',
+  'slovenian': 'SVN', 'slovenia': 'SVN',
+  'slovakian': 'SVK', 'slovakia': 'SVK', 'slovak': 'SVK',
+  'bosnian': 'BIH', 'bosnia': 'BIH',
+  'montenegrin': 'MNE', 'montenegro': 'MNE',
+  'albanian': 'ALB', 'albania': 'ALB',
+  'north macedonian': 'MKD', 'north macedonia': 'MKD',
+  'kosovan': 'KOS', 'kosovo': 'KOS',
+  'ecuadorian': 'ECU', 'ecuador': 'ECU',
+  'venezuelan': 'VEN', 'venezuela': 'VEN',
+  'bolivian': 'BOL', 'bolivia': 'BOL',
+  'chinese': 'CHN', 'china': 'CHN',
+  'indian': 'IND', 'india': 'IND',
+  'iranian': 'IRN', 'iran': 'IRN',
+  'israeli': 'ISR', 'israel': 'ISR',
+  'congolese': 'COD', 'congo': 'COD',
+  'malian': 'MLI', 'mali': 'MLI',
+  'guinean': 'GUI', 'guinea': 'GUI',
 };
 
 // ============================================================
@@ -660,41 +777,170 @@ async function getTopClubs(supabase, competitionName, limit = 25) {
   return clubs;
 }
 
+// Position aliases for chat builder
+const POSITION_ALIASES = {
+  'goalkeeper': 'GK', 'goalkeepers': 'GK', 'keeper': 'GK', 'keepers': 'GK', 'gk': 'GK',
+  'defender': 'DEF', 'defenders': 'DEF', 'centre back': 'DEF', 'center back': 'DEF',
+  'centre backs': 'DEF', 'center backs': 'DEF', 'full back': 'DEF', 'full backs': 'DEF',
+  'left back': 'DEF', 'right back': 'DEF', 'cb': 'DEF', 'cbs': 'DEF',
+  'midfielder': 'MID', 'midfielders': 'MID', 'midfield': 'MID',
+  'central midfielder': 'MID', 'central midfielders': 'MID', 'cm': 'MID',
+  'attacking midfielder': 'MID', 'defensive midfielder': 'MID',
+  'winger': 'MID', 'wingers': 'MID',
+  'forward': 'FWD', 'forwards': 'FWD', 'striker': 'FWD', 'strikers': 'FWD',
+  'attacker': 'FWD', 'attackers': 'FWD', 'centre forward': 'FWD', 'center forward': 'FWD',
+  'cf': 'FWD', 'st': 'FWD',
+};
+
+// Competition name patterns (ordered by specificity for regex matching)
+const COMP_PATTERNS = [
+  { regex: /champions\s*league|ucl|european\s*cup/i, name: 'Champions League' },
+  { regex: /la\s*liga|spanish\s*league/i, name: 'La Liga' },
+  { regex: /serie\s*a|italian\s*league/i, name: 'Serie A' },
+  { regex: /bund[ea]s?\s*liga|german\s*league/i, name: 'Bundesliga' },
+  { regex: /ligue\s*1|french\s*league/i, name: 'Ligue 1' },
+  { regex: /premier\s*league|epl|prem\b|english\s*league/i, name: 'Premier League' },
+];
+
 /**
- * Parse chat builder query
+ * Parse chat builder query — enhanced with multi-league, position, age,
+ * exclusion, and minimum threshold support.
  */
 function parseChatQuery(text) {
   const lower = text.toLowerCase();
 
+  // ----- Metric -----
   let metric = 'appearances';
-  if (/goals?|scor/.test(lower)) metric = 'goals';
+  if (/\bgoals?\b|\bscor/.test(lower)) metric = 'goals';
 
-  let competition = 'Premier League';
-  if (/champions league|ucl/.test(lower)) competition = 'Champions League';
-  else if (/la liga/.test(lower)) competition = 'La Liga';
-  else if (/serie a/.test(lower)) competition = 'Serie A';
-  else if (/bundesliga/.test(lower)) competition = 'Bundesliga';
-  else if (/ligue 1/.test(lower)) competition = 'Ligue 1';
+  // ----- Competitions (multi-league support) -----
+  const competitions = [];
+  for (const cp of COMP_PATTERNS) {
+    if (cp.regex.test(lower) && !competitions.includes(cp.name)) {
+      competitions.push(cp.name);
+    }
+  }
+  // Default to Premier League if none detected
+  if (competitions.length === 0) competitions.push('Premier League');
 
+  // ----- Exclusion / negation detection -----
+  // Detect patterns like "non english", "non-english", "not english",
+  // "excluding english", "exclude english", "no english"
+  const excludeNationalities = [];
+  const excludePatterns = [
+    /\bnon[- ](\w+)/g,
+    /\bnot\s+(\w+)/g,
+    /\bexclud(?:e|ing)\s+(\w+)/g,
+    /\bno\s+(\w+)\s+(?:players?|nationali)/g,
+    /\bwithout\s+(\w+)/g,
+  ];
+  const excludeWords = new Set();
+  for (const pat of excludePatterns) {
+    let m;
+    while ((m = pat.exec(lower)) !== null) {
+      const word = m[1].trim();
+      if (NAT_ALIASES[word]) {
+        const code = NAT_ALIASES[word];
+        if (!excludeNationalities.includes(code)) excludeNationalities.push(code);
+        excludeWords.add(word);
+      }
+    }
+  }
+
+  // ----- Nationalities (include — skip any that were flagged as exclude) -----
   const nationalities = [];
-  for (const [alias, code] of Object.entries(NAT_ALIASES)) {
+  // Sort aliases by length descending so longer phrases match first
+  const sortedNatAliases = Object.entries(NAT_ALIASES).sort((a, b) => b[0].length - a[0].length);
+  for (const [alias, code] of sortedNatAliases) {
+    if (excludeWords.has(alias)) continue; // skip excluded nationalities
     if (lower.includes(alias) && !nationalities.includes(code)) {
+      // Make sure this is not part of a negation phrase we missed
+      const idx = lower.indexOf(alias);
+      const before = lower.substring(Math.max(0, idx - 5), idx).trim();
+      if (/\bnon-?$|\bnot$|\bexclud\w*$|\bno$|\bwithout$/.test(before)) {
+        if (!excludeNationalities.includes(code)) excludeNationalities.push(code);
+        continue;
+      }
       nationalities.push(code);
     }
   }
 
+  // ----- Clubs -----
   const clubs = [];
-  for (const [alias, club] of Object.entries(CLUB_ALIASES)) {
-    if (lower.includes(alias) && !clubs.includes(club)) {
+  // Sort aliases by length descending so longer phrases match first (e.g. "man city" before "city")
+  const sortedClubAliases = Object.entries(CLUB_ALIASES).sort((a, b) => b[0].length - a[0].length);
+  for (const [alias, club] of sortedClubAliases) {
+    // Use word boundary regex to avoid partial matches (e.g. "inter" in "international")
+    const escaped = alias.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const clubRegex = new RegExp(`\\b${escaped}\\b`, 'i');
+    if (clubRegex.test(lower) && !clubs.includes(club)) {
       clubs.push(club);
     }
   }
 
+  // ----- Position -----
+  let position = null;
+  // Sort by length descending so multi-word positions match first
+  const sortedPosAliases = Object.entries(POSITION_ALIASES).sort((a, b) => b[0].length - a[0].length);
+  for (const [alias, bucket] of sortedPosAliases) {
+    // Use word boundary matching for short aliases
+    const regex = alias.length <= 3
+      ? new RegExp(`\\b${alias}\\b`, 'i')
+      : new RegExp(alias.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+    if (regex.test(lower)) {
+      position = bucket;
+      break;
+    }
+  }
+
+  // ----- Age filter -----
+  let ageFilter = null;
+  // "18 years old or younger", "under 21", "u19", "age 19 and below"
+  // Negative lookahead prevents matching age patterns that are actually thresholds
+  // (e.g. "over 35 games" should be threshold, not age)
+  const gameUnits = '(?!\\s+(?:\\w+\\s+)*(?:games?|appearances?|apps?|goals?|matches?|caps?))';
+  const ageUnder = lower.match(new RegExp(`(?:under|below|younger\\s*than|u)\\s*(\\d{1,2})${gameUnits}`));
+  const ageOrYounger = lower.match(/(\d{1,2})\s*(?:years?\s*old\s*)?(?:or\s*younger|and\s*(?:below|under|younger))/);
+  const ageOver = lower.match(new RegExp(`(?:over|above|older\\s*than)\\s*(\\d{1,2})${gameUnits}`));
+  const ageOrOlder = lower.match(/(\d{1,2})\s*(?:years?\s*old\s*)?(?:or\s*older|and\s*(?:above|over|older)|plus|\+)/);
+
+  if (ageUnder) {
+    ageFilter = { maxAge: parseInt(ageUnder[1]) };
+  } else if (ageOrYounger) {
+    ageFilter = { maxAge: parseInt(ageOrYounger[1]) };
+  } else if (ageOver) {
+    ageFilter = { minAge: parseInt(ageOver[1]) };
+  } else if (ageOrOlder) {
+    ageFilter = { minAge: parseInt(ageOrOlder[1]) };
+  }
+
+  // ----- Minimum appearances/goals threshold -----
+  let minThreshold = null;
+  // "more than 40 games", "at least 50 appearances", "over 100 goals", "40+ apps"
+  // Allow up to 4 words between number and unit (e.g. "more than 40 premier league games")
+  const thresholdMatch = lower.match(
+    /(?:more\s*than|at\s*least|over|minimum|min)\s*(\d+)(?:\s+\w+){0,4}\s+(?:games?|appearances?|apps?|goals?|matches?|caps?)/
+  );
+  const thresholdPlus = lower.match(
+    /(\d+)\+?\s*(?:games?|appearances?|apps?|goals?|matches?|caps?)\s*(?:or\s*more)?/
+  );
+  if (thresholdMatch) {
+    minThreshold = parseInt(thresholdMatch[1]);
+  } else if (thresholdPlus && parseInt(thresholdPlus[1]) >= 5) {
+    // Only treat as threshold if >= 5 to avoid false positives like "1 game"
+    minThreshold = parseInt(thresholdPlus[1]);
+  }
+
   return {
     metric,
-    competition,
+    competitions,
+    competition: competitions[0], // backward compat — primary competition
     nationalities: nationalities.length > 0 ? nationalities : null,
+    excludeNationalities: excludeNationalities.length > 0 ? excludeNationalities : null,
     clubs: clubs.length > 0 ? clubs : null,
+    position,
+    ageFilter,
+    minThreshold,
   };
 }
 
@@ -954,46 +1200,117 @@ exports.handler = async (event) => {
     }
 
     // ============================================================
-    // CHAT BUILDER
+    // CHAT BUILDER — enhanced: multi-league, position, age,
+    // exclusions, min threshold
     // ============================================================
     else if (categoryId === 'chat_builder') {
       const text = body.text || '';
       console.log('[chat_builder] Input text:', text);
 
       const parsed = parseChatQuery(text);
-      console.log('[chat_builder] Parsed:', parsed);
+      console.log('[chat_builder] Parsed:', JSON.stringify(parsed));
 
       metric = parsed.metric;
       metricLabel = parsed.metric === 'goals' ? 'Goals' : 'Apps';
-      competition = parsed.competition;
+      competition = parsed.competitions.join(' + ');
       categoryName = 'Chat Built Game';
       categoryFlag = '💬';
 
+      // --- Determine if we need position-based or age-based fetching ---
+      const usePositionFilter = !!parsed.position;
+      const useAgeFilter = !!parsed.ageFilter;
+
+      // --- STEP 1: Fetch base player data ---
       if (parsed.clubs && parsed.clubs.length > 0) {
+        // Club-specific query: fetch per-club and merge
         const playerMap = new Map();
 
         for (const clubName of parsed.clubs) {
-          const clubPlayers = await fetchFromView(supabase, competition, clubName, parsed.nationalities, parsed.metric);
+          // For club queries, use all detected competitions (or use first if single)
+          for (const comp of parsed.competitions) {
+            const clubPlayers = await fetchFromView(supabase, comp, clubName, parsed.nationalities, parsed.metric);
+            for (const p of clubPlayers) {
+              const existing = playerMap.get(p.playerId);
+              if (existing) {
+                existing.subtractValue += p.subtractValue;
+                existing.overlay.apps += p.overlay.apps;
+                existing.overlay.goals += p.overlay.goals;
+                existing.overlay.mins += p.overlay.mins;
+                for (const c of p.clubs) {
+                  if (!existing.clubs.includes(c)) existing.clubs.push(c);
+                }
+              } else {
+                playerMap.set(p.playerId, { ...p, clubs: [...p.clubs] });
+              }
+            }
+          }
+        }
+        players = Array.from(playerMap.values());
 
-          for (const p of clubPlayers) {
+      } else if (usePositionFilter) {
+        // Position-based fetch (uses player_season_stats)
+        const playerMap = new Map();
+        for (const comp of parsed.competitions) {
+          const posPlayers = await fetchByPosition(supabase, comp, parsed.position, parsed.metric);
+          for (const p of posPlayers) {
             const existing = playerMap.get(p.playerId);
             if (existing) {
               existing.subtractValue += p.subtractValue;
               existing.overlay.apps += p.overlay.apps;
               existing.overlay.goals += p.overlay.goals;
-              for (const c of p.clubs) {
-                if (!existing.clubs.includes(c)) existing.clubs.push(c);
-              }
+              existing.overlay.mins += p.overlay.mins;
             } else {
-              playerMap.set(p.playerId, { ...p, clubs: [...p.clubs] });
+              playerMap.set(p.playerId, { ...p });
             }
           }
         }
-
         players = Array.from(playerMap.values());
+
+      } else if (useAgeFilter) {
+        // Age-based fetch (uses player_season_stats)
+        const playerMap = new Map();
+        for (const comp of parsed.competitions) {
+          const agePlayers = await fetchByAgeBucket(supabase, comp, parsed.ageFilter, parsed.metric);
+          for (const p of agePlayers) {
+            const existing = playerMap.get(p.playerId);
+            if (existing) {
+              existing.subtractValue += p.subtractValue;
+              existing.overlay.apps += p.overlay.apps;
+              existing.overlay.goals += p.overlay.goals;
+              existing.overlay.mins += p.overlay.mins;
+            } else {
+              playerMap.set(p.playerId, { ...p });
+            }
+          }
+        }
+        players = Array.from(playerMap.values());
+
+      } else if (parsed.competitions.length > 1) {
+        // Multi-competition query — use fetchFromViewMultiComp
+        players = await fetchFromViewMultiComp(supabase, parsed.competitions, parsed.nationalities, parsed.metric);
+
       } else {
-        // Nationality-only or all players - use view without club filter
-        players = await fetchFromView(supabase, competition, null, parsed.nationalities, parsed.metric);
+        // Single competition, no clubs, no position, no age
+        players = await fetchFromView(supabase, parsed.competitions[0], null, parsed.nationalities, parsed.metric);
+      }
+
+      // --- STEP 2: Apply exclusion filter (e.g. "non english") ---
+      if (parsed.excludeNationalities && parsed.excludeNationalities.length > 0) {
+        console.log('[chat_builder] Excluding nationalities:', parsed.excludeNationalities);
+        players = players.filter(p => !parsed.excludeNationalities.includes(p.nationality));
+      }
+
+      // --- STEP 3: Apply nationality include filter for position/age queries ---
+      // (fetchByPosition/fetchByAgeBucket don't take nationality params,
+      //  so we filter after fetching)
+      if ((usePositionFilter || useAgeFilter) && parsed.nationalities && parsed.nationalities.length > 0) {
+        players = players.filter(p => parsed.nationalities.includes(p.nationality));
+      }
+
+      // --- STEP 4: Apply minimum threshold filter ---
+      if (parsed.minThreshold) {
+        console.log('[chat_builder] Applying min threshold:', parsed.minThreshold);
+        players = players.filter(p => p.subtractValue >= parsed.minThreshold);
       }
 
       console.log('[chat_builder] Players found:', players.length);
@@ -1019,7 +1336,11 @@ exports.handler = async (event) => {
             competition,
             metric: metricLabel,
             nationalities: parsed.nationalities,
+            excludeNationalities: parsed.excludeNationalities,
             clubs: parsed.clubs,
+            position: parsed.position,
+            ageFilter: parsed.ageFilter,
+            minThreshold: parsed.minThreshold,
           },
           player_count: count,
           difficulty,

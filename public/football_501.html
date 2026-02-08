@@ -1664,8 +1664,43 @@ function buildCategorySections() {
   loadDynamicLeagueCategories();
 }
 
+// Club colors for non-EPL leagues
+const LEAGUE_CLUB_COLORS = {
+  // La Liga
+  'Athletic Club': '#EE2523', 'Valencia': '#EE3524', 'Barcelona': '#A50044', 'Real Madrid': '#FEBE10',
+  'Atlético Madrid': '#CB3524', 'Sevilla': '#D4021D', 'Real Sociedad': '#143C8B', 'Espanyol': '#007FC8',
+  'Real Betis': '#00954C', 'Celta Vigo': '#8AC3EE', 'Villarreal': '#FFCD00', 'Dep La Coruña': '#0033A0',
+  'Osasuna': '#D91A2A', 'Mallorca': '#E20613', 'Valladolid': '#5A2D82', 'Getafe': '#004FA3',
+  'Zaragoza': '#004C99', 'Rayo Vallecano': '#E53027', 'Racing Sant': '#00A651', 'Málaga': '#009EE3',
+  'Alavés': '#003DA5', 'Levante': '#BD0811', 'Sporting Gijón': '#CC2229', 'Granada': '#E30613',
+  'Tenerife': '#1C3A7A',
+  // Bundesliga
+  'Bayern Munich': '#DC052D', 'Dortmund': '#FDE100', 'Leverkusen': '#E32221', 'Werder Bremen': '#1D9053',
+  'Stuttgart': '#E32219', 'Gladbach': '#000000', 'Schalke 04': '#004D9D', 'Wolfsburg': '#65B32E',
+  'Eintracht Frankfurt': '#E1000F', 'Hamburger SV': '#005B9A', 'Freiburg': '#000000', 'Hertha BSC': '#005BA6',
+  'Köln': '#ED1C24', 'Mainz 05': '#ED1C24', 'Hoffenheim': '#1961B5', 'Bochum': '#005BA6',
+  'Hannover 96': '#1E8C35', 'Nürnberg': '#8B0000', 'Augsburg': '#BA3733', 'Kaiserslautern': '#E3000B',
+  'Arminia': '#00447C', 'Hansa Rostock': '#003D7E', '1860 Munich': '#00529C', 'RB Leipzig': '#DD0741',
+  'MSV Duisburg': '#004B93',
+  // Serie A
+  'Lazio': '#87D8F7', 'Inter': '#009DDC', 'Milan': '#FB090B', 'Roma': '#8E1F2F',
+  'Udinese': '#000000', 'Juventus': '#000000', 'Fiorentina': '#482C83', 'Atalanta': '#1E71B8',
+  'Cagliari': '#8B0000', 'Sampdoria': '#0065A4', 'Bologna': '#1A2F48', 'Napoli': '#009FE3',
+  'Parma': '#FEDD00', 'Torino': '#8B1A2B', 'Genoa': '#93192A', 'Chievo': '#1C3C8B',
+  'Empoli': '#005BA6', 'Lecce': '#FFED00', 'Hellas Verona': '#003DA5', 'Palermo': '#F1AABB',
+  'Sassuolo': '#00A850', 'Brescia': '#004B93', 'Siena': '#000000', 'Reggina': '#6D2247',
+  'Catania': '#E3000B',
+  // Ligue 1
+  'Rennes': '#E4002B', 'Lyon': '#003DA5', 'Paris Saint-Germain': '#004170', 'Marseille': '#009FE3',
+  'Monaco': '#C8102E', 'Lille': '#D71920', 'Bordeaux': '#13244A', 'Nice': '#000000',
+  'Nantes': '#FFED00', 'Montpellier': '#003DA5', 'Toulouse': '#5B2B82', 'Saint-Étienne': '#006A3D',
+  'Lens': '#E2001A', 'Strasbourg': '#009FE3', 'Auxerre': '#FFFFFF', 'Metz': '#6D2832',
+  'Lorient': '#F47920', 'Bastia': '#009FE3', 'Sochaux': '#FEDD00', 'Guingamp': '#E30613',
+  'Nancy': '#E4002B', 'Reims': '#E30613', 'Caen': '#003DA5', 'Troyes': '#004FA3',
+  'Angers': '#000000',
+};
+
 async function loadDynamicLeagueCategories() {
-  // Load top clubs for La Liga, Serie A, Bundesliga
   const leagues = [
     { comp: 'La Liga', appsContainer: 'laligaAppsGames', goalsContainer: 'laligaGoalsGames', countApps: 'countLaLigaApps', countGoals: 'countLaLigaGoals', prefix: 'laliga', flag: '🇪🇸' },
     { comp: 'Serie A', appsContainer: 'serieaAppsGames', goalsContainer: 'serieaGoalsGames', countApps: 'countSerieAApps', countGoals: 'countSerieAGoals', prefix: 'seriea', flag: '🇮🇹' },
@@ -1683,18 +1718,23 @@ async function loadDynamicLeagueCategories() {
       const data = await res.json();
 
       if (data.clubs && data.clubs.length > 0) {
-        // Build apps categories
-        const appsCategories = data.clubs.map(c => ({
+        // Sort clubs alphabetically A-Z
+        const sorted = [...data.clubs].sort((a, b) => a.club.localeCompare(b.club));
+
+        // Build apps categories with club colors
+        const appsCategories = sorted.map(c => ({
           id: `${league.prefix}_club_${c.club.replace(/\s+/g, '_')}`,
           title: c.club,
+          color: LEAGUE_CLUB_COLORS[c.club] || null,
           flag: league.flag,
           playerCount: c.count,
         }));
 
-        // Build goals categories
-        const goalsCategories = data.clubs.map(c => ({
+        // Build goals categories with club colors
+        const goalsCategories = sorted.map(c => ({
           id: `${league.prefix}_goals_${c.club.replace(/\s+/g, '_')}`,
           title: `${c.club} Goals`,
+          color: LEAGUE_CLUB_COLORS[c.club] || null,
           flag: '⚽',
         }));
 
@@ -3300,9 +3340,12 @@ async function buildChatGame(type) {
 
   chatBuilderState[type] = { text, parsed, count, difficulty, proposal: data };
 
-  // Build proposal content
+  // Build proposal content — show all parsed filters
+  const compDisplay = (parsed.competitions && parsed.competitions.length > 0)
+    ? parsed.competitions.join(' + ')
+    : (parsed.competition || 'Premier League');
   let proposalHtml = `
-    <div class="proposal-row"><span class="label">Competition:</span><span class="value">${parsed.competition || 'Premier League'}</span></div>
+    <div class="proposal-row"><span class="label">Competition:</span><span class="value">${compDisplay}</span></div>
     <div class="proposal-row"><span class="label">Metric:</span><span class="value">${parsed.metric === 'goals' ? 'Goals' : 'Appearances'}</span></div>
   `;
 
@@ -3310,8 +3353,26 @@ async function buildChatGame(type) {
     proposalHtml += `<div class="proposal-row"><span class="label">Nationalities:</span><span class="value">${parsed.nationalities.join(', ')}</span></div>`;
   }
 
+  if (parsed.excludeNationalities && parsed.excludeNationalities.length > 0) {
+    proposalHtml += `<div class="proposal-row"><span class="label">Excluding:</span><span class="value">${parsed.excludeNationalities.join(', ')}</span></div>`;
+  }
+
   if (parsed.clubs && parsed.clubs.length > 0) {
     proposalHtml += `<div class="proposal-row"><span class="label">Clubs:</span><span class="value">${parsed.clubs.join(', ')}</span></div>`;
+  }
+
+  if (parsed.position) {
+    const posLabels = { GK: 'Goalkeepers', DEF: 'Defenders', MID: 'Midfielders', FWD: 'Forwards' };
+    proposalHtml += `<div class="proposal-row"><span class="label">Position:</span><span class="value">${posLabels[parsed.position] || parsed.position}</span></div>`;
+  }
+
+  if (parsed.ageFilter) {
+    const ageDesc = parsed.ageFilter.maxAge ? `${parsed.ageFilter.maxAge} and under` : `${parsed.ageFilter.minAge} and over`;
+    proposalHtml += `<div class="proposal-row"><span class="label">Age:</span><span class="value">${ageDesc}</span></div>`;
+  }
+
+  if (parsed.minThreshold) {
+    proposalHtml += `<div class="proposal-row"><span class="label">Min ${parsed.metric === 'goals' ? 'Goals' : 'Apps'}:</span><span class="value">${parsed.minThreshold}+</span></div>`;
   }
 
   proposalContentEl.innerHTML = proposalHtml;
@@ -3422,7 +3483,7 @@ async function startChatGame(type) {
 })();
 </script>
 <footer style="text-align:center;padding:16px;font-size:11px;color:var(--muted);opacity:0.6;">
-  Build: 2026-02-08-0400 | Football 501 v3.2
+  Build: 2026-02-08-0500 | Football 501 v3.3
 </footer>
 </body>
 </html>
