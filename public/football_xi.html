@@ -285,6 +285,95 @@ body {
 .slot.wrong .slot-context { color: #fca5a5; }
 .slot:hover .slot-circle { transform: scale(1.08); }
 
+/* ====== MY PICKS OVERLAY ====== */
+.picks-fab {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #000;
+  border: none;
+  font-size: 22px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s, background 0.15s;
+}
+.picks-fab:hover { transform: scale(1.1); background: var(--accent-dim); }
+.picks-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.8);
+  z-index: 150;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.picks-modal {
+  background: var(--card);
+  border-radius: 20px;
+  width: 100%;
+  max-width: 420px;
+  max-height: 80vh;
+  padding: 20px;
+  overflow-y: auto;
+}
+.picks-modal h3 {
+  font-size: 17px;
+  font-weight: 700;
+  margin-bottom: 14px;
+  text-align: center;
+}
+.picks-group-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 8px 0 4px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  margin-bottom: 4px;
+}
+.picks-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 4px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.picks-row .pr-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.picks-row .pr-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.picks-row .pr-dot.green { background: var(--slot-correct); }
+.picks-row .pr-dot.red { background: var(--slot-wrong); }
+.picks-row .pr-dot.grey { background: var(--slot-empty); }
+.picks-row .pr-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.picks-row .pr-pos {
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 500;
+}
+
 /* ====== PLAYER SEARCH MODAL ====== */
 .modal-overlay {
   position: fixed;
@@ -625,11 +714,17 @@ body {
     </div>
   </div>
 
-  <!-- ====== SLOT DETAIL OVERLAY (tap a scored slot to see stats) ====== -->
-  <div id="slotDetailOverlay" class="info-overlay hidden">
-    <div class="info-modal" style="padding:20px;">
-      <div id="slotDetailContent"></div>
-      <button class="info-close" onclick="hideSlotDetail()">Close</button>
+  <!-- ====== MY PICKS FAB (shown during game) ====== -->
+  <button id="picksFab" class="picks-fab hidden" onclick="showMyPicks()" title="My Picks">&#128203;</button>
+
+  <!-- ====== MY PICKS OVERLAY ====== -->
+  <div id="picksOverlay" class="picks-overlay hidden">
+    <div class="picks-modal">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <h3 style="margin:0;">My Picks</h3>
+        <button class="modal-close" onclick="hideMyPicks()">&times;</button>
+      </div>
+      <div id="picksListContent"></div>
     </div>
   </div>
 
@@ -659,8 +754,8 @@ body {
   </div>
 </div>
 
-<footer style="text-align:center;padding:16px;font-size:11px;color:var(--muted);opacity:0.6;">
-  Build: 2026-02-08 | Starting XI v1.1
+<footer style="text-align:center;padding:16px 16px 72px;font-size:11px;color:var(--muted);opacity:0.6;">
+  Build: 2026-02-09 | Starting XI v1.2
 </footer>
 
 <script>
@@ -695,6 +790,8 @@ let lockedSlots = new Set();  // slot indices that are correct & locked
 let activeSlotIdx = null;     // which slot the search modal is for
 let searchDebounce = null;
 let lastResults = null;       // last scoring results for rendering context on pitch
+let scoredOnce = false;       // whether XI has been scored at least once (enables 1-by-1 mode)
+let slotResults = {};         // per-slot result cache: slotIdx -> { correct, userRank, ... }
 
 // ============================================================
 // INIT
@@ -808,6 +905,8 @@ function startGame() {
   attempts = 0;
   lockedSlots = new Set();
   lastResults = null;
+  scoredOnce = false;
+  slotResults = {};
 
   // Show game badge
   const scopeLabel = gameConfig.scopes.find(s => s.id === selectedScope)?.label || '';
@@ -818,6 +917,7 @@ function startGame() {
   $('step2').classList.remove('hidden');
   $('scoreBanner').classList.add('hidden');
   $('actionBtns').classList.add('hidden');
+  $('picksFab').classList.remove('hidden');
 
   // Show perf info tab when objective is performance
   $('perfInfoTab').classList.toggle('hidden', selectedObjective !== 'performance');
@@ -854,21 +954,29 @@ function renderPitch() {
       const slot = rowSlots[ci];
       const xPct = count === 1 ? 50 : 15 + (ci / (count - 1)) * 70;
 
+      const isLocked = lockedSlots.has(slot.idx);
+      const sr = slotResults[slot.idx]; // per-slot scored result
+
+      let slotClass = 'slot';
+      if (isLocked) {
+        slotClass += ' filled locked correct';
+      } else if (sr && sr.correct === false) {
+        // Wrong pick — keep red, but allow tapping to replace
+        slotClass += ' filled wrong';
+      } else if (slot.player) {
+        slotClass += ' filled';
+      }
+
       const el = document.createElement('div');
-      el.className = 'slot' + (slot.player ? ' filled' : '') + (lockedSlots.has(slot.idx) ? ' locked correct' : '');
+      el.className = slotClass;
       el.style.left = xPct + '%';
       el.style.top = yPct + '%';
       el.dataset.idx = slot.idx;
 
-      const isLocked = lockedSlots.has(slot.idx);
-
-      // Build context line if we have results for this slot
+      // Build context line from per-slot result
       let contextHtml = '';
-      if (lastResults) {
-        const r = lastResults.find(res => res.slotIdx === slot.idx);
-        if (r) {
-          contextHtml = buildSlotContext(r, slot);
-        }
+      if (sr) {
+        contextHtml = buildSlotContext(sr, slot);
       }
 
       el.innerHTML = `
@@ -878,12 +986,8 @@ function renderPitch() {
         ${contextHtml}
       `;
 
-      if (lastResults && lastResults.find(res => res.slotIdx === slot.idx)) {
-        // Scored slot — tap to see detail
-        el.style.cursor = 'pointer';
-        el.style.pointerEvents = 'auto';
-        el.onclick = (e) => { e.stopPropagation(); showSlotDetail(slot.idx); };
-      } else if (!isLocked) {
+      // Wrong or empty slots can be tapped to pick a new player
+      if (!isLocked) {
         el.onclick = () => openSearchModal(slot.idx);
       }
 
@@ -894,66 +998,94 @@ function renderPitch() {
 
 /**
  * Build inline context text for a slot after scoring.
- * Just shows rank — tap slot for full details.
+ * Shows rank + stat context beneath the player name.
  */
 function buildSlotContext(r, slot) {
   if (!r.userRank) return '';
   const bucketSlotCount = slots.filter(s => s.bucket === slot.bucket).length;
   const rankStr = ordinal(r.userRank);
 
-  if (r.correct) {
-    return `<div class="slot-context">${rankStr} ${slot.bucket}</div>`;
-  } else {
-    return `<div class="slot-context">${rankStr} (need top ${bucketSlotCount})</div>`;
-  }
-}
-
-/**
- * Show slot detail overlay with full stats when tapping a scored slot.
- */
-function showSlotDetail(slotIdx) {
-  const slot = slots.find(s => s.idx === slotIdx);
-  if (!slot || !lastResults) return;
-  const r = lastResults.find(res => res.slotIdx === slotIdx);
-  if (!r) return;
-
-  const playerName = slot.player ? escHtml(slot.player.name) : 'Empty';
-  const bucketSlotCount = slots.filter(s => s.bucket === slot.bucket).length;
-  const rankStr = r.userRank ? ordinal(r.userRank) : '?';
-
-  let statLine = '';
+  // Build a short stat string
+  let statStr = '';
   if (r.userStatValue) {
     if (selectedObjective === 'performance' && r.userStatValue.score != null) {
-      statLine = `Score: ${r.userStatValue.score.toFixed(2)}`;
+      statStr = ` \u00b7 ${r.userStatValue.score.toFixed(2)}`;
     } else if (selectedObjective === 'goals' && r.userStatValue.goals != null) {
-      statLine = `${r.userStatValue.goals} goals · ${r.userStatValue.appearances || '?'} apps`;
+      statStr = ` \u00b7 ${r.userStatValue.goals}g`;
     } else if (r.userStatValue.appearances != null) {
-      statLine = `${r.userStatValue.appearances} appearances`;
+      statStr = ` \u00b7 ${r.userStatValue.appearances}app`;
     }
   }
 
-  const statusColor = r.correct ? 'var(--accent)' : 'var(--danger)';
-  const statusText = r.correct
-    ? `${rankStr} highest ${r.userRankBucket || slot.bucket} — in the best XI`
-    : `${rankStr} highest ${r.userRankBucket || slot.bucket} — needed top ${bucketSlotCount}`;
+  if (r.correct) {
+    return `<div class="slot-context">${rankStr} ${slot.bucket}${statStr}</div>`;
+  } else {
+    return `<div class="slot-context">${rankStr}${statStr} (top ${bucketSlotCount})</div>`;
+  }
+}
 
-  $('slotDetailContent').innerHTML = `
-    <div style="text-align:center;margin-bottom:12px;">
-      <div style="font-size:18px;font-weight:700;">${playerName}</div>
-      <div style="font-size:13px;color:var(--muted);margin-top:4px;">${slot.label} — ${slot.bucket}</div>
-    </div>
-    <div style="text-align:center;padding:12px;border-radius:10px;background:var(--card-dark);margin-bottom:8px;">
-      <div style="font-size:15px;font-weight:700;color:${statusColor};">${statusText}</div>
-      ${statLine ? `<div style="font-size:13px;color:var(--muted);margin-top:6px;">${statLine}</div>` : ''}
-    </div>
-  `;
-  $('slotDetailOverlay').classList.remove('hidden');
+// ============================================================
+// MY PICKS OVERLAY
+// ============================================================
+function showMyPicks() {
+  const content = $('picksListContent');
+  const groups = { GK: [], DEF: [], MID: [], FWD: [] };
+  const groupLabels = { GK: 'Goalkeepers', DEF: 'Defenders', MID: 'Midfielders', FWD: 'Forwards' };
+
+  for (const slot of slots) {
+    const bucket = slot.bucket;
+    if (!groups[bucket]) groups[bucket] = [];
+    const sr = slotResults[slot.idx];
+    groups[bucket].push({ slot, sr });
+  }
+
+  let html = '';
+  for (const [bucket, label] of Object.entries(groupLabels)) {
+    const items = groups[bucket];
+    if (!items || items.length === 0) continue;
+    html += `<div class="picks-group-title">${label}</div>`;
+    for (const { slot, sr } of items) {
+      const name = slot.player ? escHtml(slot.player.name) : 'Empty';
+      let dotClass = 'grey';
+      if (sr && sr.correct) dotClass = 'green';
+      else if (sr && sr.correct === false) dotClass = 'red';
+      else if (slot.player) dotClass = 'grey'; // picked but not scored yet
+
+      let statStr = '';
+      if (sr && sr.userRank) {
+        statStr = ordinal(sr.userRank);
+        if (sr.userStatValue) {
+          if (selectedObjective === 'performance' && sr.userStatValue.score != null) {
+            statStr += ` \u00b7 ${sr.userStatValue.score.toFixed(2)}`;
+          } else if (selectedObjective === 'goals' && sr.userStatValue.goals != null) {
+            statStr += ` \u00b7 ${sr.userStatValue.goals} goals`;
+          } else if (sr.userStatValue.appearances != null) {
+            statStr += ` \u00b7 ${sr.userStatValue.appearances} apps`;
+          }
+        }
+      }
+
+      html += `
+        <div class="picks-row">
+          <div class="pr-left">
+            <div class="pr-dot ${dotClass}"></div>
+            <span class="pr-name">${name}</span>
+          </div>
+          <span class="pr-pos">${slot.label}${statStr ? ' \u00b7 ' + statStr : ''}</span>
+        </div>
+      `;
+    }
+  }
+
+  content.innerHTML = html || '<div style="text-align:center;color:var(--muted);padding:20px;">No picks yet.</div>';
+  $('picksOverlay').classList.remove('hidden');
 }
-function hideSlotDetail() {
-  $('slotDetailOverlay').classList.add('hidden');
+
+function hideMyPicks() {
+  $('picksOverlay').classList.add('hidden');
 }
-$('slotDetailOverlay').onclick = (e) => {
-  if (e.target === $('slotDetailOverlay')) hideSlotDetail();
+$('picksOverlay').onclick = (e) => {
+  if (e.target === $('picksOverlay')) hideMyPicks();
 };
 
 function truncName(name) {
@@ -975,13 +1107,18 @@ function resetPicks() {
   for (const slot of slots) {
     if (!lockedSlots.has(slot.idx)) {
       slot.player = null;
+      delete slotResults[slot.idx];
     }
   }
   lastResults = null;
+  scoredOnce = false;
   renderPitch();
   updateSubmitBtn();
   $('scoreBanner').classList.add('hidden');
   $('actionBtns').classList.add('hidden');
+  $('submitXIBtn').classList.remove('hidden');
+  $('submitXIBtn').disabled = true;
+  $('submitXIBtn').textContent = 'GO \u2014 Submit XI';
 }
 
 // ============================================================
@@ -1116,9 +1253,97 @@ function selectPlayer(li) {
     goals: parseInt(li.dataset.goals) || 0,
   };
 
+  // Clear any previous result for this slot (it's a new pick)
+  delete slotResults[slot.idx];
+  lockedSlots.delete(slot.idx);
+
   closeModal();
+
+  if (scoredOnce) {
+    // In 1-by-1 mode — auto-score this single pick
+    scoreOneSlot(slot);
+  } else {
+    renderPitch();
+    updateSubmitBtn();
+  }
+}
+
+/**
+ * Score a single slot pick after the initial XI has been scored.
+ * Sends full picks to the server and processes just this slot's result.
+ */
+async function scoreOneSlot(targetSlot) {
+  // Show the slot as filled while scoring
   renderPitch();
-  updateSubmitBtn();
+
+  const picks = slots.map(s => ({
+    slotIdx: s.idx,
+    playerId: s.player ? s.player.playerId : null,
+  }));
+
+  try {
+    const res = await fetch(`${API_BASE}/xi_score`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        scopeId: selectedScope,
+        formation: selectedFormation,
+        objective: selectedObjective,
+        picks,
+        reveal: false,
+      }),
+    });
+    const data = await res.json();
+
+    if (data.error) {
+      console.error('Score error:', data.error);
+      renderPitch();
+      return;
+    }
+
+    // Find result for this specific slot
+    const r = data.results.find(res => res.slotIdx === targetSlot.idx);
+    if (r) {
+      slotResults[targetSlot.idx] = r;
+      if (r.correct) {
+        lockedSlots.add(targetSlot.idx);
+      }
+    }
+
+    // Animate just this one slot
+    const container = $('pitchContainer');
+    const slotEl = container.querySelector(`.slot[data-idx="${targetSlot.idx}"]`);
+    if (slotEl) {
+      if (r && r.correct) {
+        slotEl.classList.add('correct', 'locked', 'anim-correct');
+        slotEl.classList.remove('wrong');
+      } else {
+        slotEl.classList.add('wrong', 'anim-wrong');
+        slotEl.classList.remove('correct');
+      }
+      await sleep(500);
+    }
+
+    // Re-render to show updated context
+    renderPitch();
+    updateScoreBanner();
+
+    // Check if all correct now
+    const correct = countCorrect();
+    if (correct === slots.length) {
+      $('actionBtns').classList.remove('hidden');
+      $('retryBtn').classList.add('hidden');
+      $('revealBtn').classList.add('hidden');
+      $('newGameBtn').classList.remove('hidden');
+      $('submitXIBtn').classList.add('hidden');
+      $('resetBtn').classList.add('hidden');
+      setupActionHandlers(data);
+    }
+
+  } catch (err) {
+    console.error('Single slot score error:', err);
+    renderPitch();
+  }
 }
 
 function escHtml(str) {
@@ -1202,28 +1427,28 @@ async function processResults(data) {
   // Store results for rendering context on pitch
   lastResults = results;
 
-  // Lock correct picks
+  // Populate per-slot result cache and lock correct picks
   for (const r of results) {
+    slotResults[r.slotIdx] = r;
     if (r.correct) {
       lockedSlots.add(r.slotIdx);
     }
   }
 
+  // Mark that we've scored at least once — enables 1-by-1 mode
+  scoredOnce = true;
+
   // Animate slots one by one
   await animateSlotResults(results);
 
-  // Re-render pitch with context info in each slot
+  // Re-render pitch — keeps green/red with player names + context visible
   renderPitch();
 
-  // Show score banner inline
-  $('scoreBig').textContent = `${correct}/${total}`;
-  $('scoreBig').style.color = correct === total ? 'var(--gold)' : correct >= 8 ? 'var(--accent)' : correct >= 4 ? 'var(--gold)' : 'var(--danger)';
-  $('scoreLabel').textContent = correct === total ? 'Perfect Score!' : 'Correct picks';
-  $('attemptBadge').textContent = `Attempt ${attempts}`;
-  $('scoreBanner').classList.remove('hidden');
+  // Update score banner
+  updateScoreBanner();
 
   if (correct === total) {
-    // Perfect — show new game button
+    // Perfect — show new game button only
     $('actionBtns').classList.remove('hidden');
     $('retryBtn').classList.add('hidden');
     $('revealBtn').classList.add('hidden');
@@ -1234,51 +1459,57 @@ async function processResults(data) {
     return;
   }
 
+  // After scoring, hide Submit XI (user picks 1-by-1 now) but keep reset
+  $('submitXIBtn').classList.add('hidden');
+  $('resetBtn').classList.remove('hidden');
+
   // If 3+ attempts, offer reveal
   if (attempts >= 3) {
     $('actionBtns').classList.remove('hidden');
-    $('retryBtn').classList.remove('hidden');
+    $('retryBtn').classList.add('hidden');
     $('revealBtn').classList.remove('hidden');
     $('newGameBtn').classList.remove('hidden');
-    $('submitXIBtn').classList.add('hidden');
-    $('resetBtn').classList.add('hidden');
-    setupActionHandlers(data);
-    return;
   }
 
-  // Allow retry — clear wrong picks
-  $('submitXIBtn').disabled = false;
-  $('submitXIBtn').textContent = 'GO \u2014 Submit XI';
+  setupActionHandlers(data);
+}
 
-  for (const r of results) {
-    if (!r.correct) {
-      const slot = slots.find(s => s.idx === r.slotIdx);
-      if (slot) slot.player = null;
-    }
-  }
+/**
+ * Count current correct picks from slotResults
+ */
+function countCorrect() {
+  return Object.values(slotResults).filter(r => r.correct).length;
+}
 
-  renderPitch();
-  updateSubmitBtn();
+/**
+ * Update the score banner with current state
+ */
+function updateScoreBanner() {
+  const correct = countCorrect();
+  const total = slots.length;
+  $('scoreBig').textContent = `${correct}/${total}`;
+  $('scoreBig').style.color = correct === total ? 'var(--gold)' : correct >= 8 ? 'var(--accent)' : correct >= 4 ? 'var(--gold)' : 'var(--danger)';
+  $('scoreLabel').textContent = correct === total ? 'Perfect Score!' : 'Correct picks';
+  $('attemptBadge').textContent = `Attempt ${attempts}`;
+  $('scoreBanner').classList.remove('hidden');
 }
 
 function setupActionHandlers(data) {
-  const { results } = data;
-
   $('retryBtn').onclick = () => {
-    // Clear wrong picks and continue on pitch
-    for (const r of results) {
+    // Clear wrong picks but keep correct locked — stay in 1-by-1 mode
+    for (const [idx, r] of Object.entries(slotResults)) {
       if (!r.correct) {
-        const slot = slots.find(s => s.idx === r.slotIdx);
+        const slot = slots.find(s => s.idx === parseInt(idx));
         if (slot) slot.player = null;
+        delete slotResults[idx];
       }
     }
     lastResults = null;
     $('actionBtns').classList.add('hidden');
-    $('submitXIBtn').classList.remove('hidden');
+    $('submitXIBtn').classList.add('hidden');
     $('resetBtn').classList.remove('hidden');
-    $('submitXIBtn').textContent = 'GO \u2014 Submit XI';
     renderPitch();
-    updateSubmitBtn();
+    updateScoreBanner();
   };
 
   $('revealBtn').onclick = async () => {
@@ -1288,6 +1519,7 @@ function setupActionHandlers(data) {
   $('newGameBtn').onclick = () => {
     $('step2').classList.add('hidden');
     $('step1').classList.remove('hidden');
+    $('picksFab').classList.add('hidden');
     selectedScope = null;
     selectedFormation = null;
     selectedObjective = null;
@@ -1295,6 +1527,8 @@ function setupActionHandlers(data) {
     attempts = 0;
     lockedSlots = new Set();
     lastResults = null;
+    scoredOnce = false;
+    slotResults = {};
     document.querySelectorAll('.option-btn.selected, .formation-btn.selected').forEach(b => b.classList.remove('selected'));
     $('startGameBtn').disabled = true;
   };
@@ -1360,6 +1594,7 @@ async function revealAnswers() {
 
     // For wrong slots, replace the player with the correct answer
     for (const r of data.results) {
+      slotResults[r.slotIdx] = r;
       if (!r.correct && r.answer) {
         const slot = slots.find(s => s.idx === r.slotIdx);
         if (slot) {
@@ -1370,6 +1605,8 @@ async function revealAnswers() {
             appearances: r.answer.appearances,
             goals: r.answer.goals,
           };
+          // Mark as correct now that we're showing the answer
+          slotResults[r.slotIdx] = { ...r, correct: true, revealed: true };
           lockedSlots.add(r.slotIdx);
         }
       }
