@@ -901,20 +901,23 @@ body {
       <h3>How Performance Scores Work</h3>
       <p>Every player gets an effectiveness score based on what matters most for their position:</p>
 
-      <h4>Forwards &amp; Midfielders</h4>
-      <p>Scored on goals and assists per 90 minutes. The more goals and assists you contribute per game, the higher your score.</p>
+      <h4>Forwards</h4>
+      <p>Scored primarily on goals (4x) and assists (3x) per 90 minutes. Pure goal threat is king.</p>
+
+      <h4>Midfielders</h4>
+      <p>Scored on assists (3.5x) and goals (3x) per 90 minutes. Creativity is weighted slightly higher than for forwards.</p>
 
       <h4>Defenders</h4>
-      <p>Scored on tackles, interceptions, and defensive contributions per 90 minutes. Goals and assists from defence also count.</p>
+      <p>Scored on clean sheets (3x), tackles &amp; interceptions (0.5x per action), with a small bonus for goals and assists (0.5x each). Actual defending matters most here.</p>
 
       <h4>Goalkeepers</h4>
-      <p>Scored on clean sheet percentage and save percentage, minus goals conceded per 90 minutes.</p>
+      <p>Scored on clean sheet percentage (5x) and save percentage (4x), minus goals conceded per 90 minutes (2x penalty).</p>
 
       <h4>Longevity bonus</h4>
-      <p>Players who have completed more 90-minute matches get a bonus &mdash; consistency and longevity are rewarded.</p>
+      <p>All positions get a bonus from the square root of total appearances &mdash; consistency and longevity are rewarded.</p>
 
       <h4>Final score</h4>
-      <p>Everyone in the same position is compared against each other. A higher score means the player is more effective than their peers. A score of 0 is average, positive is above average, negative is below.</p>
+      <p>Everyone in the same position is compared against each other using z-scores. A score of 0 is average, positive is above average, negative is below.</p>
 
       <button class="info-close" onclick="hidePerfInfo()">Got it</button>
     </div>
@@ -1091,6 +1094,9 @@ function startGame() {
   $('giveUpBtn').classList.remove('hidden');
   $('giveUpBtn').disabled = false;
   $('giveUpBtn').innerHTML = '&#9873; Give Up &mdash; Show All Answers';
+  $('viewRankingsBtn').classList.add('hidden');
+  rankingsData = null;
+  activeRankingsTab = null;
 
   // Show perf info tab when objective is performance
   $('perfInfoTab').classList.toggle('hidden', selectedObjective !== 'performance');
@@ -1755,6 +1761,9 @@ function updateScoreBanner() {
 }
 
 function setupActionHandlers(data) {
+  // Store top-10 rankings if returned (performance objective)
+  storeRankings(data);
+
   $('retryBtn').onclick = () => {
     // Clear wrong picks but keep correct locked — stay in 1-by-1 mode
     for (const [idx, r] of Object.entries(slotResults)) {
@@ -1977,6 +1986,106 @@ async function revealAnswers() {
     btn.textContent = 'Reveal All Answers';
   }
 }
+
+// ============================================================
+// TOP-10 RANKINGS OVERLAY (Performance objective only)
+// ============================================================
+let rankingsData = null;   // topByBucket from server
+let activeRankingsTab = null;
+
+function storeRankings(data) {
+  if (data && data.topByBucket) {
+    rankingsData = data.topByBucket;
+    if (selectedObjective === 'performance') {
+      $('viewRankingsBtn').classList.remove('hidden');
+    }
+  }
+}
+
+function showRankings() {
+  if (!rankingsData) return;
+  const buckets = Object.keys(rankingsData);
+  if (buckets.length === 0) return;
+
+  // Build tabs
+  const tabLabels = { GK: 'GK', DEF: 'DEF', MID: 'MID', FWD: 'FWD' };
+  const tabsHtml = buckets.map(b =>
+    `<button class="rankings-tab-btn${b === (activeRankingsTab || buckets[0]) ? ' active' : ''}"
+            onclick="switchRankingsTab('${b}')">${tabLabels[b] || b}</button>`
+  ).join('');
+  $('rankingsTabs').innerHTML = tabsHtml;
+
+  if (!activeRankingsTab || !rankingsData[activeRankingsTab]) {
+    activeRankingsTab = buckets[0];
+  }
+  renderRankingsTab(activeRankingsTab);
+  $('rankingsOverlay').classList.remove('hidden');
+}
+
+function switchRankingsTab(bucket) {
+  activeRankingsTab = bucket;
+  // Update active tab style
+  $('rankingsTabs').querySelectorAll('.rankings-tab-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.textContent === (bucket));
+  });
+  renderRankingsTab(bucket);
+}
+
+function renderRankingsTab(bucket) {
+  const players = rankingsData[bucket];
+  if (!players || players.length === 0) {
+    $('rankingsContent').innerHTML = '<div style="text-align:center;color:var(--muted);padding:20px;">No data available.</div>';
+    return;
+  }
+
+  // Determine which stat column to show based on bucket
+  let statLabel, getStat;
+  if (bucket === 'GK') {
+    statLabel = 'CS';
+    getStat = (p) => p.cleanSheets || 0;
+  } else if (bucket === 'DEF') {
+    statLabel = 'CS';
+    getStat = (p) => p.cleanSheets || 0;
+  } else if (bucket === 'MID') {
+    statLabel = 'G+A';
+    getStat = (p) => (p.goals || 0) + (p.assists || 0);
+  } else {
+    statLabel = 'Goals';
+    getStat = (p) => p.goals || 0;
+  }
+
+  let html = `
+    <div class="rankings-row header">
+      <span class="rk-rank rk-label">#</span>
+      <span class="rk-name rk-label">Player</span>
+      <span class="rk-stat rk-label">Score</span>
+      <span class="rk-stat rk-label">${statLabel}</span>
+      <span class="rk-apps rk-label">Apps</span>
+    </div>
+  `;
+
+  for (const p of players) {
+    const rankClass = p.rank === 1 ? 'gold' : p.rank === 2 ? 'silver' : p.rank === 3 ? 'bronze' : '';
+    html += `
+      <div class="rankings-row">
+        <span class="rk-rank ${rankClass}">${p.rank}</span>
+        <span class="rk-name">${escHtml(p.name)}</span>
+        <span class="rk-stat">${p.score.toFixed(2)}</span>
+        <span class="rk-stat" style="color:var(--accent-yellow);">${getStat(p)}</span>
+        <span class="rk-apps">${p.appearances}</span>
+      </div>
+    `;
+  }
+
+  $('rankingsContent').innerHTML = html;
+}
+
+function hideRankings() {
+  $('rankingsOverlay').classList.add('hidden');
+}
+$('rankingsOverlay').onclick = (e) => {
+  if (e.target === $('rankingsOverlay')) hideRankings();
+};
 
 // ============================================================
 // BOOT
