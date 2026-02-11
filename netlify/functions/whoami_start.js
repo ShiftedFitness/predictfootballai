@@ -324,6 +324,63 @@ async function fetchEligiblePlayers(supabase, scope, competitionId) {
 
   if (eligible.length === 0) return [];
 
+  // ──────────────────────────────────────────────────────────────
+  // For CLUB scopes: fetch FULL Premier League career data for
+  // eligible players so clues reflect their entire PL career,
+  // not just their time at this one club.
+  // ──────────────────────────────────────────────────────────────
+  let fullCareerMap = null; // null means "use aggMap as-is" (league scope)
+  if (scope.type === 'club' && scope.clubId) {
+    const eligibleUids = eligible.map(p => p.player_uid);
+    fullCareerMap = new Map();
+
+    // Fetch all PL rows (no club filter) for these players in batches
+    const uidBatch = 200;
+    for (let i = 0; i < eligibleUids.length; i += uidBatch) {
+      const batch = eligibleUids.slice(i, i + uidBatch);
+      const buildFullQuery = () => supabase
+        .from('player_season_stats')
+        .select('player_uid, club_id, season_start_year, appearances, goals, assists, minutes, position_bucket')
+        .eq('competition_id', competitionId)
+        .gt('appearances', 0)
+        .in('player_uid', batch);
+
+      let fullStats;
+      try {
+        fullStats = await fetchAll(buildFullQuery);
+      } catch (err) {
+        console.error('[fetchEligiblePlayers] full career fetch error:', err);
+        fullStats = [];
+      }
+
+      for (const row of fullStats) {
+        let existing = fullCareerMap.get(row.player_uid);
+        if (!existing) {
+          existing = {
+            totalAppearances: 0,
+            totalGoals: 0,
+            totalAssists: 0,
+            totalMinutes: 0,
+            clubIds: new Set(),
+            seasons: new Set(),
+            positions: new Map(),
+          };
+          fullCareerMap.set(row.player_uid, existing);
+        }
+        existing.totalAppearances += row.appearances || 0;
+        existing.totalGoals += row.goals || 0;
+        existing.totalAssists += row.assists || 0;
+        existing.totalMinutes += row.minutes || 0;
+        if (row.club_id) existing.clubIds.add(row.club_id);
+        if (row.season_start_year != null) existing.seasons.add(row.season_start_year);
+        if (row.position_bucket) {
+          const prev = existing.positions.get(row.position_bucket) || 0;
+          existing.positions.set(row.position_bucket, prev + (row.appearances || 0));
+        }
+      }
+    }
+  }
+
   // Fetch player names and nationalities in batches
   const uids = eligible.map(p => p.player_uid);
   const playerInfoMap = new Map();
@@ -339,10 +396,15 @@ async function fetchEligiblePlayers(supabase, scope, competitionId) {
     }
   }
 
-  // Fetch club names for all referenced club_ids
+  // Fetch club names for all referenced club_ids (from both scoped + full career)
   const allClubIds = new Set();
   for (const p of eligible) {
     for (const cid of p.clubIds) allClubIds.add(cid);
+  }
+  if (fullCareerMap) {
+    for (const fc of fullCareerMap.values()) {
+      for (const cid of fc.clubIds) allClubIds.add(cid);
+    }
   }
   const clubNameMap = new Map();
   const clubIdArr = Array.from(allClubIds);
@@ -357,6 +419,14 @@ async function fetchEligiblePlayers(supabase, scope, competitionId) {
     }
   }
 
+  // Map position bucket to readable label
+  const positionLabels = {
+    'GK': 'Goalkeeper',
+    'DEF': 'Defender',
+    'MID': 'Midfielder',
+    'FWD': 'Forward',
+  };
+
   // Enrich eligible players
   const enriched = [];
   for (const agg of eligible) {
@@ -367,51 +437,62 @@ async function fetchEligiblePlayers(supabase, scope, competitionId) {
     // Skip players with very short names (probably data quality issues)
     if (displayName.length < 3) continue;
 
-    // Determine primary position (most appearances)
+    // Use full career data for clues if available, otherwise use scoped data
+    const full = fullCareerMap ? fullCareerMap.get(agg.player_uid) : null;
+    const careerData = full || agg;
+
+    // Determine primary position from FULL career (most appearances)
     let primaryPosition = 'Unknown';
     let maxPosApps = 0;
-    for (const [pos, apps] of agg.positions) {
+    for (const [pos, apps] of careerData.positions) {
       if (apps > maxPosApps) {
         maxPosApps = apps;
         primaryPosition = pos;
       }
     }
 
-    // Map position bucket to readable label
-    const positionLabels = {
-      'GK': 'Goalkeeper',
-      'DEF': 'Defender',
-      'MID': 'Midfielder',
-      'FWD': 'Forward',
-    };
-
-    // Get club names
+    // Get club names from FULL career
     const clubNames = [];
-    for (const cid of agg.clubIds) {
+    for (const cid of careerData.clubIds) {
       const name = clubNameMap.get(cid);
       if (name) clubNames.push(name);
     }
 
-    // Season span
-    const seasonsArr = Array.from(agg.seasons).sort((a, b) => a - b);
+    // Season span from FULL career
+    const seasonsArr = Array.from(careerData.seasons).sort((a, b) => a - b);
     const firstSeason = seasonsArr[0];
     const lastSeason = seasonsArr[seasonsArr.length - 1];
     const seasonCount = seasonsArr.length;
+
+    // Club-specific stats (for club scope clues)
+    const clubAppearances = agg.totalAppearances;
+    const clubGoals = agg.totalGoals;
+    const clubSeasonsArr = Array.from(agg.seasons).sort((a, b) => a - b);
+    const clubSeasonCount = clubSeasonsArr.length;
+    const clubFirstSeason = clubSeasonsArr[0];
+    const clubLastSeason = clubSeasonsArr[clubSeasonsArr.length - 1];
 
     enriched.push({
       player_uid: agg.player_uid,
       name: displayName,
       nationality: (info.nationality_norm || '').toUpperCase(),
-      totalAppearances: agg.totalAppearances,
-      totalGoals: agg.totalGoals,
-      totalAssists: agg.totalAssists,
-      totalMinutes: agg.totalMinutes,
+      // Full PL career stats (used for clues)
+      totalAppearances: careerData.totalAppearances,
+      totalGoals: careerData.totalGoals,
+      totalAssists: careerData.totalAssists,
+      totalMinutes: careerData.totalMinutes,
       clubNames,
       clubCount: clubNames.length,
       primaryPosition: positionLabels[primaryPosition] || primaryPosition,
       firstSeason,
       lastSeason,
       seasonCount,
+      // Club-specific stats (used for club scope clues)
+      clubAppearances,
+      clubGoals,
+      clubSeasonCount,
+      clubFirstSeason,
+      clubLastSeason,
     });
   }
 
@@ -420,8 +501,10 @@ async function fetchEligiblePlayers(supabase, scope, competitionId) {
 
 /**
  * Generate 5 clues for a player, from hardest to easiest.
+ * Uses full PL career stats so clues are accurate even in club-scoped games.
+ * For club scopes, also weaves in club-specific context where helpful.
  */
-function generateClues(player, scopeType) {
+function generateClues(player, scopeType, scopeClubName) {
   const clues = [];
 
   // Clue 1 (hardest): Number of PL clubs and which clubs
@@ -432,15 +515,16 @@ function generateClues(player, scopeType) {
       clues.push(`I played for ${player.clubCount} Premier League clubs: ${player.clubNames.join(', ')}`);
     }
   } else {
-    // For club scope, show total EPL clubs if available
+    // For club scope — show all their PL clubs
     if (player.clubCount === 1) {
       clues.push(`${player.clubNames[0]} was my only Premier League club`);
     } else {
-      clues.push(`I also played for: ${player.clubNames.filter(c => c !== player.clubNames[0]).join(', ')}`);
+      const otherClubs = player.clubNames.filter(c => c !== scopeClubName);
+      clues.push(`I played for ${player.clubCount} Premier League clubs — also: ${otherClubs.join(', ')}`);
     }
   }
 
-  // Clue 2: Career span
+  // Clue 2: Career span (full PL career)
   if (player.firstSeason && player.lastSeason) {
     const startDisplay = `${player.firstSeason}/${String(player.firstSeason + 1).slice(2)}`;
     const endDisplay = `${player.lastSeason}/${String(player.lastSeason + 1).slice(2)}`;
@@ -458,13 +542,25 @@ function generateClues(player, scopeType) {
   // Clue 3: Position
   clues.push(`I played as a ${player.primaryPosition}`);
 
-  // Clue 4: Total goals
+  // Clue 4: Stats — use full PL career totals, plus club-specific context for club scopes
   if (player.primaryPosition === 'Goalkeeper') {
-    clues.push(`I made ${player.totalAppearances} Premier League appearances`);
+    let clue = `I made ${player.totalAppearances} Premier League appearances`;
+    if (scopeType === 'club' && player.clubAppearances !== player.totalAppearances) {
+      clue += ` (${player.clubAppearances} for ${scopeClubName})`;
+    }
+    clues.push(clue);
   } else if (player.totalGoals === 0) {
-    clues.push(`I made ${player.totalAppearances} Premier League appearances without scoring`);
+    let clue = `I made ${player.totalAppearances} Premier League appearances without scoring`;
+    if (scopeType === 'club' && player.clubAppearances !== player.totalAppearances) {
+      clue += ` (${player.clubAppearances} for ${scopeClubName})`;
+    }
+    clues.push(clue);
   } else {
-    clues.push(`I scored ${player.totalGoals} Premier League goal${player.totalGoals !== 1 ? 's' : ''}`);
+    let clue = `I scored ${player.totalGoals} Premier League goal${player.totalGoals !== 1 ? 's' : ''}`;
+    if (scopeType === 'club' && player.clubGoals !== player.totalGoals) {
+      clue += ` (${player.clubGoals} for ${scopeClubName})`;
+    }
+    clues.push(clue);
   }
 
   // Clue 5 (easiest): Nationality
@@ -547,23 +643,26 @@ exports.handler = async (event) => {
       console.log(`[whoami_start] ${eligible.length} eligible players for scope ${scopeId}`);
 
       // Filter by difficulty based on season count
+      // For club scopes, use club-specific season count (how long at THAT club)
+      // For league scope, use full PL career season count
       // Easy: well-known players with long careers (8+ seasons)
       // Medium: moderate careers (4-7 seasons)
       // Hard: short-stint players (1-3 seasons) — the obscure ones
       const { difficulty } = body;
       let pool = eligible;
+      const getDifficultySeason = (p) => scope.type === 'club' ? p.clubSeasonCount : p.seasonCount;
 
       if (difficulty === 'easy') {
-        pool = eligible.filter(p => p.seasonCount >= 8);
-        if (pool.length < 5) pool = eligible.filter(p => p.seasonCount >= 6);
+        pool = eligible.filter(p => getDifficultySeason(p) >= 8);
+        if (pool.length < 5) pool = eligible.filter(p => getDifficultySeason(p) >= 6);
         if (pool.length < 5) pool = eligible;
       } else if (difficulty === 'medium') {
-        pool = eligible.filter(p => p.seasonCount >= 4 && p.seasonCount <= 7);
-        if (pool.length < 5) pool = eligible.filter(p => p.seasonCount >= 3 && p.seasonCount <= 8);
+        pool = eligible.filter(p => getDifficultySeason(p) >= 4 && getDifficultySeason(p) <= 7);
+        if (pool.length < 5) pool = eligible.filter(p => getDifficultySeason(p) >= 3 && getDifficultySeason(p) <= 8);
         if (pool.length < 5) pool = eligible;
       } else if (difficulty === 'hard') {
-        pool = eligible.filter(p => p.seasonCount <= 3);
-        if (pool.length < 5) pool = eligible.filter(p => p.seasonCount <= 4);
+        pool = eligible.filter(p => getDifficultySeason(p) <= 3);
+        if (pool.length < 5) pool = eligible.filter(p => getDifficultySeason(p) <= 4);
         if (pool.length < 5) pool = eligible;
       }
 
@@ -578,7 +677,7 @@ exports.handler = async (event) => {
       const letters = letterCount(player.name);
 
       // Generate clues
-      const clues = generateClues(player, scope.type);
+      const clues = generateClues(player, scope.type, scope.clubName);
 
       // Encrypt the player_uid
       const encryptedId = encryptPlayerId(player.player_uid);
