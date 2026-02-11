@@ -1,0 +1,3491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>TeleStats - Bullseye</title>
+<link rel="stylesheet" href="telestats-theme.css"/>
+<style>
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+  padding: 16px;
+  line-height: 1.4;
+}
+.card {
+  max-width: 560px;
+  margin: 0 auto;
+  background: var(--card);
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.4);
+}
+h2 { margin: 0 0 16px; font-size: 20px; font-weight: 700; }
+.subtitle { color: var(--muted); font-size: 14px; margin: -12px 0 16px; }
+
+/* Form elements */
+.field { margin-bottom: 14px; }
+.field label { display: block; font-size: 13px; color: var(--muted); font-weight: 600; margin-bottom: 6px; }
+input, select {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  font-size: 16px;
+  background: rgba(255,255,255,.95);
+  color: #1a1a1a;
+  transition: border-color .2s;
+}
+input:focus, select:focus { outline: none; border-color: var(--accent); }
+input::placeholder { color: #888; }
+
+/* Buttons */
+button {
+  width: 100%;
+  padding: 14px 20px;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .2s;
+  min-height: 48px;
+}
+.btn-primary { background: var(--accent); color: #0a0f0d; }
+.btn-primary:hover:not(:disabled) { background: var(--accent-dim); }
+.btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+.btn-secondary { background: var(--btn); color: #fff; }
+.btn-secondary:hover:not(:disabled) { background: var(--btn-hover); }
+.btn-danger { background: var(--danger); color: #fff; }
+.btn-text { background: none; color: var(--muted); text-decoration: underline; font-size: 14px; padding: 8px; width: auto; min-height: auto; }
+.btn-back { background: var(--card-dark); color: var(--muted); margin-bottom: 12px; font-size: 14px; padding: 10px 16px; }
+.btn-back:hover { background: var(--btn); color: #fff; }
+.row-btns { display: flex; gap: 10px; margin-top: 12px; }
+.row-btns button { flex: 1; }
+
+/* Category sections */
+.section { background: var(--card-dark); border-radius: 14px; margin-bottom: 10px; overflow: hidden; }
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: background .2s;
+}
+.section-header:hover { background: rgba(255,255,255,.03); }
+.section-title { font-weight: 700; font-size: 15px; display: flex; align-items: center; gap: 8px; }
+.section-count { font-size: 12px; color: var(--muted); font-weight: 400; }
+.chev { opacity: .7; transition: transform .2s; font-size: 12px; }
+.section.open .chev { transform: rotate(180deg); }
+.section-body { display: none; padding: 8px 12px 12px; }
+.section.open .section-body { display: block; }
+.section.disabled .section-header { opacity: .5; cursor: not-allowed; }
+.section.disabled .section-body { display: none; }
+.section-desc { display: none; font-size: 12px; color: var(--muted); padding: 0 16px 8px; line-height: 1.4; }
+.section.open .section-desc { display: block; }
+.disabled-note { font-size: 12px; color: var(--muted); padding: 12px; text-align: center; }
+
+/* Game cards */
+.game-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255,255,255,.04);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 6px;
+  cursor: pointer;
+  transition: background .2s, transform .1s;
+}
+.game-card:hover { background: rgba(255,255,255,.08); }
+.game-card:active { transform: scale(.98); }
+.game-card .flag { font-size: 18px; margin-right: 10px; }
+.game-card .color-dot { width: 18px; height: 18px; border-radius: 4px; margin-right: 10px; flex-shrink: 0; }
+.game-card .title { font-weight: 600; font-size: 13px; }
+.game-card .meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.game-card .arrow { opacity: .5; font-size: 14px; }
+.stars { color: var(--gold); letter-spacing: 1px; font-size: 10px; }
+
+/* Loading screen with trivia */
+.loading-screen { text-align: center; padding: 20px 0; }
+.loading-spinner {
+  width: 48px; height: 48px;
+  border: 4px solid rgba(255,255,255,.1);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 16px;
+}
+.loading-spinner.ready { animation: none; border-color: var(--accent); background: rgba(74,222,128,.2); }
+.loading-spinner.ready::after { content: '✓'; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); font-size: 24px; color: var(--accent); }
+.loading-screen { position: relative; }
+.loading-spinner-wrap { position: relative; width: 48px; height: 48px; margin: 0 auto 16px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text { font-size: 16px; margin-bottom: 20px; }
+.loading-text.ready { color: var(--accent); }
+.ready-badge {
+  display: inline-block;
+  background: var(--accent);
+  color: #0a0f0d;
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  margin-bottom: 16px;
+  animation: pulse 1.5s ease infinite;
+}
+.trivia-note { font-size: 11px; color: var(--muted); margin-top: 8px; font-style: italic; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .7; } }
+
+/* Trivia */
+.trivia-box { background: var(--card-dark); border-radius: 14px; padding: 16px; margin-top: 16px; text-align: left; }
+.trivia-q { font-weight: 600; margin-bottom: 12px; font-size: 15px; }
+.trivia-opts { display: flex; flex-direction: column; gap: 8px; }
+.trivia-opt {
+  background: rgba(255,255,255,.06);
+  border: 2px solid transparent;
+  border-radius: 10px;
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: all .2s;
+  font-size: 14px;
+}
+.trivia-opt:hover { background: rgba(255,255,255,.1); }
+.trivia-opt.selected { border-color: var(--accent); background: rgba(74,222,128,.1); }
+.trivia-opt.correct { background: rgba(74,222,128,.3); border-color: var(--accent); }
+.trivia-opt.wrong { background: rgba(224,85,85,.2); border-color: var(--danger); }
+
+/* Order reveal */
+.order-reveal { text-align: center; padding: 20px 0; }
+.order-list {
+  background: var(--card-dark);
+  border-radius: 12px;
+  padding: 14px;
+  margin: 16px 0;
+  font-size: 15px;
+}
+
+/* Scoreboard */
+.scores { display: grid; gap: 8px; margin-bottom: 14px; }
+.scores.p1 { grid-template-columns: 1fr; }
+.scores.p2 { grid-template-columns: 1fr 1fr; }
+.scores.p3 { grid-template-columns: 1fr 1fr 1fr; }
+.scores.p4 { grid-template-columns: 1fr 1fr; }
+.scores.p5, .scores.p6 { grid-template-columns: 1fr 1fr 1fr; }
+.pill {
+  background: var(--card-dark);
+  border-radius: 14px;
+  padding: 10px;
+  text-align: center;
+  cursor: pointer;
+  transition: all .2s;
+  border: 2px solid transparent;
+}
+.pill.active { border-color: var(--accent); background: rgba(74,222,128,.1); }
+.pill .name { font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pill .score { font-size: 26px; font-weight: 800; }
+.pill.bust-anim { animation: shake .4s ease; }
+.pill.win-anim { animation: celebrate .6s ease; }
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-4px); }
+  40%, 80% { transform: translateX(4px); }
+}
+@keyframes celebrate {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+.turn-info { text-align: center; font-weight: 700; margin-bottom: 10px; font-size: 14px; }
+.hint-bar { font-size: 12px; color: var(--accent); margin-bottom: 10px; padding: 8px 10px; background: rgba(74,222,128,.08); border-radius: 10px; display: flex; align-items: center; gap: 8px; }
+.hint-bar .hint-text { flex: 1; text-align: center; }
+.coverage-btn {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  flex-shrink: 0;
+  background: rgba(255,255,255,.1);
+  border: 1px solid rgba(255,255,255,.15);
+  color: var(--muted);
+  padding: 0;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all .2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.coverage-btn:hover { background: rgba(255,255,255,.2); color: #fff; border-color: rgba(255,255,255,.25); }
+.coverage-btn:active { transform: scale(.95); }
+
+/* Coverage modal */
+.coverage-modal { max-width: 380px; }
+.coverage-grid { display: flex; flex-direction: column; gap: 6px; margin: 12px 0; }
+.coverage-row { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+.coverage-label { width: 70px; text-align: right; color: var(--muted); font-size: 11px; }
+.coverage-bar-wrap { flex: 1; background: rgba(255,255,255,.1); border-radius: 4px; height: 20px; overflow: hidden; }
+.coverage-bar { height: 100%; background: var(--accent); border-radius: 4px; transition: width .3s ease; }
+.coverage-count { width: 36px; text-align: right; font-weight: 600; font-size: 12px; }
+.coverage-stats { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.coverage-stat { background: var(--card-dark); padding: 8px 12px; border-radius: 8px; text-align: center; flex: 1; min-width: 80px; }
+.coverage-stat .label { font-size: 10px; color: var(--muted); text-transform: uppercase; }
+.coverage-stat .value { font-size: 16px; font-weight: 700; margin-top: 2px; }
+
+/* Selection list (fuzzy matches) */
+.selection-list {
+  background: var(--card-dark);
+  border-radius: 12px;
+  margin-top: 10px;
+  overflow: hidden;
+  max-height: 280px;
+  overflow-y: auto;
+}
+.selection-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: background .15s;
+  border-bottom: 1px solid rgba(255,255,255,.05);
+}
+.selection-item:last-child { border-bottom: none; }
+.selection-item:hover:not(.used) { background: rgba(255,255,255,.06); }
+.selection-item .info { flex: 1; }
+.selection-item .name { font-weight: 600; font-size: 14px; }
+.selection-item .nat { font-size: 11px; color: var(--muted); }
+.selection-item.used { opacity: .5; cursor: not-allowed; }
+.selection-item.used .name { color: var(--used); text-decoration: line-through; }
+.used-badge {
+  font-size: 9px;
+  background: var(--danger);
+  color: #fff;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+/* Result toast */
+.result { min-height: 18px; text-align: center; margin: 8px 0; font-size: 13px; }
+.inline-toast {
+  background: var(--card-dark);
+  border-radius: 14px;
+  padding: 14px;
+  margin-top: 10px;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: all .25s;
+}
+.inline-toast.show { opacity: 1; transform: translateY(0); }
+.inline-toast.bust-effect { border: 2px solid var(--danger); }
+.inline-toast.win-effect { border: 2px solid var(--gold); background: rgba(251,191,36,.1); }
+.toast-row { display: flex; align-items: flex-start; gap: 12px; }
+.toast-badge {
+  min-width: 52px; height: 52px;
+  background: var(--accent);
+  color: #0a0f0d;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+.toast-badge.bust { background: var(--danger); color: #fff; font-size: 24px; }
+.toast-badge.win { background: var(--gold); color: #000; font-size: 20px; }
+.toast-body { flex: 1; min-width: 0; }
+.toast-title { font-weight: 700; font-size: 15px; }
+.toast-sub { color: var(--muted); font-size: 12px; margin-top: 2px; }
+.toast-clubs { font-size: 11px; color: var(--muted); margin-top: 4px; }
+.toast-meta { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
+.toast-meta span {
+  background: rgba(255,255,255,.06);
+  padding: 4px 7px;
+  border-radius: 5px;
+  font-size: 10px;
+  color: var(--muted);
+}
+
+/* Bust/Win overlays */
+.effect-overlay {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  pointer-events: none;
+}
+.effect-overlay.show { display: flex; }
+.effect-text {
+  font-size: 48px;
+  font-weight: 900;
+  text-transform: uppercase;
+  animation: effectPop .5s ease-out forwards;
+  opacity: 0;
+}
+.effect-text.bust { color: var(--danger); text-shadow: 0 4px 20px rgba(224,85,85,.5); }
+.effect-text.win { color: var(--gold); text-shadow: 0 4px 20px rgba(251,191,36,.5); }
+@keyframes effectPop {
+  0% { transform: scale(0.5); opacity: 0; }
+  50% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(1); opacity: 0; }
+}
+
+/* Progress modal */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.7);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+}
+.modal-backdrop.show { display: flex; }
+.modal {
+  width: 100%;
+  max-width: 480px;
+  max-height: 80vh;
+  overflow-y: auto;
+  background: var(--card);
+  border-radius: 18px;
+  padding: 20px;
+  transform: translateY(10px);
+  opacity: 0;
+  transition: all .25s;
+}
+.modal.show { transform: translateY(0); opacity: 1; }
+.modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.modal-title { font-weight: 800; font-size: 17px; }
+.close-btn { background: var(--btn); border: none; color: #fff; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 14px; }
+.chain { background: var(--card-dark); padding: 12px; border-radius: 10px; font-family: monospace; font-size: 13px; overflow-x: auto; word-break: break-all; }
+.pick-list { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+.pick {
+  background: var(--card-dark);
+  padding: 10px;
+  border-radius: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+}
+.pick.bust { border-left: 3px solid var(--danger); }
+.pick b { font-weight: 700; }
+.pick .meta { color: var(--muted); font-size: 11px; }
+
+/* Confirm dialog */
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.7);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+  padding: 16px;
+}
+.confirm-overlay.show { display: flex; }
+.confirm-box {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 340px;
+  text-align: center;
+}
+.confirm-box p { margin: 0 0 20px; font-size: 16px; }
+.confirm-btns { display: flex; gap: 10px; }
+.confirm-btns button { flex: 1; }
+
+.hidden { display: none !important; }
+
+/* Custom game builder */
+.custom-builder { padding: 4px 0; }
+.chip-grid { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; max-height: 200px; overflow-y: auto; }
+.chip {
+  background: rgba(255,255,255,.08);
+  border: 2px solid transparent;
+  border-radius: 20px;
+  padding: 6px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all .2s;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.chip:hover { background: rgba(255,255,255,.12); }
+.chip.selected { border-color: var(--accent); background: rgba(74,222,128,.15); }
+.chip .flag { font-size: 14px; }
+.chip .color-dot-sm { width: 10px; height: 10px; border-radius: 2px; }
+.custom-preview {
+  background: var(--card);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin: 12px 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+.custom-preview strong { color: var(--accent); }
+.custom-warning { background: rgba(224,85,85,.15); border: 1px solid var(--danger); border-radius: 8px; padding: 8px 12px; margin: 8px 0; font-size: 12px; color: var(--danger); }
+.chip-action { background: none; border: none; color: var(--muted); font-size: 11px; cursor: pointer; padding: 2px 6px; margin-left: 8px; text-decoration: underline; }
+.chip-action:hover { color: var(--accent); }
+
+/* Competition dividers */
+.competition-divider {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent);
+  margin: 24px 0 12px;
+  padding-left: 4px;
+  border-left: 3px solid var(--accent);
+  padding-bottom: 4px;
+}
+
+/* Chat builder */
+.chat-builder { padding: 4px 0; }
+.chat-builder textarea {
+  width: 100%;
+  background: var(--card-dark);
+  border: 1px solid rgba(255,255,255,.15);
+  border-radius: 10px;
+  color: var(--fg);
+  padding: 12px 14px;
+  font-size: 14px;
+  resize: vertical;
+  min-height: 60px;
+  font-family: inherit;
+}
+.chat-builder textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.chat-builder textarea::placeholder { color: var(--muted); }
+.chat-preview {
+  background: var(--card);
+  border: 1px solid var(--accent);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin: 12px 0;
+}
+.chat-preview-header {
+  font-size: 11px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+.chat-preview-content .preview-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+.chat-preview-content .preview-row .label { color: var(--muted); }
+.chat-preview-content .preview-row .value { font-weight: 600; }
+.chat-preview-content .preview-row .value.eligible { color: var(--accent); }
+.chat-preview-content .preview-row .value.low { color: var(--danger); }
+.chat-proposal {
+  background: var(--card);
+  border: 1px solid var(--accent);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin: 12px 0;
+}
+.chat-proposal-header {
+  font-size: 11px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+.chat-proposal-content .proposal-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+.chat-proposal-content .proposal-row .label { color: var(--muted); }
+.chat-proposal-content .proposal-row .value { font-weight: 600; }
+.chat-proposal-feasibility {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255,255,255,.1);
+}
+.feasibility-ok { color: var(--accent); }
+.feasibility-warn { color: var(--gold); }
+.feasibility-fail { color: var(--danger); }
+.feasibility-stars { color: var(--gold); margin-left: 8px; }
+.feasibility-suggestion { font-size: 12px; color: var(--muted); margin-top: 6px; }
+.chat-warning {
+  background: rgba(224,85,85,.15);
+  border: 1px solid var(--danger);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin: 10px 0;
+  font-size: 13px;
+  color: var(--danger);
+}
+.chat-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+.chat-buttons .btn-secondary {
+  flex: 1;
+  background: rgba(255,255,255,.1);
+  border: 1px solid rgba(255,255,255,.2);
+  color: var(--fg);
+  padding: 10px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all .2s;
+}
+.chat-buttons .btn-secondary:hover { background: rgba(255,255,255,.15); }
+.chat-buttons .btn-primary { flex: 2; }
+
+/* Session stats bar */
+.session-bar {
+  background: var(--card-dark);
+  border-radius: 12px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+}
+.session-stat-item { text-align: center; }
+.session-stat-item .label { color: var(--muted); font-size: 10px; text-transform: uppercase; }
+.session-stat-item .value { font-weight: 700; font-size: 16px; }
+.session-stat-item .value.wins { color: var(--accent); }
+.session-stat-item .value.busts { color: var(--danger); }
+
+/* Gameplay Options step */
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--card-dark);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+}
+.toggle-info { flex: 1; margin-right: 12px; }
+.toggle-label { font-weight: 600; font-size: 14px; }
+.toggle-desc { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.toggle-switch {
+  position: relative;
+  width: 48px;
+  height: 28px;
+  background: rgba(255,255,255,.15);
+  border-radius: 14px;
+  cursor: pointer;
+  transition: background .2s;
+  flex-shrink: 0;
+}
+.toggle-switch.on { background: var(--accent); }
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  background: #fff;
+  border-radius: 50%;
+  top: 3px;
+  left: 3px;
+  transition: transform .2s;
+}
+.toggle-switch.on::after { transform: translateX(20px); }
+
+/* Timer display */
+.timer-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 8px 12px;
+  margin-bottom: 10px;
+  background: var(--card-dark);
+  border-radius: 10px;
+  font-size: 14px;
+}
+.timer-bar.hidden { display: none; }
+.timer-display {
+  font-weight: 800;
+  font-size: 22px;
+  font-variant-numeric: tabular-nums;
+  min-width: 40px;
+  text-align: center;
+}
+.timer-display.urgent { color: var(--gold); animation: timerPulse 1s ease infinite; }
+.timer-display.critical { color: var(--danger); animation: timerPulse .5s ease infinite; }
+@keyframes timerPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .6; }
+}
+.timer-pause-btn {
+  background: rgba(255,255,255,.1);
+  border: 1px solid rgba(255,255,255,.2);
+  color: var(--muted);
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all .2s;
+}
+.timer-pause-btn:hover { background: rgba(255,255,255,.2); color: #fff; }
+.timer-paused-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.6);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 900;
+}
+.timer-paused-overlay.show { display: flex; }
+.timer-paused-box {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 24px;
+  text-align: center;
+  max-width: 300px;
+}
+.timer-paused-box h3 { margin: 0 0 8px; font-size: 18px; }
+.timer-paused-box p { margin: 0 0 16px; color: var(--muted); font-size: 14px; }
+
+/* Show suggestions button */
+.show-suggestions-btn {
+  width: 100%;
+  padding: 10px 16px;
+  background: var(--card-dark);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 10px;
+  color: var(--muted);
+  font-size: 13px;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: all .2s;
+}
+.show-suggestions-btn:hover { background: rgba(255,255,255,.08); color: #fff; }
+.show-suggestions-btn.active { border-color: var(--accent); color: var(--accent); }
+
+/* Custom builder enhancements */
+.chip-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.chip-header label { margin: 0; }
+.selection-count { font-size: 11px; color: var(--accent); font-weight: 600; }
+.selection-count.max { color: var(--gold); }
+.live-preview {
+  background: rgba(74,222,128,.08);
+  border: 1px solid rgba(74,222,128,.2);
+  border-radius: 10px;
+  padding: 12px;
+  margin: 10px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.live-preview.warning { background: rgba(224,85,85,.1); border-color: rgba(224,85,85,.3); }
+.live-preview-text { font-size: 13px; }
+.live-preview-text strong { color: var(--accent); }
+.live-preview.warning .live-preview-text strong { color: var(--danger); }
+.live-preview-diff { display: flex; align-items: center; gap: 4px; }
+.live-preview-diff .stars { font-size: 12px; }
+</style>
+</head>
+<body>
+
+<!-- SETUP CARD -->
+<div style="max-width:480px;margin:0 auto;padding:8px 0 0;">
+  <a href="ts-games.html" class="back-link" style="text-decoration:none;font-size:13px;">&larr; All Games</a>
+</div>
+
+<div class="ts-header" style="max-width:560px;">
+  <span class="ts-brand">TELESTATS</span>
+  <span>EPL &bull; BULLSEYE</span>
+  <span class="ts-time" id="tsClock">--:--</span>
+</div>
+
+<div class="card" id="setupCard">
+  <!-- Step 1: Game Mode Selection -->
+  <div id="step1">
+    <h2>Bullseye</h2>
+    <p class="subtitle">Guess players, subtract their stats, hit the bullseye to win!</p>
+    <div class="field">
+      <label>Choose game mode</label>
+    </div>
+    <div class="row-btns" style="margin-top: 8px;">
+      <button class="btn-primary" id="singlePlayerBtn">Single Player</button>
+      <button class="btn-secondary" id="multiplayerBtn">Multiplayer</button>
+    </div>
+  </div>
+
+  <!-- Step 1b: Multiplayer count -->
+  <div id="step1b" class="hidden">
+    <button class="btn-back" id="backToStep1Mode">← Back</button>
+    <h2>Multiplayer</h2>
+    <p class="subtitle">Select number of players</p>
+    <div class="field">
+      <label>Number of players</label>
+      <select id="numPlayers">
+        <option value="2" selected>2 Players</option>
+        <option value="3">3 Players</option>
+        <option value="4">4 Players</option>
+        <option value="5">5 Players</option>
+        <option value="6">6 Players</option>
+      </select>
+    </div>
+    <button class="btn-primary" id="toStep2">Continue</button>
+  </div>
+
+  <!-- Step 2: Player names -->
+  <div id="step2" class="hidden">
+    <button class="btn-back" id="backToStep1">← Back</button>
+    <h2>Player Names</h2>
+    <div id="nameFields"></div>
+    <button class="btn-primary" id="toStepOptions">Continue</button>
+  </div>
+
+  <!-- Step 2b: Gameplay Options -->
+  <div id="stepOptions" class="hidden">
+    <button class="btn-back" id="backToStep2Options">← Back</button>
+    <h2>Gameplay Options</h2>
+    <p class="subtitle">Customize your game experience</p>
+
+    <div class="toggle-row">
+      <div class="toggle-info">
+        <div class="toggle-label">Player Timer (30s)</div>
+        <div class="toggle-desc">Each turn has a 30-second countdown. Run out of time and forfeit your turn!</div>
+      </div>
+      <div class="toggle-switch" id="timerToggle" data-on="false"></div>
+    </div>
+
+    <div class="toggle-row">
+      <div class="toggle-info">
+        <div class="toggle-label">Player Suggestions</div>
+        <div class="toggle-desc">Show matching players as you type. Turn off for a harder challenge.</div>
+      </div>
+      <div class="toggle-switch on" id="suggestionsToggle" data-on="true"></div>
+    </div>
+
+    <button class="btn-primary" id="toStep3" style="margin-top: 16px;">Continue</button>
+  </div>
+
+  <!-- Step 3: Choose category -->
+  <div id="step3" class="hidden">
+    <button class="btn-back" id="backToStep2">← Back</button>
+    <h2>Choose Category</h2>
+    <p class="subtitle">Select a game mode to start</p>
+
+    <h3 class="competition-divider">Premier League</h3>
+
+    <div class="section" id="sec-country">
+      <div class="section-header" onclick="toggleSection('sec-country')">
+        <div class="section-title">Countries <span class="section-count" id="countCountry">(0)</span></div>
+        <div class="chev">▼</div>
+      </div>
+      <div class="section-desc">Player appearances by country in Premier League history (up to 2024/25 season).<br><span style="color:var(--gold)">★</span> difficulty: more stars = harder (smaller player pool)</div>
+      <div class="section-body" id="countryGames"></div>
+    </div>
+
+    <div class="section" id="sec-continent">
+      <div class="section-header" onclick="toggleSection('sec-continent')">
+        <div class="section-title">Continents <span class="section-count" id="countContinent">(0)</span></div>
+        <div class="chev">▼</div>
+      </div>
+      <div class="section-desc">Player appearances grouped by continental region (up to 2024/25 season).<br><span style="color:var(--gold)">★</span> difficulty: more stars = harder (smaller player pool)</div>
+      <div class="section-body" id="continentGames"></div>
+    </div>
+
+    <div class="section" id="sec-club">
+      <div class="section-header" onclick="toggleSection('sec-club')">
+        <div class="section-title">Clubs (Apps) <span class="section-count" id="countClub">(0)</span></div>
+        <div class="chev">▼</div>
+      </div>
+      <div class="section-desc">Player appearances for each club in Premier League history (up to 2024/25 season).<br><span style="color:var(--gold)">★</span> difficulty: more stars = harder (smaller player pool)</div>
+      <div class="section-body" id="clubGames"></div>
+    </div>
+
+    <div class="section" id="sec-goals">
+      <div class="section-header" onclick="toggleSection('sec-goals')">
+        <div class="section-title">Goals <span class="section-count" id="countGoals">(0)</span></div>
+        <div class="chev">▼</div>
+      </div>
+      <div class="section-desc">Total Premier League goals (overall and by club) (up to 2024/25 season).<br><span style="color:var(--gold)">★</span> difficulty: more stars = harder (smaller player pool)</div>
+      <div class="section-body" id="goalsGames"></div>
+    </div>
+
+    <div class="section" id="sec-positions">
+      <div class="section-header" onclick="toggleSection('sec-positions')">
+        <div class="section-title">Positions (EPL Apps) <span class="section-count" id="countPositions">(0)</span></div>
+        <div class="chev">▼</div>
+      </div>
+      <div class="section-desc">Player appearances by position in Premier League history.<br><span style="color:var(--gold)">★</span> difficulty: more stars = harder (smaller player pool)</div>
+      <div class="section-body" id="positionGames"></div>
+    </div>
+
+    <div class="section" id="sec-age">
+      <div class="section-header" onclick="toggleSection('sec-age')">
+        <div class="section-title">Age (EPL Apps) <span class="section-count" id="countAge">(0)</span></div>
+        <div class="chev">▼</div>
+      </div>
+      <div class="section-desc">Player appearances by age bucket in Premier League history.<br><span style="color:var(--gold)">★</span> difficulty: more stars = harder (smaller player pool)</div>
+      <div class="section-body" id="ageGames"></div>
+    </div>
+
+    <div class="section" id="sec-chat-epl">
+      <div class="section-header" onclick="toggleSection('sec-chat-epl')">
+        <div class="section-title">💬 Build Your Own <span class="section-count">(EPL)</span></div>
+        <div class="chev">▼</div>
+      </div>
+      <div class="section-desc">Type what you want and we'll try to build it.</div>
+      <div class="section-body" id="chatBuilderEPL">
+        <div class="chat-builder">
+          <div class="field">
+            <label>Describe your game</label>
+            <textarea id="chatInputEPL" placeholder="e.g. English players who played for Sunderland, Man Utd, Liverpool and Spurs by appearances" rows="3"></textarea>
+          </div>
+          <div id="chatProposalEPL" class="chat-proposal hidden">
+            <div class="chat-proposal-header">Proposed Game</div>
+            <div class="chat-proposal-content" id="chatProposalContentEPL"></div>
+            <div class="chat-proposal-feasibility" id="chatFeasibilityEPL"></div>
+          </div>
+          <div id="chatWarningEPL" class="chat-warning hidden"></div>
+          <div class="chat-buttons">
+            <button class="btn-primary" id="submitChatEPL">Build</button>
+            <button class="btn-primary" id="startChatEPL" disabled style="display:none">Start Game</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h3 class="competition-divider">Champions League</h3>
+
+    <div class="section" id="sec-ucl-apps">
+      <div class="section-header" onclick="toggleSection('sec-ucl-apps')">
+        <div class="section-title">UCL Appearances (Nationality) <span class="section-count" id="countUCLApps">(0)</span></div>
+        <div class="chev">▼</div>
+      </div>
+      <div class="section-desc">Champions League appearances by nationality.<br><span style="color:var(--gold)">★</span> difficulty: more stars = harder</div>
+      <div class="section-body" id="uclAppsGames"></div>
+    </div>
+
+    <div class="section" id="sec-ucl-goals">
+      <div class="section-header" onclick="toggleSection('sec-ucl-goals')">
+        <div class="section-title">UCL Goals (Nationality) <span class="section-count" id="countUCLGoals">(0)</span></div>
+        <div class="chev">▼</div>
+      </div>
+      <div class="section-desc">Champions League goals by nationality.<br><span style="color:var(--gold)">★</span> difficulty: more stars = harder</div>
+      <div class="section-body" id="uclGoalsGames"></div>
+    </div>
+
+    <div class="section" id="sec-ucl-clubs">
+      <div class="section-header" onclick="toggleSection('sec-ucl-clubs')">
+        <div class="section-title">UCL Appearances (Club) <span class="section-count" id="countUCLClubs">(0)</span></div>
+        <div class="chev">▼</div>
+      </div>
+      <div class="section-desc">Champions League appearances by club.<br><span style="color:var(--gold)">★</span> difficulty: more stars = harder</div>
+      <div class="section-body" id="uclClubsGames"></div>
+    </div>
+
+    <h3 class="competition-divider">La Liga</h3>
+
+    <div class="section" id="sec-laliga-apps">
+      <div class="section-header" onclick="toggleSection('sec-laliga-apps')">
+        <div class="section-title">La Liga Apps (Top 25 Clubs) <span class="section-count" id="countLaLigaApps">(0)</span></div>
+        <div class="chev">▼</div>
+      </div>
+      <div class="section-desc">Player appearances by club in La Liga history.<br><span style="color:var(--gold)">★</span> difficulty: more stars = harder</div>
+      <div class="section-body" id="laligaAppsGames"></div>
+    </div>
+
+    <div class="section" id="sec-laliga-goals">
+      <div class="section-header" onclick="toggleSection('sec-laliga-goals')">
+        <div class="section-title">La Liga Goals (Top 25 Clubs) <span class="section-count" id="countLaLigaGoals">(0)</span></div>
+        <div class="chev">▼</div>
+      </div>
+      <div class="section-desc">Player goals by club in La Liga history.<br><span style="color:var(--gold)">★</span> difficulty: more stars = harder</div>
+      <div class="section-body" id="laligaGoalsGames"></div>
+    </div>
+
+    <h3 class="competition-divider">Serie A</h3>
+
+    <div class="section" id="sec-seriea-apps">
+      <div class="section-header" onclick="toggleSection('sec-seriea-apps')">
+        <div class="section-title">Serie A Apps (Top 25 Clubs) <span class="section-count" id="countSerieAApps">(0)</span></div>
+        <div class="chev">▼</div>
+      </div>
+      <div class="section-desc">Player appearances by club in Serie A history.<br><span style="color:var(--gold)">★</span> difficulty: more stars = harder</div>
+      <div class="section-body" id="serieaAppsGames"></div>
+    </div>
+
+    <div class="section" id="sec-seriea-goals">
+      <div class="section-header" onclick="toggleSection('sec-seriea-goals')">
+        <div class="section-title">Serie A Goals (Top 25 Clubs) <span class="section-count" id="countSerieAGoals">(0)</span></div>
+        <div class="chev">▼</div>
+      </div>
+      <div class="section-desc">Player goals by club in Serie A history.<br><span style="color:var(--gold)">★</span> difficulty: more stars = harder</div>
+      <div class="section-body" id="serieaGoalsGames"></div>
+    </div>
+
+    <h3 class="competition-divider">Bundesliga</h3>
+
+    <div class="section" id="sec-bundesliga-apps">
+      <div class="section-header" onclick="toggleSection('sec-bundesliga-apps')">
+        <div class="section-title">Bundesliga Apps (Top 25 Clubs) <span class="section-count" id="countBundesligaApps">(0)</span></div>
+        <div class="chev">▼</div>
+      </div>
+      <div class="section-desc">Player appearances by club in Bundesliga history.<br><span style="color:var(--gold)">★</span> difficulty: more stars = harder</div>
+      <div class="section-body" id="bundesligaAppsGames"></div>
+    </div>
+
+    <div class="section" id="sec-bundesliga-goals">
+      <div class="section-header" onclick="toggleSection('sec-bundesliga-goals')">
+        <div class="section-title">Bundesliga Goals (Top 25 Clubs) <span class="section-count" id="countBundesligaGoals">(0)</span></div>
+        <div class="chev">▼</div>
+      </div>
+      <div class="section-desc">Player goals by club in Bundesliga history.<br><span style="color:var(--gold)">★</span> difficulty: more stars = harder</div>
+      <div class="section-body" id="bundesligaGoalsGames"></div>
+    </div>
+
+    <h3 class="competition-divider">Ligue 1</h3>
+
+    <div class="section" id="sec-ligue1-apps">
+      <div class="section-header" onclick="toggleSection('sec-ligue1-apps')">
+        <div class="section-title">Ligue 1 Apps (Top 25 Clubs) <span class="section-count" id="countLigue1Apps">(0)</span></div>
+        <div class="chev">▼</div>
+      </div>
+      <div class="section-desc">Player appearances by club in Ligue 1 history.<br><span style="color:var(--gold)">★</span> difficulty: more stars = harder</div>
+      <div class="section-body" id="ligue1AppsGames"></div>
+    </div>
+
+    <div class="section" id="sec-ligue1-goals">
+      <div class="section-header" onclick="toggleSection('sec-ligue1-goals')">
+        <div class="section-title">Ligue 1 Goals (Top 25 Clubs) <span class="section-count" id="countLigue1Goals">(0)</span></div>
+        <div class="chev">▼</div>
+      </div>
+      <div class="section-desc">Player goals by club in Ligue 1 history.<br><span style="color:var(--gold)">★</span> difficulty: more stars = harder</div>
+      <div class="section-body" id="ligue1GoalsGames"></div>
+    </div>
+
+    <h3 class="competition-divider">Special</h3>
+
+    <div class="section" id="sec-big5-british">
+      <div class="section-header" onclick="toggleSection('sec-big5-british')">
+        <div class="section-title">Big 5 British (ex EPL) <span class="section-count" id="countBig5British">(2)</span></div>
+        <div class="chev">▼</div>
+      </div>
+      <div class="section-desc">British players in top 5 leagues (La Liga, Serie A, Bundesliga, Ligue 1) excluding EPL.<br><span style="color:var(--gold)">★</span> difficulty: more stars = harder</div>
+      <div class="section-body" id="big5BritishGames"></div>
+    </div>
+
+    <div class="section" id="sec-chat-global">
+      <div class="section-header" onclick="toggleSection('sec-chat-global')">
+        <div class="section-title">💬 Build Your Own <span class="section-count">(Any League)</span></div>
+        <div class="chev">▼</div>
+      </div>
+      <div class="section-desc">Type what you want and we'll try to build it. Include the league name (La Liga, Serie A, etc.).</div>
+      <div class="section-body" id="chatBuilderGlobal">
+        <div class="chat-builder">
+          <div class="field">
+            <label>Describe your game (include competition)</label>
+            <textarea id="chatInputGlobal" placeholder="e.g. German players in Bundesliga for Bayern Munich and Dortmund by appearances" rows="3"></textarea>
+          </div>
+          <div id="chatProposalGlobal" class="chat-proposal hidden">
+            <div class="chat-proposal-header">Proposed Game</div>
+            <div class="chat-proposal-content" id="chatProposalContentGlobal"></div>
+            <div class="chat-proposal-feasibility" id="chatFeasibilityGlobal"></div>
+          </div>
+          <div id="chatWarningGlobal" class="chat-warning hidden"></div>
+          <div class="chat-buttons">
+            <button class="btn-primary" id="submitChatGlobal">Build</button>
+            <button class="btn-primary" id="startChatGlobal" disabled style="display:none">Start Game</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading screen with trivia -->
+  <div id="loadingScreen" class="hidden loading-screen">
+    <button class="btn-back" id="backFromLoading">← Back</button>
+    <div class="loading-spinner-wrap">
+      <div class="loading-spinner" id="loadingSpinner"></div>
+    </div>
+    <div class="loading-text" id="loadingText">Loading match data...</div>
+    <div id="readyBadge" class="ready-badge hidden">Game Ready!</div>
+    <div id="triviaContainer"></div>
+    <button id="skipTrivia" class="btn-primary hidden" style="margin-top:16px">Start Match →</button>
+    <div id="triviaNote" class="trivia-note hidden">Trivia is optional — tap Start Match to begin</div>
+  </div>
+
+  <!-- Order reveal -->
+  <div id="orderScreen" class="hidden order-reveal">
+    <h2>Turn Order</h2>
+    <div id="orderList" class="order-list"></div>
+    <button id="beginMatch" class="btn-primary">Start Match</button>
+  </div>
+</div>
+
+<!-- GAMEPLAY CARD -->
+<div class="card hidden" id="playCard">
+  <div id="timerBar" class="timer-bar hidden">
+    <span class="timer-display" id="timerDisplay">30</span>
+    <button class="timer-pause-btn" id="timerPauseBtn">⏸ Pause</button>
+  </div>
+  <div id="sessionBar" class="session-bar hidden">
+    <div class="session-stat-item">
+      <div class="label">Games</div>
+      <div class="value" id="sessionGames">0</div>
+    </div>
+    <div class="session-stat-item">
+      <div class="label">Wins</div>
+      <div class="value wins" id="sessionWins">0</div>
+    </div>
+    <div class="session-stat-item">
+      <div class="label">Busts</div>
+      <div class="value busts" id="sessionBusts">0</div>
+    </div>
+    <div class="session-stat-item">
+      <div class="label">Picks</div>
+      <div class="value" id="sessionPicks">0</div>
+    </div>
+    <div class="session-stat-item">
+      <div class="label">Total</div>
+      <div class="value" id="sessionTotal">0</div>
+    </div>
+  </div>
+  <div id="scoreGrid" class="scores p2"></div>
+  <div id="turnInfo" class="turn-info"></div>
+  <div id="hintBar" class="hint-bar hidden">
+    <span class="hint-text" id="hintText"></span>
+    <button class="coverage-btn" id="coverageBtn" title="Coverage" aria-label="Coverage">?</button>
+  </div>
+
+  <div class="field">
+    <label id="guessLabel">Your guess</label>
+    <input id="guess" type="text" placeholder="Type a player name..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+  </div>
+
+  <div id="selectionList" class="selection-list hidden"></div>
+  <button id="showSuggestionsBtn" class="show-suggestions-btn hidden">Show suggestions</button>
+
+  <div class="row-btns">
+    <button id="submitBtn" class="btn-primary" disabled>Submit</button>
+    <button id="endBtn" class="btn-text">End Game</button>
+  </div>
+
+  <div id="result" class="result"></div>
+  <div id="inlineToast" class="inline-toast"></div>
+</div>
+
+<!-- Effect Overlay -->
+<div id="effectOverlay" class="effect-overlay">
+  <div id="effectText" class="effect-text"></div>
+</div>
+
+<!-- Progress Modal -->
+<div id="modalBackdrop" class="modal-backdrop">
+  <div id="modal" class="modal">
+    <div class="modal-header">
+      <div id="modalTitle" class="modal-title">Progress</div>
+      <button id="closeModal" class="close-btn">Close</button>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Score chain</div>
+    <div id="chain" class="chain">501</div>
+    <div id="pickList" class="pick-list"></div>
+  </div>
+</div>
+
+<!-- Confirm Dialog -->
+<div id="confirmOverlay" class="confirm-overlay">
+  <div class="confirm-box">
+    <p id="confirmText">End this game?</p>
+    <div class="confirm-btns">
+      <button id="confirmNo" class="btn-secondary">Cancel</button>
+      <button id="confirmYes" class="btn-danger">End Game</button>
+    </div>
+  </div>
+</div>
+
+<!-- Coverage Modal -->
+<div id="coverageBackdrop" class="modal-backdrop">
+  <div id="coverageModal" class="modal coverage-modal">
+    <div class="modal-header">
+      <div class="modal-title">Pick Distribution</div>
+      <button id="closeCoverage" class="close-btn">Close</button>
+    </div>
+    <div id="coverageContent"></div>
+  </div>
+</div>
+
+<!-- Timer Paused Overlay -->
+<div id="timerPausedOverlay" class="timer-paused-overlay">
+  <div class="timer-paused-box">
+    <h3>⏸ Game Paused</h3>
+    <p>Timer is paused. Resume when you're ready.</p>
+    <button class="btn-primary" id="timerResumeBtn">Resume</button>
+  </div>
+</div>
+
+<script>
+// ============== CONFIGURATION ==============
+const API_BASE = '/.netlify/functions';
+const CACHE_TTL = 90 * 60 * 1000; // 90 minutes
+const DEBOUNCE_MS = 300;
+
+// ============== CATEGORIES (must match backend) ==============
+// Sorted alphabetically by title within each group
+const CATEGORIES = {
+  // EPL Countries
+  country: [
+    { id: 'country_ARG', title: 'Argentina', flag: '🇦🇷' },
+    { id: 'country_BEL', title: 'Belgium', flag: '🇧🇪' },
+    { id: 'country_BRA', title: 'Brazil', flag: '🇧🇷' },
+    { id: 'country_DEN', title: 'Denmark', flag: '🇩🇰' },
+    { id: 'country_ENG', title: 'England', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿' },
+    { id: 'country_FRA', title: 'France', flag: '🇫🇷' },
+    { id: 'country_GER', title: 'Germany', flag: '🇩🇪' },
+    { id: 'country_IRL', title: 'Ireland', flag: '🇮🇪' },
+    { id: 'country_ITA', title: 'Italy', flag: '🇮🇹' },
+    { id: 'country_NED', title: 'Netherlands', flag: '🇳🇱' },
+    { id: 'country_NIR', title: 'N. Ireland', flag: '🇬🇧' },
+    { id: 'country_NOR', title: 'Norway', flag: '🇳🇴' },
+    { id: 'country_POR', title: 'Portugal', flag: '🇵🇹' },
+    { id: 'country_SCO', title: 'Scotland', flag: '🏴󠁧󠁢󠁳󠁣󠁴󠁿' },
+    { id: 'country_ESP', title: 'Spain', flag: '🇪🇸' },
+    { id: 'country_WAL', title: 'Wales', flag: '🏴󠁧󠁢󠁷󠁬󠁳󠁿' },
+  ],
+  // EPL Continents
+  continent: [
+    { id: 'continent_AFRICA', title: 'Africa', flag: '🌍' },
+    { id: 'continent_ASIA_OCEANIA', title: 'Asia & Oceania', flag: '🌏' },
+    { id: 'continent_CONCACAF', title: 'CONCACAF', flag: '🌎' },
+    { id: 'continent_SOUTH_AMERICA', title: 'South America (excl. BRA/ARG)', flag: '🌎' },
+  ],
+  // EPL Clubs
+  club: [
+    { id: 'club_Arsenal', title: 'Arsenal', color: '#EF0107' },
+    { id: 'club_AstonVilla', title: 'Aston Villa', color: '#670E36' },
+    { id: 'club_Blackburn', title: 'Blackburn', color: '#009EE0' },
+    { id: 'club_Bolton', title: 'Bolton', color: '#263C7F' },
+    { id: 'club_Bournemouth', title: 'Bournemouth', color: '#DA291C' },
+    { id: 'club_Brentford', title: 'Brentford', color: '#E30613' },
+    { id: 'club_Brighton', title: 'Brighton', color: '#0057B8' },
+    { id: 'club_Burnley', title: 'Burnley', color: '#6C1D45' },
+    { id: 'club_Charlton', title: 'Charlton', color: '#D4021D' },
+    { id: 'club_Chelsea', title: 'Chelsea', color: '#034694' },
+    { id: 'club_Coventry', title: 'Coventry', color: '#27A9E1' },
+    { id: 'club_CrystalPalace', title: 'Crystal Palace', color: '#1B458F' },
+    { id: 'club_Derby', title: 'Derby', color: '#000000' },
+    { id: 'club_Everton', title: 'Everton', color: '#003399' },
+    { id: 'club_Fulham', title: 'Fulham', color: '#000000' },
+    { id: 'club_Ipswich', title: 'Ipswich', color: '#0033A0' },
+    { id: 'club_Leeds', title: 'Leeds', color: '#FFCD00' },
+    { id: 'club_Leicester', title: 'Leicester', color: '#003090' },
+    { id: 'club_Liverpool', title: 'Liverpool', color: '#C8102E' },
+    { id: 'club_ManCity', title: 'Man City', color: '#6CABDD' },
+    { id: 'club_ManUtd', title: 'Man Utd', color: '#DA291C' },
+    { id: 'club_Middlesbrough', title: 'Middlesbrough', color: '#E11B22' },
+    { id: 'club_Newcastle', title: 'Newcastle', color: '#241F20' },
+    { id: 'club_Norwich', title: 'Norwich', color: '#00A650' },
+    { id: 'club_NottmForest', title: 'Nottm Forest', color: '#DD0000' },
+    { id: 'club_Portsmouth', title: 'Portsmouth', color: '#001489' },
+    { id: 'club_QPR', title: 'QPR', color: '#1D5BA4' },
+    { id: 'club_Reading', title: 'Reading', color: '#004494' },
+    { id: 'club_SheffUtd', title: 'Sheff Utd', color: '#EE2737' },
+    { id: 'club_SheffWed', title: 'Sheff Wed', color: '#0066B3' },
+    { id: 'club_Southampton', title: 'Southampton', color: '#D71920' },
+    { id: 'club_Stoke', title: 'Stoke', color: '#E03A3E' },
+    { id: 'club_Sunderland', title: 'Sunderland', color: '#EB172B' },
+    { id: 'club_Swansea', title: 'Swansea', color: '#000000' },
+    { id: 'club_Tottenham', title: 'Spurs', color: '#132257' },
+    { id: 'club_Watford', title: 'Watford', color: '#FBEC5D' },
+    { id: 'club_WestBrom', title: 'West Brom', color: '#122F67' },
+    { id: 'club_WestHam', title: 'West Ham', color: '#7A263A' },
+    { id: 'club_Wigan', title: 'Wigan', color: '#0033A0' },
+    { id: 'club_Wimbledon', title: 'Wimbledon', color: '#00008B' },
+    { id: 'club_Wolves', title: 'Wolves', color: '#FDB913' },
+  ],
+  // EPL Goals (expanded)
+  goals: [
+    { id: 'goals_overall', title: 'All EPL Goals', flag: '⚽' },
+    { id: 'goals_Arsenal', title: 'Arsenal Goals', color: '#EF0107' },
+    { id: 'goals_AstonVilla', title: 'Aston Villa Goals', color: '#670E36' },
+    { id: 'goals_Chelsea', title: 'Chelsea Goals', color: '#034694' },
+    { id: 'goals_Everton', title: 'Everton Goals', color: '#003399' },
+    { id: 'goals_Leeds', title: 'Leeds Goals', color: '#FFCD00' },
+    { id: 'goals_Leicester', title: 'Leicester Goals', color: '#003090' },
+    { id: 'goals_Liverpool', title: 'Liverpool Goals', color: '#C8102E' },
+    { id: 'goals_ManCity', title: 'Man City Goals', color: '#6CABDD' },
+    { id: 'goals_ManUtd', title: 'Man Utd Goals', color: '#DA291C' },
+    { id: 'goals_Newcastle', title: 'Newcastle Goals', color: '#241F20' },
+    { id: 'goals_Southampton', title: 'Southampton Goals', color: '#D71920' },
+    { id: 'goals_Sunderland', title: 'Sunderland Goals', color: '#EB172B' },
+    { id: 'goals_Tottenham', title: 'Spurs Goals', color: '#132257' },
+    { id: 'goals_WestHam', title: 'West Ham Goals', color: '#7A263A' },
+  ],
+  // EPL Positions
+  position: [
+    { id: 'epl_position_GK', title: 'Goalkeepers', flag: '🧤' },
+    { id: 'epl_position_DF', title: 'Defenders', flag: '🛡️' },
+    { id: 'epl_position_MF', title: 'Midfielders', flag: '⚙️' },
+    { id: 'epl_position_FW', title: 'Forwards', flag: '⚡' },
+  ],
+  // EPL Age buckets
+  age: [
+    { id: 'epl_age_u19', title: 'Age 19 and Below', flag: '👶' },
+    { id: 'epl_age_u21', title: 'Age 21 and Below', flag: '🧒' },
+    { id: 'epl_age_35plus', title: 'Age 35 and Above', flag: '👴' },
+  ],
+  // UCL Appearances by nationality
+  uclApps: [
+    { id: 'ucl_country_ALL', title: 'All Nationalities', flag: '🌍' },
+    { id: 'ucl_country_ARG', title: 'Argentine', flag: '🇦🇷' },
+    { id: 'ucl_country_BRA', title: 'Brazilian', flag: '🇧🇷' },
+    { id: 'ucl_country_ENG', title: 'English', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿' },
+    { id: 'ucl_country_FRA', title: 'French', flag: '🇫🇷' },
+    { id: 'ucl_country_GER', title: 'German', flag: '🇩🇪' },
+    { id: 'ucl_country_ITA', title: 'Italian', flag: '🇮🇹' },
+    { id: 'ucl_country_NED', title: 'Dutch', flag: '🇳🇱' },
+    { id: 'ucl_country_POR', title: 'Portuguese', flag: '🇵🇹' },
+    { id: 'ucl_country_ESP', title: 'Spanish', flag: '🇪🇸' },
+  ],
+  // UCL Goals by nationality
+  uclGoals: [
+    { id: 'ucl_goals_ALL', title: 'All UCL Goals', flag: '⚽' },
+    { id: 'ucl_goals_ENG', title: 'English Goals', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿' },
+    { id: 'ucl_goals_FRA', title: 'French Goals', flag: '🇫🇷' },
+    { id: 'ucl_goals_ESP', title: 'Spanish Goals', flag: '🇪🇸' },
+    { id: 'ucl_goals_ITA', title: 'Italian Goals', flag: '🇮🇹' },
+    { id: 'ucl_goals_NED', title: 'Dutch Goals', flag: '🇳🇱' },
+  ],
+  // UCL Clubs
+  uclClubs: [
+    { id: 'ucl_club_ACMilan', title: 'AC Milan', color: '#AC1A2F' },
+    { id: 'ucl_club_Arsenal', title: 'Arsenal', color: '#EF0107' },
+    { id: 'ucl_club_Barcelona', title: 'Barcelona', color: '#A50044' },
+    { id: 'ucl_club_Bayern', title: 'Bayern Munich', color: '#DC052D' },
+    { id: 'ucl_club_Chelsea', title: 'Chelsea', color: '#034694' },
+    { id: 'ucl_club_Inter', title: 'Inter Milan', color: '#010E80' },
+    { id: 'ucl_club_Juventus', title: 'Juventus', color: '#000000' },
+    { id: 'ucl_club_Liverpool', title: 'Liverpool', color: '#C8102E' },
+    { id: 'ucl_club_ManCity', title: 'Man City', color: '#6CABDD' },
+    { id: 'ucl_club_ManUtd', title: 'Man Utd', color: '#DA291C' },
+    { id: 'ucl_club_PSG', title: 'PSG', color: '#004170' },
+    { id: 'ucl_club_RealMadrid', title: 'Real Madrid', color: '#FEBE10' },
+  ],
+  // Big 5 British
+  big5British: [
+    { id: 'big5_british_apps', title: 'Big 5 British (Apps)', flag: '🇬🇧' },
+    { id: 'big5_british_goals', title: 'Big 5 British (Goals)', flag: '🇬🇧' },
+  ],
+};
+
+// Dynamic categories loaded from API
+let dynamicCategories = {
+  laligaApps: [],
+  laligaGoals: [],
+  serieaApps: [],
+  serieaGoals: [],
+  bundesligaApps: [],
+  bundesligaGoals: [],
+};
+
+// ============== STATE ==============
+let state = null;
+let eligiblePlayers = [];
+let currentCategory = null;
+let currentMeta = null;
+let triviaData = [];
+let triviaIndex = 0;
+let matchDataReady = false;
+let debounceTimer = null;
+
+// Gameplay settings
+let gameplaySettings = {
+  timerEnabled: false,
+  suggestionsEnabled: true,
+};
+
+// Timer state
+let timerInterval = null;
+let timerSeconds = 30;
+let timerPaused = false;
+let pendingMatches = []; // For on-demand suggestions
+
+// Session stats (persists across games in same session)
+let sessionStats = {
+  games: 0,
+  wins: 0,
+  busts: 0,
+  picks: 0,
+  totalValue: 0,
+};
+
+// Fallback trivia questions when API doesn't return any
+const FALLBACK_TRIVIA = [
+  {
+    q: "Which player has the most Premier League appearances of all time?",
+    options: ["Ryan Giggs", "Gareth Barry", "Frank Lampard", "James Milner"],
+    answer: 1
+  },
+  {
+    q: "Who holds the record for most Premier League goals?",
+    options: ["Wayne Rooney", "Andrew Cole", "Alan Shearer", "Sergio Agüero"],
+    answer: 2
+  },
+  {
+    q: "Which club won the first Premier League title in 1992-93?",
+    options: ["Arsenal", "Liverpool", "Manchester United", "Blackburn"],
+    answer: 2
+  },
+  {
+    q: "How many teams competed in the original 1992 Premier League?",
+    options: ["18", "20", "22", "24"],
+    answer: 2
+  },
+  {
+    q: "Which goalkeeper has kept the most Premier League clean sheets?",
+    options: ["David Seaman", "Peter Schmeichel", "Petr Čech", "Edwin van der Sar"],
+    answer: 2
+  }
+];
+
+// ============== UTILITIES ==============
+function $(id) { return document.getElementById(id); }
+function show(id) { $(id)?.classList.remove('hidden'); }
+function hide(id) { $(id)?.classList.add('hidden'); }
+
+function normalize(s) {
+  return String(s || '').toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\s.-]/g, '').trim();
+}
+
+function levenshtein(a, b) {
+  const m = a.length, n = b.length;
+  if (!m) return n;
+  if (!n) return m;
+  const d = Array.from({ length: m + 1 }, (_, i) => Array(n + 1).fill(0));
+  for (let i = 0; i <= m; i++) d[i][0] = i;
+  for (let j = 0; j <= n; j++) d[0][j] = j;
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + cost);
+    }
+  }
+  return d[m][n];
+}
+
+function similarity(a, b) {
+  const na = normalize(a), nb = normalize(b);
+  if (!na || !nb) return 0;
+  return 1 - (levenshtein(na, nb) / Math.max(na.length, nb.length));
+}
+
+function formatNum(n) {
+  return Number(n || 0).toLocaleString('en-GB');
+}
+
+function updateSessionUI() {
+  $('sessionGames').textContent = sessionStats.games;
+  $('sessionWins').textContent = sessionStats.wins;
+  $('sessionBusts').textContent = sessionStats.busts;
+  $('sessionPicks').textContent = sessionStats.picks;
+  $('sessionTotal').textContent = formatNum(sessionStats.totalValue);
+
+  // Show session bar after first game completes
+  if (sessionStats.games > 0) {
+    $('sessionBar').classList.remove('hidden');
+  }
+}
+
+function recordPick(value, isBust) {
+  sessionStats.picks++;
+  if (!isBust) {
+    sessionStats.totalValue += value;
+  }
+  if (isBust) {
+    sessionStats.busts++;
+  }
+  updateSessionUI();
+}
+
+function recordWin() {
+  sessionStats.wins++;
+  sessionStats.games++;
+  updateSessionUI();
+}
+
+function recordGameEnd() {
+  // Called when game ends without a win (end game button)
+  sessionStats.games++;
+  updateSessionUI();
+}
+
+function sleep(ms) {
+  return new Promise(r => setTimeout(r, ms));
+}
+
+// ============== CACHING ==============
+function getCacheKey(categoryId) {
+  return `f501_${categoryId}`;
+}
+
+function getCachedData(categoryId) {
+  const key = getCacheKey(categoryId);
+  const tsKey = `${key}_ts`;
+  const cached = localStorage.getItem(key);
+  const ts = parseInt(localStorage.getItem(tsKey) || '0', 10);
+  if (cached && (Date.now() - ts) < CACHE_TTL) {
+    try {
+      const data = JSON.parse(cached);
+      // Cache bust: if cached data has 0 players, force refetch
+      if (!data.eligiblePlayers || data.eligiblePlayers.length === 0) {
+        console.log('[cache] Busting cache for', categoryId, '- had 0 players');
+        localStorage.removeItem(key);
+        localStorage.removeItem(tsKey);
+        return null;
+      }
+      return data;
+    } catch { }
+  }
+  return null;
+}
+
+function setCachedData(categoryId, data) {
+  const key = getCacheKey(categoryId);
+  try {
+    localStorage.setItem(key, JSON.stringify(data));
+    localStorage.setItem(`${key}_ts`, String(Date.now()));
+  } catch (e) {
+    // Quota exceeded — clear old caches and retry once
+    console.warn('[cache] Storage quota exceeded, clearing old entries');
+    clearExpiredCache();
+    try {
+      localStorage.setItem(key, JSON.stringify(data));
+      localStorage.setItem(`${key}_ts`, String(Date.now()));
+    } catch (e2) {
+      console.warn('[cache] Still over quota, skipping cache');
+    }
+  }
+}
+
+function clearExpiredCache() {
+  const now = Date.now();
+  const keysToRemove = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k && k.startsWith('f501_') && k.endsWith('_ts')) {
+      const ts = parseInt(localStorage.getItem(k) || '0', 10);
+      if (now - ts > CACHE_TTL) {
+        keysToRemove.push(k);
+        keysToRemove.push(k.replace('_ts', ''));
+      }
+    }
+    if (k && k.startsWith('f501_chat_')) {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(k));
+        if (parsed && parsed.timestamp && now - parsed.timestamp > 86400000) {
+          keysToRemove.push(k);
+        }
+      } catch (e) { keysToRemove.push(k); }
+    }
+  }
+  keysToRemove.forEach(k => localStorage.removeItem(k));
+}
+
+// ============== SETUP FLOW ==============
+
+// Single Player: go to gameplay options
+$('singlePlayerBtn').onclick = () => {
+  window.gameSetup = { names: ['You'], isSinglePlayer: true };
+  hide('step1');
+  show('stepOptions');
+};
+
+// Multiplayer: go to player count selection
+$('multiplayerBtn').onclick = () => {
+  hide('step1');
+  show('step1b');
+};
+
+$('backToStep1Mode').onclick = () => {
+  hide('step1b');
+  show('step1');
+};
+
+$('toStep2').onclick = () => {
+  const n = parseInt($('numPlayers').value, 10);
+  const wrap = $('nameFields');
+  wrap.innerHTML = '';
+  for (let i = 1; i <= n; i++) {
+    const div = document.createElement('div');
+    div.className = 'field';
+    div.innerHTML = `<label>Player ${i}</label><input id="pname${i}" type="text" placeholder="Enter name" autocomplete="off"/>`;
+    wrap.appendChild(div);
+  }
+  hide('step1b');
+  show('step2');
+  $('pname1')?.focus();
+};
+
+$('backToStep1').onclick = () => {
+  hide('step2');
+  show('step1b');
+};
+
+// From step2 (names) to stepOptions (gameplay options)
+$('toStepOptions').onclick = () => {
+  const n = parseInt($('numPlayers').value, 10);
+  const names = [];
+  for (let i = 1; i <= n; i++) {
+    const val = $(`pname${i}`)?.value?.trim() || `Player ${i}`;
+    names.push(val);
+  }
+  window.gameSetup = { names };
+  hide('step2');
+  show('stepOptions');
+};
+
+// Back from stepOptions to step2 (multiplayer) or step1 (single player)
+$('backToStep2Options').onclick = () => {
+  hide('stepOptions');
+  if (window.gameSetup?.isSinglePlayer) {
+    show('step1');
+  } else {
+    show('step2');
+  }
+};
+
+// Toggle handlers for gameplay options
+$('timerToggle').onclick = function() {
+  const isOn = this.dataset.on === 'true';
+  this.dataset.on = (!isOn).toString();
+  this.classList.toggle('on', !isOn);
+  gameplaySettings.timerEnabled = !isOn;
+};
+
+$('suggestionsToggle').onclick = function() {
+  const isOn = this.dataset.on === 'true';
+  this.dataset.on = (!isOn).toString();
+  this.classList.toggle('on', !isOn);
+  gameplaySettings.suggestionsEnabled = !isOn;
+};
+
+// From stepOptions to step3 (categories)
+$('toStep3').onclick = () => {
+  buildCategorySections();
+  hide('stepOptions');
+  show('step3');
+};
+
+$('backToStep2').onclick = () => {
+  hide('step3');
+  show('stepOptions');
+};
+
+$('backFromLoading').onclick = () => {
+  hide('loadingScreen');
+  show('step3');
+  matchDataReady = false;
+  // Reset loading screen state
+  $('loadingSpinner').classList.remove('ready');
+  $('loadingSpinner').style.animation = '';
+  $('loadingText').textContent = 'Loading match data...';
+  $('loadingText').classList.remove('ready');
+  hide('readyBadge');
+  hide('skipTrivia');
+  hide('triviaNote');
+};
+
+function toggleSection(id) {
+  const sec = $(id);
+  if (sec.classList.contains('disabled')) return;
+
+  const isOpening = !sec.classList.contains('open');
+
+  // If opening, close all other sections (accordion behavior)
+  if (isOpening) {
+    const allSections = document.querySelectorAll('#step3 .section:not(.disabled)');
+    allSections.forEach(s => {
+      if (s.id !== id) {
+        s.classList.remove('open');
+      }
+    });
+  }
+
+  sec.classList.toggle('open');
+
+  // If opening custom section, update preview
+  if (isOpening && id === 'sec-custom') {
+    updateCustomPreview();
+  }
+}
+
+function buildCategorySections() {
+  // EPL sections
+  buildSection('countryGames', CATEGORIES.country, 'countCountry');
+  buildSection('continentGames', CATEGORIES.continent, 'countContinent');
+  buildSection('clubGames', CATEGORIES.club, 'countClub');
+  buildSection('goalsGames', CATEGORIES.goals, 'countGoals');
+  buildSection('positionGames', CATEGORIES.position, 'countPositions');
+  buildSection('ageGames', CATEGORIES.age, 'countAge');
+
+  // UCL sections
+  buildSection('uclAppsGames', CATEGORIES.uclApps, 'countUCLApps');
+  buildSection('uclGoalsGames', CATEGORIES.uclGoals, 'countUCLGoals');
+  buildSection('uclClubsGames', CATEGORIES.uclClubs, 'countUCLClubs');
+
+  // Big 5 British
+  buildSection('big5BritishGames', CATEGORIES.big5British, 'countBig5British');
+
+  // Load dynamic categories for other leagues
+  loadDynamicLeagueCategories();
+}
+
+// Club colors for non-EPL leagues
+const LEAGUE_CLUB_COLORS = {
+  // La Liga
+  'Athletic Club': '#EE2523', 'Valencia': '#EE3524', 'Barcelona': '#A50044', 'Real Madrid': '#FEBE10',
+  'Atlético Madrid': '#CB3524', 'Sevilla': '#D4021D', 'Real Sociedad': '#143C8B', 'Espanyol': '#007FC8',
+  'Real Betis': '#00954C', 'Celta Vigo': '#8AC3EE', 'Villarreal': '#FFCD00', 'Dep La Coruña': '#0033A0',
+  'Osasuna': '#D91A2A', 'Mallorca': '#E20613', 'Valladolid': '#5A2D82', 'Getafe': '#004FA3',
+  'Zaragoza': '#004C99', 'Rayo Vallecano': '#E53027', 'Racing Sant': '#00A651', 'Málaga': '#009EE3',
+  'Alavés': '#003DA5', 'Levante': '#BD0811', 'Sporting Gijón': '#CC2229', 'Granada': '#E30613',
+  'Tenerife': '#1C3A7A',
+  // Bundesliga
+  'Bayern Munich': '#DC052D', 'Dortmund': '#FDE100', 'Leverkusen': '#E32221', 'Werder Bremen': '#1D9053',
+  'Stuttgart': '#E32219', 'Gladbach': '#000000', 'Schalke 04': '#004D9D', 'Wolfsburg': '#65B32E',
+  'Eintracht Frankfurt': '#E1000F', 'Hamburger SV': '#005B9A', 'Freiburg': '#000000', 'Hertha BSC': '#005BA6',
+  'Köln': '#ED1C24', 'Mainz 05': '#ED1C24', 'Hoffenheim': '#1961B5', 'Bochum': '#005BA6',
+  'Hannover 96': '#1E8C35', 'Nürnberg': '#8B0000', 'Augsburg': '#BA3733', 'Kaiserslautern': '#E3000B',
+  'Arminia': '#00447C', 'Hansa Rostock': '#003D7E', '1860 Munich': '#00529C', 'RB Leipzig': '#DD0741',
+  'MSV Duisburg': '#004B93',
+  // Serie A
+  'Lazio': '#87D8F7', 'Inter': '#009DDC', 'Milan': '#FB090B', 'Roma': '#8E1F2F',
+  'Udinese': '#000000', 'Juventus': '#000000', 'Fiorentina': '#482C83', 'Atalanta': '#1E71B8',
+  'Cagliari': '#8B0000', 'Sampdoria': '#0065A4', 'Bologna': '#1A2F48', 'Napoli': '#009FE3',
+  'Parma': '#FEDD00', 'Torino': '#8B1A2B', 'Genoa': '#93192A', 'Chievo': '#1C3C8B',
+  'Empoli': '#005BA6', 'Lecce': '#FFED00', 'Hellas Verona': '#003DA5', 'Palermo': '#F1AABB',
+  'Sassuolo': '#00A850', 'Brescia': '#004B93', 'Siena': '#000000', 'Reggina': '#6D2247',
+  'Catania': '#E3000B',
+  // Ligue 1
+  'Rennes': '#E4002B', 'Lyon': '#003DA5', 'Paris Saint-Germain': '#004170', 'Marseille': '#009FE3',
+  'Monaco': '#C8102E', 'Lille': '#D71920', 'Bordeaux': '#13244A', 'Nice': '#000000',
+  'Nantes': '#FFED00', 'Montpellier': '#003DA5', 'Toulouse': '#5B2B82', 'Saint-Étienne': '#006A3D',
+  'Lens': '#E2001A', 'Strasbourg': '#009FE3', 'Auxerre': '#FFFFFF', 'Metz': '#6D2832',
+  'Lorient': '#F47920', 'Bastia': '#009FE3', 'Sochaux': '#FEDD00', 'Guingamp': '#E30613',
+  'Nancy': '#E4002B', 'Reims': '#E30613', 'Caen': '#003DA5', 'Troyes': '#004FA3',
+  'Angers': '#000000',
+};
+
+async function loadDynamicLeagueCategories() {
+  const leagues = [
+    { comp: 'La Liga', appsContainer: 'laligaAppsGames', goalsContainer: 'laligaGoalsGames', countApps: 'countLaLigaApps', countGoals: 'countLaLigaGoals', prefix: 'laliga', flag: '🇪🇸' },
+    { comp: 'Serie A', appsContainer: 'serieaAppsGames', goalsContainer: 'serieaGoalsGames', countApps: 'countSerieAApps', countGoals: 'countSerieAGoals', prefix: 'seriea', flag: '🇮🇹' },
+    { comp: 'Bundesliga', appsContainer: 'bundesligaAppsGames', goalsContainer: 'bundesligaGoalsGames', countApps: 'countBundesligaApps', countGoals: 'countBundesligaGoals', prefix: 'bundesliga', flag: '🇩🇪' },
+    { comp: 'Ligue 1', appsContainer: 'ligue1AppsGames', goalsContainer: 'ligue1GoalsGames', countApps: 'countLigue1Apps', countGoals: 'countLigue1Goals', prefix: 'ligue1', flag: '🇫🇷' },
+  ];
+
+  for (const league of leagues) {
+    try {
+      const res = await fetch(`${API_BASE}/match_start`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ categoryId: 'get_top_clubs', competition: league.comp, limit: 25 }),
+      });
+      const data = await res.json();
+
+      if (data.clubs && data.clubs.length > 0) {
+        // Sort clubs alphabetically A-Z
+        const sorted = [...data.clubs].sort((a, b) => a.club.localeCompare(b.club));
+
+        // Build apps categories with club colors
+        const appsCategories = sorted.map(c => ({
+          id: `${league.prefix}_club_${c.club.replace(/\s+/g, '_')}`,
+          title: c.club,
+          color: LEAGUE_CLUB_COLORS[c.club] || null,
+          flag: league.flag,
+          playerCount: c.count,
+        }));
+
+        // Build goals categories with club colors
+        const goalsCategories = sorted.map(c => ({
+          id: `${league.prefix}_goals_${c.club.replace(/\s+/g, '_')}`,
+          title: `${c.club} Goals`,
+          color: LEAGUE_CLUB_COLORS[c.club] || null,
+          flag: '⚽',
+        }));
+
+        buildSection(league.appsContainer, appsCategories, league.countApps);
+        buildSection(league.goalsContainer, goalsCategories, league.countGoals);
+      }
+    } catch (err) {
+      console.warn(`Failed to load ${league.comp} clubs:`, err);
+      $(league.appsContainer).innerHTML = '<div class="disabled-note">Could not load clubs. Check back later.</div>';
+      $(league.goalsContainer).innerHTML = '<div class="disabled-note">Could not load clubs. Check back later.</div>';
+    }
+  }
+}
+
+function buildSection(containerId, list, countId) {
+  const cont = $(containerId);
+  cont.innerHTML = '';
+  $(countId).textContent = `(${list.length})`;
+
+  list.forEach(cat => {
+    const card = document.createElement('div');
+    card.className = 'game-card';
+    // Use color dot for clubs, flag emoji for others
+    const iconHtml = cat.color
+      ? `<div class="color-dot" style="background:${cat.color}"></div>`
+      : `<span class="flag">${cat.flag}</span>`;
+    card.innerHTML = `
+      <div style="display:flex;align-items:center">
+        ${iconHtml}
+        <div>
+          <div class="title">${cat.title}</div>
+          <div class="meta" id="meta-${cat.id}">Loading...</div>
+        </div>
+      </div>
+      <div class="arrow">→</div>
+    `;
+    card.onclick = () => chooseCategory(cat);
+    cont.appendChild(card);
+    preloadCategoryStats(cat);
+  });
+}
+
+async function preloadCategoryStats(cat) {
+  const metaEl = $(`meta-${cat.id}`);
+  if (!metaEl) return;
+
+  const cached = getCachedData(cat.id);
+  if (cached) {
+    const count = cached.eligiblePlayers?.length || 0;
+    const metric = cached.meta?.metricLabel || 'Apps';
+    const diff = getDifficulty(count);
+    metaEl.innerHTML = `<span class="stars">${'★'.repeat(diff)}${'☆'.repeat(5 - diff)}</span> ${formatNum(count)} players`;
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/match_start`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ categoryId: cat.id }),
+    });
+    const data = await res.json();
+    if (data.eligiblePlayers) {
+      setCachedData(cat.id, data);
+      const count = data.eligiblePlayers.length;
+      const diff = getDifficulty(count);
+      metaEl.innerHTML = `<span class="stars">${'★'.repeat(diff)}${'☆'.repeat(5 - diff)}</span> ${formatNum(count)} players`;
+    }
+  } catch {
+    metaEl.textContent = '—';
+  }
+}
+
+function getDifficulty(count) {
+  if (count >= 400) return 1;
+  if (count >= 250) return 2;
+  if (count >= 150) return 3;
+  if (count >= 100) return 4;
+  return 5;
+}
+
+// ============== CATEGORY SELECTION & LOADING ==============
+async function chooseCategory(cat) {
+  currentCategory = cat;
+  matchDataReady = false;
+  triviaIndex = 0;
+
+  hide('step3');
+  show('loadingScreen');
+  hide('readyBadge');
+  hide('skipTrivia');
+  hide('triviaNote');
+  $('triviaContainer').innerHTML = '';
+  $('loadingText').textContent = 'Loading match data...';
+
+  const cached = getCachedData(cat.id);
+  if (cached) {
+    eligiblePlayers = cached.eligiblePlayers || [];
+    currentMeta = cached.meta || {};
+    triviaData = cached.meta?.trivia || [];
+    matchDataReady = true;
+    // Skip trivia — go straight to game
+    proceedToOrderReveal();
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/match_start`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ categoryId: cat.id }),
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    setCachedData(cat.id, data);
+    eligiblePlayers = data.eligiblePlayers || [];
+    currentMeta = data.meta || {};
+    triviaData = data.meta?.trivia || [];
+    matchDataReady = true;
+    // Skip trivia — go straight to game
+    proceedToOrderReveal();
+  } catch (err) {
+    alert('Failed to load: ' + err.message);
+    show('step3');
+    hide('loadingScreen');
+  }
+}
+
+function showReadyState() {
+  // Stop spinner and show ready state
+  const spinner = $('loadingSpinner');
+  spinner.classList.add('ready');
+  spinner.style.animation = 'none';
+
+  $('loadingText').textContent = 'Ready to play!';
+  $('loadingText').classList.add('ready');
+
+  show('readyBadge');
+  show('skipTrivia');
+  $('skipTrivia').textContent = 'Start Match →';
+}
+
+function showTrivia() {
+  // If no trivia from API, use fallback
+  if (!triviaData.length) {
+    triviaData = [FALLBACK_TRIVIA[Math.floor(Math.random() * FALLBACK_TRIVIA.length)]];
+  }
+
+  if (triviaIndex >= triviaData.length) {
+    if (matchDataReady) proceedToOrderReveal();
+    return;
+  }
+
+  const q = triviaData[triviaIndex];
+  const container = $('triviaContainer');
+  container.innerHTML = `
+    <div class="trivia-box">
+      <div class="trivia-q">${q.q}</div>
+      <div class="trivia-opts">
+        ${q.options.map((opt, i) => `<div class="trivia-opt" data-idx="${i}">${opt}</div>`).join('')}
+      </div>
+    </div>
+  `;
+
+  container.querySelectorAll('.trivia-opt').forEach(el => {
+    el.onclick = () => handleTriviaAnswer(parseInt(el.dataset.idx, 10), q.answer);
+  });
+}
+
+function handleTriviaAnswer(selected, correct) {
+  const opts = $('triviaContainer').querySelectorAll('.trivia-opt');
+  opts.forEach((el, i) => {
+    el.onclick = null;
+    if (i === correct) el.classList.add('correct');
+    else if (i === selected) el.classList.add('wrong');
+  });
+
+  setTimeout(() => {
+    triviaIndex++;
+    showTrivia();
+  }, 1200);
+}
+
+$('skipTrivia').onclick = () => {
+  if (matchDataReady) proceedToOrderReveal();
+};
+
+// ============== ORDER REVEAL ==============
+async function proceedToOrderReveal() {
+  hide('loadingScreen');
+  show('orderScreen');
+
+  const names = [...(window.gameSetup?.names || ['Player 1', 'Player 2'])];
+
+  const orderEl = $('orderList');
+  for (let i = 0; i < 8; i++) {
+    names.sort(() => Math.random() - 0.5);
+    orderEl.innerHTML = names.map((n, i) => `<div>${i + 1}. ${n}</div>`).join('');
+    await sleep(100);
+  }
+  names.sort(() => Math.random() - 0.5);
+  orderEl.innerHTML = names.map((n, i) => `<div><strong>${i + 1}.</strong> ${n}</div>`).join('');
+
+  window.gameSetup.orderedNames = names;
+}
+
+$('beginMatch').onclick = () => {
+  const names = window.gameSetup?.orderedNames || window.gameSetup?.names || ['Player 1', 'Player 2'];
+  startMatch(names);
+};
+
+// ============== MATCH START ==============
+function startMatch(names) {
+  // Ensure clean UI state before starting
+  closeAllModals();
+  stopTimer();
+  $('guess').value = '';
+  $('guess').disabled = false;
+  $('submitBtn').disabled = true;
+  $('result').textContent = '';
+  $('selectionList').innerHTML = '';
+  $('selectionList').classList.add('hidden');
+  hideSuggestionsButton();
+  $('inlineToast').classList.remove('show', 'bust-effect', 'win-effect');
+  $('inlineToast').innerHTML = '';
+
+  const metricLabel = currentMeta?.metricLabel || 'Apps';
+  $('guessLabel').textContent = `Your guess (−${metricLabel})`;
+
+  state = {
+    players: names,
+    scores: Array(names.length).fill(501),
+    turn: 0,
+    turnCount: 1,
+    used: new Set(),
+    retry: false,
+    historyScores: names.map(() => [501]),
+    picks: names.map(() => []),
+  };
+
+  hide('setupCard');
+  show('playCard');
+
+  // Show session bar if there are previous games
+  if (sessionStats.games > 0) {
+    $('sessionBar').classList.remove('hidden');
+  }
+
+  const grid = $('scoreGrid');
+  grid.className = `scores p${names.length}`;
+
+  renderScoreboard();
+  updateTurnUI();
+  startTimer();
+  $('guess').focus();
+}
+
+// ============== SCOREBOARD ==============
+function renderScoreboard() {
+  const grid = $('scoreGrid');
+  grid.innerHTML = '';
+  state.players.forEach((name, idx) => {
+    const pill = document.createElement('div');
+    pill.className = 'pill' + (idx === state.turn ? ' active' : '');
+    pill.id = `pill_${idx}`;
+    pill.innerHTML = `<div class="name">${name}</div><div class="score" id="score_${idx}">${state.scores[idx]}</div>`;
+    pill.onclick = () => openProgressModal(idx);
+    grid.appendChild(pill);
+  });
+}
+
+function updateTurnUI() {
+  $('turnInfo').innerHTML = `<span style="color:var(--accent)">Turn ${state.turnCount}</span> &nbsp;—&nbsp; ${state.players[state.turn]}'s turn`;
+  document.querySelectorAll('.pill').forEach((el, i) => {
+    el.classList.toggle('active', i === state.turn);
+  });
+  updateHintBar();
+}
+
+function updateHintBar() {
+  const hintBar = $('hintBar');
+  const hintText = $('hintText');
+  const remaining = state.scores[state.turn];
+
+  if (remaining <= 0 || eligiblePlayers.length === 0) {
+    hintBar.classList.add('hidden');
+    return;
+  }
+
+  const available = eligiblePlayers.filter(p => !state.used.has(p.normalized));
+  const direct = available.filter(p => p.subtractValue === remaining).length;
+
+  const freq = new Map();
+  for (const p of available) {
+    const v = p.subtractValue;
+    if (v > 0 && v <= remaining) {
+      freq.set(v, (freq.get(v) || 0) + 1);
+    }
+  }
+  let pairs = 0;
+  for (const [m, c] of freq.entries()) {
+    const n = remaining - m;
+    if (n < m) continue;
+    if (!freq.has(n)) continue;
+    pairs += (n === m) ? c * (c - 1) / 2 : c * freq.get(n);
+  }
+
+  hintText.innerHTML = `Checkout: <strong>${direct || 'no'}</strong> direct • <strong>${pairs > 10 ? '>10' : pairs}</strong> two-player combos`;
+  hintBar.classList.remove('hidden');
+}
+
+// ============== COVERAGE MODAL ==============
+const COVERAGE_BUCKETS = [
+  { min: 1, max: 10, label: '1–10' },
+  { min: 11, max: 25, label: '11–25' },
+  { min: 26, max: 50, label: '26–50' },
+  { min: 51, max: 100, label: '51–100' },
+  { min: 101, max: 200, label: '101–200' },
+  { min: 201, max: 300, label: '201–300' },
+  { min: 301, max: Infinity, label: '301+' },
+];
+
+function openCoverageModal() {
+  const available = eligiblePlayers.filter(p => !state.used.has(p.normalized));
+  const remaining = state.scores[state.turn];
+
+  // Calculate bucket counts
+  const buckets = COVERAGE_BUCKETS.map(b => ({
+    ...b,
+    count: available.filter(p => p.subtractValue >= b.min && p.subtractValue <= b.max).length,
+  }));
+
+  const maxCount = Math.max(...buckets.map(b => b.count), 1);
+  const direct = available.filter(p => p.subtractValue === remaining).length;
+  const smallest = available.length ? Math.min(...available.map(p => p.subtractValue)) : 0;
+  const largest = available.length ? Math.max(...available.map(p => p.subtractValue)) : 0;
+
+  const metricLabel = currentMeta?.metricLabel || 'Apps';
+
+  const content = $('coverageContent');
+  content.innerHTML = `
+    <div style="font-size:12px;color:var(--muted);margin-bottom:8px">
+      ${formatNum(available.length)} players remaining • ${metricLabel} distribution
+    </div>
+    <div class="coverage-grid">
+      ${buckets.map(b => `
+        <div class="coverage-row">
+          <div class="coverage-label">${b.label}</div>
+          <div class="coverage-bar-wrap">
+            <div class="coverage-bar" style="width:${(b.count / maxCount) * 100}%"></div>
+          </div>
+          <div class="coverage-count">${b.count}</div>
+        </div>
+      `).join('')}
+    </div>
+    <div class="coverage-stats">
+      <div class="coverage-stat">
+        <div class="label">Direct</div>
+        <div class="value" style="color:var(--accent)">${direct}</div>
+      </div>
+      <div class="coverage-stat">
+        <div class="label">Smallest</div>
+        <div class="value">${formatNum(smallest)}</div>
+      </div>
+      <div class="coverage-stat">
+        <div class="label">Largest</div>
+        <div class="value">${formatNum(largest)}</div>
+      </div>
+    </div>
+  `;
+
+  $('coverageBackdrop').classList.add('show');
+  requestAnimationFrame(() => $('coverageModal').classList.add('show'));
+
+  // Auto-pause timer when modal opens
+  autoPauseIfTimerActive();
+}
+
+function closeCoverageModal() {
+  $('coverageModal').classList.remove('show');
+  setTimeout(() => $('coverageBackdrop').classList.remove('show'), 200);
+}
+
+$('coverageBtn').onclick = openCoverageModal;
+$('closeCoverage').onclick = closeCoverageModal;
+$('coverageBackdrop').onclick = (e) => {
+  if (e.target.id === 'coverageBackdrop') closeCoverageModal();
+};
+
+// ============== INPUT HANDLING ==============
+const guessInput = $('guess');
+const submitBtn = $('submitBtn');
+
+guessInput.oninput = () => {
+  const val = guessInput.value.trim();
+  submitBtn.disabled = !val;
+  hideSelectionList();
+  hideToast();
+  hideSuggestionsButton();
+
+  clearTimeout(debounceTimer);
+  if (val.length >= 2) {
+    debounceTimer = setTimeout(() => {
+      if (gameplaySettings.suggestionsEnabled) {
+        showFuzzyMatches(val);
+      } else {
+        // Store matches for on-demand display
+        computeFuzzyMatches(val);
+      }
+    }, DEBOUNCE_MS);
+  }
+};
+
+guessInput.onkeydown = (e) => {
+  if (e.key === 'Enter' && !submitBtn.disabled) {
+    e.preventDefault();
+    handleSubmit();
+  }
+};
+
+submitBtn.onclick = handleSubmit;
+
+// Show suggestions button handler
+$('showSuggestionsBtn').onclick = () => {
+  if (pendingMatches.length > 0) {
+    renderSuggestionList(pendingMatches);
+    $('showSuggestionsBtn').classList.add('active');
+  }
+};
+
+function hideSuggestionsButton() {
+  const btn = $('showSuggestionsBtn');
+  btn.classList.add('hidden');
+  btn.classList.remove('active');
+  pendingMatches = [];
+}
+
+function computeFuzzyMatches(input) {
+  const norm = normalize(input);
+  if (norm.length < 2) return;
+
+  const scored = eligiblePlayers.map(p => ({
+    player: p,
+    isUsed: state.used.has(p.normalized),
+    score: p.normalized.includes(norm) ? 0.95 : similarity(p.normalized, norm),
+    exactStart: p.normalized.startsWith(norm),
+  }));
+
+  const matches = scored
+    .filter(m => m.score >= 0.5 || m.exactStart)
+    .sort((a, b) => {
+      if (a.isUsed !== b.isUsed) return a.isUsed ? 1 : -1;
+      if (a.exactStart !== b.exactStart) return b.exactStart - a.exactStart;
+      return b.score - a.score;
+    })
+    .slice(0, 6);
+
+  // Check for exact match among available
+  const exactAvailable = eligiblePlayers.find(p => p.normalized === norm && !state.used.has(p.normalized));
+  if (exactAvailable) {
+    pendingMatches = [];
+    hideSuggestionsButton();
+    return;
+  }
+
+  if (matches.length > 0) {
+    pendingMatches = matches;
+    const btn = $('showSuggestionsBtn');
+    btn.textContent = `Show suggestions (${matches.length} match${matches.length !== 1 ? 'es' : ''})`;
+    btn.classList.remove('hidden');
+  }
+}
+
+function showFuzzyMatches(input) {
+  const norm = normalize(input);
+  if (norm.length < 2) return;
+
+  // Include ALL players (used and available) for display
+  const scored = eligiblePlayers.map(p => ({
+    player: p,
+    isUsed: state.used.has(p.normalized),
+    score: p.normalized.includes(norm) ? 0.95 : similarity(p.normalized, norm),
+    exactStart: p.normalized.startsWith(norm),
+  }));
+
+  const matches = scored
+    .filter(m => m.score >= 0.5 || m.exactStart)
+    .sort((a, b) => {
+      // Sort by: available first, then by score
+      if (a.isUsed !== b.isUsed) return a.isUsed ? 1 : -1;
+      if (a.exactStart !== b.exactStart) return b.exactStart - a.exactStart;
+      return b.score - a.score;
+    })
+    .slice(0, 6);
+
+  if (matches.length === 0) return;
+
+  // Check for exact match among available
+  const exactAvailable = eligiblePlayers.find(p => p.normalized === norm && !state.used.has(p.normalized));
+  if (exactAvailable) return;
+
+  renderSuggestionList(matches);
+}
+
+function renderSuggestionList(matches) {
+  const list = $('selectionList');
+  list.innerHTML = matches.map(m => `
+    <div class="selection-item${m.isUsed ? ' used' : ''}" data-norm="${m.player.normalized}" data-used="${m.isUsed}">
+      <div class="info">
+        <div class="name">${m.player.name}</div>
+        <div class="nat">${m.player.nationality}</div>
+      </div>
+      ${m.isUsed ? '<span class="used-badge">Used</span>' : ''}
+    </div>
+  `).join('');
+
+  list.querySelectorAll('.selection-item').forEach(el => {
+    el.onclick = () => {
+      if (el.dataset.used === 'true') {
+        setResult('⚠️ Already used this match!');
+        return;
+      }
+      selectPlayer(el.dataset.norm);
+    };
+  });
+
+  list.classList.remove('hidden');
+}
+
+function selectPlayer(normalized) {
+  const player = eligiblePlayers.find(p => p.normalized === normalized);
+  if (player) {
+    guessInput.value = player.name;
+    submitBtn.disabled = false;
+    hideSelectionList();
+    handleSubmit();
+  }
+}
+
+function hideSelectionList() {
+  $('selectionList').classList.add('hidden');
+}
+
+// ============== SUBMIT LOGIC ==============
+async function handleSubmit() {
+  const raw = guessInput.value.trim();
+  if (!raw) return;
+
+  submitBtn.disabled = true;
+  hideSelectionList();
+
+  const norm = normalize(raw);
+
+  if (state.used.has(norm)) {
+    if (!state.retry) {
+      state.retry = true;
+      setResult('⚠️ Already used. Try once more.');
+      submitBtn.disabled = false;
+      guessInput.select();
+      return;
+    }
+    state.retry = false;
+    setResult('❌ Duplicate. Turn passes.');
+    nextTurn();
+    return;
+  }
+
+  const available = eligiblePlayers.filter(p => !state.used.has(p.normalized));
+
+  let match = available.find(p => p.normalized === norm);
+
+  if (!match) {
+    match = available.find(p => p.normalized.includes(norm));
+  }
+
+  if (!match) {
+    let best = null;
+    let bestScore = 0;
+    for (const p of available) {
+      const s = similarity(p.normalized, norm);
+      if (s > bestScore) {
+        best = p;
+        bestScore = s;
+      }
+    }
+    if (best && bestScore >= 0.78) {
+      match = best;
+    }
+  }
+
+  if (!match) {
+    if (!state.retry) {
+      state.retry = true;
+      setResult('❌ Not found. Try once more.');
+      submitBtn.disabled = false;
+      guessInput.select();
+      return;
+    }
+    state.retry = false;
+    setResult('❌ Not found. Turn passes.');
+    nextTurn();
+    return;
+  }
+
+  state.retry = false;
+
+  if (state.used.has(match.normalized)) {
+    setResult('⚠️ Already used. Turn passes.');
+    nextTurn();
+    return;
+  }
+
+  const before = state.scores[state.turn];
+  const deduct = match.subtractValue;
+  const after = before - deduct;
+
+  let bust = false;
+  let win = false;
+
+  if (deduct === 0) {
+    bust = true;
+  } else if (after < 0) {
+    bust = true;
+  } else if (after === 0) {
+    win = true;
+  }
+
+  const metricLabel = currentMeta?.metricLabel || 'Apps';
+
+  state.picks[state.turn].unshift({
+    name: match.name,
+    value: deduct,
+    from: before,
+    to: bust ? before : after,
+    bust,
+  });
+
+  if (bust) {
+    setResult(`💥 Bust! ${match.name} has ${formatNum(deduct)} ${metricLabel.toLowerCase()}. Score stays ${formatNum(before)}.`);
+    showToast(match, before, before, 'bust');
+    showEffect('bust');
+    recordPick(deduct, true);
+    const pill = $(`pill_${state.turn}`);
+    pill?.classList.add('bust-anim');
+    setTimeout(() => pill?.classList.remove('bust-anim'), 500);
+  } else {
+    state.scores[state.turn] = after;
+    state.historyScores[state.turn].push(after);
+    state.used.add(match.normalized);
+
+    animateScore(state.turn, before, after);
+
+    recordPick(deduct, false);
+
+    if (win) {
+      const winnerName = state.players[state.turn];
+      const turnsText = state.turnCount === 1 ? '1 turn' : `${state.turnCount} turns`;
+      setResult(`🎯 ${winnerName} wins with ${match.name} (${formatNum(deduct)})!`);
+      showToast(match, before, after, 'win');
+      showEffect('win');
+      recordWin();
+      const pill = $(`pill_${state.turn}`);
+      pill?.classList.add('win-anim');
+      setTimeout(() => {
+        if (confirm(`🏆 ${winnerName} wins in ${turnsText}! Play again?`)) {
+          playAgain();
+        }
+      }, 1500);
+      return;
+    } else {
+      setResult(`✅ ${match.name}: −${formatNum(deduct)}`);
+      showToast(match, before, after, 'normal');
+    }
+  }
+
+  nextTurn();
+}
+
+function nextTurn() {
+  guessInput.value = '';
+  submitBtn.disabled = true;
+  hideSuggestionsButton();
+  state.turn = (state.turn + 1) % state.players.length;
+  state.turnCount++;
+  renderScoreboard();
+  updateTurnUI();
+  startTimer(); // Reset timer for next turn
+  guessInput.focus();
+}
+
+function setResult(msg) {
+  $('result').textContent = msg;
+}
+
+// ============== EFFECT OVERLAY ==============
+function showEffect(type) {
+  const overlay = $('effectOverlay');
+  const text = $('effectText');
+  text.className = 'effect-text ' + type;
+  text.textContent = type === 'bust' ? 'BUST!' : 'CHECKOUT!';
+  overlay.classList.add('show');
+  setTimeout(() => overlay.classList.remove('show'), 600);
+}
+
+// ============== TOAST ==============
+let toastTimer = null;
+
+function showToast(player, before, after, type) {
+  const toast = $('inlineToast');
+  const o = player.overlay || {};
+  const metricLabel = currentMeta?.metricLabel || 'Apps';
+
+  // Build clubs display
+  let clubsHtml = '';
+  if (player.clubs && player.clubs.length > 0) {
+    const displayClubs = player.clubs.slice(0, 3);
+    const moreCount = player.clubCount - 3;
+    clubsHtml = `<div class="toast-clubs">Clubs: ${displayClubs.join(', ')}${moreCount > 0 ? ` +${moreCount} more` : ''}</div>`;
+  }
+
+  // Build seasons display
+  let seasonsHtml = '';
+  if (player.seasonsCount) {
+    seasonsHtml = `<span>Seasons: ${player.seasonsCount}</span>`;
+  }
+
+  let badgeClass = '';
+  let badgeContent = '-' + formatNum(player.subtractValue);
+  if (type === 'bust') {
+    badgeClass = ' bust';
+    badgeContent = '💥';
+  } else if (type === 'win') {
+    badgeClass = ' win';
+    badgeContent = '🎯';
+  }
+
+  toast.className = 'inline-toast';
+  if (type === 'bust') toast.classList.add('bust-effect');
+  if (type === 'win') toast.classList.add('win-effect');
+
+  toast.innerHTML = `
+    <div class="toast-row">
+      <div class="toast-badge${badgeClass}">${badgeContent}</div>
+      <div class="toast-body">
+        <div class="toast-title">${player.name}</div>
+        <div class="toast-sub">${formatNum(before)} → ${formatNum(after)}</div>
+        ${clubsHtml}
+        <div class="toast-meta">
+          <span>${metricLabel} ${formatNum(o[currentMeta?.metric === 'goals_total' ? 'goals' : 'apps'] || player.subtractValue)}</span>
+          ${o.goals && currentMeta?.metric !== 'goals_total' ? `<span>Goals ${formatNum(o.goals)}</span>` : ''}
+          ${o.starts ? `<span>Starts ${formatNum(o.starts)}</span>` : ''}
+          ${seasonsHtml}
+        </div>
+      </div>
+    </div>
+  `;
+  toast.classList.add('show');
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 6000);
+}
+
+function hideToast() {
+  $('inlineToast').classList.remove('show');
+}
+
+// ============== TIMER LOGIC ==============
+function startTimer() {
+  if (!gameplaySettings.timerEnabled) return;
+
+  timerSeconds = 30;
+  timerPaused = false;
+  updateTimerDisplay();
+  $('timerBar').classList.remove('hidden');
+  $('timerPauseBtn').textContent = '⏸ Pause';
+
+  clearInterval(timerInterval);
+  timerInterval = setInterval(() => {
+    if (timerPaused) return;
+
+    timerSeconds--;
+    updateTimerDisplay();
+
+    if (timerSeconds <= 0) {
+      clearInterval(timerInterval);
+      handleTimerExpired();
+    }
+  }, 1000);
+}
+
+function stopTimer() {
+  clearInterval(timerInterval);
+  timerInterval = null;
+  $('timerBar').classList.add('hidden');
+}
+
+function pauseTimer() {
+  if (!gameplaySettings.timerEnabled || !timerInterval) return;
+
+  timerPaused = true;
+  $('timerPauseBtn').textContent = '▶ Resume';
+  $('timerPausedOverlay').classList.add('show');
+
+  // Disable input and submit
+  $('guess').disabled = true;
+  $('submitBtn').disabled = true;
+  $('selectionList').classList.add('hidden');
+  hideSuggestionsButton();
+}
+
+function resumeTimer() {
+  if (!gameplaySettings.timerEnabled) return;
+
+  timerPaused = false;
+  $('timerPauseBtn').textContent = '⏸ Pause';
+  $('timerPausedOverlay').classList.remove('show');
+
+  // Re-enable input
+  $('guess').disabled = false;
+  $('submitBtn').disabled = !$('guess').value.trim();
+  $('guess').focus();
+}
+
+function updateTimerDisplay() {
+  const display = $('timerDisplay');
+  display.textContent = timerSeconds;
+
+  // Remove urgency classes
+  display.classList.remove('urgent', 'critical');
+
+  // Add urgency classes based on time remaining
+  if (timerSeconds <= 5) {
+    display.classList.add('critical');
+  } else if (timerSeconds <= 10) {
+    display.classList.add('urgent');
+  }
+}
+
+function handleTimerExpired() {
+  if (!state) return;
+
+  const isSinglePlayer = window.gameSetup?.isSinglePlayer;
+
+  if (isSinglePlayer) {
+    // Single player: game ends
+    stopTimer();
+    showEffect('bust');
+    setTimeout(() => {
+      recordGameEnd();
+      alert("⏱️ Time's up! Game over.");
+      playAgain();
+    }, 600);
+  } else {
+    // Multiplayer: forfeit turn
+    setResult("⏱️ Time's up! Turn forfeited.");
+    nextTurn();
+  }
+}
+
+// Timer pause button handler
+$('timerPauseBtn').onclick = () => {
+  if (timerPaused) {
+    resumeTimer();
+  } else {
+    pauseTimer();
+  }
+};
+
+// Timer resume button in overlay
+$('timerResumeBtn').onclick = resumeTimer;
+
+// Auto-pause timer when modals open
+function autoPauseIfTimerActive() {
+  if (gameplaySettings.timerEnabled && timerInterval && !timerPaused) {
+    pauseTimer();
+  }
+}
+
+// ============== SCORE ANIMATION ==============
+function animateScore(idx, from, to) {
+  const el = $(`score_${idx}`);
+  if (!el) return;
+  const start = performance.now();
+  const duration = 800;
+  const diff = to - from;
+
+  function step(time) {
+    const progress = Math.min(1, (time - start) / duration);
+    const ease = progress < 0.5 ? 2 * progress * progress : -1 + (4 - 2 * progress) * progress;
+    el.textContent = Math.round(from + diff * ease);
+    if (progress < 1) {
+      requestAnimationFrame(step);
+    } else {
+      el.textContent = to;
+    }
+  }
+  requestAnimationFrame(step);
+}
+
+// ============== PROGRESS MODAL ==============
+function openProgressModal(idx) {
+  $('modalTitle').textContent = `${state.players[idx]} — Progress`;
+  $('chain').textContent = state.historyScores[idx].join(' → ');
+
+  const picks = state.picks[idx];
+  const metricLabel = currentMeta?.metricLabel || 'Apps';
+  if (picks.length === 0) {
+    $('pickList').innerHTML = '<div class="pick"><div>No picks yet</div></div>';
+  } else {
+    $('pickList').innerHTML = picks.slice(0, 15).map(p => `
+      <div class="pick${p.bust ? ' bust' : ''}">
+        <div><b>${p.name}</b> <span class="meta">-${formatNum(p.value)}</span></div>
+        <div class="meta">${formatNum(p.from)} → ${formatNum(p.to)}${p.bust ? ' (bust)' : ''}</div>
+      </div>
+    `).join('');
+  }
+
+  $('modalBackdrop').classList.add('show');
+  requestAnimationFrame(() => $('modal').classList.add('show'));
+
+  // Auto-pause timer when modal opens
+  autoPauseIfTimerActive();
+}
+
+function closeModal() {
+  $('modal').classList.remove('show');
+  setTimeout(() => $('modalBackdrop').classList.remove('show'), 200);
+}
+
+$('closeModal').onclick = closeModal;
+$('modalBackdrop').onclick = (e) => {
+  if (e.target.id === 'modalBackdrop') closeModal();
+};
+
+// ============== MODAL MANAGEMENT ==============
+function closeAllModals() {
+  // Close confirm overlay
+  $('confirmOverlay').classList.remove('show');
+
+  // Close progress modal
+  $('modal').classList.remove('show');
+  $('modalBackdrop').classList.remove('show');
+
+  // Close coverage modal
+  $('coverageModal').classList.remove('show');
+  $('coverageBackdrop').classList.remove('show');
+
+  // Close effect overlay
+  $('effectOverlay').classList.remove('show');
+}
+
+function resetMatchState() {
+  // Close all modals first
+  closeAllModals();
+
+  // Stop timer
+  stopTimer();
+  $('timerPausedOverlay').classList.remove('show');
+  $('guess').disabled = false;
+
+  // Reset game state variables
+  state = null;
+  eligiblePlayers = [];
+  currentCategory = null;
+  currentMeta = null;
+  triviaData = [];
+  triviaIndex = 0;
+  matchDataReady = false;
+
+  // Clear debounce timer
+  if (debounceTimer) {
+    clearTimeout(debounceTimer);
+    debounceTimer = null;
+  }
+
+  // Clear toast timer
+  if (toastTimer) {
+    clearTimeout(toastTimer);
+    toastTimer = null;
+  }
+
+  // Reset UI elements
+  $('guess').value = '';
+  $('submitBtn').disabled = true;
+  $('result').textContent = '';
+  $('selectionList').innerHTML = '';
+  $('selectionList').classList.add('hidden');
+  $('inlineToast').classList.remove('show', 'bust-effect', 'win-effect');
+  $('inlineToast').innerHTML = '';
+  $('hintBar').classList.add('hidden');
+  $('hintText').innerHTML = '';
+  $('scoreGrid').innerHTML = '';
+  $('turnInfo').innerHTML = '';
+  $('chain').textContent = '501';
+  $('pickList').innerHTML = '';
+  $('triviaContainer').innerHTML = '';
+
+  // Reset loading screen state
+  $('loadingSpinner').classList.remove('ready');
+  $('loadingSpinner').style.animation = '';
+  $('loadingText').textContent = 'Loading match data...';
+  $('loadingText').classList.remove('ready');
+  hide('readyBadge');
+  hide('skipTrivia');
+  hide('triviaNote');
+
+  // Reset custom builder selections (elements may not exist yet)
+  customSelectedNats.clear();
+  customSelectedClubs.clear();
+  document.querySelectorAll('#nationalityChips .chip, #clubChips .chip').forEach(c => c.classList.remove('selected'));
+  $('customPreview')?.classList.add('hidden');
+  if ($('startCustomGame')) $('startCustomGame').disabled = true;
+}
+
+// ============== END GAME CONFIRMATION ==============
+$('endBtn').onclick = () => {
+  $('confirmOverlay').classList.add('show');
+  autoPauseIfTimerActive();
+};
+
+$('confirmNo').onclick = () => {
+  $('confirmOverlay').classList.remove('show');
+};
+
+$('confirmYes').onclick = () => {
+  recordGameEnd();
+  window.location.href = 'ts-games.html';
+};
+
+function playAgain() {
+  // Full reset of match state (keeps session stats)
+  resetMatchState();
+
+  // Navigate to category selection
+  hide('playCard');
+  show('setupCard');
+  hide('orderScreen');
+  show('step3');
+}
+
+// ============== CUSTOM GAME BUILDER ==============
+const NATIONALITY_OPTIONS = [
+  // UK & Ireland
+  { code: 'ENG', name: 'England', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿' },
+  { code: 'SCO', name: 'Scotland', flag: '🏴󠁧󠁢󠁳󠁣󠁴󠁿' },
+  { code: 'WAL', name: 'Wales', flag: '🏴󠁧󠁢󠁷󠁬󠁳󠁿' },
+  { code: 'NIR', name: 'N. Ireland', flag: '🇬🇧' },
+  { code: 'IRL', name: 'Ireland', flag: '🇮🇪' },
+  // Europe
+  { code: 'FRA', name: 'France', flag: '🇫🇷' },
+  { code: 'ESP', name: 'Spain', flag: '🇪🇸' },
+  { code: 'GER', name: 'Germany', flag: '🇩🇪' },
+  { code: 'ITA', name: 'Italy', flag: '🇮🇹' },
+  { code: 'NED', name: 'Netherlands', flag: '🇳🇱' },
+  { code: 'POR', name: 'Portugal', flag: '🇵🇹' },
+  { code: 'BEL', name: 'Belgium', flag: '🇧🇪' },
+  { code: 'DEN', name: 'Denmark', flag: '🇩🇰' },
+  { code: 'NOR', name: 'Norway', flag: '🇳🇴' },
+  { code: 'SWE', name: 'Sweden', flag: '🇸🇪' },
+  { code: 'SUI', name: 'Switzerland', flag: '🇨🇭' },
+  { code: 'AUT', name: 'Austria', flag: '🇦🇹' },
+  { code: 'CRO', name: 'Croatia', flag: '🇭🇷' },
+  { code: 'SRB', name: 'Serbia', flag: '🇷🇸' },
+  { code: 'POL', name: 'Poland', flag: '🇵🇱' },
+  { code: 'CZE', name: 'Czech Rep.', flag: '🇨🇿' },
+  { code: 'UKR', name: 'Ukraine', flag: '🇺🇦' },
+  { code: 'GRE', name: 'Greece', flag: '🇬🇷' },
+  { code: 'TUR', name: 'Turkey', flag: '🇹🇷' },
+  // South America
+  { code: 'BRA', name: 'Brazil', flag: '🇧🇷' },
+  { code: 'ARG', name: 'Argentina', flag: '🇦🇷' },
+  { code: 'COL', name: 'Colombia', flag: '🇨🇴' },
+  { code: 'URU', name: 'Uruguay', flag: '🇺🇾' },
+  { code: 'CHI', name: 'Chile', flag: '🇨🇱' },
+  { code: 'ECU', name: 'Ecuador', flag: '🇪🇨' },
+  // Africa
+  { code: 'NGA', name: 'Nigeria', flag: '🇳🇬' },
+  { code: 'GHA', name: 'Ghana', flag: '🇬🇭' },
+  { code: 'CIV', name: 'Ivory Coast', flag: '🇨🇮' },
+  { code: 'SEN', name: 'Senegal', flag: '🇸🇳' },
+  { code: 'CMR', name: 'Cameroon', flag: '🇨🇲' },
+  { code: 'EGY', name: 'Egypt', flag: '🇪🇬' },
+  { code: 'MAR', name: 'Morocco', flag: '🇲🇦' },
+  { code: 'ALG', name: 'Algeria', flag: '🇩🇿' },
+  { code: 'RSA', name: 'South Africa', flag: '🇿🇦' },
+  // Other regions
+  { code: 'USA', name: 'USA', flag: '🇺🇸' },
+  { code: 'CAN', name: 'Canada', flag: '🇨🇦' },
+  { code: 'MEX', name: 'Mexico', flag: '🇲🇽' },
+  { code: 'JAM', name: 'Jamaica', flag: '🇯🇲' },
+  { code: 'AUS', name: 'Australia', flag: '🇦🇺' },
+  { code: 'NZL', name: 'New Zealand', flag: '🇳🇿' },
+  { code: 'JPN', name: 'Japan', flag: '🇯🇵' },
+  { code: 'KOR', name: 'South Korea', flag: '🇰🇷' },
+];
+
+const CLUB_OPTIONS = [
+  // Big Six + traditional top clubs
+  { id: 'Arsenal', name: 'Arsenal', color: '#EF0107' },
+  { id: 'Chelsea', name: 'Chelsea', color: '#034694' },
+  { id: 'Liverpool', name: 'Liverpool', color: '#C8102E' },
+  { id: 'Manchester City', name: 'Man City', color: '#6CABDD' },
+  { id: 'Manchester United', name: 'Man Utd', color: '#DA291C' },
+  { id: 'Tottenham Hotspur', name: 'Spurs', color: '#132257' },
+  // Other current/recent PL clubs
+  { id: 'Aston Villa', name: 'Aston Villa', color: '#670E36' },
+  { id: 'Everton', name: 'Everton', color: '#003399' },
+  { id: 'Newcastle United', name: 'Newcastle', color: '#241F20' },
+  { id: 'West Ham United', name: 'West Ham', color: '#7A263A' },
+  { id: 'Leicester City', name: 'Leicester', color: '#003090' },
+  { id: 'Southampton', name: 'Southampton', color: '#D71920' },
+  { id: 'Crystal Palace', name: 'Crystal Palace', color: '#1B458F' },
+  { id: 'Brighton', name: 'Brighton', color: '#0057B8' },
+  { id: 'Fulham', name: 'Fulham', color: '#000000' },
+  { id: 'Bournemouth', name: 'Bournemouth', color: '#DA291C' },
+  { id: 'Brentford', name: 'Brentford', color: '#E30613' },
+  { id: 'Nottingham Forest', name: 'Nottm Forest', color: '#DD0000' },
+  { id: 'Wolves', name: 'Wolves', color: '#FDB913' },
+  // Historic clubs
+  { id: 'Blackburn Rovers', name: 'Blackburn', color: '#009EE0' },
+  { id: 'Leeds United', name: 'Leeds', color: '#FFCD00' },
+  { id: 'Sunderland', name: 'Sunderland', color: '#EB172B' },
+  { id: 'Middlesbrough', name: 'Middlesbrough', color: '#E11B22' },
+  { id: 'Bolton Wanderers', name: 'Bolton', color: '#263C7F' },
+  { id: 'Burnley', name: 'Burnley', color: '#6C1D45' },
+  { id: 'Stoke City', name: 'Stoke', color: '#E03A3E' },
+  { id: 'West Bromwich Albion', name: 'West Brom', color: '#122F67' },
+  { id: 'Norwich City', name: 'Norwich', color: '#00A650' },
+  { id: 'Watford', name: 'Watford', color: '#FBEC5D' },
+  { id: 'Wigan Athletic', name: 'Wigan', color: '#0033A0' },
+  { id: 'Charlton Athletic', name: 'Charlton', color: '#D4021D' },
+  { id: 'Coventry City', name: 'Coventry', color: '#27A9E1' },
+  { id: 'Sheffield Wednesday', name: 'Sheff Wed', color: '#0066B3' },
+  { id: 'Sheffield United', name: 'Sheff Utd', color: '#EE2737' },
+  { id: 'Derby County', name: 'Derby', color: '#000000' },
+  { id: 'Wimbledon', name: 'Wimbledon', color: '#00008B' },
+  { id: 'Ipswich Town', name: 'Ipswich', color: '#0033A0' },
+];
+
+let customSelectedNats = new Set();
+let customSelectedClubs = new Set();
+let livePreviewDebounce = null;
+
+function initCustomBuilder() {
+  // Build nationality chips
+  const natContainer = $('nationalityChips');
+  if (!natContainer) return; // Custom builder HTML not present
+  natContainer.innerHTML = NATIONALITY_OPTIONS.map(n => `
+    <div class="chip" data-code="${n.code}">
+      <span class="flag">${n.flag}</span>
+      <span>${n.name}</span>
+    </div>
+  `).join('');
+
+  natContainer.querySelectorAll('.chip').forEach(chip => {
+    chip.onclick = () => toggleChip(chip, 'nationality');
+  });
+
+  // Build club chips
+  const clubContainer = $('clubChips');
+  clubContainer.innerHTML = CLUB_OPTIONS.map(c => `
+    <div class="chip" data-id="${c.id}">
+      <div class="color-dot-sm" style="background:${c.color}"></div>
+      <span>${c.name}</span>
+    </div>
+  `).join('');
+
+  clubContainer.querySelectorAll('.chip').forEach(chip => {
+    chip.onclick = () => toggleChip(chip, 'club');
+  });
+
+  // Clear buttons
+  $('clearNats').onclick = (e) => {
+    e.stopPropagation();
+    customSelectedNats.clear();
+    document.querySelectorAll('#nationalityChips .chip').forEach(c => c.classList.remove('selected'));
+    updateSelectionCounts();
+    updateCustomPreview();
+  };
+
+  $('clearClubs').onclick = (e) => {
+    e.stopPropagation();
+    customSelectedClubs.clear();
+    document.querySelectorAll('#clubChips .chip').forEach(c => c.classList.remove('selected'));
+    updateSelectionCounts();
+    updateCustomPreview();
+  };
+
+  $('customMetric').onchange = updateCustomPreview;
+
+  // Initial update
+  updateSelectionCounts();
+}
+
+function toggleChip(chip, type) {
+  const maxSelection = 5;
+  const set = type === 'nationality' ? customSelectedNats : customSelectedClubs;
+  const key = type === 'nationality' ? chip.dataset.code : chip.dataset.id;
+
+  if (chip.classList.contains('selected')) {
+    chip.classList.remove('selected');
+    set.delete(key);
+  } else {
+    if (set.size >= maxSelection) {
+      return; // Max reached
+    }
+    chip.classList.add('selected');
+    set.add(key);
+  }
+  updateSelectionCounts();
+  updateCustomPreview();
+}
+
+function updateSelectionCounts() {
+  const natCount = $('natSelectionCount');
+  const clubCount = $('clubSelectionCount');
+
+  natCount.textContent = `${customSelectedNats.size}/5`;
+  natCount.classList.toggle('max', customSelectedNats.size >= 5);
+
+  clubCount.textContent = `${customSelectedClubs.size}/5`;
+  clubCount.classList.toggle('max', customSelectedClubs.size >= 5);
+}
+
+function updateCustomPreview() {
+  const metric = $('customMetric').value;
+  const previewEl = $('customPreview');
+  const previewText = $('customPreviewText');
+  const warningEl = $('customWarning');
+  const startBtn = $('startCustomGame');
+
+  const hasNats = customSelectedNats.size > 0;
+  const hasClubs = customSelectedClubs.size > 0;
+
+  // Hide warning by default
+  warningEl.classList.add('hidden');
+
+  // Update description preview
+  previewEl.classList.remove('hidden');
+  const metricLabel = metric === 'apps' ? 'Appearances' : 'Goals';
+
+  if (!hasNats && !hasClubs) {
+    previewText.innerHTML = `<strong>${metricLabel}</strong> from <strong>all EPL players</strong>`;
+  } else {
+    let filterParts = [];
+
+    if (hasNats) {
+      const natNames = Array.from(customSelectedNats).map(code =>
+        NATIONALITY_OPTIONS.find(n => n.code === code)?.name || code
+      );
+      filterParts.push(`Nationality: ${natNames.join(', ')}`);
+    }
+
+    if (hasClubs) {
+      const clubNames = Array.from(customSelectedClubs).map(id =>
+        CLUB_OPTIONS.find(c => c.id === id)?.name || id
+      );
+      filterParts.push(`Club: ${clubNames.join(', ')}`);
+    }
+
+    const modeText = hasNats && hasClubs ? ' (intersection)' : '';
+    previewText.innerHTML = `<strong>${metricLabel}</strong>${modeText}<br>${filterParts.join('<br>')}`;
+  }
+
+  // Debounced live preview fetch
+  clearTimeout(livePreviewDebounce);
+  livePreviewDebounce = setTimeout(() => fetchLivePreview(), 400);
+}
+
+async function fetchLivePreview() {
+  const metric = $('customMetric').value;
+  const nationalities = Array.from(customSelectedNats);
+  const clubs = Array.from(customSelectedClubs);
+
+  const livePreviewEl = $('livePreview');
+  const livePreviewText = $('livePreviewText');
+  const livePreviewStars = $('livePreviewStars');
+  const warningEl = $('customWarning');
+  const startBtn = $('startCustomGame');
+
+  livePreviewEl.classList.remove('hidden', 'warning');
+  livePreviewText.innerHTML = 'Checking player count...';
+  livePreviewStars.innerHTML = '';
+
+  try {
+    const res = await fetch(`${API_BASE}/match_start`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        categoryId: 'custom',
+        metric: metric === 'goals' ? 'goals_total' : 'apps_total',
+        nationalities: nationalities.length > 0 ? nationalities : null,
+        clubs: clubs.length > 0 ? clubs : null,
+        previewOnly: true,
+      }),
+    });
+    const data = await res.json();
+
+    const count = data.eligibleCount || data.eligiblePlayers?.length || 0;
+    const diff = getDifficulty(count);
+
+    if (count === 0) {
+      livePreviewEl.classList.add('warning');
+      livePreviewText.innerHTML = `<strong>0</strong> eligible players`;
+      livePreviewStars.innerHTML = '';
+      warningEl.textContent = 'No players match these filters. Try different combinations.';
+      warningEl.classList.remove('hidden');
+      startBtn.disabled = true;
+    } else {
+      livePreviewText.innerHTML = `<strong>${formatNum(count)}</strong> eligible players`;
+      livePreviewStars.innerHTML = `${'★'.repeat(diff)}${'☆'.repeat(5 - diff)}`;
+      warningEl.classList.add('hidden');
+      startBtn.disabled = false;
+    }
+  } catch (err) {
+    livePreviewText.innerHTML = 'Could not fetch preview';
+    startBtn.disabled = false; // Allow trying anyway
+  }
+}
+
+function getCustomCacheKey() {
+  const metric = $('customMetric').value;
+  const nats = Array.from(customSelectedNats).sort().join(',');
+  const clubs = Array.from(customSelectedClubs).sort().join(',');
+  return `custom_${metric}_n${nats}_c${clubs}`;
+}
+
+if ($('startCustomGame')) $('startCustomGame').onclick = async () => {
+  const metric = $('customMetric').value;
+  const nationalities = Array.from(customSelectedNats);
+  const clubs = Array.from(customSelectedClubs);
+
+  // Build custom category object
+  const cacheKey = getCustomCacheKey();
+  const customCat = {
+    id: cacheKey,
+    title: 'Custom Game',
+    flag: '🎮',
+    isCustom: true,
+  };
+
+  currentCategory = customCat;
+  matchDataReady = false;
+  triviaIndex = 0;
+
+  hide('step3');
+  show('loadingScreen');
+  hide('readyBadge');
+  hide('skipTrivia');
+  hide('triviaNote');
+  $('triviaContainer').innerHTML = '';
+  $('loadingSpinner').classList.remove('ready');
+  $('loadingSpinner').style.animation = '';
+  $('loadingText').textContent = 'Building custom game...';
+  $('loadingText').classList.remove('ready');
+
+  // Check cache first
+  const cached = getCachedData(cacheKey);
+  if (cached) {
+    eligiblePlayers = cached.eligiblePlayers || [];
+    currentMeta = cached.meta || {};
+    triviaData = cached.meta?.trivia || [];
+    matchDataReady = true;
+    showReadyState();
+    showTrivia();
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/match_start`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        categoryId: 'custom',
+        metric: metric === 'goals' ? 'goals_total' : 'apps_total',
+        nationalities: nationalities.length > 0 ? nationalities : null,
+        clubs: clubs.length > 0 ? clubs : null,
+      }),
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+
+    // Cache the result
+    setCachedData(cacheKey, data);
+
+    eligiblePlayers = data.eligiblePlayers || [];
+    currentMeta = data.meta || {};
+    triviaData = data.meta?.trivia || [];
+    matchDataReady = true;
+    showReadyState();
+    showTrivia();
+  } catch (err) {
+    alert('Failed to load custom game: ' + err.message);
+    show('step3');
+    hide('loadingScreen');
+  }
+};
+
+// ============== CHAT BUILDER ==============
+let chatBuilderState = {
+  epl: { text: '', parsed: null, count: 0, difficulty: '', proposal: null },
+  global: { text: '', parsed: null, count: 0, difficulty: '', proposal: null },
+};
+
+// Local cache for chat builder feasibility
+const chatFeasibilityCache = new Map();
+const CHAT_CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
+
+function getChatCacheKey(type, text) {
+  return `chat_${type}_${text.toLowerCase().replace(/\s+/g, '_').slice(0, 100)}`;
+}
+
+function getCachedFeasibility(key) {
+  const cached = chatFeasibilityCache.get(key);
+  if (!cached) return null;
+  if (Date.now() - cached.timestamp > CHAT_CACHE_TTL) {
+    chatFeasibilityCache.delete(key);
+    return null;
+  }
+  return cached.data;
+}
+
+function setCachedFeasibility(key, data) {
+  chatFeasibilityCache.set(key, { data, timestamp: Date.now() });
+  // Also persist to localStorage
+  try {
+    localStorage.setItem(`f501_chat_${key}`, JSON.stringify({ data, timestamp: Date.now() }));
+  } catch (e) {}
+}
+
+function loadCachedFeasibilityFromStorage(key) {
+  try {
+    const stored = localStorage.getItem(`f501_chat_${key}`);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (Date.now() - parsed.timestamp < CHAT_CACHE_TTL) {
+        chatFeasibilityCache.set(key, parsed);
+        return parsed.data;
+      }
+    }
+  } catch (e) {}
+  return null;
+}
+
+function initChatBuilder() {
+  console.log('[chat] init started');
+
+  // EPL Chat Builder
+  const chatInputEPL = $('chatInputEPL');
+  const submitBtnEPL = $('submitChatEPL');
+  const startBtnEPL = $('startChatEPL');
+
+  console.log('[chat] EPL elements:', { chatInputEPL: !!chatInputEPL, submitBtnEPL: !!submitBtnEPL, startBtnEPL: !!startBtnEPL });
+
+  if (chatInputEPL) {
+    chatInputEPL.oninput = () => {
+      chatBuilderState.epl.text = chatInputEPL.value;
+      // Reset state when input changes
+      $('chatProposalEPL')?.classList.add('hidden');
+      $('chatWarningEPL')?.classList.add('hidden');
+      if (startBtnEPL) {
+        startBtnEPL.style.display = 'none';
+        startBtnEPL.disabled = true;
+      }
+      if (submitBtnEPL) {
+        submitBtnEPL.style.display = '';
+        submitBtnEPL.disabled = false;
+      }
+    };
+    // Allow Enter to submit
+    chatInputEPL.onkeydown = (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        console.log('[chat] Enter key pressed');
+        buildChatGame('epl');
+      }
+    };
+  }
+
+  if (submitBtnEPL) {
+    submitBtnEPL.onclick = () => {
+      console.log('[chat] submit EPL clicked');
+      buildChatGame('epl');
+    };
+    console.log('[chat] EPL submit handler attached');
+  }
+
+  if (startBtnEPL) {
+    startBtnEPL.onclick = () => startChatGame('epl');
+  }
+
+  // Global Chat Builder
+  const chatInputGlobal = $('chatInputGlobal');
+  const submitBtnGlobal = $('submitChatGlobal');
+  const startBtnGlobal = $('startChatGlobal');
+
+  console.log('[chat] Global elements:', { chatInputGlobal: !!chatInputGlobal, submitBtnGlobal: !!submitBtnGlobal, startBtnGlobal: !!startBtnGlobal });
+
+  if (chatInputGlobal) {
+    chatInputGlobal.oninput = () => {
+      chatBuilderState.global.text = chatInputGlobal.value;
+      $('chatProposalGlobal')?.classList.add('hidden');
+      $('chatWarningGlobal')?.classList.add('hidden');
+      if (startBtnGlobal) {
+        startBtnGlobal.style.display = 'none';
+        startBtnGlobal.disabled = true;
+      }
+      if (submitBtnGlobal) {
+        submitBtnGlobal.style.display = '';
+        submitBtnGlobal.disabled = false;
+      }
+    };
+    chatInputGlobal.onkeydown = (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        console.log('[chat] Enter key pressed (global)');
+        buildChatGame('global');
+      }
+    };
+  }
+
+  if (submitBtnGlobal) {
+    submitBtnGlobal.onclick = () => {
+      console.log('[chat] submit Global clicked');
+      buildChatGame('global');
+    };
+    console.log('[chat] Global submit handler attached');
+  }
+
+  if (startBtnGlobal) {
+    startBtnGlobal.onclick = () => startChatGame('global');
+  }
+
+  console.log('[chat] init complete');
+}
+
+async function buildChatGame(type) {
+  const inputEl = $(type === 'epl' ? 'chatInputEPL' : 'chatInputGlobal');
+  const proposalEl = $(type === 'epl' ? 'chatProposalEPL' : 'chatProposalGlobal');
+  const proposalContentEl = $(type === 'epl' ? 'chatProposalContentEPL' : 'chatProposalContentGlobal');
+  const feasibilityEl = $(type === 'epl' ? 'chatFeasibilityEPL' : 'chatFeasibilityGlobal');
+  const warningEl = $(type === 'epl' ? 'chatWarningEPL' : 'chatWarningGlobal');
+  const submitBtn = $(type === 'epl' ? 'submitChatEPL' : 'submitChatGlobal');
+  const startBtn = $(type === 'epl' ? 'startChatEPL' : 'startChatGlobal');
+
+  const text = inputEl.value.trim();
+  if (!text) {
+    warningEl.textContent = 'Please describe your game first.';
+    warningEl.classList.remove('hidden');
+    return;
+  }
+
+  // Show loading state
+  proposalEl.classList.remove('hidden');
+  proposalContentEl.innerHTML = '<div class="proposal-row"><span class="label">Analyzing your request...</span></div>';
+  feasibilityEl.innerHTML = '';
+  warningEl.classList.add('hidden');
+  submitBtn.disabled = true;
+
+  // Check cache first
+  const cacheKey = getChatCacheKey(type, text);
+  let data = getCachedFeasibility(cacheKey) || loadCachedFeasibilityFromStorage(cacheKey);
+
+  if (!data) {
+    try {
+      const res = await fetch(`${API_BASE}/match_start`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          categoryId: 'chat_builder',
+          text: text,
+          mode: 'preview',
+        }),
+      });
+      data = await res.json();
+
+      if (data.error) {
+        warningEl.textContent = data.error;
+        warningEl.classList.remove('hidden');
+        proposalEl.classList.add('hidden');
+        submitBtn.disabled = false;
+        return;
+      }
+
+      // Cache the result
+      setCachedFeasibility(cacheKey, data);
+    } catch (err) {
+      warningEl.textContent = 'Failed to analyze: ' + err.message;
+      warningEl.classList.remove('hidden');
+      proposalEl.classList.add('hidden');
+      submitBtn.disabled = false;
+      return;
+    }
+  }
+
+  const count = data.player_count || data.eligibleCount || 0;
+  const parsed = data.parsed || data.proposal || {};
+  const difficulty = data.difficulty || (count >= 40 ? 'easy' : count >= 20 ? 'hard' : 'not_feasible');
+  const diffStars = getDifficulty(count);
+
+  chatBuilderState[type] = { text, parsed, count, difficulty, proposal: data };
+
+  // Build proposal content — show all parsed filters
+  const compDisplay = (parsed.competitions && parsed.competitions.length > 0)
+    ? parsed.competitions.join(' + ')
+    : (parsed.competition || 'Premier League');
+  let proposalHtml = `
+    <div class="proposal-row"><span class="label">Competition:</span><span class="value">${compDisplay}</span></div>
+    <div class="proposal-row"><span class="label">Metric:</span><span class="value">${parsed.metric === 'goals' ? 'Goals' : 'Appearances'}</span></div>
+  `;
+
+  if (parsed.nationalities && parsed.nationalities.length > 0) {
+    proposalHtml += `<div class="proposal-row"><span class="label">Nationalities:</span><span class="value">${parsed.nationalities.join(', ')}</span></div>`;
+  }
+
+  if (parsed.excludeNationalities && parsed.excludeNationalities.length > 0) {
+    proposalHtml += `<div class="proposal-row"><span class="label">Excluding:</span><span class="value">${parsed.excludeNationalities.join(', ')}</span></div>`;
+  }
+
+  if (parsed.clubs && parsed.clubs.length > 0) {
+    proposalHtml += `<div class="proposal-row"><span class="label">Clubs:</span><span class="value">${parsed.clubs.join(', ')}</span></div>`;
+  }
+
+  if (parsed.position) {
+    const posLabels = { GK: 'Goalkeepers', DEF: 'Defenders', MID: 'Midfielders', FWD: 'Forwards' };
+    proposalHtml += `<div class="proposal-row"><span class="label">Position:</span><span class="value">${posLabels[parsed.position] || parsed.position}</span></div>`;
+  }
+
+  if (parsed.ageFilter) {
+    const ageDesc = parsed.ageFilter.maxAge ? `${parsed.ageFilter.maxAge} and under` : `${parsed.ageFilter.minAge} and over`;
+    proposalHtml += `<div class="proposal-row"><span class="label">Age:</span><span class="value">${ageDesc}</span></div>`;
+  }
+
+  if (parsed.minThreshold) {
+    proposalHtml += `<div class="proposal-row"><span class="label">Min ${parsed.metric === 'goals' ? 'Goals' : 'Apps'}:</span><span class="value">${parsed.minThreshold}+</span></div>`;
+  }
+
+  proposalContentEl.innerHTML = proposalHtml;
+
+  // Build feasibility section
+  let feasibilityHtml = '';
+  const stars = '★'.repeat(diffStars) + '☆'.repeat(5 - diffStars);
+
+  if (difficulty === 'not_feasible' || count < 20) {
+    feasibilityHtml = `
+      <div class="feasibility-fail">
+        <strong>${count} players found</strong> - Not enough for a good game
+        <span class="feasibility-stars">${stars}</span>
+      </div>
+      <div class="feasibility-suggestion">
+        Try broadening your criteria: add more clubs, remove a nationality filter, or try a different competition.
+      </div>
+    `;
+    startBtn.style.display = 'none';
+    startBtn.disabled = true;
+    submitBtn.disabled = false;
+    submitBtn.style.display = '';
+  } else if (difficulty === 'hard' || count < 40) {
+    feasibilityHtml = `
+      <div class="feasibility-warn">
+        <strong>${count} players found</strong> - Hard mode!
+        <span class="feasibility-stars">${stars}</span>
+      </div>
+      <div class="feasibility-suggestion">
+        This is a challenging game. Consider adding more clubs or nationalities for an easier experience.
+      </div>
+    `;
+    submitBtn.style.display = 'none';
+    startBtn.style.display = '';
+    startBtn.disabled = false;
+  } else {
+    feasibilityHtml = `
+      <div class="feasibility-ok">
+        <strong>${count} players found</strong> - Ready to play!
+        <span class="feasibility-stars">${stars}</span>
+      </div>
+    `;
+    submitBtn.style.display = 'none';
+    startBtn.style.display = '';
+    startBtn.disabled = false;
+  }
+
+  feasibilityEl.innerHTML = feasibilityHtml;
+}
+
+async function startChatGame(type) {
+  const state = chatBuilderState[type];
+  if (!state.text || state.count === 0) return;
+
+  const cacheKey = `chat_${type}_${normalize(state.text).slice(0, 50)}`;
+  const customCat = {
+    id: cacheKey,
+    title: type === 'epl' ? 'EPL Chat Game' : 'Global Chat Game',
+    flag: '💬',
+    isCustom: true,
+  };
+
+  currentCategory = customCat;
+  matchDataReady = false;
+  triviaIndex = 0;
+
+  hide('step3');
+  show('loadingScreen');
+  hide('readyBadge');
+  hide('skipTrivia');
+  hide('triviaNote');
+  $('triviaContainer').innerHTML = '';
+  $('loadingSpinner').classList.remove('ready');
+  $('loadingSpinner').style.animation = '';
+  $('loadingText').textContent = 'Building chat game...';
+  $('loadingText').classList.remove('ready');
+
+  try {
+    const res = await fetch(`${API_BASE}/match_start`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        categoryId: 'chat_builder',
+        text: state.text,
+      }),
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+
+    setCachedData(cacheKey, data);
+    eligiblePlayers = data.eligiblePlayers || [];
+    currentMeta = data.meta || {};
+    triviaData = data.meta?.trivia || [];
+    matchDataReady = true;
+    showReadyState();
+    showTrivia();
+  } catch (err) {
+    alert('Failed to start chat game: ' + err.message);
+    show('step3');
+    hide('loadingScreen');
+  }
+}
+
+// ============== INIT ==============
+(function init() {
+  initCustomBuilder();
+  initChatBuilder();
+})();
+</script>
+<script>
+// Live clock
+(function() {
+  const el = document.getElementById('tsClock');
+  if (el) {
+    el.textContent = new Date().toTimeString().slice(0,5);
+    setInterval(() => { el.textContent = new Date().toTimeString().slice(0,5); }, 1000);
+  }
+})();
+</script>
+<footer style="text-align:center;padding:16px;font-size:11px;color:var(--muted);opacity:0.6;">
+  Build: 2026-02-11 | TeleStats Bullseye v1.0
+</footer>
+</body>
+</html>
