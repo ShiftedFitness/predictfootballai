@@ -546,9 +546,32 @@ exports.handler = async (event) => {
 
       console.log(`[whoami_start] ${eligible.length} eligible players for scope ${scopeId}`);
 
-      // Pick a random player
-      const randomIndex = Math.floor(Math.random() * eligible.length);
-      const player = eligible[randomIndex];
+      // Filter by difficulty based on season count
+      // Easy: well-known players with long careers (8+ seasons)
+      // Medium: moderate careers (4-7 seasons)
+      // Hard: short-stint players (1-3 seasons) — the obscure ones
+      const { difficulty } = body;
+      let pool = eligible;
+
+      if (difficulty === 'easy') {
+        pool = eligible.filter(p => p.seasonCount >= 8);
+        if (pool.length < 5) pool = eligible.filter(p => p.seasonCount >= 6);
+        if (pool.length < 5) pool = eligible;
+      } else if (difficulty === 'medium') {
+        pool = eligible.filter(p => p.seasonCount >= 4 && p.seasonCount <= 7);
+        if (pool.length < 5) pool = eligible.filter(p => p.seasonCount >= 3 && p.seasonCount <= 8);
+        if (pool.length < 5) pool = eligible;
+      } else if (difficulty === 'hard') {
+        pool = eligible.filter(p => p.seasonCount <= 3);
+        if (pool.length < 5) pool = eligible.filter(p => p.seasonCount <= 4);
+        if (pool.length < 5) pool = eligible;
+      }
+
+      console.log(`[whoami_start] Difficulty "${difficulty || 'any'}" → pool size: ${pool.length}`);
+
+      // Pick a random player from the filtered pool
+      const randomIndex = Math.floor(Math.random() * pool.length);
+      const player = pool[randomIndex];
 
       // Build blanks pattern
       const blanks = buildBlanks(player.name);
@@ -568,6 +591,78 @@ exports.handler = async (event) => {
         scope: { id: scope.id, label: scope.label, type: scope.type },
         eligibleCount: eligible.length,
       });
+    }
+
+    // ============================================================
+    // SEARCH PLAYERS — typeahead suggestions for the guess input
+    // ============================================================
+    if (action === 'search_players') {
+      const { scopeId, query } = body;
+
+      if (!scopeId || !query || query.trim().length < 2) {
+        return respond(400, { error: 'Missing scopeId or query (min 2 chars)' });
+      }
+
+      const scopeDef = SCOPES.find(s => s.id === scopeId);
+      if (!scopeDef) {
+        return respond(400, { error: `Unknown scope: ${scopeId}` });
+      }
+
+      const competitionId = await getEplCompId(supabase);
+      if (!competitionId) {
+        return respond(500, { error: 'Premier League competition not found' });
+      }
+
+      const scope = { ...scopeDef };
+      if (scope.type === 'club' && scope.clubName) {
+        scope.clubId = await getClubId(supabase, scope.clubName);
+        if (!scope.clubId) {
+          return respond(400, { error: `Club not found: ${scope.clubName}` });
+        }
+      }
+
+      // Fetch all eligible players (same pool used for the game)
+      const eligible = await fetchEligiblePlayers(supabase, scope, competitionId);
+
+      // Filter by query — match against full name and individual name parts
+      const normalizedQuery = normalize(query.trim());
+      const results = [];
+
+      for (const player of eligible) {
+        const normalizedName = normalize(player.name);
+        const nameParts = normalizedName.split(/\s+/);
+
+        const fullMatch = normalizedName.includes(normalizedQuery);
+        const partMatch = nameParts.some(part => part.includes(normalizedQuery));
+        const partStartMatch = nameParts.some(part => part.startsWith(normalizedQuery));
+
+        if (!fullMatch && !partMatch) continue;
+
+        results.push({
+          name: player.name,
+          nationality: player.nationality,
+          appearances: player.totalAppearances,
+          goals: player.totalGoals,
+          _normalized: normalizedName,
+          _surnameStartMatch: nameParts.length > 1 && nameParts[nameParts.length - 1].startsWith(normalizedQuery),
+          _partStartMatch: partStartMatch,
+        });
+      }
+
+      // Sort: surname start match → part start → full name start → by appearances
+      results.sort((a, b) => {
+        if (a._surnameStartMatch !== b._surnameStartMatch) return a._surnameStartMatch ? -1 : 1;
+        if (a._partStartMatch !== b._partStartMatch) return a._partStartMatch ? -1 : 1;
+        const aStarts = a._normalized.startsWith(normalizedQuery) ? 0 : 1;
+        const bStarts = b._normalized.startsWith(normalizedQuery) ? 0 : 1;
+        if (aStarts !== bStarts) return aStarts - bStarts;
+        return b.appearances - a.appearances;
+      });
+
+      // Return top 8, strip internal fields
+      const top = results.slice(0, 8).map(({ _normalized, _surnameStartMatch, _partStartMatch, ...rest }) => rest);
+
+      return respond(200, { players: top });
     }
 
     // ============================================================

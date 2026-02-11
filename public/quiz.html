@@ -367,7 +367,7 @@ function init() {
     if (scope.type === 'league') {
       btn.innerHTML = `<span class="emoji">&#127942;</span>${scope.label}`;
     } else {
-      btn.innerHTML = `<span class="color-dot" style="background:${colour || '#555'}"></span>${scope.label}`;
+      btn.innerHTML = `<span class="color-dot" style="background:${colour || '#555'}"></span> ${scope.label}`;
     }
     btn.onclick = () => {
       selectedScope = scope.id;

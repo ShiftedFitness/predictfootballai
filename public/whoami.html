@@ -113,17 +113,74 @@ body {
 .go-btn.secondary { background: var(--btn); color: var(--ink); margin-top: 10px; }
 .go-btn.secondary:hover { background: var(--btn-hover); }
 
-/* ====== GAME AREA ====== */
-.blanks {
+/* ====== DIFFICULTY SELECTOR ====== */
+.difficulty-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+}
+.diff-btn {
+  background: var(--card-dark);
+  border: 2px solid transparent;
+  border-radius: 12px;
+  padding: 12px 8px;
+  color: var(--ink);
+  cursor: pointer;
   text-align: center;
-  padding: 24px 0;
-  font-size: 28px;
+  transition: all 0.15s;
+}
+.diff-btn:hover { border-color: var(--accent-dim); background: var(--btn); }
+.diff-btn.selected { border-color: var(--accent); background: var(--btn); }
+.diff-btn .diff-icon { font-size: 20px; display: block; margin-bottom: 4px; }
+.diff-btn .diff-label { font-size: 13px; font-weight: 700; display: block; }
+.diff-btn .diff-desc { font-size: 10px; color: var(--muted); display: block; margin-top: 2px; }
+
+/* ====== BLANKS DISPLAY ====== */
+.blanks-container {
+  text-align: center;
+  padding: 20px 8px;
+  min-height: 80px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 2px;
+}
+.blank-word {
+  display: inline-flex;
+  gap: 3px;
+  margin: 4px 8px;
+}
+.blank-char {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 34px;
+  border-bottom: 3px solid var(--accent);
+  font-size: 20px;
   font-weight: 800;
-  letter-spacing: 4px;
   font-family: 'Courier New', monospace;
-  word-spacing: 12px;
+  color: transparent;
+  transition: color 0.3s, border-color 0.3s, transform 0.3s;
+  text-transform: uppercase;
+}
+.blank-char.revealed {
   color: var(--accent);
-  line-height: 1.6;
+  transform: scale(1.1);
+}
+.blank-char.correct {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.blank-char.wrong {
+  color: var(--danger);
+  border-color: var(--danger);
+}
+.blank-char.hyphen, .blank-char.apostrophe {
+  color: var(--accent);
+  border-bottom-color: transparent;
+  width: 14px;
 }
 
 .clue-list {
@@ -166,8 +223,10 @@ body {
 }
 .clue-item.locked .clue-number { background: var(--btn); color: var(--muted); }
 
+/* ====== GUESS AREA WITH SUGGESTIONS ====== */
 .guess-area {
   margin-top: 16px;
+  position: relative;
 }
 .guess-input {
   width: 100%;
@@ -178,10 +237,59 @@ body {
   color: var(--ink);
   font-size: 15px;
   outline: none;
-  margin-bottom: 8px;
+  margin-bottom: 0;
 }
 .guess-input:focus { border-color: var(--accent); }
 .guess-input::placeholder { color: var(--muted); }
+
+.suggestions-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--card-dark);
+  border: 1px solid var(--btn);
+  border-radius: 12px;
+  margin-top: 4px;
+  max-height: 280px;
+  overflow-y: auto;
+  z-index: 50;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+}
+.suggestions-dropdown.hidden { display: none; }
+
+.suggestion-item {
+  padding: 12px 16px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  transition: background 0.1s;
+}
+.suggestion-item:last-child { border-bottom: none; }
+.suggestion-item:hover { background: var(--btn); }
+.suggestion-item:first-child { border-radius: 12px 12px 0 0; }
+.suggestion-item:last-child { border-radius: 0 0 12px 12px; }
+.suggestion-item:only-child { border-radius: 12px; }
+
+.suggestion-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.suggestion-meta {
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.suggestion-loading {
+  padding: 12px 16px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--muted);
+}
 
 .guess-feedback {
   text-align: center;
@@ -262,6 +370,15 @@ body {
   margin-top: 10px;
 }
 .btn-row .go-btn { flex: 1; }
+
+@keyframes popIn {
+  0% { transform: scale(0.5); opacity: 0; }
+  60% { transform: scale(1.2); }
+  100% { transform: scale(1.1); opacity: 1; }
+}
+.blank-char.pop {
+  animation: popIn 0.3s ease forwards;
+}
 </style>
 </head>
 <body>
@@ -280,6 +397,26 @@ body {
       <h2>Choose Scope</h2>
       <div class="option-grid" id="scopeGrid"></div>
     </div>
+    <div class="card">
+      <h2>Difficulty</h2>
+      <div class="difficulty-grid" id="difficultyGrid">
+        <button class="diff-btn selected" data-diff="easy">
+          <span class="diff-icon">&#11088;</span>
+          <span class="diff-label">Easy</span>
+          <span class="diff-desc">Household names</span>
+        </button>
+        <button class="diff-btn" data-diff="medium">
+          <span class="diff-icon">&#128293;</span>
+          <span class="diff-label">Medium</span>
+          <span class="diff-desc">Solid careers</span>
+        </button>
+        <button class="diff-btn" data-diff="hard">
+          <span class="diff-icon">&#128128;</span>
+          <span class="diff-label">Hard</span>
+          <span class="diff-desc">1-3 season wonders</span>
+        </button>
+      </div>
+    </div>
     <button class="go-btn primary" id="startBtn" disabled>Start Game</button>
   </div>
 
@@ -288,7 +425,7 @@ body {
     <div class="scope-badge" id="gameBadge"></div>
 
     <div class="card">
-      <div class="blanks" id="blanksDisplay"></div>
+      <div class="blanks-container" id="blanksDisplay"></div>
     </div>
 
     <div class="card">
@@ -300,9 +437,10 @@ body {
 
     <div class="card">
       <div class="guess-area">
-        <input type="text" class="guess-input" id="guessInput" placeholder="Type your guess..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+        <input type="text" class="guess-input" id="guessInput" placeholder="Type player name..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+        <div id="suggestionsDropdown" class="suggestions-dropdown hidden"></div>
         <div class="guess-feedback" id="guessFeedback"></div>
-        <button class="go-btn primary" id="guessBtn" disabled>Guess</button>
+        <button class="go-btn primary" id="guessBtn">Guess</button>
       </div>
     </div>
 
@@ -315,7 +453,7 @@ body {
       </div>
     </div>
 
-    <div class="btn-row" id="actionBtns" class="hidden">
+    <div class="btn-row" id="actionBtns">
       <button class="go-btn secondary" id="giveUpBtn">Give Up</button>
       <button class="go-btn primary hidden" id="playAgainBtn">Play Again</button>
     </div>
@@ -323,7 +461,7 @@ body {
 </div>
 
 <footer style="text-align:center;padding:16px 16px 72px;font-size:11px;color:var(--muted);opacity:0.6;">
-  Build: 2026-02-11 | Who Am I? v1.0
+  Build: 2026-02-11 | Who Am I? v1.2
 </footer>
 
 <script>
@@ -348,11 +486,17 @@ const SCOPES = [
 ];
 
 let selectedScope = null;
+let selectedDifficulty = 'easy'; // default to easy
 let gameData = null;
 let cluesRevealed = 0;
 let gameOver = false;
 let guessCount = 0;
+let searchDebounce = null;
+let selectedSuggestion = null; // the player name selected from dropdown
 
+// ============================================================
+// INIT
+// ============================================================
 function init() {
   const grid = $('scopeGrid');
   for (const scope of SCOPES) {
@@ -362,7 +506,7 @@ function init() {
     if (scope.type === 'league') {
       btn.innerHTML = `<span class="emoji">&#127942;</span>${scope.label}`;
     } else {
-      btn.innerHTML = `<span class="color-dot" style="background:${colour || '#555'}"></span>${scope.label}`;
+      btn.innerHTML = `<span class="color-dot" style="background:${colour || '#555'}"></span> ${scope.label}`;
     }
     btn.onclick = () => {
       selectedScope = scope.id;
@@ -373,20 +517,205 @@ function init() {
     grid.appendChild(btn);
   }
 
+  // Difficulty buttons
+  $('difficultyGrid').querySelectorAll('.diff-btn').forEach(btn => {
+    btn.onclick = () => {
+      selectedDifficulty = btn.dataset.diff;
+      $('difficultyGrid').querySelectorAll('.diff-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+    };
+  });
+
   $('startBtn').onclick = startGame;
   $('nextClueBtn').onclick = revealNextClue;
   $('guessBtn').onclick = submitGuess;
   $('giveUpBtn').onclick = giveUp;
   $('playAgainBtn').onclick = resetToSetup;
 
+  // Typeahead search on input
   $('guessInput').addEventListener('input', () => {
-    $('guessBtn').disabled = $('guessInput').value.trim().length < 2;
+    selectedSuggestion = null;
+    clearTimeout(searchDebounce);
+    const q = $('guessInput').value.trim();
+    if (q.length < 2) {
+      hideSuggestions();
+      return;
+    }
+    searchDebounce = setTimeout(() => doSearch(q), 250);
   });
+
+  // Submit on Enter
   $('guessInput').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && !$('guessBtn').disabled) submitGuess();
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      hideSuggestions();
+      submitGuess();
+    }
+  });
+
+  // Close suggestions when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.guess-area')) {
+      hideSuggestions();
+    }
   });
 }
 
+// ============================================================
+// BLANKS RENDERING
+// ============================================================
+function renderBlanks(name, revealedName, colorClass) {
+  const container = $('blanksDisplay');
+  container.innerHTML = '';
+
+  if (!name) return;
+
+  // Split name into words
+  const words = name.split(' ');
+
+  for (let wi = 0; wi < words.length; wi++) {
+    const wordEl = document.createElement('span');
+    wordEl.className = 'blank-word';
+
+    for (let ci = 0; ci < words[wi].length; ci++) {
+      const ch = words[wi][ci];
+      const charEl = document.createElement('span');
+      charEl.className = 'blank-char';
+
+      if (ch === '-') {
+        charEl.className = 'blank-char hyphen';
+        charEl.textContent = '-';
+      } else if (ch === "'") {
+        charEl.className = 'blank-char apostrophe';
+        charEl.textContent = "'";
+      } else {
+        // If we have a revealed name, show the letter
+        if (revealedName) {
+          charEl.textContent = ch;
+          charEl.classList.add('revealed');
+          if (colorClass) charEl.classList.add(colorClass);
+        }
+      }
+
+      wordEl.appendChild(charEl);
+    }
+
+    container.appendChild(wordEl);
+  }
+}
+
+/**
+ * Animate filling in the blanks letter by letter, then flash color.
+ * Returns a promise that resolves when animation is done.
+ */
+function animateBlanksReveal(actualName, isCorrect) {
+  return new Promise(resolve => {
+    const container = $('blanksDisplay');
+    const words = actualName.split(' ');
+    const allChars = container.querySelectorAll('.blank-char:not(.hyphen):not(.apostrophe)');
+
+    // Build flat array of letters from actualName
+    const letters = [];
+    for (const word of words) {
+      for (const ch of word) {
+        if (ch !== '-' && ch !== "'") letters.push(ch);
+      }
+    }
+
+    let idx = 0;
+    const colorClass = isCorrect ? 'correct' : 'wrong';
+
+    function revealNext() {
+      if (idx >= allChars.length || idx >= letters.length) {
+        // Flash all at once with final color
+        setTimeout(() => {
+          allChars.forEach(el => {
+            el.classList.add(colorClass);
+          });
+          resolve();
+        }, 200);
+        return;
+      }
+
+      const el = allChars[idx];
+      el.textContent = letters[idx];
+      el.classList.add('revealed', 'pop', colorClass);
+      idx++;
+      setTimeout(revealNext, 60);
+    }
+
+    revealNext();
+  });
+}
+
+// ============================================================
+// PLAYER SEARCH / SUGGESTIONS
+// ============================================================
+async function doSearch(query) {
+  if (gameOver) return;
+
+  const dropdown = $('suggestionsDropdown');
+  dropdown.innerHTML = '<div class="suggestion-loading"><span class="spinner"></span></div>';
+  dropdown.classList.remove('hidden');
+
+  try {
+    const res = await fetch(`${API_BASE}/whoami_start`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'search_players',
+        scopeId: selectedScope,
+        query,
+      }),
+    });
+    const data = await res.json();
+
+    if (gameOver) { hideSuggestions(); return; }
+
+    const players = data.players || [];
+    if (players.length === 0) {
+      dropdown.innerHTML = '<div class="suggestion-loading" style="color:var(--muted);">No players found</div>';
+      return;
+    }
+
+    dropdown.innerHTML = players.map(p => `
+      <div class="suggestion-item" data-name="${escHtml(p.name)}">
+        <span class="suggestion-name">${escHtml(p.name)}</span>
+        <span class="suggestion-meta">${p.nationality} &middot; ${p.appearances} apps</span>
+      </div>
+    `).join('');
+
+    dropdown.querySelectorAll('.suggestion-item').forEach(item => {
+      item.onclick = (e) => {
+        e.stopPropagation();
+        const name = item.dataset.name;
+        selectedSuggestion = name;
+        $('guessInput').value = name;
+        hideSuggestions();
+        submitGuess();
+      };
+    });
+
+  } catch (err) {
+    console.error('Search error:', err);
+    dropdown.innerHTML = '<div class="suggestion-loading" style="color:var(--danger);">Search failed</div>';
+  }
+}
+
+function hideSuggestions() {
+  $('suggestionsDropdown').classList.add('hidden');
+  $('suggestionsDropdown').innerHTML = '';
+}
+
+function escHtml(str) {
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+// ============================================================
+// GAME FLOW
+// ============================================================
 async function startGame() {
   $('startBtn').disabled = true;
   $('startBtn').innerHTML = '<span class="spinner"></span> Loading...';
@@ -395,7 +724,7 @@ async function startGame() {
     const res = await fetch(`${API_BASE}/whoami_start`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'start_game', scopeId: selectedScope }),
+      body: JSON.stringify({ action: 'start_game', scopeId: selectedScope, difficulty: selectedDifficulty }),
     });
     gameData = await res.json();
 
@@ -404,13 +733,15 @@ async function startGame() {
     cluesRevealed = 0;
     gameOver = false;
     guessCount = 0;
+    selectedSuggestion = null;
 
     // Setup UI
     const scopeLabel = SCOPES.find(s => s.id === selectedScope)?.label || '';
-    $('gameBadge').innerHTML = `<span class="dot"></span> ${scopeLabel}`;
+    const diffLabel = selectedDifficulty.charAt(0).toUpperCase() + selectedDifficulty.slice(1);
+    $('gameBadge').innerHTML = `<span class="dot"></span> ${scopeLabel} &middot; ${diffLabel}`;
 
-    // Display blanks
-    $('blanksDisplay').textContent = gameData.blanks;
+    // Display blanks from the pattern
+    renderBlanksFromPattern(gameData.blanks);
 
     // Setup clue items (all locked initially)
     const clueList = $('clueList');
@@ -435,9 +766,10 @@ async function startGame() {
     $('guessInput').value = '';
     $('guessFeedback').textContent = '';
     $('guessFeedback').className = 'guess-feedback';
-    $('guessBtn').disabled = true;
+    $('guessBtn').disabled = false;
     $('guessInput').disabled = false;
     $('nextClueBtn').classList.remove('hidden');
+    hideSuggestions();
 
     setTimeout(() => $('guessInput').focus(), 200);
 
@@ -447,6 +779,46 @@ async function startGame() {
 
   $('startBtn').disabled = false;
   $('startBtn').textContent = 'Start Game';
+}
+
+/**
+ * Render blanks from the server-provided pattern string.
+ * Parses the pattern to reconstruct word structure.
+ */
+function renderBlanksFromPattern(blanksStr) {
+  const container = $('blanksDisplay');
+  container.innerHTML = '';
+
+  if (!blanksStr) return;
+
+  // The pattern uses: _ for letters, double space for word gaps, - for hyphens, ' for apostrophes
+  // Split by triple-space (word separator) — the blanks format uses "   " between words
+  const rawWords = blanksStr.split(/\s{3,}/);
+
+  for (const rawWord of rawWords) {
+    const wordEl = document.createElement('span');
+    wordEl.className = 'blank-word';
+
+    // Each char in the word is separated by single space
+    const chars = rawWord.split(' ').filter(c => c !== '');
+
+    for (const ch of chars) {
+      const charEl = document.createElement('span');
+      if (ch === '-') {
+        charEl.className = 'blank-char hyphen';
+        charEl.textContent = '-';
+      } else if (ch === "'") {
+        charEl.className = 'blank-char apostrophe';
+        charEl.textContent = "'";
+      } else {
+        charEl.className = 'blank-char';
+        // Leave empty for underscore blanks
+      }
+      wordEl.appendChild(charEl);
+    }
+
+    container.appendChild(wordEl);
+  }
 }
 
 function revealNextClue() {
@@ -473,6 +845,8 @@ async function submitGuess() {
   guessCount++;
   $('guessBtn').disabled = true;
   $('guessBtn').innerHTML = '<span class="spinner"></span>';
+  $('guessInput').disabled = true;
+  hideSuggestions();
 
   try {
     const res = await fetch(`${API_BASE}/whoami_start`, {
@@ -489,16 +863,20 @@ async function submitGuess() {
 
     if (result.correct) {
       gameOver = true;
+      // Animate the correct answer into blanks
+      await animateBlanksReveal(result.player.name, true);
       showResult(true, result.player);
     } else {
-      $('guessFeedback').textContent = `Wrong! Try again...`;
+      $('guessFeedback').textContent = 'Wrong! Try again...';
       $('guessFeedback').className = 'guess-feedback wrong';
       $('guessInput').value = '';
+      $('guessInput').disabled = false;
       $('guessInput').focus();
     }
   } catch (err) {
     $('guessFeedback').textContent = 'Error checking answer. Try again.';
     $('guessFeedback').className = 'guess-feedback wrong';
+    $('guessInput').disabled = false;
   }
 
   $('guessBtn').disabled = false;
@@ -507,8 +885,10 @@ async function submitGuess() {
 
 async function giveUp() {
   gameOver = true;
+  $('giveUpBtn').disabled = true;
+  $('guessInput').disabled = true;
+  hideSuggestions();
 
-  // Fetch the answer
   try {
     const res = await fetch(`${API_BASE}/whoami_start`, {
       method: 'POST',
@@ -522,10 +902,15 @@ async function giveUp() {
       }),
     });
     const result = await res.json();
+
+    // Animate the answer into blanks (red for give up)
+    await animateBlanksReveal(result.player.name, false);
     showResult(false, result.player);
   } catch (err) {
     $('guessFeedback').textContent = 'Failed to reveal answer.';
   }
+
+  $('giveUpBtn').disabled = false;
 }
 
 function showResult(won, player) {
@@ -570,8 +955,14 @@ function resetToSetup() {
   cluesRevealed = 0;
   gameOver = false;
   guessCount = 0;
+  selectedSuggestion = null;
+  hideSuggestions();
+  // Keep scope and difficulty selections for quick replay
 }
 
+// ============================================================
+// BOOT
+// ============================================================
 init();
 </script>
 </body>
