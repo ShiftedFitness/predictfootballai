@@ -1,5 +1,5 @@
 /**
- * quiz_start.js — Pop Quiz football trivia game
+ * quiz_start.js — Pop Quiz football trivia game  (v1.1)
  *
  * Endpoints (via `action` field in POST body):
  *   generate_quiz  → Returns 5 multiple-choice questions for a given scope,

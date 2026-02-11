@@ -1,5 +1,5 @@
 /**
- * xi_score.js — Starting XI scoring / evaluation
+ * xi_score.js — Starting XI scoring / evaluation  (v1.1)
  *
  * POST body: { scopeId, formation, objective, picks: [{ slotIdx, playerId }] }
  *
