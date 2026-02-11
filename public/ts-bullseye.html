@@ -95,11 +95,11 @@ button {
   align-items: center;
   justify-content: space-between;
   background: rgba(255,255,255,.04);
-  border-radius: 12px;
+  border-radius: 8px;
   padding: 12px 14px;
   margin-bottom: 6px;
   cursor: pointer;
-  transition: background .2s, transform .1s;
+  transition: background .15s, transform .1s;
 }
 .game-card:hover { background: rgba(255,255,255,.08); }
 .game-card:active { transform: scale(.98); }
@@ -395,7 +395,7 @@ button {
 .confirm-overlay.show { display: flex; }
 .confirm-box {
   background: var(--card);
-  border-radius: 16px;
+  border-radius: 12px;
   padding: 24px;
   max-width: 340px;
   text-align: center;
@@ -440,13 +440,16 @@ button {
 
 /* Competition dividers */
 .competition-divider {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--accent);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent-cyan);
   margin: 24px 0 12px;
-  padding-left: 4px;
-  border-left: 3px solid var(--accent);
+  padding-left: 10px;
+  border-left: 3px solid var(--accent-cyan);
   padding-bottom: 4px;
+  font-family: 'Space Mono', monospace;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
 }
 
 /* Chat builder */
@@ -555,7 +558,7 @@ button {
 /* Session stats bar */
 .session-bar {
   background: var(--card-dark);
-  border-radius: 12px;
+  border-radius: 8px;
   padding: 10px 14px;
   margin-bottom: 16px;
   display: flex;
@@ -575,7 +578,7 @@ button {
   align-items: center;
   justify-content: space-between;
   background: var(--card-dark);
-  border-radius: 12px;
+  border-radius: 10px;
   padding: 14px 16px;
   margin-bottom: 10px;
 }
@@ -592,7 +595,7 @@ button {
   transition: background .2s;
   flex-shrink: 0;
 }
-.toggle-switch.on { background: var(--accent); }
+.toggle-switch.on { background: var(--accent-cyan); }
 .toggle-switch::after {
   content: '';
   position: absolute;
