@@ -67,6 +67,22 @@ h1, h2, h3,
 .chain,
 .results-score {
   font-family: 'Space Mono', 'Courier New', monospace;
+  letter-spacing: -0.8px;
+}
+
+/* ── Monospace Numbers (authoritative stat feel) ─────────── */
+.pill .score,
+.score-big,
+.score-banner,
+.timer-display,
+.results-score,
+.results-stat .val,
+.chain,
+.clue-counter,
+.q-number {
+  font-family: 'Space Mono', 'Courier New', monospace;
+  font-weight: 800;
+  text-shadow: none;
 }
 
 /* ── Teletext Header Bar ──────────────────────────────────── */
@@ -78,7 +94,7 @@ h1, h2, h3,
   font-size: 11px;
   font-weight: 400;
   padding: 10px 16px;
-  border-bottom: 2px solid var(--accent-cyan);
+  border-bottom: 3px solid var(--accent-cyan);
   color: var(--text-muted);
   letter-spacing: 0.8px;
   text-transform: uppercase;
@@ -94,7 +110,7 @@ h1, h2, h3,
   font-variant-numeric: tabular-nums;
 }
 
-/* ── Scanline Overlay (very subtle) ───────────────────────── */
+/* ── Scanline Overlay (<2% opacity — barely visible texture) ─ */
 body::after {
   content: '';
   position: fixed;
@@ -105,24 +121,25 @@ body::after {
     0deg,
     transparent,
     transparent 2px,
-    rgba(0, 0, 0, 0.025) 2px,
-    rgba(0, 0, 0, 0.025) 4px
+    rgba(0, 0, 0, 0.018) 2px,
+    rgba(0, 0, 0, 0.018) 4px
   );
 }
 
-/* ── Primary Button (Yellow CTA) ──────────────────────────── */
+/* ── Primary Button (Yellow CTA — bold & flat) ───────────── */
 .go-btn.primary,
 .btn-primary {
   background: var(--accent-yellow) !important;
   color: #0B0F12 !important;
   font-weight: 700;
   border: none;
-  transition: all 0.15s;
+  border-radius: 10px;
+  transition: background 0.12s, opacity 0.12s;
 }
 .go-btn.primary:hover:not(:disabled),
 .btn-primary:hover:not(:disabled) {
   background: #E6C009 !important;
-  box-shadow: 0 0 16px rgba(255, 214, 10, 0.15);
+  box-shadow: none;
 }
 .go-btn.primary:disabled,
 .btn-primary:disabled {
@@ -131,19 +148,20 @@ body::after {
   box-shadow: none;
 }
 
-/* ── Secondary Button (Cyan Border) ───────────────────────── */
+/* ── Secondary Button (Cyan Border — clean) ──────────────── */
 .go-btn.secondary,
 .btn-secondary {
   background: var(--bg-panel) !important;
   color: var(--text-primary) !important;
   border: 1px solid var(--accent-cyan) !important;
+  border-radius: 10px;
   font-weight: 600;
-  transition: all 0.15s;
+  transition: background 0.12s;
 }
 .go-btn.secondary:hover:not(:disabled),
 .btn-secondary:hover:not(:disabled) {
   background: var(--bg-elevated) !important;
-  box-shadow: 0 0 12px rgba(0, 229, 255, 0.08);
+  box-shadow: none;
 }
 
 /* ── Danger Button ────────────────────────────────────────── */
@@ -153,7 +171,7 @@ body::after {
   border: none;
 }
 
-/* ── Tags & Chips (Teletext Block Style) ──────────────────── */
+/* ── Tags & Chips (Teletext Block Style — blocky) ────────── */
 .badge,
 .scope-badge,
 .q-difficulty {
@@ -161,14 +179,15 @@ body::after {
   text-transform: uppercase;
   font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.8px;
-  border-radius: 4px;
-  padding: 3px 8px;
+  letter-spacing: 1px;
+  border-radius: 3px;
+  padding: 4px 10px;
 }
 
-/* ── Card hover glow ──────────────────────────────────────── */
+/* ── Card styling (reduced radius) ───────────────────────── */
 .card {
   border: 1px solid transparent;
+  border-radius: 12px !important;
   transition: border-color 0.2s;
 }
 
@@ -187,14 +206,52 @@ select:focus {
   opacity: 0.4;
 }
 
-/* ── Selection / Active States ────────────────────────────── */
+/* ── Selection / Active States (highlighted block feel) ───── */
 .option-btn.selected {
   border-color: var(--accent-cyan) !important;
+  background: rgba(0, 229, 255, 0.10) !important;
+  box-shadow: inset 0 0 0 1px var(--accent-cyan);
+}
+.option-btn:hover:not(.selected) {
+  border-color: rgba(0, 229, 255, 0.4) !important;
   background: var(--bg-elevated) !important;
 }
-.option-btn:hover {
+
+/* Answer buttons — highlighted block when selected */
+.answer-btn.selected {
   border-color: var(--accent-cyan) !important;
-  background: var(--bg-elevated) !important;
+  background: rgba(0, 229, 255, 0.10) !important;
+}
+
+/* ── Correct Answer Flash ────────────────────────────────── */
+@keyframes correctFlash {
+  0% { background: rgba(50, 255, 126, 0.25); }
+  100% { background: rgba(50, 255, 126, 0.10); }
+}
+.answer-btn.correct {
+  animation: correctFlash 0.4s ease-out;
+}
+
+/* ── Clue Reveal Animation ───────────────────────────────── */
+.clue-item.revealed {
+  opacity: 1;
+  transform: translateY(0);
+  border-left: 3px solid var(--accent-cyan);
+}
+@keyframes clueSlideIn {
+  from { opacity: 0; transform: translateX(-8px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.clue-item.animate-in {
+  animation: clueSlideIn 0.3s ease-out forwards;
+}
+
+/* ── Section Dividers (dotted pixel-style) ───────────────── */
+.ts-divider,
+.card + .card::before {
+  border: none;
+  border-top: 1px dotted rgba(111, 122, 131, 0.35);
+  margin: 12px 0;
 }
 
 /* ── Back link ────────────────────────────────────────────── */
@@ -210,4 +267,28 @@ select:focus {
 .spinner {
   border-color: var(--text-muted);
   border-top-color: var(--accent-cyan);
+}
+
+/* ── Global Border-Radius Reduction (~20%) ───────────────── */
+.option-btn,
+.diff-btn,
+.formation-btn,
+.answer-btn,
+.go-btn {
+  border-radius: 10px !important;
+}
+
+/* ── Difficulty Tags — Extra Blocky ──────────────────────── */
+.q-difficulty {
+  border-radius: 3px !important;
+  padding: 4px 12px;
+  font-size: 11px;
+  letter-spacing: 1.2px;
+}
+
+/* ── Question Card — Higher Contrast ─────────────────────── */
+#questionCard,
+.card:has(.q-text) {
+  background: var(--bg-elevated);
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }

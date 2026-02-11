@@ -46,12 +46,12 @@ body {
 /* ====== CARDS ====== */
 .card {
   background: var(--card);
-  border-radius: 16px;
+  border-radius: 12px;
   padding: 20px;
   margin-bottom: 16px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.25);
 }
-.card h2 { font-size: 17px; font-weight: 700; margin-bottom: 12px; }
+.card h2 { font-size: 17px; font-weight: 700; margin-bottom: 12px; letter-spacing: -0.5px; }
 .card h3 { font-size: 15px; font-weight: 600; margin-bottom: 8px; color: var(--muted); }
 
 /* ====== STEP 1: SETUP ====== */
@@ -64,7 +64,7 @@ body {
 .option-btn {
   background: var(--card-dark);
   border: 2px solid transparent;
-  border-radius: 12px;
+  border-radius: 10px;
   padding: 12px 10px;
   color: var(--ink);
   font-size: 13px;
@@ -73,8 +73,8 @@ body {
   text-align: center;
   transition: all 0.15s;
 }
-.option-btn:hover { border-color: var(--accent-cyan); background: var(--btn); }
-.option-btn.selected { border-color: var(--accent-cyan); background: var(--btn); }
+.option-btn:hover:not(.selected) { border-color: rgba(0,229,255,0.4); background: var(--btn); }
+.option-btn.selected { border-color: var(--accent-cyan); background: rgba(0,229,255,0.10); box-shadow: inset 0 0 0 1px var(--accent-cyan); }
 .option-btn .emoji { font-size: 20px; display: block; margin-bottom: 4px; }
 .option-btn .color-dot {
   display: inline-block;
@@ -97,7 +97,7 @@ body {
 .formation-btn {
   background: var(--card-dark);
   border: 2px solid transparent;
-  border-radius: 10px;
+  border-radius: 8px;
   padding: 10px 16px;
   color: var(--ink);
   font-size: 14px;
@@ -106,19 +106,19 @@ body {
   transition: all 0.15s;
   letter-spacing: 0.5px;
 }
-.formation-btn:hover { border-color: var(--accent-cyan); }
-.formation-btn.selected { border-color: var(--accent-cyan); background: var(--btn); }
+.formation-btn:hover:not(.selected) { border-color: rgba(0,229,255,0.4); }
+.formation-btn.selected { border-color: var(--accent-cyan); background: rgba(0,229,255,0.10); box-shadow: inset 0 0 0 1px var(--accent-cyan); }
 
 .go-btn {
   width: 100%;
   padding: 16px;
   border: none;
-  border-radius: 14px;
+  border-radius: 10px;
   font-size: 16px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s;
-  letter-spacing: 0.5px;
+  transition: all 0.15s;
+  letter-spacing: 0.3px;
 }
 .go-btn.primary {
   background: var(--accent-yellow);

@@ -44,12 +44,12 @@ body {
 
 .card {
   background: var(--card);
-  border-radius: 16px;
+  border-radius: 12px;
   padding: 20px;
   margin-bottom: 16px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.25);
 }
-.card h2 { font-size: 17px; font-weight: 700; margin-bottom: 12px; }
+.card h2 { font-size: 17px; font-weight: 700; margin-bottom: 12px; letter-spacing: -0.5px; }
 
 .option-grid {
   display: grid;
@@ -60,7 +60,7 @@ body {
 .option-btn {
   background: var(--card-dark);
   border: 2px solid transparent;
-  border-radius: 12px;
+  border-radius: 10px;
   padding: 12px 10px;
   color: var(--ink);
   font-size: 13px;
@@ -85,12 +85,12 @@ body {
   width: 100%;
   padding: 16px;
   border: none;
-  border-radius: 14px;
+  border-radius: 10px;
   font-size: 16px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s;
-  letter-spacing: 0.5px;
+  transition: all 0.15s;
+  letter-spacing: 0.3px;
 }
 
 .scope-badge {
@@ -99,10 +99,13 @@ body {
   gap: 6px;
   background: var(--card-dark);
   padding: 6px 14px;
-  border-radius: 20px;
+  border-radius: 3px;
   font-size: 12px;
   font-weight: 600;
   margin-bottom: 12px;
+  font-family: 'Space Mono', monospace;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
 }
 .scope-badge .dot {
   width: 8px;
@@ -144,10 +147,11 @@ body {
 .q-difficulty {
   font-size: 11px;
   font-weight: 700;
-  padding: 3px 10px;
-  border-radius: 10px;
+  padding: 4px 12px;
+  border-radius: 3px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 1.2px;
+  font-family: 'Space Mono', monospace;
 }
 .q-difficulty.easy { background: var(--accent-green); color: #0B0F12; }
 .q-difficulty.medium { background: var(--accent-yellow); color: #0B0F12; }
@@ -169,7 +173,7 @@ body {
   padding: 14px 16px;
   background: var(--card-dark);
   border: 2px solid transparent;
-  border-radius: 12px;
+  border-radius: 10px;
   color: var(--ink);
   font-size: 14px;
   font-weight: 600;
@@ -177,9 +181,14 @@ body {
   text-align: left;
   transition: all 0.15s;
 }
-.answer-btn:hover:not(.locked) { border-color: var(--accent-dim); background: var(--btn); }
-.answer-btn.selected { border-color: var(--accent); background: var(--btn); }
-.answer-btn.correct { border-color: var(--accent-green); background: rgba(50,255,126,0.12); color: var(--accent-green); }
+.answer-btn:hover:not(.locked) { border-color: rgba(0,229,255,0.4); background: var(--btn); }
+.answer-btn.selected { border-color: var(--accent-cyan); background: rgba(0,229,255,0.10); }
+@keyframes correctPulse {
+  0% { background: rgba(50,255,126,0.25); }
+  50% { background: rgba(50,255,126,0.15); }
+  100% { background: rgba(50,255,126,0.10); }
+}
+.answer-btn.correct { border-color: var(--accent-green); background: rgba(50,255,126,0.10); color: var(--accent-green); animation: correctPulse 0.5s ease-out; }
 .answer-btn.wrong { border-color: var(--danger); background: rgba(224,85,85,0.15); color: var(--danger); }
 .answer-btn.locked { cursor: default; pointer-events: none; }
 .answer-btn .answer-letter {
@@ -202,10 +211,12 @@ body {
   padding: 24px;
 }
 .results-score {
-  font-size: 56px;
+  font-size: 64px;
   font-weight: 800;
   color: var(--accent);
   margin-bottom: 4px;
+  font-family: 'Space Mono', monospace;
+  text-shadow: none;
 }
 .results-label {
   font-size: 15px;
@@ -222,8 +233,9 @@ body {
   text-align: center;
 }
 .results-stat .val {
-  font-size: 20px;
-  font-weight: 700;
+  font-size: 22px;
+  font-weight: 800;
+  font-family: 'Space Mono', monospace;
 }
 .results-stat .val.green { color: var(--accent-green); }
 .results-stat .val.red { color: var(--danger); }
