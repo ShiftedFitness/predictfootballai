@@ -1,0 +1,213 @@
+/*  ============================================================
+    TeleStats — Modern Teletext-Inspired Theme
+    ============================================================
+    Shared CSS for all ts-*.html game pages.
+    Link this BEFORE any inline <style> blocks.
+    ============================================================ */
+
+/* ── Google Fonts ─────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap');
+
+/* ── Colour System ────────────────────────────────────────── */
+:root {
+  /* Base UI (modern dark — no green tint) */
+  --bg:            #0B0F12;
+  --bg-panel:      #12181D;
+  --bg-card:       #171F25;
+  --bg-elevated:   #1E272E;
+
+  --text-primary:  #F2F5F7;
+  --text-secondary:#9BA7B0;
+  --text-muted:    #6F7A83;
+
+  /* Teletext accent palette */
+  --accent-cyan:    #00E5FF;
+  --accent-yellow:  #FFD60A;
+  --accent-magenta: #FF2E9F;
+  --accent-green:   #32FF7E;
+
+  /* Pitch (the most organic green in the UI) */
+  --pitch-green:  #2E6F3E;
+  --pitch-lines:  rgba(255,255,255,0.25);
+
+  /* ── Legacy aliases ────────────────────────────────────── *
+     Existing CSS references like var(--card), var(--accent),
+     var(--muted) etc. keep working without any changes.       */
+  --card:         #171F25;
+  --card-dark:    #12181D;
+  --ink:          #F2F5F7;
+  --muted:        #9BA7B0;
+  --btn:          #1E272E;
+  --btn-hover:    #2A353D;
+  --accent:       #00E5FF;
+  --accent-dim:   #00B8D4;
+  --gold:         #FFD60A;
+  --danger:       #e05555;
+  --used:         #555;
+
+  /* XI-specific */
+  --pitch:        #2E6F3E;
+  --pitch-line:   rgba(255,255,255,0.25);
+  --slot-empty:   rgba(255,255,255,0.10);
+  --slot-correct: #32FF7E;
+  --slot-wrong:   #e05555;
+}
+
+/* ── Typography ───────────────────────────────────────────── */
+body {
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  color: var(--text-primary);
+  background: var(--bg);
+  line-height: 1.4;
+}
+
+h1, h2, h3,
+.stat .v,
+.score-display,
+.chain,
+.results-score {
+  font-family: 'Space Mono', 'Courier New', monospace;
+}
+
+/* ── Teletext Header Bar ──────────────────────────────────── */
+.ts-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  font-weight: 400;
+  padding: 10px 16px;
+  border-bottom: 2px solid var(--accent-cyan);
+  color: var(--text-muted);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  max-width: 560px;
+  margin: 0 auto 8px;
+}
+.ts-header .ts-brand {
+  color: var(--accent-cyan);
+  font-weight: 700;
+}
+.ts-header .ts-time {
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Scanline Overlay (very subtle) ───────────────────────── */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.025) 2px,
+    rgba(0, 0, 0, 0.025) 4px
+  );
+}
+
+/* ── Primary Button (Yellow CTA) ──────────────────────────── */
+.go-btn.primary,
+.btn-primary {
+  background: var(--accent-yellow) !important;
+  color: #0B0F12 !important;
+  font-weight: 700;
+  border: none;
+  transition: all 0.15s;
+}
+.go-btn.primary:hover:not(:disabled),
+.btn-primary:hover:not(:disabled) {
+  background: #E6C009 !important;
+  box-shadow: 0 0 16px rgba(255, 214, 10, 0.15);
+}
+.go-btn.primary:disabled,
+.btn-primary:disabled {
+  background: var(--bg-elevated) !important;
+  color: var(--text-muted) !important;
+  box-shadow: none;
+}
+
+/* ── Secondary Button (Cyan Border) ───────────────────────── */
+.go-btn.secondary,
+.btn-secondary {
+  background: var(--bg-panel) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--accent-cyan) !important;
+  font-weight: 600;
+  transition: all 0.15s;
+}
+.go-btn.secondary:hover:not(:disabled),
+.btn-secondary:hover:not(:disabled) {
+  background: var(--bg-elevated) !important;
+  box-shadow: 0 0 12px rgba(0, 229, 255, 0.08);
+}
+
+/* ── Danger Button ────────────────────────────────────────── */
+.btn-danger {
+  background: var(--danger) !important;
+  color: #fff !important;
+  border: none;
+}
+
+/* ── Tags & Chips (Teletext Block Style) ──────────────────── */
+.badge,
+.scope-badge,
+.q-difficulty {
+  font-family: 'Space Mono', monospace;
+  text-transform: uppercase;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  border-radius: 4px;
+  padding: 3px 8px;
+}
+
+/* ── Card hover glow ──────────────────────────────────────── */
+.card {
+  border: 1px solid transparent;
+  transition: border-color 0.2s;
+}
+
+/* ── Input focus ──────────────────────────────────────────── */
+input:focus,
+select:focus {
+  border-color: var(--accent-cyan) !important;
+  outline: none;
+}
+
+/* ── Pixel-style dividers ─────────────────────────────────── */
+.ts-divider {
+  border: none;
+  border-top: 1px dotted var(--text-muted);
+  margin: 12px 0;
+  opacity: 0.4;
+}
+
+/* ── Selection / Active States ────────────────────────────── */
+.option-btn.selected {
+  border-color: var(--accent-cyan) !important;
+  background: var(--bg-elevated) !important;
+}
+.option-btn:hover {
+  border-color: var(--accent-cyan) !important;
+  background: var(--bg-elevated) !important;
+}
+
+/* ── Back link ────────────────────────────────────────────── */
+.back-link {
+  color: var(--text-muted);
+  transition: color 0.15s;
+}
+.back-link:hover {
+  color: var(--accent-cyan);
+}
+
+/* ── Spinner ──────────────────────────────────────────────── */
+.spinner {
+  border-color: var(--text-muted);
+  border-top-color: var(--accent-cyan);
+}

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>TeleStats Games</title>
+<link rel="stylesheet" href="telestats-theme.css"/>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  min-height: 100vh;
+  padding: 0 16px 16px;
+}
+.container { max-width: 520px; margin: 0 auto; }
+
+.header {
+  text-align: center;
+  padding: 24px 0 20px;
+}
+.header h1 {
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: var(--text-primary);
+}
+.header h1 .accent { color: var(--accent-cyan); }
+.header .subtitle {
+  color: var(--text-muted);
+  font-size: 14px;
+  margin-top: 6px;
+  font-family: 'Inter', sans-serif;
+}
+
+.game-grid {
+  display: grid;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.game-card {
+  display: block;
+  background: var(--bg-card);
+  border-radius: 20px;
+  padding: 24px;
+  text-decoration: none;
+  color: var(--text-primary);
+  border: 1px solid rgba(255,255,255,0.04);
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+.game-card:hover {
+  border-color: var(--accent-cyan);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.4), 0 0 20px rgba(0,229,255,0.06);
+}
+.game-card .game-icon {
+  font-size: 36px;
+  margin-bottom: 12px;
+  display: block;
+}
+.game-card .game-title {
+  font-size: 20px;
+  font-weight: 800;
+  margin-bottom: 6px;
+  letter-spacing: -0.3px;
+}
+.game-card .game-title .highlight { color: var(--accent-cyan); }
+.game-card .game-desc {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  font-family: 'Inter', sans-serif;
+}
+.game-card .game-arrow {
+  position: absolute;
+  top: 50%;
+  right: 20px;
+  transform: translateY(-50%);
+  font-size: 24px;
+  color: var(--text-muted);
+  transition: color 0.2s;
+}
+.game-card:hover .game-arrow { color: var(--accent-cyan); }
+
+.game-card .badge {
+  display: inline-block;
+  background: var(--accent-cyan);
+  color: #0B0F12;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 10px;
+  font-family: 'Space Mono', monospace;
+}
+.game-card .badge.new { background: var(--accent-yellow); }
+
+footer {
+  text-align: center;
+  padding: 24px 16px;
+  font-size: 11px;
+  color: var(--text-muted);
+  opacity: 0.6;
+  font-family: 'Space Mono', monospace;
+}
+</style>
+</head>
+<body>
+
+<div class="ts-header">
+  <span class="ts-brand">TELESTATS</span>
+  <span>EPL &middot; GAMES</span>
+  <span class="ts-time" id="tsTime"></span>
+</div>
+
+<div class="container">
+  <div class="header">
+    <h1>Tele<span class="accent">Stats</span></h1>
+    <div class="subtitle">Test your Premier League knowledge</div>
+  </div>
+
+  <div class="game-grid">
+
+    <a href="ts-bullseye.html" class="game-card">
+      <span class="game-icon">🎯</span>
+      <div class="game-title">Bull<span class="highlight">seye</span></div>
+      <div class="game-desc">Name players to subtract their stats from 501. Go bust and you lose. A darts-style football trivia game.</div>
+      <span class="game-arrow">&rarr;</span>
+    </a>
+
+    <a href="ts-xi.html" class="game-card">
+      <span class="game-icon">⚽</span>
+      <div class="game-title">Starting <span class="highlight">XI</span></div>
+      <div class="game-desc">Pick the best starting XI by appearances, goals, or performance. Fill every position correctly to win.</div>
+      <span class="game-arrow">&rarr;</span>
+    </a>
+
+    <a href="ts-whoami.html" class="game-card">
+      <span class="badge new">New</span>
+      <span class="game-icon">🕵️</span>
+      <div class="game-title">Who Am <span class="highlight">I?</span></div>
+      <div class="game-desc">A mystery player is chosen. Clues are revealed one by one. Can you guess who it is before all clues are shown?</div>
+      <span class="game-arrow">&rarr;</span>
+    </a>
+
+    <a href="ts-quiz.html" class="game-card">
+      <span class="badge new">New</span>
+      <span class="game-icon">🧠</span>
+      <div class="game-title">Pop <span class="highlight">Quiz</span></div>
+      <div class="game-desc">5 questions from easy to hard, all generated from real Premier League data. How much do you really know?</div>
+      <span class="game-arrow">&rarr;</span>
+    </a>
+
+  </div>
+</div>
+
+<footer>
+  Build: 2026-02-11 | TeleStats Games Hub v2.0
+</footer>
+
+<script>
+/* Live clock in header */
+function updateClock() {
+  const now = new Date();
+  const hh = String(now.getHours()).padStart(2, '0');
+  const mm = String(now.getMinutes()).padStart(2, '0');
+  const el = document.getElementById('tsTime');
+  if (el) el.textContent = hh + ':' + mm;
+}
+updateClock();
+setInterval(updateClock, 30000);
+</script>
+</body>
+</html>
