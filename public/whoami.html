@@ -226,6 +226,8 @@ body {
 /* ====== GUESS AREA WITH SUGGESTIONS ====== */
 .guess-area {
   margin-top: 16px;
+}
+.input-wrapper {
   position: relative;
 }
 .guess-input {
@@ -244,17 +246,17 @@ body {
 
 .suggestions-dropdown {
   position: absolute;
-  top: 100%;
+  bottom: 100%;
   left: 0;
   right: 0;
   background: var(--card-dark);
   border: 1px solid var(--btn);
   border-radius: 12px;
-  margin-top: 4px;
+  margin-bottom: 6px;
   max-height: 280px;
   overflow-y: auto;
   z-index: 50;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  box-shadow: 0 -8px 24px rgba(0,0,0,0.5);
 }
 .suggestions-dropdown.hidden { display: none; }
 
@@ -437,8 +439,10 @@ body {
 
     <div class="card">
       <div class="guess-area">
-        <input type="text" class="guess-input" id="guessInput" placeholder="Type player name..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
-        <div id="suggestionsDropdown" class="suggestions-dropdown hidden"></div>
+        <div class="input-wrapper">
+          <div id="suggestionsDropdown" class="suggestions-dropdown hidden"></div>
+          <input type="text" class="guess-input" id="guessInput" placeholder="Type player name..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+        </div>
         <div class="guess-feedback" id="guessFeedback"></div>
         <button class="go-btn primary" id="guessBtn">Guess</button>
       </div>
@@ -606,24 +610,49 @@ function renderBlanks(name, revealedName, colorClass) {
 
 /**
  * Animate filling in the blanks letter by letter, then flash color.
+ * For wrong guesses, temporarily rebuilds blanks to match the guessed name.
  * Returns a promise that resolves when animation is done.
  */
-function animateBlanksReveal(actualName, isCorrect) {
+function animateBlanksReveal(guessedName, isCorrect) {
   return new Promise(resolve => {
     const container = $('blanksDisplay');
-    const words = actualName.split(' ');
+    const colorClass = isCorrect ? 'correct' : 'wrong';
+
+    if (!isCorrect) {
+      // For wrong guesses: rebuild blanks to match the guessed name structure
+      container.innerHTML = '';
+      const words = guessedName.trim().split(/\s+/);
+      for (const word of words) {
+        const wordEl = document.createElement('span');
+        wordEl.className = 'blank-word';
+        for (const ch of word) {
+          const charEl = document.createElement('span');
+          if (ch === '-') {
+            charEl.className = 'blank-char hyphen';
+            charEl.textContent = '-';
+          } else if (ch === "'") {
+            charEl.className = 'blank-char apostrophe';
+            charEl.textContent = "'";
+          } else {
+            charEl.className = 'blank-char';
+          }
+          wordEl.appendChild(charEl);
+        }
+        container.appendChild(wordEl);
+      }
+    }
+
     const allChars = container.querySelectorAll('.blank-char:not(.hyphen):not(.apostrophe)');
 
-    // Build flat array of letters from actualName
+    // Build flat array of letters from guessedName
     const letters = [];
-    for (const word of words) {
+    for (const word of guessedName.trim().split(/\s+/)) {
       for (const ch of word) {
         if (ch !== '-' && ch !== "'") letters.push(ch);
       }
     }
 
     let idx = 0;
-    const colorClass = isCorrect ? 'correct' : 'wrong';
 
     function revealNext() {
       if (idx >= allChars.length || idx >= letters.length) {
@@ -867,6 +896,11 @@ async function submitGuess() {
       await animateBlanksReveal(result.player.name, true);
       showResult(true, result.player);
     } else {
+      // Animate the guessed name into blanks, then flash red and reset
+      await animateBlanksReveal(guess, false);
+      await sleep(600);
+      // Reset blanks back to empty underscores
+      renderBlanksFromPattern(gameData.blanks);
       $('guessFeedback').textContent = 'Wrong! Try again...';
       $('guessFeedback').className = 'guess-feedback wrong';
       $('guessInput').value = '';
@@ -882,6 +916,8 @@ async function submitGuess() {
   $('guessBtn').disabled = false;
   $('guessBtn').textContent = 'Guess';
 }
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 async function giveUp() {
   gameOver = true;

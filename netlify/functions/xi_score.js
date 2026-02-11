@@ -339,7 +339,7 @@ exports.handler = async (event) => {
     const bestByBucket = {};
     for (const slot of bestXI) {
       if (!bestByBucket[slot.bucket]) bestByBucket[slot.bucket] = new Set();
-      if (slot.player) bestByBucket[slot.bucket].add(slot.player.playerId);
+      if (slot.player) bestByBucket[slot.bucket].add(String(slot.player.playerId));
     }
 
     // Compute full rankings per bucket for context on wrong picks
@@ -368,7 +368,7 @@ exports.handler = async (event) => {
           const data = await fetchAll(buildPerfQuery);
           if (data) {
             bucketRankings[bucket] = data.map((r, i) => ({
-              playerId: r.player_uid,
+              playerId: String(r.player_uid),
               rank: i + 1,
               score: parseFloat(r.performance_score) || 0,
               appearances: r.appearances,
@@ -428,7 +428,7 @@ exports.handler = async (event) => {
           return b.appearances - a.appearances;
         });
         bucketRankings[bucket] = eligible.map((p, i) => ({
-          playerId: p.player_uid,
+          playerId: String(p.player_uid),
           rank: i + 1,
           appearances: p.appearances,
           goals: p.goals,
@@ -448,7 +448,8 @@ exports.handler = async (event) => {
       }
 
       const bucket = bestSlot.bucket;
-      const isCorrect = pick.playerId && bestByBucket[bucket] && bestByBucket[bucket].has(pick.playerId);
+      const pickId = pick.playerId != null ? String(pick.playerId) : null;
+      const isCorrect = pickId && bestByBucket[bucket] && bestByBucket[bucket].has(pickId);
 
       if (isCorrect) correct++;
 
@@ -457,14 +458,14 @@ exports.handler = async (event) => {
       let userRank = null;
       let userStatValue = null;
       let userRankBucket = null;
-      if (pick.playerId) {
+      if (pickId) {
         const bucketsToCheck = [bucket];
         if (bucket === 'FWD') bucketsToCheck.push('MID');
         else if (bucket === 'MID') bucketsToCheck.push('FWD');
 
         for (const checkBucket of bucketsToCheck) {
           if (!bucketRankings[checkBucket]) continue;
-          const found = bucketRankings[checkBucket].find(r => r.playerId === pick.playerId);
+          const found = bucketRankings[checkBucket].find(r => String(r.playerId) === pickId);
           if (found) {
             userRank = found.rank;
             userRankBucket = checkBucket;

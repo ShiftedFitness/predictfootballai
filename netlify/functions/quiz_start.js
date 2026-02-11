@@ -113,6 +113,67 @@ function generateNumericOptions(correct, count = 3) {
 }
 
 /**
+ * Generate range-based answer options for numeric questions.
+ * Instead of exact numbers, produces ranges like "Below 200", "200–220", "220–240", "Above 240".
+ * Returns { correctRange, wrongRanges, allRanges } with the correct range label.
+ */
+function generateRangeOptions(correct) {
+  // Determine a sensible step size based on the magnitude of the answer
+  // For numbers <20, step=3; <50 step=5; <100 step=10; <300 step=20; else step based on magnitude
+  let step;
+  if (correct < 15) step = 2;
+  else if (correct < 30) step = 3;
+  else if (correct < 60) step = 5;
+  else if (correct < 150) step = 10;
+  else if (correct < 400) step = 20;
+  else if (correct < 1000) step = 50;
+  else step = Math.round(correct * 0.05 / 10) * 10 || 50;
+
+  // Find the range that contains the correct answer
+  // Build ranges: the correct answer falls in one range, then we have 3 others
+  const rangeStart = Math.floor(correct / step) * step;
+  const rangeEnd = rangeStart + step;
+
+  // Build 4 contiguous ranges centered around the correct one
+  // Randomly offset so the correct one isn't always in the same position
+  const offsets = [-1, 0, 1, 2]; // these create 4 ranges
+  // Randomly shift the window so correct range position varies
+  const shift = Math.floor(Math.random() * 3) - 1; // -1, 0, or 1
+  const ranges = offsets.map(o => {
+    const s = rangeStart + (o + shift) * step;
+    const e = s + step;
+    return { start: s, end: e };
+  });
+
+  // Ensure no negative ranges
+  const filteredRanges = ranges.filter(r => r.end > 0);
+  if (filteredRanges.length < 4) {
+    // Fallback: build ranges starting from a low point
+    const baseStart = Math.max(0, rangeStart - step);
+    filteredRanges.length = 0;
+    for (let i = 0; i < 4; i++) {
+      filteredRanges.push({ start: baseStart + i * step, end: baseStart + (i + 1) * step });
+    }
+  }
+
+  // Format range labels
+  const labels = filteredRanges.map((r, i) => {
+    if (i === 0 && r.start <= 0) return `Below ${r.end}`;
+    if (i === filteredRanges.length - 1) return `${r.start}+`;
+    return `${r.start} – ${r.end - 1}`;
+  });
+
+  // Find which label contains the correct answer
+  let correctIdx = filteredRanges.findIndex(r => correct >= r.start && correct < r.end);
+  if (correctIdx === -1) correctIdx = 0; // safety fallback
+
+  const correctLabel = labels[correctIdx];
+  const wrongLabels = labels.filter((_, i) => i !== correctIdx);
+
+  return { correctLabel, wrongLabels };
+}
+
+/**
  * Build a question object with shuffled options.
  * correctAnswer is the correct string, wrongAnswers is an array of 3 strings.
  */
@@ -266,12 +327,12 @@ async function qCountSeasons(stats, nameMap, scopeLabel, scope) {
   const correct = seasons.size;
   if (correct < 2) return null;
 
-  const wrongs = generateNumericOptions(correct, 3);
+  const { correctLabel, wrongLabels } = generateRangeOptions(correct);
   const subject = scope.type === 'club' ? scopeLabel : 'the Premier League';
   return buildQuestion(
     `How many Premier League seasons has ${subject} had?`,
-    String(correct),
-    wrongs.map(String),
+    correctLabel,
+    wrongLabels,
     'easy'
   );
 }
@@ -328,14 +389,14 @@ async function qCountPlayers(stats, nameMap, scopeLabel, scope) {
   const correct = players.size;
   if (correct < 10) return null;
 
-  const wrongs = generateNumericOptions(correct, 3);
+  const { correctLabel, wrongLabels } = generateRangeOptions(correct);
   const subject = scope.type === 'club'
     ? `have represented ${scopeLabel}`
     : 'have played';
   return buildQuestion(
-    `How many players ${subject} in the Premier League?`,
-    String(correct),
-    wrongs.map(String),
+    `Roughly how many players ${subject} in the Premier League?`,
+    correctLabel,
+    wrongLabels,
     'easy'
   );
 }
@@ -416,10 +477,10 @@ async function qMostCommonPosition(stats, nameMap, scopeLabel, scope) {
   if (wrongs.length < 3) return null;
 
   const subject = scope.type === 'club'
-    ? `${scopeLabel} players`
-    : 'Premier League players';
+    ? scopeLabel
+    : 'the Premier League';
   return buildQuestion(
-    `What is the most common position for ${subject}?`,
+    `Which position has had the most players at ${subject}?`,
     correct,
     wrongs.slice(0, 3),
     'medium'
@@ -485,14 +546,14 @@ async function qCountNationalities(stats, nameMap, scopeLabel, scope) {
   const correct = nationalities.size;
   if (correct < 5) return null;
 
-  const wrongs = generateNumericOptions(correct, 3);
+  const { correctLabel, wrongLabels } = generateRangeOptions(correct);
   const subject = scope.type === 'club'
     ? `have played for ${scopeLabel}`
     : 'have played';
   return buildQuestion(
-    `How many different nationalities ${subject} in the Premier League?`,
-    String(correct),
-    wrongs.map(String),
+    `Roughly how many different nationalities ${subject} in the Premier League?`,
+    correctLabel,
+    wrongLabels,
     'hard'
   );
 }
