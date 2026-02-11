@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>TeleStats - Who Am I?</title>
+<link rel="stylesheet" href="telestats-theme.css"/>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+  padding: 12px;
+  line-height: 1.4;
+}
+
+.container { max-width: 480px; margin: 0 auto; }
+
+.back-link {
+  display: inline-block;
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+.back-link:hover { color: var(--accent-cyan); }
+
+.header {
+  text-align: center;
+  padding: 16px 0 8px;
+}
+.header h1 {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+.header h1 span { color: var(--accent-cyan); }
+.header .subtitle {
+  color: var(--muted);
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+.card {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+.card h2 { font-size: 17px; font-weight: 700; margin-bottom: 12px; }
+
+.option-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.option-btn {
+  background: var(--card-dark);
+  border: 2px solid transparent;
+  border-radius: 12px;
+  padding: 12px 10px;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s;
+}
+.option-btn .color-dot {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  vertical-align: middle;
+  margin-bottom: 4px;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+.option-btn .emoji { font-size: 20px; display: block; margin-bottom: 4px; }
+.option-btn.wide { grid-column: 1 / -1; }
+
+.go-btn {
+  width: 100%;
+  padding: 16px;
+  border: none;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.5px;
+}
+
+/* ====== DIFFICULTY SELECTOR ====== */
+.difficulty-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+}
+.diff-btn {
+  background: var(--card-dark);
+  border: 2px solid transparent;
+  border-radius: 12px;
+  padding: 12px 8px;
+  color: var(--ink);
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s;
+}
+.diff-btn:hover { border-color: var(--accent-cyan); background: var(--btn); }
+.diff-btn.selected { border-color: var(--accent-cyan); background: var(--btn); }
+.diff-btn .diff-icon { font-size: 20px; display: block; margin-bottom: 4px; }
+.diff-btn .diff-label { font-size: 13px; font-weight: 700; display: block; }
+.diff-btn .diff-desc { font-size: 10px; color: var(--muted); display: block; margin-top: 2px; }
+
+/* ====== BLANKS DISPLAY ====== */
+.blanks-container {
+  text-align: center;
+  padding: 20px 8px;
+  min-height: 80px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 2px;
+}
+.blank-word {
+  display: inline-flex;
+  gap: 3px;
+  margin: 4px 8px;
+}
+.blank-char {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 34px;
+  border-bottom: 3px solid var(--accent-cyan);
+  font-size: 20px;
+  font-weight: 800;
+  font-family: 'Courier New', monospace;
+  color: transparent;
+  transition: color 0.3s, border-color 0.3s, transform 0.3s;
+  text-transform: uppercase;
+}
+.blank-char.revealed {
+  color: var(--accent-cyan);
+  transform: scale(1.1);
+}
+.blank-char.correct {
+  color: var(--accent-green);
+  border-color: var(--accent-green);
+}
+.blank-char.wrong {
+  color: var(--danger);
+  border-color: var(--danger);
+}
+.blank-char.hyphen, .blank-char.apostrophe {
+  color: var(--accent-cyan);
+  border-bottom-color: transparent;
+  width: 14px;
+}
+
+.clue-list {
+  list-style: none;
+}
+.clue-item {
+  padding: 14px 16px;
+  background: var(--card-dark);
+  border-radius: 12px;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink);
+  border-left: 3px solid var(--accent-cyan);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: all 0.4s ease;
+}
+.clue-item.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+.clue-item.locked {
+  opacity: 0.3;
+  border-left-color: var(--btn);
+  color: var(--muted);
+}
+.clue-item .clue-number {
+  display: inline-block;
+  background: var(--accent-cyan);
+  color: #000;
+  font-size: 10px;
+  font-weight: 800;
+  width: 20px;
+  height: 20px;
+  line-height: 20px;
+  text-align: center;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+.clue-item.locked .clue-number { background: var(--btn); color: var(--muted); }
+
+/* ====== GUESS AREA WITH SUGGESTIONS ====== */
+.guess-area {
+  margin-top: 16px;
+}
+.input-wrapper {
+  position: relative;
+}
+.guess-input {
+  width: 100%;
+  padding: 14px 16px;
+  background: var(--card-dark);
+  border: 2px solid transparent;
+  border-radius: 12px;
+  color: var(--ink);
+  font-size: 15px;
+  outline: none;
+  margin-bottom: 0;
+}
+.guess-input:focus { border-color: var(--accent); }
+.guess-input::placeholder { color: var(--muted); }
+
+.suggestions-dropdown {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  right: 0;
+  background: var(--card-dark);
+  border: 1px solid var(--btn);
+  border-radius: 12px;
+  margin-bottom: 6px;
+  max-height: 280px;
+  overflow-y: auto;
+  z-index: 50;
+  box-shadow: 0 -8px 24px rgba(0,0,0,0.5);
+}
+.suggestions-dropdown.hidden { display: none; }
+
+.suggestion-item {
+  padding: 12px 16px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  transition: background 0.1s;
+}
+.suggestion-item:last-child { border-bottom: none; }
+.suggestion-item:hover { background: var(--bg-elevated); }
+.suggestion-item:first-child { border-radius: 12px 12px 0 0; }
+.suggestion-item:last-child { border-radius: 0 0 12px 12px; }
+.suggestion-item:only-child { border-radius: 12px; }
+
+.suggestion-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.suggestion-meta {
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.suggestion-loading {
+  padding: 12px 16px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.guess-feedback {
+  text-align: center;
+  padding: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  min-height: 36px;
+}
+.guess-feedback.wrong { color: var(--danger); }
+.guess-feedback.correct { color: var(--accent-green); }
+
+.reveal-card {
+  text-align: center;
+  padding: 24px;
+}
+.reveal-card .player-name {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--accent-cyan);
+  margin-bottom: 8px;
+}
+.reveal-card .player-meta {
+  font-size: 14px;
+  color: var(--muted);
+}
+.reveal-card .result-badge {
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 700;
+  margin-top: 12px;
+}
+.reveal-card .result-badge.win { background: var(--accent-green); color: #0B0F12; }
+.reveal-card .result-badge.lose { background: var(--danger); color: #fff; }
+
+.clue-counter {
+  background: var(--accent-magenta);
+  color: #fff;
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 4px;
+  font-family: 'Space Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+
+.scope-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--card-dark);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+.scope-badge .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-cyan);
+}
+
+.spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--muted);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.hidden { display: none !important; }
+
+.btn-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+.btn-row .go-btn { flex: 1; }
+
+@keyframes popIn {
+  0% { transform: scale(0.5); opacity: 0; }
+  60% { transform: scale(1.2); }
+  100% { transform: scale(1.1); opacity: 1; }
+}
+.blank-char.pop {
+  animation: popIn 0.3s ease forwards;
+}
+</style>
+</head>
+<body>
+
+<div class="ts-header">
+  <span class="ts-brand">TELESTATS</span>
+  <span>EPL &middot; WHO AM I?</span>
+  <span class="ts-time" id="tsTime"></span>
+</div>
+
+<div class="container">
+  <a href="ts-games.html" class="back-link">&larr; All Games</a>
+
+  <div class="header">
+    <h1>Who Am <span>I?</span></h1>
+    <div class="subtitle">Guess the mystery player from clues</div>
+  </div>
+
+  <!-- STEP 1: SETUP -->
+  <div id="step1">
+    <div class="card">
+      <h2>Choose Scope</h2>
+      <div class="option-grid" id="scopeGrid"></div>
+    </div>
+    <div class="card">
+      <h2>Difficulty</h2>
+      <div class="difficulty-grid" id="difficultyGrid">
+        <button class="diff-btn selected" data-diff="easy">
+          <span class="diff-icon">&#11088;</span>
+          <span class="diff-label">Easy</span>
+          <span class="diff-desc">Household names</span>
+        </button>
+        <button class="diff-btn" data-diff="medium">
+          <span class="diff-icon">&#128293;</span>
+          <span class="diff-label">Medium</span>
+          <span class="diff-desc">Solid careers</span>
+        </button>
+        <button class="diff-btn" data-diff="hard">
+          <span class="diff-icon">&#128128;</span>
+          <span class="diff-label">Hard</span>
+          <span class="diff-desc">1-3 season wonders</span>
+        </button>
+      </div>
+    </div>
+    <button class="go-btn primary" id="startBtn" disabled>Start Game</button>
+  </div>
+
+  <!-- STEP 2: GAME -->
+  <div id="step2" class="hidden">
+    <div class="scope-badge" id="gameBadge"></div>
+
+    <div class="card">
+      <div class="blanks-container" id="blanksDisplay"></div>
+    </div>
+
+    <div class="card">
+      <div class="clue-counter" id="clueCounter">Clue 1 of 5</div>
+      <ul class="clue-list" id="clueList"></ul>
+
+      <button class="go-btn secondary" id="nextClueBtn">Reveal Next Clue</button>
+    </div>
+
+    <div class="card">
+      <div class="guess-area">
+        <div class="input-wrapper">
+          <div id="suggestionsDropdown" class="suggestions-dropdown hidden"></div>
+          <input type="text" class="guess-input" id="guessInput" placeholder="Type player name..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+        </div>
+        <div class="guess-feedback" id="guessFeedback"></div>
+        <button class="go-btn primary" id="guessBtn">Guess</button>
+      </div>
+    </div>
+
+    <!-- Reveal card (shown on win or give up) -->
+    <div id="revealCard" class="card hidden">
+      <div class="reveal-card">
+        <div class="player-name" id="revealName"></div>
+        <div class="player-meta" id="revealMeta"></div>
+        <div class="result-badge" id="resultBadge"></div>
+      </div>
+    </div>
+
+    <div class="btn-row" id="actionBtns">
+      <button class="go-btn secondary" id="giveUpBtn">Give Up</button>
+      <button class="go-btn primary hidden" id="playAgainBtn">Play Again</button>
+    </div>
+  </div>
+</div>
+
+<footer style="text-align:center;padding:16px 16px 72px;font-size:11px;color:var(--muted);opacity:0.6;">
+  Build: 2026-02-11 | TeleStats - Who Am I? v2.0
+</footer>
+
+<script>
+const API_BASE = '/.netlify/functions';
+const $ = id => document.getElementById(id);
+
+const CLUB_COLOURS = {
+  'club_sunderland': '#EB172B',
+  'club_manutd': '#DA291C',
+  'club_arsenal': '#EF0107',
+  'club_liverpool': '#C8102E',
+  'club_chelsea': '#034694',
+};
+
+const SCOPES = [
+  { id: 'epl_alltime', label: 'Premier League (All-time)', type: 'league' },
+  { id: 'club_sunderland', label: 'Sunderland', type: 'club' },
+  { id: 'club_manutd', label: 'Manchester United', type: 'club' },
+  { id: 'club_arsenal', label: 'Arsenal', type: 'club' },
+  { id: 'club_liverpool', label: 'Liverpool', type: 'club' },
+  { id: 'club_chelsea', label: 'Chelsea', type: 'club' },
+];
+
+let selectedScope = null;
+let selectedDifficulty = 'easy'; // default to easy
+let gameData = null;
+let cluesRevealed = 0;
+let gameOver = false;
+let guessCount = 0;
+let searchDebounce = null;
+let selectedSuggestion = null; // the player name selected from dropdown
+
+// ============================================================
+// INIT
+// ============================================================
+function init() {
+  const grid = $('scopeGrid');
+  for (const scope of SCOPES) {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn' + (scope.type === 'league' ? ' wide' : '');
+    const colour = CLUB_COLOURS[scope.id];
+    if (scope.type === 'league') {
+      btn.innerHTML = `<span class="emoji">&#127942;</span>${scope.label}`;
+    } else {
+      btn.innerHTML = `<span class="color-dot" style="background:${colour || '#555'}"></span> ${scope.label}`;
+    }
+    btn.onclick = () => {
+      selectedScope = scope.id;
+      grid.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      $('startBtn').disabled = false;
+    };
+    grid.appendChild(btn);
+  }
+
+  // Difficulty buttons
+  $('difficultyGrid').querySelectorAll('.diff-btn').forEach(btn => {
+    btn.onclick = () => {
+      selectedDifficulty = btn.dataset.diff;
+      $('difficultyGrid').querySelectorAll('.diff-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+    };
+  });
+
+  $('startBtn').onclick = startGame;
+  $('nextClueBtn').onclick = revealNextClue;
+  $('guessBtn').onclick = submitGuess;
+  $('giveUpBtn').onclick = giveUp;
+  $('playAgainBtn').onclick = resetToSetup;
+
+  // Typeahead search on input
+  $('guessInput').addEventListener('input', () => {
+    selectedSuggestion = null;
+    clearTimeout(searchDebounce);
+    const q = $('guessInput').value.trim();
+    if (q.length < 2) {
+      hideSuggestions();
+      return;
+    }
+    searchDebounce = setTimeout(() => doSearch(q), 250);
+  });
+
+  // Submit on Enter
+  $('guessInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      hideSuggestions();
+      submitGuess();
+    }
+  });
+
+  // Close suggestions when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.guess-area')) {
+      hideSuggestions();
+    }
+  });
+}
+
+// ============================================================
+// BLANKS RENDERING
+// ============================================================
+function renderBlanks(name, revealedName, colorClass) {
+  const container = $('blanksDisplay');
+  container.innerHTML = '';
+
+  if (!name) return;
+
+  // Split name into words
+  const words = name.split(' ');
+
+  for (let wi = 0; wi < words.length; wi++) {
+    const wordEl = document.createElement('span');
+    wordEl.className = 'blank-word';
+
+    for (let ci = 0; ci < words[wi].length; ci++) {
+      const ch = words[wi][ci];
+      const charEl = document.createElement('span');
+      charEl.className = 'blank-char';
+
+      if (ch === '-') {
+        charEl.className = 'blank-char hyphen';
+        charEl.textContent = '-';
+      } else if (ch === "'") {
+        charEl.className = 'blank-char apostrophe';
+        charEl.textContent = "'";
+      } else {
+        // If we have a revealed name, show the letter
+        if (revealedName) {
+          charEl.textContent = ch;
+          charEl.classList.add('revealed');
+          if (colorClass) charEl.classList.add(colorClass);
+        }
+      }
+
+      wordEl.appendChild(charEl);
+    }
+
+    container.appendChild(wordEl);
+  }
+}
+
+/**
+ * Animate filling in the blanks letter by letter, then flash color.
+ * For wrong guesses, temporarily rebuilds blanks to match the guessed name.
+ * Returns a promise that resolves when animation is done.
+ */
+function animateBlanksReveal(guessedName, isCorrect) {
+  return new Promise(resolve => {
+    const container = $('blanksDisplay');
+    const colorClass = isCorrect ? 'correct' : 'wrong';
+
+    if (!isCorrect) {
+      // For wrong guesses: rebuild blanks to match the guessed name structure
+      container.innerHTML = '';
+      const words = guessedName.trim().split(/\s+/);
+      for (const word of words) {
+        const wordEl = document.createElement('span');
+        wordEl.className = 'blank-word';
+        for (const ch of word) {
+          const charEl = document.createElement('span');
+          if (ch === '-') {
+            charEl.className = 'blank-char hyphen';
+            charEl.textContent = '-';
+          } else if (ch === "'") {
+            charEl.className = 'blank-char apostrophe';
+            charEl.textContent = "'";
+          } else {
+            charEl.className = 'blank-char';
+          }
+          wordEl.appendChild(charEl);
+        }
+        container.appendChild(wordEl);
+      }
+    }
+
+    const allChars = container.querySelectorAll('.blank-char:not(.hyphen):not(.apostrophe)');
+
+    // Build flat array of letters from guessedName
+    const letters = [];
+    for (const word of guessedName.trim().split(/\s+/)) {
+      for (const ch of word) {
+        if (ch !== '-' && ch !== "'") letters.push(ch);
+      }
+    }
+
+    let idx = 0;
+
+    function revealNext() {
+      if (idx >= allChars.length || idx >= letters.length) {
+        // Flash all at once with final color
+        setTimeout(() => {
+          allChars.forEach(el => {
+            el.classList.add(colorClass);
+          });
+          resolve();
+        }, 200);
+        return;
+      }
+
+      const el = allChars[idx];
+      el.textContent = letters[idx];
+      el.classList.add('revealed', 'pop', colorClass);
+      idx++;
+      setTimeout(revealNext, 60);
+    }
+
+    revealNext();
+  });
+}
+
+// ============================================================
+// PLAYER SEARCH / SUGGESTIONS
+// ============================================================
+async function doSearch(query) {
+  if (gameOver) return;
+
+  const dropdown = $('suggestionsDropdown');
+  dropdown.innerHTML = '<div class="suggestion-loading"><span class="spinner"></span></div>';
+  dropdown.classList.remove('hidden');
+
+  try {
+    const res = await fetch(`${API_BASE}/whoami_start`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'search_players',
+        scopeId: selectedScope,
+        query,
+      }),
+    });
+    const data = await res.json();
+
+    if (gameOver) { hideSuggestions(); return; }
+
+    const players = data.players || [];
+    if (players.length === 0) {
+      dropdown.innerHTML = '<div class="suggestion-loading" style="color:var(--muted);">No players found</div>';
+      return;
+    }
+
+    dropdown.innerHTML = players.map(p => `
+      <div class="suggestion-item" data-name="${escHtml(p.name)}">
+        <span class="suggestion-name">${escHtml(p.name)}</span>
+        <span class="suggestion-meta">${p.nationality} &middot; ${p.appearances} apps</span>
+      </div>
+    `).join('');
+
+    dropdown.querySelectorAll('.suggestion-item').forEach(item => {
+      item.onclick = (e) => {
+        e.stopPropagation();
+        const name = item.dataset.name;
+        selectedSuggestion = name;
+        $('guessInput').value = name;
+        hideSuggestions();
+        submitGuess();
+      };
+    });
+
+  } catch (err) {
+    console.error('Search error:', err);
+    dropdown.innerHTML = '<div class="suggestion-loading" style="color:var(--danger);">Search failed</div>';
+  }
+}
+
+function hideSuggestions() {
+  $('suggestionsDropdown').classList.add('hidden');
+  $('suggestionsDropdown').innerHTML = '';
+}
+
+function escHtml(str) {
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+// ============================================================
+// GAME FLOW
+// ============================================================
+async function startGame() {
+  $('startBtn').disabled = true;
+  $('startBtn').innerHTML = '<span class="spinner"></span> Loading...';
+
+  try {
+    const res = await fetch(`${API_BASE}/whoami_start`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'start_game', scopeId: selectedScope, difficulty: selectedDifficulty }),
+    });
+    gameData = await res.json();
+
+    if (gameData.error) throw new Error(gameData.error);
+
+    cluesRevealed = 0;
+    gameOver = false;
+    guessCount = 0;
+    selectedSuggestion = null;
+
+    // Setup UI
+    const scopeLabel = SCOPES.find(s => s.id === selectedScope)?.label || '';
+    const diffLabel = selectedDifficulty.charAt(0).toUpperCase() + selectedDifficulty.slice(1);
+    $('gameBadge').innerHTML = `<span class="dot"></span> ${scopeLabel} &middot; ${diffLabel}`;
+
+    // Display blanks from the pattern
+    renderBlanksFromPattern(gameData.blanks);
+
+    // Setup clue items (all locked initially)
+    const clueList = $('clueList');
+    clueList.innerHTML = '';
+    for (let i = 0; i < gameData.clues.length; i++) {
+      const li = document.createElement('li');
+      li.className = 'clue-item locked';
+      li.id = `clue${i}`;
+      li.innerHTML = `<span class="clue-number">${i + 1}</span> ?`;
+      clueList.appendChild(li);
+    }
+
+    // Reveal first clue
+    revealNextClue();
+
+    // Show game
+    $('step1').classList.add('hidden');
+    $('step2').classList.remove('hidden');
+    $('revealCard').classList.add('hidden');
+    $('playAgainBtn').classList.add('hidden');
+    $('giveUpBtn').classList.remove('hidden');
+    $('guessInput').value = '';
+    $('guessFeedback').textContent = '';
+    $('guessFeedback').className = 'guess-feedback';
+    $('guessBtn').disabled = false;
+    $('guessInput').disabled = false;
+    $('nextClueBtn').classList.remove('hidden');
+    hideSuggestions();
+
+    setTimeout(() => $('guessInput').focus(), 200);
+
+  } catch (err) {
+    alert('Failed to start game: ' + err.message);
+  }
+
+  $('startBtn').disabled = false;
+  $('startBtn').textContent = 'Start Game';
+}
+
+/**
+ * Render blanks from the server-provided pattern string.
+ * Parses the pattern to reconstruct word structure.
+ */
+function renderBlanksFromPattern(blanksStr) {
+  const container = $('blanksDisplay');
+  container.innerHTML = '';
+
+  if (!blanksStr) return;
+
+  // The pattern uses: _ for letters, double space for word gaps, - for hyphens, ' for apostrophes
+  // Split by triple-space (word separator) — the blanks format uses "   " between words
+  const rawWords = blanksStr.split(/\s{3,}/);
+
+  for (const rawWord of rawWords) {
+    const wordEl = document.createElement('span');
+    wordEl.className = 'blank-word';
+
+    // Each char in the word is separated by single space
+    const chars = rawWord.split(' ').filter(c => c !== '');
+
+    for (const ch of chars) {
+      const charEl = document.createElement('span');
+      if (ch === '-') {
+        charEl.className = 'blank-char hyphen';
+        charEl.textContent = '-';
+      } else if (ch === "'") {
+        charEl.className = 'blank-char apostrophe';
+        charEl.textContent = "'";
+      } else {
+        charEl.className = 'blank-char';
+        // Leave empty for underscore blanks
+      }
+      wordEl.appendChild(charEl);
+    }
+
+    container.appendChild(wordEl);
+  }
+}
+
+function revealNextClue() {
+  if (cluesRevealed >= gameData.clues.length || gameOver) return;
+
+  const clueEl = $(`clue${cluesRevealed}`);
+  const clueText = gameData.clues[cluesRevealed];
+  clueEl.innerHTML = `<span class="clue-number">${cluesRevealed + 1}</span> ${clueText}`;
+  clueEl.classList.remove('locked');
+  clueEl.classList.add('revealed');
+
+  cluesRevealed++;
+  $('clueCounter').textContent = `Clue ${cluesRevealed} of ${gameData.clues.length}`;
+
+  if (cluesRevealed >= gameData.clues.length) {
+    $('nextClueBtn').classList.add('hidden');
+  }
+}
+
+async function submitGuess() {
+  const guess = $('guessInput').value.trim();
+  if (guess.length < 2 || gameOver) return;
+
+  guessCount++;
+  $('guessBtn').disabled = true;
+  $('guessBtn').innerHTML = '<span class="spinner"></span>';
+  $('guessInput').disabled = true;
+  hideSuggestions();
+
+  try {
+    const res = await fetch(`${API_BASE}/whoami_start`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'check_answer',
+        scopeId: selectedScope,
+        playerId: gameData.playerId,
+        guess,
+      }),
+    });
+    const result = await res.json();
+
+    if (result.correct) {
+      gameOver = true;
+      // Animate the correct answer into blanks
+      await animateBlanksReveal(result.player.name, true);
+      showResult(true, result.player);
+    } else {
+      // Animate the guessed name into blanks, then flash red and reset
+      await animateBlanksReveal(guess, false);
+      await sleep(600);
+      // Reset blanks back to empty underscores
+      renderBlanksFromPattern(gameData.blanks);
+      $('guessFeedback').textContent = 'Wrong! Try again...';
+      $('guessFeedback').className = 'guess-feedback wrong';
+      $('guessInput').value = '';
+      $('guessInput').disabled = false;
+      $('guessInput').focus();
+    }
+  } catch (err) {
+    $('guessFeedback').textContent = 'Error checking answer. Try again.';
+    $('guessFeedback').className = 'guess-feedback wrong';
+    $('guessInput').disabled = false;
+  }
+
+  $('guessBtn').disabled = false;
+  $('guessBtn').textContent = 'Guess';
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+async function giveUp() {
+  gameOver = true;
+  $('giveUpBtn').disabled = true;
+  $('guessInput').disabled = true;
+  hideSuggestions();
+
+  try {
+    const res = await fetch(`${API_BASE}/whoami_start`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'check_answer',
+        scopeId: selectedScope,
+        playerId: gameData.playerId,
+        guess: '__GIVE_UP__',
+        giveUp: true,
+      }),
+    });
+    const result = await res.json();
+
+    // Animate the answer into blanks (red for give up)
+    await animateBlanksReveal(result.player.name, false);
+    showResult(false, result.player);
+  } catch (err) {
+    $('guessFeedback').textContent = 'Failed to reveal answer.';
+  }
+
+  $('giveUpBtn').disabled = false;
+}
+
+function showResult(won, player) {
+  // Reveal all remaining clues
+  for (let i = cluesRevealed; i < gameData.clues.length; i++) {
+    const clueEl = $(`clue${i}`);
+    const clueText = gameData.clues[i];
+    clueEl.innerHTML = `<span class="clue-number">${i + 1}</span> ${clueText}`;
+    clueEl.classList.remove('locked');
+    clueEl.classList.add('revealed');
+  }
+  $('nextClueBtn').classList.add('hidden');
+
+  // Show reveal card
+  $('revealName').textContent = player.name;
+  const apps = player.stats ? player.stats.appearances : (player.appearances || 0);
+  const goals = player.stats ? player.stats.goals : (player.goals || 0);
+  const natLabel = player.nationalityLabel || player.nationality || '';
+  $('revealMeta').textContent = `${natLabel} | ${apps} apps | ${goals} goals`;
+
+  const badge = $('resultBadge');
+  if (won) {
+    const clueWord = cluesRevealed === 1 ? 'clue' : 'clues';
+    badge.textContent = `Guessed in ${guessCount} ${guessCount === 1 ? 'try' : 'tries'} with ${cluesRevealed} ${clueWord}!`;
+    badge.className = 'result-badge win';
+  } else {
+    badge.textContent = 'Better luck next time!';
+    badge.className = 'result-badge lose';
+  }
+
+  $('revealCard').classList.remove('hidden');
+  $('giveUpBtn').classList.add('hidden');
+  $('playAgainBtn').classList.remove('hidden');
+  $('guessInput').disabled = true;
+  $('guessBtn').disabled = true;
+}
+
+function resetToSetup() {
+  $('step2').classList.add('hidden');
+  $('step1').classList.remove('hidden');
+  gameData = null;
+  cluesRevealed = 0;
+  gameOver = false;
+  guessCount = 0;
+  selectedSuggestion = null;
+  hideSuggestions();
+  // Keep scope and difficulty selections for quick replay
+}
+
+// ============================================================
+// BOOT
+// ============================================================
+init();
+
+// ============================================================
+// TELESTATS CLOCK
+// ============================================================
+function updateClock() {
+  const now = new Date();
+  const hh = String(now.getHours()).padStart(2, '0');
+  const mm = String(now.getMinutes()).padStart(2, '0');
+  const el = document.getElementById('tsTime');
+  if (el) el.textContent = hh + ':' + mm;
+}
+updateClock();
+setInterval(updateClock, 30000);
+</script>
+</body>
+</html>
