@@ -482,6 +482,12 @@ body {
   margin-top: 8px;
 }
 
+/* ====== GIVE UP BUTTON ====== */
+#giveUpBtn:hover {
+  background: var(--danger) !important;
+  color: #fff !important;
+}
+
 .hidden { display: none !important; }
 
 /* ====== LOADING ====== */
@@ -716,6 +722,7 @@ body {
       <button class="go-btn primary" id="submitXIBtn" disabled style="flex:0 0 auto;padding:10px 18px;font-size:13px;">GO &mdash; Submit XI</button>
       <button class="go-btn secondary" id="resetBtn" style="flex:1;padding:10px 14px;font-size:13px;margin-top:0;">Reset</button>
     </div>
+    <button class="go-btn" id="giveUpBtn" style="margin-top:10px;background:transparent;border:1px solid var(--danger);color:var(--danger);font-size:13px;padding:10px 14px;">&#9873; Give Up &mdash; Show All Answers</button>
     <div id="actionBtns" class="hidden" style="margin-top:10px;">
       <button class="go-btn primary" id="retryBtn">Try Again (swap wrong picks)</button>
       <button class="go-btn secondary" id="revealBtn">Reveal All Answers</button>
@@ -948,6 +955,9 @@ function startGame() {
   $('scoreBanner').classList.add('hidden');
   $('actionBtns').classList.add('hidden');
   $('picksFab').classList.remove('hidden');
+  $('giveUpBtn').classList.remove('hidden');
+  $('giveUpBtn').disabled = false;
+  $('giveUpBtn').innerHTML = '&#9873; Give Up &mdash; Show All Answers';
 
   // Show perf info tab when objective is performance
   $('perfInfoTab').classList.toggle('hidden', selectedObjective !== 'performance');
@@ -957,6 +967,7 @@ function startGame() {
 
   $('submitXIBtn').onclick = submitXI;
   $('resetBtn').onclick = resetPicks;
+  $('giveUpBtn').onclick = giveUp;
 }
 
 function renderPitch() {
@@ -1440,6 +1451,7 @@ async function scoreOneSlot(targetSlot) {
       $('newGameBtn').classList.remove('hidden');
       $('submitXIBtn').classList.add('hidden');
       $('resetBtn').classList.add('hidden');
+      $('giveUpBtn').classList.add('hidden');
       setupActionHandlers(data);
     }
 
@@ -1569,6 +1581,7 @@ async function processResults(data) {
     $('newGameBtn').classList.remove('hidden');
     $('submitXIBtn').classList.add('hidden');
     $('resetBtn').classList.add('hidden');
+    $('giveUpBtn').classList.add('hidden');
     setupActionHandlers(data);
     return;
   }
@@ -1677,6 +1690,93 @@ function ordinal(n) {
   return n + (s[(v - 20) % 10] || s[v] || s[0]);
 }
 
+// ============================================================
+// GIVE UP — REVEAL ALL ANSWERS WITHOUT NEEDING TO FILL SLOTS
+// ============================================================
+async function giveUp() {
+  if (!confirm('Are you sure you want to give up? All correct answers will be revealed.')) return;
+
+  const btn = $('giveUpBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Revealing...';
+
+  // Fill any empty slots with a null playerId so the server can process
+  const picks = slots.map(s => ({
+    slotIdx: s.idx,
+    playerId: s.player ? s.player.playerId : null,
+  }));
+
+  try {
+    const res = await fetch(`${API_BASE}/xi_score`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        scopeId: selectedScope,
+        formation: selectedFormation,
+        objective: selectedObjective,
+        picks,
+        reveal: true,
+      }),
+    });
+    const data = await res.json();
+
+    if (data.error) {
+      alert('Error: ' + data.error);
+      btn.disabled = false;
+      btn.innerHTML = '&#9873; Give Up &mdash; Show All Answers';
+      return;
+    }
+
+    // Count how many the user got right before giving up
+    const userCorrect = countCorrect();
+
+    // Replace all slots with the correct answers
+    for (const r of data.results) {
+      slotResults[r.slotIdx] = r;
+      const slot = slots.find(s => s.idx === r.slotIdx);
+      if (slot && r.answer) {
+        // If the user already had the right pick, keep it green
+        const wasCorrect = r.correct;
+        slot.player = {
+          playerId: r.answer.playerId,
+          name: r.answer.name,
+          nationality: r.answer.nationality || '',
+          appearances: r.answer.appearances,
+          goals: r.answer.goals,
+        };
+        slotResults[r.slotIdx] = { ...r, correct: true, revealed: !wasCorrect };
+        lockedSlots.add(r.slotIdx);
+      }
+    }
+
+    lastResults = data.results;
+    scoredOnce = true;
+    renderPitch();
+
+    // Show score banner with give-up message
+    $('scoreBig').textContent = `${userCorrect}/${slots.length}`;
+    $('scoreBig').style.color = userCorrect === 0 ? 'var(--danger)' : userCorrect >= 8 ? 'var(--accent-green)' : 'var(--accent-yellow)';
+    $('scoreLabel').textContent = 'You gave up — answers revealed';
+    $('attemptBadge').textContent = attempts > 0 ? `After ${attempts} attempt${attempts > 1 ? 's' : ''}` : 'No attempts';
+    $('scoreBanner').classList.remove('hidden');
+
+    // Hide game controls, show only New Game
+    $('submitXIBtn').classList.add('hidden');
+    $('resetBtn').classList.add('hidden');
+    btn.classList.add('hidden');
+    $('actionBtns').classList.remove('hidden');
+    $('retryBtn').classList.add('hidden');
+    $('revealBtn').classList.add('hidden');
+    $('newGameBtn').classList.remove('hidden');
+    setupActionHandlers(data);
+
+  } catch (err) {
+    alert('Failed to reveal: ' + err.message);
+    btn.disabled = false;
+    btn.innerHTML = '&#9873; Give Up &mdash; Show All Answers';
+  }
+}
+
 async function revealAnswers() {
   const btn = $('revealBtn');
   btn.disabled = true;
@@ -1736,6 +1836,7 @@ async function revealAnswers() {
     $('scoreLabel').textContent = 'Answers revealed';
     $('retryBtn').classList.add('hidden');
     $('revealBtn').classList.add('hidden');
+    $('giveUpBtn').classList.add('hidden');
 
   } catch (err) {
     alert('Failed to reveal: ' + err.message);
