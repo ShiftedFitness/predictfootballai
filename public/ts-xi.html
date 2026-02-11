@@ -1,0 +1,1758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>TeleStats - Starting XI</title>
+<link rel="stylesheet" href="telestats-theme.css"/>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  min-height: 100vh;
+  padding: 12px;
+  line-height: 1.4;
+}
+
+/* ====== LAYOUT ====== */
+.container { max-width: 480px; margin: 0 auto; }
+
+.header {
+  text-align: center;
+  padding: 16px 0 8px;
+}
+.header h1 {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+.header h1 .accent { color: var(--accent-cyan); }
+.header .subtitle {
+  color: var(--muted);
+  font-size: 13px;
+  margin-top: 4px;
+}
+.back-link {
+  display: inline-block;
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+.back-link:hover { color: var(--accent-cyan); }
+
+/* ====== CARDS ====== */
+.card {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+.card h2 { font-size: 17px; font-weight: 700; margin-bottom: 12px; }
+.card h3 { font-size: 15px; font-weight: 600; margin-bottom: 8px; color: var(--muted); }
+
+/* ====== STEP 1: SETUP ====== */
+.option-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.option-btn {
+  background: var(--card-dark);
+  border: 2px solid transparent;
+  border-radius: 12px;
+  padding: 12px 10px;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s;
+}
+.option-btn:hover { border-color: var(--accent-cyan); background: var(--btn); }
+.option-btn.selected { border-color: var(--accent-cyan); background: var(--btn); }
+.option-btn .emoji { font-size: 20px; display: block; margin-bottom: 4px; }
+.option-btn .color-dot {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  vertical-align: middle;
+  margin-bottom: 4px;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+.option-btn .desc { font-size: 11px; color: var(--muted); font-weight: 400; margin-top: 4px; }
+.option-btn.wide { grid-column: 1 / -1; }
+
+.formation-grid {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.formation-btn {
+  background: var(--card-dark);
+  border: 2px solid transparent;
+  border-radius: 10px;
+  padding: 10px 16px;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+  letter-spacing: 0.5px;
+}
+.formation-btn:hover { border-color: var(--accent-cyan); }
+.formation-btn.selected { border-color: var(--accent-cyan); background: var(--btn); }
+
+.go-btn {
+  width: 100%;
+  padding: 16px;
+  border: none;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.5px;
+}
+.go-btn.primary {
+  background: var(--accent-yellow);
+  color: #000;
+}
+.go-btn.primary:hover { background: #E6C009; }
+.go-btn:disabled {
+  background: var(--btn);
+  color: var(--muted);
+  cursor: not-allowed;
+}
+.go-btn.secondary {
+  background: var(--btn);
+  color: var(--ink);
+  margin-top: 10px;
+}
+.go-btn.secondary:hover { background: var(--btn-hover); }
+
+/* ====== STEP 2: PITCH ====== */
+.pitch-container {
+  position: relative;
+  width: 100%;
+  padding-top: 150%;
+  background: var(--pitch);
+  border-radius: 16px;
+  overflow: visible;
+  margin-bottom: 16px;
+}
+
+/* Pitch markings */
+.pitch-container::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  border: 2px solid var(--pitch-line);
+  border-radius: 16px;
+}
+.pitch-center-line {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--pitch-line);
+}
+.pitch-center-circle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 80px;
+  height: 80px;
+  border: 1px solid var(--pitch-line);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+.pitch-box-top {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 55%;
+  height: 16%;
+  border: 1px solid var(--pitch-line);
+  border-top: none;
+}
+.pitch-box-bottom {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 55%;
+  height: 16%;
+  border: 1px solid var(--pitch-line);
+  border-bottom: none;
+}
+
+/* Player slots */
+.slot {
+  position: absolute;
+  width: 72px;
+  transform: translateX(-50%);
+  text-align: center;
+  cursor: pointer;
+  z-index: 2;
+}
+.slot-circle {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--slot-empty);
+  border: 2px solid rgba(255,255,255,0.3);
+  margin: 0 auto 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  transition: all 0.2s;
+}
+.slot.filled .slot-circle {
+  background: var(--btn);
+  border-color: var(--accent-cyan);
+  color: var(--ink);
+}
+.slot.correct .slot-circle {
+  background: var(--slot-correct);
+  border-color: var(--slot-correct);
+  color: #000;
+}
+.slot.wrong .slot-circle {
+  background: var(--slot-wrong);
+  border-color: var(--slot-wrong);
+  color: #fff;
+}
+.slot.locked { cursor: default; pointer-events: none; }
+.slot-name {
+  font-size: 9px;
+  font-weight: 600;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 72px;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+}
+.slot-role {
+  font-size: 8px;
+  color: rgba(255,255,255,0.6);
+  font-weight: 500;
+}
+/* Inline result context shown below slot after scoring */
+.slot-context {
+  font-size: 7.5px;
+  font-weight: 600;
+  line-height: 1.2;
+  margin-top: 1px;
+  padding: 2px 4px;
+  border-radius: 4px;
+  white-space: nowrap;
+  max-width: 80px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+}
+.slot.correct .slot-context { color: var(--accent-green); }
+.slot.wrong .slot-context { color: #fca5a5; }
+.slot:hover .slot-circle { transform: scale(1.08); }
+
+/* ====== MY PICKS OVERLAY ====== */
+.picks-fab {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--accent-cyan);
+  color: #000;
+  border: none;
+  font-size: 22px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s, background 0.15s;
+}
+.picks-fab:hover { transform: scale(1.1); background: var(--accent-dim); }
+.picks-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.8);
+  z-index: 150;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.picks-modal {
+  background: var(--card);
+  border-radius: 20px;
+  width: 100%;
+  max-width: 420px;
+  max-height: 80vh;
+  padding: 20px;
+  overflow-y: auto;
+}
+.picks-modal h3 {
+  font-size: 17px;
+  font-weight: 700;
+  margin-bottom: 14px;
+  text-align: center;
+}
+.picks-group-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 8px 0 4px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  margin-bottom: 4px;
+}
+.picks-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 4px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.picks-row .pr-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.picks-row .pr-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.picks-row .pr-dot.green { background: var(--slot-correct); }
+.picks-row .pr-dot.red { background: var(--slot-wrong); }
+.picks-row .pr-dot.grey { background: var(--slot-empty); }
+.picks-row .pr-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.picks-row .pr-pos {
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+/* ====== PICKS TOGGLE ====== */
+.picks-toggle {
+  display: flex;
+  gap: 4px;
+  background: var(--card-dark);
+  border-radius: 10px;
+  padding: 3px;
+  margin-bottom: 12px;
+}
+.picks-toggle-btn {
+  flex: 1;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.picks-toggle-btn.active {
+  background: var(--btn);
+  color: var(--ink);
+}
+.picks-toggle-btn:hover:not(.active) {
+  color: var(--ink);
+}
+
+/* ====== PLAYER SEARCH MODAL ====== */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 100;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 15vh;
+}
+.modal {
+  background: var(--card);
+  border-radius: 20px;
+  width: 100%;
+  max-width: 480px;
+  max-height: 60vh;
+  padding: 20px;
+  overflow-y: auto;
+}
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.modal-header h3 { font-size: 16px; font-weight: 700; }
+.modal-close {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 24px;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+.search-input {
+  width: 100%;
+  padding: 14px 16px;
+  background: var(--card-dark);
+  border: 2px solid transparent;
+  border-radius: 12px;
+  color: var(--ink);
+  font-size: 15px;
+  outline: none;
+  margin-bottom: 8px;
+}
+.search-input:focus { border-color: var(--accent-cyan); }
+.search-input::placeholder { color: var(--muted); }
+.suggestion-list {
+  list-style: none;
+}
+.suggestion-item {
+  padding: 12px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.1s;
+}
+.suggestion-item:hover { background: var(--btn); }
+.suggestion-name { font-weight: 600; font-size: 14px; }
+.suggestion-meta { font-size: 12px; color: var(--muted); }
+.suggestion-nat { font-size: 11px; color: var(--muted); margin-left: 6px; }
+.no-results { text-align: center; color: var(--muted); padding: 20px; font-size: 13px; }
+.search-loading { text-align: center; padding: 20px; }
+.search-loading .spinner { width: 24px; height: 24px; }
+
+/* ====== SCORE BANNER (inline above pitch after scoring) ====== */
+.score-banner {
+  text-align: center;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+.score-big {
+  font-size: 48px;
+  font-weight: 800;
+  color: var(--accent-cyan);
+}
+.score-label {
+  font-size: 15px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+.attempt-badge {
+  display: inline-block;
+  background: var(--btn);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 8px;
+}
+
+.hidden { display: none !important; }
+
+/* ====== LOADING ====== */
+.spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--muted);
+  border-top-color: var(--accent-cyan);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ====== SCORING OVERLAY ====== */
+.scoring-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.75);
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+.scoring-overlay .scoring-spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid var(--muted);
+  border-top-color: var(--accent-cyan);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+.scoring-overlay .scoring-text {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* ====== SLOT ANIMATIONS ====== */
+@keyframes slotCorrect {
+  0% { transform: translateX(-50%) scale(1); }
+  40% { transform: translateX(-50%) scale(1.25); }
+  100% { transform: translateX(-50%) scale(1); }
+}
+@keyframes slotWrong {
+  0%, 100% { transform: translateX(-50%); }
+  20% { transform: translateX(calc(-50% + 6px)); }
+  40% { transform: translateX(calc(-50% - 6px)); }
+  60% { transform: translateX(calc(-50% + 3px)); }
+  80% { transform: translateX(calc(-50% - 3px)); }
+}
+.slot.anim-correct { animation: slotCorrect 0.5s ease; }
+.slot.anim-wrong { animation: slotWrong 0.4s ease; }
+
+/* ====== SCOPE INFO BADGE ====== */
+.scope-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--card-dark);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+.scope-badge .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-cyan);
+}
+
+/* ====== PERFORMANCE INFO OVERLAY ====== */
+.info-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.8);
+  z-index: 150;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.info-modal {
+  background: var(--card);
+  border-radius: 20px;
+  width: 100%;
+  max-width: 480px;
+  max-height: 80vh;
+  padding: 24px;
+  overflow-y: auto;
+}
+.info-modal h3 {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: var(--accent-cyan);
+}
+.info-modal h4 {
+  font-size: 14px;
+  font-weight: 700;
+  margin-top: 16px;
+  margin-bottom: 6px;
+  color: var(--gold);
+}
+.info-modal p, .info-modal li {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+.info-modal ul {
+  padding-left: 18px;
+  margin-bottom: 8px;
+}
+.info-modal code {
+  background: var(--card-dark);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+  color: var(--ink);
+}
+.info-close {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 12px;
+  background: var(--btn);
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 16px;
+}
+.info-close:hover { background: var(--btn-hover); }
+.info-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--card-dark);
+  border: 1px solid var(--accent-cyan);
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent-cyan);
+  cursor: pointer;
+  margin-top: 8px;
+}
+.info-tab:hover { background: var(--btn); }
+
+/* ====== RESPONSIVE ====== */
+@media (max-width: 360px) {
+  .slot { width: 58px; }
+  .slot-circle { width: 40px; height: 40px; font-size: 10px; }
+  .slot-name { font-size: 8px; max-width: 56px; }
+  .slot-context { font-size: 7px; max-width: 60px; }
+  .option-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="ts-header">
+    <span class="ts-brand">TELESTATS</span>
+    <span>EPL &bull; XI MODE</span>
+    <span class="ts-time" id="tsClock">--:--</span>
+  </div>
+
+  <a href="ts-games.html" class="back-link">&larr; All Games</a>
+
+  <div class="header">
+    <h1>Starting <span class="accent">XI</span></h1>
+    <div class="subtitle">Pick the best Starting XI. How well do you know your squad?</div>
+  </div>
+
+  <!-- ====== STEP 1: SETUP ====== -->
+  <div id="step1">
+    <div class="card">
+      <h2>Choose Scope</h2>
+      <div class="option-grid" id="scopeGrid"></div>
+    </div>
+
+    <div class="card">
+      <h2>Choose Formation</h2>
+      <div class="formation-grid" id="formationGrid"></div>
+    </div>
+
+    <div class="card">
+      <h2>Choose Objective</h2>
+      <div class="option-grid" id="objectiveGrid"></div>
+    </div>
+
+    <button class="go-btn primary" id="startGameBtn" disabled>Start Challenge</button>
+  </div>
+
+  <!-- ====== STEP 2: PITCH + PICKS ====== -->
+  <div id="step2" class="hidden">
+    <div class="scope-badge" id="gameBadge"></div>
+
+    <!-- Score banner shown inline after scoring -->
+    <div id="scoreBanner" class="hidden">
+      <div class="card" style="padding:14px;">
+        <div style="text-align:center;">
+          <span id="scoreBig" style="font-size:36px;font-weight:800;color:var(--accent-cyan);">0/11</span>
+          <span id="scoreLabel" style="font-size:14px;color:var(--muted);margin-left:8px;">Correct picks</span>
+          <span id="attemptBadge" class="attempt-badge" style="margin-left:8px;">Attempt 1</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="pitch-container" id="pitchContainer">
+      <div class="pitch-center-line"></div>
+      <div class="pitch-center-circle"></div>
+      <div class="pitch-box-top"></div>
+      <div class="pitch-box-bottom"></div>
+      <!-- Slots rendered dynamically -->
+    </div>
+
+    <!-- Performance info tab (shown when objective=performance) -->
+    <div id="perfInfoTab" class="hidden" style="margin-bottom:10px;">
+      <button class="info-tab" onclick="showPerfInfo()">&#9432; How are scores calculated?</button>
+    </div>
+
+    <div style="display:flex;gap:8px;align-items:center;">
+      <button class="go-btn primary" id="submitXIBtn" disabled style="flex:0 0 auto;padding:10px 18px;font-size:13px;">GO &mdash; Submit XI</button>
+      <button class="go-btn secondary" id="resetBtn" style="flex:1;padding:10px 14px;font-size:13px;margin-top:0;">Reset</button>
+    </div>
+    <div id="actionBtns" class="hidden" style="margin-top:10px;">
+      <button class="go-btn primary" id="retryBtn">Try Again (swap wrong picks)</button>
+      <button class="go-btn secondary" id="revealBtn">Reveal All Answers</button>
+      <button class="go-btn secondary" id="newGameBtn">Start New Challenge</button>
+    </div>
+  </div>
+
+  <!-- ====== PLAYER SEARCH MODAL ====== -->
+  <div id="searchModal" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="modalTitle">Pick a Player</h3>
+        <button class="modal-close" id="modalClose">&times;</button>
+      </div>
+      <input type="text" class="search-input" id="searchInput" placeholder="Type player name..." autocomplete="off"/>
+      <div class="search-loading hidden" id="searchLoading"><span class="spinner"></span></div>
+      <ul class="suggestion-list" id="suggestionList"></ul>
+      <div class="no-results hidden" id="noResults">No players found matching your search.</div>
+    </div>
+  </div>
+
+  <!-- ====== MY PICKS FAB (shown during game) ====== -->
+  <button id="picksFab" class="picks-fab hidden" onclick="showMyPicks()" title="My Picks">&#128203;</button>
+
+  <!-- ====== MY PICKS OVERLAY ====== -->
+  <div id="picksOverlay" class="picks-overlay hidden">
+    <div class="picks-modal">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <h3 style="margin:0;">My Picks</h3>
+        <button class="modal-close" onclick="hideMyPicks()">&times;</button>
+      </div>
+      <div id="picksToggle" class="picks-toggle">
+        <button class="picks-toggle-btn active" id="toggleCurrent" onclick="showPicksTab('current')">Current</button>
+        <button class="picks-toggle-btn" id="toggleHistory" onclick="showPicksTab('history')">Previous Attempts</button>
+      </div>
+      <div id="picksListContent"></div>
+    </div>
+  </div>
+
+  <!-- ====== PERFORMANCE INFO OVERLAY ====== -->
+  <div id="perfInfoOverlay" class="info-overlay hidden">
+    <div class="info-modal">
+      <h3>How Performance Scores Work</h3>
+      <p>Every player gets an effectiveness score based on what matters most for their position:</p>
+
+      <h4>Forwards &amp; Midfielders</h4>
+      <p>Scored on goals and assists per 90 minutes. The more goals and assists you contribute per game, the higher your score.</p>
+
+      <h4>Defenders</h4>
+      <p>Scored on tackles, interceptions, and defensive contributions per 90 minutes. Goals and assists from defence also count.</p>
+
+      <h4>Goalkeepers</h4>
+      <p>Scored on clean sheet percentage and save percentage, minus goals conceded per 90 minutes.</p>
+
+      <h4>Longevity bonus</h4>
+      <p>Players who have completed more 90-minute matches get a bonus &mdash; consistency and longevity are rewarded.</p>
+
+      <h4>Final score</h4>
+      <p>Everyone in the same position is compared against each other. A higher score means the player is more effective than their peers. A score of 0 is average, positive is above average, negative is below.</p>
+
+      <button class="info-close" onclick="hidePerfInfo()">Got it</button>
+    </div>
+  </div>
+</div>
+
+<footer style="text-align:center;padding:16px 16px 72px;font-size:11px;color:var(--muted);opacity:0.6;">
+  Build: 2026-02-11 | TeleStats XI v1.0
+</footer>
+
+<script>
+// ============================================================
+// STARTING XI — CLIENT
+// ============================================================
+
+const API_BASE = '/.netlify/functions';
+const $ = id => document.getElementById(id);
+
+// ============================================================
+// CLUB COLOURS (matching 501 game mode)
+// ============================================================
+const CLUB_COLOURS = {
+  'club_sunderland': '#EB172B',
+  'club_manutd': '#DA291C',
+  'club_arsenal': '#EF0107',
+  'club_liverpool': '#C8102E',
+  'club_chelsea': '#034694',
+};
+
+// ============================================================
+// STATE
+// ============================================================
+let gameConfig = null;    // { scopes, formations, objectives } from server
+let selectedScope = null;
+let selectedFormation = null;
+let selectedObjective = null;
+let slots = [];           // current formation slots with player picks
+let attempts = 0;
+let lockedSlots = new Set();  // slot indices that are correct & locked
+let activeSlotIdx = null;     // which slot the search modal is for
+let searchDebounce = null;
+let lastResults = null;       // last scoring results for rendering context on pitch
+let scoredOnce = false;       // whether XI has been scored at least once (enables 1-by-1 mode)
+let slotResults = {};         // per-slot result cache: slotIdx -> { correct, userRank, ... }
+let previousAttempts = [];    // history of wrong picks: [{ slotIdx, player, sr }]
+
+// ============================================================
+// INIT
+// ============================================================
+async function init() {
+  try {
+    const res = await fetch(`${API_BASE}/xi_start`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'get_scopes' }),
+    });
+    gameConfig = await res.json();
+    renderSetup();
+  } catch (err) {
+    console.error('Failed to load game config:', err);
+    $('step1').innerHTML = '<div class="card"><p style="color:var(--danger)">Failed to load. Please refresh.</p></div>';
+  }
+}
+
+// ============================================================
+// STEP 1: SETUP RENDERING
+// ============================================================
+function renderSetup() {
+  // Scopes
+  const scopeGrid = $('scopeGrid');
+  scopeGrid.innerHTML = '';
+  for (const scope of gameConfig.scopes) {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn' + (scope.type === 'league' ? ' wide' : '');
+    const colour = CLUB_COLOURS[scope.id];
+    if (scope.type === 'league') {
+      btn.innerHTML = `
+        <span class="emoji">&#127942;</span>
+        ${scope.label}
+      `;
+    } else {
+      btn.innerHTML = `
+        <span class="color-dot" style="background:${colour || '#555'}"></span>
+        ${scope.label}
+      `;
+    }
+    btn.onclick = () => selectScope(scope.id, btn);
+    scopeGrid.appendChild(btn);
+  }
+
+  // Formations
+  const formGrid = $('formationGrid');
+  formGrid.innerHTML = '';
+  for (const fm of gameConfig.formations) {
+    const btn = document.createElement('button');
+    btn.className = 'formation-btn';
+    btn.textContent = fm.label;
+    btn.onclick = () => selectFormation(fm.id, btn);
+    formGrid.appendChild(btn);
+  }
+
+  // Objectives
+  const objGrid = $('objectiveGrid');
+  objGrid.innerHTML = '';
+  for (const obj of gameConfig.objectives) {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn wide';
+    btn.innerHTML = `
+      <span class="emoji">${obj.id === 'appearances' ? '&#128202;' : obj.id === 'goals' ? '&#9917;' : '&#127775;'}</span>
+      ${obj.label}
+      <div class="desc">${obj.description}</div>
+    `;
+    btn.onclick = () => selectObjective(obj.id, btn);
+    objGrid.appendChild(btn);
+  }
+
+  $('startGameBtn').onclick = startGame;
+}
+
+function selectScope(id, btn) {
+  selectedScope = id;
+  document.querySelectorAll('#scopeGrid .option-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  checkReady();
+}
+
+function selectFormation(id, btn) {
+  selectedFormation = id;
+  document.querySelectorAll('#formationGrid .formation-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  checkReady();
+}
+
+function selectObjective(id, btn) {
+  selectedObjective = id;
+  document.querySelectorAll('#objectiveGrid .option-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  checkReady();
+}
+
+function checkReady() {
+  $('startGameBtn').disabled = !(selectedScope && selectedFormation && selectedObjective);
+}
+
+// ============================================================
+// STEP 2: START GAME — RENDER PITCH
+// ============================================================
+function startGame() {
+  const fm = gameConfig.formations.find(f => f.id === selectedFormation);
+  if (!fm) return;
+
+  slots = fm.slots.map(s => ({
+    ...s,
+    player: null,
+  }));
+  attempts = 0;
+  lockedSlots = new Set();
+  lastResults = null;
+  scoredOnce = false;
+  slotResults = {};
+  previousAttempts = [];
+  currentPicksTab = 'current';
+
+  // Show game badge
+  const scopeLabel = gameConfig.scopes.find(s => s.id === selectedScope)?.label || '';
+  const objLabel = gameConfig.objectives.find(o => o.id === selectedObjective)?.label || '';
+  $('gameBadge').innerHTML = `<span class="dot"></span> ${scopeLabel} &middot; ${selectedFormation} &middot; ${objLabel}`;
+
+  $('step1').classList.add('hidden');
+  $('step2').classList.remove('hidden');
+  $('scoreBanner').classList.add('hidden');
+  $('actionBtns').classList.add('hidden');
+  $('picksFab').classList.remove('hidden');
+
+  // Show perf info tab when objective is performance
+  $('perfInfoTab').classList.toggle('hidden', selectedObjective !== 'performance');
+
+  renderPitch();
+  updateSubmitBtn();
+
+  $('submitXIBtn').onclick = submitXI;
+  $('resetBtn').onclick = resetPicks;
+}
+
+function renderPitch() {
+  const container = $('pitchContainer');
+  // Remove old slots
+  container.querySelectorAll('.slot').forEach(el => el.remove());
+
+  // Compute layout positions
+  const rows = {};
+  for (const slot of slots) {
+    if (!rows[slot.row]) rows[slot.row] = [];
+    rows[slot.row].push(slot);
+  }
+
+  const rowKeys = Object.keys(rows).sort((a, b) => Number(a) - Number(b));
+  const totalRows = rowKeys.length;
+
+  for (let ri = 0; ri < totalRows; ri++) {
+    const rowSlots = rows[rowKeys[ri]];
+    const count = rowSlots.length;
+    // Vertical position: GK at bottom, FWD at top
+    const yPct = 84 - (ri / (totalRows - 1)) * 72;
+
+    for (let ci = 0; ci < count; ci++) {
+      const slot = rowSlots[ci];
+      const xPct = count === 1 ? 50 : 15 + (ci / (count - 1)) * 70;
+
+      const isLocked = lockedSlots.has(slot.idx);
+      const sr = slotResults[slot.idx]; // per-slot scored result
+
+      let slotClass = 'slot';
+      if (isLocked) {
+        slotClass += ' filled locked correct';
+      } else if (sr && sr.correct === false) {
+        // Wrong pick — keep red, but allow tapping to replace
+        slotClass += ' filled wrong';
+      } else if (slot.player) {
+        slotClass += ' filled';
+      }
+
+      const el = document.createElement('div');
+      el.className = slotClass;
+      el.style.left = xPct + '%';
+      el.style.top = yPct + '%';
+      el.dataset.idx = slot.idx;
+
+      el.innerHTML = `
+        <div class="slot-circle">${slot.player ? slot.player.nationality || '&#10003;' : slot.label}</div>
+        <div class="slot-name">${slot.player ? truncName(slot.player.name) : ''}</div>
+        <div class="slot-role">${slot.label}</div>
+      `;
+
+      // Wrong or empty slots can be tapped to pick a new player
+      if (!isLocked) {
+        el.onclick = () => openSearchModal(slot.idx);
+      }
+
+      container.appendChild(el);
+    }
+  }
+}
+
+/**
+ * Build inline context text for a slot after scoring.
+ * Shows rank + stat context beneath the player name.
+ */
+function buildSlotContext(r, slot) {
+  if (!r.userRank) return '';
+  const bucketSlotCount = slots.filter(s => s.bucket === slot.bucket).length;
+  const rankStr = ordinal(r.userRank);
+
+  // Build a short stat string
+  let statStr = '';
+  if (r.userStatValue) {
+    if (selectedObjective === 'performance' && r.userStatValue.score != null) {
+      statStr = ` \u00b7 ${r.userStatValue.score.toFixed(2)}`;
+    } else if (selectedObjective === 'goals' && r.userStatValue.goals != null) {
+      statStr = ` \u00b7 ${r.userStatValue.goals}g`;
+    } else if (r.userStatValue.appearances != null) {
+      statStr = ` \u00b7 ${r.userStatValue.appearances}app`;
+    }
+  }
+
+  if (r.correct) {
+    return `<div class="slot-context">${rankStr} ${slot.bucket}${statStr}</div>`;
+  } else {
+    return `<div class="slot-context">${rankStr}${statStr} (top ${bucketSlotCount})</div>`;
+  }
+}
+
+// ============================================================
+// MY PICKS OVERLAY
+// ============================================================
+let currentPicksTab = 'current';
+
+function showPicksTab(tab) {
+  currentPicksTab = tab;
+  $('toggleCurrent').classList.toggle('active', tab === 'current');
+  $('toggleHistory').classList.toggle('active', tab === 'history');
+  renderPicksContent();
+}
+
+function showMyPicks() {
+  renderPicksContent();
+  $('picksOverlay').classList.remove('hidden');
+}
+
+function renderPicksContent() {
+  const content = $('picksListContent');
+  const groupLabels = { GK: 'Goalkeepers', DEF: 'Defenders', MID: 'Midfielders', FWD: 'Forwards' };
+
+  // Show/hide the history toggle depending on whether there are previous attempts
+  $('picksToggle').style.display = previousAttempts.length > 0 ? 'flex' : 'none';
+
+  if (currentPicksTab === 'history') {
+    // Show previous wrong attempts
+    if (previousAttempts.length === 0) {
+      content.innerHTML = '<div style="text-align:center;color:var(--muted);padding:20px;">No previous attempts yet.</div>';
+      return;
+    }
+
+    // Group by position bucket
+    const groups = { GK: [], DEF: [], MID: [], FWD: [] };
+    for (const attempt of previousAttempts) {
+      if (!groups[attempt.bucket]) groups[attempt.bucket] = [];
+      groups[attempt.bucket].push(attempt);
+    }
+
+    let html = '';
+    for (const [bucket, label] of Object.entries(groupLabels)) {
+      const items = groups[bucket];
+      if (!items || items.length === 0) continue;
+      html += `<div class="picks-group-title">${label}</div>`;
+      for (const attempt of items) {
+        const name = escHtml(attempt.player.name);
+        let statStr = '';
+        if (attempt.sr && attempt.sr.userRank) {
+          statStr = ordinal(attempt.sr.userRank);
+          if (attempt.sr.userStatValue) {
+            if (selectedObjective === 'performance' && attempt.sr.userStatValue.score != null) {
+              statStr += ` \u00b7 ${attempt.sr.userStatValue.score.toFixed(2)}`;
+            } else if (selectedObjective === 'goals' && attempt.sr.userStatValue.goals != null) {
+              statStr += ` \u00b7 ${attempt.sr.userStatValue.goals} goals`;
+            } else if (attempt.sr.userStatValue.appearances != null) {
+              statStr += ` \u00b7 ${attempt.sr.userStatValue.appearances} apps`;
+            }
+          }
+        }
+
+        html += `
+          <div class="picks-row">
+            <div class="pr-left">
+              <div class="pr-dot red"></div>
+              <span class="pr-name">${name}</span>
+            </div>
+            <span class="pr-pos">${attempt.label}${statStr ? ' \u00b7 ' + statStr : ''}</span>
+          </div>
+        `;
+      }
+    }
+
+    content.innerHTML = html;
+    return;
+  }
+
+  // Current picks view
+  const groups = { GK: [], DEF: [], MID: [], FWD: [] };
+  for (const slot of slots) {
+    const bucket = slot.bucket;
+    if (!groups[bucket]) groups[bucket] = [];
+    const sr = slotResults[slot.idx];
+    groups[bucket].push({ slot, sr });
+  }
+
+  let html = '';
+  for (const [bucket, label] of Object.entries(groupLabels)) {
+    const items = groups[bucket];
+    if (!items || items.length === 0) continue;
+    html += `<div class="picks-group-title">${label}</div>`;
+    for (const { slot, sr } of items) {
+      const name = slot.player ? escHtml(slot.player.name) : 'Empty';
+      let dotClass = 'grey';
+      if (sr && sr.correct) dotClass = 'green';
+      else if (sr && sr.correct === false) dotClass = 'red';
+      else if (slot.player) dotClass = 'grey';
+
+      let statStr = '';
+      if (sr && sr.userRank) {
+        statStr = ordinal(sr.userRank);
+        if (sr.userStatValue) {
+          if (selectedObjective === 'performance' && sr.userStatValue.score != null) {
+            statStr += ` \u00b7 ${sr.userStatValue.score.toFixed(2)}`;
+          } else if (selectedObjective === 'goals' && sr.userStatValue.goals != null) {
+            statStr += ` \u00b7 ${sr.userStatValue.goals} goals`;
+          } else if (sr.userStatValue.appearances != null) {
+            statStr += ` \u00b7 ${sr.userStatValue.appearances} apps`;
+          }
+        }
+      }
+
+      html += `
+        <div class="picks-row">
+          <div class="pr-left">
+            <div class="pr-dot ${dotClass}"></div>
+            <span class="pr-name">${name}</span>
+          </div>
+          <span class="pr-pos">${slot.label}${statStr ? ' \u00b7 ' + statStr : ''}</span>
+        </div>
+      `;
+    }
+  }
+
+  content.innerHTML = html || '<div style="text-align:center;color:var(--muted);padding:20px;">No picks yet.</div>';
+}
+
+function hideMyPicks() {
+  $('picksOverlay').classList.add('hidden');
+}
+$('picksOverlay').onclick = (e) => {
+  if (e.target === $('picksOverlay')) hideMyPicks();
+};
+
+function truncName(name) {
+  if (!name) return '';
+  // Show surname or truncated name
+  const parts = name.split(' ');
+  if (parts.length > 1) {
+    return parts[parts.length - 1];
+  }
+  return name.length > 10 ? name.slice(0, 9) + '\u2026' : name;
+}
+
+function updateSubmitBtn() {
+  const allFilled = slots.every(s => s.player !== null || lockedSlots.has(s.idx));
+  $('submitXIBtn').disabled = !allFilled;
+}
+
+function resetPicks() {
+  for (const slot of slots) {
+    if (!lockedSlots.has(slot.idx)) {
+      slot.player = null;
+      delete slotResults[slot.idx];
+    }
+  }
+  lastResults = null;
+  scoredOnce = false;
+  renderPitch();
+  updateSubmitBtn();
+  $('scoreBanner').classList.add('hidden');
+  $('actionBtns').classList.add('hidden');
+  $('submitXIBtn').classList.remove('hidden');
+  $('submitXIBtn').disabled = true;
+  $('submitXIBtn').textContent = 'GO \u2014 Submit XI';
+}
+
+// ============================================================
+// PERFORMANCE INFO OVERLAY
+// ============================================================
+function showPerfInfo() {
+  $('perfInfoOverlay').classList.remove('hidden');
+}
+function hidePerfInfo() {
+  $('perfInfoOverlay').classList.add('hidden');
+}
+$('perfInfoOverlay').onclick = (e) => {
+  if (e.target === $('perfInfoOverlay')) hidePerfInfo();
+};
+
+// ============================================================
+// PLAYER SEARCH MODAL
+// ============================================================
+function openSearchModal(slotIdx) {
+  activeSlotIdx = slotIdx;
+  const slot = slots.find(s => s.idx === slotIdx);
+  if (!slot) return;
+
+  $('modalTitle').textContent = `Pick ${slot.label} \u2014 ${slot.bucket}`;
+  $('searchInput').value = '';
+  $('suggestionList').innerHTML = '';
+  $('noResults').classList.add('hidden');
+  $('searchModal').classList.remove('hidden');
+
+  setTimeout(() => $('searchInput').focus(), 100);
+}
+
+$('modalClose').onclick = closeModal;
+$('searchModal').onclick = (e) => {
+  if (e.target === $('searchModal')) closeModal();
+};
+
+function closeModal() {
+  $('searchModal').classList.add('hidden');
+  activeSlotIdx = null;
+}
+
+$('searchInput').addEventListener('input', () => {
+  clearTimeout(searchDebounce);
+  searchDebounce = setTimeout(doSearch, 300);
+});
+
+async function doSearch() {
+  const query = $('searchInput').value.trim();
+  const slot = slots.find(s => s.idx === activeSlotIdx);
+  if (!slot || query.length < 2) {
+    $('suggestionList').innerHTML = '';
+    $('noResults').classList.add('hidden');
+    $('searchLoading').classList.add('hidden');
+    return;
+  }
+
+  // Show loading spinner
+  $('suggestionList').innerHTML = '';
+  $('noResults').classList.add('hidden');
+  $('searchLoading').classList.remove('hidden');
+
+  try {
+    const res = await fetch(`${API_BASE}/xi_start`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'search_players',
+        query,
+        positionBucket: slot.bucket,
+        scopeId: selectedScope,
+      }),
+    });
+    const data = await res.json();
+
+    $('searchLoading').classList.add('hidden');
+
+    if (data.error) {
+      $('suggestionList').innerHTML = '';
+      $('noResults').textContent = data.error;
+      $('noResults').classList.remove('hidden');
+      return;
+    }
+
+    const players = data.players || [];
+
+    // Filter out already-picked players (in other slots)
+    const pickedIds = new Set(
+      slots.filter(s => s.player && s.idx !== activeSlotIdx).map(s => s.player.playerId)
+    );
+    const filtered = players.filter(p => !pickedIds.has(p.playerId));
+
+    if (filtered.length === 0) {
+      $('suggestionList').innerHTML = '';
+      $('noResults').textContent = 'No players found matching your search.';
+      $('noResults').classList.remove('hidden');
+      return;
+    }
+
+    $('noResults').classList.add('hidden');
+    $('suggestionList').innerHTML = filtered.map(p => `
+      <li class="suggestion-item" data-pid="${p.playerId}" data-name="${escHtml(p.name)}" data-nat="${p.nationality}" data-apps="${p.appearances}" data-goals="${p.goals}">
+        <div>
+          <span class="suggestion-name">${escHtml(p.name)}</span>
+          <span class="suggestion-nat">${p.nationality}</span>
+        </div>
+      </li>
+    `).join('');
+
+    // Click handlers
+    $('suggestionList').querySelectorAll('.suggestion-item').forEach(li => {
+      li.onclick = () => selectPlayer(li);
+    });
+
+  } catch (err) {
+    console.error('Search error:', err);
+    $('searchLoading').classList.add('hidden');
+    $('noResults').textContent = 'Search failed. Try again.';
+    $('noResults').classList.remove('hidden');
+  }
+}
+
+function selectPlayer(li) {
+  const slot = slots.find(s => s.idx === activeSlotIdx);
+  if (!slot) return;
+
+  slot.player = {
+    playerId: li.dataset.pid,
+    name: li.dataset.name,
+    nationality: li.dataset.nat,
+    appearances: parseInt(li.dataset.apps) || 0,
+    goals: parseInt(li.dataset.goals) || 0,
+  };
+
+  // Archive the old wrong pick before replacing
+  const oldResult = slotResults[slot.idx];
+  if (oldResult && oldResult.correct === false && slot.player) {
+    previousAttempts.push({
+      slotIdx: slot.idx,
+      bucket: slot.bucket,
+      label: slot.label,
+      player: { ...slot.player },
+      sr: { ...oldResult },
+    });
+  }
+
+  // Clear any previous result for this slot (it's a new pick)
+  delete slotResults[slot.idx];
+  lockedSlots.delete(slot.idx);
+
+  closeModal();
+
+  if (scoredOnce) {
+    // In 1-by-1 mode — auto-score this single pick
+    scoreOneSlot(slot);
+  } else {
+    renderPitch();
+    updateSubmitBtn();
+  }
+}
+
+/**
+ * Score a single slot pick after the initial XI has been scored.
+ * Sends full picks to the server and processes just this slot's result.
+ */
+async function scoreOneSlot(targetSlot) {
+  // Show the slot as filled while scoring
+  renderPitch();
+
+  const picks = slots.map(s => ({
+    slotIdx: s.idx,
+    playerId: s.player ? s.player.playerId : null,
+  }));
+
+  try {
+    const res = await fetch(`${API_BASE}/xi_score`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        scopeId: selectedScope,
+        formation: selectedFormation,
+        objective: selectedObjective,
+        picks,
+        reveal: false,
+      }),
+    });
+    const data = await res.json();
+
+    if (data.error) {
+      console.error('Score error:', data.error);
+      renderPitch();
+      return;
+    }
+
+    // Find result for this specific slot
+    const r = data.results.find(res => res.slotIdx === targetSlot.idx);
+    if (r) {
+      slotResults[targetSlot.idx] = r;
+      if (r.correct) {
+        lockedSlots.add(targetSlot.idx);
+      }
+    }
+
+    // Animate just this one slot
+    const container = $('pitchContainer');
+    const slotEl = container.querySelector(`.slot[data-idx="${targetSlot.idx}"]`);
+    if (slotEl) {
+      if (r && r.correct) {
+        slotEl.classList.add('correct', 'locked', 'anim-correct');
+        slotEl.classList.remove('wrong');
+      } else {
+        slotEl.classList.add('wrong', 'anim-wrong');
+        slotEl.classList.remove('correct');
+      }
+      await sleep(500);
+    }
+
+    // Re-render to show updated context
+    renderPitch();
+    updateScoreBanner();
+
+    // Check if all correct now
+    const correct = countCorrect();
+    if (correct === slots.length) {
+      $('actionBtns').classList.remove('hidden');
+      $('retryBtn').classList.add('hidden');
+      $('revealBtn').classList.add('hidden');
+      $('newGameBtn').classList.remove('hidden');
+      $('submitXIBtn').classList.add('hidden');
+      $('resetBtn').classList.add('hidden');
+      setupActionHandlers(data);
+    }
+
+  } catch (err) {
+    console.error('Single slot score error:', err);
+    renderPitch();
+  }
+}
+
+function escHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+// ============================================================
+// SUBMIT XI — SCORE
+// ============================================================
+function showScoringOverlay() {
+  const overlay = document.createElement('div');
+  overlay.className = 'scoring-overlay';
+  overlay.id = 'scoringOverlay';
+  overlay.innerHTML = `
+    <div class="scoring-spinner"></div>
+    <div class="scoring-text">Checking your XI...</div>
+  `;
+  document.body.appendChild(overlay);
+}
+
+function hideScoringOverlay() {
+  const overlay = $('scoringOverlay');
+  if (overlay) overlay.remove();
+}
+
+async function submitXI() {
+  const btn = $('submitXIBtn');
+  btn.disabled = true;
+  btn.textContent = 'Checking...';
+
+  showScoringOverlay();
+
+  attempts++;
+
+  const picks = slots.map(s => ({
+    slotIdx: s.idx,
+    playerId: s.player ? s.player.playerId : null,
+  }));
+
+  try {
+    const res = await fetch(`${API_BASE}/xi_score`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        scopeId: selectedScope,
+        formation: selectedFormation,
+        objective: selectedObjective,
+        picks,
+        reveal: false,
+      }),
+    });
+    const data = await res.json();
+
+    hideScoringOverlay();
+
+    if (data.error) {
+      alert('Error: ' + data.error);
+      btn.disabled = false;
+      btn.textContent = 'GO \u2014 Submit XI';
+      return;
+    }
+
+    // Process results with animation
+    await processResults(data);
+
+  } catch (err) {
+    hideScoringOverlay();
+    alert('Scoring failed: ' + err.message);
+    btn.disabled = false;
+    btn.textContent = 'GO \u2014 Submit XI';
+  }
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+async function processResults(data) {
+  const { correct, total, results } = data;
+
+  // Store results for rendering context on pitch
+  lastResults = results;
+
+  // Archive previous wrong picks before overwriting, then populate result cache
+  for (const r of results) {
+    const oldResult = slotResults[r.slotIdx];
+    const slot = slots.find(s => s.idx === r.slotIdx);
+    if (oldResult && oldResult.correct === false && slot && slot.player) {
+      previousAttempts.push({
+        slotIdx: r.slotIdx,
+        bucket: slot.bucket,
+        label: slot.label,
+        player: { ...slot.player },
+        sr: { ...oldResult },
+      });
+    }
+    slotResults[r.slotIdx] = r;
+    if (r.correct) {
+      lockedSlots.add(r.slotIdx);
+    }
+  }
+
+  // Mark that we've scored at least once — enables 1-by-1 mode
+  scoredOnce = true;
+
+  // Animate slots one by one
+  await animateSlotResults(results);
+
+  // Re-render pitch — keeps green/red with player names + context visible
+  renderPitch();
+
+  // Update score banner
+  updateScoreBanner();
+
+  if (correct === total) {
+    // Perfect — show new game button only
+    $('actionBtns').classList.remove('hidden');
+    $('retryBtn').classList.add('hidden');
+    $('revealBtn').classList.add('hidden');
+    $('newGameBtn').classList.remove('hidden');
+    $('submitXIBtn').classList.add('hidden');
+    $('resetBtn').classList.add('hidden');
+    setupActionHandlers(data);
+    return;
+  }
+
+  // After scoring, hide Submit XI (user picks 1-by-1 now) but keep reset
+  $('submitXIBtn').classList.add('hidden');
+  $('resetBtn').classList.remove('hidden');
+
+  // If 3+ attempts, offer reveal
+  if (attempts >= 3) {
+    $('actionBtns').classList.remove('hidden');
+    $('retryBtn').classList.add('hidden');
+    $('revealBtn').classList.remove('hidden');
+    $('newGameBtn').classList.remove('hidden');
+  }
+
+  setupActionHandlers(data);
+}
+
+/**
+ * Count current correct picks from slotResults
+ */
+function countCorrect() {
+  return Object.values(slotResults).filter(r => r.correct).length;
+}
+
+/**
+ * Update the score banner with current state
+ */
+function updateScoreBanner() {
+  const correct = countCorrect();
+  const total = slots.length;
+  $('scoreBig').textContent = `${correct}/${total}`;
+  $('scoreBig').style.color = correct === total ? 'var(--accent-yellow)' : correct >= 8 ? 'var(--accent-green)' : correct >= 4 ? 'var(--accent-yellow)' : 'var(--danger)';
+  $('scoreLabel').textContent = correct === total ? 'Perfect Score!' : 'Correct picks';
+  $('attemptBadge').textContent = `Attempt ${attempts}`;
+  $('scoreBanner').classList.remove('hidden');
+}
+
+function setupActionHandlers(data) {
+  $('retryBtn').onclick = () => {
+    // Clear wrong picks but keep correct locked — stay in 1-by-1 mode
+    for (const [idx, r] of Object.entries(slotResults)) {
+      if (!r.correct) {
+        const slot = slots.find(s => s.idx === parseInt(idx));
+        if (slot) slot.player = null;
+        delete slotResults[idx];
+      }
+    }
+    lastResults = null;
+    $('actionBtns').classList.add('hidden');
+    $('submitXIBtn').classList.add('hidden');
+    $('resetBtn').classList.remove('hidden');
+    renderPitch();
+    updateScoreBanner();
+  };
+
+  $('revealBtn').onclick = async () => {
+    await revealAnswers();
+  };
+
+  $('newGameBtn').onclick = () => {
+    $('step2').classList.add('hidden');
+    $('step1').classList.remove('hidden');
+    $('picksFab').classList.add('hidden');
+    selectedScope = null;
+    selectedFormation = null;
+    selectedObjective = null;
+    slots = [];
+    attempts = 0;
+    lockedSlots = new Set();
+    lastResults = null;
+    scoredOnce = false;
+    slotResults = {};
+    previousAttempts = [];
+    currentPicksTab = 'current';
+    document.querySelectorAll('.option-btn.selected, .formation-btn.selected').forEach(b => b.classList.remove('selected'));
+    $('startGameBtn').disabled = true;
+  };
+}
+
+async function animateSlotResults(results) {
+  const container = $('pitchContainer');
+  for (const r of results) {
+    const slotEl = container.querySelector(`.slot[data-idx="${r.slotIdx}"]`);
+    if (!slotEl) continue;
+
+    if (r.correct) {
+      slotEl.classList.add('correct', 'locked', 'anim-correct');
+      slotEl.classList.remove('wrong');
+    } else {
+      slotEl.classList.add('wrong', 'anim-wrong');
+      slotEl.classList.remove('correct');
+    }
+
+    await sleep(120);
+  }
+  // Wait for last animation to finish
+  await sleep(400);
+}
+
+function ordinal(n) {
+  if (!n) return '';
+  const s = ['th','st','nd','rd'];
+  const v = n % 100;
+  return n + (s[(v - 20) % 10] || s[v] || s[0]);
+}
+
+async function revealAnswers() {
+  const btn = $('revealBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Revealing...';
+
+  const picks = slots.map(s => ({
+    slotIdx: s.idx,
+    playerId: s.player ? s.player.playerId : null,
+  }));
+
+  try {
+    const res = await fetch(`${API_BASE}/xi_score`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        scopeId: selectedScope,
+        formation: selectedFormation,
+        objective: selectedObjective,
+        picks,
+        reveal: true,
+      }),
+    });
+    const data = await res.json();
+
+    if (data.error) {
+      alert('Error: ' + data.error);
+      btn.disabled = false;
+      btn.textContent = 'Reveal All Answers';
+      return;
+    }
+
+    // For wrong slots, replace the player with the correct answer
+    for (const r of data.results) {
+      slotResults[r.slotIdx] = r;
+      if (!r.correct && r.answer) {
+        const slot = slots.find(s => s.idx === r.slotIdx);
+        if (slot) {
+          slot.player = {
+            playerId: r.answer.playerId,
+            name: r.answer.name,
+            nationality: r.answer.nationality || '',
+            appearances: r.answer.appearances,
+            goals: r.answer.goals,
+          };
+          // Mark as correct now that we're showing the answer
+          slotResults[r.slotIdx] = { ...r, correct: true, revealed: true };
+          lockedSlots.add(r.slotIdx);
+        }
+      }
+    }
+
+    lastResults = data.results;
+    renderPitch();
+
+    // Update score banner
+    $('scoreBig').textContent = `${data.correct}/${data.total}`;
+    $('scoreLabel').textContent = 'Answers revealed';
+    $('retryBtn').classList.add('hidden');
+    $('revealBtn').classList.add('hidden');
+
+  } catch (err) {
+    alert('Failed to reveal: ' + err.message);
+    btn.disabled = false;
+    btn.textContent = 'Reveal All Answers';
+  }
+}
+
+// ============================================================
+// BOOT
+// ============================================================
+init();
+
+// ============================================================
+// LIVE CLOCK
+// ============================================================
+setInterval(() => {
+  const now = new Date();
+  const el = document.getElementById('tsClock');
+  if (el) el.textContent = now.toTimeString().slice(0,5);
+}, 1000);
+document.getElementById('tsClock').textContent = new Date().toTimeString().slice(0,5);
+</script>
+</body>
+</html>
