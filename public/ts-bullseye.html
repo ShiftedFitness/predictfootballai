@@ -148,15 +148,15 @@ button {
 .trivia-opt {
   background: rgba(255,255,255,.06);
   border: 2px solid transparent;
-  border-radius: 10px;
+  border-radius: 8px;
   padding: 12px 14px;
   cursor: pointer;
-  transition: all .2s;
+  transition: all .15s;
   font-size: 14px;
 }
 .trivia-opt:hover { background: rgba(255,255,255,.1); }
-.trivia-opt.selected { border-color: var(--accent); background: rgba(74,222,128,.1); }
-.trivia-opt.correct { background: rgba(74,222,128,.3); border-color: var(--accent); }
+.trivia-opt.selected { border-color: var(--accent-cyan); background: rgba(0,229,255,.08); }
+.trivia-opt.correct { background: rgba(50,255,126,.2); border-color: var(--accent-green); }
 .trivia-opt.wrong { background: rgba(224,85,85,.2); border-color: var(--danger); }
 
 /* Order reveal */
@@ -412,17 +412,17 @@ button {
 .chip {
   background: rgba(255,255,255,.08);
   border: 2px solid transparent;
-  border-radius: 20px;
+  border-radius: 4px;
   padding: 6px 12px;
   font-size: 12px;
   cursor: pointer;
-  transition: all .2s;
+  transition: all .15s;
   display: flex;
   align-items: center;
   gap: 4px;
 }
 .chip:hover { background: rgba(255,255,255,.12); }
-.chip.selected { border-color: var(--accent); background: rgba(74,222,128,.15); }
+.chip.selected { border-color: var(--accent-cyan); background: rgba(0,229,255,.10); }
 .chip .flag { font-size: 14px; }
 .chip .color-dot-sm { width: 10px; height: 10px; border-radius: 2px; }
 .custom-preview {
@@ -565,7 +565,7 @@ button {
 }
 .session-stat-item { text-align: center; }
 .session-stat-item .label { color: var(--muted); font-size: 10px; text-transform: uppercase; }
-.session-stat-item .value { font-weight: 700; font-size: 16px; }
+.session-stat-item .value { font-weight: 800; font-size: 18px; font-family: 'Space Mono', monospace; }
 .session-stat-item .value.wins { color: var(--accent); }
 .session-stat-item .value.busts { color: var(--danger); }
 
@@ -621,7 +621,8 @@ button {
 .timer-bar.hidden { display: none; }
 .timer-display {
   font-weight: 800;
-  font-size: 22px;
+  font-size: 24px;
+  font-family: 'Space Mono', monospace;
   font-variant-numeric: tabular-nums;
   min-width: 40px;
   text-align: center;
