@@ -158,10 +158,10 @@ body {
 .pitch-container {
   position: relative;
   width: 100%;
-  padding-top: 140%;
+  padding-top: 150%;
   background: var(--pitch);
   border-radius: 16px;
-  overflow: hidden;
+  overflow: visible;
   margin-bottom: 16px;
 }
 
@@ -372,6 +372,35 @@ body {
   font-size: 11px;
   color: var(--muted);
   font-weight: 500;
+}
+
+/* ====== PICKS TOGGLE ====== */
+.picks-toggle {
+  display: flex;
+  gap: 4px;
+  background: var(--card-dark);
+  border-radius: 10px;
+  padding: 3px;
+  margin-bottom: 12px;
+}
+.picks-toggle-btn {
+  flex: 1;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.picks-toggle-btn.active {
+  background: var(--btn);
+  color: var(--ink);
+}
+.picks-toggle-btn:hover:not(.active) {
+  color: var(--ink);
 }
 
 /* ====== PLAYER SEARCH MODAL ====== */
@@ -634,11 +663,11 @@ body {
 <body>
 
 <div class="container">
-  <a href="football_501.html" class="back-link">&larr; Back to Football 501</a>
+  <a href="games.html" class="back-link">&larr; All Games</a>
 
   <div class="header">
     <h1>Starting <span>XI</span></h1>
-    <div class="subtitle">Pick the best Starting XI. Can you beat the algorithm?</div>
+    <div class="subtitle">Pick the best Starting XI. How well do you know your squad?</div>
   </div>
 
   <!-- ====== STEP 1: SETUP ====== -->
@@ -724,6 +753,10 @@ body {
         <h3 style="margin:0;">My Picks</h3>
         <button class="modal-close" onclick="hideMyPicks()">&times;</button>
       </div>
+      <div id="picksToggle" class="picks-toggle">
+        <button class="picks-toggle-btn active" id="toggleCurrent" onclick="showPicksTab('current')">Current</button>
+        <button class="picks-toggle-btn" id="toggleHistory" onclick="showPicksTab('history')">Previous Attempts</button>
+      </div>
       <div id="picksListContent"></div>
     </div>
   </div>
@@ -755,7 +788,7 @@ body {
 </div>
 
 <footer style="text-align:center;padding:16px 16px 72px;font-size:11px;color:var(--muted);opacity:0.6;">
-  Build: 2026-02-09 | Starting XI v1.2
+  Build: 2026-02-11 | Starting XI v1.3
 </footer>
 
 <script>
@@ -792,6 +825,7 @@ let searchDebounce = null;
 let lastResults = null;       // last scoring results for rendering context on pitch
 let scoredOnce = false;       // whether XI has been scored at least once (enables 1-by-1 mode)
 let slotResults = {};         // per-slot result cache: slotIdx -> { correct, userRank, ... }
+let previousAttempts = [];    // history of wrong picks: [{ slotIdx, player, sr }]
 
 // ============================================================
 // INIT
@@ -907,6 +941,8 @@ function startGame() {
   lastResults = null;
   scoredOnce = false;
   slotResults = {};
+  previousAttempts = [];
+  currentPicksTab = 'current';
 
   // Show game badge
   const scopeLabel = gameConfig.scopes.find(s => s.id === selectedScope)?.label || '';
@@ -948,7 +984,7 @@ function renderPitch() {
     const rowSlots = rows[rowKeys[ri]];
     const count = rowSlots.length;
     // Vertical position: GK at bottom, FWD at top
-    const yPct = 88 - (ri / (totalRows - 1)) * 76;
+    const yPct = 84 - (ri / (totalRows - 1)) * 72;
 
     for (let ci = 0; ci < count; ci++) {
       const slot = rowSlots[ci];
@@ -973,17 +1009,10 @@ function renderPitch() {
       el.style.top = yPct + '%';
       el.dataset.idx = slot.idx;
 
-      // Build context line from per-slot result
-      let contextHtml = '';
-      if (sr) {
-        contextHtml = buildSlotContext(sr, slot);
-      }
-
       el.innerHTML = `
         <div class="slot-circle">${slot.player ? slot.player.nationality || '&#10003;' : slot.label}</div>
         <div class="slot-name">${slot.player ? truncName(slot.player.name) : ''}</div>
         <div class="slot-role">${slot.label}</div>
-        ${contextHtml}
       `;
 
       // Wrong or empty slots can be tapped to pick a new player
@@ -1027,11 +1056,80 @@ function buildSlotContext(r, slot) {
 // ============================================================
 // MY PICKS OVERLAY
 // ============================================================
+let currentPicksTab = 'current';
+
+function showPicksTab(tab) {
+  currentPicksTab = tab;
+  $('toggleCurrent').classList.toggle('active', tab === 'current');
+  $('toggleHistory').classList.toggle('active', tab === 'history');
+  renderPicksContent();
+}
+
 function showMyPicks() {
+  renderPicksContent();
+  $('picksOverlay').classList.remove('hidden');
+}
+
+function renderPicksContent() {
   const content = $('picksListContent');
-  const groups = { GK: [], DEF: [], MID: [], FWD: [] };
   const groupLabels = { GK: 'Goalkeepers', DEF: 'Defenders', MID: 'Midfielders', FWD: 'Forwards' };
 
+  // Show/hide the history toggle depending on whether there are previous attempts
+  $('picksToggle').style.display = previousAttempts.length > 0 ? 'flex' : 'none';
+
+  if (currentPicksTab === 'history') {
+    // Show previous wrong attempts
+    if (previousAttempts.length === 0) {
+      content.innerHTML = '<div style="text-align:center;color:var(--muted);padding:20px;">No previous attempts yet.</div>';
+      return;
+    }
+
+    // Group by position bucket
+    const groups = { GK: [], DEF: [], MID: [], FWD: [] };
+    for (const attempt of previousAttempts) {
+      if (!groups[attempt.bucket]) groups[attempt.bucket] = [];
+      groups[attempt.bucket].push(attempt);
+    }
+
+    let html = '';
+    for (const [bucket, label] of Object.entries(groupLabels)) {
+      const items = groups[bucket];
+      if (!items || items.length === 0) continue;
+      html += `<div class="picks-group-title">${label}</div>`;
+      for (const attempt of items) {
+        const name = escHtml(attempt.player.name);
+        let statStr = '';
+        if (attempt.sr && attempt.sr.userRank) {
+          statStr = ordinal(attempt.sr.userRank);
+          if (attempt.sr.userStatValue) {
+            if (selectedObjective === 'performance' && attempt.sr.userStatValue.score != null) {
+              statStr += ` \u00b7 ${attempt.sr.userStatValue.score.toFixed(2)}`;
+            } else if (selectedObjective === 'goals' && attempt.sr.userStatValue.goals != null) {
+              statStr += ` \u00b7 ${attempt.sr.userStatValue.goals} goals`;
+            } else if (attempt.sr.userStatValue.appearances != null) {
+              statStr += ` \u00b7 ${attempt.sr.userStatValue.appearances} apps`;
+            }
+          }
+        }
+
+        html += `
+          <div class="picks-row">
+            <div class="pr-left">
+              <div class="pr-dot red"></div>
+              <span class="pr-name">${name}</span>
+            </div>
+            <span class="pr-pos">${attempt.label}${statStr ? ' \u00b7 ' + statStr : ''}</span>
+          </div>
+        `;
+      }
+    }
+
+    content.innerHTML = html;
+    return;
+  }
+
+  // Current picks view
+  const groups = { GK: [], DEF: [], MID: [], FWD: [] };
   for (const slot of slots) {
     const bucket = slot.bucket;
     if (!groups[bucket]) groups[bucket] = [];
@@ -1049,7 +1147,7 @@ function showMyPicks() {
       let dotClass = 'grey';
       if (sr && sr.correct) dotClass = 'green';
       else if (sr && sr.correct === false) dotClass = 'red';
-      else if (slot.player) dotClass = 'grey'; // picked but not scored yet
+      else if (slot.player) dotClass = 'grey';
 
       let statStr = '';
       if (sr && sr.userRank) {
@@ -1078,7 +1176,6 @@ function showMyPicks() {
   }
 
   content.innerHTML = html || '<div style="text-align:center;color:var(--muted);padding:20px;">No picks yet.</div>';
-  $('picksOverlay').classList.remove('hidden');
 }
 
 function hideMyPicks() {
@@ -1252,6 +1349,18 @@ function selectPlayer(li) {
     appearances: parseInt(li.dataset.apps) || 0,
     goals: parseInt(li.dataset.goals) || 0,
   };
+
+  // Archive the old wrong pick before replacing
+  const oldResult = slotResults[slot.idx];
+  if (oldResult && oldResult.correct === false && slot.player) {
+    previousAttempts.push({
+      slotIdx: slot.idx,
+      bucket: slot.bucket,
+      label: slot.label,
+      player: { ...slot.player },
+      sr: { ...oldResult },
+    });
+  }
 
   // Clear any previous result for this slot (it's a new pick)
   delete slotResults[slot.idx];
@@ -1427,8 +1536,19 @@ async function processResults(data) {
   // Store results for rendering context on pitch
   lastResults = results;
 
-  // Populate per-slot result cache and lock correct picks
+  // Archive previous wrong picks before overwriting, then populate result cache
   for (const r of results) {
+    const oldResult = slotResults[r.slotIdx];
+    const slot = slots.find(s => s.idx === r.slotIdx);
+    if (oldResult && oldResult.correct === false && slot && slot.player) {
+      previousAttempts.push({
+        slotIdx: r.slotIdx,
+        bucket: slot.bucket,
+        label: slot.label,
+        player: { ...slot.player },
+        sr: { ...oldResult },
+      });
+    }
     slotResults[r.slotIdx] = r;
     if (r.correct) {
       lockedSlots.add(r.slotIdx);
@@ -1529,6 +1649,8 @@ function setupActionHandlers(data) {
     lastResults = null;
     scoredOnce = false;
     slotResults = {};
+    previousAttempts = [];
+    currentPicksTab = 'current';
     document.querySelectorAll('.option-btn.selected, .formation-btn.selected').forEach(b => b.classList.remove('selected'));
     $('startGameBtn').disabled = true;
   };

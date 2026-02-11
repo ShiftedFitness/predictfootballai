@@ -410,6 +410,24 @@ const CURATED_LEAGUE_CLUBS = {
 };
 
 // ============================================================
+// PAGINATION HELPER — fetch all rows past the 1000-row default
+// ============================================================
+async function fetchAll(queryFn) {
+  const PAGE = 1000;
+  let all = [];
+  let offset = 0;
+  while (true) {
+    const { data, error } = await queryFn().range(offset, offset + PAGE - 1);
+    if (error) throw error;
+    if (!data || data.length === 0) break;
+    all = all.concat(data);
+    if (data.length < PAGE) break;
+    offset += PAGE;
+  }
+  return all;
+}
+
+// ============================================================
 // DATA FETCHING - ALL via v_game_player_club_comp view
 // (player_competition_totals table is empty)
 // ============================================================
@@ -425,30 +443,35 @@ const CURATED_LEAGUE_CLUBS = {
 async function fetchFromView(supabase, competitionName, clubName = null, nationalityCodes = null, metric = 'appearances') {
   console.log('[fetchFromView]', { competitionName, clubName, nationalityCodes, metric });
 
-  let query = supabase
-    .from('v_game_player_club_comp')
-    .select('player_uid, player_name, nationality_norm, competition_name, club_name, appearances, goals, assists, minutes, seasons')
-    .eq('competition_name', competitionName)
-    .gt(metric === 'goals' ? 'goals' : 'appearances', 0);
+  const buildQuery = () => {
+    let query = supabase
+      .from('v_game_player_club_comp')
+      .select('player_uid, player_name, nationality_norm, competition_name, club_name, appearances, goals, assists, minutes, seasons')
+      .eq('competition_name', competitionName)
+      .gt(metric === 'goals' ? 'goals' : 'appearances', 0);
 
-  if (clubName) {
-    if (Array.isArray(clubName)) {
-      query = query.in('club_name', clubName);
-    } else {
-      query = query.eq('club_name', clubName);
+    if (clubName) {
+      if (Array.isArray(clubName)) {
+        query = query.in('club_name', clubName);
+      } else {
+        query = query.eq('club_name', clubName);
+      }
     }
-  }
 
-  // Apply nationality filter at the DB level if possible (single code)
-  if (nationalityCodes && !Array.isArray(nationalityCodes)) {
-    query = query.eq('nationality_norm', nationalityCodes);
-  } else if (nationalityCodes && Array.isArray(nationalityCodes) && nationalityCodes.length <= 15) {
-    query = query.in('nationality_norm', nationalityCodes);
-  }
+    // Apply nationality filter at the DB level if possible (single code)
+    if (nationalityCodes && !Array.isArray(nationalityCodes)) {
+      query = query.eq('nationality_norm', nationalityCodes);
+    } else if (nationalityCodes && Array.isArray(nationalityCodes) && nationalityCodes.length <= 15) {
+      query = query.in('nationality_norm', nationalityCodes);
+    }
 
-  const { data, error } = await query;
+    return query;
+  };
 
-  if (error) {
+  let data;
+  try {
+    data = await fetchAll(buildQuery);
+  } catch (error) {
     console.error('[fetchFromView] Error:', error);
     throw new Error(error.message);
   }
@@ -512,20 +535,25 @@ async function fetchFromView(supabase, competitionName, clubName = null, nationa
 async function fetchFromViewMultiComp(supabase, competitionNames, nationalityCodes = null, metric = 'appearances') {
   console.log('[fetchFromViewMultiComp]', { competitionNames, nationalityCodes, metric });
 
-  let query = supabase
-    .from('v_game_player_club_comp')
-    .select('player_uid, player_name, nationality_norm, competition_name, club_name, appearances, goals, assists, minutes, seasons')
-    .in('competition_name', competitionNames)
-    .gt(metric === 'goals' ? 'goals' : 'appearances', 0);
+  const buildQuery = () => {
+    let query = supabase
+      .from('v_game_player_club_comp')
+      .select('player_uid, player_name, nationality_norm, competition_name, club_name, appearances, goals, assists, minutes, seasons')
+      .in('competition_name', competitionNames)
+      .gt(metric === 'goals' ? 'goals' : 'appearances', 0);
 
-  if (nationalityCodes) {
-    const codes = Array.isArray(nationalityCodes) ? nationalityCodes : [nationalityCodes];
-    query = query.in('nationality_norm', codes);
-  }
+    if (nationalityCodes) {
+      const codes = Array.isArray(nationalityCodes) ? nationalityCodes : [nationalityCodes];
+      query = query.in('nationality_norm', codes);
+    }
 
-  const { data, error } = await query;
+    return query;
+  };
 
-  if (error) {
+  let data;
+  try {
+    data = await fetchAll(buildQuery);
+  } catch (error) {
     console.error('[fetchFromViewMultiComp] Error:', error);
     throw new Error(error.message);
   }
@@ -588,15 +616,23 @@ async function fetchByPosition(supabase, competitionName, positionBucket, metric
 
   if (compErr || !compData) return [];
 
-  // Get season stats filtered by position
-  const { data: stats, error: statsErr } = await supabase
-    .from('player_season_stats')
-    .select('player_uid, appearances, goals, assists, minutes')
-    .eq('competition_id', compData.competition_id)
-    .eq('position_bucket', positionBucket)
-    .gt(metric === 'goals' ? 'goals' : 'appearances', 0);
+  // Get season stats filtered by position (paginated)
+  let stats;
+  try {
+    stats = await fetchAll(() =>
+      supabase
+        .from('player_season_stats')
+        .select('player_uid, appearances, goals, assists, minutes')
+        .eq('competition_id', compData.competition_id)
+        .eq('position_bucket', positionBucket)
+        .gt(metric === 'goals' ? 'goals' : 'appearances', 0)
+    );
+  } catch (err) {
+    console.error('[fetchByPosition] fetchAll error:', err);
+    return [];
+  }
 
-  if (statsErr || !stats || stats.length === 0) return [];
+  if (!stats || stats.length === 0) return [];
 
   // Aggregate by player_uid
   const aggMap = new Map();
@@ -669,24 +705,32 @@ async function fetchByAgeBucket(supabase, competitionName, ageCat, metric = 'app
 
   if (compErr || !compData) return [];
 
-  // Use age column directly since is_u19/u21/35plus are all NULL
-  let query = supabase
-    .from('player_season_stats')
-    .select('player_uid, appearances, goals, assists, minutes')
-    .eq('competition_id', compData.competition_id)
-    .not('age', 'is', null)
-    .gt(metric === 'goals' ? 'goals' : 'appearances', 0);
+  // Use age column directly since is_u19/u21/35plus are all NULL (paginated)
+  let stats;
+  try {
+    stats = await fetchAll(() => {
+      let q = supabase
+        .from('player_season_stats')
+        .select('player_uid, appearances, goals, assists, minutes')
+        .eq('competition_id', compData.competition_id)
+        .not('age', 'is', null)
+        .gt(metric === 'goals' ? 'goals' : 'appearances', 0);
 
-  if (ageCat.maxAge) {
-    query = query.lte('age', ageCat.maxAge);
+      if (ageCat.maxAge) {
+        q = q.lte('age', ageCat.maxAge);
+      }
+      if (ageCat.minAge) {
+        q = q.gte('age', ageCat.minAge);
+      }
+
+      return q;
+    });
+  } catch (err) {
+    console.error('[fetchByAgeBucket] fetchAll error:', err);
+    return [];
   }
-  if (ageCat.minAge) {
-    query = query.gte('age', ageCat.minAge);
-  }
 
-  const { data: stats, error: statsErr } = await query;
-
-  if (statsErr || !stats || stats.length === 0) return [];
+  if (!stats || stats.length === 0) return [];
 
   // Aggregate by player_uid
   const aggMap = new Map();
@@ -751,13 +795,21 @@ async function fetchByAgeBucket(supabase, competitionName, ageCat, metric = 'app
 async function getTopClubs(supabase, competitionName, limit = 25) {
   console.log('[getTopClubs]', { competitionName, limit });
 
-  const { data, error } = await supabase
-    .from('v_game_player_club_comp')
-    .select('club_name, player_uid')
-    .eq('competition_name', competitionName)
-    .gt('appearances', 0);
+  let data;
+  try {
+    data = await fetchAll(() =>
+      supabase
+        .from('v_game_player_club_comp')
+        .select('club_name, player_uid')
+        .eq('competition_name', competitionName)
+        .gt('appearances', 0)
+    );
+  } catch (err) {
+    console.error('[getTopClubs] fetchAll error:', err);
+    return [];
+  }
 
-  if (error || !data) return [];
+  if (!data || data.length === 0) return [];
 
   // Count unique players per club
   const clubMap = new Map();

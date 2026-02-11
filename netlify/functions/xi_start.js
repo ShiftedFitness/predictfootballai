@@ -162,16 +162,62 @@ const MIN_APPS_CLUB = 20;
 // ============================================================
 
 /**
- * Get club_id for a club name
+ * Get club_id for a club name.
+ * Tries exact match first, then case-insensitive, then common aliases.
  */
 async function getClubId(supabase, clubName) {
-  const { data, error } = await supabase
+  // Try exact match first
+  let { data, error } = await supabase
     .from('clubs')
     .select('club_id')
     .eq('club_name', clubName)
     .single();
-  if (error || !data) return null;
-  return data.club_id;
+  if (data) return data.club_id;
+
+  // Try case-insensitive match
+  ({ data, error } = await supabase
+    .from('clubs')
+    .select('club_id')
+    .ilike('club_name', clubName)
+    .limit(1));
+  if (data && data.length > 0) return data[0].club_id;
+
+  // Try common aliases
+  const CLUB_NAME_ALIASES = {
+    'Manchester United': ['Manchester Utd', 'Man United', 'Man Utd'],
+    'Manchester City': ['Manchester City', 'Man City'],
+    'Newcastle United': ['Newcastle Utd'],
+    'Tottenham Hotspur': ['Tottenham', 'Spurs'],
+    'West Ham United': ['West Ham'],
+    'West Bromwich Albion': ['West Brom'],
+    'Sheffield United': ['Sheffield Utd'],
+    'Wolverhampton Wanderers': ['Wolves'],
+    'Brighton & Hove Albion': ['Brighton'],
+    'AFC Bournemouth': ['Bournemouth'],
+  };
+
+  const aliases = CLUB_NAME_ALIASES[clubName] || [];
+  for (const alias of aliases) {
+    ({ data, error } = await supabase
+      .from('clubs')
+      .select('club_id')
+      .ilike('club_name', alias)
+      .limit(1));
+    if (data && data.length > 0) return data[0].club_id;
+  }
+
+  // Try partial match as last resort
+  ({ data, error } = await supabase
+    .from('clubs')
+    .select('club_id, club_name')
+    .ilike('club_name', `%${clubName}%`)
+    .limit(1));
+  if (data && data.length > 0) {
+    console.log(`[getClubId] Fuzzy matched "${clubName}" → "${data[0].club_name}"`);
+    return data[0].club_id;
+  }
+
+  return null;
 }
 
 /**
@@ -264,6 +310,7 @@ async function searchPlayers(supabase, query, positionBucket, scope, competition
   }
 
   // Filter by name match and format results
+  // Match against full name AND individual name parts (first/last)
   const results = [];
   for (const agg of eligible) {
     const player = playerNames.get(agg.player_uid);
@@ -271,8 +318,15 @@ async function searchPlayers(supabase, query, positionBucket, scope, competition
 
     const displayName = fixMojibake(player.player_name);
     const normalizedName = normalize(displayName);
+    const nameParts = normalizedName.split(/\s+/);
 
-    if (!normalizedName.includes(normalizedQuery)) continue;
+    // Check if query matches full name or any individual name part
+    const fullMatch = normalizedName.includes(normalizedQuery);
+    const partMatch = nameParts.some(part => part.includes(normalizedQuery));
+    // Also check if query matches start of any part (for partial typing)
+    const partStartMatch = nameParts.some(part => part.startsWith(normalizedQuery));
+
+    if (!fullMatch && !partMatch) continue;
 
     results.push({
       playerId: agg.player_uid,
@@ -283,11 +337,16 @@ async function searchPlayers(supabase, query, positionBucket, scope, competition
       goals: agg.goals,
       assists: agg.assists,
       minutes: agg.minutes,
+      _surnameStartMatch: nameParts.length > 1 && nameParts[nameParts.length - 1].startsWith(normalizedQuery),
+      _partStartMatch: partStartMatch,
     });
   }
 
-  // Sort: exact start match first, then by appearances desc
+  // Sort: surname start match first, then any part start match, then full name start, then by appearances desc
   results.sort((a, b) => {
+    // Surname match is highest priority (users typically search by surname)
+    if (a._surnameStartMatch !== b._surnameStartMatch) return a._surnameStartMatch ? -1 : 1;
+    if (a._partStartMatch !== b._partStartMatch) return a._partStartMatch ? -1 : 1;
     const aStarts = a.normalized.startsWith(normalizedQuery) ? 0 : 1;
     const bStarts = b.normalized.startsWith(normalizedQuery) ? 0 : 1;
     if (aStarts !== bStarts) return aStarts - bStarts;

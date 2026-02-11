@@ -724,6 +724,9 @@ button {
 <body>
 
 <!-- SETUP CARD -->
+<div style="max-width:480px;margin:0 auto;padding:8px 0 0;">
+  <a href="games.html" style="color:#a8c4b8;text-decoration:none;font-size:13px;">&larr; All Games</a>
+</div>
 <div class="card" id="setupCard">
   <!-- Step 1: Game Mode Selection -->
   <div id="step1">
@@ -1826,7 +1829,9 @@ async function chooseCategory(cat) {
   show('loadingScreen');
   hide('readyBadge');
   hide('skipTrivia');
+  hide('triviaNote');
   $('triviaContainer').innerHTML = '';
+  $('loadingText').textContent = 'Loading match data...';
 
   const cached = getCachedData(cat.id);
   if (cached) {
@@ -1834,36 +1839,31 @@ async function chooseCategory(cat) {
     currentMeta = cached.meta || {};
     triviaData = cached.meta?.trivia || [];
     matchDataReady = true;
-    showReadyState();
-    showTrivia();
+    // Skip trivia — go straight to game
+    proceedToOrderReveal();
     return;
   }
 
-  const fetchPromise = (async () => {
-    try {
-      const res = await fetch(`${API_BASE}/match_start`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ categoryId: cat.id }),
-      });
-      const data = await res.json();
-      if (data.error) throw new Error(data.error);
-      setCachedData(cat.id, data);
-      eligiblePlayers = data.eligiblePlayers || [];
-      currentMeta = data.meta || {};
-      triviaData = data.meta?.trivia || [];
-      matchDataReady = true;
-      showReadyState();
-    } catch (err) {
-      alert('Failed to load: ' + err.message);
-      show('step3');
-      hide('loadingScreen');
-    }
-  })();
-
-  await sleep(500);
-  showTrivia();
-  await fetchPromise;
+  try {
+    const res = await fetch(`${API_BASE}/match_start`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ categoryId: cat.id }),
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    setCachedData(cat.id, data);
+    eligiblePlayers = data.eligiblePlayers || [];
+    currentMeta = data.meta || {};
+    triviaData = data.meta?.trivia || [];
+    matchDataReady = true;
+    // Skip trivia — go straight to game
+    proceedToOrderReveal();
+  } catch (err) {
+    alert('Failed to load: ' + err.message);
+    show('step3');
+    hide('loadingScreen');
+  }
 }
 
 function showReadyState() {
@@ -1877,7 +1877,6 @@ function showReadyState() {
 
   show('readyBadge');
   show('skipTrivia');
-  show('triviaNote');
   $('skipTrivia').textContent = 'Start Match →';
 }
 
@@ -2764,7 +2763,7 @@ $('confirmNo').onclick = () => {
 
 $('confirmYes').onclick = () => {
   recordGameEnd();
-  playAgain();
+  window.location.href = 'games.html';
 };
 
 function playAgain() {
@@ -3482,13 +3481,8 @@ async function startChatGame(type) {
   initChatBuilder();
 })();
 </script>
-<div style="text-align:center;padding:20px 16px 8px;">
-  <a href="football_xi.html" style="display:inline-flex;align-items:center;gap:8px;background:#1a3a2a;padding:12px 24px;border-radius:14px;color:#4ade80;text-decoration:none;font-weight:700;font-size:14px;border:2px solid #2d5a45;transition:all 0.2s;">
-    ⚽ Try Starting XI — Pick the Best XI Challenge
-  </a>
-</div>
 <footer style="text-align:center;padding:16px;font-size:11px;color:var(--muted);opacity:0.6;">
-  Build: 2026-02-08-0500 | Football 501 v3.3
+  Build: 2026-02-11 | Football 501 v3.4
 </footer>
 </body>
 </html>
