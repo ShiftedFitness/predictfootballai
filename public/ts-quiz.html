@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>TeleStats - Pop Quiz</title>
+<link rel="stylesheet" href="telestats-theme.css"/>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+  padding: 12px;
+  line-height: 1.4;
+}
+
+.container { max-width: 480px; margin: 0 auto; }
+
+.back-link {
+  display: inline-block;
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+.back-link:hover { color: var(--accent-cyan); }
+
+.header {
+  text-align: center;
+  padding: 16px 0 8px;
+}
+.header h1 {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+.header h1 span { color: var(--accent-cyan); }
+.header .subtitle {
+  color: var(--muted);
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+.card {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+.card h2 { font-size: 17px; font-weight: 700; margin-bottom: 12px; }
+
+.option-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.option-btn {
+  background: var(--card-dark);
+  border: 2px solid transparent;
+  border-radius: 12px;
+  padding: 12px 10px;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s;
+}
+.option-btn .color-dot {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  vertical-align: middle;
+  margin-bottom: 4px;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+.option-btn .emoji { font-size: 20px; display: block; margin-bottom: 4px; }
+.option-btn.wide { grid-column: 1 / -1; }
+
+.go-btn {
+  width: 100%;
+  padding: 16px;
+  border: none;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.5px;
+}
+
+.scope-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--card-dark);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+.scope-badge .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-cyan);
+}
+
+/* ====== QUIZ GAME ====== */
+.progress-bar {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 16px;
+}
+.progress-pip {
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--card-dark);
+  transition: background 0.3s;
+}
+.progress-pip.correct { background: var(--accent-green); }
+.progress-pip.wrong { background: var(--danger); }
+.progress-pip.current { background: var(--accent-yellow); }
+
+.q-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.q-number {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.q-difficulty {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.q-difficulty.easy { background: var(--accent-green); color: #0B0F12; }
+.q-difficulty.medium { background: var(--accent-yellow); color: #0B0F12; }
+.q-difficulty.hard { background: var(--accent-magenta); color: #fff; }
+
+.q-text {
+  font-size: 17px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  line-height: 1.4;
+}
+
+.answer-grid {
+  display: grid;
+  gap: 8px;
+}
+.answer-btn {
+  width: 100%;
+  padding: 14px 16px;
+  background: var(--card-dark);
+  border: 2px solid transparent;
+  border-radius: 12px;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s;
+}
+.answer-btn:hover:not(.locked) { border-color: var(--accent-dim); background: var(--btn); }
+.answer-btn.selected { border-color: var(--accent); background: var(--btn); }
+.answer-btn.correct { border-color: var(--accent-green); background: rgba(50,255,126,0.12); color: var(--accent-green); }
+.answer-btn.wrong { border-color: var(--danger); background: rgba(224,85,85,0.15); color: var(--danger); }
+.answer-btn.locked { cursor: default; pointer-events: none; }
+.answer-btn .answer-letter {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.08);
+  font-size: 12px;
+  font-weight: 700;
+  margin-right: 10px;
+  flex-shrink: 0;
+}
+
+/* ====== RESULTS ====== */
+.results-card {
+  text-align: center;
+  padding: 24px;
+}
+.results-score {
+  font-size: 56px;
+  font-weight: 800;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+.results-label {
+  font-size: 15px;
+  color: var(--muted);
+  margin-bottom: 16px;
+}
+.results-breakdown {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.results-stat {
+  text-align: center;
+}
+.results-stat .val {
+  font-size: 20px;
+  font-weight: 700;
+}
+.results-stat .val.green { color: var(--accent-green); }
+.results-stat .val.red { color: var(--danger); }
+.results-stat .lbl {
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--muted);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<div class="ts-header">
+  <span class="ts-brand">TELESTATS</span>
+  <span>EPL &middot; POP QUIZ</span>
+  <span class="ts-time" id="tsTime"></span>
+</div>
+
+<div class="container">
+  <a href="ts-games.html" class="back-link">&larr; All Games</a>
+
+  <div class="header">
+    <h1>Pop <span>Quiz</span></h1>
+    <div class="subtitle">5 questions. Easy to hard. All from real data.</div>
+  </div>
+
+  <!-- STEP 1: SETUP -->
+  <div id="step1">
+    <div class="card">
+      <h2>Choose Scope</h2>
+      <div class="option-grid" id="scopeGrid"></div>
+    </div>
+    <button class="go-btn primary" id="startBtn" disabled>Start Quiz</button>
+  </div>
+
+  <!-- STEP 2: QUIZ -->
+  <div id="step2" class="hidden">
+    <div class="scope-badge" id="gameBadge"></div>
+    <div class="progress-bar" id="progressBar"></div>
+
+    <div class="card" id="questionCard">
+      <div class="q-header">
+        <span class="q-number" id="qNumber">Question 1 of 5</span>
+        <span class="q-difficulty" id="qDifficulty">Easy</span>
+      </div>
+      <div class="q-text" id="qText"></div>
+      <div class="answer-grid" id="answerGrid"></div>
+    </div>
+
+    <button class="go-btn primary hidden" id="nextBtn">Next Question</button>
+  </div>
+
+  <!-- STEP 3: RESULTS -->
+  <div id="step3" class="hidden">
+    <div class="card">
+      <div class="results-card">
+        <div class="results-score" id="finalScore">0/5</div>
+        <div class="results-label" id="finalLabel">Questions correct</div>
+        <div class="results-breakdown">
+          <div class="results-stat">
+            <div class="val green" id="correctCount">0</div>
+            <div class="lbl">Correct</div>
+          </div>
+          <div class="results-stat">
+            <div class="val red" id="wrongCount">0</div>
+            <div class="lbl">Wrong</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <button class="go-btn primary" id="playAgainBtn">Play Again</button>
+    <button class="go-btn secondary" id="backToMenuBtn">Back to Games</button>
+  </div>
+</div>
+
+<footer style="text-align:center;padding:16px 16px 72px;font-size:11px;color:var(--muted);opacity:0.6;">
+  Build: 2026-02-11 | TeleStats - Pop Quiz v2.0
+</footer>
+
+<script>
+const API_BASE = '/.netlify/functions';
+const $ = id => document.getElementById(id);
+
+const CLUB_COLOURS = {
+  'club_sunderland': '#EB172B',
+  'club_manutd': '#DA291C',
+  'club_arsenal': '#EF0107',
+  'club_liverpool': '#C8102E',
+  'club_chelsea': '#034694',
+};
+
+const SCOPES = [
+  { id: 'epl_alltime', label: 'Premier League (All-time)', type: 'league' },
+  { id: 'club_sunderland', label: 'Sunderland', type: 'club' },
+  { id: 'club_manutd', label: 'Manchester United', type: 'club' },
+  { id: 'club_arsenal', label: 'Arsenal', type: 'club' },
+  { id: 'club_liverpool', label: 'Liverpool', type: 'club' },
+  { id: 'club_chelsea', label: 'Chelsea', type: 'club' },
+];
+
+let selectedScope = null;
+let quizData = null;
+let currentQ = 0;
+let score = 0;
+let answers = []; // track per-question results
+
+function init() {
+  const grid = $('scopeGrid');
+  for (const scope of SCOPES) {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn' + (scope.type === 'league' ? ' wide' : '');
+    const colour = CLUB_COLOURS[scope.id];
+    if (scope.type === 'league') {
+      btn.innerHTML = `<span class="emoji">&#127942;</span>${scope.label}`;
+    } else {
+      btn.innerHTML = `<span class="color-dot" style="background:${colour || '#555'}"></span> ${scope.label}`;
+    }
+    btn.onclick = () => {
+      selectedScope = scope.id;
+      grid.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      $('startBtn').disabled = false;
+    };
+    grid.appendChild(btn);
+  }
+
+  $('startBtn').onclick = startQuiz;
+  $('nextBtn').onclick = nextQuestion;
+  $('playAgainBtn').onclick = resetToSetup;
+  $('backToMenuBtn').onclick = () => { window.location.href = 'ts-games.html'; };
+}
+
+async function startQuiz() {
+  $('startBtn').disabled = true;
+  $('startBtn').innerHTML = '<span class="spinner"></span> Generating quiz...';
+
+  try {
+    const res = await fetch(`${API_BASE}/quiz_start`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'generate_quiz', scopeId: selectedScope }),
+    });
+    quizData = await res.json();
+
+    if (quizData.error) throw new Error(quizData.error);
+
+    currentQ = 0;
+    score = 0;
+    answers = [];
+
+    const scopeLabel = SCOPES.find(s => s.id === selectedScope)?.label || '';
+    $('gameBadge').innerHTML = `<span class="dot"></span> ${scopeLabel}`;
+
+    // Build progress pips
+    const bar = $('progressBar');
+    bar.innerHTML = '';
+    for (let i = 0; i < quizData.questions.length; i++) {
+      const pip = document.createElement('div');
+      pip.className = 'progress-pip';
+      pip.id = `pip${i}`;
+      bar.appendChild(pip);
+    }
+
+    $('step1').classList.add('hidden');
+    $('step2').classList.remove('hidden');
+    $('step3').classList.add('hidden');
+
+    showQuestion();
+
+  } catch (err) {
+    alert('Failed to generate quiz: ' + err.message);
+  }
+
+  $('startBtn').disabled = false;
+  $('startBtn').textContent = 'Start Quiz';
+}
+
+function showQuestion() {
+  const q = quizData.questions[currentQ];
+  if (!q) {
+    showResults();
+    return;
+  }
+
+  $('qNumber').textContent = `Question ${currentQ + 1} of ${quizData.questions.length}`;
+
+  const diff = q.difficulty || 'easy';
+  $('qDifficulty').textContent = diff.charAt(0).toUpperCase() + diff.slice(1);
+  $('qDifficulty').className = `q-difficulty ${diff}`;
+
+  $('qText').textContent = q.q;
+
+  // Update progress
+  $(`pip${currentQ}`).classList.add('current');
+
+  // Render answers
+  const grid = $('answerGrid');
+  const letters = ['A', 'B', 'C', 'D'];
+  grid.innerHTML = q.options.map((opt, i) => `
+    <button class="answer-btn" data-idx="${i}">
+      <span class="answer-letter">${letters[i]}</span>
+      ${escHtml(String(opt))}
+    </button>
+  `).join('');
+
+  grid.querySelectorAll('.answer-btn').forEach(btn => {
+    btn.onclick = () => handleAnswer(parseInt(btn.dataset.idx));
+  });
+
+  $('nextBtn').classList.add('hidden');
+}
+
+function handleAnswer(selected) {
+  const q = quizData.questions[currentQ];
+  const correct = q.answer;
+  const isCorrect = selected === correct;
+
+  if (isCorrect) score++;
+  answers.push({ qIdx: currentQ, selected, correct, isCorrect });
+
+  // Lock all buttons and show result
+  const btns = $('answerGrid').querySelectorAll('.answer-btn');
+  btns.forEach((btn, i) => {
+    btn.classList.add('locked');
+    if (i === correct) btn.classList.add('correct');
+    else if (i === selected && !isCorrect) btn.classList.add('wrong');
+  });
+
+  // Update progress pip
+  const pip = $(`pip${currentQ}`);
+  pip.classList.remove('current');
+  pip.classList.add(isCorrect ? 'correct' : 'wrong');
+
+  // Show next button or results
+  if (currentQ < quizData.questions.length - 1) {
+    $('nextBtn').classList.remove('hidden');
+  } else {
+    setTimeout(showResults, 1200);
+  }
+}
+
+function nextQuestion() {
+  currentQ++;
+  showQuestion();
+}
+
+function showResults() {
+  $('step2').classList.add('hidden');
+  $('step3').classList.remove('hidden');
+
+  const total = quizData.questions.length;
+  $('finalScore').textContent = `${score}/${total}`;
+  $('correctCount').textContent = score;
+  $('wrongCount').textContent = total - score;
+
+  if (score === total) {
+    $('finalLabel').textContent = 'Perfect score!';
+    $('finalScore').style.color = 'var(--gold)';
+  } else if (score >= 3) {
+    $('finalLabel').textContent = 'Great job!';
+    $('finalScore').style.color = 'var(--accent)';
+  } else {
+    $('finalLabel').textContent = 'Better luck next time';
+    $('finalScore').style.color = 'var(--danger)';
+  }
+}
+
+function resetToSetup() {
+  $('step2').classList.add('hidden');
+  $('step3').classList.add('hidden');
+  $('step1').classList.remove('hidden');
+  quizData = null;
+  currentQ = 0;
+  score = 0;
+  answers = [];
+}
+
+function escHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+init();
+</script>
+
+<script>
+function updateClock() {
+  const now = new Date();
+  const hh = String(now.getHours()).padStart(2, '0');
+  const mm = String(now.getMinutes()).padStart(2, '0');
+  const el = document.getElementById('tsTime');
+  if (el) el.textContent = hh + ':' + mm;
+}
+updateClock();
+setInterval(updateClock, 30000);
+</script>
+</body>
+</html>
