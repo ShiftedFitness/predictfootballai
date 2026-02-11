@@ -105,6 +105,11 @@ h1, h2, h3,
   color: var(--accent-cyan);
   font-weight: 700;
 }
+.ts-header .ts-logo {
+  height: 28px;
+  width: auto;
+  display: block;
+}
 .ts-header .ts-time {
   color: var(--text-muted);
   font-variant-numeric: tabular-nums;
