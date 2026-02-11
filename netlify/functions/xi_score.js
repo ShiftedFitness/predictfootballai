@@ -353,7 +353,7 @@ exports.handler = async (event) => {
         const buildPerfQuery = () => {
           let q = supabase
             .from('player_performance_scores')
-            .select('player_uid, performance_score, appearances, goals')
+            .select('player_uid, player_name, nationality, performance_score, appearances, goals, assists, minutes, clean_sheets, tackles_interceptions, tackles_won, interceptions, saves')
             .eq('position_bucket', bucket)
             .eq('scope_type', scope.type);
           if (scope.type === 'club' && scope.clubId) {
@@ -369,10 +369,17 @@ exports.handler = async (event) => {
           if (data) {
             bucketRankings[bucket] = data.map((r, i) => ({
               playerId: String(r.player_uid),
+              name: fixMojibake(r.player_name),
+              nationality: r.nationality,
               rank: i + 1,
               score: parseFloat(r.performance_score) || 0,
               appearances: r.appearances,
               goals: r.goals,
+              assists: r.assists,
+              minutes: r.minutes,
+              cleanSheets: r.clean_sheets,
+              tacklesInterceptions: r.tackles_interceptions || ((r.tackles_won || 0) + (r.interceptions || 0)),
+              saves: r.saves,
             }));
           }
         } catch (err) {
@@ -505,11 +512,34 @@ exports.handler = async (event) => {
     }
 
     const total = bestXI.length;
+
+    // Build top-10 rankings per bucket for performance objective (always include after scoring)
+    let topByBucket = undefined;
+    if (objective === 'performance') {
+      topByBucket = {};
+      for (const bucket of uniqueBuckets) {
+        const rankings = bucketRankings[bucket] || [];
+        topByBucket[bucket] = rankings.slice(0, 10).map(r => ({
+          rank: r.rank,
+          name: r.name || 'Unknown',
+          nationality: r.nationality || '',
+          score: r.score,
+          appearances: r.appearances,
+          goals: r.goals,
+          assists: r.assists,
+          cleanSheets: r.cleanSheets,
+          tacklesInterceptions: r.tacklesInterceptions,
+          saves: r.saves,
+        }));
+      }
+    }
+
     return respond(200, {
       correct,
       total,
       results,
       complete: correct === total,
+      topByBucket,
     });
 
   } catch (err) {

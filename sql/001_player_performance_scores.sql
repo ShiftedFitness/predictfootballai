@@ -160,25 +160,93 @@ BEGIN
   HAVING SUM(COALESCE(pss.appearances, 0)) >= 20;  -- club min threshold
 
   -- ============================================================
+  -- STEP B2: Estimate clean sheets for DEF players
+  -- DEF rows typically have clean_sheets = 0 because the source data
+  -- only records clean sheets for goalkeepers. We estimate a defender's
+  -- clean sheets from GK data: for each club+season, compute the GK
+  -- clean sheet rate, then multiply by the DEF player's appearances
+  -- in that club+season. This is summed across all their seasons.
+  -- ============================================================
+  UPDATE player_performance_scores pps
+  SET clean_sheets = COALESCE(est.estimated_cs, 0)
+  FROM (
+    SELECT
+      def_pss.player_uid,
+      def_pss.club_id AS eff_club_id,
+      pps_outer.scope_type,
+      pps_outer.scope_id,
+      SUM(
+        ROUND(
+          def_pss.appearances::numeric
+          * COALESCE(gk_cs.cs_rate, 0)
+        )
+      )::integer AS estimated_cs
+    FROM player_performance_scores pps_outer
+    JOIN player_season_stats def_pss
+      ON def_pss.player_uid = pps_outer.player_uid
+     AND def_pss.competition_id = epl_comp_id
+     AND def_pss.position_bucket = 'DEF'
+     AND def_pss.appearances > 0
+     AND (
+       (pps_outer.scope_type = 'league')
+       OR (pps_outer.scope_type = 'club' AND def_pss.club_id = pps_outer.scope_id)
+     )
+    LEFT JOIN (
+      -- GK clean sheet rate per club per season
+      SELECT
+        club_id,
+        season_start_year,
+        CASE WHEN SUM(appearances) > 0
+          THEN SUM(clean_sheets)::numeric / SUM(appearances)
+          ELSE 0
+        END AS cs_rate
+      FROM player_season_stats
+      WHERE competition_id = epl_comp_id
+        AND position_bucket = 'GK'
+        AND appearances > 0
+      GROUP BY club_id, season_start_year
+    ) gk_cs
+      ON gk_cs.club_id = def_pss.club_id
+     AND gk_cs.season_start_year = def_pss.season_start_year
+    WHERE pps_outer.position_bucket = 'DEF'
+      AND pps_outer.clean_sheets = 0
+    GROUP BY def_pss.player_uid, def_pss.club_id, pps_outer.scope_type, pps_outer.scope_id
+  ) est
+  WHERE pps.player_uid = est.player_uid
+    AND pps.scope_type = est.scope_type
+    AND pps.scope_id IS NOT DISTINCT FROM est.scope_id
+    AND pps.position_bucket = 'DEF'
+    AND pps.clean_sheets = 0;
+
+  -- ============================================================
   -- STEP C: Compute raw_score based on position bucket
   -- ============================================================
 
-  -- FWD + MID: attacking score
+  -- FWD: attacking score (goals weighted highest)
   UPDATE player_performance_scores
   SET raw_score = (
     (goals * 4.0 + assists * 3.0 + (goals + assists) * 1.0)
     / GREATEST(minutes::numeric / 90.0, 1.0)
   ) * sqrt(appearances::numeric)
-  WHERE position_bucket IN ('FWD', 'MID');
+  WHERE position_bucket = 'FWD';
 
-  -- DEF: defensive score (fallback to availability + contributions)
+  -- MID: creative score (assists weighted up, goals slightly down vs FWD)
+  UPDATE player_performance_scores
+  SET raw_score = (
+    (goals * 3.0 + assists * 3.5 + (goals + assists) * 1.0)
+    / GREATEST(minutes::numeric / 90.0, 1.0)
+  ) * sqrt(appearances::numeric)
+  WHERE position_bucket = 'MID';
+
+  -- DEF: defensive score (tackles, clean sheets primary; goals/assists minor bonus)
   UPDATE player_performance_scores
   SET raw_score = (
     ((CASE WHEN COALESCE(tackles_interceptions, 0) > 0 THEN tackles_interceptions
            WHEN COALESCE(tackles_won, 0) + COALESCE(interceptions, 0) > 0 THEN tackles_won + interceptions
-           ELSE 0 END)::numeric * 0.08
-     + assists * 2.0
-     + goals * 2.0)
+           ELSE 0 END)::numeric * 0.5
+     + clean_sheets * 3.0
+     + goals * 0.5
+     + assists * 0.5)
     / GREATEST(minutes::numeric / 90.0, 1.0)
   ) * sqrt(appearances::numeric)
   WHERE position_bucket = 'DEF';
