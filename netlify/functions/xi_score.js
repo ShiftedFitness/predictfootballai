@@ -84,9 +84,20 @@ const FORMATIONS = {
   ]},
 };
 
-// All 41 EPL clubs + league-wide (must match xi_start.js)
+// All scopes — must match xi_start.js
 const SCOPES = [
   { id: 'epl_alltime',      label: 'Premier League (All-time)', type: 'league', clubName: null },
+  // Wonders
+  { id: 'wonder_onematch',  label: 'One Match Wonders', type: 'wonder', wonderType: 'match' },
+  { id: 'wonder_onegoal',   label: 'One Goal Wonders',  type: 'wonder', wonderType: 'goal' },
+  // Nationality XIs
+  { id: 'nat_english',  label: 'English XI',  type: 'nationality', nationalityCode: 'ENG' },
+  { id: 'nat_spanish',  label: 'Spanish XI',  type: 'nationality', nationalityCode: 'ESP' },
+  { id: 'nat_french',   label: 'French XI',   type: 'nationality', nationalityCode: 'FRA' },
+  { id: 'nat_scottish', label: 'Scottish XI', type: 'nationality', nationalityCode: 'SCO' },
+  { id: 'nat_irish',    label: 'Irish XI',    type: 'nationality', nationalityCode: 'IRL' },
+  { id: 'nat_welsh',    label: 'Welsh XI',    type: 'nationality', nationalityCode: 'WAL' },
+  { id: 'nat_nirish',   label: 'N. Irish XI', type: 'nationality', nationalityCode: 'NIR' },
   { id: 'club_arsenal',     label: 'Arsenal',          type: 'club', clubName: 'Arsenal',              clubId: 94  },
   { id: 'club_astonvilla',  label: 'Aston Villa',      type: 'club', clubName: 'Aston Villa',          clubId: 295 },
   { id: 'club_blackburn',   label: 'Blackburn',        type: 'club', clubName: 'Blackburn Rovers',     clubId: 24  },
@@ -172,16 +183,31 @@ async function computeBestXI(supabase, scope, formation, objective) {
 
   if (objective === 'performance') {
     for (const [bucket, count] of Object.entries(bucketCounts)) {
+      let scopeType = scope.type;
+      let scopeId = null;
+      if (scope.type === 'nationality' || scope.type === 'wonder') {
+        scopeType = 'league'; scopeId = null;
+      } else if (scope.type === 'club') {
+        scopeId = scope.clubId;
+      }
+
+      const fetchLimit = (scope.type === 'nationality' || scope.type === 'wonder') ? 500 : count;
+
       let query = supabase
         .from('player_performance_scores')
         .select('player_uid, player_name, nationality, appearances, goals, assists, minutes, performance_score')
         .eq('position_bucket', bucket)
-        .eq('scope_type', scope.type);
+        .eq('scope_type', scopeType);
 
-      if (scope.type === 'club' && scope.clubId) {
-        query = query.eq('scope_id', scope.clubId);
-      } else {
-        query = query.is('scope_id', null);
+      if (scopeId) { query = query.eq('scope_id', scopeId); }
+      else { query = query.is('scope_id', null); }
+
+      if (scope.type === 'nationality' && scope.nationalityCode) {
+        query = query.eq('nationality', scope.nationalityCode.toUpperCase());
+      }
+      if (scope.type === 'wonder') {
+        if (scope.wonderType === 'match') query = query.eq('appearances', 1);
+        else if (scope.wonderType === 'goal') query = query.eq('goals', 1);
       }
 
       query = query
@@ -189,10 +215,10 @@ async function computeBestXI(supabase, scope, formation, objective) {
         .order('appearances', { ascending: false })
         .order('minutes', { ascending: false })
         .order('player_name', { ascending: true })
-        .limit(count);
+        .limit(fetchLimit);
 
       const { data } = await query;
-      bestByBucket[bucket] = (data || []).map(row => ({
+      bestByBucket[bucket] = (data || []).slice(0, count).map(row => ({
         playerId: row.player_uid,
         name: fixMojibake(row.player_name),
         nationality: row.nationality,
@@ -249,8 +275,40 @@ async function computeBestXI(supabase, scope, formation, objective) {
         }
       }
 
-      const minApps = scope.type === 'club' ? MIN_APPS_CLUB : MIN_APPS_LEAGUE;
+      const minApps = scope.type === 'wonder' ? 0 : (scope.type === 'club' ? MIN_APPS_CLUB : MIN_APPS_LEAGUE);
       let eligible = Array.from(aggMap.values()).filter(p => p.appearances >= minApps);
+
+      // Apply wonder filters
+      if (scope.type === 'wonder') {
+        if (scope.wonderType === 'match') eligible = eligible.filter(p => p.appearances === 1);
+        else if (scope.wonderType === 'goal') eligible = eligible.filter(p => p.goals === 1);
+      }
+
+      // For nationality scopes, we need player info before filtering
+      const allUids = eligible.map(p => p.player_uid);
+      const nameMap = new Map();
+      if (allUids.length > 0) {
+        const batchSize = 500;
+        for (let i = 0; i < allUids.length; i += batchSize) {
+          const batch = allUids.slice(i, i + batchSize);
+          const { data: players } = await supabase
+            .from('players')
+            .select('player_uid, player_name, nationality_norm')
+            .in('player_uid', batch);
+          if (players) {
+            for (const p of players) nameMap.set(p.player_uid, p);
+          }
+        }
+      }
+
+      // Apply nationality filter
+      if (scope.type === 'nationality' && scope.nationalityCode) {
+        const natCode = scope.nationalityCode.toUpperCase();
+        eligible = eligible.filter(p => {
+          const player = nameMap.get(p.player_uid);
+          return player && (player.nationality_norm || '').toUpperCase() === natCode;
+        });
+      }
 
       eligible.sort((a, b) => {
         const d = (b[metric] || 0) - (a[metric] || 0);
@@ -262,17 +320,6 @@ async function computeBestXI(supabase, scope, formation, objective) {
 
       const topN = eligible.slice(0, count);
       const uids = topN.map(p => p.player_uid);
-
-      const nameMap = new Map();
-      if (uids.length > 0) {
-        const { data: players } = await supabase
-          .from('players')
-          .select('player_uid, player_name, nationality_norm')
-          .in('player_uid', uids);
-        if (players) {
-          for (const p of players) nameMap.set(p.player_uid, p);
-        }
-      }
 
       // Final alphabetical tiebreak for same score
       topN.forEach(agg => {
