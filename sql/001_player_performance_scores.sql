@@ -119,7 +119,7 @@ BEGIN
 
   -- ============================================================
   -- STEP B: Insert raw aggregated stats for CLUB scopes
-  -- Only for the 5 supported clubs
+  -- Computes for ALL EPL clubs (no hardcoded list)
   -- ============================================================
   INSERT INTO player_performance_scores (
     scope_type, scope_id, position_bucket, player_uid, player_name, nationality,
@@ -157,10 +157,6 @@ BEGIN
   JOIN players p ON p.player_uid = pss.player_uid
   WHERE pss.competition_id = epl_comp_id
     AND pss.position_bucket IS NOT NULL
-    AND pss.club_id IN (
-      SELECT club_id FROM clubs
-      WHERE club_name IN ('Sunderland', 'Manchester United', 'Arsenal', 'Liverpool', 'Chelsea')
-    )
   GROUP BY pss.club_id, pss.position_bucket, pss.player_uid, p.player_name, p.nationality_norm
   HAVING SUM(COALESCE(pss.appearances, 0)) >= 20;  -- club min threshold
 
@@ -187,6 +183,32 @@ BEGIN
   WHERE def_pps.position_bucket = 'DEF'
     AND def_pps.scope_type = gk_stats.scope_type
     AND def_pps.scope_id IS NOT DISTINCT FROM gk_stats.scope_id;
+
+  -- ============================================================
+  -- STEP B3: Impute defensive actions for DEF players with missing data
+  -- Many pre-2010s players have 0 tackles/interceptions (not tracked).
+  -- To avoid penalizing them, fill in the average per-90 rate from
+  -- players who DO have data, prorated by the player's minutes.
+  -- This ensures old defenders get a fair baseline.
+  -- ============================================================
+  UPDATE player_performance_scores def_pps
+  SET tackles_won = ROUND(avg_stats.avg_tackles_p90 * def_pps.minutes / 90.0)::integer,
+      interceptions = ROUND(avg_stats.avg_interceptions_p90 * def_pps.minutes / 90.0)::integer,
+      tackles_interceptions = ROUND((avg_stats.avg_tackles_p90 + avg_stats.avg_interceptions_p90) * def_pps.minutes / 90.0)::integer
+  FROM (
+    SELECT scope_type, scope_id,
+      AVG(tackles_won::numeric / GREATEST(minutes::numeric / 90.0, 1.0)) AS avg_tackles_p90,
+      AVG(interceptions::numeric / GREATEST(minutes::numeric / 90.0, 1.0)) AS avg_interceptions_p90
+    FROM player_performance_scores
+    WHERE position_bucket = 'DEF'
+      AND (tackles_won + interceptions) > 0
+    GROUP BY scope_type, scope_id
+  ) avg_stats
+  WHERE def_pps.position_bucket = 'DEF'
+    AND def_pps.tackles_won = 0
+    AND def_pps.interceptions = 0
+    AND def_pps.scope_type = avg_stats.scope_type
+    AND def_pps.scope_id IS NOT DISTINCT FROM avg_stats.scope_id;
 
   -- ============================================================
   -- STEP C: Compute raw_score based on position bucket

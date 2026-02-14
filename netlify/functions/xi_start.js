@@ -81,76 +81,113 @@ const FORMATIONS = {
     label: '4-4-2',
     slots: [
       { idx: 0, role: 'GK',  bucket: 'GK',  label: 'GK',  row: 0 },
-      { idx: 1, role: 'LB',  bucket: 'DEF', label: 'DEF', row: 1 },
-      { idx: 2, role: 'CB',  bucket: 'DEF', label: 'DEF', row: 1 },
-      { idx: 3, role: 'CB',  bucket: 'DEF', label: 'DEF', row: 1 },
-      { idx: 4, role: 'RB',  bucket: 'DEF', label: 'DEF', row: 1 },
-      { idx: 5, role: 'LM',  bucket: 'MID', label: 'MID', row: 2 },
-      { idx: 6, role: 'CM',  bucket: 'MID', label: 'MID', row: 2 },
-      { idx: 7, role: 'CM',  bucket: 'MID', label: 'MID', row: 2 },
-      { idx: 8, role: 'RM',  bucket: 'MID', label: 'MID', row: 2 },
-      { idx: 9, role: 'ST',  bucket: 'FWD', label: 'FWD', row: 3 },
-      { idx: 10, role: 'ST', bucket: 'FWD', label: 'FWD', row: 3 },
+      { idx: 1, role: 'LB',  bucket: 'DEF', label: 'DF', row: 1 },
+      { idx: 2, role: 'CB',  bucket: 'DEF', label: 'DF', row: 1 },
+      { idx: 3, role: 'CB',  bucket: 'DEF', label: 'DF', row: 1 },
+      { idx: 4, role: 'RB',  bucket: 'DEF', label: 'DF', row: 1 },
+      { idx: 5, role: 'LM',  bucket: 'MID', label: 'MF', row: 2 },
+      { idx: 6, role: 'CM',  bucket: 'MID', label: 'MF', row: 2 },
+      { idx: 7, role: 'CM',  bucket: 'MID', label: 'MF', row: 2 },
+      { idx: 8, role: 'RM',  bucket: 'MID', label: 'MF', row: 2 },
+      { idx: 9, role: 'ST',  bucket: 'FWD', label: 'FW', row: 3 },
+      { idx: 10, role: 'ST', bucket: 'FWD', label: 'FW', row: 3 },
     ],
   },
   '4-3-3': {
     label: '4-3-3',
     slots: [
       { idx: 0, role: 'GK',  bucket: 'GK',  label: 'GK',  row: 0 },
-      { idx: 1, role: 'LB',  bucket: 'DEF', label: 'DEF', row: 1 },
-      { idx: 2, role: 'CB',  bucket: 'DEF', label: 'DEF', row: 1 },
-      { idx: 3, role: 'CB',  bucket: 'DEF', label: 'DEF', row: 1 },
-      { idx: 4, role: 'RB',  bucket: 'DEF', label: 'DEF', row: 1 },
-      { idx: 5, role: 'CM',  bucket: 'MID', label: 'MID', row: 2 },
-      { idx: 6, role: 'CM',  bucket: 'MID', label: 'MID', row: 2 },
-      { idx: 7, role: 'CM',  bucket: 'MID', label: 'MID', row: 2 },
-      { idx: 8, role: 'LW',  bucket: 'FWD', label: 'FWD', row: 3 },
-      { idx: 9, role: 'ST',  bucket: 'FWD', label: 'FWD', row: 3 },
-      { idx: 10, role: 'RW', bucket: 'FWD', label: 'FWD', row: 3 },
+      { idx: 1, role: 'LB',  bucket: 'DEF', label: 'DF', row: 1 },
+      { idx: 2, role: 'CB',  bucket: 'DEF', label: 'DF', row: 1 },
+      { idx: 3, role: 'CB',  bucket: 'DEF', label: 'DF', row: 1 },
+      { idx: 4, role: 'RB',  bucket: 'DEF', label: 'DF', row: 1 },
+      { idx: 5, role: 'CM',  bucket: 'MID', label: 'MF', row: 2 },
+      { idx: 6, role: 'CM',  bucket: 'MID', label: 'MF', row: 2 },
+      { idx: 7, role: 'CM',  bucket: 'MID', label: 'MF', row: 2 },
+      { idx: 8, role: 'LW',  bucket: 'FWD', label: 'FW', row: 3 },
+      { idx: 9, role: 'ST',  bucket: 'FWD', label: 'FW', row: 3 },
+      { idx: 10, role: 'RW', bucket: 'FWD', label: 'FW', row: 3 },
     ],
   },
   '3-5-2': {
     label: '3-5-2',
     slots: [
       { idx: 0, role: 'GK',   bucket: 'GK',  label: 'GK',  row: 0 },
-      { idx: 1, role: 'CB',   bucket: 'DEF', label: 'DEF', row: 1 },
-      { idx: 2, role: 'CB',   bucket: 'DEF', label: 'DEF', row: 1 },
-      { idx: 3, role: 'CB',   bucket: 'DEF', label: 'DEF', row: 1 },
-      { idx: 4, role: 'LWB',  bucket: 'MID', label: 'MID', row: 2 },
-      { idx: 5, role: 'CM',   bucket: 'MID', label: 'MID', row: 2 },
-      { idx: 6, role: 'CM',   bucket: 'MID', label: 'MID', row: 2 },
-      { idx: 7, role: 'CM',   bucket: 'MID', label: 'MID', row: 2 },
-      { idx: 8, role: 'RWB',  bucket: 'MID', label: 'MID', row: 2 },
-      { idx: 9, role: 'ST',   bucket: 'FWD', label: 'FWD', row: 3 },
-      { idx: 10, role: 'ST',  bucket: 'FWD', label: 'FWD', row: 3 },
+      { idx: 1, role: 'CB',   bucket: 'DEF', label: 'DF', row: 1 },
+      { idx: 2, role: 'CB',   bucket: 'DEF', label: 'DF', row: 1 },
+      { idx: 3, role: 'CB',   bucket: 'DEF', label: 'DF', row: 1 },
+      { idx: 4, role: 'LWB',  bucket: 'MID', label: 'MF', row: 2 },
+      { idx: 5, role: 'CM',   bucket: 'MID', label: 'MF', row: 2 },
+      { idx: 6, role: 'CM',   bucket: 'MID', label: 'MF', row: 2 },
+      { idx: 7, role: 'CM',   bucket: 'MID', label: 'MF', row: 2 },
+      { idx: 8, role: 'RWB',  bucket: 'MID', label: 'MF', row: 2 },
+      { idx: 9, role: 'ST',   bucket: 'FWD', label: 'FW', row: 3 },
+      { idx: 10, role: 'ST',  bucket: 'FWD', label: 'FW', row: 3 },
     ],
   },
   '3-4-3': {
     label: '3-4-3',
     slots: [
       { idx: 0, role: 'GK',   bucket: 'GK',  label: 'GK',  row: 0 },
-      { idx: 1, role: 'CB',   bucket: 'DEF', label: 'DEF', row: 1 },
-      { idx: 2, role: 'CB',   bucket: 'DEF', label: 'DEF', row: 1 },
-      { idx: 3, role: 'CB',   bucket: 'DEF', label: 'DEF', row: 1 },
-      { idx: 4, role: 'LM',   bucket: 'MID', label: 'MID', row: 2 },
-      { idx: 5, role: 'CM',   bucket: 'MID', label: 'MID', row: 2 },
-      { idx: 6, role: 'CM',   bucket: 'MID', label: 'MID', row: 2 },
-      { idx: 7, role: 'RM',   bucket: 'MID', label: 'MID', row: 2 },
-      { idx: 8, role: 'LW',   bucket: 'FWD', label: 'FWD', row: 3 },
-      { idx: 9, role: 'ST',   bucket: 'FWD', label: 'FWD', row: 3 },
-      { idx: 10, role: 'RW',  bucket: 'FWD', label: 'FWD', row: 3 },
+      { idx: 1, role: 'CB',   bucket: 'DEF', label: 'DF', row: 1 },
+      { idx: 2, role: 'CB',   bucket: 'DEF', label: 'DF', row: 1 },
+      { idx: 3, role: 'CB',   bucket: 'DEF', label: 'DF', row: 1 },
+      { idx: 4, role: 'LM',   bucket: 'MID', label: 'MF', row: 2 },
+      { idx: 5, role: 'CM',   bucket: 'MID', label: 'MF', row: 2 },
+      { idx: 6, role: 'CM',   bucket: 'MID', label: 'MF', row: 2 },
+      { idx: 7, role: 'RM',   bucket: 'MID', label: 'MF', row: 2 },
+      { idx: 8, role: 'LW',   bucket: 'FWD', label: 'FW', row: 3 },
+      { idx: 9, role: 'ST',   bucket: 'FWD', label: 'FW', row: 3 },
+      { idx: 10, role: 'RW',  bucket: 'FWD', label: 'FW', row: 3 },
     ],
   },
 };
 
-// Supported scopes
+// Supported scopes — all 41 EPL clubs + league-wide
+// clubId is the direct database ID (avoids fragile name lookups)
 const SCOPES = [
-  { id: 'epl_alltime', label: 'Premier League (All-time)', type: 'league', clubName: null },
-  { id: 'club_sunderland', label: 'Sunderland', type: 'club', clubName: 'Sunderland' },
-  { id: 'club_manutd', label: 'Manchester United', type: 'club', clubName: 'Manchester United' },
-  { id: 'club_arsenal', label: 'Arsenal', type: 'club', clubName: 'Arsenal' },
-  { id: 'club_liverpool', label: 'Liverpool', type: 'club', clubName: 'Liverpool' },
-  { id: 'club_chelsea', label: 'Chelsea', type: 'club', clubName: 'Chelsea' },
+  { id: 'epl_alltime',      label: 'Premier League (All-time)', type: 'league', clubName: null },
+  { id: 'club_arsenal',     label: 'Arsenal',          type: 'club', clubName: 'Arsenal',              clubId: 94  },
+  { id: 'club_astonvilla',  label: 'Aston Villa',      type: 'club', clubName: 'Aston Villa',          clubId: 295 },
+  { id: 'club_blackburn',   label: 'Blackburn',        type: 'club', clubName: 'Blackburn Rovers',     clubId: 24  },
+  { id: 'club_bolton',      label: 'Bolton',           type: 'club', clubName: 'Bolton Wanderers',     clubId: 158 },
+  { id: 'club_bournemouth', label: 'Bournemouth',      type: 'club', clubName: 'Bournemouth',          clubId: 117 },
+  { id: 'club_brentford',   label: 'Brentford',        type: 'club', clubName: 'Brentford',            clubId: 336 },
+  { id: 'club_brighton',    label: 'Brighton',         type: 'club', clubName: 'Brighton',              clubId: 483 },
+  { id: 'club_burnley',     label: 'Burnley',          type: 'club', clubName: 'Burnley',              clubId: 535 },
+  { id: 'club_charlton',    label: 'Charlton',         type: 'club', clubName: 'Charlton Athletic',    clubId: 407 },
+  { id: 'club_chelsea',     label: 'Chelsea',          type: 'club', clubName: 'Chelsea',              clubId: 75  },
+  { id: 'club_coventry',    label: 'Coventry',         type: 'club', clubName: 'Coventry City',        clubId: 501 },
+  { id: 'club_crystalpalace', label: 'Crystal Palace', type: 'club', clubName: 'Crystal Palace',       clubId: 57  },
+  { id: 'club_derby',       label: 'Derby',            type: 'club', clubName: 'Derby County',         clubId: 218 },
+  { id: 'club_everton',     label: 'Everton',          type: 'club', clubName: 'Everton',              clubId: 22  },
+  { id: 'club_fulham',      label: 'Fulham',           type: 'club', clubName: 'Fulham',               clubId: 356 },
+  { id: 'club_ipswich',     label: 'Ipswich',          type: 'club', clubName: 'Ipswich Town',         clubId: 348 },
+  { id: 'club_leeds',       label: 'Leeds',            type: 'club', clubName: 'Leeds United',         clubId: 559 },
+  { id: 'club_leicester',   label: 'Leicester',        type: 'club', clubName: 'Leicester City',       clubId: 68  },
+  { id: 'club_liverpool',   label: 'Liverpool',        type: 'club', clubName: 'Liverpool',            clubId: 28  },
+  { id: 'club_mancity',     label: 'Man City',         type: 'club', clubName: 'Manchester City',      clubId: 278 },
+  { id: 'club_manutd',      label: 'Man Utd',          type: 'club', clubName: 'Manchester Utd',       clubId: 592 },
+  { id: 'club_middlesbrough', label: 'Middlesbrough',  type: 'club', clubName: 'Middlesbrough',        clubId: 534 },
+  { id: 'club_newcastle',   label: 'Newcastle',        type: 'club', clubName: 'Newcastle United',     clubId: 520 },
+  { id: 'club_norwich',     label: 'Norwich',          type: 'club', clubName: 'Norwich City',         clubId: 137 },
+  { id: 'club_nottmforest', label: 'Nottm Forest',     type: 'club', clubName: 'Nottingham Forest',    clubId: 213 },
+  { id: 'club_portsmouth',  label: 'Portsmouth',       type: 'club', clubName: 'Portsmouth',           clubId: 493 },
+  { id: 'club_qpr',         label: 'QPR',              type: 'club', clubName: 'Queens Park Rangers',  clubId: 543 },
+  { id: 'club_reading',     label: 'Reading',          type: 'club', clubName: 'Reading',              clubId: 344 },
+  { id: 'club_sheffutd',    label: 'Sheff Utd',        type: 'club', clubName: 'Sheffield United',     clubId: 371 },
+  { id: 'club_sheffwed',    label: 'Sheff Wed',        type: 'club', clubName: 'Sheffield Weds',       clubId: 496 },
+  { id: 'club_southampton', label: 'Southampton',      type: 'club', clubName: 'Southampton',          clubId: 208 },
+  { id: 'club_stoke',       label: 'Stoke',            type: 'club', clubName: 'Stoke City',           clubId: 121 },
+  { id: 'club_sunderland',  label: 'Sunderland',       type: 'club', clubName: 'Sunderland',           clubId: 12  },
+  { id: 'club_swansea',     label: 'Swansea',          type: 'club', clubName: 'Swansea City',         clubId: 548 },
+  { id: 'club_tottenham',   label: 'Spurs',            type: 'club', clubName: 'Tottenham Hotspur',    clubId: 239 },
+  { id: 'club_watford',     label: 'Watford',          type: 'club', clubName: 'Watford',              clubId: 71  },
+  { id: 'club_westbrom',    label: 'West Brom',        type: 'club', clubName: 'West Bromwich Albion', clubId: 9   },
+  { id: 'club_westham',     label: 'West Ham',         type: 'club', clubName: 'West Ham United',      clubId: 153 },
+  { id: 'club_wigan',       label: 'Wigan',            type: 'club', clubName: 'Wigan Athletic',       clubId: 564 },
+  { id: 'club_wimbledon',   label: 'Wimbledon',        type: 'club', clubName: 'Wimbledon',            clubId: 140 },
+  { id: 'club_wolves',      label: 'Wolves',           type: 'club', clubName: 'Wolves',               clubId: 577 },
 ];
 
 // Min appearance thresholds
@@ -622,10 +659,12 @@ exports.handler = async (event) => {
         return respond(500, { error: 'Premier League competition not found' });
       }
 
-      // Resolve club_id if needed
+      // Resolve club_id — use direct clubId if available, else name lookup
       const scope = { ...scopeDef };
-      if (scope.type === 'club' && scope.clubName) {
-        scope.clubId = await getClubId(supabase, scope.clubName);
+      if (scope.type === 'club') {
+        if (!scope.clubId && scope.clubName) {
+          scope.clubId = await getClubId(supabase, scope.clubName);
+        }
         if (!scope.clubId) {
           return respond(400, { error: `Club not found: ${scope.clubName}` });
         }
@@ -655,9 +694,9 @@ exports.handler = async (event) => {
         return respond(400, { error: `Unknown formation: ${formation}` });
       }
 
-      // Resolve club_id
+      // Resolve club_id — use direct clubId if available, else name lookup
       const scope = { ...scopeDef };
-      if (scope.type === 'club' && scope.clubName) {
+      if (scope.type === 'club' && !scope.clubId && scope.clubName) {
         scope.clubId = await getClubId(supabase, scope.clubName);
       }
 
