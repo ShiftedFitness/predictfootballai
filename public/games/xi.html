@@ -88,42 +88,38 @@ body {
 .option-btn .desc { font-size: 11px; color: var(--muted); font-weight: 400; margin-top: 4px; }
 .option-btn.wide { grid-column: 1 / -1; }
 
-/* Scope category dropdowns within the Team selector */
-.scope-category {
-  margin-bottom: 10px;
-}
-.scope-category-header {
+/* Scope sections (Bullseye-style collapsible) */
+.scope-section { background: var(--card-dark); border-radius: 10px; margin-bottom: 10px; overflow: hidden; }
+.scope-section-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 12px;
-  background: var(--card-dark);
-  border-radius: 8px;
+  padding: 14px 16px;
   cursor: pointer;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--muted);
-  transition: all 0.2s;
-  border: 1px solid transparent;
+  transition: background 0.15s;
 }
-.scope-category-header:hover { border-color: rgba(255,255,255,0.1); color: var(--ink); }
-.scope-category-header .cat-chevron {
-  font-size: 11px;
-  transition: transform 0.3s;
+.scope-section-header:hover { background: rgba(255,255,255,0.03); }
+.scope-section-title { font-weight: 700; font-size: 15px; display: flex; align-items: center; gap: 8px; }
+.scope-section-count { font-size: 12px; color: var(--muted); font-weight: 400; }
+.scope-section .chev { opacity: 0.7; transition: transform 0.2s; font-size: 12px; }
+.scope-section.open .chev { transform: rotate(180deg); }
+.scope-section-body { display: none; padding: 0 0 4px; }
+.scope-section.open .scope-section-body { display: block; }
+.scope-card {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: background 0.15s;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
 }
-.scope-category.cat-collapsed .cat-chevron { transform: rotate(-90deg); }
-.scope-category-body {
-  overflow: hidden;
-  max-height: 800px;
-  transition: max-height 0.3s ease, opacity 0.2s ease;
-  opacity: 1;
-  padding-top: 8px;
-}
-.scope-category.cat-collapsed .scope-category-body {
-  max-height: 0;
-  opacity: 0;
-  padding-top: 0;
-}
+.scope-card:last-child { border-bottom: none; }
+.scope-card:hover { background: rgba(255,255,255,0.06); }
+.scope-card.selected { background: rgba(0,229,255,0.10); }
+.scope-card .sc-icon { font-size: 18px; margin-right: 10px; flex-shrink: 0; }
+.scope-card .sc-dot { width: 18px; height: 18px; border-radius: 4px; margin-right: 10px; flex-shrink: 0; border: 1px solid rgba(255,255,255,0.2); }
+.scope-card .sc-label { font-weight: 600; font-size: 13px; flex: 1; }
+.scope-card .sc-arrow { opacity: 0.5; font-size: 14px; }
 
 .formation-grid {
   display: flex;
@@ -1162,12 +1158,21 @@ const SCOPE_CATEGORIES = [
   { key: 'clubs', label: 'Teams', defaultOpen: false },
 ];
 
+const NAT_FLAGS = {
+  ENG: '\uD83C\uDFF4\uDB40\uDC67\uDB40\uDC62\uDB40\uDC65\uDB40\uDC6E\uDB40\uDC67\uDB40\uDC7F',
+  ESP: '\uD83C\uDDEA\uD83C\uDDF8',
+  FRA: '\uD83C\uDDEB\uD83C\uDDF7',
+  SCO: '\uD83C\uDFF4\uDB40\uDC67\uDB40\uDC62\uDB40\uDC73\uDB40\uDC63\uDB40\uDC74\uDB40\uDC7F',
+  IRL: '\uD83C\uDDEE\uD83C\uDDEA',
+  WAL: '\uD83C\uDFF4\uDB40\uDC67\uDB40\uDC62\uDB40\uDC77\uDB40\uDC6C\uDB40\uDC73\uDB40\uDC7F',
+  NIR: '\uD83C\uDDEC\uD83C\uDDE7',
+};
+
 function renderScopeGrid() {
   const scopeGrid = $('scopeGrid');
   scopeGrid.innerHTML = '';
 
   for (const cat of SCOPE_CATEGORIES) {
-    // Get scopes in this category
     let catScopes = gameConfig.scopes.filter(s => (s.category || 'clubs') === cat.key);
 
     // Filter wonders by selected objective visibility
@@ -1176,49 +1181,50 @@ function renderScopeGrid() {
         if (!s.visibleObjectives) return true;
         return selectedObjective && s.visibleObjectives.includes(selectedObjective);
       });
-      if (catScopes.length === 0) continue; // hide wonders section if nothing visible
+      if (catScopes.length === 0) continue;
     }
 
     const section = document.createElement('div');
-    section.className = 'scope-category' + (cat.defaultOpen ? '' : ' cat-collapsed');
+    section.className = 'scope-section' + (cat.defaultOpen ? ' open' : '');
     section.id = 'scopeCat_' + cat.key;
 
     const header = document.createElement('div');
-    header.className = 'scope-category-header';
-    header.innerHTML = `${cat.label} <span class="cat-chevron">&#9660;</span>`;
-    header.onclick = () => section.classList.toggle('cat-collapsed');
+    header.className = 'scope-section-header';
+    header.innerHTML = `<div class="scope-section-title">${cat.label} <span class="scope-section-count">(${catScopes.length})</span></div><div class="chev">\u25BC</div>`;
+    header.onclick = () => section.classList.toggle('open');
     section.appendChild(header);
 
     const body = document.createElement('div');
-    body.className = 'scope-category-body';
-
-    const grid = document.createElement('div');
-    grid.className = 'option-grid';
+    body.className = 'scope-section-body';
 
     for (const scope of catScopes) {
-      const btn = document.createElement('button');
-      btn.className = 'option-btn' + (scope.type === 'league' ? ' wide' : '');
-      if (scope.id === selectedScope) btn.classList.add('selected');
+      const card = document.createElement('div');
+      card.className = 'scope-card' + (scope.id === selectedScope ? ' selected' : '');
+
       const colour = CLUB_COLOURS[scope.id];
 
       if (scope.type === 'league') {
-        btn.innerHTML = `<span class="emoji">&#127942;</span>${scope.label}`;
+        card.innerHTML = `<span class="sc-icon">\uD83C\uDFC6</span><span class="sc-label">${scope.label}</span><span class="sc-arrow">\u203A</span>`;
       } else if (scope.type === 'wonder') {
-        btn.className = 'option-btn wide';
-        const emoji = scope.id === 'wonder_onematch' ? '&#9889;' : '&#9917;';
-        btn.innerHTML = `<span class="emoji">${emoji}</span>${scope.label}`;
+        const emoji = scope.wonderType === 'match' ? '\u26A1' : '\u26BD';
+        card.innerHTML = `<span class="sc-icon">${emoji}</span><span class="sc-label">${scope.label}</span><span class="sc-arrow">\u203A</span>`;
       } else if (scope.type === 'nationality') {
-        const flags = { ENG: '&#127988;&#917607;&#917602;&#917605;&#917614;&#917607;&#917631;', ESP: '&#127466;&#127480;', FRA: '&#127467;&#127479;', SCO: '&#127988;&#917607;&#917602;&#917619;&#917603;&#917620;&#917631;', IRL: '&#127470;&#127466;', WAL: '&#127988;&#917607;&#917602;&#917623;&#917612;&#917619;&#917631;', NIR: '&#127988;&#917607;&#917602;&#917614;&#917609;&#917618;&#917631;' };
-        const flag = flags[scope.label.split(' ')[0].toUpperCase()] || '&#127760;';
-        btn.innerHTML = `<span class="emoji">${flag}</span>${scope.label}`;
+        const flag = NAT_FLAGS[scope.nationalityCode] || '\uD83C\uDF10';
+        card.innerHTML = `<span class="sc-icon">${flag}</span><span class="sc-label">${scope.label}</span><span class="sc-arrow">\u203A</span>`;
       } else {
-        btn.innerHTML = `<span class="color-dot" style="background:${colour || '#555'}"></span>${scope.label}`;
+        card.innerHTML = `<span class="sc-dot" style="background:${colour || '#555'}"></span><span class="sc-label">${scope.label}</span><span class="sc-arrow">\u203A</span>`;
       }
-      btn.onclick = () => selectScope(scope.id, btn);
-      grid.appendChild(btn);
+
+      card.onclick = () => {
+        // Deselect all cards
+        scopeGrid.querySelectorAll('.scope-card').forEach(c => c.classList.remove('selected'));
+        card.classList.add('selected');
+        selectScope(scope.id);
+      };
+
+      body.appendChild(card);
     }
 
-    body.appendChild(grid);
     section.appendChild(body);
     scopeGrid.appendChild(section);
   }
@@ -1239,7 +1245,7 @@ function expandSection(cardId) {
   setTimeout(() => {
     const el = $(cardId);
     const rect = el.getBoundingClientRect();
-    const offset = 16; // padding above the header
+    const offset = 60; // accounts for TS header bar + safe padding on mobile
     window.scrollBy({ top: rect.top - offset, behavior: 'smooth' });
   }, 150);
 }
@@ -1285,10 +1291,8 @@ function selectObjective(id, btn) {
   checkReady();
 }
 
-function selectScope(id, btn) {
+function selectScope(id) {
   selectedScope = id;
-  document.querySelectorAll('#scopeGrid .option-btn').forEach(b => b.classList.remove('selected'));
-  btn.classList.add('selected');
   // Update badge and collapse
   const badge = $('scopeBadge');
   const scope = gameConfig.scopes.find(s => s.id === id);
@@ -2295,8 +2299,9 @@ function renderRankingsTab(bucket) {
     statLabel = 'G+A';
     getStat = (p) => (p.goals || 0) + (p.assists || 0);
   } else {
-    statLabel = 'Goals';
-    getStat = (p) => p.goals || 0;
+    // FWD — show G+A since performance formula uses both goals and assists
+    statLabel = 'G+A';
+    getStat = (p) => (p.goals || 0) + (p.assists || 0);
   }
 
   let html = `

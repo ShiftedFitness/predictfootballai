@@ -693,7 +693,7 @@ exports.handler = async (event) => {
     // ============================================================
     if (action === 'get_scopes') {
       return respond(200, {
-        scopes: SCOPES.map(s => ({ id: s.id, label: s.label, type: s.type, category: s.category || 'clubs', visibleObjectives: s.visibleObjectives || null })),
+        scopes: SCOPES.map(s => ({ id: s.id, label: s.label, type: s.type, category: s.category || 'clubs', visibleObjectives: s.visibleObjectives || null, nationalityCode: s.nationalityCode || null, wonderType: s.wonderType || null })),
         formations: Object.entries(FORMATIONS).map(([key, val]) => ({
           id: key,
           label: val.label,

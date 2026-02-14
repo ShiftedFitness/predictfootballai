@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>TeleStats - Player Alphabet</title>
+<link rel="stylesheet" href="../telestats-theme.css"/>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  min-height: 100vh;
+  padding: 12px;
+  line-height: 1.4;
+}
+.container { max-width: 480px; margin: 0 auto; }
+.header { text-align: center; padding: 16px 0 8px; }
+.header h1 { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; }
+.header h1 .accent { color: var(--accent-cyan); }
+.header .subtitle { color: var(--muted); font-size: 13px; margin-top: 4px; }
+.back-link { display: inline-block; color: var(--muted); text-decoration: none; font-size: 13px; margin-bottom: 8px; }
+.back-link:hover { color: var(--accent-cyan); }
+
+.card { background: var(--card); border-radius: 12px; padding: 20px; margin-bottom: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.25); }
+.card h2 { font-size: 17px; font-weight: 700; margin-bottom: 12px; }
+
+/* Setup sections */
+.section { background: var(--card-dark); border-radius: 10px; margin-bottom: 10px; overflow: hidden; }
+.section-header { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; cursor: pointer; }
+.section-header:hover { background: rgba(255,255,255,0.03); }
+.section-title { font-weight: 700; font-size: 15px; }
+.chev { opacity: 0.7; transition: transform 0.2s; font-size: 12px; }
+.section.open .chev { transform: rotate(180deg); }
+.section-body { display: none; padding: 0 0 4px; }
+.section.open .section-body { display: block; }
+.scope-card { display: flex; align-items: center; padding: 12px 16px; cursor: pointer; transition: background 0.15s; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.scope-card:last-child { border-bottom: none; }
+.scope-card:hover { background: rgba(255,255,255,0.06); }
+.scope-card.selected { background: rgba(0,229,255,0.10); }
+.scope-card .sc-icon { font-size: 18px; margin-right: 10px; }
+.scope-card .sc-dot { width: 18px; height: 18px; border-radius: 4px; margin-right: 10px; flex-shrink: 0; border: 1px solid rgba(255,255,255,0.2); }
+.scope-card .sc-label { font-weight: 600; font-size: 13px; flex: 1; }
+.scope-card .sc-arrow { opacity: 0.5; font-size: 14px; }
+
+/* Timer toggle */
+.timer-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; padding: 12px; background: var(--card-dark); border-radius: 10px; }
+.timer-row label { font-size: 14px; font-weight: 600; flex: 1; }
+.timer-row select { background: var(--btn); border: none; color: var(--ink); padding: 8px 12px; border-radius: 8px; font-size: 14px; font-weight: 600; }
+.toggle-switch { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+.toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: var(--btn); border-radius: 24px; transition: 0.3s; }
+.toggle-slider:before { content: ''; position: absolute; height: 18px; width: 18px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: 0.3s; }
+.toggle-switch input:checked + .toggle-slider { background: var(--accent-cyan); }
+.toggle-switch input:checked + .toggle-slider:before { transform: translateX(20px); }
+
+.go-btn { width: 100%; padding: 16px; border: none; border-radius: 10px; font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.15s; }
+.go-btn.primary { background: var(--accent-yellow); color: #000; }
+.go-btn.primary:hover { background: #E6C009; }
+.go-btn:disabled { background: var(--btn); color: var(--muted); cursor: not-allowed; }
+.go-btn.secondary { background: var(--btn); color: var(--ink); margin-top: 10px; }
+
+/* Game area */
+.letter-strip { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; margin-bottom: 16px; }
+.letter-cell { width: 30px; height: 30px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; background: var(--card-dark); color: var(--muted); transition: all 0.2s; }
+.letter-cell.active { background: var(--accent-cyan); color: #000; transform: scale(1.15); }
+.letter-cell.done { background: rgba(34,197,94,0.2); color: #22c55e; }
+.letter-cell.skipped { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.15); text-decoration: line-through; }
+.letter-cell.missed { background: rgba(239,68,68,0.15); color: #ef4444; }
+
+.current-letter { text-align: center; margin-bottom: 16px; }
+.current-letter .big { font-size: 64px; font-weight: 800; color: var(--accent-cyan); font-family: 'Space Mono', monospace; }
+.current-letter .hint { font-size: 13px; color: var(--muted); }
+
+.timer-bar { height: 6px; background: var(--card-dark); border-radius: 3px; margin-bottom: 16px; overflow: hidden; }
+.timer-bar .fill { height: 100%; background: var(--accent-cyan); transition: width 0.1s linear; border-radius: 3px; }
+.timer-bar .fill.warning { background: var(--accent-yellow); }
+.timer-bar .fill.danger { background: var(--danger); }
+
+.search-input { width: 100%; padding: 14px 16px; background: var(--card-dark); border: 2px solid transparent; border-radius: 12px; color: var(--ink); font-size: 15px; outline: none; margin-bottom: 8px; }
+.search-input:focus { border-color: var(--accent-cyan); }
+.search-input::placeholder { color: var(--muted); }
+
+.player-list { max-height: 200px; overflow-y: auto; margin-bottom: 12px; }
+.player-item { padding: 10px 14px; border-radius: 8px; cursor: pointer; transition: background 0.1s; font-size: 14px; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.04); }
+.player-item:hover { background: var(--btn); }
+
+.reveal-btn { display: inline-block; padding: 8px 16px; background: var(--card-dark); border: 1px solid var(--muted); border-radius: 8px; color: var(--muted); font-size: 12px; font-weight: 600; cursor: pointer; margin-top: 8px; }
+.reveal-btn:hover { background: var(--btn); color: var(--ink); }
+
+.result-msg { text-align: center; padding: 10px; border-radius: 8px; font-weight: 700; font-size: 14px; margin-bottom: 8px; }
+.result-msg.correct { background: rgba(34,197,94,0.15); color: #22c55e; }
+.result-msg.wrong { background: rgba(239,68,68,0.15); color: #ef4444; }
+.result-msg.timeout { background: rgba(251,191,36,0.15); color: var(--accent-yellow); }
+.result-msg.skip { background: rgba(255,255,255,0.05); color: var(--muted); }
+
+/* Score */
+.score-row { display: flex; justify-content: center; gap: 20px; margin-bottom: 16px; }
+.score-item { text-align: center; }
+.score-item .num { font-size: 28px; font-weight: 800; font-family: 'Space Mono', monospace; }
+.score-item .lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; }
+.score-item .num.green { color: #22c55e; }
+.score-item .num.red { color: #ef4444; }
+.score-item .num.grey { color: var(--muted); }
+
+.hidden { display: none !important; }
+.spinner { display: inline-block; width: 20px; height: 20px; border: 2px solid var(--muted); border-top-color: var(--accent-cyan); border-radius: 50%; animation: spin 0.6s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="ts-header">
+    <img src="https://res.cloudinary.com/dbfvogb95/image/upload/v1770835428/Screenshot_2026-02-11_at_19.43.16_m7urul.png" alt="TeleStats" class="ts-logo"/>
+    <span>EPL &bull; ALPHABET</span>
+    <span class="ts-time" id="tsClock">--:--</span>
+  </div>
+
+  <a href="index.html" class="back-link">&larr; All Games</a>
+
+  <div class="header">
+    <h1>Player <span class="accent">Alphabet</span></h1>
+    <div class="subtitle">Find a player for each letter A-Z by surname. How many can you get?</div>
+  </div>
+
+  <!-- SETUP -->
+  <div id="step1">
+    <div class="card">
+      <h2>1. Choose Team</h2>
+      <div id="scopeList"></div>
+
+      <h2 style="margin-top:16px;">2. Timer</h2>
+      <div class="timer-row">
+        <label>Enable timer</label>
+        <label class="toggle-switch">
+          <input type="checkbox" id="timerToggle" checked onchange="toggleTimer()"/>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="timer-row" id="timerLengthRow">
+        <label>Seconds per letter</label>
+        <select id="timerLength">
+          <option value="10">10s</option>
+          <option value="15">15s</option>
+          <option value="20" selected>20s</option>
+          <option value="30">30s</option>
+          <option value="45">45s</option>
+          <option value="60">60s</option>
+        </select>
+      </div>
+    </div>
+    <button class="go-btn primary" id="startBtn" disabled onclick="startGame()">Start Game</button>
+  </div>
+
+  <!-- GAME -->
+  <div id="step2" class="hidden">
+    <div class="letter-strip" id="letterStrip"></div>
+
+    <div class="score-row">
+      <div class="score-item"><div class="num green" id="scoreCorrect">0</div><div class="lbl">Found</div></div>
+      <div class="score-item"><div class="num red" id="scoreMissed">0</div><div class="lbl">Missed</div></div>
+      <div class="score-item"><div class="num grey" id="scoreSkipped">0</div><div class="lbl">Skipped</div></div>
+    </div>
+
+    <div class="current-letter">
+      <div class="big" id="currentBig">A</div>
+      <div class="hint" id="currentHint">Find a player whose surname starts with A</div>
+    </div>
+
+    <div id="timerBarWrap" class="timer-bar"><div class="fill" id="timerFill" style="width:100%"></div></div>
+
+    <div id="resultMsg" class="result-msg hidden"></div>
+
+    <input type="text" class="search-input" id="searchInput" placeholder="Type a player name..." autocomplete="off"/>
+    <div class="player-list" id="playerList"></div>
+
+    <div style="text-align:center;">
+      <button class="reveal-btn" id="revealBtn" onclick="revealAnswer()">Show a valid answer</button>
+      <button class="reveal-btn" id="skipBtn" onclick="skipLetter()" style="margin-left:8px;">Skip letter</button>
+    </div>
+  </div>
+
+  <!-- GAME OVER -->
+  <div id="step3" class="hidden">
+    <div class="card">
+      <div style="text-align:center;">
+        <h2>Game Complete!</h2>
+        <div class="score-row" style="margin-top:16px;">
+          <div class="score-item"><div class="num green" id="finalCorrect">0</div><div class="lbl">Found</div></div>
+          <div class="score-item"><div class="num red" id="finalMissed">0</div><div class="lbl">Missed</div></div>
+          <div class="score-item"><div class="num grey" id="finalSkipped">0</div><div class="lbl">No players</div></div>
+        </div>
+      </div>
+      <div id="finalSummary" style="margin-top:16px;"></div>
+    </div>
+    <button class="go-btn primary" onclick="startGame()">Play Again</button>
+    <button class="go-btn secondary" onclick="backToSetup()">Change Team</button>
+  </div>
+</div>
+
+<footer style="text-align:center;padding:16px 16px 72px;font-size:11px;color:var(--muted);opacity:0.6;">
+  Build: 2026-02-14 | TeleStats Alphabet v1.0
+</footer>
+
+<script>
+const API_BASE = '/.netlify/functions';
+const $ = id => document.getElementById(id);
+
+const CLUB_COLOURS = {
+  'club_arsenal': '#EF0107', 'club_astonvilla': '#670E36', 'club_blackburn': '#009EE0',
+  'club_bolton': '#263C7F', 'club_bournemouth': '#DA291C', 'club_brentford': '#E30613',
+  'club_brighton': '#0057B8', 'club_burnley': '#6C1D45', 'club_charlton': '#D4021D',
+  'club_chelsea': '#034694', 'club_coventry': '#27A9E1', 'club_crystalpalace': '#1B458F',
+  'club_derby': '#000000', 'club_everton': '#003399', 'club_fulham': '#000000',
+  'club_ipswich': '#0033A0', 'club_leeds': '#FFCD00', 'club_leicester': '#003090',
+  'club_liverpool': '#C8102E', 'club_mancity': '#6CABDD', 'club_manutd': '#DA291C',
+  'club_middlesbrough': '#E11B22', 'club_newcastle': '#241F20', 'club_norwich': '#00A650',
+  'club_nottmforest': '#DD0000', 'club_portsmouth': '#001489', 'club_qpr': '#1D5BA4',
+  'club_reading': '#004494', 'club_sheffutd': '#EE2737', 'club_sheffwed': '#0066B3',
+  'club_southampton': '#D71920', 'club_stoke': '#E03A3E', 'club_sunderland': '#EB172B',
+  'club_swansea': '#000000', 'club_tottenham': '#132257', 'club_watford': '#FBEC5D',
+  'club_westbrom': '#122F67', 'club_westham': '#7A263A', 'club_wigan': '#0033A0',
+  'club_wimbledon': '#00008B', 'club_wolves': '#FDB913',
+};
+
+let scopes = [];
+let selectedScope = null;
+let alphabetData = []; // [{letter, count, players}]
+let currentLetterIdx = 0;
+let scoreCorrect = 0;
+let scoreMissed = 0;
+let scoreSkipped = 0;
+let timerEnabled = true;
+let timerSeconds = 20;
+let timerInterval = null;
+let timerRemaining = 0;
+let letterResults = {}; // letter -> { status: 'correct'|'missed'|'skipped', answer: string }
+let processing = false;
+
+async function init() {
+  try {
+    const res = await fetch(`${API_BASE}/alpha_start`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'get_scopes' }),
+    });
+    const data = await res.json();
+    scopes = data.scopes || [];
+    renderScopes();
+  } catch (err) {
+    console.error('Init error:', err);
+  }
+}
+
+function renderScopes() {
+  const container = $('scopeList');
+  container.innerHTML = '';
+  const leagueScopes = scopes.filter(s => s.type === 'league');
+  const clubScopes = scopes.filter(s => s.type === 'club');
+
+  if (leagueScopes.length > 0) container.appendChild(makeSection('Combined', leagueScopes, true));
+  if (clubScopes.length > 0) container.appendChild(makeSection('Teams (' + clubScopes.length + ')', clubScopes, false));
+}
+
+function makeSection(title, items, open) {
+  const sec = document.createElement('div');
+  sec.className = 'section' + (open ? ' open' : '');
+  const header = document.createElement('div');
+  header.className = 'section-header';
+  header.innerHTML = `<div class="section-title">${title}</div><div class="chev">\u25BC</div>`;
+  header.onclick = () => sec.classList.toggle('open');
+  sec.appendChild(header);
+
+  const body = document.createElement('div');
+  body.className = 'section-body';
+  for (const s of items) {
+    const card = document.createElement('div');
+    card.className = 'scope-card';
+    const colour = CLUB_COLOURS[s.id];
+    if (s.type === 'league') {
+      card.innerHTML = `<span class="sc-icon">\uD83C\uDFC6</span><span class="sc-label">${s.label}</span><span class="sc-arrow">\u203A</span>`;
+    } else {
+      card.innerHTML = `<span class="sc-dot" style="background:${colour || '#555'}"></span><span class="sc-label">${s.label}</span><span class="sc-arrow">\u203A</span>`;
+    }
+    card.onclick = () => {
+      container.querySelectorAll('.scope-card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      selectedScope = s.id;
+      $('startBtn').disabled = false;
+    };
+    body.appendChild(card);
+  }
+  sec.appendChild(body);
+  return sec;
+}
+
+function toggleTimer() {
+  timerEnabled = $('timerToggle').checked;
+  $('timerLengthRow').style.display = timerEnabled ? 'flex' : 'none';
+}
+
+async function startGame() {
+  timerSeconds = parseInt($('timerLength').value) || 20;
+  $('startBtn').disabled = true;
+  $('startBtn').innerHTML = '<span class="spinner"></span> Loading...';
+
+  try {
+    const res = await fetch(`${API_BASE}/alpha_start`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'get_alphabet', scopeId: selectedScope }),
+    });
+    const data = await res.json();
+    if (data.error) { alert('Error: ' + data.error); return; }
+
+    alphabetData = data.letters || [];
+    currentLetterIdx = 0;
+    scoreCorrect = 0;
+    scoreMissed = 0;
+    scoreSkipped = 0;
+    letterResults = {};
+    processing = false;
+
+    $('step1').classList.add('hidden');
+    $('step2').classList.remove('hidden');
+    $('step3').classList.add('hidden');
+
+    renderLetterStrip();
+    updateScores();
+    advanceToNextLetter();
+  } catch (err) {
+    alert('Failed to start: ' + err.message);
+  }
+  $('startBtn').disabled = false;
+  $('startBtn').textContent = 'Start Game';
+}
+
+function renderLetterStrip() {
+  const strip = $('letterStrip');
+  strip.innerHTML = '';
+  for (let i = 0; i < 26; i++) {
+    const letter = String.fromCharCode(65 + i);
+    const cell = document.createElement('div');
+    cell.className = 'letter-cell';
+    cell.id = 'cell_' + letter;
+    cell.textContent = letter;
+    strip.appendChild(cell);
+  }
+}
+
+function updateLetterCell(letter, status) {
+  const cell = $('cell_' + letter);
+  if (!cell) return;
+  cell.className = 'letter-cell ' + status;
+}
+
+function updateScores() {
+  $('scoreCorrect').textContent = scoreCorrect;
+  $('scoreMissed').textContent = scoreMissed;
+  $('scoreSkipped').textContent = scoreSkipped;
+}
+
+function advanceToNextLetter() {
+  stopTimer();
+  $('resultMsg').classList.add('hidden');
+  $('searchInput').value = '';
+  $('playerList').innerHTML = '';
+  processing = false;
+
+  // Skip letters with no players
+  while (currentLetterIdx < 26) {
+    const ld = alphabetData[currentLetterIdx];
+    if (ld && ld.count > 0) break;
+    // Auto-skip
+    if (ld) {
+      updateLetterCell(ld.letter, 'skipped');
+      letterResults[ld.letter] = { status: 'skipped', answer: null };
+      scoreSkipped++;
+    }
+    currentLetterIdx++;
+  }
+
+  if (currentLetterIdx >= 26) {
+    endGame();
+    return;
+  }
+
+  const ld = alphabetData[currentLetterIdx];
+  $('currentBig').textContent = ld.letter;
+  $('currentHint').textContent = `Find a player whose surname starts with ${ld.letter} (${ld.count} available)`;
+  updateLetterCell(ld.letter, 'active');
+  updateScores();
+
+  // Focus search input
+  $('searchInput').focus();
+
+  // Start timer
+  if (timerEnabled) startTimer();
+}
+
+function startTimer() {
+  timerRemaining = timerSeconds;
+  $('timerBarWrap').classList.remove('hidden');
+  updateTimerBar();
+  timerInterval = setInterval(() => {
+    timerRemaining -= 0.1;
+    if (timerRemaining <= 0) {
+      timerRemaining = 0;
+      updateTimerBar();
+      onTimeout();
+    } else {
+      updateTimerBar();
+    }
+  }, 100);
+}
+
+function stopTimer() {
+  if (timerInterval) {
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
+}
+
+function updateTimerBar() {
+  const pct = Math.max(0, (timerRemaining / timerSeconds) * 100);
+  const fill = $('timerFill');
+  fill.style.width = pct + '%';
+  fill.classList.remove('warning', 'danger');
+  if (pct < 20) fill.classList.add('danger');
+  else if (pct < 50) fill.classList.add('warning');
+}
+
+function onTimeout() {
+  stopTimer();
+  if (processing) return;
+  processing = true;
+
+  const ld = alphabetData[currentLetterIdx];
+  scoreMissed++;
+  updateLetterCell(ld.letter, 'missed');
+  letterResults[ld.letter] = { status: 'missed', answer: ld.players[0] || null };
+
+  showResult('timeout', `Time's up! A valid answer was: ${ld.players[0] || '?'}`);
+
+  setTimeout(() => {
+    currentLetterIdx++;
+    advanceToNextLetter();
+  }, 1500);
+}
+
+function showResult(type, msg) {
+  const el = $('resultMsg');
+  el.className = 'result-msg ' + type;
+  el.textContent = msg;
+  el.classList.remove('hidden');
+}
+
+// Search input — filter and display matching players
+$('searchInput').addEventListener('input', () => {
+  if (processing) return;
+  const query = $('searchInput').value.trim().toLowerCase();
+  if (query.length < 2) {
+    $('playerList').innerHTML = '';
+    return;
+  }
+
+  const ld = alphabetData[currentLetterIdx];
+  if (!ld) return;
+
+  // Filter players whose name matches the query AND surname starts with the current letter
+  const matches = ld.players.filter(name => name.toLowerCase().includes(query)).slice(0, 8);
+
+  $('playerList').innerHTML = matches.map(name =>
+    `<div class="player-item" onclick="selectPlayer('${escHtml(name)}')">${escHtml(name)}</div>`
+  ).join('');
+});
+
+function escHtml(str) {
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/'/g, '&#39;').replace(/"/g, '&quot;');
+}
+
+function selectPlayer(name) {
+  if (processing) return;
+  processing = true;
+  stopTimer();
+
+  const ld = alphabetData[currentLetterIdx];
+  // Check if the player is valid for this letter
+  const isValid = ld.players.some(p => p === name);
+
+  if (isValid) {
+    scoreCorrect++;
+    updateLetterCell(ld.letter, 'done');
+    letterResults[ld.letter] = { status: 'correct', answer: name };
+    showResult('correct', '\u2713 ' + name);
+  } else {
+    // Wrong — let them keep trying if timer still going
+    processing = false;
+    showResult('wrong', '\u2717 Not a valid player for this letter');
+    if (timerEnabled && timerRemaining > 0) return;
+    return;
+  }
+
+  setTimeout(() => {
+    currentLetterIdx++;
+    advanceToNextLetter();
+  }, 1000);
+}
+
+function revealAnswer() {
+  const ld = alphabetData[currentLetterIdx];
+  if (!ld || ld.count === 0) return;
+  // Show a random valid answer but don't mark as correct
+  const answer = ld.players[Math.floor(Math.random() * ld.players.length)];
+  showResult('skip', `A valid answer: ${answer}`);
+}
+
+function skipLetter() {
+  if (processing) return;
+  processing = true;
+  stopTimer();
+
+  const ld = alphabetData[currentLetterIdx];
+  scoreMissed++;
+  updateLetterCell(ld.letter, 'missed');
+  letterResults[ld.letter] = { status: 'missed', answer: ld.players[0] || null };
+  showResult('wrong', `Skipped! A valid answer was: ${ld.players[0] || '?'}`);
+
+  setTimeout(() => {
+    currentLetterIdx++;
+    advanceToNextLetter();
+  }, 1200);
+}
+
+function endGame() {
+  stopTimer();
+  $('step2').classList.add('hidden');
+  $('step3').classList.remove('hidden');
+
+  $('finalCorrect').textContent = scoreCorrect;
+  $('finalMissed').textContent = scoreMissed;
+  $('finalSkipped').textContent = scoreSkipped;
+
+  // Build summary
+  let html = '<div style="font-size:13px;">';
+  for (let i = 0; i < 26; i++) {
+    const letter = String.fromCharCode(65 + i);
+    const r = letterResults[letter];
+    if (!r) continue;
+    const color = r.status === 'correct' ? '#22c55e' : r.status === 'missed' ? '#ef4444' : 'var(--muted)';
+    const icon = r.status === 'correct' ? '\u2713' : r.status === 'missed' ? '\u2717' : '\u2014';
+    html += `<div style="display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.04);">`;
+    html += `<span style="width:24px;font-weight:800;color:${color};">${letter}</span>`;
+    html += `<span style="color:${color};width:16px;">${icon}</span>`;
+    html += `<span style="flex:1;color:var(--muted);">${r.answer || (r.status === 'skipped' ? 'No players' : '')}</span>`;
+    html += `</div>`;
+  }
+  html += '</div>';
+  $('finalSummary').innerHTML = html;
+}
+
+function backToSetup() {
+  $('step1').classList.remove('hidden');
+  $('step2').classList.add('hidden');
+  $('step3').classList.add('hidden');
+}
+
+init();
+
+setInterval(() => {
+  const now = new Date();
+  const el = $('tsClock');
+  if (el) el.textContent = now.toTimeString().slice(0, 5);
+}, 1000);
+$('tsClock').textContent = new Date().toTimeString().slice(0, 5);
+</script>
+</body>
+</html>
