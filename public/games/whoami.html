@@ -81,6 +81,25 @@ body {
 .option-btn .emoji { font-size: 20px; display: block; margin-bottom: 4px; }
 .option-btn.wide { grid-column: 1 / -1; }
 
+/* Bullseye-style scope sections */
+.section { background: var(--card-dark); border-radius: 10px; margin-bottom: 10px; overflow: hidden; }
+.section-header { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; cursor: pointer; transition: background 0.15s; }
+.section-header:hover { background: rgba(255,255,255,0.03); }
+.section-title { font-weight: 700; font-size: 15px; }
+.section-count { font-size: 12px; color: var(--muted); font-weight: 400; }
+.chev { opacity: 0.7; transition: transform 0.2s; font-size: 12px; }
+.section.open .chev { transform: rotate(180deg); }
+.section-body { display: none; padding: 0 0 4px; }
+.section.open .section-body { display: block; }
+.scope-card { display: flex; align-items: center; padding: 12px 16px; cursor: pointer; transition: background 0.15s; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.scope-card:last-child { border-bottom: none; }
+.scope-card:hover { background: rgba(255,255,255,0.06); }
+.scope-card.selected { background: rgba(0,229,255,0.10); }
+.scope-card .sc-icon { font-size: 18px; margin-right: 10px; }
+.scope-card .sc-dot { width: 18px; height: 18px; border-radius: 4px; margin-right: 10px; flex-shrink: 0; border: 1px solid rgba(255,255,255,0.2); }
+.scope-card .sc-label { font-weight: 600; font-size: 13px; flex: 1; }
+.scope-card .sc-arrow { opacity: 0.5; font-size: 14px; }
+
 .go-btn {
   width: 100%;
   padding: 16px;
@@ -396,10 +415,6 @@ body {
   <!-- STEP 1: SETUP -->
   <div id="step1">
     <div class="card">
-      <h2>Choose Scope</h2>
-      <div class="option-grid" id="scopeGrid"></div>
-    </div>
-    <div class="card">
       <h2>Difficulty</h2>
       <div class="difficulty-grid" id="difficultyGrid">
         <button class="diff-btn selected" data-diff="easy">
@@ -418,6 +433,10 @@ body {
           <span class="diff-desc">1-3 season wonders</span>
         </button>
       </div>
+    </div>
+    <div class="card">
+      <h2>Choose Team</h2>
+      <div id="scopeGrid"></div>
     </div>
     <button class="go-btn primary" id="startBtn" disabled>Start Game</button>
   </div>
@@ -571,27 +590,52 @@ let searchDebounce = null;
 let selectedSuggestion = null; // the player name selected from dropdown
 
 // ============================================================
+// SCOPE SECTIONS (Bullseye-style)
+// ============================================================
+function makeScopeSection(title, items, open) {
+  const sec = document.createElement('div');
+  sec.className = 'section' + (open ? ' open' : '');
+  const header = document.createElement('div');
+  header.className = 'section-header';
+  header.innerHTML = `<div class="section-title">${title}</div><div class="chev">\u25BC</div>`;
+  header.onclick = () => sec.classList.toggle('open');
+  sec.appendChild(header);
+
+  const body = document.createElement('div');
+  body.className = 'section-body';
+  for (const s of items) {
+    const card = document.createElement('div');
+    card.className = 'scope-card';
+    const colour = CLUB_COLOURS[s.id];
+    if (s.type === 'league') {
+      card.innerHTML = `<span class="sc-icon">\uD83C\uDFC6</span><span class="sc-label">${s.label}</span><span class="sc-arrow">\u203A</span>`;
+    } else {
+      card.innerHTML = `<span class="sc-dot" style="background:${colour || '#555'}"></span><span class="sc-label">${s.label}</span><span class="sc-arrow">\u203A</span>`;
+    }
+    card.onclick = () => {
+      $('scopeGrid').querySelectorAll('.scope-card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      selectedScope = s.id;
+      $('startBtn').disabled = false;
+    };
+    body.appendChild(card);
+  }
+  sec.appendChild(body);
+  return sec;
+}
+
+// ============================================================
 // INIT
 // ============================================================
 function init() {
   const grid = $('scopeGrid');
-  for (const scope of SCOPES) {
-    const btn = document.createElement('button');
-    btn.className = 'option-btn' + (scope.type === 'league' ? ' wide' : '');
-    const colour = CLUB_COLOURS[scope.id];
-    if (scope.type === 'league') {
-      btn.innerHTML = `<span class="emoji">&#127942;</span>${scope.label}`;
-    } else {
-      btn.innerHTML = `<span class="color-dot" style="background:${colour || '#555'}"></span> ${scope.label}`;
-    }
-    btn.onclick = () => {
-      selectedScope = scope.id;
-      grid.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
-      btn.classList.add('selected');
-      $('startBtn').disabled = false;
-    };
-    grid.appendChild(btn);
-  }
+  grid.innerHTML = '';
+
+  const leagueScopes = SCOPES.filter(s => s.type === 'league');
+  const clubScopes = SCOPES.filter(s => s.type === 'club');
+
+  if (leagueScopes.length > 0) grid.appendChild(makeScopeSection('Combined', leagueScopes, true));
+  if (clubScopes.length > 0) grid.appendChild(makeScopeSection('Teams (' + clubScopes.length + ')', clubScopes, false));
 
   // Difficulty buttons
   $('difficultyGrid').querySelectorAll('.diff-btn').forEach(btn => {
