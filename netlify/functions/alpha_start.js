@@ -41,11 +41,11 @@ async function getClubId(supabase, clubName) {
   return null;
 }
 
-async function fetchAll(queryBuilder) {
+async function fetchAll(queryFn) {
   const PAGE = 1000;
   let all = [], offset = 0;
   while (true) {
-    const { data, error } = await queryBuilder.range(offset, offset + PAGE - 1);
+    const { data, error } = await queryFn().range(offset, offset + PAGE - 1);
     if (error) throw error;
     if (!data || data.length === 0) break;
     all = all.concat(data);
@@ -93,16 +93,16 @@ exports.handler = async (event) => {
         if (!clubId) return respond(400, { error: `Club not found: ${scope.clubName}` });
       }
 
-      let query = supabase
-        .from('player_season_stats')
-        .select('player_name, appearances')
-        .eq('competition_id', 7);
+      const buildQuery = () => {
+        let q = supabase
+          .from('player_season_stats')
+          .select('player_name, appearances')
+          .eq('competition_id', 7);
+        if (clubId) q = q.eq('club_id', clubId);
+        return q;
+      };
 
-      if (clubId) {
-        query = query.eq('club_id', clubId);
-      }
-
-      const rows = await fetchAll(query);
+      const rows = await fetchAll(buildQuery);
 
       // Aggregate by player
       const playerMap = {};
