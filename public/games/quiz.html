@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
 <title>TeleStats - Pop Quiz</title>
-<link rel="stylesheet" href="telestats-theme.css"/>
+<link rel="stylesheet" href="../telestats-theme.css"/>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
@@ -269,7 +269,7 @@ body {
 </div>
 
 <div class="container">
-  <a href="ts-games.html" class="back-link">&larr; All Games</a>
+  <a href="index.html" class="back-link">&larr; All Games</a>
 
   <div class="header">
     <h1>Pop <span>Quiz</span></h1>
@@ -379,7 +379,7 @@ function init() {
   $('startBtn').onclick = startQuiz;
   $('nextBtn').onclick = nextQuestion;
   $('playAgainBtn').onclick = resetToSetup;
-  $('backToMenuBtn').onclick = () => { window.location.href = 'ts-games.html'; };
+  $('backToMenuBtn').onclick = () => { window.location.href = 'index.html'; };
 }
 
 async function startQuiz() {
