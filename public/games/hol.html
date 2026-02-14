@@ -190,20 +190,8 @@ const API_BASE = '/.netlify/functions';
 const $ = id => document.getElementById(id);
 
 const CLUB_COLOURS = {
-  'club_arsenal': '#EF0107', 'club_astonvilla': '#670E36', 'club_blackburn': '#009EE0',
-  'club_bolton': '#263C7F', 'club_bournemouth': '#DA291C', 'club_brentford': '#E30613',
-  'club_brighton': '#0057B8', 'club_burnley': '#6C1D45', 'club_charlton': '#D4021D',
-  'club_chelsea': '#034694', 'club_coventry': '#27A9E1', 'club_crystalpalace': '#1B458F',
-  'club_derby': '#000000', 'club_everton': '#003399', 'club_fulham': '#000000',
-  'club_ipswich': '#0033A0', 'club_leeds': '#FFCD00', 'club_leicester': '#003090',
-  'club_liverpool': '#C8102E', 'club_mancity': '#6CABDD', 'club_manutd': '#DA291C',
-  'club_middlesbrough': '#E11B22', 'club_newcastle': '#241F20', 'club_norwich': '#00A650',
-  'club_nottmforest': '#DD0000', 'club_portsmouth': '#001489', 'club_qpr': '#1D5BA4',
-  'club_reading': '#004494', 'club_sheffutd': '#EE2737', 'club_sheffwed': '#0066B3',
-  'club_southampton': '#D71920', 'club_stoke': '#E03A3E', 'club_sunderland': '#EB172B',
-  'club_swansea': '#000000', 'club_tottenham': '#132257', 'club_watford': '#FBEC5D',
-  'club_westbrom': '#122F67', 'club_westham': '#7A263A', 'club_wigan': '#0033A0',
-  'club_wimbledon': '#00008B', 'club_wolves': '#FDB913',
+  'club_liverpool': '#C8102E', 'club_arsenal': '#EF0107', 'club_chelsea': '#034694',
+  'club_manutd': '#DA291C', 'club_sunderland': '#EB172B',
 };
 
 let scopes = [];
@@ -274,7 +262,7 @@ function makeSection(title, items, open) {
       card.innerHTML = `<span class="sc-dot" style="background:${colour || '#555'}"></span><span class="sc-label">${s.label}</span><span class="sc-arrow">\u203A</span>`;
     }
     card.onclick = () => {
-      container.querySelectorAll('.scope-card').forEach(c => c.classList.remove('selected'));
+      $('scopeList').querySelectorAll('.scope-card').forEach(c => c.classList.remove('selected'));
       card.classList.add('selected');
       selectedScope = s.id;
       $('startBtn').disabled = false;
