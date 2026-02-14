@@ -137,6 +137,52 @@ body {
 }
 .go-btn.secondary:hover { background: var(--btn-hover); }
 
+/* ====== COLLAPSIBLE SETUP SECTIONS ====== */
+.setup-card {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+  transition: all 0.3s ease;
+}
+.setup-card .card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+}
+.setup-card .card-header h2 { font-size: 17px; font-weight: 700; margin-bottom: 0; letter-spacing: -0.5px; }
+.setup-card .card-header .selection-badge {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent-cyan);
+  background: rgba(0,229,255,0.1);
+  border: 1px solid rgba(0,229,255,0.3);
+  border-radius: 6px;
+  padding: 3px 10px;
+  display: none;
+}
+.setup-card .card-header .selection-badge.visible { display: inline-block; }
+.setup-card .card-header .chevron {
+  font-size: 14px;
+  color: var(--muted);
+  transition: transform 0.3s;
+}
+.setup-card.collapsed .card-header .chevron { transform: rotate(-90deg); }
+.setup-card .card-body {
+  overflow: hidden;
+  max-height: 1200px;
+  transition: max-height 0.35s ease, opacity 0.25s ease, padding 0.3s ease;
+  opacity: 1;
+  padding-top: 12px;
+}
+.setup-card.collapsed .card-body {
+  max-height: 0;
+  opacity: 0;
+  padding-top: 0;
+}
+
 /* ====== STEP 2: PITCH ====== */
 .pitch-container {
   position: relative;
@@ -792,19 +838,37 @@ body {
 
   <!-- ====== STEP 1: SETUP ====== -->
   <div id="step1">
-    <div class="card">
-      <h2>Choose Scope</h2>
-      <div class="option-grid" id="scopeGrid"></div>
+    <div class="setup-card" id="formationCard">
+      <div class="card-header" onclick="toggleSection('formationCard')">
+        <h2>1. Choose Formation</h2>
+        <span class="selection-badge" id="formationBadge"></span>
+        <span class="chevron">&#9660;</span>
+      </div>
+      <div class="card-body">
+        <div class="formation-grid" id="formationGrid"></div>
+      </div>
     </div>
 
-    <div class="card">
-      <h2>Choose Formation</h2>
-      <div class="formation-grid" id="formationGrid"></div>
+    <div class="setup-card" id="objectiveCard">
+      <div class="card-header" onclick="toggleSection('objectiveCard')">
+        <h2>2. Choose Objective</h2>
+        <span class="selection-badge" id="objectiveBadge"></span>
+        <span class="chevron">&#9660;</span>
+      </div>
+      <div class="card-body">
+        <div class="option-grid" id="objectiveGrid"></div>
+      </div>
     </div>
 
-    <div class="card">
-      <h2>Choose Objective</h2>
-      <div class="option-grid" id="objectiveGrid"></div>
+    <div class="setup-card" id="scopeCard">
+      <div class="card-header" onclick="toggleSection('scopeCard')">
+        <h2>3. Choose Team</h2>
+        <span class="selection-badge" id="scopeBadge"></span>
+        <span class="chevron">&#9660;</span>
+      </div>
+      <div class="card-body">
+        <div class="option-grid" id="scopeGrid"></div>
+      </div>
     </div>
 
     <button class="go-btn primary" id="startGameBtn" disabled>Start Challenge</button>
@@ -940,11 +1004,47 @@ const $ = id => document.getElementById(id);
 // CLUB COLOURS (matching 501 game mode)
 // ============================================================
 const CLUB_COLOURS = {
-  'club_sunderland': '#EB172B',
-  'club_manutd': '#DA291C',
   'club_arsenal': '#EF0107',
-  'club_liverpool': '#C8102E',
+  'club_astonvilla': '#670E36',
+  'club_blackburn': '#009EE0',
+  'club_bolton': '#263C7F',
+  'club_bournemouth': '#DA291C',
+  'club_brentford': '#E30613',
+  'club_brighton': '#0057B8',
+  'club_burnley': '#6C1D45',
+  'club_charlton': '#D4021D',
   'club_chelsea': '#034694',
+  'club_coventry': '#27A9E1',
+  'club_crystalpalace': '#1B458F',
+  'club_derby': '#000000',
+  'club_everton': '#003399',
+  'club_fulham': '#000000',
+  'club_ipswich': '#0033A0',
+  'club_leeds': '#FFCD00',
+  'club_leicester': '#003090',
+  'club_liverpool': '#C8102E',
+  'club_mancity': '#6CABDD',
+  'club_manutd': '#DA291C',
+  'club_middlesbrough': '#E11B22',
+  'club_newcastle': '#241F20',
+  'club_norwich': '#00A650',
+  'club_nottmforest': '#DD0000',
+  'club_portsmouth': '#001489',
+  'club_qpr': '#1D5BA4',
+  'club_reading': '#004494',
+  'club_sheffutd': '#EE2737',
+  'club_sheffwed': '#0066B3',
+  'club_southampton': '#D71920',
+  'club_stoke': '#E03A3E',
+  'club_sunderland': '#EB172B',
+  'club_swansea': '#000000',
+  'club_tottenham': '#132257',
+  'club_watford': '#FBEC5D',
+  'club_westbrom': '#122F67',
+  'club_westham': '#7A263A',
+  'club_wigan': '#0033A0',
+  'club_wimbledon': '#00008B',
+  'club_wolves': '#FDB913',
 };
 
 // ============================================================
@@ -986,7 +1086,33 @@ async function init() {
 // STEP 1: SETUP RENDERING
 // ============================================================
 function renderSetup() {
-  // Scopes
+  // 1. Formations (first)
+  const formGrid = $('formationGrid');
+  formGrid.innerHTML = '';
+  for (const fm of gameConfig.formations) {
+    const btn = document.createElement('button');
+    btn.className = 'formation-btn';
+    btn.textContent = fm.label;
+    btn.onclick = () => selectFormation(fm.id, btn);
+    formGrid.appendChild(btn);
+  }
+
+  // 2. Objectives (second)
+  const objGrid = $('objectiveGrid');
+  objGrid.innerHTML = '';
+  for (const obj of gameConfig.objectives) {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn wide';
+    btn.innerHTML = `
+      <span class="emoji">${obj.id === 'appearances' ? '&#128202;' : obj.id === 'goals' ? '&#9917;' : '&#127775;'}</span>
+      ${obj.label}
+      <div class="desc">${obj.description}</div>
+    `;
+    btn.onclick = () => selectObjective(obj.id, btn);
+    objGrid.appendChild(btn);
+  }
+
+  // 3. Scopes / Teams (third)
   const scopeGrid = $('scopeGrid');
   scopeGrid.innerHTML = '';
   for (const scope of gameConfig.scopes) {
@@ -1008,46 +1134,35 @@ function renderSetup() {
     scopeGrid.appendChild(btn);
   }
 
-  // Formations
-  const formGrid = $('formationGrid');
-  formGrid.innerHTML = '';
-  for (const fm of gameConfig.formations) {
-    const btn = document.createElement('button');
-    btn.className = 'formation-btn';
-    btn.textContent = fm.label;
-    btn.onclick = () => selectFormation(fm.id, btn);
-    formGrid.appendChild(btn);
-  }
-
-  // Objectives
-  const objGrid = $('objectiveGrid');
-  objGrid.innerHTML = '';
-  for (const obj of gameConfig.objectives) {
-    const btn = document.createElement('button');
-    btn.className = 'option-btn wide';
-    btn.innerHTML = `
-      <span class="emoji">${obj.id === 'appearances' ? '&#128202;' : obj.id === 'goals' ? '&#9917;' : '&#127775;'}</span>
-      ${obj.label}
-      <div class="desc">${obj.description}</div>
-    `;
-    btn.onclick = () => selectObjective(obj.id, btn);
-    objGrid.appendChild(btn);
-  }
-
   $('startGameBtn').onclick = startGame;
 }
 
-function selectScope(id, btn) {
-  selectedScope = id;
-  document.querySelectorAll('#scopeGrid .option-btn').forEach(b => b.classList.remove('selected'));
-  btn.classList.add('selected');
-  checkReady();
+function toggleSection(cardId) {
+  const card = $(cardId);
+  card.classList.toggle('collapsed');
+}
+
+function collapseSection(cardId) {
+  $(cardId).classList.add('collapsed');
+}
+
+function expandSection(cardId) {
+  $(cardId).classList.remove('collapsed');
+  // Smooth scroll the section into view
+  setTimeout(() => $(cardId).scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
 }
 
 function selectFormation(id, btn) {
   selectedFormation = id;
   document.querySelectorAll('#formationGrid .formation-btn').forEach(b => b.classList.remove('selected'));
   btn.classList.add('selected');
+  // Update badge and collapse
+  const badge = $('formationBadge');
+  badge.textContent = id;
+  badge.classList.add('visible');
+  collapseSection('formationCard');
+  // Expand next section
+  if (!selectedObjective) expandSection('objectiveCard');
   checkReady();
 }
 
@@ -1055,11 +1170,37 @@ function selectObjective(id, btn) {
   selectedObjective = id;
   document.querySelectorAll('#objectiveGrid .option-btn').forEach(b => b.classList.remove('selected'));
   btn.classList.add('selected');
+  // Update badge and collapse
+  const badge = $('objectiveBadge');
+  const obj = gameConfig.objectives.find(o => o.id === id);
+  badge.textContent = obj ? obj.label : id;
+  badge.classList.add('visible');
+  collapseSection('objectiveCard');
+  // Expand next section
+  if (!selectedScope) expandSection('scopeCard');
+  checkReady();
+}
+
+function selectScope(id, btn) {
+  selectedScope = id;
+  document.querySelectorAll('#scopeGrid .option-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  // Update badge and collapse
+  const badge = $('scopeBadge');
+  const scope = gameConfig.scopes.find(s => s.id === id);
+  badge.textContent = scope ? scope.label : id;
+  badge.classList.add('visible');
+  collapseSection('scopeCard');
   checkReady();
 }
 
 function checkReady() {
-  $('startGameBtn').disabled = !(selectedScope && selectedFormation && selectedObjective);
+  const ready = !!(selectedScope && selectedFormation && selectedObjective);
+  $('startGameBtn').disabled = !ready;
+  if (ready) {
+    // Scroll start button into view
+    setTimeout(() => $('startGameBtn').scrollIntoView({ behavior: 'smooth', block: 'center' }), 200);
+  }
 }
 
 // ============================================================
