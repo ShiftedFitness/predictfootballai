@@ -899,25 +899,25 @@ body {
   <div id="perfInfoOverlay" class="info-overlay hidden">
     <div class="info-modal">
       <h3>How Performance Scores Work</h3>
-      <p>Every player gets an effectiveness score based on what matters most for their position:</p>
+      <p>Every player gets a performance score based on what matters most for their position:</p>
 
       <h4>Forwards</h4>
-      <p>Scored primarily on goals (4x) and assists (3x) per 90 minutes. Pure goal threat is king.</p>
+      <p>Scored primarily on goals (4x) and assists (3x) per 90 minutes, scaled by longevity. Pure goal threat is king.</p>
 
       <h4>Midfielders</h4>
-      <p>Scored on assists (3.5x) and goals (3x) per 90 minutes. Creativity is weighted slightly higher than for forwards.</p>
+      <p>Scored on assists (3.5x) and goals (3x) per 90 minutes, scaled by longevity. Creativity is weighted slightly higher than for forwards.</p>
 
       <h4>Defenders</h4>
-      <p>Scored on clean sheets (3x), tackles &amp; interceptions (0.5x per action), with a small bonus for goals and assists (0.5x each). Actual defending matters most here.</p>
+      <p>Scored on tackles and interceptions per 90 minutes, plus estimated clean sheet rate (derived from the club&rsquo;s GK data). A small bonus is given for goals and assists.</p>
 
       <h4>Goalkeepers</h4>
-      <p>Scored on clean sheet percentage (5x) and save percentage (4x), minus goals conceded per 90 minutes (2x penalty).</p>
+      <p>Scored on clean sheet rate, win rate, and save percentage, with a penalty for goals conceded per 90 minutes.</p>
 
-      <h4>Longevity bonus</h4>
-      <p>All positions get a bonus from the square root of total appearances &mdash; consistency and longevity are rewarded.</p>
+      <h4>Longevity</h4>
+      <p>All positions benefit from the square root of total appearances &mdash; consistency and longevity are rewarded, but diminishing returns prevent pure longevity from dominating.</p>
 
       <h4>Final score</h4>
-      <p>Everyone in the same position is compared against each other using z-scores. A score of 0 is average, positive is above average, negative is below.</p>
+      <p>Everyone in the same position is compared against each other using z-scores. A score of 0 is average, positive is above average, negative is below. Scores are comparable across positions.</p>
 
       <button class="info-close" onclick="hidePerfInfo()">Got it</button>
     </div>
