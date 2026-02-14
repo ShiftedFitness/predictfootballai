@@ -63,6 +63,18 @@ function shuffle(arr) {
   return arr;
 }
 
+function fixMojibake(str) {
+  if (!str) return str;
+  try {
+    if (/[\xC0-\xDF][\x80-\xBF]/.test(str)) {
+      const bytes = new Uint8Array([...str].map(c => c.charCodeAt(0)));
+      const decoded = new TextDecoder('utf-8').decode(bytes);
+      if (decoded && !decoded.includes('\uFFFD')) return decoded;
+    }
+  } catch (_) { /* ignore */ }
+  return str;
+}
+
 async function fetchAll(queryFn) {
   const PAGE = 1000;
   let all = [], offset = 0;
@@ -75,6 +87,24 @@ async function fetchAll(queryFn) {
     offset += PAGE;
   }
   return all;
+}
+
+async function fetchPlayerNames(supabase, uids) {
+  const nameMap = new Map();
+  const batchSize = 200;
+  for (let i = 0; i < uids.length; i += batchSize) {
+    const batch = uids.slice(i, i + batchSize);
+    const { data: players } = await supabase
+      .from('players')
+      .select('player_uid, player_name')
+      .in('player_uid', batch);
+    if (players) {
+      for (const p of players) {
+        nameMap.set(p.player_uid, fixMojibake(p.player_name));
+      }
+    }
+  }
+  return nameMap;
 }
 
 exports.handler = async (event) => {
@@ -107,55 +137,58 @@ exports.handler = async (event) => {
         if (!clubId) return respond(400, { error: `Club not found: ${scope.clubName}` });
       }
 
-      // Build query function for aggregated player stats
+      // Query player_season_stats by player_uid (player_name is in players table)
       const buildQuery = () => {
         let q = supabase
           .from('player_season_stats')
-          .select('player_name, appearances, goals, minutes, club_id')
-          .eq('competition_id', 7); // Premier League
+          .select('player_uid, appearances, goals')
+          .eq('competition_id', 7);
         if (clubId) q = q.eq('club_id', clubId);
         return q;
       };
 
       const rows = await fetchAll(buildQuery);
 
-      // Aggregate per player
+      // Aggregate per player_uid
       const playerMap = {};
       for (const row of rows) {
-        const name = row.player_name;
-        if (!name) continue;
-        if (!playerMap[name]) {
-          playerMap[name] = { name, appearances: 0, goals: 0 };
+        const uid = row.player_uid;
+        if (!uid) continue;
+        if (!playerMap[uid]) {
+          playerMap[uid] = { uid, appearances: 0, goals: 0 };
         }
-        playerMap[name].appearances += row.appearances || 0;
-        playerMap[name].goals += row.goals || 0;
+        playerMap[uid].appearances += row.appearances || 0;
+        playerMap[uid].goals += row.goals || 0;
       }
 
       // Filter: min 5 apps for club, 20 for league
       const minApps = scope.type === 'club' ? 5 : 20;
-      // For goals mode, need at least 1 goal
       let players = Object.values(playerMap).filter(p => p.appearances >= minApps);
       if (statType === 'goals') {
         players = players.filter(p => p.goals >= 1);
       }
 
-      // Sort by stat descending, then shuffle nearby players for variety
+      // Sort by stat descending
       players.sort((a, b) => b[statType] - a[statType]);
 
-      // Take top 100 for a good game experience, then shuffle
+      // Take top 100, then shuffle
       const pool = players.slice(0, Math.min(100, players.length));
       shuffle(pool);
 
+      // Fetch player names from players table
+      const uids = pool.map(p => p.uid);
+      const nameMap = await fetchPlayerNames(supabase, uids);
+
       return respond(200, {
         players: pool.map(p => ({
-          name: p.name,
+          name: nameMap.get(p.uid) || 'Unknown',
           appearances: p.appearances,
           goals: p.goals,
-        })),
+        })).filter(p => p.name !== 'Unknown'),
       });
     } catch (err) {
       console.error('HoL get_players error:', err);
-      return respond(500, { error: 'Failed to load players' });
+      return respond(500, { error: 'Failed to load players: ' + (err.message || err) });
     }
   }
 

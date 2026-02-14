@@ -41,6 +41,18 @@ async function getClubId(supabase, clubName) {
   return null;
 }
 
+function fixMojibake(str) {
+  if (!str) return str;
+  try {
+    if (/[\xC0-\xDF][\x80-\xBF]/.test(str)) {
+      const bytes = new Uint8Array([...str].map(c => c.charCodeAt(0)));
+      const decoded = new TextDecoder('utf-8').decode(bytes);
+      if (decoded && !decoded.includes('\uFFFD')) return decoded;
+    }
+  } catch (_) { /* ignore */ }
+  return str;
+}
+
 async function fetchAll(queryFn) {
   const PAGE = 1000;
   let all = [], offset = 0;
@@ -55,9 +67,24 @@ async function fetchAll(queryFn) {
   return all;
 }
 
-/**
- * Get the surname (last word) from a player name
- */
+async function fetchPlayerNames(supabase, uids) {
+  const nameMap = new Map();
+  const batchSize = 200;
+  for (let i = 0; i < uids.length; i += batchSize) {
+    const batch = uids.slice(i, i + batchSize);
+    const { data: players } = await supabase
+      .from('players')
+      .select('player_uid, player_name')
+      .in('player_uid', batch);
+    if (players) {
+      for (const p of players) {
+        nameMap.set(p.player_uid, fixMojibake(p.player_name));
+      }
+    }
+  }
+  return nameMap;
+}
+
 function getSurname(name) {
   if (!name) return '';
   const parts = name.trim().split(/\s+/);
@@ -93,10 +120,11 @@ exports.handler = async (event) => {
         if (!clubId) return respond(400, { error: `Club not found: ${scope.clubName}` });
       }
 
+      // Query player_season_stats by player_uid
       const buildQuery = () => {
         let q = supabase
           .from('player_season_stats')
-          .select('player_name, appearances')
+          .select('player_uid, appearances')
           .eq('competition_id', 7);
         if (clubId) q = q.eq('club_id', clubId);
         return q;
@@ -104,18 +132,27 @@ exports.handler = async (event) => {
 
       const rows = await fetchAll(buildQuery);
 
-      // Aggregate by player
+      // Aggregate by player_uid
       const playerMap = {};
       for (const row of rows) {
-        const name = row.player_name;
-        if (!name) continue;
-        if (!playerMap[name]) playerMap[name] = { name, apps: 0 };
-        playerMap[name].apps += row.appearances || 0;
+        const uid = row.player_uid;
+        if (!uid) continue;
+        if (!playerMap[uid]) playerMap[uid] = { uid, apps: 0 };
+        playerMap[uid].apps += row.appearances || 0;
       }
 
       // Min apps filter
       const minApps = scope.type === 'club' ? 3 : 10;
-      const allPlayers = Object.values(playerMap).filter(p => p.apps >= minApps);
+      const qualified = Object.values(playerMap).filter(p => p.apps >= minApps);
+
+      // Fetch player names from players table
+      const uids = qualified.map(p => p.uid);
+      const nameMap = await fetchPlayerNames(supabase, uids);
+
+      // Merge names with stats
+      const allPlayers = qualified
+        .map(p => ({ name: nameMap.get(p.uid), apps: p.apps }))
+        .filter(p => p.name);
 
       // Group by first letter of surname
       const alphabet = {};
@@ -132,7 +169,7 @@ exports.handler = async (event) => {
         alphabet[letter].sort((a, b) => b.apps - a.apps);
       }
 
-      // Build response: for each letter A-Z, return list or empty
+      // Build response: for each letter A-Z
       const letters = [];
       for (let i = 0; i < 26; i++) {
         const letter = String.fromCharCode(65 + i);
@@ -140,14 +177,14 @@ exports.handler = async (event) => {
         letters.push({
           letter,
           count: players.length,
-          players: players.map(p => p.name), // all valid player names for this letter
+          players: players.map(p => p.name),
         });
       }
 
       return respond(200, { letters });
     } catch (err) {
       console.error('Alpha get_alphabet error:', err);
-      return respond(500, { error: 'Failed to load alphabet' });
+      return respond(500, { error: 'Failed to load alphabet: ' + (err.message || err) });
     }
   }
 
