@@ -1148,8 +1148,13 @@ function collapseSection(cardId) {
 
 function expandSection(cardId) {
   $(cardId).classList.remove('collapsed');
-  // Smooth scroll the section into view
-  setTimeout(() => $(cardId).scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+  // Smooth scroll the section header into view with padding above
+  setTimeout(() => {
+    const el = $(cardId);
+    const rect = el.getBoundingClientRect();
+    const offset = 16; // padding above the header
+    window.scrollBy({ top: rect.top - offset, behavior: 'smooth' });
+  }, 150);
 }
 
 function selectFormation(id, btn) {
