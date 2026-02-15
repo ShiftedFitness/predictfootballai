@@ -12,8 +12,8 @@
  *   4. Once ALL 5 matches in the week have results, triggers the week scoring
  *      logic (same as admin-score-week)
  *
- * Designed to be called daily via a cron/scheduler. Uses 1 API-Football call
- * per unscored match (max 5), well within the 100/day free tier.
+ * Designed to be called daily via a cron/scheduler. Uses 1 football-data.org call
+ * per unscored match (max 5), well within the 10/min free tier rate limit.
  *
  * Auth: x-admin-secret header required (same as other admin endpoints).
  *
@@ -23,29 +23,24 @@
 
 const { ADALO, adaloFetch, listAll } = require('./_adalo.js');
 
-const rawBase = process.env.API_FOOTBALL_URL || 'https://v3.football.api-sports.io';
-const API_BASE = rawBase.startsWith('http') ? rawBase : `https://${rawBase}`;
+const FD_BASE = 'https://api.football-data.org/v4';
 
-async function apiFetch(endpoint, params = {}) {
-  const key = process.env.API_FOOTBALL_KEY;
-  if (!key) throw new Error('API_FOOTBALL_KEY not configured');
+async function fdFetch(path) {
+  const key = process.env.FOOTBALL_DATA_KEY;
+  if (!key) throw new Error('FOOTBALL_DATA_KEY not configured');
 
-  const qs = new URLSearchParams(params).toString();
-  const url = `${API_BASE}/${endpoint}${qs ? '?' + qs : ''}`;
-  const res = await fetch(url, { headers: { 'x-apisports-key': key } });
+  const url = `${FD_BASE}/${path}`;
+  const res = await fetch(url, { headers: { 'X-Auth-Token': key } });
 
-  if (res.status === 429) throw new Error('API-Football daily limit reached');
+  if (res.status === 429) throw new Error('football-data.org rate limit reached');
   if (!res.ok) {
     const text = await res.text().catch(() => '');
-    throw new Error(`API-Football ${res.status}: ${text}`);
+    throw new Error(`football-data.org ${res.status}: ${text}`);
   }
-
-  const json = await res.json();
-  if (json.errors && Object.keys(json.errors).length > 0) {
-    throw new Error(`API-Football error: ${Object.values(json.errors).join('; ')}`);
-  }
-  return json;
+  return res.json();
 }
+
+const delay = (ms = 700) => new Promise(r => setTimeout(r, ms));
 
 // Determine match result from final score
 function resultFromScore(homeGoals, awayGoals) {
@@ -271,33 +266,30 @@ exports.handler = async (event) => {
         continue;
       }
 
-      // Fetch fixture status from API-Football
+      // Fetch fixture status from football-data.org
       try {
-        const data = await apiFetch('fixtures', { id: fixtureId });
+        await delay();
+        const fixture = await fdFetch(`matches/${fixtureId}`);
         apiCallsUsed++;
 
-        const fixture = data.response?.[0];
-        if (!fixture) {
+        if (!fixture || !fixture.status) {
           log.push({ match: `${m['Home Team']} v ${m['Away Team']}`, status: 'api_not_found', fixtureId });
           continue;
         }
 
-        const statusShort = fixture.fixture?.status?.short || '';
-        const FINISHED = ['FT', 'AET', 'PEN'];
-
-        if (!FINISHED.includes(statusShort)) {
+        if (fixture.status !== 'FINISHED' && fixture.status !== 'AWARDED') {
           log.push({
             match: `${m['Home Team']} v ${m['Away Team']}`,
             status: 'not_finished',
-            fixtureStatus: statusShort,
+            fixtureStatus: fixture.status,
             fixtureId
           });
           continue;
         }
 
         // Match is finished — determine result
-        const homeGoals = fixture.goals?.home ?? fixture.score?.fulltime?.home;
-        const awayGoals = fixture.goals?.away ?? fixture.score?.fulltime?.away;
+        const homeGoals = fixture.score?.fullTime?.home;
+        const awayGoals = fixture.score?.fullTime?.away;
 
         if (homeGoals == null || awayGoals == null) {
           log.push({ match: `${m['Home Team']} v ${m['Away Team']}`, status: 'no_score_data', fixtureId });

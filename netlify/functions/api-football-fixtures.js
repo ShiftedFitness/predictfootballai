@@ -1,150 +1,261 @@
 /**
  * api-football-fixtures.js
  *
- * Proxy for API-Football v3. Two actions:
- *   ?action=list   — GET upcoming EPL fixtures (next 10)
- *   ?action=enrich — POST with fixture IDs to fetch predictions, form, H2H
+ * Proxy for football-data.org v4 API (free tier, current season included).
+ *
+ * Two actions:
+ *   ?action=list   — GET upcoming EPL matchday fixtures with standings + predictions
+ *   ?action=enrich — POST with fixture IDs to fetch H2H, form, computed predictions
+ *
+ * Prediction model:
+ *   - PRIMARY: League position gap (1st vs 20th = massive favourite)
+ *   - SECONDARY: H2H historical record
+ *   - FACTOR: Home advantage (~8% boost, based on EPL historical average)
  *
  * Auth: x-admin-secret header required.
- * Env:  API_FOOTBALL_KEY
+ * Env:  FOOTBALL_DATA_KEY (API token from football-data.org)
+ *
+ * football-data.org free tier: 10 requests/minute, EPL included forever.
+ * We add 700ms delays between calls to stay well within limits.
  */
 
-const rawBase = process.env.API_FOOTBALL_URL || 'https://v3.football.api-sports.io';
-const API_BASE = rawBase.startsWith('http') ? rawBase : `https://${rawBase}`;
-const EPL_LEAGUE_ID = 39;
+const FD_BASE = 'https://api.football-data.org/v4';
+const EPL_CODE = 'PL';   // Premier League competition code
 
-// Determine current EPL season year: Aug–May → if month >= 8, season = thisYear; else lastYear
-function getCurrentSeason() {
-  const now = new Date();
-  return now.getMonth() >= 7 ? now.getFullYear() : now.getFullYear() - 1;
-}
+// ── API helper ──────────────────────────────────────────────────────────────
+async function fdFetch(path) {
+  const key = process.env.FOOTBALL_DATA_KEY;
+  if (!key) throw Object.assign(new Error('FOOTBALL_DATA_KEY not configured'), { status: 500 });
 
-// Thin wrapper around API-Football fetch
-async function apiFetch(endpoint, params = {}) {
-  const key = process.env.API_FOOTBALL_KEY;
-  if (!key) throw Object.assign(new Error('API_FOOTBALL_KEY not configured'), { status: 500 });
-
-  const qs = new URLSearchParams(params).toString();
-  const url = `${API_BASE}/${endpoint}${qs ? '?' + qs : ''}`;
-
-  const res = await fetch(url, {
-    headers: { 'x-apisports-key': key }
-  });
+  const url = `${FD_BASE}/${path}`;
+  const res = await fetch(url, { headers: { 'X-Auth-Token': key } });
 
   if (res.status === 429) {
-    throw Object.assign(new Error('API-Football daily limit reached. Try again tomorrow.'), { status: 429 });
+    throw Object.assign(new Error('football-data.org rate limit reached. Wait a minute and try again.'), { status: 429 });
   }
   if (!res.ok) {
     const text = await res.text().catch(() => '');
-    throw Object.assign(new Error(`API-Football ${res.status}: ${text}`), { status: res.status });
+    throw Object.assign(new Error(`football-data.org ${res.status}: ${text}`), { status: res.status });
+  }
+  return res.json();
+}
+
+// Polite delay to respect 10 req/min rate limit
+const delay = (ms = 700) => new Promise(r => setTimeout(r, ms));
+
+// ── Standings cache (shared between list and enrich in same invocation) ─────
+let standingsCache = null;  // { byTeamId: Map, fetchedAt: Date }
+
+async function getStandings() {
+  // Cache for the lifetime of this function invocation
+  if (standingsCache) return standingsCache;
+
+  const data = await fdFetch(`competitions/${EPL_CODE}/standings`);
+  const table = data.standings?.[0]?.table || [];  // [0] = TOTAL standings
+
+  const byTeamId = {};
+  for (const row of table) {
+    byTeamId[row.team.id] = {
+      position: row.position,
+      points: row.points,
+      played: row.playedGames,
+      won: row.won,
+      draw: row.draw,
+      lost: row.lost,
+      gf: row.goalsFor,
+      ga: row.goalsAgainst,
+      gd: row.goalDifference,
+      form: row.form || '',       // e.g. "W,L,W,D,W"
+      teamName: row.team.name,
+      teamShort: row.team.shortName || row.team.tla || ''
+    };
   }
 
-  const json = await res.json();
-  // API-Football wraps errors inside response body
-  if (json.errors && Object.keys(json.errors).length > 0) {
-    const msg = Object.values(json.errors).join('; ');
-    throw Object.assign(new Error(`API-Football error: ${msg}`), { status: 400 });
+  standingsCache = byTeamId;
+  return byTeamId;
+}
+
+// ── Prediction model ─────────────────────────────────────────────────────────
+// Blends league position with H2H record.
+//
+// Position-based: uses a strength rating derived from league position.
+//   - Position 1 → strength ~0.95, position 20 → strength ~0.05
+//   - The gap between strengths drives the base win probability.
+//
+// H2H-based: if available, adjusts the base probability based on historical record.
+//
+// Home advantage: +8% to home win probability (EPL historical average is ~46% home,
+// ~27% draw, ~27% away — the ~8% gap from 38% baseline accounts for home advantage).
+
+function computePrediction(homeTeamId, awayTeamId, standings, h2hAgg) {
+  const homeStanding = standings[homeTeamId];
+  const awayStanding = standings[awayTeamId];
+
+  // ── Step 1: Position-based probability ──
+  // Convert position (1-20) to strength (0.95-0.05)
+  const homePos = homeStanding?.position || 10;
+  const awayPos = awayStanding?.position || 10;
+  const homeStrength = 1 - (homePos - 1) / 19;  // pos 1 → 1.0, pos 20 → 0.0
+  const awayStrength = 1 - (awayPos - 1) / 19;
+
+  // Expected score from strength difference (logistic-like curve)
+  // When strengths are equal → 0.5, when one dominates → approaches 0.9
+  const diff = homeStrength - awayStrength;
+  const homeExpected = 1 / (1 + Math.exp(-4 * diff));  // Sigmoid with steepness 4
+
+  // Convert expected score to H/D/A probabilities
+  // Draw probability is highest when teams are close, lowest when far apart
+  const posDiff = Math.abs(homePos - awayPos);
+  const drawBase = Math.max(0.10, 0.30 - posDiff * 0.012);  // 30% when equal, drops with gap
+
+  let hPct = homeExpected * (1 - drawBase);
+  let aPct = (1 - homeExpected) * (1 - drawBase);
+  let dPct = drawBase;
+
+  // ── Step 2: Home advantage boost (+8%) ──
+  hPct += 0.08;
+  aPct -= 0.05;
+  dPct -= 0.03;
+
+  // ── Step 3: Blend with H2H if available (30% weight) ──
+  if (h2hAgg && h2hAgg.numberOfMatches >= 2) {
+    const h2hTotal = h2hAgg.numberOfMatches;
+    const h2hHome = (h2hAgg.homeTeam?.wins || 0) / h2hTotal;
+    const h2hDraw = (h2hAgg.homeTeam?.draws || 0) / h2hTotal;
+    const h2hAway = (h2hAgg.awayTeam?.wins || 0) / h2hTotal;
+
+    // Weight H2H more if we have more matches (max 30% weight at 5+ matches)
+    const h2hWeight = Math.min(0.30, h2hTotal * 0.06);
+    const posWeight = 1 - h2hWeight;
+
+    hPct = hPct * posWeight + h2hHome * h2hWeight;
+    dPct = dPct * posWeight + h2hDraw * h2hWeight;
+    aPct = aPct * posWeight + h2hAway * h2hWeight;
   }
-  return json;
+
+  // ── Step 4: Clamp & normalize ──
+  hPct = Math.max(0.03, hPct);
+  dPct = Math.max(0.03, dPct);
+  aPct = Math.max(0.03, aPct);
+
+  const sum = hPct + dPct + aPct;
+  const home = Math.round((hPct / sum) * 100);
+  const draw = Math.round((dPct / sum) * 100);
+  const away = 100 - home - draw;  // Ensure they sum to exactly 100
+
+  return { home, draw, away };
 }
 
 // ── ACTION: list ──────────────────────────────────────────────────────────────
-// Returns all EPL fixtures for the next upcoming matchweek (round).
-// Strategy: fetch 1 upcoming fixture to discover its round, then fetch all
-// fixtures for that round. This avoids the "next 10" problem where ad-hoc
-// rescheduled fixtures from different rounds pollute the list.
-// Also fetches quick predictions for each to calculate difficulty scores.
+// Returns all EPL fixtures for the next upcoming matchday.
+// Fetches standings (1 call) + matchday fixtures (1 call) + H2H per fixture.
 async function listFixtures() {
-  const season = getCurrentSeason();
+  // 1. Fetch standings (gives position + form for all 20 teams)
+  const standings = await getStandings();
 
-  // Step 1: discover the next round by fetching the very next fixture (1 API call)
-  const probe = await apiFetch('fixtures', {
-    league: EPL_LEAGUE_ID,
-    season,
-    next: 1
-  });
+  // 2. Fetch competition info for current matchday
+  await delay();
+  const comp = await fdFetch(`competitions/${EPL_CODE}`);
+  const currentMatchday = comp.currentSeason?.currentMatchday;
 
-  const nextFixture = probe.response?.[0];
-  if (!nextFixture) {
-    return { ok: true, season, round: null, count: 0, fixtures: [], message: 'No upcoming fixtures found' };
+  if (!currentMatchday) {
+    return { ok: true, round: null, count: 0, fixtures: [], message: 'No current matchday found — season may be over.' };
   }
 
-  const round = nextFixture.league?.round;
-  if (!round) {
-    throw Object.assign(new Error('Could not determine matchweek round from API'), { status: 500 });
+  // 3. Fetch matches for the current matchday
+  await delay();
+  let data = await fdFetch(`competitions/${EPL_CODE}/matches?matchday=${currentMatchday}`);
+  let matches = data.matches || [];
+
+  // If all matches in this matchday are FINISHED, try the next one
+  const allFinished = matches.every(m => m.status === 'FINISHED');
+  let matchday = currentMatchday;
+
+  if (allFinished && currentMatchday < 38) {
+    matchday = currentMatchday + 1;
+    await delay();
+    data = await fdFetch(`competitions/${EPL_CODE}/matches?matchday=${matchday}`);
+    matches = data.matches || [];
   }
 
-  // Step 2: fetch ALL fixtures for that round (1 API call)
-  const data = await apiFetch('fixtures', {
-    league: EPL_LEAGUE_ID,
-    season,
-    round
-  });
+  // Filter out finished matches
+  const finishedStatuses = new Set(['FINISHED', 'AWARDED']);
+  const upcoming = matches.filter(m => !finishedStatuses.has(m.status));
 
-  // Finished-match statuses to exclude (FT = Full Time, AET = After Extra Time, PEN = Penalties)
-  const finishedStatuses = new Set(['FT', 'AET', 'PEN']);
+  const round = `Matchweek ${matchday}`;
 
-  const fixtures = (data.response || [])
-    .filter(f => !finishedStatuses.has(f.fixture.status?.short))
-    .map(f => ({
-      fixtureId:   f.fixture.id,
-      date:        f.fixture.date,
-      status:      f.fixture.status?.short || 'NS',
-      round:       f.league?.round || '',
-      homeTeam:    f.teams.home.name,
-      homeTeamId:  f.teams.home.id,
-      homeLogo:    f.teams.home.logo,
-      awayTeam:    f.teams.away.name,
-      awayTeamId:  f.teams.away.id,
-      awayLogo:    f.teams.away.logo,
-      // Will be populated below
+  const fixtures = upcoming.map(m => {
+    const homeS = standings[m.homeTeam?.id] || {};
+    const awayS = standings[m.awayTeam?.id] || {};
+
+    return {
+      fixtureId:   m.id,
+      date:        m.utcDate,
+      status:      m.status,
+      round:       round,
+      matchday:    matchday,
+      homeTeam:    m.homeTeam?.name || m.homeTeam?.shortName || '',
+      homeTeamId:  m.homeTeam?.id,
+      homeLogo:    m.homeTeam?.crest || '',
+      homePosition: homeS.position || null,
+      homePoints:  homeS.points ?? null,
+      homeFormRaw: homeS.form || '',
+      awayTeam:    m.awayTeam?.name || m.awayTeam?.shortName || '',
+      awayTeamId:  m.awayTeam?.id,
+      awayLogo:    m.awayTeam?.crest || '',
+      awayPosition: awayS.position || null,
+      awayPoints:  awayS.points ?? null,
+      awayFormRaw: awayS.form || '',
       quickPrediction: null,
       difficulty: 0
-    }));
+    };
+  });
 
-  // Fetch predictions for each fixture to calculate difficulty
-  // Difficulty = how close to 33/33/33 (Shannon entropy, higher = harder to call)
+  // 4. Fetch H2H per fixture and compute predictions
   for (const fix of fixtures) {
     try {
-      const predData = await apiFetch('predictions', { fixture: fix.fixtureId });
-      const pred = predData.response?.[0];
-      if (pred?.predictions?.percent) {
-        const h = parseInt(pred.predictions.percent.home) || 0;
-        const d = parseInt(pred.predictions.percent.draw) || 0;
-        const a = parseInt(pred.predictions.percent.away) || 0;
-        fix.quickPrediction = { home: h, draw: d, away: a };
+      await delay();
+      const h2hData = await fdFetch(`matches/${fix.fixtureId}/head2head?limit=10`);
+      const agg = h2hData.aggregates || null;
 
-        // Shannon entropy (higher = more uncertain = harder to call)
-        // Max entropy for 3 outcomes is log2(3) ≈ 1.585
-        const total = h + d + a || 1;
-        const probs = [h/total, d/total, a/total].filter(p => p > 0);
-        fix.difficulty = probs.reduce((sum, p) => sum - p * Math.log2(p), 0);
-      }
+      const pred = computePrediction(fix.homeTeamId, fix.awayTeamId, standings, agg);
+      fix.quickPrediction = pred;
+
+      // Shannon entropy for difficulty
+      const total = pred.home + pred.draw + pred.away || 1;
+      const probs = [pred.home/total, pred.draw/total, pred.away/total].filter(p => p > 0);
+      fix.difficulty = probs.reduce((sum, p) => sum - p * Math.log2(p), 0);
     } catch (e) {
-      console.warn(`Quick prediction failed for fixture ${fix.fixtureId}:`, e.message);
-      // Non-fatal: fixture still shows, just without difficulty score
+      console.warn(`H2H failed for fixture ${fix.fixtureId}:`, e.message);
+      // Fall back to position-only prediction
+      const pred = computePrediction(fix.homeTeamId, fix.awayTeamId, standings, null);
+      fix.quickPrediction = pred;
+      const total = pred.home + pred.draw + pred.away || 1;
+      const probs = [pred.home/total, pred.draw/total, pred.away/total].filter(p => p > 0);
+      fix.difficulty = probs.reduce((sum, p) => sum - p * Math.log2(p), 0);
     }
   }
 
-  // Rank by difficulty (highest first) and mark suggested top 5
+  // Rank by difficulty and mark suggested top 5
   const sorted = [...fixtures].sort((a, b) => b.difficulty - a.difficulty);
   const suggestedIds = new Set(sorted.slice(0, 5).map(f => f.fixtureId));
   fixtures.forEach(f => { f.suggested = suggestedIds.has(f.fixtureId); });
 
-  return { ok: true, season, round, count: fixtures.length, fixtures };
+  return { ok: true, round, matchday, count: fixtures.length, fixtures };
 }
 
 // ── ACTION: enrich ────────────────────────────────────────────────────────────
-// Accepts array of fixtures, returns predictions + form + H2H for each
-// If quickPrediction is provided per fixture (from list step), skips re-fetching predictions
-// and only fetches full prediction data (H2H, comparison) + team form
+// Accepts array of selected fixtures, returns H2H detail + form + predictions.
+// Uses standings for form (saves API calls) and H2H for detailed match history.
 async function enrichFixtures(body) {
   const { fixtures } = body || {};
   if (!Array.isArray(fixtures) || fixtures.length === 0) {
     throw Object.assign(new Error('fixtures array required'), { status: 400 });
   }
 
-  const season = getCurrentSeason();
+  // Fetch standings (may already be cached from list call in same invocation)
+  const standings = await getStandings();
+
   const enrichment = [];
 
   for (const fix of fixtures) {
@@ -154,84 +265,81 @@ async function enrichFixtures(body) {
       homeForm: '',
       awayForm: '',
       h2h: [],
-      comparison: null,
-      advice: ''
+      advice: '',
+      homePosition: null,
+      awayPosition: null
     };
 
-    // 1) Predictions (includes H2H + comparison)
-    // Always fetch full predictions for H2H and comparison data
+    // Standings data (position + form — no extra API calls!)
+    const homeS = standings[fix.homeTeamId] || {};
+    const awayS = standings[fix.awayTeamId] || {};
+    item.homePosition = homeS.position || null;
+    item.awayPosition = awayS.position || null;
+
+    // Form from standings: "W,L,W,D,W" → "WLWDW"
+    item.homeForm = (homeS.form || '').replace(/,/g, '').slice(-5);
+    item.awayForm = (awayS.form || '').replace(/,/g, '').slice(-5);
+
+    // H2H + predictions
+    let h2hAgg = null;
     try {
-      const predData = await apiFetch('predictions', { fixture: fix.fixtureId });
-      const pred = predData.response?.[0];
-      if (pred) {
-        item.predictions = {
-          home: parseInt(pred.predictions?.percent?.home) || 0,
-          draw: parseInt(pred.predictions?.percent?.draw) || 0,
-          away: parseInt(pred.predictions?.percent?.away) || 0
-        };
-        item.advice = pred.predictions?.advice || '';
+      await delay();
+      const h2hData = await fdFetch(`matches/${fix.fixtureId}/head2head?limit=10`);
+      h2hAgg = h2hData.aggregates || null;
+      const h2hMatches = h2hData.matches || [];
 
-        // Comparison stats from predictions response
-        if (pred.comparison) {
-          item.comparison = {};
-          for (const [key, val] of Object.entries(pred.comparison)) {
-            item.comparison[key] = {
-              home: parseInt(val.home) || 0,
-              away: parseInt(val.away) || 0
-            };
-          }
-        }
+      // Map H2H matches to our format
+      item.h2h = h2hMatches.slice(0, 5).map(h => ({
+        date:       h.utcDate,
+        homeTeam:   h.homeTeam?.name || '',
+        awayTeam:   h.awayTeam?.name || '',
+        homeGoals:  h.score?.fullTime?.home ?? null,
+        awayGoals:  h.score?.fullTime?.away ?? null,
+        homeWinner: h.score?.winner === 'HOME_TEAM',
+        awayWinner: h.score?.winner === 'AWAY_TEAM'
+      }));
 
-        // H2H from predictions response (last 5)
-        if (Array.isArray(pred.h2h)) {
-          item.h2h = pred.h2h.slice(0, 5).map(h => ({
-            date:       h.fixture?.date,
-            homeTeam:   h.teams?.home?.name,
-            awayTeam:   h.teams?.away?.name,
-            homeGoals:  h.goals?.home ?? null,
-            awayGoals:  h.goals?.away ?? null,
-            homeWinner: h.teams?.home?.winner,
-            awayWinner: h.teams?.away?.winner
-          }));
-        }
-      }
     } catch (e) {
-      console.warn(`Predictions failed for fixture ${fix.fixtureId}:`, e.message);
-      // Fall back to quickPrediction from list step if available
-      if (fix.quickPrediction) {
-        item.predictions = fix.quickPrediction;
-      }
+      console.warn(`H2H failed for fixture ${fix.fixtureId}:`, e.message);
     }
 
-    // 2) Home team form
-    if (fix.homeTeamId) {
-      try {
-        const statsData = await apiFetch('teams/statistics', {
-          league: EPL_LEAGUE_ID,
-          season,
-          team: fix.homeTeamId
-        });
-        const form = statsData.response?.form || '';
-        item.homeForm = form.slice(-5); // last 5 results
-      } catch (e) {
-        console.warn(`Home form failed for team ${fix.homeTeamId}:`, e.message);
-      }
+    // Compute prediction from position + H2H
+    item.predictions = computePrediction(fix.homeTeamId, fix.awayTeamId, standings, h2hAgg);
+
+    // Fall back to quickPrediction if prediction computation fails
+    if (!item.predictions && fix.quickPrediction) {
+      item.predictions = fix.quickPrediction;
     }
 
-    // 3) Away team form
-    if (fix.awayTeamId) {
-      try {
-        const statsData = await apiFetch('teams/statistics', {
-          league: EPL_LEAGUE_ID,
-          season,
-          team: fix.awayTeamId
-        });
-        const form = statsData.response?.form || '';
-        item.awayForm = form.slice(-5);
-      } catch (e) {
-        console.warn(`Away form failed for team ${fix.awayTeamId}:`, e.message);
-      }
+    // Generate advice text
+    const posGap = Math.abs((homeS.position || 10) - (awayS.position || 10));
+    const homeHigher = (homeS.position || 10) < (awayS.position || 10);
+
+    let adviceParts = [];
+
+    // Position context
+    if (homeS.position && awayS.position) {
+      adviceParts.push(`${homeHigher ? 'Home' : 'Away'} side sit ${homeHigher ? homeS.position : awayS.position}${ordinal(homeHigher ? homeS.position : awayS.position)} vs ${homeHigher ? awayS.position : homeS.position}${ordinal(homeHigher ? awayS.position : homeS.position)}.`);
     }
+
+    // H2H context
+    if (h2hAgg && h2hAgg.numberOfMatches > 0) {
+      const hw = h2hAgg.homeTeam?.wins || 0;
+      const aw = h2hAgg.awayTeam?.wins || 0;
+      const dr = h2hAgg.homeTeam?.draws || 0;
+      adviceParts.push(`H2H: ${hw}W-${dr}D-${aw}L from ${h2hAgg.numberOfMatches} meetings.`);
+    }
+
+    // Verdict
+    if (posGap >= 12) {
+      adviceParts.push(homeHigher ? 'Strong home favourite.' : 'Away side heavily favoured despite travelling.');
+    } else if (posGap >= 6) {
+      adviceParts.push(homeHigher ? 'Home advantage + table position points to a home win.' : 'Away side fancied but home advantage could be a factor.');
+    } else {
+      adviceParts.push('Close in the table — this one could go either way.');
+    }
+
+    item.advice = adviceParts.join(' ');
 
     enrichment.push(item);
   }
@@ -239,8 +347,18 @@ async function enrichFixtures(body) {
   return { ok: true, enrichment };
 }
 
+// ── Helpers ──────────────────────────────────────────────────────────────────
+function ordinal(n) {
+  const s = ['th', 'st', 'nd', 'rd'];
+  const v = n % 100;
+  return s[(v - 20) % 10] || s[v] || s[0];
+}
+
 // ── HANDLER ───────────────────────────────────────────────────────────────────
 exports.handler = async (event) => {
+  // Reset standings cache per invocation
+  standingsCache = null;
+
   try {
     // Auth check
     const secret = (event.headers['x-admin-secret'] || event.headers['X-Admin-Secret'] || '').trim();

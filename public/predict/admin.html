@@ -319,6 +319,12 @@ async function loadMatches(week) {
 }
 
 // ── Format helpers ──────────────────────────────────────────────────────
+function ordinalSuffix(n) {
+  const s = ['th','st','nd','rd'];
+  const v = n % 100;
+  return s[(v-20)%10] || s[v] || s[0];
+}
+
 function formatFixtureDate(isoDate) {
   if (!isoDate) return '';
   try {
@@ -419,12 +425,21 @@ function renderFixtureGrid() {
       ? `<span style="display:inline-block;background:#ff9800;color:#000;font-size:10px;font-weight:800;padding:2px 6px;border-radius:4px;margin-left:6px">TOUGH CALL</span>`
       : '';
 
+    // Position badges
+    const posHtml = (fix.homePosition && fix.awayPosition)
+      ? `<div style="display:flex;gap:6px;align-items:center;margin-top:4px;font-size:11px">
+           <span style="background:#1a1a1a;padding:2px 6px;border-radius:4px;font-weight:700">${fix.homePosition}${ordinalSuffix(fix.homePosition)}</span>
+           <span style="color:#666">vs</span>
+           <span style="background:#1a1a1a;padding:2px 6px;border-radius:4px;font-weight:700">${fix.awayPosition}${ordinalSuffix(fix.awayPosition)}</span>
+         </div>`
+      : '';
+
     card.innerHTML = `
       <div class="fix-card-header">
         <div style="flex:1">
           <div class="fix-teams">${fix.homeTeam} v ${fix.awayTeam}${suggestedBadge}</div>
           <div class="fix-date">${formatFixtureDate(fix.date)}</div>
-          <div class="fix-round">${fix.round || ''}</div>
+          ${posHtml}
           ${predHtml}
         </div>
         <div class="fix-check"></div>
