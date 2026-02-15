@@ -57,7 +57,10 @@ exports.handler = async (event) => {
 };
 
 /**
- * Search players by name — returns up to 30 matches.
+ * Search players by name — returns up to 30 matches, deduplicated by name.
+ * Historical data can have multiple UIDs for the same player (different
+ * nationality formats, birth years, mojibake). We group by player_name
+ * and return the UID with the most historical data as the canonical one.
  */
 async function handleSearch(supabase, url) {
   const q = (url.searchParams.get('q') || '').trim();
@@ -65,21 +68,38 @@ async function handleSearch(supabase, url) {
     return respond(400, { error: 'q must be at least 2 characters' });
   }
 
-  // Use ilike for case-insensitive partial match on player_name
+  // Search by name
   const { data, error } = await supabase
     .from('players')
     .select('player_uid, player_name, nationality_raw, birth_year')
     .or(`player_name.ilike.%${q}%,player_uid.ilike.%${q}%`)
     .order('player_name')
-    .limit(30);
+    .limit(100);
 
   if (error) throw error;
 
-  return respond(200, { results: data || [] });
+  // Deduplicate by player_name — keep the entry with birth_year set, prefer shorter nationality
+  const byName = {};
+  for (const p of (data || [])) {
+    const key = (p.player_name || '').toLowerCase();
+    if (!byName[key]) {
+      byName[key] = p;
+    } else {
+      // Prefer entry with birth_year, then shorter uid (likely canonical)
+      const existing = byName[key];
+      if (!existing.birth_year && p.birth_year) byName[key] = p;
+      else if (p.player_uid.length < existing.player_uid.length) byName[key] = p;
+    }
+  }
+
+  const results = Object.values(byName).slice(0, 30);
+  return respond(200, { results });
 }
 
 /**
  * Full player detail — all season stats grouped by club + current season.
+ * Aggregates across ALL UIDs for the same player name to handle historical
+ * data fragmentation (different nationality formats, birth years, mojibake).
  */
 async function handleDetail(supabase, url) {
   const uid = (url.searchParams.get('uid') || '').trim();
@@ -98,11 +118,20 @@ async function handleDetail(supabase, url) {
     return respond(404, { error: 'Player not found' });
   }
 
-  // 2. All season stats from the combined view
+  // 2. Find ALL UIDs for this player name (handles fragmented historical data)
+  const { data: allPlayerEntries } = await supabase
+    .from('players')
+    .select('player_uid')
+    .eq('player_name', player.player_name);
+
+  const allUids = (allPlayerEntries || []).map(p => p.player_uid);
+  if (!allUids.includes(uid)) allUids.push(uid);
+
+  // 3. All season stats from the combined view across ALL UIDs
   const { data: stats, error: sErr } = await supabase
     .from('v_all_player_season_stats')
     .select('*')
-    .eq('player_uid', uid)
+    .in('player_uid', allUids)
     .order('season_label', { ascending: true });
 
   if (sErr) throw sErr;
@@ -122,7 +151,7 @@ async function handleDetail(supabase, url) {
 
   // 4. Separate historical vs current season
   const historical = (stats || []).filter(s => s.source === 'historical');
-  const current = (stats || []).filter(s => s.source === 'current_season');
+  const current = (stats || []).filter(s => s.source === 'current');
 
   // 5. Build club-grouped summaries
   const clubGroups = {};
