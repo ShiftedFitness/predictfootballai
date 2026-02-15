@@ -36,11 +36,18 @@ Scrapes current-season (2025/26) player stats from FBref.com and upserts them in
 | Frontend display | `index.html` footer shows "Current season stats updated: [date]" |
 | Player Lookup Tool | `public/tools/player-lookup.html` (for spot-checking data) |
 | Migration SQL | `sql/002_current_season_table.sql` |
+| Bullseye view fix | `sql/003_fix_bullseye_view.sql` |
+| Bullseye game view | `v_game_player_club_comp` (aggregates from combined view) |
 | Node.js ingestion script | `scripts/ingest_current_season.js` (backup approach — blocked by Cloudflare) |
 
 ## ⚠️ Known Data Issues & Lessons Learned
 
 These issues were discovered during the first ingestion (Feb 2026) and fixes were applied. The `genUid()` function now handles all of these automatically — future runs should work cleanly.
+
+### 0. Bullseye View Missing Current Season Data (CRITICAL)
+**Problem:** The Bullseye game (`match_start.js`) queries `v_game_player_club_comp` for club/country/continent categories. This view originally read from `player_club_total_competition` — a pre-aggregated rollup table with ONLY historical data. Current season stats never flowed through to the game.
+**Fix:** Redefined `v_game_player_club_comp` to aggregate from `v_all_player_season_stats` (which includes both historical + current data). See `sql/003_fix_bullseye_view.sql`. Run this once in Supabase SQL Editor.
+**Note:** All OTHER games (HoL, XI, Quiz, Who Am I, Alphabet) already query `v_all_player_season_stats` directly and were unaffected.
 
 ### 1. Nationality Format Mismatch (BIGGEST ISSUE)
 **Problem:** FBref gives nationality as two codes (e.g., `eng eng`, `fr fra`, `br bra`, `us usa`). Historical data uses just ONE code (e.g., `eng`, `fra`, `bra`, `usa`). This caused ~80% of current season UIDs to NOT match any historical player.

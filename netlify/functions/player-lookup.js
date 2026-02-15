@@ -168,8 +168,8 @@ async function handleDetail(supabase, url) {
       goals: s.goals ?? 0,
       assists: s.assists ?? 0,
       clean_sheets: s.clean_sheets ?? 0,
-      minutes: s.minutes_played ?? 0,
-      position: s.position_group,
+      minutes: s.minutes ?? 0,
+      position: s.position_bucket,
     });
   }
 
@@ -187,8 +187,8 @@ async function handleDetail(supabase, url) {
     goals: s.goals ?? 0,
     assists: s.assists ?? 0,
     clean_sheets: s.clean_sheets ?? 0,
-    minutes: s.minutes_played ?? 0,
-    position: s.position_group,
+    minutes: s.minutes ?? 0,
+    position: s.position_bucket,
     saves: s.saves ?? 0,
     tackles: s.tackles ?? 0,
     interceptions: s.interceptions ?? 0,
