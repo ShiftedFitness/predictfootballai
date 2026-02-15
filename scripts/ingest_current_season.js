@@ -14,6 +14,7 @@
  *   --dry-run         Parse and log but don't write to Supabase
  *   --verbose         Extra logging
  *   --local           Read HTML from data/fbref/ instead of fetching from FBref
+ *                     (use this if FBref/Cloudflare blocks automated requests)
  *
  * Local mode workflow:
  *   1. Run with --local and it will tell you which pages to save
