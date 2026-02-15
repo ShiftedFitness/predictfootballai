@@ -178,7 +178,8 @@ footer {
 </div>
 
 <footer>
-  Build: 2026-02-14 | TeleStats Games Hub v3.0
+  <div>Build: 2026-02-14 | TeleStats Games Hub v3.0</div>
+  <div id="lastUpdated" style="margin-top:4px;opacity:0.5;font-size:0.8em;"></div>
 </footer>
 
 <script>
@@ -192,6 +193,27 @@ function updateClock() {
 }
 updateClock();
 setInterval(updateClock, 30000);
+
+/* Fetch last-updated metadata */
+(async function() {
+  try {
+    const API_BASE = window.location.hostname === 'localhost'
+      ? 'http://localhost:8888/.netlify/functions'
+      : '/.netlify/functions';
+    const res = await fetch(API_BASE + '/meta');
+    if (!res.ok) return;
+    const meta = await res.json();
+    const info = meta.current_season_last_updated;
+    if (info && info.value !== 'never') {
+      const d = new Date(info.updated_at);
+      const formatted = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+        + ' ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+      document.getElementById('lastUpdated').textContent = 'Current season stats updated: ' + formatted;
+    } else {
+      document.getElementById('lastUpdated').textContent = 'Current season stats: not yet loaded';
+    }
+  } catch(e) { /* silently fail */ }
+})();
 </script>
 </body>
 </html>

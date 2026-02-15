@@ -123,7 +123,7 @@ exports.handler = async (event) => {
       // Query player_season_stats by player_uid
       const buildQuery = () => {
         let q = supabase
-          .from('player_season_stats')
+          .from('v_all_player_season_stats')
           .select('player_uid, appearances')
           .eq('competition_id', 7);
         if (clubId) q = q.eq('club_id', clubId);

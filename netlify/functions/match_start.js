@@ -621,7 +621,7 @@ async function fetchByPosition(supabase, competitionName, positionBucket, metric
   try {
     stats = await fetchAll(() =>
       supabase
-        .from('player_season_stats')
+        .from('v_all_player_season_stats')
         .select('player_uid, appearances, goals, assists, minutes')
         .eq('competition_id', compData.competition_id)
         .eq('position_bucket', positionBucket)
@@ -710,7 +710,7 @@ async function fetchByAgeBucket(supabase, competitionName, ageCat, metric = 'app
   try {
     stats = await fetchAll(() => {
       let q = supabase
-        .from('player_season_stats')
+        .from('v_all_player_season_stats')
         .select('player_uid, appearances, goals, assists, minutes')
         .eq('competition_id', compData.competition_id)
         .not('age', 'is', null)

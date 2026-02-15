@@ -327,7 +327,7 @@ async function getEplCompId(supabase) {
 async function fetchScopedStats(supabase, competitionId, scope) {
   const buildQuery = () => {
     let q = supabase
-      .from('player_season_stats')
+      .from('v_all_player_season_stats')
       .select('player_uid, season_start_year, appearances, goals, assists, minutes, position_bucket, club_id')
       .eq('competition_id', competitionId)
       .gt('appearances', 0);

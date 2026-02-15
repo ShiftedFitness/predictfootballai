@@ -296,7 +296,7 @@ async function searchPlayers(supabase, query, positionBucket, scope, competition
 
   const buildQuery = () => {
     let q = supabase
-      .from('player_season_stats')
+      .from('v_all_player_season_stats')
       .select('player_uid, appearances, goals, assists, minutes')
       .eq('competition_id', competitionId)
       .in('position_bucket', bucketsToSearch)
@@ -518,7 +518,7 @@ async function computeBestXI(supabase, scope, formation, objective) {
     for (const [bucket, count] of Object.entries(bucketCounts)) {
       const buildBucketQuery = () => {
         let q = supabase
-          .from('player_season_stats')
+          .from('v_all_player_season_stats')
           .select('player_uid, appearances, goals, assists, minutes')
           .eq('competition_id', competitionId)
           .eq('position_bucket', bucket)

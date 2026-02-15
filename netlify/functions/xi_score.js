@@ -235,7 +235,7 @@ async function computeBestXI(supabase, scope, formation, objective) {
     for (const [bucket, count] of Object.entries(bucketCounts)) {
       const buildBucketQuery = () => {
         let q = supabase
-          .from('player_season_stats')
+          .from('v_all_player_season_stats')
           .select('player_uid, appearances, goals, assists, minutes')
           .eq('competition_id', competitionId)
           .eq('position_bucket', bucket)
@@ -480,7 +480,7 @@ exports.handler = async (event) => {
       for (const bucket of uniqueBuckets) {
         const buildRankQuery = () => {
           let q = supabase
-            .from('player_season_stats')
+            .from('v_all_player_season_stats')
             .select('player_uid, appearances, goals, minutes')
             .eq('competition_id', competitionId)
             .eq('position_bucket', bucket)

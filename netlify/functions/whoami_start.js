@@ -322,7 +322,7 @@ async function fetchEligiblePlayers(supabase, scope, competitionId) {
   // Fetch season-level stats for all players in scope
   const buildQuery = () => {
     let q = supabase
-      .from('player_season_stats')
+      .from('v_all_player_season_stats')
       .select('player_uid, club_id, season_start_year, appearances, goals, assists, minutes, position_bucket, age')
       .eq('competition_id', competitionId)
       .gt('appearances', 0);
@@ -390,7 +390,7 @@ async function fetchEligiblePlayers(supabase, scope, competitionId) {
     for (let i = 0; i < eligibleUids.length; i += uidBatch) {
       const batch = eligibleUids.slice(i, i + uidBatch);
       const buildFullQuery = () => supabase
-        .from('player_season_stats')
+        .from('v_all_player_season_stats')
         .select('player_uid, club_id, season_start_year, appearances, goals, assists, minutes, position_bucket')
         .eq('competition_id', competitionId)
         .gt('appearances', 0)
@@ -898,7 +898,7 @@ exports.handler = async (event) => {
 
           const buildStatsQuery = () => {
             let q = supabase
-              .from('player_season_stats')
+              .from('v_all_player_season_stats')
               .select('club_id, season_start_year, appearances, goals, assists, minutes, position_bucket')
               .eq('player_uid', decryptedUid)
               .eq('competition_id', competitionId)

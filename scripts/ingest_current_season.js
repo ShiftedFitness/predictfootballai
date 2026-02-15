@@ -604,7 +604,14 @@ async function main() {
     }
   }
 
-  // Summary
+  // ── Summary & Verdict ──────────────────────────────────────────────────────
+  const totalLeagues = Object.keys(results).length;
+  const successLeagues = Object.values(results).filter(r => !r.error).length;
+  const failedLeagues = Object.values(results).filter(r => r.error).length;
+  const totalUpserted = Object.values(results).reduce((sum, r) => sum + (r.upserted || 0), 0);
+  const totalNewPlayers = Object.values(results).reduce((sum, r) => sum + (r.newPlayers || 0), 0);
+  const allUnmatched = Object.values(results).flatMap(r => r.unmatched || []);
+
   console.log('\n' + '═'.repeat(60));
   console.log('INGESTION SUMMARY');
   console.log('═'.repeat(60));
@@ -619,10 +626,59 @@ async function main() {
       }
     }
   }
+  console.log('─'.repeat(60));
+  console.log(`  Leagues: ${successLeagues}/${totalLeagues} succeeded`);
+  console.log(`  Total rows upserted: ${totalUpserted}`);
+  console.log(`  New players created: ${totalNewPlayers}`);
+  if (allUnmatched.length > 0) {
+    console.log(`  ⚠ Total unmatched clubs: ${allUnmatched.length} (${allUnmatched.join(', ')})`);
+  }
   console.log('═'.repeat(60));
+
+  // ── Final Verdict ─────────────────────────────────────────────────────────
+  if (failedLeagues === 0 && totalUpserted > 0) {
+    console.log('\n✅ SUCCESS — All leagues ingested. Safe to proceed.');
+
+    // Update ingestion_meta timestamp
+    if (!dryRun) {
+      try {
+        await supabaseRPC('POST',
+          'ingestion_meta?on_conflict=key',
+          [{ key: 'current_season_last_updated', value: `${successLeagues} leagues, ${totalUpserted} rows`, updated_at: new Date().toISOString() }]
+        );
+        console.log('  📝 Updated ingestion_meta timestamp');
+      } catch (metaErr) {
+        console.warn(`  ⚠ Could not update ingestion_meta: ${metaErr.message}`);
+      }
+    }
+  } else if (failedLeagues > 0 && successLeagues > 0) {
+    console.log(`\n⚠️  PARTIAL SUCCESS — ${failedLeagues} league(s) failed. Check errors above.`);
+    console.log('  The successful leagues were still saved. Re-run with --league <name> to retry failed ones.');
+
+    if (!dryRun) {
+      try {
+        await supabaseRPC('POST',
+          'ingestion_meta?on_conflict=key',
+          [{ key: 'current_season_last_updated', value: `${successLeagues}/${totalLeagues} leagues (partial), ${totalUpserted} rows`, updated_at: new Date().toISOString() }]
+        );
+      } catch (metaErr) { /* silent */ }
+    }
+  } else if (totalUpserted === 0 && !dryRun) {
+    console.log('\n❌ FAILED — No data was ingested. Do NOT proceed.');
+    console.log('  Common causes:');
+    console.log('  - FBref may be rate-limiting or blocking requests');
+    console.log('  - FBref HTML structure may have changed');
+    console.log('  - Network/DNS issue');
+    console.log('  Try again later, or run with --verbose for more details.');
+    process.exit(1);
+  } else if (dryRun) {
+    console.log('\n🏃 DRY RUN complete — no data written. Run without --dry-run to go live.');
+  }
 }
 
 main().catch(err => {
-  console.error('Fatal error:', err);
+  console.error('\n❌ FATAL ERROR:', err.message);
+  console.error('  The ingestion crashed unexpectedly. No data was modified.');
+  console.error('  Run with --verbose for full stack trace.');
   process.exit(1);
 });
