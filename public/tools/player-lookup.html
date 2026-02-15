@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Player Lookup — TeleStats DB Tool</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --card: #161b22;
+    --card-alt: #1c2333;
+    --border: #30363d;
+    --text: #e6edf3;
+    --text-dim: #8b949e;
+    --accent: #58a6ff;
+    --accent-dim: #1f6feb;
+    --green: #3fb950;
+    --yellow: #d29922;
+    --red: #f85149;
+    --orange: #db6d28;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 20px;
+  }
+  .container { max-width: 800px; margin: 0 auto; }
+  h1 { font-size: 1.4rem; font-weight: 600; margin-bottom: 4px; }
+  .subtitle { color: var(--text-dim); font-size: 0.85rem; margin-bottom: 20px; }
+
+  /* Search */
+  .search-box {
+    display: flex; gap: 8px; margin-bottom: 16px;
+  }
+  .search-box input {
+    flex: 1;
+    padding: 10px 14px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 1rem;
+    outline: none;
+  }
+  .search-box input:focus { border-color: var(--accent); }
+  .search-box button {
+    padding: 10px 20px;
+    background: var(--accent-dim);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    font-weight: 500;
+  }
+  .search-box button:hover { background: var(--accent); }
+
+  /* Results list */
+  .results { margin-bottom: 20px; }
+  .result-item {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 14px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 6px;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .result-item:hover { border-color: var(--accent); }
+  .result-name { font-weight: 500; }
+  .result-meta { color: var(--text-dim); font-size: 0.8rem; }
+
+  /* Detail view */
+  .detail { display: none; }
+  .detail.visible { display: block; }
+
+  .player-header {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .player-name { font-size: 1.5rem; font-weight: 700; margin-bottom: 6px; }
+  .player-info { color: var(--text-dim); font-size: 0.9rem; }
+  .player-info span { margin-right: 16px; }
+
+  .totals-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .total-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    text-align: center;
+  }
+  .total-val { font-size: 1.3rem; font-weight: 700; color: var(--accent); }
+  .total-label { font-size: 0.75rem; color: var(--text-dim); margin-top: 2px; }
+
+  .section-title {
+    font-size: 1rem; font-weight: 600;
+    margin: 20px 0 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-title .badge {
+    display: inline-block;
+    font-size: 0.7rem;
+    background: var(--accent-dim);
+    color: #fff;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-left: 8px;
+    font-weight: 400;
+    vertical-align: middle;
+  }
+
+  /* Current season cards */
+  .current-card {
+    background: var(--card);
+    border: 1px solid var(--green);
+    border-radius: 8px;
+    padding: 14px;
+    margin-bottom: 8px;
+  }
+  .current-card .club-comp {
+    font-weight: 600; margin-bottom: 6px;
+  }
+  .current-card .club-comp .comp {
+    color: var(--text-dim); font-weight: 400; font-size: 0.85rem;
+  }
+  .stat-row {
+    display: flex; flex-wrap: wrap; gap: 12px; font-size: 0.85rem;
+  }
+  .stat-row .stat-item {
+    color: var(--text-dim);
+  }
+  .stat-row .stat-item b { color: var(--text); font-weight: 600; }
+
+  /* Club history */
+  .club-block {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    overflow: hidden;
+  }
+  .club-block-header {
+    padding: 12px 14px;
+    font-weight: 600;
+    display: flex; justify-content: space-between; align-items: center;
+    cursor: pointer;
+  }
+  .club-block-header:hover { background: var(--card-alt); }
+  .club-block-header .comp-tag {
+    font-size: 0.75rem; color: var(--text-dim); font-weight: 400;
+  }
+  .club-block-body { padding: 0 14px 12px; }
+  .season-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.85rem;
+  }
+  .season-row:last-child { border-bottom: none; }
+  .season-label { font-weight: 500; min-width: 80px; }
+  .season-stats { color: var(--text-dim); display: flex; gap: 10px; }
+  .season-stats b { color: var(--text); }
+
+  /* Back button */
+  .back-btn {
+    background: none; border: none; color: var(--accent);
+    cursor: pointer; font-size: 0.9rem; margin-bottom: 12px;
+    padding: 4px 0;
+  }
+  .back-btn:hover { text-decoration: underline; }
+
+  .empty-msg {
+    color: var(--text-dim); text-align: center; padding: 40px;
+    font-size: 0.9rem;
+  }
+  .loading { color: var(--text-dim); font-size: 0.85rem; padding: 10px 0; }
+
+  /* Source tag */
+  .source-tag {
+    display: inline-block;
+    font-size: 0.65rem;
+    padding: 1px 6px;
+    border-radius: 4px;
+    margin-left: 6px;
+    vertical-align: middle;
+    font-weight: 500;
+  }
+  .source-tag.historical { background: #30363d; color: var(--text-dim); }
+  .source-tag.current { background: #1a4d2e; color: var(--green); }
+
+  /* Raw data toggle */
+  .raw-toggle {
+    background: none; border: 1px solid var(--border); color: var(--text-dim);
+    padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8rem;
+    margin-top: 16px;
+  }
+  .raw-toggle:hover { border-color: var(--accent); color: var(--text); }
+  .raw-data {
+    display: none; margin-top: 10px;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 8px; padding: 14px;
+    font-family: 'SFMono-Regular', Consolas, monospace;
+    font-size: 0.75rem; color: var(--text-dim);
+    overflow-x: auto; max-height: 400px; overflow-y: auto;
+    white-space: pre-wrap;
+  }
+  .raw-data.visible { display: block; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Player Lookup</h1>
+  <p class="subtitle">Search the TeleStats database — view any player's full career + current season stats</p>
+
+  <!-- Search view -->
+  <div id="searchView">
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="Search by player name…" autocomplete="off">
+      <button onclick="doSearch()">Search</button>
+    </div>
+    <div id="results"></div>
+  </div>
+
+  <!-- Detail view -->
+  <div id="detailView" class="detail">
+    <button class="back-btn" onclick="showSearch()">← Back to search</button>
+    <div id="detailContent"></div>
+  </div>
+</div>
+
+<script>
+const API = '/.netlify/functions/player-lookup';
+
+const searchInput = document.getElementById('searchInput');
+const resultsDiv = document.getElementById('results');
+const searchView = document.getElementById('searchView');
+const detailView = document.getElementById('detailView');
+const detailContent = document.getElementById('detailContent');
+
+searchInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') doSearch();
+});
+
+// Debounced live search
+let debounceTimer;
+searchInput.addEventListener('input', () => {
+  clearTimeout(debounceTimer);
+  const q = searchInput.value.trim();
+  if (q.length >= 2) {
+    debounceTimer = setTimeout(doSearch, 350);
+  } else {
+    resultsDiv.innerHTML = '';
+  }
+});
+
+async function doSearch() {
+  const q = searchInput.value.trim();
+  if (q.length < 2) return;
+
+  resultsDiv.innerHTML = '<div class="loading">Searching…</div>';
+
+  try {
+    const res = await fetch(`${API}?action=search&q=${encodeURIComponent(q)}`);
+    const data = await res.json();
+
+    if (!data.results || data.results.length === 0) {
+      resultsDiv.innerHTML = '<div class="empty-msg">No players found</div>';
+      return;
+    }
+
+    resultsDiv.innerHTML = data.results.map(p => `
+      <div class="result-item" onclick="loadDetail('${escHtml(p.player_uid)}')">
+        <div>
+          <div class="result-name">${escHtml(p.player_name)}</div>
+          <div class="result-meta">${escHtml(p.nationality_raw || '—')} · Born ${p.birth_year || '?'}</div>
+        </div>
+        <div style="color:var(--text-dim);font-size:0.8rem">→</div>
+      </div>
+    `).join('');
+  } catch (e) {
+    resultsDiv.innerHTML = `<div class="empty-msg" style="color:var(--red)">Error: ${escHtml(e.message)}</div>`;
+  }
+}
+
+async function loadDetail(uid) {
+  searchView.style.display = 'none';
+  detailView.classList.add('visible');
+  detailContent.innerHTML = '<div class="loading">Loading player data…</div>';
+
+  try {
+    const res = await fetch(`${API}?action=detail&uid=${encodeURIComponent(uid)}`);
+    const data = await res.json();
+
+    if (data.error) {
+      detailContent.innerHTML = `<div class="empty-msg" style="color:var(--red)">${escHtml(data.error)}</div>`;
+      return;
+    }
+
+    detailContent.innerHTML = renderDetail(data);
+  } catch (e) {
+    detailContent.innerHTML = `<div class="empty-msg" style="color:var(--red)">Error: ${escHtml(e.message)}</div>`;
+  }
+}
+
+function showSearch() {
+  searchView.style.display = 'block';
+  detailView.classList.remove('visible');
+}
+
+function renderDetail(data) {
+  const { player, totals, currentSeason, clubHistory } = data;
+  let html = '';
+
+  // Header
+  html += `
+    <div class="player-header">
+      <div class="player-name">${escHtml(player.name)}</div>
+      <div class="player-info">
+        <span>🌍 ${escHtml(player.nationality || '—')}</span>
+        <span>📅 Born ${player.birth_year || '?'}</span>
+        <span style="font-family:monospace;font-size:0.75rem;color:var(--text-dim)">UID: ${escHtml(player.uid)}</span>
+      </div>
+    </div>
+  `;
+
+  // Career totals
+  html += `<div class="totals-grid">
+    <div class="total-card"><div class="total-val">${totals.seasons}</div><div class="total-label">Seasons</div></div>
+    <div class="total-card"><div class="total-val">${totals.clubs}</div><div class="total-label">Clubs</div></div>
+    <div class="total-card"><div class="total-val">${totals.appearances}</div><div class="total-label">Apps</div></div>
+    <div class="total-card"><div class="total-val">${totals.goals}</div><div class="total-label">Goals</div></div>
+    <div class="total-card"><div class="total-val">${totals.assists}</div><div class="total-label">Assists</div></div>
+    <div class="total-card"><div class="total-val">${totals.clean_sheets}</div><div class="total-label">Clean Sheets</div></div>
+  </div>`;
+
+  // Current season
+  if (currentSeason && currentSeason.length > 0) {
+    html += `<div class="section-title">This Season <span class="badge">CURRENT</span></div>`;
+    for (const cs of currentSeason) {
+      html += `
+        <div class="current-card">
+          <div class="club-comp">${escHtml(cs.club)} <span class="comp">— ${escHtml(cs.competition)}</span></div>
+          <div class="stat-row">
+            <span class="stat-item"><b>${cs.appearances}</b> apps</span>
+            <span class="stat-item"><b>${cs.goals}</b> goals</span>
+            <span class="stat-item"><b>${cs.assists}</b> assists</span>
+            <span class="stat-item"><b>${cs.clean_sheets}</b> CS</span>
+            <span class="stat-item"><b>${cs.minutes}</b> mins</span>
+            ${cs.saves ? `<span class="stat-item"><b>${cs.saves}</b> saves</span>` : ''}
+            ${cs.tackles ? `<span class="stat-item"><b>${cs.tackles}</b> tackles</span>` : ''}
+            ${cs.interceptions ? `<span class="stat-item"><b>${cs.interceptions}</b> ints</span>` : ''}
+            ${cs.yellow_cards ? `<span class="stat-item"><b>${cs.yellow_cards}</b> YC</span>` : ''}
+            ${cs.red_cards ? `<span class="stat-item"><b>${cs.red_cards}</b> RC</span>` : ''}
+            <span class="stat-item" style="color:var(--text-dim)">${escHtml(cs.position || '')}</span>
+          </div>
+        </div>
+      `;
+    }
+  } else {
+    html += `<div class="section-title">This Season</div>
+      <div class="empty-msg">No current season data</div>`;
+  }
+
+  // Club history
+  if (clubHistory && clubHistory.length > 0) {
+    html += `<div class="section-title">Career History <span class="badge">HISTORICAL</span></div>`;
+    for (const ch of clubHistory) {
+      const totalApps = ch.seasons.reduce((s, r) => s + r.appearances, 0);
+      const totalGoals = ch.seasons.reduce((s, r) => s + r.goals, 0);
+      const totalAssists = ch.seasons.reduce((s, r) => s + r.assists, 0);
+      const yearRange = ch.seasons.length > 0
+        ? `${ch.seasons[0].season} – ${ch.seasons[ch.seasons.length - 1].season}`
+        : '';
+
+      html += `
+        <div class="club-block">
+          <div class="club-block-header" onclick="this.parentElement.classList.toggle('open')">
+            <div>
+              ${escHtml(ch.club)} <span class="comp-tag">${escHtml(ch.competition)}</span>
+              <span class="comp-tag">${yearRange} · ${ch.seasons.length} season${ch.seasons.length !== 1 ? 's' : ''}</span>
+            </div>
+            <div style="color:var(--text-dim);font-size:0.8rem">${totalApps} apps · ${totalGoals} gls · ${totalAssists} ast</div>
+          </div>
+          <div class="club-block-body" style="display:none">
+            ${ch.seasons.map(s => `
+              <div class="season-row">
+                <span class="season-label">${escHtml(s.season)}</span>
+                <div class="season-stats">
+                  <span><b>${s.appearances}</b> apps</span>
+                  <span><b>${s.goals}</b> gls</span>
+                  <span><b>${s.assists}</b> ast</span>
+                  <span><b>${s.clean_sheets}</b> CS</span>
+                  <span style="color:var(--text-dim)">${escHtml(s.position || '')}</span>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+  } else {
+    html += `<div class="section-title">Career History</div>
+      <div class="empty-msg">No historical data</div>`;
+  }
+
+  // Raw data toggle
+  html += `
+    <button class="raw-toggle" onclick="document.getElementById('rawData').classList.toggle('visible')">
+      Toggle raw JSON
+    </button>
+    <div id="rawData" class="raw-data">${escHtml(JSON.stringify(data, null, 2))}</div>
+  `;
+
+  return html;
+}
+
+// Toggle club block expansion
+document.addEventListener('click', (e) => {
+  const header = e.target.closest('.club-block-header');
+  if (header) {
+    const body = header.nextElementSibling;
+    body.style.display = body.style.display === 'none' ? 'block' : 'none';
+  }
+});
+
+function escHtml(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Auto-focus
+searchInput.focus();
+</script>
+</body>
+</html>
