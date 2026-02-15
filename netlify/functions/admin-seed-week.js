@@ -7,7 +7,7 @@ exports.handler = async (event) => {
     if (process.env.ADMIN_SECRET && secret !== process.env.ADMIN_SECRET) return r(401, 'Unauthorised');
 
     const { week, lockoutTime, fixtures } = JSON.parse(event.body || '{}');
-    // fixtures: [{home:"...", away:"..."}, ...]  (expect 5)
+    // fixtures: [{home, away, apiFixtureId?, homeForm?, awayForm?, ...}, ...]  (expect 5)
     if (!week || !lockoutTime || !Array.isArray(fixtures) || fixtures.length !== 5)
       return r(400, 'week, lockoutTime, and 5 fixtures required');
 
@@ -21,6 +21,22 @@ exports.handler = async (event) => {
         'Locked': false,
         'Correct Result': ''
       };
+
+      // Enrichment fields (optional — backward compatible with old-style seeds)
+      if (f.apiFixtureId != null)    body['API Fixture ID']    = Number(f.apiFixtureId);
+      if (f.homeForm != null)        body['Home Form']         = String(f.homeForm).slice(0, 10);
+      if (f.awayForm != null)        body['Away Form']         = String(f.awayForm).slice(0, 10);
+      if (f.predictionHome != null)  body['Prediction Home']   = String(f.predictionHome);
+      if (f.predictionDraw != null)  body['Prediction Draw']   = String(f.predictionDraw);
+      if (f.predictionAway != null)  body['Prediction Away']   = String(f.predictionAway);
+      if (f.predictionAdvice != null) body['Prediction Advice'] = String(f.predictionAdvice).slice(0, 500);
+      if (f.h2hSummary != null)      body['H2H Summary']       = typeof f.h2hSummary === 'string'
+                                                                    ? f.h2hSummary.slice(0, 5000)
+                                                                    : JSON.stringify(f.h2hSummary).slice(0, 5000);
+      if (f.matchStats != null)      body['Match Stats']       = typeof f.matchStats === 'string'
+                                                                    ? f.matchStats.slice(0, 5000)
+                                                                    : JSON.stringify(f.matchStats).slice(0, 5000);
+
       const rec = await adaloFetch(`${ADALO.col.matches}`, { method:'POST', body: JSON.stringify(body) });
       created.push(rec);
     }

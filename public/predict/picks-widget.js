@@ -22,11 +22,13 @@
     .pf-card{ background:${THEME.card}; color:${THEME.text}; border:1px solid ${THEME.border}; border-radius: 12px; padding:16px; margin-bottom:12px; }
     .pf-teams{ font-weight:700 }
     .pf-grid{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin-top:10px }
-    .pf-pick{ padding:12px 12px; border-radius:10px; text-align:center; cursor:pointer; background: transparent; color:${THEME.text}; border:1px solid ${THEME.border}; transition: all .15s ease; font-weight:700; display:flex; align-items:center; justify-content:center; gap:8px; }
+    .pf-pick{ padding:12px 12px; border-radius:10px; text-align:center; cursor:pointer; background: transparent; color:${THEME.text}; border:1px solid ${THEME.border}; transition: all .15s ease; font-weight:700; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; }
     .pf-pick:hover{ border-color:#333 }
     .pf-pick.active{ background:${THEME.accent}; color:${THEME.accentText}; border-color:${THEME.accent}; font-weight: 900; }
     .pf-badge{ display:none; color:${THEME.good}; font-weight:900; }
     .pf-pick.active .pf-badge{ display:inline; }
+    .pf-pick-pct{ font-size:11px; opacity:0.7; font-weight:600 }
+    .pf-pick.active .pf-pick-pct{ opacity:1 }
     .pf-row{ display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap }
     .pf-muted{ color:${THEME.muted} }
     .pf-bar{ height:8px; background:#1F1F1F; border-radius:8px; overflow:hidden }
@@ -40,6 +42,37 @@
     @keyframes pfspin{ to{ transform: rotate(360deg) } }
     .pf-hidden{ display:none !important; }
     .pf-error{ background:#7a1111; border:1px solid #aa3a3a; color:#fff; padding:10px 12px; border-radius:10px; margin:8px 0; white-space:pre-wrap }
+
+    /* Enrichment styles */
+    .pf-enrich{ margin-top:10px; padding-top:10px; border-top:1px solid #1a1a1a }
+    .pf-pred-bar{ display:flex; height:24px; border-radius:6px; overflow:hidden; margin:6px 0; font-size:11px; font-weight:700 }
+    .pf-pred-seg{ display:flex; align-items:center; justify-content:center; min-width:28px; transition: all .15s }
+    .pf-pred-seg.home{ background:#2e7d32; color:#fff }
+    .pf-pred-seg.draw{ background:#555; color:#fff }
+    .pf-pred-seg.away{ background:#c62828; color:#fff }
+    .pf-form-row{ display:flex; align-items:center; gap:5px; margin:4px 0 }
+    .pf-form-label{ font-size:11px; color:#999; min-width:70px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+    .pf-form-badge{ width:20px; height:20px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:10px; font-weight:800; flex-shrink:0 }
+    .pf-form-badge.w{ background:#7CFC00; color:#000 }
+    .pf-form-badge.d{ background:#666; color:#fff }
+    .pf-form-badge.l{ background:#cc3333; color:#fff }
+    .pf-h2h{ font-size:11px; color:#bbb; margin:4px 0 }
+    .pf-advice{ font-size:11px; color:#EAEAEA; font-style:italic; margin-top:4px }
+
+    /* Probability summary */
+    .pf-prob-card{ background:#000; border:1px solid #1a1a1a; border-radius:12px; padding:16px; margin-bottom:12px }
+    .pf-prob-title{ font-weight:800; font-size:16px; margin-bottom:12px }
+    .pf-prob-row{ display:flex; align-items:center; gap:10px; margin:6px 0 }
+    .pf-prob-label{ font-size:13px; color:#EAEAEA; min-width:90px }
+    .pf-prob-bar-wrap{ flex:1; height:20px; background:#1a1a1a; border-radius:6px; overflow:hidden; position:relative }
+    .pf-prob-bar-fill{ height:100%; border-radius:6px; transition:width .3s ease }
+    .pf-prob-val{ font-size:13px; font-weight:700; min-width:50px; text-align:right }
+    .pf-commentary{ margin-top:12px; padding:10px 12px; background:#1a1a1a; border-radius:8px; font-size:13px; color:#EAEAEA; line-height:1.5 }
+    .pf-dist-grid{ display:grid; grid-template-columns:repeat(6,1fr); gap:6px; margin-top:10px }
+    .pf-dist-item{ text-align:center; padding:8px 4px; background:#111; border-radius:8px; border:1px solid #222 }
+    .pf-dist-num{ font-size:18px; font-weight:800; display:block }
+    .pf-dist-label{ font-size:10px; color:#999; margin-top:2px; display:block }
+    .pf-dist-pct{ font-size:12px; font-weight:700; display:block; margin-top:4px }
   `;
   const style = document.createElement('style');
   style.textContent = css;
@@ -87,6 +120,201 @@
     }
   }
 
+  // === ENRICHMENT HELPERS ===
+  function hasEnrichment(m) {
+    return !!(m['Prediction Home'] || m['Prediction Draw'] || m['Prediction Away'] || m['Home Form'] || m['Away Form']);
+  }
+
+  function getMatchPredictions(m) {
+    return {
+      home: Number(m['Prediction Home']) || 0,
+      draw: Number(m['Prediction Draw']) || 0,
+      away: Number(m['Prediction Away']) || 0
+    };
+  }
+
+  function formBadgesHtml(formStr) {
+    if (!formStr) return '<span style="color:#555">-</span>';
+    return formStr.split('').map(c => {
+      const cls = c.toUpperCase() === 'W' ? 'w' : c.toUpperCase() === 'D' ? 'd' : 'l';
+      return `<span class="pf-form-badge ${cls}">${c.toUpperCase()}</span>`;
+    }).join('');
+  }
+
+  function parseH2H(m) {
+    try {
+      const raw = m['H2H Summary'];
+      if (!raw) return [];
+      return typeof raw === 'string' ? JSON.parse(raw) : raw;
+    } catch { return []; }
+  }
+
+  function h2hSummaryText(h2hArr, homeTeam) {
+    if (!Array.isArray(h2hArr) || h2hArr.length === 0) return '';
+    let homeWins = 0, draws = 0, awayWins = 0;
+    h2hArr.forEach(h => {
+      if (h.homeGoals === h.awayGoals) { draws++; return; }
+      if (h.homeTeam === homeTeam) {
+        if (h.homeGoals > h.awayGoals) homeWins++; else awayWins++;
+      } else if (h.awayTeam === homeTeam) {
+        if (h.awayGoals > h.homeGoals) homeWins++; else awayWins++;
+      } else {
+        if (h.homeWinner) homeWins++; else if (h.awayWinner) awayWins++; else draws++;
+      }
+    });
+    return `H2H (last ${h2hArr.length}): ${homeWins}W ${draws}D ${awayWins}L`;
+  }
+
+  function renderEnrichmentHtml(m) {
+    if (!hasEnrichment(m)) return '';
+
+    const pred = getMatchPredictions(m);
+    const total = pred.home + pred.draw + pred.away || 1;
+    const homeTeam = m['Home Team'] || '';
+    const awayTeam = m['Away Team'] || '';
+    const advice = m['Prediction Advice'] || '';
+    const h2h = parseH2H(m);
+    const h2hText = h2hSummaryText(h2h, homeTeam);
+
+    return `
+      <div class="pf-enrich">
+        <div class="pf-pred-bar">
+          <div class="pf-pred-seg home" style="width:${pred.home/total*100}%">${pred.home}%</div>
+          <div class="pf-pred-seg draw" style="width:${pred.draw/total*100}%">${pred.draw}%</div>
+          <div class="pf-pred-seg away" style="width:${pred.away/total*100}%">${pred.away}%</div>
+        </div>
+        <div class="pf-form-row">
+          <span class="pf-form-label">${homeTeam}</span>
+          ${formBadgesHtml(m['Home Form'])}
+        </div>
+        <div class="pf-form-row">
+          <span class="pf-form-label">${awayTeam}</span>
+          ${formBadgesHtml(m['Away Form'])}
+        </div>
+        ${h2hText ? `<div class="pf-h2h">${h2hText}</div>` : ''}
+        ${advice ? `<div class="pf-advice">${advice}</div>` : ''}
+      </div>
+    `;
+  }
+
+  // === PROBABILITY CALCULATIONS ===
+  // Exact Poisson binomial: enumerate all 2^5 = 32 outcomes
+  function calculateProbabilities(matches, picks) {
+    const probs = matches.map(m => {
+      const mid = String(m.id);
+      const pick = picks[mid];
+      if (!pick || !hasEnrichment(m)) return 0;
+      const pred = getMatchPredictions(m);
+      const pctMap = { HOME: pred.home, DRAW: pred.draw, AWAY: pred.away };
+      return (pctMap[pick] || 0) / 100;
+    });
+
+    // If no enrichment data at all, return null
+    if (probs.every(p => p === 0)) return null;
+
+    const n = probs.length;
+    const dist = new Array(n + 1).fill(0);
+
+    // Enumerate all 2^n outcomes
+    for (let mask = 0; mask < (1 << n); mask++) {
+      let p = 1;
+      let correct = 0;
+      for (let i = 0; i < n; i++) {
+        if (mask & (1 << i)) {
+          p *= probs[i];
+          correct++;
+        } else {
+          p *= (1 - probs[i]);
+        }
+      }
+      dist[correct] += p;
+    }
+
+    const fullHouse = dist[n];
+    const blanks = dist[0];
+
+    // Expected value
+    const expected = probs.reduce((s, p) => s + p, 0);
+
+    // Risk profile
+    const avgProb = probs.reduce((s, p) => s + p, 0) / n;
+    const favourites = probs.filter(p => p >= 0.40).length;
+
+    let commentary = '';
+    if (favourites >= 4) {
+      commentary = "Playing it safe this week — mostly favourites. Solid strategy, but the rewards for a full house are slimmer.";
+    } else if (favourites >= 3) {
+      commentary = "A balanced set of picks — some favourites, some punts. A sensible approach with decent upside.";
+    } else if (favourites >= 1) {
+      commentary = "Feeling adventurous! A few risky picks in the mix. No risk, no reward — a full house here would be something special.";
+    } else {
+      commentary = "Going full maverick! All underdogs and long shots. If this comes off, you deserve a standing ovation.";
+    }
+
+    return { dist, fullHouse, blanks, expected, commentary, probs };
+  }
+
+  function renderProbabilitySummary(matches, picks) {
+    const calc = calculateProbabilities(matches, picks);
+    if (!calc) return '';
+
+    const fmtPct = (v) => {
+      const pct = v * 100;
+      if (pct < 0.1 && pct > 0) return '<0.1%';
+      if (pct >= 10) return pct.toFixed(1) + '%';
+      return pct.toFixed(2) + '%';
+    };
+
+    // Colours for the distribution
+    const distColours = ['#cc3333', '#e65100', '#ff9800', '#fdd835', '#7CFC00', '#00e676'];
+
+    let distHtml = '<div class="pf-dist-grid">';
+    for (let i = 0; i <= 5; i++) {
+      distHtml += `
+        <div class="pf-dist-item">
+          <span class="pf-dist-num" style="color:${distColours[i]}">${i}</span>
+          <span class="pf-dist-label">correct</span>
+          <span class="pf-dist-pct">${fmtPct(calc.dist[i])}</span>
+        </div>
+      `;
+    }
+    distHtml += '</div>';
+
+    return `
+      <div class="pf-prob-card">
+        <div class="pf-prob-title">Your Picks Analysis</div>
+
+        <div class="pf-prob-row">
+          <span class="pf-prob-label">Full House</span>
+          <div class="pf-prob-bar-wrap">
+            <div class="pf-prob-bar-fill" style="width:${Math.min(calc.fullHouse*100, 100)}%;background:#00e676"></div>
+          </div>
+          <span class="pf-prob-val" style="color:#00e676">${fmtPct(calc.fullHouse)}</span>
+        </div>
+
+        <div class="pf-prob-row">
+          <span class="pf-prob-label">Blanks</span>
+          <div class="pf-prob-bar-wrap">
+            <div class="pf-prob-bar-fill" style="width:${Math.min(calc.blanks*100, 100)}%;background:#cc3333"></div>
+          </div>
+          <span class="pf-prob-val" style="color:#cc3333">${fmtPct(calc.blanks)}</span>
+        </div>
+
+        <div class="pf-prob-row">
+          <span class="pf-prob-label">Expected</span>
+          <div class="pf-prob-bar-wrap">
+            <div class="pf-prob-bar-fill" style="width:${calc.expected/5*100}%;background:#ff9800"></div>
+          </div>
+          <span class="pf-prob-val" style="color:#ff9800">${calc.expected.toFixed(1)} / 5</span>
+        </div>
+
+        ${distHtml}
+
+        <div class="pf-commentary">${calc.commentary}</div>
+      </div>
+    `;
+  }
+
   // === MAIN ===
   async function renderPicks(container, cfg) {
     try {
@@ -96,7 +324,7 @@
       let week = String(qs.get('week') ?? cfg.week);
       let userId = String(qs.get('userId') ?? cfg.userId);
 
-      // ✅ HARD STOP if not logged in / missing user id
+      // HARD STOP if not logged in / missing user id
       const userIdOk =
         userId &&
         userId !== 'undefined' &&
@@ -136,6 +364,7 @@
           <div id="pf-status" class="pf-status"></div>
           <div id="pf-matches"></div>
           <div id="pf-actions" class="pf-footer"></div>
+          <div id="pf-prob-summary"></div>
           <div id="pf-summary" style="margin-top:24px"></div>
         </div>
       `);
@@ -156,7 +385,6 @@
       // picks: matchId -> 'HOME'/'DRAW'/'AWAY'
       const picks = {};
       (data.predictions || []).forEach(p => {
-        // predictions coming from get-week should have Match as an id (string/number)
         const mid = String(p['Match'] ?? p.match_id ?? '').trim();
         const pk = String(p['Pick'] ?? '').trim().toUpperCase();
         if (mid) picks[mid] = pk;
@@ -174,9 +402,10 @@
       const statusEl = wrap.querySelector('#pf-status');
       const matchesEl = wrap.querySelector('#pf-matches');
       const actionsEl = wrap.querySelector('#pf-actions');
+      const probSummaryEl = wrap.querySelector('#pf-prob-summary');
       const summaryEl = wrap.querySelector('#pf-summary');
 
-      // Display chosen week (normalize)
+      // Display chosen week
       wrap.querySelector('#pf-week').textContent = String(data.week || week);
 
       let editMode = !locked;
@@ -202,23 +431,45 @@
         }
       }
 
+      // Update probability summary when picks change
+      function updateProbSummary() {
+        if (!probSummaryEl) return;
+        const allPicked = matches.length > 0 && matches.every(m => !!picks[String(m.id)]);
+        const anyEnrich = matches.some(m => hasEnrichment(m));
+        if (allPicked && anyEnrich) {
+          probSummaryEl.innerHTML = renderProbabilitySummary(matches, picks);
+        } else {
+          probSummaryEl.innerHTML = '';
+        }
+      }
+
       function renderEdit() {
         statusEl.textContent = '';
         matchesEl.innerHTML = '';
         actionsEl.innerHTML = '';
         summaryEl.innerHTML = '';
+        probSummaryEl.innerHTML = '';
 
         matches.forEach(m => {
           const mid = String(m.id);
           const cur = picks[mid] || '';
+          const pred = getMatchPredictions(m);
+          const showPct = hasEnrichment(m);
+
           const card = el(`<div class="pf-card">
             <div class="pf-teams">${m['Home Team']} v ${m['Away Team']}</div>
+            ${renderEnrichmentHtml(m)}
             <div class="pf-grid">
-              ${['HOME','DRAW','AWAY'].map(opt => `
-                <button class="pf-pick ${cur===opt?'active':''}" data-match="${mid}" data-val="${opt}">
-                  <span class="pf-label">${opt}</span><span class="pf-badge">✓</span>
-                </button>
-              `).join('')}
+              ${['HOME','DRAW','AWAY'].map(opt => {
+                const pct = showPct ? (opt === 'HOME' ? pred.home : opt === 'DRAW' ? pred.draw : pred.away) : null;
+                return `
+                  <button class="pf-pick ${cur===opt?'active':''}" data-match="${mid}" data-val="${opt}">
+                    <span class="pf-label">${opt}</span>
+                    ${pct !== null ? `<span class="pf-pick-pct">${pct}%</span>` : ''}
+                    <span class="pf-badge">&check;</span>
+                  </button>
+                `;
+              }).join('')}
             </div>
           </div>`);
 
@@ -229,11 +480,15 @@
               picks[mId] = val;
               card.querySelectorAll('.pf-pick').forEach(b => b.classList.remove('active'));
               btn.classList.add('active');
+              updateProbSummary();
             });
           });
 
           matchesEl.appendChild(card);
         });
+
+        // Show probability summary if all picks already selected
+        updateProbSummary();
 
         const btnRow = el(`<div class="pf-btnrow"></div>`);
         const saveBtn = el(`<button class="pf-btn" id="pf-save">Save picks</button>`);
@@ -253,7 +508,7 @@
           }
 
           saveBtn.disabled = true;
-          saveBtn.innerHTML = `<span class="pf-spinner"></span>Saving…`;
+          saveBtn.innerHTML = `<span class="pf-spinner"></span>Saving\u2026`;
           matchesEl.querySelectorAll('.pf-pick').forEach(b => b.disabled = true);
 
           try {
@@ -263,7 +518,6 @@
               body: JSON.stringify({ userId, week: Number(data.week || week), picks: payload })
             });
             editMode = false;
-            // re-render from current in-memory picks (or you could re-fetch get-week if you prefer)
             render();
           } catch (e) {
             alert('Save failed. Please try again.\n' + e.message);
@@ -279,6 +533,7 @@
         matchesEl.innerHTML = '';
         actionsEl.innerHTML = '';
         summaryEl.innerHTML = '';
+        probSummaryEl.innerHTML = '';
 
         matches.forEach(m => {
           const mid = String(m.id);
@@ -288,9 +543,13 @@
               <div class="pf-teams">${m['Home Team']} v ${m['Away Team']}</div>
               <div><span class="pf-muted">Your pick:</span> <strong>${myPick}</strong></div>
             </div>
+            ${renderEnrichmentHtml(m)}
           </div>`);
           matchesEl.appendChild(card);
         });
+
+        // Show probability summary
+        updateProbSummary();
 
         const btnRow = el(`<div class="pf-btnrow"></div>`);
         const editBtn = el(`<button class="pf-btn secondary" style="font-size:18px;padding:14px 18px;">Edit picks</button>`);
@@ -304,6 +563,7 @@
         matchesEl.innerHTML = '';
         actionsEl.innerHTML = '';
         summaryEl.innerHTML = '';
+        probSummaryEl.innerHTML = '';
 
         let sum;
         try {
@@ -320,13 +580,14 @@
 
           const myPick = picks[String(m.id)] || '(none)';
           const countsBit = (pm.total != null && pm.count)
-            ? `<div class="pf-muted" style="margin-top:6px">(${pm.count.HOME} home, ${pm.count.DRAW} draw, ${pm.count.AWAY} away • total ${pm.total})</div>`
+            ? `<div class="pf-muted" style="margin-top:6px">(${pm.count.HOME} home, ${pm.count.DRAW} draw, ${pm.count.AWAY} away \u2022 total ${pm.total})</div>`
             : '';
           const card = el(`<div class="pf-card">
             <div class="pf-row" style="justify-content:space-between">
               <div class="pf-teams">${m['Home Team']} v ${m['Away Team']}</div>
               <div><span class="pf-muted">Your pick:</span> <strong>${myPick}</strong></div>
             </div>
+            ${renderEnrichmentHtml(m)}
             <div class="pf-muted" style="margin-top:8px">HOME ${pm.pct.HOME}%</div>
             <div class="pf-bar"><span style="width:${pm.pct.HOME}%"></span></div>
             <div class="pf-muted" style="margin-top:6px">DRAW ${pm.pct.DRAW}%</div>
@@ -337,6 +598,9 @@
           </div>`);
           summaryEl.appendChild(card);
         });
+
+        // Show probability analysis
+        updateProbSummary();
 
         const matchesMsg = (sum.samePickUsers || []).length
           ? `<strong>${(sum.samePickUsers||[]).length}</strong> user(s) have the exact same 5-pick combo as you.`

@@ -13,7 +13,8 @@
     - Load/view matches for any week
     - Set correct results (HOME/DRAW/AWAY)
     - Score individual matches or entire weeks
-    - Seed next week's matches
+    - Seed next week's matches via API-Football matchweek fixture browser
+    - Manual seed fallback
     - "Latest matchweek" auto-fetch from weeks endpoint
     - Scoring prevented until all 5 match results are set
 -->
@@ -25,13 +26,14 @@
   body{margin:0;background:#111;color:#fff;font-family:Inter,system-ui,Arial;display:flex;justify-content:center}
   .wrap{max-width:780px;width:100%;margin:24px 12px;background:#30A278;color:#fff;border-radius:14px;padding:16px}
   h2{margin:0 0 12px}
+  h3{margin:0 0 8px}
   .card{background:#000;border:1px solid #1a1a1a;border-radius:12px;padding:12px;margin-bottom:12px}
   label{display:block;margin-bottom:6px;color:#EAEAEA}
   input,select{background:#0e0e0e;color:#fff;border:1px solid #2a2a2a;border-radius:8px;padding:8px 10px}
   .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
   .btn{background:#fff;color:#000;border:0;padding:10px 14px;border-radius:8px;font-weight:800;cursor:pointer}
   .btn.small{padding:8px 10px}
-  .btn.danger{background:#ff7676;color:#000;}
+  .btn.danger{background:#ff7676;color:#000}
   .btn:disabled{opacity:0.5;cursor:not-allowed}
   table{width:100%;border-collapse:collapse;margin-top:8px}
   th,td{padding:8px;border-bottom:1px solid #1f1f1f;text-align:left;vertical-align:middle}
@@ -45,12 +47,94 @@
   .debug-panel .value{color:#fff;word-break:break-all}
   .error-banner{background:#ff4444;color:#fff;padding:10px;border-radius:8px;margin-top:8px;font-weight:bold}
   .warning-banner{background:#ff9800;color:#000;padding:10px;border-radius:8px;margin-top:8px;font-weight:bold}
+  .success-banner{background:#2e7d32;color:#fff;padding:10px;border-radius:8px;margin-top:8px;font-weight:bold}
   .mode-switch{display:flex;gap:0;margin-bottom:8px}
   .mode-switch button{background:#222;color:#fff;border:1px solid #333;padding:8px 14px;cursor:pointer}
   .mode-switch button:first-child{border-radius:8px 0 0 8px}
   .mode-switch button:last-child{border-radius:0 8px 8px 0}
   .mode-switch button.active{background:#30A278;border-color:#30A278}
   @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* Fixture browser styles */
+  .fix-grid{display:grid;gap:10px;margin-top:10px}
+  .fix-card{background:#111;border:2px solid #222;border-radius:10px;padding:12px;cursor:pointer;transition:border-color .15s,background .15s}
+  .fix-card:hover{border-color:#444}
+  .fix-card.selected{border-color:#30A278;background:#0a2a1a}
+  .fix-card-header{display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .fix-teams{font-weight:700;font-size:15px}
+  .fix-date{font-size:12px;color:#999}
+  .fix-round{font-size:11px;color:#666;margin-top:2px}
+  .fix-check{width:20px;height:20px;border-radius:50%;border:2px solid #444;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+  .fix-card.selected .fix-check{background:#30A278;border-color:#30A278}
+  .fix-card.selected .fix-check::after{content:'\\2713';color:#fff;font-weight:900;font-size:13px}
+  .fix-count{font-size:13px;color:#EAEAEA;margin-top:8px}
+
+  /* Enrichment preview styles */
+  .enrich-card{background:#111;border:1px solid #222;border-radius:10px;padding:12px;margin-top:10px}
+  .enrich-teams{font-weight:700;font-size:15px;margin-bottom:8px}
+  .pred-bar{display:flex;height:28px;border-radius:6px;overflow:hidden;margin:8px 0;font-size:12px;font-weight:700}
+  .pred-bar .seg{display:flex;align-items:center;justify-content:center;min-width:30px}
+  .pred-bar .seg.home{background:#2e7d32;color:#fff}
+  .pred-bar .seg.draw{background:#555;color:#fff}
+  .pred-bar .seg.away{background:#c62828;color:#fff}
+  .form-row{display:flex;align-items:center;gap:6px;margin:4px 0}
+  .form-label{font-size:12px;color:#999;min-width:80px}
+  .form-badge{width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:800}
+  .form-badge.w{background:#7CFC00;color:#000}
+  .form-badge.d{background:#666;color:#fff}
+  .form-badge.l{background:#cc3333;color:#fff}
+  .h2h-row{font-size:12px;color:#bbb;margin:4px 0}
+  .advice-text{font-size:12px;color:#EAEAEA;font-style:italic;margin-top:6px;padding:6px 8px;background:#1a1a1a;border-radius:6px}
+  .seed-mode-tabs{display:flex;gap:0;margin-bottom:10px}
+  .seed-mode-tabs button{background:#222;color:#aaa;border:1px solid #333;padding:8px 16px;cursor:pointer;font-weight:600;font-size:13px;border-radius:0}
+  .seed-mode-tabs button:first-child{border-radius:8px 0 0 8px}
+  .seed-mode-tabs button:last-child{border-radius:0 8px 8px 0}
+  .seed-mode-tabs button.active{background:#1a1a1a;color:#fff;border-color:#555}
+
+  /* Simulator styles (mirrors picks-widget) */
+  .sim-wrap{background:#30A278;border-radius:14px;padding:16px;margin-top:10px}
+  .sim-card{background:#000;border:1px solid #1a1a1a;border-radius:12px;padding:16px;margin-bottom:12px}
+  .sim-teams{font-weight:700;font-size:15px}
+  .sim-pick-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}
+  .sim-pick{padding:12px;border-radius:10px;text-align:center;cursor:pointer;background:transparent;color:#fff;border:1px solid #1a1a1a;font-weight:700;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;transition:all .15s}
+  .sim-pick:hover{border-color:#333}
+  .sim-pick.active{background:#fff;color:#000;border-color:#fff;font-weight:900}
+  .sim-pick .sim-pct{font-size:11px;opacity:0.7;font-weight:600}
+  .sim-pick.active .sim-pct{opacity:1}
+  .sim-pick .sim-check{display:none;color:#7CFC00;font-weight:900}
+  .sim-pick.active .sim-check{display:inline}
+  .sim-enrich{margin-top:10px;padding-top:10px;border-top:1px solid #1a1a1a}
+  .sim-pred-bar{display:flex;height:24px;border-radius:6px;overflow:hidden;margin:6px 0;font-size:11px;font-weight:700}
+  .sim-pred-seg{display:flex;align-items:center;justify-content:center;min-width:28px}
+  .sim-pred-seg.home{background:#2e7d32;color:#fff}
+  .sim-pred-seg.draw{background:#555;color:#fff}
+  .sim-pred-seg.away{background:#c62828;color:#fff}
+  .sim-form-row{display:flex;align-items:center;gap:5px;margin:4px 0}
+  .sim-form-label{font-size:11px;color:#999;min-width:70px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .sim-form-badge{width:20px;height:20px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0}
+  .sim-form-badge.w{background:#7CFC00;color:#000}
+  .sim-form-badge.d{background:#666;color:#fff}
+  .sim-form-badge.l{background:#cc3333;color:#fff}
+  .sim-h2h{font-size:11px;color:#bbb;margin:4px 0}
+  .sim-advice{font-size:11px;color:#EAEAEA;font-style:italic;margin-top:4px}
+  .sim-prob-card{background:#000;border:1px solid #1a1a1a;border-radius:12px;padding:16px;margin-bottom:12px}
+  .sim-prob-title{font-weight:800;font-size:16px;margin-bottom:12px}
+  .sim-prob-row{display:flex;align-items:center;gap:10px;margin:6px 0}
+  .sim-prob-label{font-size:13px;color:#EAEAEA;min-width:90px}
+  .sim-prob-bar-wrap{flex:1;height:20px;background:#1a1a1a;border-radius:6px;overflow:hidden;position:relative}
+  .sim-prob-bar-fill{height:100%;border-radius:6px;transition:width .3s ease}
+  .sim-prob-val{font-size:13px;font-weight:700;min-width:50px;text-align:right}
+  .sim-commentary{margin-top:12px;padding:10px 12px;background:#1a1a1a;border-radius:8px;font-size:13px;color:#EAEAEA;line-height:1.5}
+  .sim-dist-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-top:10px}
+  .sim-dist-item{text-align:center;padding:8px 4px;background:#111;border-radius:8px;border:1px solid #222}
+  .sim-dist-num{font-size:18px;font-weight:800;display:block}
+  .sim-dist-label{font-size:10px;color:#999;margin-top:2px;display:block}
+  .sim-dist-pct{font-size:12px;font-weight:700;display:block;margin-top:4px}
+  .sim-save-btn{background:#fff;color:#000;border:none;font-weight:900;padding:12px 18px;border-radius:10px;cursor:pointer;font-size:16px}
+  .sim-save-btn:hover{background:#e0e0e0}
+  .sim-save-btn.saved{background:#7CFC00;color:#000}
+  .sim-status{color:#EAEAEA;margin-bottom:8px}
+  .sim-reset{background:#333;color:#fff;border:1px solid #555;padding:8px 14px;border-radius:8px;cursor:pointer;font-weight:600;font-size:13px;margin-left:8px}
 </style>
 </head>
 <body>
@@ -62,16 +146,12 @@
 <script>
 const base = '/.netlify/functions';
 
-// Read ADMIN_SECRET from URL query param (support URL-encoded values like "=" chars)
+// Read ADMIN_SECRET from URL query param
 function getAdminSecret() {
   const params = new URLSearchParams(location.search);
   const raw = params.get('ADMIN_SECRET');
   if (!raw) return '';
-  try {
-    return decodeURIComponent(raw);
-  } catch {
-    return raw;
-  }
+  try { return decodeURIComponent(raw); } catch { return raw; }
 }
 
 const ADMIN_SECRET = getAdminSecret();
@@ -82,6 +162,12 @@ let latestWeek = null;
 let useLatestMode = false;
 let loadedMatches = [];
 let lastDebugInfo = null;
+
+// Fixture browser state
+let fetchedFixtures = [];
+let selectedFixtureIds = new Set();
+let enrichmentMap = {};  // fixtureId -> enrichment data
+let seedMode = 'api';    // 'api', 'manual', or 'sim'
 
 // Helper: get element by ID
 function $(id) {
@@ -100,16 +186,12 @@ async function adminFetch(url, options = {}) {
   };
 
   const startTime = Date.now();
-  let response, data, errorText;
+  let response, data;
 
   try {
     response = await fetch(fullUrl, { ...options, headers, cache: 'no-store' });
     const text = await response.text();
-    try {
-      data = JSON.parse(text);
-    } catch {
-      data = { raw: text };
-    }
+    try { data = JSON.parse(text); } catch { data = { raw: text }; }
 
     lastDebugInfo = {
       endpoint: fullUrl.replace(base, ''),
@@ -119,10 +201,7 @@ async function adminFetch(url, options = {}) {
       error: response.ok ? null : (data.error || data.raw || `HTTP ${response.status}`)
     };
 
-    if (!response.ok) {
-      throw new Error(data.error || `HTTP ${response.status}`);
-    }
-
+    if (!response.ok) throw new Error(data.error || `HTTP ${response.status}`);
     return data;
   } catch (e) {
     lastDebugInfo = {
@@ -136,17 +215,14 @@ async function adminFetch(url, options = {}) {
   }
 }
 
-// Show status message
 function setStatus(msg) {
   const s = $('status');
   if (s) s.textContent = msg;
 }
 
-// Show debug info (safe: never shows secret)
 function showDebugInfo() {
   const panel = $('debugPanel');
   if (!panel || !lastDebugInfo) return;
-
   panel.innerHTML = `
     <div class="label">Last API Call:</div>
     <div class="value">Endpoint: ${lastDebugInfo.endpoint}</div>
@@ -156,63 +232,44 @@ function showDebugInfo() {
   `;
 }
 
-// Loading button wrapper
 function withLoading(btn, fn) {
   if (!btn) return fn();
   const orig = btn.innerHTML;
   btn.disabled = true;
   btn.innerHTML = '<span style="display:inline-block;width:14px;height:14px;border:2px solid rgba(0,0,0,0.35);border-top-color:#000;border-radius:50%;margin-right:8px;vertical-align:-2px;animation:spin .7s linear infinite"></span>Working...';
-  return fn().finally(() => {
-    btn.disabled = false;
-    btn.innerHTML = orig;
-  });
+  return fn().finally(() => { btn.disabled = false; btn.innerHTML = orig; });
 }
 
-// Result dropdown options
 function resultOptions(val) {
   const up = (val || '').toUpperCase();
   const opt = t => `<option value="${t}" ${up === t ? 'selected' : ''}>${t}</option>`;
   return '<option value="">--</option>' + opt('HOME') + opt('DRAW') + opt('AWAY');
 }
 
-// Match row template
 function matchRow(match) {
   const hasResult = ['HOME', 'DRAW', 'AWAY'].includes((match['Correct Result'] || '').toUpperCase());
   return `<tr data-id="${match.id}" data-has-result="${hasResult}">
     <td>${match.id}</td>
     <td>${match['Home Team']} v ${match['Away Team']}</td>
-    <td>
-      <select class="result">
-        ${resultOptions(match['Correct Result'] || '')}
-      </select>
-    </td>
-    <td class="right">
-      <button class="btn small score-one">Save & Score</button>
-    </td>
+    <td><select class="result">${resultOptions(match['Correct Result'] || '')}</select></td>
+    <td class="right"><button class="btn small score-one">Save & Score</button></td>
   </tr>`;
 }
 
-// Check if all matches have results set
 function checkAllResultsSet() {
   const rows = Array.from(document.querySelectorAll('#matches tbody tr'));
   const allSet = rows.length === 5 && rows.every(r => {
     const select = r.querySelector('select.result');
     return ['HOME', 'DRAW', 'AWAY'].includes((select?.value || '').toUpperCase());
   });
-
   const scoreBtn = $('scoreWeek');
   const forceBtn = $('forceScoreWeek');
   const warning = $('scoringWarning');
-
   if (scoreBtn) scoreBtn.disabled = !allSet;
   if (forceBtn) forceBtn.disabled = !allSet;
-
   if (warning) {
     if (!allSet && rows.length > 0) {
-      const missing = rows.filter(r => {
-        const select = r.querySelector('select.result');
-        return !['HOME', 'DRAW', 'AWAY'].includes((select?.value || '').toUpperCase());
-      }).length;
+      const missing = rows.filter(r => !['HOME', 'DRAW', 'AWAY'].includes((r.querySelector('select.result')?.value || '').toUpperCase())).length;
       warning.style.display = 'block';
       warning.textContent = `Scoring disabled: Add results for all ${missing} remaining match${missing > 1 ? 'es' : ''} before scoring this week.`;
     } else {
@@ -221,7 +278,6 @@ function checkAllResultsSet() {
   }
 }
 
-// Fetch latest week from weeks endpoint
 async function fetchLatestWeek() {
   try {
     const data = await adminFetch('/weeks');
@@ -234,7 +290,6 @@ async function fetchLatestWeek() {
   }
 }
 
-// Load matches for selected week
 async function loadMatches(week) {
   const loadBtn = $('load');
   return withLoading(loadBtn, async () => {
@@ -243,24 +298,17 @@ async function loadMatches(week) {
       loadedMatches = data.matches || [];
       setStatus(`Loaded ${loadedMatches.length} matches for week ${week}`);
       showDebugInfo();
-
       $('matches').innerHTML = loadedMatches.length ? `
         <table>
-          <thead>
-            <tr><th>ID</th><th>Fixture</th><th>Correct Result</th><th class="right">Live Score</th></tr>
-          </thead>
+          <thead><tr><th>ID</th><th>Fixture</th><th>Correct Result</th><th class="right">Live Score</th></tr></thead>
           <tbody>${loadedMatches.map(matchRow).join('')}</tbody>
         </table>
       ` : '<p style="color:#aaa;padding:12px">No matches found for this week.</p>';
-
-      // Listen for result changes to update scoring button state
       document.querySelectorAll('#matches select.result').forEach(sel => {
         sel.addEventListener('change', checkAllResultsSet);
       });
-
       checkAllResultsSet();
       $('nextWeek').value = String(week + 1);
-
     } catch (e) {
       setStatus(`Failed to load matches: ${e.message}`);
       showDebugInfo();
@@ -270,7 +318,496 @@ async function loadMatches(week) {
   });
 }
 
-// Initialize admin UI
+// ── Format helpers ──────────────────────────────────────────────────────
+function formatFixtureDate(isoDate) {
+  if (!isoDate) return '';
+  try {
+    return new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'Europe/London',
+      weekday: 'short', day: '2-digit', month: 'short',
+      hour: '2-digit', minute: '2-digit'
+    }).format(new Date(isoDate));
+  } catch { return isoDate; }
+}
+
+function formBadges(formStr) {
+  if (!formStr) return '<span style="color:#666">—</span>';
+  return formStr.split('').map(c => {
+    const cls = c.toUpperCase() === 'W' ? 'w' : c.toUpperCase() === 'D' ? 'd' : 'l';
+    return `<span class="form-badge ${cls}">${c.toUpperCase()}</span>`;
+  }).join('');
+}
+
+function h2hSummary(h2hArr, homeTeam, awayTeam) {
+  if (!Array.isArray(h2hArr) || h2hArr.length === 0) return '';
+  let homeWins = 0, draws = 0, awayWins = 0;
+  h2hArr.forEach(h => {
+    if (h.homeGoals === h.awayGoals) draws++;
+    // Check by team name which "side" won
+    else if (h.homeTeam === homeTeam) {
+      if (h.homeGoals > h.awayGoals) homeWins++; else awayWins++;
+    } else if (h.awayTeam === homeTeam) {
+      if (h.awayGoals > h.homeGoals) homeWins++; else awayWins++;
+    } else {
+      // Fallback: use winner flags
+      if (h.homeWinner) homeWins++;
+      else if (h.awayWinner) awayWins++;
+      else draws++;
+    }
+  });
+  return `Last ${h2hArr.length}: ${homeTeam} ${homeWins}W ${draws}D ${awayWins}L`;
+}
+
+// ── Fixture Browser ─────────────────────────────────────────────────────
+function renderFixtureGrid() {
+  const container = $('fixtureGrid');
+  if (!container) return;
+
+  if (fetchedFixtures.length === 0) {
+    container.innerHTML = '<p style="color:#888;padding:8px">No fixtures loaded. Click "Fetch Next Matchweek Fixtures" above.</p>';
+    return;
+  }
+
+  // Show "Select Suggested 5" button if suggestions exist
+  const hasSuggestions = fetchedFixtures.some(f => f.suggested);
+
+  container.innerHTML = '';
+
+  if (hasSuggestions) {
+    const suggestRow = document.createElement('div');
+    suggestRow.style.cssText = 'display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap';
+    suggestRow.innerHTML = `
+      <button class="btn small" id="selectSuggestedBtn" style="background:#ff9800;color:#000">Select Suggested Top 5</button>
+      <span style="font-size:12px;color:#bbb">Hardest to call — closest to a three-way toss-up</span>
+    `;
+    container.appendChild(suggestRow);
+    suggestRow.querySelector('#selectSuggestedBtn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      selectedFixtureIds = new Set(fetchedFixtures.filter(f => f.suggested).map(f => f.fixtureId));
+      document.querySelectorAll('.fix-card').forEach(card => {
+        const fid = Number(card.dataset.fixtureId);
+        card.classList.toggle('selected', selectedFixtureIds.has(fid));
+      });
+      updateFixtureCount();
+      enrichmentMap = {};
+      $('enrichPreview').innerHTML = '';
+      setSeedStatus('Suggested top 5 selected — the tightest matches this round.', 'success');
+    });
+  }
+
+  fetchedFixtures.forEach(fix => {
+    const selected = selectedFixtureIds.has(fix.fixtureId);
+    const card = document.createElement('div');
+    card.className = `fix-card${selected ? ' selected' : ''}`;
+    card.dataset.fixtureId = fix.fixtureId;
+
+    // Quick prediction mini bar (from list response)
+    const qp = fix.quickPrediction;
+    const predHtml = qp ? `
+      <div style="display:flex;height:6px;border-radius:3px;overflow:hidden;margin-top:6px;gap:1px">
+        <div style="width:${qp.home}%;background:#2e7d32"></div>
+        <div style="width:${qp.draw}%;background:#555"></div>
+        <div style="width:${qp.away}%;background:#c62828"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:#888;margin-top:2px">
+        <span>H ${qp.home}%</span><span>D ${qp.draw}%</span><span>A ${qp.away}%</span>
+      </div>
+    ` : '';
+
+    // Suggested badge
+    const suggestedBadge = fix.suggested
+      ? `<span style="display:inline-block;background:#ff9800;color:#000;font-size:10px;font-weight:800;padding:2px 6px;border-radius:4px;margin-left:6px">TOUGH CALL</span>`
+      : '';
+
+    card.innerHTML = `
+      <div class="fix-card-header">
+        <div style="flex:1">
+          <div class="fix-teams">${fix.homeTeam} v ${fix.awayTeam}${suggestedBadge}</div>
+          <div class="fix-date">${formatFixtureDate(fix.date)}</div>
+          <div class="fix-round">${fix.round || ''}</div>
+          ${predHtml}
+        </div>
+        <div class="fix-check"></div>
+      </div>
+    `;
+    card.addEventListener('click', () => toggleFixture(fix.fixtureId));
+    container.appendChild(card);
+  });
+
+  updateFixtureCount();
+}
+
+function toggleFixture(fixtureId) {
+  if (selectedFixtureIds.has(fixtureId)) {
+    selectedFixtureIds.delete(fixtureId);
+  } else {
+    if (selectedFixtureIds.size >= 5) {
+      setSeedStatus('You can only select 5 fixtures. Deselect one first.');
+      return;
+    }
+    selectedFixtureIds.add(fixtureId);
+  }
+  // Update card visuals
+  document.querySelectorAll('.fix-card').forEach(card => {
+    const fid = Number(card.dataset.fixtureId);
+    card.classList.toggle('selected', selectedFixtureIds.has(fid));
+  });
+  updateFixtureCount();
+  // Clear enrichment if selection changed
+  enrichmentMap = {};
+  $('enrichPreview').innerHTML = '';
+}
+
+function updateFixtureCount() {
+  const countEl = $('fixCount');
+  if (countEl) {
+    countEl.textContent = `${selectedFixtureIds.size}/5 selected`;
+    countEl.style.color = selectedFixtureIds.size === 5 ? '#7CFC00' : '#EAEAEA';
+  }
+  const enrichBtn = $('enrichBtn');
+  if (enrichBtn) enrichBtn.disabled = selectedFixtureIds.size !== 5;
+}
+
+function setSeedStatus(msg, type) {
+  const el = $('seedStatus');
+  if (!el) return;
+  el.textContent = msg;
+  el.className = type === 'error' ? 'error-banner' : type === 'success' ? 'success-banner' : '';
+  el.style.display = msg ? 'block' : 'none';
+}
+
+// ── Simulator ────────────────────────────────────────────────────────────────
+// Mirrors the real picks-widget user experience using enrichment data from
+// the seed flow. Nothing is saved — purely for admin preview/testing.
+function renderSimulator() {
+  const container = $('simContainer');
+  if (!container) return;
+
+  // Need enriched fixtures (the 5 selected ones)
+  const selectedFixtures = fetchedFixtures.filter(f => selectedFixtureIds.has(f.fixtureId));
+  if (selectedFixtures.length === 0 || Object.keys(enrichmentMap).length === 0) {
+    container.innerHTML = `
+      <div style="background:#1a1a1a;border-radius:10px;padding:16px;margin-top:8px;color:#999">
+        <strong style="color:#ff9800">No enriched fixtures available.</strong><br><br>
+        To use the simulator:<br>
+        1. Switch to "Fetch from API" tab<br>
+        2. Fetch fixtures and select 5<br>
+        3. Click "Load Stats & Preview" to enrich them<br>
+        4. Then come back here to simulate the user experience
+      </div>`;
+    return;
+  }
+
+  // Build mock match objects that look like what picks-widget receives from Adalo
+  const mockMatches = selectedFixtures.map((fix, i) => {
+    const en = enrichmentMap[fix.fixtureId] || {};
+    const pred = en.predictions || fix.quickPrediction || { home: 0, draw: 0, away: 0 };
+    const h2h = en.h2h || [];
+    return {
+      id: fix.fixtureId,
+      'Home Team': fix.homeTeam,
+      'Away Team': fix.awayTeam,
+      'Prediction Home': String(pred.home || 0),
+      'Prediction Draw': String(pred.draw || 0),
+      'Prediction Away': String(pred.away || 0),
+      'Home Form': en.homeForm || '',
+      'Away Form': en.awayForm || '',
+      'H2H Summary': JSON.stringify(h2h),
+      'Prediction Advice': en.advice || ''
+    };
+  });
+
+  const simPicks = {};  // matchId -> 'HOME'/'DRAW'/'AWAY'
+
+  function hasEnrich(m) {
+    return !!(Number(m['Prediction Home']) || Number(m['Prediction Draw']) || Number(m['Prediction Away']) || m['Home Form'] || m['Away Form']);
+  }
+
+  function getPred(m) {
+    return { home: Number(m['Prediction Home']) || 0, draw: Number(m['Prediction Draw']) || 0, away: Number(m['Prediction Away']) || 0 };
+  }
+
+  function formBadges(formStr) {
+    if (!formStr) return '<span style="color:#555">-</span>';
+    return formStr.split('').map(c => {
+      const cls = c.toUpperCase() === 'W' ? 'w' : c.toUpperCase() === 'D' ? 'd' : 'l';
+      return `<span class="sim-form-badge ${cls}">${c.toUpperCase()}</span>`;
+    }).join('');
+  }
+
+  function h2hText(m) {
+    let arr;
+    try { arr = typeof m['H2H Summary'] === 'string' ? JSON.parse(m['H2H Summary']) : m['H2H Summary']; } catch { return ''; }
+    if (!Array.isArray(arr) || arr.length === 0) return '';
+    const home = m['Home Team'];
+    let hw = 0, dw = 0, aw = 0;
+    arr.forEach(h => {
+      if (h.homeGoals === h.awayGoals) { dw++; return; }
+      if (h.homeTeam === home) {
+        if (h.homeGoals > h.awayGoals) hw++; else aw++;
+      } else if (h.awayTeam === home) {
+        if (h.awayGoals > h.homeGoals) hw++; else aw++;
+      } else {
+        if (h.homeWinner) hw++; else if (h.awayWinner) aw++; else dw++;
+      }
+    });
+    return `H2H (last ${arr.length}): ${hw}W ${dw}D ${aw}L`;
+  }
+
+  function enrichHtml(m) {
+    if (!hasEnrich(m)) return '';
+    const pred = getPred(m);
+    const total = pred.home + pred.draw + pred.away || 1;
+    const h2h = h2hText(m);
+    const advice = m['Prediction Advice'] || '';
+    return `
+      <div class="sim-enrich">
+        <div class="sim-pred-bar">
+          <div class="sim-pred-seg home" style="width:${pred.home/total*100}%">${pred.home}%</div>
+          <div class="sim-pred-seg draw" style="width:${pred.draw/total*100}%">${pred.draw}%</div>
+          <div class="sim-pred-seg away" style="width:${pred.away/total*100}%">${pred.away}%</div>
+        </div>
+        <div class="sim-form-row">
+          <span class="sim-form-label">${m['Home Team']}</span>
+          ${formBadges(m['Home Form'])}
+        </div>
+        <div class="sim-form-row">
+          <span class="sim-form-label">${m['Away Team']}</span>
+          ${formBadges(m['Away Form'])}
+        </div>
+        ${h2h ? `<div class="sim-h2h">${h2h}</div>` : ''}
+        ${advice ? `<div class="sim-advice">${advice}</div>` : ''}
+      </div>
+    `;
+  }
+
+  // Probability calculation (exact Poisson binomial, same as picks-widget)
+  function calcProbs() {
+    const probs = mockMatches.map(m => {
+      const mid = String(m.id);
+      const pick = simPicks[mid];
+      if (!pick || !hasEnrich(m)) return 0;
+      const pred = getPred(m);
+      const pctMap = { HOME: pred.home, DRAW: pred.draw, AWAY: pred.away };
+      return (pctMap[pick] || 0) / 100;
+    });
+    if (probs.every(p => p === 0)) return null;
+
+    const n = probs.length;
+    const dist = new Array(n + 1).fill(0);
+    for (let mask = 0; mask < (1 << n); mask++) {
+      let p = 1, correct = 0;
+      for (let i = 0; i < n; i++) {
+        if (mask & (1 << i)) { p *= probs[i]; correct++; }
+        else { p *= (1 - probs[i]); }
+      }
+      dist[correct] += p;
+    }
+
+    const fullHouse = dist[n];
+    const blanks = dist[0];
+    const expected = probs.reduce((s, p) => s + p, 0);
+    const favourites = probs.filter(p => p >= 0.40).length;
+
+    let commentary = '';
+    if (favourites >= 4) commentary = "Playing it safe — mostly favourites. Solid strategy, but the rewards for a full house are slimmer.";
+    else if (favourites >= 3) commentary = "A balanced set of picks — some favourites, some punts. A sensible approach with decent upside.";
+    else if (favourites >= 1) commentary = "Feeling adventurous! A few risky picks in the mix. No risk, no reward — a full house here would be something special.";
+    else commentary = "Going full maverick! All underdogs and long shots. If this comes off, you deserve a standing ovation.";
+
+    return { dist, fullHouse, blanks, expected, commentary, probs };
+  }
+
+  function fmtPct(v) {
+    const pct = v * 100;
+    if (pct < 0.1 && pct > 0) return '<0.1%';
+    if (pct >= 10) return pct.toFixed(1) + '%';
+    return pct.toFixed(2) + '%';
+  }
+
+  function probSummaryHtml() {
+    const calc = calcProbs();
+    if (!calc) return '';
+
+    const distColours = ['#cc3333', '#e65100', '#ff9800', '#fdd835', '#7CFC00', '#00e676'];
+    let distHtml = '<div class="sim-dist-grid">';
+    for (let i = 0; i <= 5; i++) {
+      distHtml += `
+        <div class="sim-dist-item">
+          <span class="sim-dist-num" style="color:${distColours[i]}">${i}</span>
+          <span class="sim-dist-label">correct</span>
+          <span class="sim-dist-pct">${fmtPct(calc.dist[i])}</span>
+        </div>`;
+    }
+    distHtml += '</div>';
+
+    return `
+      <div class="sim-prob-card">
+        <div class="sim-prob-title">Your Picks Analysis</div>
+        <div class="sim-prob-row">
+          <span class="sim-prob-label">Full House</span>
+          <div class="sim-prob-bar-wrap"><div class="sim-prob-bar-fill" style="width:${Math.min(calc.fullHouse*100,100)}%;background:#00e676"></div></div>
+          <span class="sim-prob-val" style="color:#00e676">${fmtPct(calc.fullHouse)}</span>
+        </div>
+        <div class="sim-prob-row">
+          <span class="sim-prob-label">Blanks</span>
+          <div class="sim-prob-bar-wrap"><div class="sim-prob-bar-fill" style="width:${Math.min(calc.blanks*100,100)}%;background:#cc3333"></div></div>
+          <span class="sim-prob-val" style="color:#cc3333">${fmtPct(calc.blanks)}</span>
+        </div>
+        <div class="sim-prob-row">
+          <span class="sim-prob-label">Expected</span>
+          <div class="sim-prob-bar-wrap"><div class="sim-prob-bar-fill" style="width:${calc.expected/5*100}%;background:#ff9800"></div></div>
+          <span class="sim-prob-val" style="color:#ff9800">${calc.expected.toFixed(1)} / 5</span>
+        </div>
+        ${distHtml}
+        <div class="sim-commentary">${calc.commentary}</div>
+      </div>`;
+  }
+
+  // Main render
+  function renderSim() {
+    container.innerHTML = '';
+
+    const wrap = document.createElement('div');
+    wrap.className = 'sim-wrap';
+
+    // Header
+    const header = document.createElement('div');
+    header.style.cssText = 'display:flex;justify-content:space-between;align-items:center;margin-bottom:12px';
+    const allPicked = mockMatches.length > 0 && mockMatches.every(m => !!simPicks[String(m.id)]);
+    const pickedCount = mockMatches.filter(m => !!simPicks[String(m.id)]).length;
+    header.innerHTML = `
+      <div>
+        <h2 style="margin:0 0 4px">Week ${$('nextWeek').value || '?'} Picks</h2>
+        <div class="sim-status">${allPicked ? 'All picks selected!' : `${pickedCount}/5 picks made`}</div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="sim-reset" id="simResetBtn">Reset picks</button>
+      </div>
+    `;
+    wrap.appendChild(header);
+
+    // Match cards
+    const matchesDiv = document.createElement('div');
+    mockMatches.forEach(m => {
+      const mid = String(m.id);
+      const cur = simPicks[mid] || '';
+      const pred = getPred(m);
+      const showPct = hasEnrich(m);
+
+      const card = document.createElement('div');
+      card.className = 'sim-card';
+      card.innerHTML = `
+        <div class="sim-teams">${m['Home Team']} v ${m['Away Team']}</div>
+        ${enrichHtml(m)}
+        <div class="sim-pick-grid">
+          ${['HOME','DRAW','AWAY'].map(opt => {
+            const pct = showPct ? (opt === 'HOME' ? pred.home : opt === 'DRAW' ? pred.draw : pred.away) : null;
+            return `
+              <button class="sim-pick ${cur===opt?'active':''}" data-match="${mid}" data-val="${opt}">
+                <span>${opt}</span>
+                ${pct !== null ? `<span class="sim-pct">${pct}%</span>` : ''}
+                <span class="sim-check">&#10003;</span>
+              </button>`;
+          }).join('')}
+        </div>
+      `;
+
+      card.querySelectorAll('.sim-pick').forEach(btn => {
+        btn.addEventListener('click', () => {
+          simPicks[btn.dataset.match] = btn.dataset.val;
+          renderSim();
+        });
+      });
+      matchesDiv.appendChild(card);
+    });
+    wrap.appendChild(matchesDiv);
+
+    // Fake save button (shows success animation but doesn't actually save)
+    if (allPicked) {
+      const btnRow = document.createElement('div');
+      btnRow.style.cssText = 'margin-bottom:12px';
+      const saveBtn = document.createElement('button');
+      saveBtn.className = 'sim-save-btn';
+      saveBtn.textContent = 'Save picks';
+      saveBtn.addEventListener('click', () => {
+        saveBtn.classList.add('saved');
+        saveBtn.textContent = '\u2713 Picks saved! (simulated)';
+        saveBtn.disabled = true;
+        setTimeout(() => {
+          saveBtn.classList.remove('saved');
+          saveBtn.textContent = 'Save picks';
+          saveBtn.disabled = false;
+        }, 2000);
+      });
+      btnRow.appendChild(saveBtn);
+      wrap.appendChild(btnRow);
+    }
+
+    // Probability summary (only when all 5 picked)
+    if (allPicked) {
+      const probDiv = document.createElement('div');
+      probDiv.innerHTML = probSummaryHtml();
+      wrap.appendChild(probDiv);
+    }
+
+    container.appendChild(wrap);
+
+    // Wire reset
+    const resetBtn = container.querySelector('#simResetBtn');
+    if (resetBtn) {
+      resetBtn.addEventListener('click', () => {
+        Object.keys(simPicks).forEach(k => delete simPicks[k]);
+        renderSim();
+      });
+    }
+  }
+
+  renderSim();
+}
+
+function renderEnrichmentPreview() {
+  const container = $('enrichPreview');
+  if (!container) return;
+  container.innerHTML = '';
+
+  const selectedFixtures = fetchedFixtures.filter(f => selectedFixtureIds.has(f.fixtureId));
+
+  selectedFixtures.forEach(fix => {
+    const en = enrichmentMap[fix.fixtureId];
+    if (!en) return;
+
+    const pred = en.predictions || { home: 0, draw: 0, away: 0 };
+    const total = pred.home + pred.draw + pred.away || 1;
+
+    const card = document.createElement('div');
+    card.className = 'enrich-card';
+    card.innerHTML = `
+      <div class="enrich-teams">${fix.homeTeam} v ${fix.awayTeam}</div>
+
+      <div class="pred-bar">
+        <div class="seg home" style="width:${pred.home / total * 100}%">${pred.home}%</div>
+        <div class="seg draw" style="width:${pred.draw / total * 100}%">${pred.draw}%</div>
+        <div class="seg away" style="width:${pred.away / total * 100}%">${pred.away}%</div>
+      </div>
+
+      <div class="form-row">
+        <span class="form-label">${fix.homeTeam}</span>
+        ${formBadges(en.homeForm)}
+      </div>
+      <div class="form-row">
+        <span class="form-label">${fix.awayTeam}</span>
+        ${formBadges(en.awayForm)}
+      </div>
+
+      ${en.h2h && en.h2h.length > 0 ? `<div class="h2h-row">H2H: ${h2hSummary(en.h2h, fix.homeTeam, fix.awayTeam)}</div>` : ''}
+      ${en.advice ? `<div class="advice-text">${en.advice}</div>` : ''}
+    `;
+    container.appendChild(card);
+  });
+}
+
+// ── Initialize admin UI ─────────────────────────────────────────────────
 function initAdminUI() {
   const wrap = $('mainWrap');
   wrap.innerHTML = `
@@ -303,50 +840,84 @@ function initAdminUI() {
       <div><label style="margin-top:8px"><input type="checkbox" id="showDebug"> Show API debug info</label></div>
     </div>
 
+    <!-- ═══ SEED SECTION ═══ -->
     <div class="card">
-      <h3 style="margin:0 0 8px">Seed Next Week (optional)</h3>
-      <div class="row">
-        <div><label>Next Week</label><input id="nextWeek" type="number" min="1" step="1"/></div>
+      <h3>Seed Next Week</h3>
+
+      <div class="seed-mode-tabs">
+        <button id="seedModeApi" class="active">Fetch from API</button>
+        <button id="seedModeManual">Enter Manually</button>
+        <button id="seedModeSim">Simulate Picks</button>
+      </div>
+
+      <div class="row" style="margin-bottom:10px">
+        <div><label>Week Number</label><input id="nextWeek" type="number" min="1" step="1"/></div>
         <div><label>Lockout Time</label><input id="nextLock" type="datetime-local"/></div>
       </div>
-      <table id="seedTbl">
-        <thead><tr><th>#</th><th>Home</th><th>Away</th></tr></thead>
-        <tbody></tbody>
-      </table>
-      <button class="btn" id="seedBtn">Create 5 Matches</button>
+
+      <!-- API mode -->
+      <div id="seedApiMode">
+        <button class="btn" id="fetchFixturesBtn">Fetch Next Matchweek Fixtures</button>
+        <div id="seedStatus" style="display:none;margin-top:8px"></div>
+        <div class="fix-count" id="fixCount" style="margin-top:8px">0/5 selected</div>
+        <div id="fixtureGrid" class="fix-grid"></div>
+
+        <div style="margin-top:12px">
+          <button class="btn" id="enrichBtn" disabled>Load Stats & Preview</button>
+        </div>
+        <div id="enrichPreview"></div>
+
+        <div style="margin-top:12px">
+          <button class="btn" id="seedApiBtn" style="font-size:16px;padding:12px 20px">Confirm & Create 5 Matches</button>
+        </div>
+      </div>
+
+      <!-- Manual mode (hidden by default) -->
+      <div id="seedManualMode" style="display:none">
+        <table id="seedTbl">
+          <thead><tr><th>#</th><th>Home</th><th>Away</th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <button class="btn" id="seedManualBtn">Create 5 Matches</button>
+      </div>
+
+      <!-- Simulator mode (hidden by default) -->
+      <div id="seedSimMode" style="display:none">
+        <p style="color:#EAEAEA;font-size:13px;margin:0 0 8px">
+          Preview the user experience — select picks below to see enrichment data, probability analysis, and commentary exactly as real users will.
+          Nothing is saved.
+        </p>
+        <div id="simContainer"></div>
+      </div>
     </div>
   `;
 
   setupEventListeners();
 }
 
-// Show access denied page
 function showAccessDenied() {
   const wrap = $('mainWrap');
   wrap.innerHTML = `
     <div class="access-denied">
       <h1>Access Denied</h1>
       <p style="color:#ccc">Admin access requires a valid ADMIN_SECRET in the URL.</p>
-      <p style="color:#888;font-size:14px;margin-top:20px">
-        Usage: admin.html?ADMIN_SECRET=your_secret_here
-      </p>
+      <p style="color:#888;font-size:14px;margin-top:20px">Usage: admin.html?ADMIN_SECRET=your_secret_here</p>
     </div>
   `;
 }
 
-// Setup all event listeners
+// ── Event Listeners ─────────────────────────────────────────────────────
 function setupEventListeners() {
   const loadBtn = $('load');
   const applyBtn = $('applyResults');
   const scoreBtn = $('scoreWeek');
   const forceBtn = $('forceScoreWeek');
-  const seedBtn = $('seedBtn');
   const modeSelected = $('modeSelected');
   const modeLatest = $('modeLatest');
   const showDebugCb = $('showDebug');
   const weekInput = $('week');
 
-  // Mode switching
+  // ── Mode switching (results) ──
   modeSelected.onclick = () => {
     useLatestMode = false;
     modeSelected.classList.add('active');
@@ -368,157 +939,213 @@ function setupEventListeners() {
     }
   };
 
-  // Debug toggle
   showDebugCb.onchange = () => {
     $('debugPanel').style.display = showDebugCb.checked ? 'block' : 'none';
     if (showDebugCb.checked && lastDebugInfo) showDebugInfo();
   };
 
-  // Load matches
-  loadBtn.onclick = () => {
-    currentWeek = Number(weekInput.value);
-    loadMatches(currentWeek);
-  };
+  loadBtn.onclick = () => { currentWeek = Number(weekInput.value); loadMatches(currentWeek); };
 
-  // Per-row Save & Score (delegated)
+  // ── Per-row Save & Score (delegated) ──
   document.addEventListener('click', async (e) => {
     const btn = e.target.closest('.score-one');
     if (!btn) return;
-
     const tr = btn.closest('tr');
     const matchId = tr.getAttribute('data-id');
     const select = tr.querySelector('select.result');
     const correct = (select?.value || '').toUpperCase();
     const week = Number(weekInput.value);
-
-    if (!['HOME', 'DRAW', 'AWAY'].includes(correct)) {
-      setStatus('Pick a correct result first (HOME/DRAW/AWAY)');
-      return;
-    }
-
+    if (!['HOME', 'DRAW', 'AWAY'].includes(correct)) { setStatus('Pick a correct result first (HOME/DRAW/AWAY)'); return; }
     await withLoading(btn, async () => {
       try {
-        // 1) Save result
-        await adminFetch('/admin-set-results', {
-          method: 'POST',
-          body: JSON.stringify({ week, results: [{ match_id: matchId, correct }] })
-        });
-
-        // 2) Score this match
-        const scoreData = await adminFetch('/score-match', {
-          method: 'POST',
-          body: JSON.stringify({ match_id: matchId })
-        });
-
+        await adminFetch('/admin-set-results', { method: 'POST', body: JSON.stringify({ week, results: [{ match_id: matchId, correct }] }) });
+        const scoreData = await adminFetch('/score-match', { method: 'POST', body: JSON.stringify({ match_id: matchId }) });
         tr.setAttribute('data-has-result', 'true');
         checkAllResultsSet();
-
         setStatus(`Match ${matchId} saved & scored (updated ${scoreData.updated || 0} predictions)`);
         showDebugInfo();
-      } catch (e) {
-        setStatus(`Failed to save/score match ${matchId}: ${e.message}`);
-        showDebugInfo();
-      }
+      } catch (e) { setStatus(`Failed to save/score match ${matchId}: ${e.message}`); showDebugInfo(); }
     });
   });
 
-  // Apply results (bulk)
+  // ── Apply results (bulk) ──
   applyBtn.onclick = () => withLoading(applyBtn, async () => {
     const week = Number(weekInput.value);
     const rows = Array.from(document.querySelectorAll('#matches tbody tr'));
-    const results = rows.map(r => ({
-      match_id: r.getAttribute('data-id'),
-      correct: r.querySelector('select').value
-    })).filter(r => ['HOME', 'DRAW', 'AWAY'].includes(r.correct.toUpperCase()));
-
-    if (!results.length) {
-      setStatus('No valid results to apply. Set HOME/DRAW/AWAY for each match.');
-      return;
-    }
-
+    const results = rows.map(r => ({ match_id: r.getAttribute('data-id'), correct: r.querySelector('select').value }))
+      .filter(r => ['HOME', 'DRAW', 'AWAY'].includes(r.correct.toUpperCase()));
+    if (!results.length) { setStatus('No valid results to apply.'); return; }
     try {
-      const data = await adminFetch('/admin-set-results', {
-        method: 'POST',
-        body: JSON.stringify({ week, results })
-      });
-
-      rows.forEach(r => {
-        const val = r.querySelector('select').value;
-        if (['HOME', 'DRAW', 'AWAY'].includes(val.toUpperCase())) {
-          r.setAttribute('data-has-result', 'true');
-        }
-      });
+      const data = await adminFetch('/admin-set-results', { method: 'POST', body: JSON.stringify({ week, results }) });
+      rows.forEach(r => { if (['HOME', 'DRAW', 'AWAY'].includes(r.querySelector('select').value.toUpperCase())) r.setAttribute('data-has-result', 'true'); });
       checkAllResultsSet();
-
       setStatus(`Results applied: ${data.updated || results.length} matches updated`);
       showDebugInfo();
-    } catch (e) {
-      setStatus(`Failed to apply results: ${e.message}`);
-      showDebugInfo();
-    }
+    } catch (e) { setStatus(`Failed to apply results: ${e.message}`); showDebugInfo(); }
   });
 
-  // Score week (normal)
+  // ── Score week ──
   scoreBtn.onclick = () => withLoading(scoreBtn, async () => {
     const week = Number(weekInput.value);
     try {
-      const data = await adminFetch('/admin-score-week', {
-        method: 'POST',
-        body: JSON.stringify({ week })
-      });
-
+      const data = await adminFetch('/admin-score-week', { method: 'POST', body: JSON.stringify({ week }) });
       let message = 'Week scored successfully!';
       if (data.ok) {
-        const winners = data.fullHouseNames || [];
-        const blanks = data.blanksNames || [];
-        if (winners.length) message += `  |  BONUS: ${winners.join(', ')}`;
-        else message += '  |  No full houses';
+        const winners = data.fullHouseNames || []; const blanks = data.blanksNames || [];
+        if (winners.length) message += `  |  BONUS: ${winners.join(', ')}`; else message += '  |  No full houses';
         if (blanks.length) message += `  |  BLANKS: ${blanks.join(', ')}`;
       }
-      setStatus(message);
-      showDebugInfo();
+      setStatus(message); showDebugInfo();
+    } catch (e) { setStatus(`Scoring failed: ${e.message}`); showDebugInfo(); }
+  });
+
+  // ── Force rescore ──
+  forceBtn.onclick = () => {
+    const week = Number(weekInput.value);
+    if (!week) { setStatus('Please enter a valid week number.'); return; }
+    if (!confirm(`ARE YOU SURE?\n\nThis will FORCE RESCORE week ${week} and may change existing user totals.`)) return;
+    withLoading(forceBtn, async () => {
+      try {
+        const data = await adminFetch('/admin-score-week', { method: 'POST', body: JSON.stringify({ week, force: true }) });
+        let message = 'Week FORCE RESCORED!';
+        if (data.ok) {
+          const winners = data.fullHouseNames || []; const blanks = data.blanksNames || [];
+          if (winners.length) message += `  |  BONUS: ${winners.join(', ')}`;
+          if (blanks.length) message += `  |  BLANKS: ${blanks.join(', ')}`;
+        }
+        setStatus(message); showDebugInfo();
+      } catch (e) { setStatus(`Force rescore failed: ${e.message}`); showDebugInfo(); }
+    });
+  };
+
+  // ── Seed mode tabs ──
+  function switchSeedTab(mode) {
+    seedMode = mode;
+    ['seedModeApi', 'seedModeManual', 'seedModeSim'].forEach(id => $(id).classList.remove('active'));
+    $('seedApiMode').style.display = 'none';
+    $('seedManualMode').style.display = 'none';
+    $('seedSimMode').style.display = 'none';
+    if (mode === 'api') {
+      $('seedModeApi').classList.add('active');
+      $('seedApiMode').style.display = '';
+    } else if (mode === 'manual') {
+      $('seedModeManual').classList.add('active');
+      $('seedManualMode').style.display = '';
+    } else if (mode === 'sim') {
+      $('seedModeSim').classList.add('active');
+      $('seedSimMode').style.display = '';
+      renderSimulator();
+    }
+  }
+  $('seedModeApi').onclick = () => switchSeedTab('api');
+  $('seedModeManual').onclick = () => switchSeedTab('manual');
+  $('seedModeSim').onclick = () => switchSeedTab('sim');
+
+  // ── Fetch fixtures from API-Football ──
+  $('fetchFixturesBtn').onclick = () => withLoading($('fetchFixturesBtn'), async () => {
+    try {
+      setSeedStatus('');
+      const data = await adminFetch('/api-football-fixtures?action=list');
+      fetchedFixtures = data.fixtures || [];
+      selectedFixtureIds = new Set();
+      enrichmentMap = {};
+      $('enrichPreview').innerHTML = '';
+
+      if (fetchedFixtures.length === 0) {
+        setSeedStatus('No upcoming EPL fixtures found. The season may be between rounds.', 'error');
+        return;
+      }
+
+      const roundLabel = data.round || 'Upcoming';
+      setSeedStatus(`${roundLabel} — ${fetchedFixtures.length} fixtures (Season ${data.season})`, 'success');
+      renderFixtureGrid();
     } catch (e) {
-      setStatus(`Scoring failed: ${e.message}`);
+      setSeedStatus(`Failed to fetch fixtures: ${e.message}`, 'error');
       showDebugInfo();
     }
   });
 
-  // Force rescore week
-  forceBtn.onclick = () => {
-    const week = Number(weekInput.value);
-    if (!week) {
-      setStatus('Please enter a valid week number.');
-      return;
+  // ── Enrich selected fixtures ──
+  $('enrichBtn').onclick = () => withLoading($('enrichBtn'), async () => {
+    if (selectedFixtureIds.size !== 5) { setSeedStatus('Select exactly 5 fixtures first.', 'error'); return; }
+
+    const selectedFixtures = fetchedFixtures.filter(f => selectedFixtureIds.has(f.fixtureId));
+    const payload = selectedFixtures.map(f => ({
+      fixtureId: f.fixtureId,
+      homeTeamId: f.homeTeamId,
+      awayTeamId: f.awayTeamId,
+      quickPrediction: f.quickPrediction || null
+    }));
+
+    try {
+      setSeedStatus('Fetching predictions, form & H2H... (this uses ~15 API calls)', '');
+      const data = await adminFetch('/api-football-fixtures?action=enrich', {
+        method: 'POST',
+        body: JSON.stringify({ fixtures: payload })
+      });
+
+      enrichmentMap = {};
+      (data.enrichment || []).forEach(en => { enrichmentMap[en.fixtureId] = en; });
+
+      const enriched = Object.keys(enrichmentMap).length;
+      setSeedStatus(`Loaded stats for ${enriched}/${selectedFixtureIds.size} fixtures`, enriched > 0 ? 'success' : 'error');
+      renderEnrichmentPreview();
+    } catch (e) {
+      setSeedStatus(`Failed to load enrichment: ${e.message}`, 'error');
+      showDebugInfo();
     }
+  });
 
-    if (!confirm(`ARE YOU SURE?\n\nThis will FORCE RESCORE week ${week} and may change existing user totals.\nOnly use if normal scoring failed.`)) {
-      return;
-    }
+  // ── Seed via API (with enrichment) ──
+  $('seedApiBtn').onclick = () => withLoading($('seedApiBtn'), async () => {
+    const week = Number($('nextWeek').value);
+    const dt = $('nextLock')?.value;
+    if (!week) { setSeedStatus('Enter a week number.', 'error'); return; }
+    if (!dt) { setSeedStatus('Choose a lockout date & time.', 'error'); return; }
+    if (selectedFixtureIds.size !== 5) { setSeedStatus('Select exactly 5 fixtures.', 'error'); return; }
 
-    withLoading(forceBtn, async () => {
-      try {
-        const data = await adminFetch('/admin-score-week', {
-          method: 'POST',
-          body: JSON.stringify({ week, force: true })
-        });
+    const lockoutIso = new Date(dt).toISOString();
+    const selectedFixtures = fetchedFixtures.filter(f => selectedFixtureIds.has(f.fixtureId));
 
-        let message = 'Week FORCE RESCORED!';
-        if (data.ok) {
-          const winners = data.fullHouseNames || [];
-          const blanks = data.blanksNames || [];
-          if (winners.length) message += `  |  BONUS: ${winners.join(', ')}`;
-          if (blanks.length) message += `  |  BLANKS: ${blanks.join(', ')}`;
-        }
-        setStatus(message);
-        showDebugInfo();
-      } catch (e) {
-        setStatus(`Force rescore failed: ${e.message}`);
-        showDebugInfo();
-      }
+    const fixtures = selectedFixtures.map(f => {
+      const en = enrichmentMap[f.fixtureId] || {};
+      const pred = en.predictions || {};
+      return {
+        home: f.homeTeam,
+        away: f.awayTeam,
+        apiFixtureId: f.fixtureId,
+        homeForm: en.homeForm || '',
+        awayForm: en.awayForm || '',
+        predictionHome: String(pred.home || 0),
+        predictionDraw: String(pred.draw || 0),
+        predictionAway: String(pred.away || 0),
+        predictionAdvice: en.advice || '',
+        h2hSummary: JSON.stringify(en.h2h || []),
+        matchStats: JSON.stringify(en.comparison || {})
+      };
     });
-  };
 
-  // Build seed table
+    try {
+      await adminFetch('/admin-seed-week', {
+        method: 'POST',
+        body: JSON.stringify({ week, lockoutTime: lockoutIso, fixtures })
+      });
+      setSeedStatus(`Week ${week} seeded with 5 matches + enrichment data!`, 'success');
+      showDebugInfo();
+      // Reset state
+      fetchedFixtures = [];
+      selectedFixtureIds = new Set();
+      enrichmentMap = {};
+      $('fixtureGrid').innerHTML = '';
+      $('enrichPreview').innerHTML = '';
+      updateFixtureCount();
+    } catch (e) {
+      setSeedStatus(`Failed to seed week: ${e.message}`, 'error');
+      showDebugInfo();
+    }
+  });
+
+  // ── Build manual seed table ──
   const tb = $('seedTbl')?.querySelector('tbody');
   if (tb) {
     tb.innerHTML = '';
@@ -529,87 +1156,47 @@ function setupEventListeners() {
     }
   }
 
-  // Seed next week
-  seedBtn.onclick = () => withLoading(seedBtn, async () => {
+  // ── Seed manually (original flow) ──
+  $('seedManualBtn').onclick = () => withLoading($('seedManualBtn'), async () => {
     const week = Number($('nextWeek').value);
     const dt = $('nextLock')?.value;
-
-    if (!dt) {
-      setStatus('Please choose a lockout date & time');
-      return;
-    }
-
+    if (!dt) { setSeedStatus('Please choose a lockout date & time', 'error'); return; }
     const lockoutIso = new Date(dt).toISOString();
     const rows = Array.from(document.querySelectorAll('#seedTbl tbody tr'));
-    const fixtures = rows.map(r => ({
-      home: r.querySelector('.home').value.trim(),
-      away: r.querySelector('.away').value.trim()
-    }));
-
-    if (fixtures.some(f => !f.home || !f.away)) {
-      setStatus('Please fill all 5 fixtures');
-      return;
-    }
-
+    const fixtures = rows.map(r => ({ home: r.querySelector('.home').value.trim(), away: r.querySelector('.away').value.trim() }));
+    if (fixtures.some(f => !f.home || !f.away)) { setSeedStatus('Please fill all 5 fixtures', 'error'); return; }
     try {
-      await adminFetch('/admin-seed-week', {
-        method: 'POST',
-        body: JSON.stringify({ week, lockoutTime: lockoutIso, fixtures })
-      });
-      setStatus(`Week ${week} seeded with 5 matches`);
+      await adminFetch('/admin-seed-week', { method: 'POST', body: JSON.stringify({ week, lockoutTime: lockoutIso, fixtures }) });
+      setSeedStatus(`Week ${week} seeded with 5 matches (manual)`, 'success');
       showDebugInfo();
     } catch (e) {
-      setStatus(`Failed to seed week: ${e.message}`);
+      setSeedStatus(`Failed to seed week: ${e.message}`, 'error');
       showDebugInfo();
     }
   });
 }
 
-// Validate secret by making a test API call
+// ── Validate & Init ─────────────────────────────────────────────────────
 async function validateSecret() {
   if (!ADMIN_SECRET) return false;
-
   try {
-    // Try to call weeks endpoint (doesn't need auth) and then a protected endpoint
     const weeksData = await adminFetch('/weeks');
     latestWeek = weeksData.recommendedPickWeek || weeksData.latest || 1;
-
-    // Now test actual admin access
     await adminFetch(`/get-week?week=${latestWeek}`);
     return true;
   } catch (e) {
-    // If it fails with 401, the secret is invalid
     if (lastDebugInfo?.status === 401) return false;
-    // For other errors, we might still have valid auth
     return true;
   }
 }
 
-// Initialize on page load
 window.addEventListener('DOMContentLoaded', async () => {
-  if (!ADMIN_SECRET) {
-    showAccessDenied();
-    return;
-  }
-
-  // Show loading state
+  if (!ADMIN_SECRET) { showAccessDenied(); return; }
   $('mainWrap').innerHTML = '<div style="text-align:center;padding:40px;color:#ccc">Validating access...</div>';
-
   const isValid = await validateSecret();
-
-  if (!isValid) {
-    showAccessDenied();
-    return;
-  }
-
-  // Valid secret - show admin UI
+  if (!isValid) { showAccessDenied(); return; }
   initAdminUI();
-
-  // Set initial week to latest
-  if (latestWeek) {
-    $('week').value = latestWeek;
-    currentWeek = latestWeek;
-  }
+  if (latestWeek) { $('week').value = latestWeek; currentWeek = latestWeek; }
 });
 </script>
 </body>
