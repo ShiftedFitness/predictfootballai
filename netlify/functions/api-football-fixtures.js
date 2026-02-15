@@ -147,40 +147,52 @@ function computePrediction(homeTeamId, awayTeamId, standings, h2hAgg) {
 }
 
 // ── ACTION: list ──────────────────────────────────────────────────────────────
-// Returns all EPL fixtures for the next upcoming matchday.
+// Returns all EPL fixtures for the given or next upcoming matchday.
 // Fetches standings (1 call) + matchday fixtures (1 call) + H2H per fixture.
-async function listFixtures() {
+// Optional: pass requestedMatchday to fetch a specific matchday instead of auto-detecting.
+async function listFixtures(requestedMatchday) {
   // 1. Fetch standings (gives position + form for all 20 teams)
   const standings = await getStandings();
 
-  // 2. Fetch competition info for current matchday
-  await delay();
-  const comp = await fdFetch(`competitions/${EPL_CODE}`);
-  const currentMatchday = comp.currentSeason?.currentMatchday;
+  let matchday;
 
-  if (!currentMatchday) {
-    return { ok: true, round: null, count: 0, fixtures: [], message: 'No current matchday found — season may be over.' };
+  if (requestedMatchday && requestedMatchday >= 1 && requestedMatchday <= 38) {
+    // Admin explicitly requested a specific matchday
+    matchday = requestedMatchday;
+  } else {
+    // Auto-detect: fetch competition info for current matchday
+    await delay();
+    const comp = await fdFetch(`competitions/${EPL_CODE}`);
+    const currentMatchday = comp.currentSeason?.currentMatchday;
+
+    if (!currentMatchday) {
+      return { ok: true, round: null, count: 0, fixtures: [], message: 'No current matchday found — season may be over.' };
+    }
+
+    matchday = currentMatchday;
   }
 
-  // 3. Fetch matches for the current matchday
+  // 2. Fetch matches for the matchday
   await delay();
-  let data = await fdFetch(`competitions/${EPL_CODE}/matches?matchday=${currentMatchday}`);
+  let data = await fdFetch(`competitions/${EPL_CODE}/matches?matchday=${matchday}`);
   let matches = data.matches || [];
 
-  // If all matches in this matchday are FINISHED, try the next one
+  // If all matches in this matchday are FINISHED and we're auto-detecting, try the next one
   const allFinished = matches.every(m => m.status === 'FINISHED');
-  let matchday = currentMatchday;
 
-  if (allFinished && currentMatchday < 38) {
-    matchday = currentMatchday + 1;
+  if (allFinished && !requestedMatchday && matchday < 38) {
+    matchday = matchday + 1;
     await delay();
     data = await fdFetch(`competitions/${EPL_CODE}/matches?matchday=${matchday}`);
     matches = data.matches || [];
   }
 
-  // Filter out finished matches
+  // When auto-detecting, filter out finished matches.
+  // When admin explicitly requested a matchday, show ALL matches (they may want to see the full round).
   const finishedStatuses = new Set(['FINISHED', 'AWARDED']);
-  const upcoming = matches.filter(m => !finishedStatuses.has(m.status));
+  const upcoming = requestedMatchday
+    ? matches  // Show all when explicitly requested
+    : matches.filter(m => !finishedStatuses.has(m.status));
 
   const round = `Matchweek ${matchday}`;
 
@@ -371,7 +383,9 @@ exports.handler = async (event) => {
 
     if (action === 'list') {
       if (event.httpMethod !== 'GET') return resp(405, 'GET only for action=list');
-      const result = await listFixtures();
+      const mdParam = url.searchParams.get('matchday');
+      const requestedMatchday = mdParam ? Number(mdParam) : null;
+      const result = await listFixtures(requestedMatchday);
       return resp(200, result);
     }
 

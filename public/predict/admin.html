@@ -872,7 +872,11 @@ function initAdminUI() {
 
       <!-- API mode -->
       <div id="seedApiMode">
-        <button class="btn" id="fetchFixturesBtn">Fetch Next Matchweek Fixtures</button>
+        <div class="row" style="margin-bottom:8px;align-items:flex-end">
+          <div><label>EPL Matchday (1-38)</label><input id="apiMatchday" type="number" min="1" max="38" step="1" placeholder="auto" style="width:80px"/></div>
+          <button class="btn" id="fetchFixturesBtn">Fetch Matchweek Fixtures</button>
+        </div>
+        <div style="font-size:11px;color:#999;margin-bottom:6px">Leave blank to auto-detect the next unplayed matchweek</div>
         <div id="seedStatus" style="display:none;margin-top:8px"></div>
         <div class="fix-count" id="fixCount" style="margin-top:8px">0/5 selected</div>
         <div id="fixtureGrid" class="fix-grid"></div>
@@ -1060,7 +1064,9 @@ function setupEventListeners() {
   $('fetchFixturesBtn').onclick = () => withLoading($('fetchFixturesBtn'), async () => {
     try {
       setSeedStatus('');
-      const data = await adminFetch('/api-football-fixtures?action=list');
+      const mdInput = $('apiMatchday').value.trim();
+      const mdParam = mdInput ? `&matchday=${encodeURIComponent(mdInput)}` : '';
+      const data = await adminFetch(`/api-football-fixtures?action=list${mdParam}`);
       fetchedFixtures = data.fixtures || [];
       selectedFixtureIds = new Set();
       enrichmentMap = {};
@@ -1072,7 +1078,9 @@ function setupEventListeners() {
       }
 
       const roundLabel = data.round || 'Upcoming';
-      setSeedStatus(`${roundLabel} — ${fetchedFixtures.length} fixtures (Season ${data.season})`, 'success');
+      // Auto-populate matchday input with what the API returned
+      if (data.matchday) $('apiMatchday').value = data.matchday;
+      setSeedStatus(`${roundLabel} — ${fetchedFixtures.length} fixtures`, 'success');
       renderFixtureGrid();
     } catch (e) {
       setSeedStatus(`Failed to fetch fixtures: ${e.message}`, 'error');
