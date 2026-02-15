@@ -44,12 +44,18 @@ Scrapes current-season (2025/26) player stats from FBref.com and upserts them in
 
 These issues were discovered during the first ingestion (Feb 2026) and fixes were applied. The `genUid()` function now handles all of these automatically — future runs should work cleanly.
 
-### 0. Bullseye View Missing Current Season Data (CRITICAL)
+### 0. Bullseye View Missing Current Season Data (CRITICAL — one-time fix)
 **Problem:** The Bullseye game (`match_start.js`) queries `v_game_player_club_comp` for club/country/continent categories. This view originally read from `player_club_total_competition` — a pre-aggregated rollup table with ONLY historical data. Current season stats never flowed through to the game.
 **Fix:** Redefined `v_game_player_club_comp` to aggregate from `v_all_player_season_stats` (which includes both historical + current data). See `sql/003_fix_bullseye_view.sql`. Run this once in Supabase SQL Editor.
 **Note:** All OTHER games (HoL, XI, Quiz, Who Am I, Alphabet) already query `v_all_player_season_stats` directly and were unaffected.
 
-### 1. Nationality Format Mismatch (BIGGEST ISSUE)
+### 0b. UID Mismatch Between Current Season and Historical Data (CRITICAL — run after each ingestion)
+**Problem:** Even after `genUid()` normalizes nationality to single-nat format, the historical data itself uses INCONSISTENT UID formats. For example, Saka's historical PL data is under `bukayo saka|eng eng|2002` while FBref gives `bukayo saka|eng|2001`. The `genUid()` fix produces UIDs that match the `players` table but NOT necessarily the historical `player_season_stats` table.
+**Impact:** ~320 players (out of ~2,750 current season rows) had their current season stats show separately from historical data in games.
+**Fix:** After each ingestion, run the UID remap SQL in `sql/003_fix_bullseye_view.sql` (Fix 2). This finds current season rows with no matching historical data in the same competition, looks up the best historical UID by player name, and updates the current season UID to match.
+**Important:** This should be run AFTER every weekly ingestion, not just once.
+
+### 1. Nationality Format Mismatch
 **Problem:** FBref gives nationality as two codes (e.g., `eng eng`, `fr fra`, `br bra`, `us usa`). Historical data uses just ONE code (e.g., `eng`, `fra`, `bra`, `usa`). This caused ~80% of current season UIDs to NOT match any historical player.
 **Example:** FBref UID `bukayo saka|eng eng|2001` vs historical `bukayo saka|eng|2001`
 **Fix:** The `genUid()` function now extracts only the LAST nationality code: `nat.split(' ').pop()`.
