@@ -7,12 +7,18 @@
  * and upserts into Supabase `current_season_player_stats` table.
  *
  * Usage:
- *   node scripts/ingest_current_season.js [--league <league>] [--dry-run]
+ *   node scripts/ingest_current_season.js [--league <league>] [--dry-run] [--local]
  *
  * Options:
  *   --league <name>   Only ingest one league (epl|laliga|seriea|bundesliga|ligue1|ucl)
  *   --dry-run         Parse and log but don't write to Supabase
  *   --verbose         Extra logging
+ *   --local           Read HTML from data/fbref/ instead of fetching from FBref
+ *
+ * Local mode workflow:
+ *   1. Run with --local and it will tell you which pages to save
+ *   2. Save each FBref page as HTML from your browser to data/fbref/
+ *   3. Run again with --local to process the saved files
  *
  * Prerequisites:
  *   npm install cheerio node-fetch@2
@@ -22,6 +28,8 @@
  */
 
 const cheerio = require('cheerio');
+const fs = require('fs');
+const path = require('path');
 const fetch = require('node-fetch');
 
 // ─── Configuration ───────────────────────────────────────────────────────────
@@ -189,14 +197,42 @@ function generatePlayerUid(name, nationality, birthYear) {
 
 // ─── HTML Fetching ───────────────────────────────────────────────────────────
 
-async function fetchPage(url) {
+// Local file directory for --local mode
+const LOCAL_DIR = path.join(__dirname, '..', 'data', 'fbref');
+
+function getLocalFilename(leagueKey, pageType) {
+  return path.join(LOCAL_DIR, `${leagueKey}_${pageType}.html`);
+}
+
+async function fetchPage(url, opts = {}) {
+  if (opts.localFile) {
+    if (!fs.existsSync(opts.localFile)) {
+      throw new Error(`Local file not found: ${opts.localFile}\n    Save the page from your browser: ${url}\n    Save as: ${opts.localFile}`);
+    }
+    console.log(`  Reading local: ${opts.localFile}`);
+    return fs.readFileSync(opts.localFile, 'utf-8');
+  }
+
   console.log(`  Fetching: ${url}`);
   const res = await fetch(url, {
     headers: {
-      'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-      'Accept': 'text/html,application/xhtml+xml',
-      'Accept-Language': 'en-US,en;q=0.9',
+      'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+      'Accept-Language': 'en-GB,en-US;q=0.9,en;q=0.8',
+      'Accept-Encoding': 'gzip, deflate, br',
+      'Cache-Control': 'no-cache',
+      'Pragma': 'no-cache',
+      'Sec-Ch-Ua': '"Google Chrome";v="131", "Chromium";v="131", "Not_A Brand";v="24"',
+      'Sec-Ch-Ua-Mobile': '?0',
+      'Sec-Ch-Ua-Platform': '"macOS"',
+      'Sec-Fetch-Dest': 'document',
+      'Sec-Fetch-Mode': 'navigate',
+      'Sec-Fetch-Site': 'none',
+      'Sec-Fetch-User': '?1',
+      'Upgrade-Insecure-Requests': '1',
+      'Connection': 'keep-alive',
     },
+    redirect: 'follow',
   });
   if (!res.ok) throw new Error(`HTTP ${res.status} for ${url}`);
   return res.text();
@@ -379,25 +415,27 @@ async function ingestLeague(leagueKey, opts = {}) {
   console.log(`Ingesting: ${league.name} (FBref comp ${league.fbref} → Supabase comp ${league.compId})`);
   console.log(`${'='.repeat(60)}`);
 
+  const useLocal = opts.useLocal || false;
+
   // 1. Fetch standard stats
   const statsUrl = `${FBREF_BASE}/${league.fbref}/${PAGE_TYPES.stats.path}/${league.slug}`;
-  const statsHtml = await fetchPage(statsUrl);
+  const statsHtml = await fetchPage(statsUrl, useLocal ? { localFile: getLocalFilename(leagueKey, 'stats') } : {});
   const players = parseStandardStats(statsHtml);
   console.log(`  Parsed ${players.length} players from standard stats`);
 
-  await sleep(REQUEST_DELAY_MS);
+  if (!useLocal) await sleep(REQUEST_DELAY_MS);
 
   // 2. Fetch keeper stats
   const keepersUrl = `${FBREF_BASE}/${league.fbref}/${PAGE_TYPES.keepers.path}/${league.slug}`;
-  const keepersHtml = await fetchPage(keepersUrl);
+  const keepersHtml = await fetchPage(keepersUrl, useLocal ? { localFile: getLocalFilename(leagueKey, 'keepers') } : {});
   const keepers = parseKeeperStats(keepersHtml);
   console.log(`  Parsed ${Object.keys(keepers).length} keepers`);
 
-  await sleep(REQUEST_DELAY_MS);
+  if (!useLocal) await sleep(REQUEST_DELAY_MS);
 
   // 3. Fetch defense stats
   const defenseUrl = `${FBREF_BASE}/${league.fbref}/${PAGE_TYPES.defense.path}/${league.slug}`;
-  const defenseHtml = await fetchPage(defenseUrl);
+  const defenseHtml = await fetchPage(defenseUrl, useLocal ? { localFile: getLocalFilename(leagueKey, 'defense') } : {});
   const defense = parseDefenseStats(defenseHtml);
   console.log(`  Parsed ${Object.keys(defense).length} players with defense stats`);
 
@@ -561,14 +599,55 @@ async function main() {
   const args = process.argv.slice(2);
   const dryRun = args.includes('--dry-run');
   const verbose = args.includes('--verbose');
+  const useLocal = args.includes('--local');
   const leagueIdx = args.indexOf('--league');
   const specificLeague = leagueIdx >= 0 ? args[leagueIdx + 1] : null;
+
+  const mode = dryRun ? 'DRY RUN' : useLocal ? 'LOCAL FILES' : 'LIVE (fetch)';
 
   console.log('╔══════════════════════════════════════════════════════════════╗');
   console.log('║  FBref → Supabase Current Season Ingestion                  ║');
   console.log(`║  Season: ${SEASON_LABEL}                                           ║`);
-  console.log(`║  Mode: ${dryRun ? 'DRY RUN' : 'LIVE'}                                             ║`);
+  console.log(`║  Mode: ${mode.padEnd(49)}║`);
   console.log('╚══════════════════════════════════════════════════════════════╝');
+
+  // In local mode, check/create directory and list needed files
+  if (useLocal) {
+    if (!fs.existsSync(LOCAL_DIR)) {
+      fs.mkdirSync(LOCAL_DIR, { recursive: true });
+      console.log(`\n  Created directory: ${LOCAL_DIR}`);
+    }
+
+    const leagueKeys = specificLeague ? [specificLeague] : Object.keys(LEAGUES);
+    const missingFiles = [];
+    const pageTypes = ['stats', 'keepers', 'defense'];
+
+    console.log('\n  Checking for local HTML files...');
+    for (const lk of leagueKeys) {
+      const league = LEAGUES[lk];
+      for (const pt of pageTypes) {
+        const filePath = getLocalFilename(lk, pt);
+        const url = `${FBREF_BASE}/${league.fbref}/${PAGE_TYPES[pt].path}/${league.slug}`;
+        if (!fs.existsSync(filePath)) {
+          missingFiles.push({ file: filePath, url, league: league.name, type: pt });
+        }
+      }
+    }
+
+    if (missingFiles.length > 0) {
+      console.log(`\n  ⚠ ${missingFiles.length} file(s) missing. Save these pages from your browser:\n`);
+      for (const mf of missingFiles) {
+        console.log(`  ${mf.league} (${mf.type}):`);
+        console.log(`    URL:  ${mf.url}`);
+        console.log(`    Save: ${mf.file}\n`);
+      }
+      console.log('  Tip: In Chrome, use Ctrl+S / Cmd+S → "Webpage, Complete" and rename to the filename above.');
+      console.log('  Then re-run this command.\n');
+      process.exit(0);
+    }
+
+    console.log('  ✓ All local files found. Proceeding...\n');
+  }
 
   if (!dryRun) {
     if (!SUPABASE_URL || !SUPABASE_KEY) {
@@ -590,7 +669,7 @@ async function main() {
 
   for (const key of leagueKeys) {
     try {
-      results[key] = await ingestLeague(key, { dryRun, verbose });
+      results[key] = await ingestLeague(key, { dryRun, verbose, useLocal });
     } catch (err) {
       console.error(`\nERROR processing ${key}: ${err.message}`);
       if (verbose) console.error(err.stack);
