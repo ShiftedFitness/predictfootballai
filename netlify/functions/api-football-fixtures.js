@@ -9,7 +9,8 @@
  * Env:  API_FOOTBALL_KEY
  */
 
-const API_BASE = process.env.API_FOOTBALL_URL || 'https://v3.football.api-sports.io';
+const rawBase = process.env.API_FOOTBALL_URL || 'https://v3.football.api-sports.io';
+const API_BASE = rawBase.startsWith('http') ? rawBase : `https://${rawBase}`;
 const EPL_LEAGUE_ID = 39;
 
 // Determine current EPL season year: Aug–May → if month >= 8, season = thisYear; else lastYear

@@ -1,0 +1,8 @@
+[build]
+  functions = "netlify/functions"
+  publish = "public"
+
+# Auto-score: runs daily at 22:00 UTC (10pm) and 07:00 UTC (7am)
+# Covers evening matches (checked next morning) and afternoon matches (checked same evening)
+[functions."auto-score"]
+  schedule = "0 7,22 * * *"
