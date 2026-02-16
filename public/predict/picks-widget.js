@@ -269,7 +269,7 @@
     };
 
     // Colours for the distribution
-    const distColours = ['#cc3333', '#e65100', '#ff9800', '#fdd835', '#7CFC00', '#00e676'];
+    const distColours = ['#E05555', '#e65100', '#ff9800', '#fdd835', '#32FF7E', '#00E5FF'];
 
     let distHtml = '<div class="pf-dist-grid">';
     for (let i = 0; i <= 5; i++) {
