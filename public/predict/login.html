@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>PredictFootball.ai – Log In</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: #111; color: #fff;
+    font-family: Inter, system-ui, Arial;
+    display: flex; justify-content: center; align-items: flex-start; min-height: 100vh;
+  }
+  .wrap {
+    max-width: 420px; width: 100%; margin: 48px 16px;
+    background: #30A278; border-radius: 14px; padding: 28px 24px;
+  }
+  h1 { margin: 0 0 4px; font-size: 22px; }
+  .subtitle { opacity: .8; font-size: 14px; margin-bottom: 24px; }
+
+  .form-group { margin-bottom: 16px; }
+  label { display: block; font-size: 13px; margin-bottom: 4px; opacity: .9; }
+  input[type="email"], input[type="password"] {
+    width: 100%; padding: 12px 14px; border: 1px solid rgba(255,255,255,.3);
+    border-radius: 10px; background: rgba(0,0,0,.25); color: #fff;
+    font-size: 15px; outline: none;
+  }
+  input::placeholder { color: rgba(255,255,255,.5); }
+  input:focus { border-color: #fff; }
+
+  .btn {
+    width: 100%; padding: 13px; border: none; border-radius: 10px;
+    font-size: 15px; font-weight: 800; cursor: pointer;
+    transition: opacity .15s;
+  }
+  .btn:hover { opacity: .9; }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+  .btn-primary { background: #fff; color: #000; }
+  .btn-secondary { background: rgba(0,0,0,.3); color: #fff; border: 1px solid rgba(255,255,255,.3); }
+
+  .divider {
+    display: flex; align-items: center; gap: 12px;
+    margin: 20px 0; font-size: 13px; opacity: .7;
+  }
+  .divider::before, .divider::after {
+    content: ''; flex: 1; height: 1px; background: rgba(255,255,255,.3);
+  }
+
+  .link-btn {
+    background: none; border: none; color: #fff; font-size: 13px;
+    text-decoration: underline; cursor: pointer; padding: 0; opacity: .85;
+  }
+  .link-btn:hover { opacity: 1; }
+
+  .msg { padding: 10px 14px; border-radius: 8px; font-size: 14px; margin-bottom: 16px; display: none; }
+  .msg-error { background: rgba(255,50,50,.25); border: 1px solid rgba(255,50,50,.4); }
+  .msg-success { background: rgba(50,255,100,.2); border: 1px solid rgba(50,255,100,.35); }
+
+  .views > div { display: none; }
+  .views > div.active { display: block; }
+
+  .footer { margin-top: 20px; text-align: center; font-size: 12px; opacity: .6; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <h1>PredictFootball.ai</h1>
+  <p class="subtitle">Sign in to make your picks</p>
+
+  <!-- Messages -->
+  <div id="msgError" class="msg msg-error"></div>
+  <div id="msgSuccess" class="msg msg-success"></div>
+
+  <div class="views">
+
+    <!-- LOGIN VIEW -->
+    <div id="viewLogin" class="active">
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="loginEmail">Email</label>
+          <input type="email" id="loginEmail" placeholder="your@email.com" required autocomplete="email"/>
+        </div>
+        <div class="form-group">
+          <label for="loginPass">Password</label>
+          <input type="password" id="loginPass" placeholder="Password" required autocomplete="current-password"/>
+        </div>
+        <button type="submit" class="btn btn-primary" id="loginBtn">Sign In</button>
+      </form>
+
+      <div style="margin-top:12px; text-align:right;">
+        <button class="link-btn" onclick="showView('forgot')">Forgot password?</button>
+      </div>
+
+      <div class="divider">or</div>
+
+      <button class="btn btn-secondary" id="magicBtn" onclick="sendMagicLink()">
+        Send me a magic link instead
+      </button>
+    </div>
+
+    <!-- FORGOT PASSWORD VIEW -->
+    <div id="viewForgot">
+      <p style="margin:0 0 16px; font-size:14px;">
+        Enter your email and we'll send you a link to set a new password.
+      </p>
+      <form id="forgotForm">
+        <div class="form-group">
+          <label for="forgotEmail">Email</label>
+          <input type="email" id="forgotEmail" placeholder="your@email.com" required autocomplete="email"/>
+        </div>
+        <button type="submit" class="btn btn-primary" id="forgotBtn">Send Reset Link</button>
+      </form>
+      <div style="margin-top:12px;">
+        <button class="link-btn" onclick="showView('login')">Back to sign in</button>
+      </div>
+    </div>
+
+    <!-- MAGIC LINK SENT VIEW -->
+    <div id="viewMagicSent">
+      <p style="font-size:15px; line-height:1.5;">
+        Check your inbox for a magic link. Click the link in the email to sign in — no password needed.
+      </p>
+      <button class="btn btn-secondary" onclick="showView('login')" style="margin-top:8px;">Back to sign in</button>
+    </div>
+
+    <!-- RESET SENT VIEW -->
+    <div id="viewResetSent">
+      <p style="font-size:15px; line-height:1.5;">
+        Password reset email sent. Check your inbox and follow the link to set a new password.
+      </p>
+      <button class="btn btn-secondary" onclick="showView('login')" style="margin-top:8px;">Back to sign in</button>
+    </div>
+
+  </div>
+
+  <div class="footer">PredictFootball.ai</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/predict/auth.js"></script>
+<script>
+(async function () {
+  const sb = PFAuth.supabase;
+  const qs = new URLSearchParams(location.search);
+  const redirectTo = qs.get('redirect') || '/predict/';
+
+  // If already logged in, redirect immediately
+  const { data: { session } } = await sb.auth.getSession();
+  if (session && session.user) {
+    // Verify they have a predict_users row
+    const { data: row } = await sb
+      .from('predict_users')
+      .select('id')
+      .eq('email', session.user.email)
+      .maybeSingle();
+    if (row) {
+      location.href = redirectTo;
+      return;
+    }
+  }
+
+  // Listen for auth state changes (handles magic link & password reset callbacks)
+  sb.auth.onAuthStateChange(async (event, session) => {
+    if ((event === 'SIGNED_IN' || event === 'PASSWORD_RECOVERY') && session) {
+      // If this is a password recovery, redirect to update password flow
+      if (event === 'PASSWORD_RECOVERY') {
+        showView('updatePassword');
+        return;
+      }
+      // Normal sign-in — redirect
+      await handleSuccessfulAuth(session);
+    }
+  });
+
+  /* ---- Helpers ---- */
+  function showMsg(type, text) {
+    const errEl = document.getElementById('msgError');
+    const sucEl = document.getElementById('msgSuccess');
+    errEl.style.display = 'none';
+    sucEl.style.display = 'none';
+    if (type === 'error') { errEl.textContent = text; errEl.style.display = 'block'; }
+    if (type === 'success') { sucEl.textContent = text; sucEl.style.display = 'block'; }
+  }
+
+  function clearMsg() {
+    document.getElementById('msgError').style.display = 'none';
+    document.getElementById('msgSuccess').style.display = 'none';
+  }
+
+  async function handleSuccessfulAuth(session) {
+    const email = session.user.email;
+    const { data: row } = await sb
+      .from('predict_users')
+      .select('id, email, username, full_name, is_admin')
+      .eq('email', email)
+      .maybeSingle();
+
+    if (!row) {
+      showMsg('error', 'Your email is not registered in the game. Contact the admin.');
+      await sb.auth.signOut();
+      return;
+    }
+
+    // Cache user info
+    localStorage.setItem('pf_user', JSON.stringify({
+      userId: row.id,
+      email: row.email,
+      username: row.username,
+      fullName: row.full_name,
+      isAdmin: row.is_admin
+    }));
+
+    location.href = redirectTo;
+  }
+
+  /* ---- Views ---- */
+  window.showView = function (name) {
+    clearMsg();
+    document.querySelectorAll('.views > div').forEach(d => d.classList.remove('active'));
+    const el = document.getElementById('view' + name.charAt(0).toUpperCase() + name.slice(1));
+    if (el) el.classList.add('active');
+  };
+
+  /* ---- Login form ---- */
+  document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearMsg();
+    const email = document.getElementById('loginEmail').value.trim();
+    const pass = document.getElementById('loginPass').value;
+    const btn = document.getElementById('loginBtn');
+
+    btn.disabled = true;
+    btn.textContent = 'Signing in…';
+
+    const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
+
+    btn.disabled = false;
+    btn.textContent = 'Sign In';
+
+    if (error) {
+      showMsg('error', error.message === 'Invalid login credentials'
+        ? 'Invalid email or password. Try "Forgot password" or a magic link if this is your first time.'
+        : error.message);
+      return;
+    }
+
+    await handleSuccessfulAuth(data.session);
+  });
+
+  /* ---- Forgot password form ---- */
+  document.getElementById('forgotForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearMsg();
+    const email = document.getElementById('forgotEmail').value.trim();
+    const btn = document.getElementById('forgotBtn');
+
+    btn.disabled = true;
+    btn.textContent = 'Sending…';
+
+    const { error } = await sb.auth.resetPasswordForEmail(email, {
+      redirectTo: location.origin + '/predict/login.html'
+    });
+
+    btn.disabled = false;
+    btn.textContent = 'Send Reset Link';
+
+    if (error) {
+      showMsg('error', error.message);
+      return;
+    }
+
+    showView('resetSent');
+  });
+
+  /* ---- Magic link ---- */
+  window.sendMagicLink = async function () {
+    clearMsg();
+    const email = document.getElementById('loginEmail').value.trim();
+    if (!email) {
+      showMsg('error', 'Enter your email address first, then click "Send me a magic link".');
+      return;
+    }
+
+    const btn = document.getElementById('magicBtn');
+    btn.disabled = true;
+    btn.textContent = 'Sending…';
+
+    const { error } = await sb.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: location.origin + '/predict/login.html?redirect=' + encodeURIComponent(redirectTo) }
+    });
+
+    btn.disabled = false;
+    btn.textContent = 'Send me a magic link instead';
+
+    if (error) {
+      showMsg('error', error.message);
+      return;
+    }
+
+    showView('magicSent');
+  };
+})();
+</script>
+</body>
+</html>

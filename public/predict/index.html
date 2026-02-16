@@ -19,6 +19,8 @@
     <div class="panel" id="status">Loading…</div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/predict/auth.js"></script>
   <script src="/predict/picks-widget.js"></script>
 
   <script>
@@ -32,19 +34,12 @@
         statusEl.innerHTML = msg + (extra ? `<pre class="muted">${extra}</pre>` : '');
       };
 
+      // Authenticate via Supabase (falls back to ?userId= URL param for Adalo compat)
+      const userId = await PFAuth.initAuth();
+      PFAuth.renderNav();
+
       const qs = new URLSearchParams(location.search);
       const urlWeek = qs.get('week');
-      const urlUser = qs.get('userId');
-
-      // ✅ Hard stop if userId is missing/invalid
-      const userIdOk = (urlUser && urlUser !== 'undefined' && urlUser !== 'null' && String(urlUser).trim() !== '');
-      if (!userIdOk) {
-        setStatus(
-          `<strong>You need to log in to see and submit picks.</strong><br/><span class="muted">Please return to the app and log in, then open Picks again.</span>`
-        );
-        return;
-      }
-      const userId = String(urlUser).trim();
 
       // Wait for widget to load
       async function waitForWidget(ms = 8000) {

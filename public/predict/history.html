@@ -34,6 +34,8 @@
 </style>
 </head>
 <body>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/predict/auth.js"></script>
   <div class="wrap">
     <h2>Historical Results</h2>
 
@@ -82,15 +84,15 @@
 <script>
 const base = '/.netlify/functions';
 const qs   = new URLSearchParams(location.search);
-const userId      = qs.get('userId') || '';      // REQUIRED
-const currentWeek = qs.get('week') || '';        // defaulting seed
-const compareIdQ  = qs.get('compareId') || '1';  // default AI=1
+let userId         = qs.get('userId') || '';
+const currentWeek  = qs.get('week') || '';
+const compareIdQ   = qs.get('compareId') || '1';
 
-if (!userId) {
-  document.body.innerHTML = '<div style="padding:24px;color:#fff;font-family:Inter,system-ui,Arial">Missing userId in URL</div>';
-} else {
+(async () => {
+  userId = await PFAuth.initAuth();
+  PFAuth.renderNav();
   load({ currentWeek, viewWeek: qs.get('viewWeek'), compareId: compareIdQ });
-}
+})();
 
 async function fetchJSON(u){ const r = await fetch(u, { cache:'no-store' }); if(!r.ok) throw new Error(await r.text()); return r.json(); }
 
