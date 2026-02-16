@@ -273,7 +273,7 @@ body {
 
   <div class="header">
     <h1>Pop <span>Quiz</span></h1>
-    <div class="subtitle">5 questions. Easy to hard. All from real data.</div>
+    <div class="subtitle">10 questions. Easy to hard. All from real data.</div>
   </div>
 
   <!-- STEP 1: SETUP -->
@@ -488,6 +488,9 @@ async function startQuiz() {
     $('step1').classList.add('hidden');
     $('step2').classList.remove('hidden');
     $('step3').classList.add('hidden');
+
+    // Scroll to top so quiz is visible
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 
     showQuestion();
 

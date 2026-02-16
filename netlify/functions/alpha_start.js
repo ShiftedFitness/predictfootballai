@@ -2,7 +2,7 @@
  * alpha_start.js — Player Alphabet game backend
  *
  * Endpoints (via `action` field in POST body):
- *   get_scopes      → Returns available scopes (clubs)
+ *   get_scopes      → Returns available scopes (clubs) grouped by league
  *   get_alphabet     → Returns available letters + player counts + players per letter
  */
 
@@ -15,18 +15,144 @@ function respond(code, body) {
   return { statusCode: code, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) };
 }
 
-const SCOPES = [
-  { id: 'epl_alltime', label: 'Premier League (All-time)', type: 'league', clubName: null },
-  { id: 'club_liverpool',   label: 'Liverpool',      type: 'club', clubName: 'Liverpool' },
-  { id: 'club_arsenal',     label: 'Arsenal',        type: 'club', clubName: 'Arsenal' },
-  { id: 'club_chelsea',     label: 'Chelsea',        type: 'club', clubName: 'Chelsea' },
-  { id: 'club_manutd',      label: 'Man Utd',        type: 'club', clubName: 'Manchester United' },
-  { id: 'club_sunderland',  label: 'Sunderland',     type: 'club', clubName: 'Sunderland' },
+// ============================================================
+// CLUB LISTS PER LEAGUE (mirrors match_start.js)
+// ============================================================
+
+const EPL_CLUBS = [
+  'Arsenal', 'Aston Villa', 'Blackburn Rovers', 'Bolton Wanderers', 'Bournemouth',
+  'Brentford', 'Brighton', 'Burnley', 'Charlton Athletic', 'Chelsea',
+  'Coventry City', 'Crystal Palace', 'Derby County', 'Everton', 'Fulham',
+  'Ipswich Town', 'Leeds United', 'Leicester City', 'Liverpool', 'Manchester City',
+  'Manchester United', 'Middlesbrough', 'Newcastle United', 'Norwich City',
+  'Nottingham Forest', 'Portsmouth', 'Queens Park Rangers', 'Reading',
+  'Sheffield United', 'Sheffield Wednesday', 'Southampton', 'Stoke City',
+  'Sunderland', 'Swansea City', 'Tottenham Hotspur', 'Watford',
+  'West Bromwich Albion', 'West Ham United', 'Wigan Athletic', 'Wimbledon',
+  'Wolverhampton Wanderers',
 ];
+
+const LALIGA_CLUBS = [
+  'Athletic Club', 'Valencia', 'Barcelona', 'Real Madrid', 'Atlético Madrid',
+  'Sevilla', 'Real Sociedad', 'Espanyol', 'Real Betis', 'Celta Vigo',
+  'Villarreal', 'Dep La Coruña', 'Osasuna', 'Mallorca', 'Valladolid',
+  'Getafe', 'Zaragoza', 'Rayo Vallecano', 'Racing Sant', 'Málaga',
+  'Alavés', 'Levante', 'Sporting Gijón', 'Granada', 'Tenerife',
+];
+
+const BUNDESLIGA_CLUBS = [
+  'Bayern Munich', 'Dortmund', 'Leverkusen', 'Werder Bremen', 'Stuttgart',
+  'Gladbach', 'Schalke 04', 'Wolfsburg', 'Eintracht Frankfurt', 'Hamburger SV',
+  'Freiburg', 'Hertha BSC', 'Köln', 'Mainz 05', 'Hoffenheim',
+  'Bochum', 'Hannover 96', 'Nürnberg', 'Augsburg', 'Kaiserslautern',
+  'Arminia', 'Hansa Rostock', '1860 Munich', 'RB Leipzig', 'MSV Duisburg',
+];
+
+const SERIEA_CLUBS = [
+  'Lazio', 'Inter', 'Milan', 'Roma', 'Udinese',
+  'Juventus', 'Fiorentina', 'Atalanta', 'Cagliari', 'Sampdoria',
+  'Bologna', 'Napoli', 'Parma', 'Torino', 'Genoa',
+  'Chievo', 'Empoli', 'Lecce', 'Hellas Verona', 'Palermo',
+  'Sassuolo', 'Brescia', 'Siena', 'Reggina', 'Catania',
+];
+
+const LIGUE1_CLUBS = [
+  'Rennes', 'Lyon', 'Paris Saint-Germain', 'Marseille', 'Monaco',
+  'Lille', 'Bordeaux', 'Nice', 'Nantes', 'Montpellier',
+  'Toulouse', 'Saint-Étienne', 'Lens', 'Strasbourg', 'Auxerre',
+  'Metz', 'Lorient', 'Bastia', 'Sochaux', 'Guingamp',
+  'Nancy', 'Reims', 'Caen', 'Troyes', 'Angers',
+];
+
+// ============================================================
+// SCOPE DEFINITIONS
+// ============================================================
+
+const LEAGUES = [
+  { key: 'epl', name: 'Premier League', competitionName: 'Premier League', clubs: EPL_CLUBS },
+  { key: 'laliga', name: 'La Liga', competitionName: 'La Liga', clubs: LALIGA_CLUBS },
+  { key: 'seriea', name: 'Serie A', competitionName: 'Serie A', clubs: SERIEA_CLUBS },
+  { key: 'bundesliga', name: 'Bundesliga', competitionName: 'Bundesliga', clubs: BUNDESLIGA_CLUBS },
+  { key: 'ligue1', name: 'Ligue 1', competitionName: 'Ligue 1', clubs: LIGUE1_CLUBS },
+];
+
+function buildScopes() {
+  const scopes = [];
+  for (const league of LEAGUES) {
+    scopes.push({
+      id: `${league.key}_alltime`,
+      label: `${league.name} (All-time)`,
+      type: 'league',
+      league: league.key,
+      competitionName: league.competitionName,
+      clubName: null,
+    });
+    for (const club of league.clubs) {
+      const slug = club.toLowerCase().replace(/[^a-z0-9]+/g, '').replace(/^the/, '');
+      scopes.push({
+        id: `${league.key}_club_${slug}`,
+        label: club.replace('Wolverhampton Wanderers', 'Wolves')
+          .replace('Tottenham Hotspur', 'Spurs')
+          .replace('Manchester United', 'Man Utd')
+          .replace('Manchester City', 'Man City')
+          .replace('Newcastle United', 'Newcastle')
+          .replace('West Bromwich Albion', 'West Brom')
+          .replace('West Ham United', 'West Ham')
+          .replace('Sheffield Wednesday', 'Sheff Wed')
+          .replace('Sheffield United', 'Sheff Utd')
+          .replace('Queens Park Rangers', 'QPR')
+          .replace('Nottingham Forest', 'Nottm Forest')
+          .replace('Brighton & Hove Albion', 'Brighton')
+          .replace('Paris Saint-Germain', 'PSG')
+          .replace('Eintracht Frankfurt', 'Frankfurt')
+          .replace('Atlético Madrid', 'Atlético'),
+        type: 'club',
+        league: league.key,
+        competitionName: league.competitionName,
+        clubName: club,
+      });
+    }
+  }
+  return scopes;
+}
+
+const SCOPES = buildScopes();
 
 const CLUB_NAME_ALIASES = {
   'Manchester United': ['Manchester Utd', 'Man United', 'Man Utd'],
+  'Manchester City': ['Man City'],
+  'Newcastle United': ['Newcastle Utd', 'Newcastle'],
+  'Tottenham Hotspur': ['Tottenham', 'Spurs'],
+  'West Ham United': ['West Ham'],
+  'West Bromwich Albion': ['West Brom'],
+  'Sheffield United': ['Sheffield Utd', 'Sheff Utd'],
+  'Sheffield Wednesday': ['Sheffield Weds', 'Sheff Wed'],
+  'Wolverhampton Wanderers': ['Wolves'],
+  'Brighton & Hove Albion': ['Brighton', 'Brighton and Hove Albion'],
+  'Blackburn Rovers': ['Blackburn'],
+  'Bolton Wanderers': ['Bolton'],
+  'Charlton Athletic': ['Charlton'],
+  'Coventry City': ['Coventry'],
+  'Derby County': ['Derby'],
+  'Ipswich Town': ['Ipswich'],
+  'Leeds United': ['Leeds'],
+  'Leicester City': ['Leicester'],
+  'Norwich City': ['Norwich'],
+  'Nottingham Forest': ['Nottm Forest', "Nott'm Forest"],
+  'Queens Park Rangers': ['QPR'],
+  'Stoke City': ['Stoke'],
+  'Swansea City': ['Swansea'],
+  'Wigan Athletic': ['Wigan'],
+  'Paris Saint-Germain': ['PSG'],
+  'Atlético Madrid': ['Atletico Madrid', 'Atletico'],
+  'Dep La Coruña': ['Deportivo'],
+  'Eintracht Frankfurt': ['Frankfurt'],
+  'Hamburger SV': ['Hamburg', 'HSV'],
 };
+
+// ============================================================
+// HELPERS
+// ============================================================
 
 async function getClubId(supabase, clubName) {
   let { data } = await supabase.from('clubs').select('club_id').eq('club_name', clubName).single();
@@ -38,7 +164,22 @@ async function getClubId(supabase, clubName) {
     ({ data } = await supabase.from('clubs').select('club_id').ilike('club_name', alias).limit(1));
     if (data && data.length > 0) return data[0].club_id;
   }
+  ({ data } = await supabase.from('clubs').select('club_id').ilike('club_name', `%${clubName}%`).limit(1));
+  if (data && data.length > 0) return data[0].club_id;
   return null;
+}
+
+const compIdCache = new Map();
+async function getCompetitionId(supabase, competitionName) {
+  if (compIdCache.has(competitionName)) return compIdCache.get(competitionName);
+  const { data } = await supabase
+    .from('competitions')
+    .select('competition_id')
+    .eq('competition_name', competitionName)
+    .single();
+  const id = data ? data.competition_id : null;
+  if (id) compIdCache.set(competitionName, id);
+  return id;
 }
 
 function fixMojibake(str) {
@@ -91,6 +232,10 @@ function getSurname(name) {
   return parts[parts.length - 1];
 }
 
+// ============================================================
+// HANDLER
+// ============================================================
+
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') return respond(405, { error: 'POST only' });
 
@@ -102,7 +247,8 @@ exports.handler = async (event) => {
 
   if (action === 'get_scopes') {
     return respond(200, {
-      scopes: SCOPES.map(s => ({ id: s.id, label: s.label, type: s.type })),
+      leagues: LEAGUES.map(l => ({ key: l.key, name: l.name })),
+      scopes: SCOPES.map(s => ({ id: s.id, label: s.label, type: s.type, league: s.league })),
     });
   }
 
@@ -114,18 +260,20 @@ exports.handler = async (event) => {
     if (!scope) return respond(400, { error: 'Unknown scope' });
 
     try {
+      const competitionId = await getCompetitionId(supabase, scope.competitionName);
+      if (!competitionId) return respond(400, { error: `Competition not found: ${scope.competitionName}` });
+
       let clubId = null;
       if (scope.type === 'club') {
         clubId = await getClubId(supabase, scope.clubName);
         if (!clubId) return respond(400, { error: `Club not found: ${scope.clubName}` });
       }
 
-      // Query player_season_stats by player_uid
       const buildQuery = () => {
         let q = supabase
           .from('v_all_player_season_stats')
           .select('player_uid, appearances')
-          .eq('competition_id', 7);
+          .eq('competition_id', competitionId);
         if (clubId) q = q.eq('club_id', clubId);
         return q;
       };

@@ -111,7 +111,7 @@ button {
 .stars { color: var(--gold); letter-spacing: 1px; font-size: 10px; }
 
 /* Loading screen with trivia */
-.loading-screen { text-align: center; padding: 20px 0; }
+.loading-screen { text-align: center; padding: 20px 0; position: relative; }
 .loading-spinner {
   width: 48px; height: 48px;
   border: 4px solid rgba(255,255,255,.1);
@@ -121,12 +121,17 @@ button {
   margin: 0 auto 16px;
 }
 .loading-spinner.ready { animation: none; border-color: var(--accent); background: rgba(74,222,128,.2); }
-.loading-spinner.ready::after { content: '✓'; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); font-size: 24px; color: var(--accent); }
-.loading-screen { position: relative; }
+.loading-spinner.ready::after { content: '\2713'; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); font-size: 24px; color: var(--accent); }
 .loading-spinner-wrap { position: relative; width: 48px; height: 48px; margin: 0 auto 16px; }
 @keyframes spin { to { transform: rotate(360deg); } }
 .loading-text { font-size: 16px; margin-bottom: 20px; }
 .loading-text.ready { color: var(--accent); }
+
+/* Retro loading animations */
+.retro-loader { font-family: 'Space Mono', monospace; margin: 0 auto 16px; text-align: center; min-height: 80px; display: flex; align-items: center; justify-content: center; flex-direction: column; }
+.retro-loader .retro-bar { font-size: 16px; letter-spacing: 2px; color: var(--accent-cyan); }
+.retro-loader .retro-label { font-size: 11px; color: var(--muted); margin-top: 8px; text-transform: uppercase; letter-spacing: 1px; }
+.retro-loader .retro-ascii { font-size: 14px; line-height: 1.2; color: var(--accent-yellow); white-space: pre; }
 .ready-badge {
   display: inline-block;
   background: var(--accent);
@@ -438,7 +443,36 @@ button {
 .chip-action { background: none; border: none; color: var(--muted); font-size: 11px; cursor: pointer; padding: 2px 6px; margin-left: 8px; text-decoration: underline; }
 .chip-action:hover { color: var(--accent); }
 
-/* Competition dividers */
+/* League groups (collapsible wrappers) */
+.league-group { margin-bottom: 8px; }
+.league-group-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 14px;
+  cursor: pointer;
+  background: var(--card-dark);
+  border-radius: 10px;
+  margin-bottom: 4px;
+  transition: background 0.15s;
+  border-left: 3px solid var(--accent-cyan);
+}
+.league-group-header:hover { background: rgba(255,255,255,0.05); }
+.league-group-header .lg-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--accent-cyan);
+  font-family: 'Space Mono', monospace;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.league-group-header .lg-icon { font-size: 16px; margin-right: 8px; }
+.league-group-header .lg-chev { opacity: 0.7; transition: transform 0.2s; font-size: 12px; }
+.league-group.open .league-group-header .lg-chev { transform: rotate(180deg); }
+.league-group-body { display: none; padding: 0 0 8px; }
+.league-group.open .league-group-body { display: block; }
+
+/* Competition dividers (kept for backward compat but hidden when inside league groups) */
 .competition-divider {
   font-size: 13px;
   font-weight: 700;
@@ -450,7 +484,12 @@ button {
   font-family: 'Space Mono', monospace;
   letter-spacing: 0.5px;
   text-transform: uppercase;
+  display: none;
 }
+
+/* Build Your Own highlight */
+.section.build-your-own { border: 1px solid var(--accent-yellow); }
+.section.build-your-own .section-header { background: rgba(255,193,7,0.06); }
 
 /* Chat builder */
 .chat-builder { padding: 4px 0; }
@@ -795,219 +834,18 @@ button {
     <h2>Choose Category</h2>
     <p class="subtitle">Select a game mode to start</p>
 
-    <h3 class="competition-divider">Premier League</h3>
-
-    <div class="section" id="sec-country">
-      <div class="section-header" onclick="toggleSection('sec-country')">
-        <div class="section-title">Countries <span class="section-count" id="countCountry">(0)</span></div>
-        <div class="chev">▼</div>
-      </div>
-      <div class="section-desc">Player appearances by country in Premier League history (up to 2024/25 season).<br><span style="color:var(--gold)">★</span> difficulty: more stars = harder (smaller player pool)</div>
-      <div class="section-body" id="countryGames"></div>
-    </div>
-
-    <div class="section" id="sec-continent">
-      <div class="section-header" onclick="toggleSection('sec-continent')">
-        <div class="section-title">Continents <span class="section-count" id="countContinent">(0)</span></div>
-        <div class="chev">▼</div>
-      </div>
-      <div class="section-desc">Player appearances grouped by continental region (up to 2024/25 season).<br><span style="color:var(--gold)">★</span> difficulty: more stars = harder (smaller player pool)</div>
-      <div class="section-body" id="continentGames"></div>
-    </div>
-
-    <div class="section" id="sec-club">
-      <div class="section-header" onclick="toggleSection('sec-club')">
-        <div class="section-title">Clubs (Apps) <span class="section-count" id="countClub">(0)</span></div>
-        <div class="chev">▼</div>
-      </div>
-      <div class="section-desc">Player appearances for each club in Premier League history (up to 2024/25 season).<br><span style="color:var(--gold)">★</span> difficulty: more stars = harder (smaller player pool)</div>
-      <div class="section-body" id="clubGames"></div>
-    </div>
-
-    <div class="section" id="sec-goals">
-      <div class="section-header" onclick="toggleSection('sec-goals')">
-        <div class="section-title">Goals <span class="section-count" id="countGoals">(0)</span></div>
-        <div class="chev">▼</div>
-      </div>
-      <div class="section-desc">Total Premier League goals (overall and by club) (up to 2024/25 season).<br><span style="color:var(--gold)">★</span> difficulty: more stars = harder (smaller player pool)</div>
-      <div class="section-body" id="goalsGames"></div>
-    </div>
-
-    <div class="section" id="sec-positions">
-      <div class="section-header" onclick="toggleSection('sec-positions')">
-        <div class="section-title">Positions (EPL Apps) <span class="section-count" id="countPositions">(0)</span></div>
-        <div class="chev">▼</div>
-      </div>
-      <div class="section-desc">Player appearances by position in Premier League history.<br><span style="color:var(--gold)">★</span> difficulty: more stars = harder (smaller player pool)</div>
-      <div class="section-body" id="positionGames"></div>
-    </div>
-
-    <div class="section" id="sec-age">
-      <div class="section-header" onclick="toggleSection('sec-age')">
-        <div class="section-title">Age (EPL Apps) <span class="section-count" id="countAge">(0)</span></div>
-        <div class="chev">▼</div>
-      </div>
-      <div class="section-desc">Player appearances by age bucket in Premier League history.<br><span style="color:var(--gold)">★</span> difficulty: more stars = harder (smaller player pool)</div>
-      <div class="section-body" id="ageGames"></div>
-    </div>
-
-    <div class="section" id="sec-chat-epl">
-      <div class="section-header" onclick="toggleSection('sec-chat-epl')">
-        <div class="section-title">💬 Build Your Own <span class="section-count">(EPL)</span></div>
-        <div class="chev">▼</div>
-      </div>
-      <div class="section-desc">Type what you want and we'll try to build it.</div>
-      <div class="section-body" id="chatBuilderEPL">
-        <div class="chat-builder">
-          <div class="field">
-            <label>Describe your game</label>
-            <textarea id="chatInputEPL" placeholder="e.g. English players who played for Sunderland, Man Utd, Liverpool and Spurs by appearances" rows="3"></textarea>
-          </div>
-          <div id="chatProposalEPL" class="chat-proposal hidden">
-            <div class="chat-proposal-header">Proposed Game</div>
-            <div class="chat-proposal-content" id="chatProposalContentEPL"></div>
-            <div class="chat-proposal-feasibility" id="chatFeasibilityEPL"></div>
-          </div>
-          <div id="chatWarningEPL" class="chat-warning hidden"></div>
-          <div class="chat-buttons">
-            <button class="btn-primary" id="submitChatEPL">Build</button>
-            <button class="btn-primary" id="startChatEPL" disabled style="display:none">Start Game</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <h3 class="competition-divider">Champions League</h3>
-
-    <div class="section" id="sec-ucl-apps">
-      <div class="section-header" onclick="toggleSection('sec-ucl-apps')">
-        <div class="section-title">UCL Appearances (Nationality) <span class="section-count" id="countUCLApps">(0)</span></div>
-        <div class="chev">▼</div>
-      </div>
-      <div class="section-desc">Champions League appearances by nationality.<br><span style="color:var(--gold)">★</span> difficulty: more stars = harder</div>
-      <div class="section-body" id="uclAppsGames"></div>
-    </div>
-
-    <div class="section" id="sec-ucl-goals">
-      <div class="section-header" onclick="toggleSection('sec-ucl-goals')">
-        <div class="section-title">UCL Goals (Nationality) <span class="section-count" id="countUCLGoals">(0)</span></div>
-        <div class="chev">▼</div>
-      </div>
-      <div class="section-desc">Champions League goals by nationality.<br><span style="color:var(--gold)">★</span> difficulty: more stars = harder</div>
-      <div class="section-body" id="uclGoalsGames"></div>
-    </div>
-
-    <div class="section" id="sec-ucl-clubs">
-      <div class="section-header" onclick="toggleSection('sec-ucl-clubs')">
-        <div class="section-title">UCL Appearances (Club) <span class="section-count" id="countUCLClubs">(0)</span></div>
-        <div class="chev">▼</div>
-      </div>
-      <div class="section-desc">Champions League appearances by club.<br><span style="color:var(--gold)">★</span> difficulty: more stars = harder</div>
-      <div class="section-body" id="uclClubsGames"></div>
-    </div>
-
-    <h3 class="competition-divider">La Liga</h3>
-
-    <div class="section" id="sec-laliga-apps">
-      <div class="section-header" onclick="toggleSection('sec-laliga-apps')">
-        <div class="section-title">La Liga Apps (Top 25 Clubs) <span class="section-count" id="countLaLigaApps">(0)</span></div>
-        <div class="chev">▼</div>
-      </div>
-      <div class="section-desc">Player appearances by club in La Liga history.<br><span style="color:var(--gold)">★</span> difficulty: more stars = harder</div>
-      <div class="section-body" id="laligaAppsGames"></div>
-    </div>
-
-    <div class="section" id="sec-laliga-goals">
-      <div class="section-header" onclick="toggleSection('sec-laliga-goals')">
-        <div class="section-title">La Liga Goals (Top 25 Clubs) <span class="section-count" id="countLaLigaGoals">(0)</span></div>
-        <div class="chev">▼</div>
-      </div>
-      <div class="section-desc">Player goals by club in La Liga history.<br><span style="color:var(--gold)">★</span> difficulty: more stars = harder</div>
-      <div class="section-body" id="laligaGoalsGames"></div>
-    </div>
-
-    <h3 class="competition-divider">Serie A</h3>
-
-    <div class="section" id="sec-seriea-apps">
-      <div class="section-header" onclick="toggleSection('sec-seriea-apps')">
-        <div class="section-title">Serie A Apps (Top 25 Clubs) <span class="section-count" id="countSerieAApps">(0)</span></div>
-        <div class="chev">▼</div>
-      </div>
-      <div class="section-desc">Player appearances by club in Serie A history.<br><span style="color:var(--gold)">★</span> difficulty: more stars = harder</div>
-      <div class="section-body" id="serieaAppsGames"></div>
-    </div>
-
-    <div class="section" id="sec-seriea-goals">
-      <div class="section-header" onclick="toggleSection('sec-seriea-goals')">
-        <div class="section-title">Serie A Goals (Top 25 Clubs) <span class="section-count" id="countSerieAGoals">(0)</span></div>
-        <div class="chev">▼</div>
-      </div>
-      <div class="section-desc">Player goals by club in Serie A history.<br><span style="color:var(--gold)">★</span> difficulty: more stars = harder</div>
-      <div class="section-body" id="serieaGoalsGames"></div>
-    </div>
-
-    <h3 class="competition-divider">Bundesliga</h3>
-
-    <div class="section" id="sec-bundesliga-apps">
-      <div class="section-header" onclick="toggleSection('sec-bundesliga-apps')">
-        <div class="section-title">Bundesliga Apps (Top 25 Clubs) <span class="section-count" id="countBundesligaApps">(0)</span></div>
-        <div class="chev">▼</div>
-      </div>
-      <div class="section-desc">Player appearances by club in Bundesliga history.<br><span style="color:var(--gold)">★</span> difficulty: more stars = harder</div>
-      <div class="section-body" id="bundesligaAppsGames"></div>
-    </div>
-
-    <div class="section" id="sec-bundesliga-goals">
-      <div class="section-header" onclick="toggleSection('sec-bundesliga-goals')">
-        <div class="section-title">Bundesliga Goals (Top 25 Clubs) <span class="section-count" id="countBundesligaGoals">(0)</span></div>
-        <div class="chev">▼</div>
-      </div>
-      <div class="section-desc">Player goals by club in Bundesliga history.<br><span style="color:var(--gold)">★</span> difficulty: more stars = harder</div>
-      <div class="section-body" id="bundesligaGoalsGames"></div>
-    </div>
-
-    <h3 class="competition-divider">Ligue 1</h3>
-
-    <div class="section" id="sec-ligue1-apps">
-      <div class="section-header" onclick="toggleSection('sec-ligue1-apps')">
-        <div class="section-title">Ligue 1 Apps (Top 25 Clubs) <span class="section-count" id="countLigue1Apps">(0)</span></div>
-        <div class="chev">▼</div>
-      </div>
-      <div class="section-desc">Player appearances by club in Ligue 1 history.<br><span style="color:var(--gold)">★</span> difficulty: more stars = harder</div>
-      <div class="section-body" id="ligue1AppsGames"></div>
-    </div>
-
-    <div class="section" id="sec-ligue1-goals">
-      <div class="section-header" onclick="toggleSection('sec-ligue1-goals')">
-        <div class="section-title">Ligue 1 Goals (Top 25 Clubs) <span class="section-count" id="countLigue1Goals">(0)</span></div>
-        <div class="chev">▼</div>
-      </div>
-      <div class="section-desc">Player goals by club in Ligue 1 history.<br><span style="color:var(--gold)">★</span> difficulty: more stars = harder</div>
-      <div class="section-body" id="ligue1GoalsGames"></div>
-    </div>
-
-    <h3 class="competition-divider">Special</h3>
-
-    <div class="section" id="sec-big5-british">
-      <div class="section-header" onclick="toggleSection('sec-big5-british')">
-        <div class="section-title">Big 5 British (ex EPL) <span class="section-count" id="countBig5British">(2)</span></div>
-        <div class="chev">▼</div>
-      </div>
-      <div class="section-desc">British players in top 5 leagues (La Liga, Serie A, Bundesliga, Ligue 1) excluding EPL.<br><span style="color:var(--gold)">★</span> difficulty: more stars = harder</div>
-      <div class="section-body" id="big5BritishGames"></div>
-    </div>
-
-    <div class="section" id="sec-chat-global">
+    <!-- Build Your Own (always visible, highlighted) -->
+    <div class="section build-your-own" id="sec-chat-global">
       <div class="section-header" onclick="toggleSection('sec-chat-global')">
-        <div class="section-title">💬 Build Your Own <span class="section-count">(Any League)</span></div>
-        <div class="chev">▼</div>
+        <div class="section-title">&#128172; Build Your Own</div>
+        <div class="chev">&#9660;</div>
       </div>
-      <div class="section-desc">Type what you want and we'll try to build it. Include the league name (La Liga, Serie A, etc.).</div>
+      <div class="section-desc">Type what you want and we'll build it. Works with any league.</div>
       <div class="section-body" id="chatBuilderGlobal">
         <div class="chat-builder">
           <div class="field">
-            <label>Describe your game (include competition)</label>
-            <textarea id="chatInputGlobal" placeholder="e.g. German players in Bundesliga for Bayern Munich and Dortmund by appearances" rows="3"></textarea>
+            <label>Describe your game</label>
+            <textarea id="chatInputGlobal" placeholder="e.g. English players who played for Sunderland, Man Utd, Liverpool and Spurs by appearances" rows="3"></textarea>
           </div>
           <div id="chatProposalGlobal" class="chat-proposal hidden">
             <div class="chat-proposal-header">Proposed Game</div>
@@ -1022,12 +860,238 @@ button {
         </div>
       </div>
     </div>
+
+    <!-- PREMIER LEAGUE -->
+    <div class="league-group open" id="lg-epl">
+      <div class="league-group-header" onclick="toggleLeague('lg-epl')">
+        <div><span class="lg-icon">&#127988;&#917607;&#917602;&#917605;&#917614;&#917607;&#917631;</span> <span class="lg-title">Premier League</span></div>
+        <div class="lg-chev">&#9660;</div>
+      </div>
+      <div class="league-group-body">
+        <div class="section" id="sec-country">
+          <div class="section-header" onclick="toggleSection('sec-country')">
+            <div class="section-title">Countries <span class="section-count" id="countCountry">(0)</span></div>
+            <div class="chev">&#9660;</div>
+          </div>
+          <div class="section-desc">Player appearances by country in Premier League history.<br><span style="color:var(--gold)">&#9733;</span> difficulty: more stars = harder</div>
+          <div class="section-body" id="countryGames"></div>
+        </div>
+
+        <div class="section" id="sec-continent">
+          <div class="section-header" onclick="toggleSection('sec-continent')">
+            <div class="section-title">Continents <span class="section-count" id="countContinent">(0)</span></div>
+            <div class="chev">&#9660;</div>
+          </div>
+          <div class="section-desc">Player appearances grouped by continental region.<br><span style="color:var(--gold)">&#9733;</span> difficulty: more stars = harder</div>
+          <div class="section-body" id="continentGames"></div>
+        </div>
+
+        <div class="section" id="sec-club">
+          <div class="section-header" onclick="toggleSection('sec-club')">
+            <div class="section-title">Clubs (Apps) <span class="section-count" id="countClub">(0)</span></div>
+            <div class="chev">&#9660;</div>
+          </div>
+          <div class="section-desc">Player appearances for each club in Premier League history.<br><span style="color:var(--gold)">&#9733;</span> difficulty: more stars = harder</div>
+          <div class="section-body" id="clubGames"></div>
+        </div>
+
+        <div class="section" id="sec-goals">
+          <div class="section-header" onclick="toggleSection('sec-goals')">
+            <div class="section-title">Goals <span class="section-count" id="countGoals">(0)</span></div>
+            <div class="chev">&#9660;</div>
+          </div>
+          <div class="section-desc">Total Premier League goals (overall and by club).<br><span style="color:var(--gold)">&#9733;</span> difficulty: more stars = harder</div>
+          <div class="section-body" id="goalsGames"></div>
+        </div>
+
+        <div class="section" id="sec-positions">
+          <div class="section-header" onclick="toggleSection('sec-positions')">
+            <div class="section-title">Positions <span class="section-count" id="countPositions">(0)</span></div>
+            <div class="chev">&#9660;</div>
+          </div>
+          <div class="section-desc">Player appearances by position in Premier League history.<br><span style="color:var(--gold)">&#9733;</span> difficulty: more stars = harder</div>
+          <div class="section-body" id="positionGames"></div>
+        </div>
+
+        <div class="section" id="sec-age">
+          <div class="section-header" onclick="toggleSection('sec-age')">
+            <div class="section-title">Age <span class="section-count" id="countAge">(0)</span></div>
+            <div class="chev">&#9660;</div>
+          </div>
+          <div class="section-desc">Player appearances by age bucket.<br><span style="color:var(--gold)">&#9733;</span> difficulty: more stars = harder</div>
+          <div class="section-body" id="ageGames"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHAMPIONS LEAGUE -->
+    <div class="league-group" id="lg-ucl">
+      <div class="league-group-header" onclick="toggleLeague('lg-ucl')">
+        <div><span class="lg-icon">&#9917;</span> <span class="lg-title">Champions League</span></div>
+        <div class="lg-chev">&#9660;</div>
+      </div>
+      <div class="league-group-body">
+        <div class="section" id="sec-ucl-apps">
+          <div class="section-header" onclick="toggleSection('sec-ucl-apps')">
+            <div class="section-title">UCL Apps (Nationality) <span class="section-count" id="countUCLApps">(0)</span></div>
+            <div class="chev">&#9660;</div>
+          </div>
+          <div class="section-desc">Champions League appearances by nationality.<br><span style="color:var(--gold)">&#9733;</span> difficulty: more stars = harder</div>
+          <div class="section-body" id="uclAppsGames"></div>
+        </div>
+
+        <div class="section" id="sec-ucl-goals">
+          <div class="section-header" onclick="toggleSection('sec-ucl-goals')">
+            <div class="section-title">UCL Goals (Nationality) <span class="section-count" id="countUCLGoals">(0)</span></div>
+            <div class="chev">&#9660;</div>
+          </div>
+          <div class="section-desc">Champions League goals by nationality.<br><span style="color:var(--gold)">&#9733;</span> difficulty: more stars = harder</div>
+          <div class="section-body" id="uclGoalsGames"></div>
+        </div>
+
+        <div class="section" id="sec-ucl-clubs">
+          <div class="section-header" onclick="toggleSection('sec-ucl-clubs')">
+            <div class="section-title">UCL Apps (Club) <span class="section-count" id="countUCLClubs">(0)</span></div>
+            <div class="chev">&#9660;</div>
+          </div>
+          <div class="section-desc">Champions League appearances by club.<br><span style="color:var(--gold)">&#9733;</span> difficulty: more stars = harder</div>
+          <div class="section-body" id="uclClubsGames"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LA LIGA -->
+    <div class="league-group" id="lg-laliga">
+      <div class="league-group-header" onclick="toggleLeague('lg-laliga')">
+        <div><span class="lg-icon">&#127466;&#127480;</span> <span class="lg-title">La Liga</span></div>
+        <div class="lg-chev">&#9660;</div>
+      </div>
+      <div class="league-group-body">
+        <div class="section" id="sec-laliga-apps">
+          <div class="section-header" onclick="toggleSection('sec-laliga-apps')">
+            <div class="section-title">Apps (Top 25 Clubs) <span class="section-count" id="countLaLigaApps">(0)</span></div>
+            <div class="chev">&#9660;</div>
+          </div>
+          <div class="section-desc">Player appearances by club in La Liga history.<br><span style="color:var(--gold)">&#9733;</span> difficulty: more stars = harder</div>
+          <div class="section-body" id="laligaAppsGames"></div>
+        </div>
+
+        <div class="section" id="sec-laliga-goals">
+          <div class="section-header" onclick="toggleSection('sec-laliga-goals')">
+            <div class="section-title">Goals (Top 25 Clubs) <span class="section-count" id="countLaLigaGoals">(0)</span></div>
+            <div class="chev">&#9660;</div>
+          </div>
+          <div class="section-desc">Player goals by club in La Liga history.<br><span style="color:var(--gold)">&#9733;</span> difficulty: more stars = harder</div>
+          <div class="section-body" id="laligaGoalsGames"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SERIE A -->
+    <div class="league-group" id="lg-seriea">
+      <div class="league-group-header" onclick="toggleLeague('lg-seriea')">
+        <div><span class="lg-icon">&#127470;&#127481;</span> <span class="lg-title">Serie A</span></div>
+        <div class="lg-chev">&#9660;</div>
+      </div>
+      <div class="league-group-body">
+        <div class="section" id="sec-seriea-apps">
+          <div class="section-header" onclick="toggleSection('sec-seriea-apps')">
+            <div class="section-title">Apps (Top 25 Clubs) <span class="section-count" id="countSerieAApps">(0)</span></div>
+            <div class="chev">&#9660;</div>
+          </div>
+          <div class="section-desc">Player appearances by club in Serie A history.<br><span style="color:var(--gold)">&#9733;</span> difficulty: more stars = harder</div>
+          <div class="section-body" id="serieaAppsGames"></div>
+        </div>
+
+        <div class="section" id="sec-seriea-goals">
+          <div class="section-header" onclick="toggleSection('sec-seriea-goals')">
+            <div class="section-title">Goals (Top 25 Clubs) <span class="section-count" id="countSerieAGoals">(0)</span></div>
+            <div class="chev">&#9660;</div>
+          </div>
+          <div class="section-desc">Player goals by club in Serie A history.<br><span style="color:var(--gold)">&#9733;</span> difficulty: more stars = harder</div>
+          <div class="section-body" id="serieaGoalsGames"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BUNDESLIGA -->
+    <div class="league-group" id="lg-bundesliga">
+      <div class="league-group-header" onclick="toggleLeague('lg-bundesliga')">
+        <div><span class="lg-icon">&#127465;&#127466;</span> <span class="lg-title">Bundesliga</span></div>
+        <div class="lg-chev">&#9660;</div>
+      </div>
+      <div class="league-group-body">
+        <div class="section" id="sec-bundesliga-apps">
+          <div class="section-header" onclick="toggleSection('sec-bundesliga-apps')">
+            <div class="section-title">Apps (Top 25 Clubs) <span class="section-count" id="countBundesligaApps">(0)</span></div>
+            <div class="chev">&#9660;</div>
+          </div>
+          <div class="section-desc">Player appearances by club in Bundesliga history.<br><span style="color:var(--gold)">&#9733;</span> difficulty: more stars = harder</div>
+          <div class="section-body" id="bundesligaAppsGames"></div>
+        </div>
+
+        <div class="section" id="sec-bundesliga-goals">
+          <div class="section-header" onclick="toggleSection('sec-bundesliga-goals')">
+            <div class="section-title">Goals (Top 25 Clubs) <span class="section-count" id="countBundesligaGoals">(0)</span></div>
+            <div class="chev">&#9660;</div>
+          </div>
+          <div class="section-desc">Player goals by club in Bundesliga history.<br><span style="color:var(--gold)">&#9733;</span> difficulty: more stars = harder</div>
+          <div class="section-body" id="bundesligaGoalsGames"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LIGUE 1 -->
+    <div class="league-group" id="lg-ligue1">
+      <div class="league-group-header" onclick="toggleLeague('lg-ligue1')">
+        <div><span class="lg-icon">&#127467;&#127479;</span> <span class="lg-title">Ligue 1</span></div>
+        <div class="lg-chev">&#9660;</div>
+      </div>
+      <div class="league-group-body">
+        <div class="section" id="sec-ligue1-apps">
+          <div class="section-header" onclick="toggleSection('sec-ligue1-apps')">
+            <div class="section-title">Apps (Top 25 Clubs) <span class="section-count" id="countLigue1Apps">(0)</span></div>
+            <div class="chev">&#9660;</div>
+          </div>
+          <div class="section-desc">Player appearances by club in Ligue 1 history.<br><span style="color:var(--gold)">&#9733;</span> difficulty: more stars = harder</div>
+          <div class="section-body" id="ligue1AppsGames"></div>
+        </div>
+
+        <div class="section" id="sec-ligue1-goals">
+          <div class="section-header" onclick="toggleSection('sec-ligue1-goals')">
+            <div class="section-title">Goals (Top 25 Clubs) <span class="section-count" id="countLigue1Goals">(0)</span></div>
+            <div class="chev">&#9660;</div>
+          </div>
+          <div class="section-desc">Player goals by club in Ligue 1 history.<br><span style="color:var(--gold)">&#9733;</span> difficulty: more stars = harder</div>
+          <div class="section-body" id="ligue1GoalsGames"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SPECIAL -->
+    <div class="league-group" id="lg-special">
+      <div class="league-group-header" onclick="toggleLeague('lg-special')">
+        <div><span class="lg-icon">&#11088;</span> <span class="lg-title">Special</span></div>
+        <div class="lg-chev">&#9660;</div>
+      </div>
+      <div class="league-group-body">
+        <div class="section" id="sec-big5-british">
+          <div class="section-header" onclick="toggleSection('sec-big5-british')">
+            <div class="section-title">Big 5 British (ex EPL) <span class="section-count" id="countBig5British">(2)</span></div>
+            <div class="chev">&#9660;</div>
+          </div>
+          <div class="section-desc">British players in top 5 leagues (La Liga, Serie A, Bundesliga, Ligue 1) excluding EPL.<br><span style="color:var(--gold)">&#9733;</span> difficulty: more stars = harder</div>
+          <div class="section-body" id="big5BritishGames"></div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Loading screen with trivia -->
   <div id="loadingScreen" class="hidden loading-screen">
     <button class="btn-back" id="backFromLoading">← Back</button>
-    <div class="loading-spinner-wrap">
+    <div id="retroLoaderWrap" class="retro-loader"></div>
+    <div class="loading-spinner-wrap" style="display:none;">
       <div class="loading-spinner" id="loadingSpinner"></div>
     </div>
     <div class="loading-text" id="loadingText">Loading match data...</div>
@@ -1090,11 +1154,34 @@ button {
 
   <div class="row-btns">
     <button id="submitBtn" class="btn-primary" disabled>Submit</button>
+    <button id="settingsBtn" class="btn-text" title="Game settings" style="min-width:auto;padding:8px 12px;">⚙</button>
     <button id="endBtn" class="btn-text">End Game</button>
   </div>
 
   <div id="result" class="result"></div>
   <div id="inlineToast" class="inline-toast"></div>
+</div>
+
+<!-- In-game settings panel -->
+<div id="settingsPanel" class="hidden" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:flex;align-items:center;justify-content:center;">
+  <div style="background:var(--card);border-radius:12px;padding:20px;max-width:360px;width:90%;box-shadow:0 8px 24px rgba(0,0,0,.5);">
+    <h3 style="margin:0 0 16px;font-size:17px;">Game Settings</h3>
+    <div class="toggle-row">
+      <div class="toggle-info">
+        <div class="toggle-label">Player Timer (30s)</div>
+        <div class="toggle-desc">Each turn has a 30-second countdown.</div>
+      </div>
+      <div class="toggle-switch" id="timerToggleInGame" data-on="false"></div>
+    </div>
+    <div class="toggle-row">
+      <div class="toggle-info">
+        <div class="toggle-label">Player Suggestions</div>
+        <div class="toggle-desc">Show matching players as you type.</div>
+      </div>
+      <div class="toggle-switch" id="suggestionsToggleInGame" data-on="true"></div>
+    </div>
+    <button class="btn-primary" id="closeSettings" style="margin-top:16px;">Done</button>
+  </div>
 </div>
 
 <!-- Effect Overlay -->
@@ -1150,6 +1237,7 @@ button {
 // ============== CONFIGURATION ==============
 const API_BASE = '/.netlify/functions';
 const CACHE_TTL = 90 * 60 * 1000; // 90 minutes
+const COUNT_CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours for count-only cache
 const DEBOUNCE_MS = 300;
 
 // ============== CATEGORIES (must match backend) ==============
@@ -1205,7 +1293,7 @@ const CATEGORIES = {
     { id: 'club_ManCity', title: 'Man City', color: '#6CABDD' },
     { id: 'club_ManUtd', title: 'Man Utd', color: '#DA291C' },
     { id: 'club_Middlesbrough', title: 'Middlesbrough', color: '#E11B22' },
-    { id: 'club_Newcastle', title: 'Newcastle', color: '#241F20' },
+    { id: 'club_Newcastle', title: 'Newcastle', color: '#000000' },
     { id: 'club_Norwich', title: 'Norwich', color: '#00A650' },
     { id: 'club_NottmForest', title: 'Nottm Forest', color: '#DD0000' },
     { id: 'club_Portsmouth', title: 'Portsmouth', color: '#001489' },
@@ -1237,7 +1325,7 @@ const CATEGORIES = {
     { id: 'goals_Liverpool', title: 'Liverpool Goals', color: '#C8102E' },
     { id: 'goals_ManCity', title: 'Man City Goals', color: '#6CABDD' },
     { id: 'goals_ManUtd', title: 'Man Utd Goals', color: '#DA291C' },
-    { id: 'goals_Newcastle', title: 'Newcastle Goals', color: '#241F20' },
+    { id: 'goals_Newcastle', title: 'Newcastle Goals', color: '#000000' },
     { id: 'goals_Southampton', title: 'Southampton Goals', color: '#D71920' },
     { id: 'goals_Sunderland', title: 'Sunderland Goals', color: '#EB172B' },
     { id: 'goals_Tottenham', title: 'Spurs Goals', color: '#132257' },
@@ -1320,11 +1408,18 @@ let triviaIndex = 0;
 let matchDataReady = false;
 let debounceTimer = null;
 
-// Gameplay settings
-let gameplaySettings = {
-  timerEnabled: false,
-  suggestionsEnabled: true,
-};
+// Gameplay settings — load from localStorage if available
+const PREFS_KEY = 'bullseye_prefs';
+let gameplaySettings = (function() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(PREFS_KEY));
+    if (saved && typeof saved.timerEnabled === 'boolean') return saved;
+  } catch {}
+  return { timerEnabled: false, suggestionsEnabled: true };
+})();
+function saveGameplaySettings() {
+  try { localStorage.setItem(PREFS_KEY, JSON.stringify(gameplaySettings)); } catch {}
+}
 
 // Timer state
 let timerInterval = null;
@@ -1517,11 +1612,17 @@ function clearExpiredCache() {
 
 // ============== SETUP FLOW ==============
 
-// Single Player: go to gameplay options
+// Single Player: skip gameplay options if prefs already saved
 $('singlePlayerBtn').onclick = () => {
   window.gameSetup = { names: ['You'], isSinglePlayer: true };
   hide('step1');
-  show('stepOptions');
+  const hasSavedPrefs = !!localStorage.getItem(PREFS_KEY);
+  if (hasSavedPrefs) {
+    buildCategorySections();
+    show('step3');
+  } else {
+    show('stepOptions');
+  }
 };
 
 // Multiplayer: go to player count selection
@@ -1555,7 +1656,7 @@ $('backToStep1').onclick = () => {
   show('step1b');
 };
 
-// From step2 (names) to stepOptions (gameplay options)
+// From step2 (names) to stepOptions (or skip to categories if prefs saved)
 $('toStepOptions').onclick = () => {
   const n = parseInt($('numPlayers').value, 10);
   const names = [];
@@ -1565,7 +1666,41 @@ $('toStepOptions').onclick = () => {
   }
   window.gameSetup = { names };
   hide('step2');
-  show('stepOptions');
+  const hasSavedPrefs = !!localStorage.getItem(PREFS_KEY);
+  if (hasSavedPrefs) {
+    buildCategorySections();
+    show('step3');
+  } else {
+    show('stepOptions');
+  }
+};
+
+// In-game settings panel
+$('settingsBtn').onclick = () => {
+  applyToggleState('timerToggleInGame', gameplaySettings.timerEnabled);
+  applyToggleState('suggestionsToggleInGame', gameplaySettings.suggestionsEnabled);
+  $('settingsPanel').classList.remove('hidden');
+  $('settingsPanel').style.display = 'flex';
+};
+$('closeSettings').onclick = () => {
+  $('settingsPanel').classList.add('hidden');
+  $('settingsPanel').style.display = 'none';
+};
+$('timerToggleInGame').onclick = function() {
+  const isOn = this.dataset.on === 'true';
+  this.dataset.on = (!isOn).toString();
+  this.classList.toggle('on', !isOn);
+  gameplaySettings.timerEnabled = !isOn;
+  saveGameplaySettings();
+  applyToggleState('timerToggle', !isOn);
+};
+$('suggestionsToggleInGame').onclick = function() {
+  const isOn = this.dataset.on === 'true';
+  this.dataset.on = (!isOn).toString();
+  this.classList.toggle('on', !isOn);
+  gameplaySettings.suggestionsEnabled = !isOn;
+  saveGameplaySettings();
+  applyToggleState('suggestionsToggle', !isOn);
 };
 
 // Back from stepOptions to step2 (multiplayer) or step1 (single player)
@@ -1579,11 +1714,22 @@ $('backToStep2Options').onclick = () => {
 };
 
 // Toggle handlers for gameplay options
+function applyToggleState(id, val) {
+  const el = $(id);
+  if (!el) return;
+  el.dataset.on = String(val);
+  el.classList.toggle('on', val);
+}
+// Apply saved prefs to toggle UI on load
+applyToggleState('timerToggle', gameplaySettings.timerEnabled);
+applyToggleState('suggestionsToggle', gameplaySettings.suggestionsEnabled);
+
 $('timerToggle').onclick = function() {
   const isOn = this.dataset.on === 'true';
   this.dataset.on = (!isOn).toString();
   this.classList.toggle('on', !isOn);
   gameplaySettings.timerEnabled = !isOn;
+  saveGameplaySettings();
 };
 
 $('suggestionsToggle').onclick = function() {
@@ -1591,6 +1737,7 @@ $('suggestionsToggle').onclick = function() {
   this.dataset.on = (!isOn).toString();
   this.classList.toggle('on', !isOn);
   gameplaySettings.suggestionsEnabled = !isOn;
+  saveGameplaySettings();
 };
 
 // From stepOptions to step3 (categories)
@@ -1619,16 +1766,29 @@ $('backFromLoading').onclick = () => {
   hide('triviaNote');
 };
 
+function toggleLeague(id) {
+  const lg = $(id);
+  if (!lg) return;
+  const isOpening = !lg.classList.contains('open');
+  // Accordion: close other league groups
+  if (isOpening) {
+    document.querySelectorAll('#step3 .league-group').forEach(g => {
+      if (g.id !== id) g.classList.remove('open');
+    });
+  }
+  lg.classList.toggle('open');
+}
+
 function toggleSection(id) {
   const sec = $(id);
   if (sec.classList.contains('disabled')) return;
 
   const isOpening = !sec.classList.contains('open');
 
-  // If opening, close all other sections (accordion behavior)
+  // If opening, close other sections within the same league group (accordion within league)
   if (isOpening) {
-    const allSections = document.querySelectorAll('#step3 .section:not(.disabled)');
-    allSections.forEach(s => {
+    const parent = sec.closest('.league-group-body') || document.querySelector('#step3');
+    parent.querySelectorAll('.section:not(.disabled)').forEach(s => {
       if (s.id !== id) {
         s.classList.remove('open');
       }
@@ -1781,25 +1941,41 @@ async function preloadCategoryStats(cat) {
   const metaEl = $(`meta-${cat.id}`);
   if (!metaEl) return;
 
+  // Check full data cache first (from actual game loads)
   const cached = getCachedData(cat.id);
   if (cached) {
     const count = cached.eligiblePlayers?.length || 0;
-    const metric = cached.meta?.metricLabel || 'Apps';
     const diff = getDifficulty(count);
     metaEl.innerHTML = `<span class="stars">${'★'.repeat(diff)}${'☆'.repeat(5 - diff)}</span> ${formatNum(count)} players`;
     return;
+  }
+
+  // Check lightweight count cache (24h TTL)
+  const countKey = `f501_count_${cat.id}`;
+  const countTsKey = `${countKey}_ts`;
+  const cachedCount = localStorage.getItem(countKey);
+  const countTs = parseInt(localStorage.getItem(countTsKey) || '0', 10);
+  if (cachedCount && (Date.now() - countTs) < COUNT_CACHE_TTL) {
+    const count = parseInt(cachedCount, 10);
+    if (count > 0) {
+      const diff = getDifficulty(count);
+      metaEl.innerHTML = `<span class="stars">${'★'.repeat(diff)}${'☆'.repeat(5 - diff)}</span> ${formatNum(count)} players`;
+      return;
+    }
   }
 
   try {
     const res = await fetch(`${API_BASE}/match_start`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ categoryId: cat.id }),
+      body: JSON.stringify({ categoryId: cat.id, previewOnly: true }),
     });
     const data = await res.json();
-    if (data.eligiblePlayers) {
-      setCachedData(cat.id, data);
-      const count = data.eligiblePlayers.length;
+    const count = data.eligibleCount || data.meta?.eligibleCount || 0;
+    if (count > 0) {
+      // Cache just the count (much smaller than full player list)
+      localStorage.setItem(countKey, String(count));
+      localStorage.setItem(countTsKey, String(Date.now()));
       const diff = getDifficulty(count);
       metaEl.innerHTML = `<span class="stars">${'★'.repeat(diff)}${'☆'.repeat(5 - diff)}</span> ${formatNum(count)} players`;
     }
@@ -1829,6 +2005,7 @@ async function chooseCategory(cat) {
   hide('triviaNote');
   $('triviaContainer').innerHTML = '';
   $('loadingText').textContent = 'Loading match data...';
+  startRetroLoader();
 
   const cached = getCachedData(cat.id);
   if (cached) {
@@ -1860,10 +2037,12 @@ async function chooseCategory(cat) {
     alert('Failed to load: ' + err.message);
     show('step3');
     hide('loadingScreen');
+    stopRetroLoader();
   }
 }
 
 function showReadyState() {
+  stopRetroLoader();
   // Stop spinner and show ready state
   const spinner = $('loadingSpinner');
   spinner.classList.add('ready');
@@ -1924,6 +2103,14 @@ $('skipTrivia').onclick = () => {
 
 // ============== ORDER REVEAL ==============
 async function proceedToOrderReveal() {
+  stopRetroLoader();
+  // Skip order reveal for single player — no value in showing "1. You"
+  if (window.gameSetup?.isSinglePlayer) {
+    hide('loadingScreen');
+    startMatch(window.gameSetup.names || ['You']);
+    return;
+  }
+
   hide('loadingScreen');
   show('orderScreen');
 
@@ -2760,7 +2947,8 @@ $('confirmNo').onclick = () => {
 
 $('confirmYes').onclick = () => {
   recordGameEnd();
-  window.location.href = 'index.html';
+  $('confirmOverlay').classList.remove('show');
+  playAgain();
 };
 
 function playAgain() {
@@ -2841,7 +3029,7 @@ const CLUB_OPTIONS = [
   // Other current/recent PL clubs
   { id: 'Aston Villa', name: 'Aston Villa', color: '#670E36' },
   { id: 'Everton', name: 'Everton', color: '#003399' },
-  { id: 'Newcastle United', name: 'Newcastle', color: '#241F20' },
+  { id: 'Newcastle United', name: 'Newcastle', color: '#000000' },
   { id: 'West Ham United', name: 'West Ham', color: '#7A263A' },
   { id: 'Leicester City', name: 'Leicester', color: '#003090' },
   { id: 'Southampton', name: 'Southampton', color: '#D71920' },
@@ -3089,6 +3277,7 @@ if ($('startCustomGame')) $('startCustomGame').onclick = async () => {
   $('loadingSpinner').style.animation = '';
   $('loadingText').textContent = 'Building custom game...';
   $('loadingText').classList.remove('ready');
+  startRetroLoader();
 
   // Check cache first
   const cached = getCachedData(cacheKey);
@@ -3129,6 +3318,7 @@ if ($('startCustomGame')) $('startCustomGame').onclick = async () => {
     alert('Failed to load custom game: ' + err.message);
     show('step3');
     hide('loadingScreen');
+    stopRetroLoader();
   }
 };
 
@@ -3445,6 +3635,7 @@ async function startChatGame(type) {
   $('loadingSpinner').style.animation = '';
   $('loadingText').textContent = 'Building chat game...';
   $('loadingText').classList.remove('ready');
+  startRetroLoader();
 
   try {
     const res = await fetch(`${API_BASE}/match_start`, {
@@ -3469,6 +3660,7 @@ async function startChatGame(type) {
     alert('Failed to start chat game: ' + err.message);
     show('step3');
     hide('loadingScreen');
+    stopRetroLoader();
   }
 }
 
@@ -3487,9 +3679,107 @@ async function startChatGame(type) {
     setInterval(() => { el.textContent = new Date().toTimeString().slice(0,5); }, 1000);
   }
 })();
+
+// ============== RETRO LOADING ANIMATIONS ==============
+let retroLoaderInterval = null;
+
+function stopRetroLoader() {
+  if (retroLoaderInterval) { clearInterval(retroLoaderInterval); retroLoaderInterval = null; }
+  const wrap = $('retroLoaderWrap');
+  if (wrap) wrap.innerHTML = '';
+}
+
+function startRetroLoader() {
+  stopRetroLoader();
+  const wrap = $('retroLoaderWrap');
+  if (!wrap) return;
+
+  const animations = [retroProgressBar, retroBounceBall, retroTeletextFlip, retroCountdown, retroBlockReveal];
+  const anim = animations[Math.floor(Math.random() * animations.length)];
+  anim(wrap);
+}
+
+function retroProgressBar(wrap) {
+  const total = 20;
+  let filled = 0;
+  wrap.innerHTML = '<div class="retro-bar" id="rBar"></div><div class="retro-label">Loading data...</div>';
+  retroLoaderInterval = setInterval(() => {
+    filled = Math.min(filled + 1, total);
+    const bar = '\u2588'.repeat(filled) + '\u2591'.repeat(total - filled);
+    const el = $('rBar');
+    if (el) el.textContent = '[' + bar + ']';
+    if (filled >= total) filled = 0;
+  }, 200);
+}
+
+function retroBounceBall(wrap) {
+  const width = 18;
+  let pos = 0, dir = 1;
+  wrap.innerHTML = '<div class="retro-bar" id="rBall"></div><div class="retro-label">Preparing players...</div>';
+  retroLoaderInterval = setInterval(() => {
+    const line = '\u00B7'.repeat(pos) + '\u26BD' + '\u00B7'.repeat(width - pos - 1);
+    const el = $('rBall');
+    if (el) el.textContent = line;
+    pos += dir;
+    if (pos >= width - 1 || pos <= 0) dir *= -1;
+  }, 100);
+}
+
+function retroTeletextFlip(wrap) {
+  const chars = '\u2588\u2593\u2592\u2591 ';
+  const w = 16, h = 4;
+  wrap.innerHTML = '<div class="retro-ascii" id="rFlip"></div><div class="retro-label">Teletext page loading...</div>';
+  retroLoaderInterval = setInterval(() => {
+    let block = '';
+    for (let r = 0; r < h; r++) {
+      for (let c = 0; c < w; c++) {
+        block += chars[Math.floor(Math.random() * chars.length)];
+      }
+      if (r < h - 1) block += '\n';
+    }
+    const el = $('rFlip');
+    if (el) el.textContent = block;
+  }, 150);
+}
+
+function retroCountdown(wrap) {
+  const frames = ['  \u2588\u2588\u2588  ', ' \u2588   \u2588 ', '\u2588     \u2588', ' \u2588   \u2588 ', '  \u2588\u2588\u2588  '];
+  let idx = 0;
+  wrap.innerHTML = '<div class="retro-ascii" id="rCount"></div><div class="retro-label">Building match...</div>';
+  retroLoaderInterval = setInterval(() => {
+    const el = $('rCount');
+    if (el) el.textContent = frames[idx % frames.length];
+    idx++;
+  }, 300);
+}
+
+function retroBlockReveal(wrap) {
+  const w = 16, h = 3;
+  let revealed = 0;
+  const grid = Array.from({ length: h }, () => Array(w).fill('\u2591'));
+  const order = [];
+  for (let r = 0; r < h; r++) for (let c = 0; c < w; c++) order.push([r, c]);
+  // Shuffle reveal order
+  for (let i = order.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [order[i], order[j]] = [order[j], order[i]]; }
+  wrap.innerHTML = '<div class="retro-ascii" id="rReveal"></div><div class="retro-label">Fetching stats...</div>';
+  retroLoaderInterval = setInterval(() => {
+    if (revealed < order.length) {
+      const [r, c] = order[revealed];
+      grid[r][c] = '\u2588';
+      revealed++;
+    } else {
+      // Reset
+      revealed = 0;
+      for (let r = 0; r < h; r++) for (let c = 0; c < w; c++) grid[r][c] = '\u2591';
+      for (let i = order.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [order[i], order[j]] = [order[j], order[i]]; }
+    }
+    const el = $('rReveal');
+    if (el) el.textContent = grid.map(row => row.join('')).join('\n');
+  }, 40);
+}
 </script>
 <footer style="text-align:center;padding:16px;font-size:11px;color:var(--muted);opacity:0.6;">
-  Build: 2026-02-11 | TeleStats Bullseye v1.0
+  Build: 2026-02-16 | TeleStats Bullseye v1.1
 </footer>
 </body>
 </html>

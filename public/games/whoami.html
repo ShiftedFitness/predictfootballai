@@ -796,10 +796,21 @@ function animateBlanksReveal(guessedName, isCorrect) {
 // ============================================================
 // PLAYER SEARCH / SUGGESTIONS
 // ============================================================
+// Cache search results to avoid repeated API calls for same/similar queries
+const searchCache = new Map();
+
 async function doSearch(query) {
   if (gameOver) return;
 
   const dropdown = $('suggestionsDropdown');
+  const cacheKey = `${selectedScope}_${query.toLowerCase()}`;
+
+  // Check cache first
+  if (searchCache.has(cacheKey)) {
+    renderSuggestions(searchCache.get(cacheKey));
+    return;
+  }
+
   dropdown.innerHTML = '<div class="suggestion-loading"><span class="spinner"></span></div>';
   dropdown.classList.remove('hidden');
 
@@ -818,33 +829,41 @@ async function doSearch(query) {
     if (gameOver) { hideSuggestions(); return; }
 
     const players = data.players || [];
-    if (players.length === 0) {
-      dropdown.innerHTML = '<div class="suggestion-loading" style="color:var(--muted);">No players found</div>';
-      return;
-    }
-
-    dropdown.innerHTML = players.map(p => `
-      <div class="suggestion-item" data-name="${escHtml(p.name)}">
-        <span class="suggestion-name">${escHtml(p.name)}</span>
-        <span class="suggestion-meta">${p.nationality} &middot; ${p.appearances} apps</span>
-      </div>
-    `).join('');
-
-    dropdown.querySelectorAll('.suggestion-item').forEach(item => {
-      item.onclick = (e) => {
-        e.stopPropagation();
-        const name = item.dataset.name;
-        selectedSuggestion = name;
-        $('guessInput').value = name;
-        hideSuggestions();
-        submitGuess();
-      };
-    });
+    searchCache.set(cacheKey, players);
+    renderSuggestions(players);
 
   } catch (err) {
     console.error('Search error:', err);
     dropdown.innerHTML = '<div class="suggestion-loading" style="color:var(--danger);">Search failed</div>';
   }
+}
+
+function renderSuggestions(players) {
+  const dropdown = $('suggestionsDropdown');
+  dropdown.classList.remove('hidden');
+
+  if (players.length === 0) {
+    dropdown.innerHTML = '<div class="suggestion-loading" style="color:var(--muted);">No players found</div>';
+    return;
+  }
+
+  dropdown.innerHTML = players.map(p => `
+    <div class="suggestion-item" data-name="${escHtml(p.name)}">
+      <span class="suggestion-name">${escHtml(p.name)}</span>
+      <span class="suggestion-meta">${p.nationality} &middot; ${p.appearances} apps</span>
+    </div>
+  `).join('');
+
+  dropdown.querySelectorAll('.suggestion-item').forEach(item => {
+    item.onclick = (e) => {
+      e.stopPropagation();
+      const name = item.dataset.name;
+      selectedSuggestion = name;
+      $('guessInput').value = name;
+      hideSuggestions();
+      submitGuess();
+    };
+  });
 }
 
 function hideSuggestions() {
@@ -1066,15 +1085,33 @@ async function giveUp() {
 }
 
 function showResult(won, player) {
-  // Reveal all remaining clues
-  for (let i = cluesRevealed; i < gameData.clues.length; i++) {
-    const clueEl = $(`clue${i}`);
-    const clueText = gameData.clues[i];
-    clueEl.innerHTML = `<span class="clue-number">${i + 1}</span> ${clueText}`;
-    clueEl.classList.remove('locked');
-    clueEl.classList.add('revealed');
-  }
+  // Collapse clues to a summary line instead of showing all expanded
+  const clueList = $('clueList');
+  clueList.style.maxHeight = '0';
+  clueList.style.overflow = 'hidden';
+  clueList.style.transition = 'max-height 0.3s ease';
   $('nextClueBtn').classList.add('hidden');
+  $('clueCounter').textContent = `${cluesRevealed} clue${cluesRevealed !== 1 ? 's' : ''} revealed`;
+  $('clueCounter').style.cursor = 'pointer';
+  $('clueCounter').onclick = () => {
+    // Toggle clue visibility
+    if (clueList.style.maxHeight === '0px' || clueList.style.maxHeight === '0') {
+      // Reveal all clues before showing
+      for (let i = 0; i < gameData.clues.length; i++) {
+        const clueEl = $(`clue${i}`);
+        const clueText = gameData.clues[i];
+        clueEl.innerHTML = `<span class="clue-number">${i + 1}</span> ${clueText}`;
+        clueEl.classList.remove('locked');
+        clueEl.classList.add('revealed');
+      }
+      clueList.style.maxHeight = '500px';
+      $('clueCounter').textContent = `${cluesRevealed} clues ▲ hide`;
+    } else {
+      clueList.style.maxHeight = '0';
+      $('clueCounter').textContent = `${cluesRevealed} clue${cluesRevealed !== 1 ? 's' : ''} revealed ▼ show`;
+    }
+  };
+  $('clueCounter').textContent += ' ▼ show';
 
   // Show reveal card
   $('revealName').textContent = player.name;
@@ -1098,6 +1135,11 @@ function showResult(won, player) {
   $('playAgainBtn').classList.remove('hidden');
   $('guessInput').disabled = true;
   $('guessBtn').disabled = true;
+
+  // Scroll result card into view
+  setTimeout(() => {
+    $('revealCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 100);
 }
 
 function resetToSetup() {

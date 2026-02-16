@@ -114,7 +114,7 @@ body {
 <div class="container">
   <div class="ts-header">
     <img src="https://res.cloudinary.com/dbfvogb95/image/upload/v1770835428/Screenshot_2026-02-11_at_19.43.16_m7urul.png" alt="TeleStats" class="ts-logo"/>
-    <span>EPL &bull; ALPHABET</span>
+    <span>ALPHABET</span>
     <span class="ts-time" id="tsClock">--:--</span>
   </div>
 
@@ -187,9 +187,12 @@ body {
     <div class="card">
       <div style="text-align:center;">
         <h2>Game Complete!</h2>
+        <div id="finalScoreDisplay" style="font-size:56px;font-weight:800;color:var(--accent-cyan);font-family:'Space Mono',monospace;margin:12px 0 4px;">0</div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:12px;">Score out of 100</div>
         <div class="score-row" style="margin-top:16px;">
           <div class="score-item"><div class="num green" id="finalCorrect">0</div><div class="lbl">Found</div></div>
           <div class="score-item"><div class="num red" id="finalMissed">0</div><div class="lbl">Missed</div></div>
+          <div class="score-item"><div class="num grey" id="finalRevealed">0</div><div class="lbl">Revealed</div></div>
           <div class="score-item"><div class="num grey" id="finalSkipped">0</div><div class="lbl">No players</div></div>
         </div>
       </div>
@@ -208,11 +211,15 @@ body {
 const API_BASE = '/.netlify/functions';
 const $ = id => document.getElementById(id);
 
-const CLUB_COLOURS = {
-  'club_liverpool': '#C8102E', 'club_arsenal': '#EF0107', 'club_chelsea': '#034694',
-  'club_manutd': '#DA291C', 'club_sunderland': '#EB172B',
+const LEAGUE_ICONS = {
+  epl: '\uD83C\uDFF4\uDB40\uDC67\uDB40\uDC62\uDB40\uDC65\uDB40\uDC6E\uDB40\uDC67\uDB40\uDC7F',
+  laliga: '\uD83C\uDDEA\uD83C\uDDF8',
+  seriea: '\uD83C\uDDEE\uD83C\uDDF9',
+  bundesliga: '\uD83C\uDDE9\uD83C\uDDEA',
+  ligue1: '\uD83C\uDDEB\uD83C\uDDF7',
 };
 
+let leagues = [];
 let scopes = [];
 let selectedScope = null;
 let alphabetData = []; // [{letter, count, players}]
@@ -220,12 +227,14 @@ let currentLetterIdx = 0;
 let scoreCorrect = 0;
 let scoreMissed = 0;
 let scoreSkipped = 0;
+let scoreRevealed = 0;
 let timerEnabled = true;
 let timerSeconds = 20;
 let timerInterval = null;
 let timerRemaining = 0;
-let letterResults = {}; // letter -> { status: 'correct'|'missed'|'skipped', answer: string }
+let letterResults = {}; // letter -> { status: 'correct'|'missed'|'skipped'|'revealed', answer: string }
 let processing = false;
+let currentLetterRevealed = false; // tracks if "Show answer" was used for this letter
 
 async function init() {
   try {
@@ -235,6 +244,7 @@ async function init() {
       body: JSON.stringify({ action: 'get_scopes' }),
     });
     const data = await res.json();
+    leagues = data.leagues || [];
     scopes = data.scopes || [];
     renderScopes();
   } catch (err) {
@@ -245,43 +255,50 @@ async function init() {
 function renderScopes() {
   const container = $('scopeList');
   container.innerHTML = '';
-  const leagueScopes = scopes.filter(s => s.type === 'league');
-  const clubScopes = scopes.filter(s => s.type === 'club');
 
-  if (leagueScopes.length > 0) container.appendChild(makeSection('Combined', leagueScopes, true));
-  if (clubScopes.length > 0) container.appendChild(makeSection('Teams (' + clubScopes.length + ')', clubScopes, false));
+  for (let i = 0; i < leagues.length; i++) {
+    const league = leagues[i];
+    const leagueScopes = scopes.filter(s => s.league === league.key);
+    const overallScope = leagueScopes.find(s => s.type === 'league');
+    const clubScopes = leagueScopes.filter(s => s.type === 'club');
+
+    const sec = document.createElement('div');
+    sec.className = 'section' + (i === 0 ? ' open' : '');
+
+    const icon = LEAGUE_ICONS[league.key] || '\u26BD';
+    const header = document.createElement('div');
+    header.className = 'section-header';
+    header.innerHTML = `<div class="section-title">${icon} ${league.name} <span class="section-count" style="font-size:12px;color:var(--muted);font-weight:400;">(${clubScopes.length + (overallScope ? 1 : 0)})</span></div><div class="chev">\u25BC</div>`;
+    header.onclick = () => {
+      container.querySelectorAll('.section').forEach(s => { if (s !== sec) s.classList.remove('open'); });
+      sec.classList.toggle('open');
+    };
+    sec.appendChild(header);
+
+    const body = document.createElement('div');
+    body.className = 'section-body';
+    if (overallScope) body.appendChild(makeScopeCard(overallScope));
+    for (const s of clubScopes) body.appendChild(makeScopeCard(s));
+    sec.appendChild(body);
+    container.appendChild(sec);
+  }
 }
 
-function makeSection(title, items, open) {
-  const sec = document.createElement('div');
-  sec.className = 'section' + (open ? ' open' : '');
-  const header = document.createElement('div');
-  header.className = 'section-header';
-  header.innerHTML = `<div class="section-title">${title}</div><div class="chev">\u25BC</div>`;
-  header.onclick = () => sec.classList.toggle('open');
-  sec.appendChild(header);
-
-  const body = document.createElement('div');
-  body.className = 'section-body';
-  for (const s of items) {
-    const card = document.createElement('div');
-    card.className = 'scope-card';
-    const colour = CLUB_COLOURS[s.id];
-    if (s.type === 'league') {
-      card.innerHTML = `<span class="sc-icon">\uD83C\uDFC6</span><span class="sc-label">${s.label}</span><span class="sc-arrow">\u203A</span>`;
-    } else {
-      card.innerHTML = `<span class="sc-dot" style="background:${colour || '#555'}"></span><span class="sc-label">${s.label}</span><span class="sc-arrow">\u203A</span>`;
-    }
-    card.onclick = () => {
-      $('scopeList').querySelectorAll('.scope-card').forEach(c => c.classList.remove('selected'));
-      card.classList.add('selected');
-      selectedScope = s.id;
-      $('startBtn').disabled = false;
-    };
-    body.appendChild(card);
+function makeScopeCard(s) {
+  const card = document.createElement('div');
+  card.className = 'scope-card';
+  if (s.type === 'league') {
+    card.innerHTML = `<span class="sc-icon">\uD83C\uDFC6</span><span class="sc-label">${s.label}</span><span class="sc-arrow">\u203A</span>`;
+  } else {
+    card.innerHTML = `<span class="sc-dot" style="background:#555"></span><span class="sc-label">${s.label}</span><span class="sc-arrow">\u203A</span>`;
   }
-  sec.appendChild(body);
-  return sec;
+  card.onclick = () => {
+    $('scopeList').querySelectorAll('.scope-card').forEach(c => c.classList.remove('selected'));
+    card.classList.add('selected');
+    selectedScope = s.id;
+    $('startBtn').disabled = false;
+  };
+  return card;
 }
 
 function toggleTimer() {
@@ -308,8 +325,10 @@ async function startGame() {
     scoreCorrect = 0;
     scoreMissed = 0;
     scoreSkipped = 0;
+    scoreRevealed = 0;
     letterResults = {};
     processing = false;
+    currentLetterRevealed = false;
 
     $('step1').classList.add('hidden');
     $('step2').classList.remove('hidden');
@@ -356,6 +375,7 @@ function advanceToNextLetter() {
   $('searchInput').value = '';
   $('playerList').innerHTML = '';
   processing = false;
+  currentLetterRevealed = false;
 
   // Skip letters with no players
   while (currentLetterIdx < 26) {
@@ -445,7 +465,7 @@ function showResult(type, msg) {
   el.classList.remove('hidden');
 }
 
-// Search input — filter and display matching players
+// Search input — show match count until exactly 1 match, then reveal name
 $('searchInput').addEventListener('input', () => {
   if (processing) return;
   const query = $('searchInput').value.trim().toLowerCase();
@@ -457,12 +477,17 @@ $('searchInput').addEventListener('input', () => {
   const ld = alphabetData[currentLetterIdx];
   if (!ld) return;
 
-  // Filter players whose name matches the query AND surname starts with the current letter
-  const matches = ld.players.filter(name => name.toLowerCase().includes(query)).slice(0, 8);
+  const matches = ld.players.filter(name => name.toLowerCase().includes(query));
 
-  $('playerList').innerHTML = matches.map(name =>
-    `<div class="player-item" onclick="selectPlayer('${escHtml(name)}')">${escHtml(name)}</div>`
-  ).join('');
+  if (matches.length === 0) {
+    $('playerList').innerHTML = '<div class="player-item" style="color:var(--muted);cursor:default;">No matches</div>';
+  } else if (matches.length === 1) {
+    // Exactly 1 match — reveal name and let user click
+    $('playerList').innerHTML = `<div class="player-item" onclick="selectPlayer('${escHtml(matches[0])}')">${escHtml(matches[0])}</div>`;
+  } else {
+    // Multiple matches — show count only
+    $('playerList').innerHTML = `<div class="player-item" style="color:var(--muted);cursor:default;">${matches.length} players match</div>`;
+  }
 });
 
 function escHtml(str) {
@@ -475,16 +500,22 @@ function selectPlayer(name) {
   stopTimer();
 
   const ld = alphabetData[currentLetterIdx];
-  // Check if the player is valid for this letter
   const isValid = ld.players.some(p => p === name);
 
   if (isValid) {
-    scoreCorrect++;
-    updateLetterCell(ld.letter, 'done');
-    letterResults[ld.letter] = { status: 'correct', answer: name };
-    showResult('correct', '\u2713 ' + name);
+    if (currentLetterRevealed) {
+      // Player used "Show answer" before entering — counts as revealed, not correct
+      scoreRevealed++;
+      updateLetterCell(ld.letter, 'done');
+      letterResults[ld.letter] = { status: 'revealed', answer: name };
+      showResult('correct', '\u2713 ' + name + ' (revealed)');
+    } else {
+      scoreCorrect++;
+      updateLetterCell(ld.letter, 'done');
+      letterResults[ld.letter] = { status: 'correct', answer: name };
+      showResult('correct', '\u2713 ' + name);
+    }
   } else {
-    // Wrong — let them keep trying if timer still going
     processing = false;
     showResult('wrong', '\u2717 Not a valid player for this letter');
     if (timerEnabled && timerRemaining > 0) return;
@@ -500,7 +531,7 @@ function selectPlayer(name) {
 function revealAnswer() {
   const ld = alphabetData[currentLetterIdx];
   if (!ld || ld.count === 0) return;
-  // Show a random valid answer but don't mark as correct
+  currentLetterRevealed = true;
   const answer = ld.players[Math.floor(Math.random() * ld.players.length)];
   showResult('skip', `A valid answer: ${answer}`);
 }
@@ -529,7 +560,19 @@ function endGame() {
 
   $('finalCorrect').textContent = scoreCorrect;
   $('finalMissed').textContent = scoreMissed;
+  $('finalRevealed').textContent = scoreRevealed;
   $('finalSkipped').textContent = scoreSkipped;
+
+  // Calculate 0-100 score
+  // Letters that had players = total playable letters
+  const playableLetters = alphabetData.filter(l => l.count > 0).length;
+  let score = 0;
+  if (playableLetters > 0) {
+    // Correct = 1 point, revealed = 0.5 points, missed = 0
+    const rawScore = (scoreCorrect + scoreRevealed * 0.5) / playableLetters;
+    score = Math.round(rawScore * 100);
+  }
+  $('finalScoreDisplay').textContent = score;
 
   // Build summary
   let html = '<div style="font-size:13px;">';
@@ -537,12 +580,15 @@ function endGame() {
     const letter = String.fromCharCode(65 + i);
     const r = letterResults[letter];
     if (!r) continue;
-    const color = r.status === 'correct' ? '#22c55e' : r.status === 'missed' ? '#ef4444' : 'var(--muted)';
-    const icon = r.status === 'correct' ? '\u2713' : r.status === 'missed' ? '\u2717' : '\u2014';
+    let color, icon;
+    if (r.status === 'correct') { color = '#22c55e'; icon = '\u2713'; }
+    else if (r.status === 'revealed') { color = 'var(--accent-yellow)'; icon = '\uD83D\uDCA1'; }
+    else if (r.status === 'missed') { color = '#ef4444'; icon = '\u2717'; }
+    else { color = 'var(--muted)'; icon = '\u2014'; }
     html += `<div style="display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.04);">`;
     html += `<span style="width:24px;font-weight:800;color:${color};">${letter}</span>`;
     html += `<span style="color:${color};width:16px;">${icon}</span>`;
-    html += `<span style="flex:1;color:var(--muted);">${r.answer || (r.status === 'skipped' ? 'No players' : '')}</span>`;
+    html += `<span style="flex:1;color:var(--muted);">${r.answer || (r.status === 'skipped' ? 'No players' : '')}${r.status === 'revealed' ? ' (revealed)' : ''}</span>`;
     html += `</div>`;
   }
   html += '</div>';

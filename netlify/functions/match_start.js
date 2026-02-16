@@ -867,9 +867,17 @@ function parseChatQuery(text) {
 
   // ----- Competitions (multi-league support) -----
   const competitions = [];
-  for (const cp of COMP_PATTERNS) {
-    if (cp.regex.test(lower) && !competitions.includes(cp.name)) {
-      competitions.push(cp.name);
+
+  // Detect "all leagues" / "every league" / "all competitions" — includes all supported leagues
+  if (/\ball\s+leagues?\b|\bevery\s+league\b|\ball\s+competitions?\b|\bacross\s+all\s+leagues?\b|\bin\s+all\s+leagues?\b/.test(lower)) {
+    for (const cp of COMP_PATTERNS) {
+      if (!competitions.includes(cp.name)) competitions.push(cp.name);
+    }
+  } else {
+    for (const cp of COMP_PATTERNS) {
+      if (cp.regex.test(lower) && !competitions.includes(cp.name)) {
+        competitions.push(cp.name);
+      }
     }
   }
   // Default to Premier League if none detected
