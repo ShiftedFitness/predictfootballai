@@ -104,6 +104,11 @@ body {
 .score-item .num.red { color: #ef4444; }
 .score-item .num.grey { color: var(--muted); }
 
+/* Sticky start footer */
+.start-footer { position: fixed; bottom: 0; left: 0; right: 0; padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); background: linear-gradient(transparent, var(--bg) 20%); z-index: 100; display: flex; justify-content: center; pointer-events: none; opacity: 0; transform: translateY(20px); transition: opacity 0.3s, transform 0.3s; }
+.start-footer.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
+.start-footer .go-btn { max-width: 480px; width: 100%; }
+
 .hidden { display: none !important; }
 .spinner { display: inline-block; width: 20px; height: 20px; border: 2px solid var(--muted); border-top-color: var(--accent-cyan); border-radius: 50%; animation: spin 0.6s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
@@ -128,10 +133,7 @@ body {
   <!-- SETUP -->
   <div id="step1">
     <div class="card">
-      <h2>1. Choose Team</h2>
-      <div id="scopeList"></div>
-
-      <h2 style="margin-top:16px;">2. Timer</h2>
+      <h2>1. Timer</h2>
       <div class="timer-row">
         <label>Enable timer</label>
         <label class="toggle-switch">
@@ -150,8 +152,10 @@ body {
           <option value="60">60s</option>
         </select>
       </div>
+
+      <h2 style="margin-top:16px;">2. Choose Team</h2>
+      <div id="scopeList"></div>
     </div>
-    <button class="go-btn primary" id="startBtn" disabled onclick="startGame()">Start Game</button>
   </div>
 
   <!-- GAME -->
@@ -201,6 +205,11 @@ body {
     <button class="go-btn primary" onclick="startGame()">Play Again</button>
     <button class="go-btn secondary" onclick="backToSetup()">Change Team</button>
   </div>
+</div>
+
+<!-- Sticky start button footer -->
+<div class="start-footer" id="startFooter">
+  <button class="go-btn primary" id="startBtn" onclick="startGame()">Start Game</button>
 </div>
 
 <footer style="text-align:center;padding:16px 16px 72px;font-size:11px;color:var(--muted);opacity:0.6;">
@@ -367,7 +376,7 @@ function makeScopeCard(s) {
     $('scopeList').querySelectorAll('.scope-card').forEach(c => c.classList.remove('selected'));
     card.classList.add('selected');
     selectedScope = s.id;
-    $('startBtn').disabled = false;
+    $('startFooter').classList.add('visible');
   };
   return card;
 }
@@ -381,6 +390,7 @@ async function startGame() {
   timerSeconds = parseInt($('timerLength').value) || 20;
   $('startBtn').disabled = true;
   $('startBtn').innerHTML = '<span class="spinner"></span> Loading...';
+  $('startFooter').classList.remove('visible');
 
   try {
     const res = await fetch(`${API_BASE}/alpha_start`, {
@@ -413,6 +423,9 @@ async function startGame() {
   }
   $('startBtn').disabled = false;
   $('startBtn').textContent = 'Start Game';
+  if ($('step1').classList.contains('hidden')) {
+    $('startFooter').classList.remove('visible');
+  }
 }
 
 function renderLetterStrip() {
@@ -670,6 +683,7 @@ function backToSetup() {
   $('step1').classList.remove('hidden');
   $('step2').classList.add('hidden');
   $('step3').classList.add('hidden');
+  if (selectedScope) $('startFooter').classList.add('visible');
 }
 
 init();

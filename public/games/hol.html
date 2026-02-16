@@ -279,17 +279,18 @@ function renderScopes() {
     const league = leagues[i];
     const leagueScopes = scopes.filter(s => s.league === league.key);
     const overallScope = leagueScopes.find(s => s.type === 'league');
-    const clubScopes = leagueScopes.filter(s => s.type === 'club');
+    const clubScopes = leagueScopes.filter(s => s.type === 'club')
+      .sort((a, b) => a.label.localeCompare(b.label));
 
     const sec = document.createElement('div');
-    sec.className = 'section' + (i === 0 ? ' open' : '');
+    sec.className = 'section'; // all collapsed by default
 
     const icon = LEAGUE_ICONS[league.key] || '\u26BD';
     const header = document.createElement('div');
     header.className = 'section-header';
     header.innerHTML = `<div class="section-title">${icon} ${league.name} <span class="section-count">(${clubScopes.length + (overallScope ? 1 : 0)})</span></div><div class="chev">\u25BC</div>`;
-    header.onclick = () => {
-      // Accordion: close others
+    header.onclick = (e) => {
+      e.stopPropagation();
       container.querySelectorAll('.section').forEach(s => { if (s !== sec) s.classList.remove('open'); });
       sec.classList.toggle('open');
     };
@@ -298,17 +299,28 @@ function renderScopes() {
     const body = document.createElement('div');
     body.className = 'section-body';
 
-    // Overall scope first
-    if (overallScope) {
-      body.appendChild(makeScopeCard(overallScope));
-    }
-    for (const s of clubScopes) {
-      body.appendChild(makeScopeCard(s));
-    }
+    if (overallScope) body.appendChild(makeScopeCard(overallScope));
+    for (const s of clubScopes) body.appendChild(makeScopeCard(s));
 
     sec.appendChild(body);
     container.appendChild(sec);
   }
+}
+
+function getClubColour(scope) {
+  for (const [name, colour] of Object.entries(CLUB_COLOURS)) {
+    if (scope.label === name || name.includes(scope.label) || scope.label.includes(name)) return colour;
+  }
+  const shortMap = {
+    'Man Utd': 'Manchester United', 'Man City': 'Manchester City', 'Spurs': 'Tottenham Hotspur',
+    'West Ham': 'West Ham United', 'West Brom': 'West Bromwich Albion', 'Wolves': 'Wolverhampton Wanderers',
+    'Sheff Utd': 'Sheffield United', 'Sheff Wed': 'Sheffield Wednesday', 'QPR': 'Queens Park Rangers',
+    'Nottm Forest': 'Nottingham Forest', 'Newcastle': 'Newcastle United', 'PSG': 'Paris Saint-Germain',
+    'Frankfurt': 'Eintracht Frankfurt', 'Atlético': 'Atlético Madrid',
+  };
+  const fullName = shortMap[scope.label];
+  if (fullName && CLUB_COLOURS[fullName]) return CLUB_COLOURS[fullName];
+  return '#555';
 }
 
 function makeScopeCard(s) {
@@ -317,9 +329,11 @@ function makeScopeCard(s) {
   if (s.type === 'league') {
     card.innerHTML = `<span class="sc-icon">\uD83C\uDFC6</span><span class="sc-label">${s.label}</span><span class="sc-arrow">\u203A</span>`;
   } else {
-    card.innerHTML = `<span class="sc-dot" style="background:#555"></span><span class="sc-label">${s.label}</span><span class="sc-arrow">\u203A</span>`;
+    const colour = getClubColour(s);
+    card.innerHTML = `<span class="sc-dot" style="background:${colour}"></span><span class="sc-label">${s.label}</span><span class="sc-arrow">\u203A</span>`;
   }
-  card.onclick = () => {
+  card.onclick = (e) => {
+    e.stopPropagation();
     $('scopeList').querySelectorAll('.scope-card').forEach(c => c.classList.remove('selected'));
     card.classList.add('selected');
     selectedScope = s.id;
