@@ -28,11 +28,52 @@ Scrapes current-season (2025/26) player stats from FBref.com and upserts them in
 | Component | Location |
 |-----------|----------|
 | Current season table | `current_season_player_stats` in Supabase |
+| Historical table | `player_season_stats` (~170K+ rows) |
 | Combined view | `v_all_player_season_stats` (UNION ALL of historical + current) |
+| Players table | `players` (36K+ players, keyed by `player_uid`) |
+| Clubs table | `clubs` (540+ clubs) |
 | Metadata table | `ingestion_meta` (tracks last update timestamp) |
 | Frontend display | `index.html` footer shows "Current season stats updated: [date]" |
+| Player Lookup Tool | `public/tools/player-lookup.html` (for spot-checking data) |
 | Migration SQL | `sql/002_current_season_table.sql` |
-| Node.js ingestion script | `scripts/ingest_current_season.js` (backup approach) |
+| Bullseye view fix | `sql/003_fix_bullseye_view.sql` |
+| Bullseye game view | `v_game_player_club_comp` (aggregates from combined view) |
+| Node.js ingestion script | `scripts/ingest_current_season.js` (backup approach — blocked by Cloudflare) |
+
+## ⚠️ Known Data Issues & Lessons Learned
+
+These issues were discovered during the first ingestion (Feb 2026) and fixes were applied. The `genUid()` function now handles all of these automatically — future runs should work cleanly.
+
+### 0. Bullseye View Missing Current Season Data (CRITICAL — one-time fix)
+**Problem:** The Bullseye game (`match_start.js`) queries `v_game_player_club_comp` for club/country/continent categories. This view originally read from `player_club_total_competition` — a pre-aggregated rollup table with ONLY historical data. Current season stats never flowed through to the game.
+**Fix:** Redefined `v_game_player_club_comp` to aggregate from `v_all_player_season_stats` (which includes both historical + current data). See `sql/003_fix_bullseye_view.sql`. Run this once in Supabase SQL Editor.
+**Note:** All OTHER games (HoL, XI, Quiz, Who Am I, Alphabet) already query `v_all_player_season_stats` directly and were unaffected.
+
+### 0b. UID Mismatch Between Current Season and Historical Data (CRITICAL — run after each ingestion)
+**Problem:** Even after `genUid()` normalizes nationality to single-nat format, the historical data itself uses INCONSISTENT UID formats. For example, Saka's historical PL data is under `bukayo saka|eng eng|2002` while FBref gives `bukayo saka|eng|2001`. The `genUid()` fix produces UIDs that match the `players` table but NOT necessarily the historical `player_season_stats` table.
+**Impact:** ~320 players (out of ~2,750 current season rows) had their current season stats show separately from historical data in games.
+**Fix:** After each ingestion, run the UID remap SQL in `sql/003_fix_bullseye_view.sql` (Fix 2). This finds current season rows with no matching historical data in the same competition, looks up the best historical UID by player name, and updates the current season UID to match.
+**Important:** This should be run AFTER every weekly ingestion, not just once.
+
+### 1. Nationality Format Mismatch
+**Problem:** FBref gives nationality as two codes (e.g., `eng eng`, `fr fra`, `br bra`, `us usa`). Historical data uses just ONE code (e.g., `eng`, `fra`, `bra`, `usa`). This caused ~80% of current season UIDs to NOT match any historical player.
+**Example:** FBref UID `bukayo saka|eng eng|2001` vs historical `bukayo saka|eng|2001`
+**Fix:** The `genUid()` function now extracts only the LAST nationality code: `nat.split(' ').pop()`.
+
+### 2. Birth Year Discrepancy
+**Problem:** Historical data calculated birth years from player age (e.g., `2025 - age`), which can be off by 1 year. FBref uses actual birth years.
+**Example:** Saka historical = `bukayo saka|eng|2001`, but some historical rows had `|2002`
+**Fix:** `genUid()` tries ±1 birth year when exact match fails.
+
+### 3. Mojibake Encoding in Historical Data
+**Problem:** Historical data has corrupted Unicode (e.g., `ferna¡ndez` instead of `fernández`). FBref has proper Unicode.
+**Fix:** `genUid()` falls back to normalized ASCII-only matching when exact/year matching fails.
+
+### 4. Unmatched Clubs
+**Problem:** Some clubs in FBref don't exist in the clubs table (e.g., newly promoted teams, minor UCL clubs like Pafos FC, Bodø/Glimt).
+**Fix:** The ingestion function auto-inserts missing clubs rather than skipping those players.
+
+---
 
 ## Step-by-Step Update Process
 
@@ -43,6 +84,8 @@ Navigate to any FBref stats page to establish the session (this bypasses Cloudfl
 ```
 https://fbref.com/en/comps/9/stats/Premier-League-Stats
 ```
+
+**Important:** All subsequent fetches use same-origin `fetch('/en/comps/...')` from this tab. Do NOT navigate away from fbref.com or the JS context will be lost.
 
 ### Step 2: Load Supabase Caches
 
@@ -67,15 +110,28 @@ Run this JavaScript in the FBref tab to load club and player lookup caches from 
   }
 
   // Load all players (paginated, 1000 per request)
+  // We need full player data (uid + birth_year) for UID matching
   window.__playerCache = {};
+  window.__playersByNorm = {}; // normalized lookup for fuzzy matching
   let loaded = 0;
   for (let start = 0; start < 50000; start += 1000) {
-    const res = await fetch(`${SB_URL}/rest/v1/players?select=player_uid&order=player_uid&offset=${start}&limit=1000`, {
+    const res = await fetch(`${SB_URL}/rest/v1/players?select=player_uid,birth_year&order=player_uid&offset=${start}&limit=1000`, {
       headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
     });
     const batch = await res.json();
     if (!Array.isArray(batch) || !batch.length) break;
-    for (const p of batch) window.__playerCache[p.player_uid] = true;
+    for (const p of batch) {
+      window.__playerCache[p.player_uid] = p.birth_year;
+      // Build normalized lookup: strip all non-ASCII to handle mojibake
+      const parts = p.player_uid.split('|');
+      if (parts.length === 3) {
+        const normName = parts[0].replace(/[^\x00-\x7F]/g, '').replace(/\s+/g,' ').trim();
+        const normNat = parts[1].replace(/[^\x00-\x7F]/g, '').replace(/\s+/g,' ').trim();
+        const normKey = `${normName}|${normNat}`;
+        if (!window.__playersByNorm[normKey]) window.__playersByNorm[normKey] = [];
+        window.__playersByNorm[normKey].push(p.player_uid);
+      }
+    }
     loaded += batch.length;
     if (batch.length < 1000) break;
   }
@@ -127,8 +183,59 @@ window.posBucket = function(raw) {
   return f==='GK'?'GK':f==='DF'?'DEF':f==='MF'?'MID':f==='FW'?'FWD':'UNK';
 };
 
+/**
+ * Generate player UID — with smart matching against existing historical UIDs.
+ *
+ * CRITICAL: FBref nationality format is "xx yyy" (e.g., "eng eng", "fr fra", "br bra")
+ * but historical data uses just the LAST code (e.g., "eng", "fra", "bra").
+ * We MUST extract only the last code to match historical UIDs.
+ *
+ * Strategy:
+ * 1. Convert FBref nationality to single code (last word)
+ * 2. Try exact match with that nat code + FBref birth year
+ * 3. Try ±1 birth year (historical data often has off-by-one from age calculation)
+ * 4. Try normalized (ASCII-only) match to handle mojibake in historical data
+ * 5. If no match found, generate a new UID using single nat code
+ */
 window.genUid = function(name, nat, year) {
-  return `${name.toLowerCase().normalize('NFD').trim()}|${(nat||'').toLowerCase().trim()}|${year||''}`;
+  const lowerName = name.toLowerCase().normalize('NFD').trim();
+  const baseName = lowerName.replace(/[\u0300-\u036f]/g, '').trim();
+  // IMPORTANT: FBref gives "eng eng", "fr fra" etc — use LAST code only
+  const natParts = (nat||'').toLowerCase().trim().split(/\s+/);
+  const baseNat = natParts[natParts.length - 1] || '';
+  const baseYear = parseInt(year) || '';
+
+  // 1. Exact match with single nat code
+  const exact = `${lowerName}|${baseNat}|${baseYear}`;
+  if (window.__playerCache[exact] !== undefined) return exact;
+
+  // 2. Try ±1 birth year
+  if (baseYear) {
+    for (const tryYear of [baseYear - 1, baseYear + 1]) {
+      const tryUid = `${lowerName}|${baseNat}|${tryYear}`;
+      if (window.__playerCache[tryUid] !== undefined) return tryUid;
+    }
+  }
+
+  // 3. Normalized ASCII-only match (handles mojibake in historical names)
+  const normName = baseName.replace(/[^\x00-\x7F]/g, '').replace(/\s+/g,' ').trim();
+  const normNat = baseNat.replace(/[^\x00-\x7F]/g, '').replace(/\s+/g,' ').trim();
+  const normKey = `${normName}|${normNat}`;
+  const candidates = window.__playersByNorm[normKey];
+  if (candidates && candidates.length > 0) {
+    // If multiple candidates, try to match by birth year (±1)
+    if (baseYear) {
+      for (const cUid of candidates) {
+        const cYear = window.__playerCache[cUid];
+        if (cYear && Math.abs(cYear - baseYear) <= 1) return cUid;
+      }
+    }
+    // If only one candidate, use it
+    if (candidates.length === 1) return candidates[0];
+  }
+
+  // 4. No historical match — generate new UID using single nat code
+  return exact;
 };
 ```
 
@@ -146,6 +253,7 @@ window.ingestLeague = async function(fbrefCompId, supabaseCompId, slug, leagueNa
   const parseTable = (doc, tableId, extractor) => {
     let table = doc.getElementById(tableId);
     if (!table) {
+      // FBref hides some tables in HTML comments — search for them
       const walker = document.createTreeWalker(doc, NodeFilter.SHOW_COMMENT);
       while (walker.nextNode()) {
         if (walker.currentNode.data.includes(tableId)) {
@@ -169,8 +277,11 @@ window.ingestLeague = async function(fbrefCompId, supabaseCompId, slug, leagueNa
     return new DOMParser().parseFromString(html, 'text/html');
   };
 
+  console.log(`[${leagueName}] Fetching stats page...`);
   const statsDoc = await fetchDoc('stats');
+  console.log(`[${leagueName}] Fetching keepers page...`);
   const keepersDoc = await fetchDoc('keepers');
+  console.log(`[${leagueName}] Fetching defense page...`);
   const defenseDoc = await fetchDoc('defense');
 
   // Parse standard stats
@@ -194,6 +305,7 @@ window.ingestLeague = async function(fbrefCompId, supabaseCompId, slug, leagueNa
     };
   });
   if (!standard) return { error: 'stats_standard not found' };
+  console.log(`[${leagueName}] Parsed ${standard.length} players from stats`);
 
   // Parse keepers
   const keepersMap = {};
@@ -228,8 +340,10 @@ window.ingestLeague = async function(fbrefCompId, supabaseCompId, slug, leagueNa
   });
 
   // Merge and build records
-  // AUTO-INSERT missing clubs so no players are skipped (e.g. newly promoted teams, minor UCL clubs)
+  // AUTO-INSERT missing clubs so no players are skipped
   const newPlayers = []; const records = []; const newClubs = new Set();
+  let matchedExisting = 0, matchedByYear = 0, matchedByNorm = 0, brandNew = 0;
+
   for (const p of standard) {
     let clubId = window.resolveClub(p.team);
     if (!clubId) {
@@ -250,17 +364,30 @@ window.ingestLeague = async function(fbrefCompId, supabaseCompId, slug, leagueNa
       }
       if (!clubId) continue; // only skip if insert also failed
     }
+
     const uid = window.genUid(p.name, p.nat, p.born);
+
+    // Track how the UID was matched for diagnostics
+    const natLast = (p.nat||'').toLowerCase().trim().split(/\s+/).pop()||'';
+    const exactUid = `${p.name.toLowerCase().normalize('NFD').trim()}|${natLast}|${p.born}`;
+    if (uid === exactUid && window.__playerCache[uid] !== undefined) matchedExisting++;
+    else if (uid !== exactUid && window.__playerCache[uid] !== undefined) {
+      if (uid.split('|')[2] !== p.born) matchedByYear++;
+      else matchedByNorm++;
+    } else brandNew++;
+
     const age = p.ageStr.includes('-') ? parseInt(p.ageStr.split('-')[0]) : (parseInt(p.ageStr)||null);
     const kKey = `${p.name}|${p.team}`;
     const gk = keepersMap[kKey]||{}; const def = defenseMap[kKey]||{};
-    if (!window.__playerCache[uid]) {
+
+    if (window.__playerCache[uid] === undefined) {
       newPlayers.push({ player_uid:uid, player_name:p.name,
         nationality_raw: p.nat.split(' ').pop()||'',
         nationality_norm: (p.nat.split(' ').pop()||'').toUpperCase(),
         birth_year: parseInt(p.born)||null });
-      window.__playerCache[uid] = true;
+      window.__playerCache[uid] = parseInt(p.born)||null;
     }
+
     records.push({
       player_uid:uid, competition_id:supabaseCompId, club_id:clubId,
       season_label:'2025/26', season_start_year:2025,
@@ -295,7 +422,14 @@ window.ingestLeague = async function(fbrefCompId, supabaseCompId, slug, leagueNa
     sUpserted += batch.length;
   }
 
-  return { league:leagueName, players:standard.length, newPlayers:pInserted, statsUpserted:sUpserted, newClubs:[...newClubs] };
+  return {
+    league: leagueName,
+    parsed: standard.length,
+    statsUpserted: sUpserted,
+    newPlayers: pInserted,
+    newClubs: [...newClubs],
+    matching: { exactMatch: matchedExisting, birthYearFix: matchedByYear, mojibakeFix: matchedByNorm, brandNew }
+  };
 };
 ```
 
@@ -331,11 +465,13 @@ await window.ingestLeague(8, 2, 'Champions-League-Stats', 'Champions League');
 After all leagues complete:
 
 ```javascript
-await fetch(`${SB_URL}/rest/v1/ingestion_meta?on_conflict=key`, {
-  method: 'POST', headers,
+await fetch(`${window.__SB_URL}/rest/v1/ingestion_meta?on_conflict=key`, {
+  method: 'POST',
+  headers: { 'apikey': window.__SB_KEY, 'Authorization': `Bearer ${window.__SB_KEY}`,
+    'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates,return=minimal' },
   body: JSON.stringify([{
     key: 'current_season_last_updated',
-    value: '<summary of what was ingested>',
+    value: '<DATE> — Updated all 6 leagues from FBref',
     updated_at: new Date().toISOString()
   }])
 });
@@ -347,12 +483,26 @@ Check the data was written correctly:
 
 ```javascript
 // Count by league
-const h = { 'apikey': KEY, 'Authorization': `Bearer ${KEY}`, 'Prefer': 'count=exact' };
+const h = { 'apikey': window.__SB_KEY, 'Authorization': `Bearer ${window.__SB_KEY}`, 'Prefer': 'count=exact' };
 for (const [name, compId] of [['EPL',7],['La Liga',1],['Serie A',3],['Bundesliga',9],['Ligue 1',6],['UCL',2]]) {
-  const r = await fetch(`${SB}/rest/v1/current_season_player_stats?competition_id=eq.${compId}&select=id&limit=1`, { headers: h });
+  const r = await fetch(`${window.__SB_URL}/rest/v1/current_season_player_stats?competition_id=eq.${compId}&select=id&limit=1`, { headers: h });
   console.log(`${name}: ${r.headers.get('content-range')}`);
 }
 ```
+
+**Spot-check with Player Lookup Tool:**
+After deployment, visit `/tools/player-lookup.html` and search for key players to verify:
+- Their current season stats appear (green "CURRENT" section)
+- Historical data still shows (expandable club blocks)
+- Stats make sense (e.g., Haaland should have 20+ PL goals, Saka should show Arsenal across seasons)
+
+Good players to spot-check across leagues:
+- **PL:** Bukayo Saka, Erling Haaland, Cole Palmer
+- **La Liga:** Kylian Mbappé, Robert Lewandowski
+- **Serie A:** Lautaro Martínez
+- **Bundesliga:** Florian Wirtz, Harry Kane
+- **Ligue 1:** Bradley Barcola
+- **UCL:** Players who appear in domestic + UCL (Saka, Haaland, etc.)
 
 ---
 
@@ -361,27 +511,53 @@ for (const [name, compId] of [['EPL',7],['La Liga',1],['Serie A',3],['Bundesliga
 | Issue | Solution |
 |-------|----------|
 | FBref returns 403 | Must use real browser (Chrome). Open any FBref page first to pass Cloudflare. |
-| New clubs auto-inserted | The script auto-creates missing clubs (e.g. Pisa, Paris FC, Pafos FC) so no players are skipped. Check `newClubs` in the output to see what was added. |
-| Timeout on UCL | Break into separate fetch/parse/upsert steps (UCL has 800+ players). |
-| Player UID mismatch | UIDs use `name.normalize('NFD').toLowerCase()`. Historical data may have mojibake — this is expected. |
-| Stats not showing in games | Ensure games query `v_all_player_season_stats` (not `player_season_stats` directly). |
+| JS context lost | Do NOT navigate away from FBref. All fetches use same-origin `fetch('/en/comps/...')`. |
+| Supabase only returns 1000 rows | Player cache loading uses pagination (1000 per request in a loop). Verify the loaded count matches expectations (~36K+). |
+| New clubs auto-inserted | The script auto-creates missing clubs (e.g. Pisa, Paris FC, Pafos FC). Check `newClubs` in the output. |
+| Timeout on UCL | Break into separate fetch/parse/upsert steps (UCL has 800+ players across 3 pages). |
+| Player UID mismatch | The updated `genUid()` tries: exact match → ±1 birth year → normalized ASCII match → new UID. Check the `matching` diagnostics in the output. |
+| Stats not showing in games | Ensure games query `v_all_player_season_stats` (not `player_season_stats` directly). All 7 game backends were confirmed pointing to the view as of Feb 2026. |
+| `await` not valid error | Wrap code in `(async () => { ... })()` — top-level await may not work in the browser console. |
+| Duplicate player entries | If a player shows up twice in games (once with historical data, once with current), their UIDs don't match. Use the Player Lookup tool to check both UIDs and fix the mismatch. |
+
+## Club Name Mapping
+
+FBref uses abbreviated club names. The `__CLUB_NAME_MAP` handles known mismatches. If new clubs appear in future seasons or FBref changes its naming, add them to the map. Check `newClubs` in the ingestion output — if a club was auto-inserted that should have matched an existing one, add a mapping.
+
+**Common patterns:**
+- `Manchester Utd` → `Manchester United`
+- `Nott'ham Forest` → `Nottingham Forest`
+- `Paris S-G` → `Paris Saint-Germain`
+- `M'Gladbach` → `Borussia Monchengladbach`
 
 ## Season Rollover Notes
 
 When the season changes (e.g. 2026/27):
-1. Update `season_label` from `'2025/26'` to `'2026/27'`
+1. Update `season_label` from `'2025/26'` to `'2026/27'` in the ingestion function
 2. Update `season_start_year` from `2025` to `2026`
 3. The old current season data can be migrated to `player_season_stats` (historical) or left in place
 4. FBref URLs stay the same (always show current season)
+5. Consider truncating `current_season_player_stats` before the new season starts
 
 ## Expected Data Volumes (Feb 2026)
 
-| League | Players |
-|--------|---------|
-| Premier League | ~526 |
-| La Liga | ~557 |
-| Serie A | ~530 |
-| Bundesliga | ~474 |
-| Ligue 1 | ~490 |
-| Champions League | ~750 |
-| **Total** | **~3,300** |
+| League | Players | Total Apps | Total Goals |
+|--------|---------|------------|-------------|
+| Premier League | ~526 | ~7,873 | ~692 |
+| La Liga | ~557 | ~7,320 | ~601 |
+| Serie A | ~529 | ~7,216 | ~557 |
+| Bundesliga | ~474 | ~6,093 | ~608 |
+| Ligue 1 | ~490 | ~5,628 | ~506 |
+| Champions League | ~753 | ~3,962 | ~431 |
+| **Total** | **~3,329** | **~38,092** | **~3,395** |
+
+## Competition IDs Reference
+
+| League | Supabase `competition_id` | FBref comp ID |
+|--------|--------------------------|---------------|
+| La Liga | 1 | 12 |
+| UCL | 2 | 8 |
+| Serie A | 3 | 11 |
+| Ligue 1 | 6 | 13 |
+| Premier League | 7 | 9 |
+| Bundesliga | 9 | 20 |
