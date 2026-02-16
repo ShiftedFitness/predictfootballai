@@ -21,56 +21,50 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>PredictFootball – Admin</title>
+<title>TeleStats Fives – Admin</title>
+<link rel="stylesheet" href="/predict/telestats-theme.css"/>
 <style>
-  body{margin:0;background:#111;color:#fff;font-family:Inter,system-ui,Arial;display:flex;justify-content:center}
-  .wrap{max-width:780px;width:100%;margin:24px 12px;background:#30A278;color:#fff;border-radius:14px;padding:16px}
-  h2{margin:0 0 12px}
-  h3{margin:0 0 8px}
-  .card{background:#000;border:1px solid #1a1a1a;border-radius:12px;padding:12px;margin-bottom:12px}
-  label{display:block;margin-bottom:6px;color:#EAEAEA}
-  input,select{background:#0e0e0e;color:#fff;border:1px solid #2a2a2a;border-radius:8px;padding:8px 10px}
+  /* Admin-specific overrides — theme vars used throughout */
   .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-  .btn{background:#fff;color:#000;border:0;padding:10px 14px;border-radius:8px;font-weight:800;cursor:pointer}
+  .btn{background:var(--accent-yellow);color:#0B0F12;border:0;padding:10px 14px;border-radius:8px;font-weight:800;cursor:pointer}
   .btn.small{padding:8px 10px}
-  .btn.danger{background:#ff7676;color:#000}
-  .btn:disabled{opacity:0.5;cursor:not-allowed}
+  .btn.danger{background:var(--danger);color:#fff}
+  .btn:disabled{opacity:0.4;cursor:not-allowed}
   table{width:100%;border-collapse:collapse;margin-top:8px}
-  th,td{padding:8px;border-bottom:1px solid #1f1f1f;text-align:left;vertical-align:middle}
+  th,td{padding:8px;border-bottom:1px solid rgba(255,255,255,0.06);text-align:left;vertical-align:middle}
   select.result{min-width:120px}
   #status{white-space:pre-wrap;margin-top:6px}
   .right{text-align:right}
-  .access-denied{text-align:center;padding:60px 20px}
-  .access-denied h1{font-size:2em;margin-bottom:12px}
-  .debug-panel{background:#1a1a1a;border:1px solid #333;border-radius:8px;padding:10px;margin-top:8px;font-size:12px;font-family:monospace}
-  .debug-panel .label{color:#888;margin-bottom:4px}
-  .debug-panel .value{color:#fff;word-break:break-all}
-  .error-banner{background:#ff4444;color:#fff;padding:10px;border-radius:8px;margin-top:8px;font-weight:bold}
-  .warning-banner{background:#ff9800;color:#000;padding:10px;border-radius:8px;margin-top:8px;font-weight:bold}
-  .success-banner{background:#2e7d32;color:#fff;padding:10px;border-radius:8px;margin-top:8px;font-weight:bold}
+  .debug-panel{background:var(--bg-panel);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:10px;margin-top:8px;font-size:12px;font-family:'Space Mono',monospace}
+  .debug-panel .label{color:var(--text-muted);margin-bottom:4px}
+  .debug-panel .value{color:var(--text-primary);word-break:break-all}
+  .error-banner{background:rgba(224,85,85,0.2);border:1px solid var(--danger);color:var(--danger);padding:10px;border-radius:8px;margin-top:8px;font-weight:bold}
+  .warning-banner{background:rgba(255,152,0,0.15);border:1px solid #ff9800;color:#ff9800;padding:10px;border-radius:8px;margin-top:8px;font-weight:bold}
+  .success-banner{background:rgba(50,255,126,0.1);border:1px solid var(--accent-green);color:var(--accent-green);padding:10px;border-radius:8px;margin-top:8px;font-weight:bold}
   .mode-switch{display:flex;gap:0;margin-bottom:8px}
-  .mode-switch button{background:#222;color:#fff;border:1px solid #333;padding:8px 14px;cursor:pointer}
+  .mode-switch button{background:var(--bg-elevated);color:var(--text-secondary);border:1px solid rgba(255,255,255,0.1);padding:8px 14px;cursor:pointer}
   .mode-switch button:first-child{border-radius:8px 0 0 8px}
   .mode-switch button:last-child{border-radius:0 8px 8px 0}
-  .mode-switch button.active{background:#30A278;border-color:#30A278}
+  .mode-switch button.active{background:rgba(0,229,255,0.10);color:var(--accent-cyan);border-color:var(--accent-cyan)}
   @keyframes spin{to{transform:rotate(360deg)}}
+  input,select{background:var(--bg-panel);color:var(--text-primary);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:8px 10px}
+  input:focus,select:focus{border-color:var(--accent-cyan);outline:none}
+  label{display:block;margin-bottom:6px;color:var(--text-muted);font-size:12px}
 
-  /* Fixture browser styles */
+  /* Fixture browser */
   .fix-grid{display:grid;gap:10px;margin-top:10px}
-  .fix-card{background:#111;border:2px solid #222;border-radius:10px;padding:12px;cursor:pointer;transition:border-color .15s,background .15s}
-  .fix-card:hover{border-color:#444}
-  .fix-card.selected{border-color:#30A278;background:#0a2a1a}
+  .fix-card{background:var(--bg-panel);border:2px solid rgba(255,255,255,0.06);border-radius:10px;padding:12px;cursor:pointer;transition:border-color .15s,background .15s}
+  .fix-card:hover{border-color:rgba(255,255,255,0.15)}
+  .fix-card.selected{border-color:var(--accent-cyan);background:rgba(0,229,255,0.05)}
   .fix-card-header{display:flex;justify-content:space-between;align-items:center;gap:8px}
   .fix-teams{font-weight:700;font-size:15px}
-  .fix-date{font-size:12px;color:#999}
-  .fix-round{font-size:11px;color:#666;margin-top:2px}
-  .fix-check{width:20px;height:20px;border-radius:50%;border:2px solid #444;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
-  .fix-card.selected .fix-check{background:#30A278;border-color:#30A278}
-  .fix-card.selected .fix-check::after{content:'\\2713';color:#fff;font-weight:900;font-size:13px}
-  .fix-count{font-size:13px;color:#EAEAEA;margin-top:8px}
-
-  /* Enrichment preview styles */
-  .enrich-card{background:#111;border:1px solid #222;border-radius:10px;padding:12px;margin-top:10px}
+  .fix-date{font-size:12px;color:var(--text-muted)}
+  .fix-round{font-size:11px;color:var(--text-muted);margin-top:2px}
+  .fix-check{width:20px;height:20px;border-radius:50%;border:2px solid rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+  .fix-card.selected .fix-check{background:var(--accent-cyan);border-color:var(--accent-cyan)}
+  .fix-card.selected .fix-check::after{content:'\\2713';color:#0B0F12;font-weight:900;font-size:13px}
+  .fix-count{font-size:13px;color:var(--text-secondary);margin-top:8px}
+  .enrich-card{background:var(--bg-panel);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:12px;margin-top:10px}
   .enrich-teams{font-weight:700;font-size:15px;margin-bottom:8px}
   .pred-bar{display:flex;height:28px;border-radius:6px;overflow:hidden;margin:8px 0;font-size:12px;font-weight:700}
   .pred-bar .seg{display:flex;align-items:center;justify-content:center;min-width:30px}
@@ -78,77 +72,77 @@
   .pred-bar .seg.draw{background:#555;color:#fff}
   .pred-bar .seg.away{background:#c62828;color:#fff}
   .form-row{display:flex;align-items:center;gap:6px;margin:4px 0}
-  .form-label{font-size:12px;color:#999;min-width:80px}
+  .form-label{font-size:12px;color:var(--text-muted);min-width:80px}
   .form-badge{width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:800}
-  .form-badge.w{background:#7CFC00;color:#000}
+  .form-badge.w{background:var(--accent-green);color:#000}
   .form-badge.d{background:#666;color:#fff}
-  .form-badge.l{background:#cc3333;color:#fff}
-  .h2h-row{font-size:12px;color:#bbb;margin:4px 0}
-  .advice-text{font-size:12px;color:#EAEAEA;font-style:italic;margin-top:6px;padding:6px 8px;background:#1a1a1a;border-radius:6px}
+  .form-badge.l{background:var(--danger);color:#fff}
+  .h2h-row{font-size:12px;color:var(--text-secondary);margin:4px 0}
+  .advice-text{font-size:12px;color:var(--text-secondary);font-style:italic;margin-top:6px;padding:6px 8px;background:var(--bg-elevated);border-radius:6px}
   .seed-mode-tabs{display:flex;gap:0;margin-bottom:10px}
-  .seed-mode-tabs button{background:#222;color:#aaa;border:1px solid #333;padding:8px 16px;cursor:pointer;font-weight:600;font-size:13px;border-radius:0}
+  .seed-mode-tabs button{background:var(--bg-elevated);color:var(--text-muted);border:1px solid rgba(255,255,255,0.1);padding:8px 16px;cursor:pointer;font-weight:600;font-size:13px;border-radius:0}
   .seed-mode-tabs button:first-child{border-radius:8px 0 0 8px}
   .seed-mode-tabs button:last-child{border-radius:0 8px 8px 0}
-  .seed-mode-tabs button.active{background:#1a1a1a;color:#fff;border-color:#555}
+  .seed-mode-tabs button.active{background:rgba(0,229,255,0.08);color:var(--accent-cyan);border-color:var(--accent-cyan)}
 
-  /* Simulator styles (mirrors picks-widget) */
-  .sim-wrap{background:#30A278;border-radius:14px;padding:16px;margin-top:10px}
-  .sim-card{background:#000;border:1px solid #1a1a1a;border-radius:12px;padding:16px;margin-bottom:12px}
+  /* Simulator */
+  .sim-wrap{background:var(--bg-card);border:1px solid rgba(255,255,255,0.04);border-radius:14px;padding:16px;margin-top:10px}
+  .sim-card{background:var(--bg-panel);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:16px;margin-bottom:12px}
   .sim-teams{font-weight:700;font-size:15px}
   .sim-pick-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}
-  .sim-pick{padding:12px;border-radius:10px;text-align:center;cursor:pointer;background:transparent;color:#fff;border:1px solid #1a1a1a;font-weight:700;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;transition:all .15s}
-  .sim-pick:hover{border-color:#333}
-  .sim-pick.active{background:#fff;color:#000;border-color:#fff;font-weight:900}
+  .sim-pick{padding:12px;border-radius:10px;text-align:center;cursor:pointer;background:transparent;color:var(--text-primary);border:1px solid rgba(255,255,255,0.1);font-weight:700;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;transition:all .15s}
+  .sim-pick:hover{border-color:rgba(0,229,255,0.4)}
+  .sim-pick.active{background:var(--accent-cyan);color:#0B0F12;border-color:var(--accent-cyan);font-weight:900}
   .sim-pick .sim-pct{font-size:11px;opacity:0.7;font-weight:600}
   .sim-pick.active .sim-pct{opacity:1}
-  .sim-pick .sim-check{display:none;color:#7CFC00;font-weight:900}
-  .sim-pick.active .sim-check{display:inline}
-  .sim-enrich{margin-top:10px;padding-top:10px;border-top:1px solid #1a1a1a}
+  .sim-pick .sim-check{display:none;color:var(--accent-green);font-weight:900}
+  .sim-pick.active .sim-check{display:inline;color:#0B0F12}
+  .sim-enrich{margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.06)}
   .sim-pred-bar{display:flex;height:24px;border-radius:6px;overflow:hidden;margin:6px 0;font-size:11px;font-weight:700}
   .sim-pred-seg{display:flex;align-items:center;justify-content:center;min-width:28px}
   .sim-pred-seg.home{background:#2e7d32;color:#fff}
   .sim-pred-seg.draw{background:#555;color:#fff}
   .sim-pred-seg.away{background:#c62828;color:#fff}
   .sim-form-row{display:flex;align-items:center;gap:5px;margin:4px 0}
-  .sim-form-label{font-size:11px;color:#999;min-width:70px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .sim-form-label{font-size:11px;color:var(--text-muted);min-width:70px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .sim-form-badge{width:20px;height:20px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0}
-  .sim-form-badge.w{background:#7CFC00;color:#000}
+  .sim-form-badge.w{background:var(--accent-green);color:#000}
   .sim-form-badge.d{background:#666;color:#fff}
-  .sim-form-badge.l{background:#cc3333;color:#fff}
-  .sim-h2h{font-size:11px;color:#bbb;margin:4px 0}
-  .sim-advice{font-size:11px;color:#EAEAEA;font-style:italic;margin-top:4px}
-  .sim-prob-card{background:#000;border:1px solid #1a1a1a;border-radius:12px;padding:16px;margin-bottom:12px}
+  .sim-form-badge.l{background:var(--danger);color:#fff}
+  .sim-h2h{font-size:11px;color:var(--text-secondary);margin:4px 0}
+  .sim-advice{font-size:11px;color:var(--text-secondary);font-style:italic;margin-top:4px}
+  .sim-prob-card{background:var(--bg-panel);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:16px;margin-bottom:12px}
   .sim-prob-title{font-weight:800;font-size:16px;margin-bottom:12px}
   .sim-prob-row{display:flex;align-items:center;gap:10px;margin:6px 0}
-  .sim-prob-label{font-size:13px;color:#EAEAEA;min-width:90px}
-  .sim-prob-bar-wrap{flex:1;height:20px;background:#1a1a1a;border-radius:6px;overflow:hidden;position:relative}
+  .sim-prob-label{font-size:13px;color:var(--text-secondary);min-width:90px}
+  .sim-prob-bar-wrap{flex:1;height:20px;background:var(--bg-elevated);border-radius:6px;overflow:hidden;position:relative}
   .sim-prob-bar-fill{height:100%;border-radius:6px;transition:width .3s ease}
   .sim-prob-val{font-size:13px;font-weight:700;min-width:50px;text-align:right}
-  .sim-commentary{margin-top:12px;padding:10px 12px;background:#1a1a1a;border-radius:8px;font-size:13px;color:#EAEAEA;line-height:1.5}
+  .sim-commentary{margin-top:12px;padding:10px 12px;background:var(--bg-elevated);border-radius:8px;font-size:13px;color:var(--text-secondary);line-height:1.5}
   .sim-dist-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-top:10px}
-  .sim-dist-item{text-align:center;padding:8px 4px;background:#111;border-radius:8px;border:1px solid #222}
+  .sim-dist-item{text-align:center;padding:8px 4px;background:var(--bg-panel);border-radius:8px;border:1px solid rgba(255,255,255,0.06)}
   .sim-dist-num{font-size:18px;font-weight:800;display:block}
-  .sim-dist-label{font-size:10px;color:#999;margin-top:2px;display:block}
+  .sim-dist-label{font-size:10px;color:var(--text-muted);margin-top:2px;display:block}
   .sim-dist-pct{font-size:12px;font-weight:700;display:block;margin-top:4px}
-  .sim-save-btn{background:#fff;color:#000;border:none;font-weight:900;padding:12px 18px;border-radius:10px;cursor:pointer;font-size:16px}
-  .sim-save-btn:hover{background:#e0e0e0}
-  .sim-save-btn.saved{background:#7CFC00;color:#000}
-  .sim-status{color:#EAEAEA;margin-bottom:8px}
-  .sim-reset{background:#333;color:#fff;border:1px solid #555;padding:8px 14px;border-radius:8px;cursor:pointer;font-weight:600;font-size:13px;margin-left:8px}
+  .sim-save-btn{background:var(--accent-yellow);color:#0B0F12;border:none;font-weight:900;padding:12px 18px;border-radius:10px;cursor:pointer;font-size:16px}
+  .sim-save-btn:hover{background:#E6C009}
+  .sim-save-btn.saved{background:var(--accent-green);color:#000}
+  .sim-status{color:var(--text-secondary);margin-bottom:8px}
+  .sim-reset{background:var(--bg-elevated);color:var(--text-primary);border:1px solid rgba(255,255,255,0.1);padding:8px 14px;border-radius:8px;cursor:pointer;font-weight:600;font-size:13px;margin-left:8px}
 </style>
 </head>
 <body>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/predict/auth.js"></script>
 
-<div class="wrap" id="mainWrap">
+<div class="ts-page" id="mainWrap">
   <!-- Content loaded by JS based on auth -->
 </div>
 
 <script>
 const base = '/.netlify/functions';
 
-// Read ADMIN_SECRET from URL query param
+// Read ADMIN_SECRET from URL query param (backward compat for API calls)
 function getAdminSecret() {
   const params = new URLSearchParams(location.search);
   const raw = params.get('ADMIN_SECRET');
@@ -838,9 +832,9 @@ function renderEnrichmentPreview() {
 function initAdminUI() {
   const wrap = $('mainWrap');
   wrap.innerHTML = `
-    <h2>Admin – Results & Scoring</h2>
+    <h2 class="ts-page-title">Admin – Results & Scoring</h2>
 
-    <div class="card">
+    <div class="ts-card">
       <div class="mode-switch">
         <button id="modeSelected" class="active">Selected Week</button>
         <button id="modeLatest">Latest Matchweek</button>
@@ -849,26 +843,26 @@ function initAdminUI() {
         <div id="weekInputWrapper"><label>Week</label><input id="week" type="number" min="1" step="1" value="1" /></div>
         <div><button class="btn" id="load">Load Matches</button></div>
       </div>
-      <div id="status" style="margin-top:6px;color:#EAEAEA"></div>
+      <div id="status" style="margin-top:6px;color:var(--text-primary)"></div>
       <div id="debugPanel" class="debug-panel" style="display:none"></div>
       <div id="matches"></div>
     </div>
 
-    <div class="card">
+    <div class="ts-card">
       <div id="scoringWarning" class="warning-banner" style="display:none"></div>
       <div class="row" style="margin-top:8px">
         <button class="btn" id="applyResults">Apply Results & Lock</button>
         <button class="btn" id="scoreWeek" disabled>Score Week</button>
         <button class="btn danger" id="forceScoreWeek" disabled title="Force rescore even if week already scored">Force Rescore Week</button>
       </div>
-      <p style="margin-top:8px;font-size:12px;color:#f5dede">
+      <p style="margin-top:8px;font-size:12px;color:var(--text-secondary)">
         <strong>Force Rescore Week</strong> will ignore safety checks and rescore the selected week. Use only if normal scoring failed.
       </p>
       <div><label style="margin-top:8px"><input type="checkbox" id="showDebug"> Show API debug info</label></div>
     </div>
 
     <!-- ═══ SEED SECTION ═══ -->
-    <div class="card">
+    <div class="ts-card">
       <h3>Seed Next Week</h3>
 
       <div class="seed-mode-tabs">
@@ -888,7 +882,7 @@ function initAdminUI() {
           <div><label>EPL Matchday (1-38)</label><input id="apiMatchday" type="number" min="1" max="38" step="1" placeholder="auto" style="width:80px"/></div>
           <button class="btn" id="fetchFixturesBtn">Fetch Matchweek Fixtures</button>
         </div>
-        <div style="font-size:11px;color:#999;margin-bottom:6px">Leave blank to auto-detect the next unplayed matchweek</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px">Leave blank to auto-detect the next unplayed matchweek</div>
         <div id="seedStatus" style="display:none;margin-top:8px"></div>
         <div class="fix-count" id="fixCount" style="margin-top:8px">0/5 selected</div>
         <div id="fixtureGrid" class="fix-grid"></div>
@@ -914,7 +908,7 @@ function initAdminUI() {
 
       <!-- Simulator mode (hidden by default) -->
       <div id="seedSimMode" style="display:none">
-        <p style="color:#EAEAEA;font-size:13px;margin:0 0 8px">
+        <p style="color:var(--text-primary);font-size:13px;margin:0 0 8px">
           Preview the user experience — select picks below to see enrichment data, probability analysis, and commentary exactly as real users will.
           Nothing is saved.
         </p>
@@ -929,10 +923,10 @@ function initAdminUI() {
 function showAccessDenied() {
   const wrap = $('mainWrap');
   wrap.innerHTML = `
-    <div class="access-denied">
-      <h1>Access Denied</h1>
-      <p style="color:#ccc">Admin access requires a valid ADMIN_SECRET in the URL.</p>
-      <p style="color:#888;font-size:14px;margin-top:20px">Usage: admin.html?ADMIN_SECRET=your_secret_here</p>
+    <div class="ts-access-denied" style="text-align:center;padding:60px 20px;">
+      <h1 style="font-family:'Space Mono',monospace;font-size:28px;color:var(--danger);margin-bottom:12px;">Access Denied</h1>
+      <p style="color:var(--text-muted);font-size:14px;">You need admin privileges to access this page.</p>
+      <a href="/predict/" style="color:var(--accent-cyan);margin-top:16px;display:inline-block;">Back to Picks</a>
     </div>
   `;
 }
@@ -1215,25 +1209,35 @@ function setupEventListeners() {
   });
 }
 
-// ── Validate & Init ─────────────────────────────────────────────────────
-async function validateSecret() {
-  if (!ADMIN_SECRET) return false;
+// ── Init ────────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', async () => {
+  // Authenticate via Supabase session
+  try {
+    await PFAuth.initAuth();
+    PFAuth.renderNav();
+  } catch (e) {
+    showAccessDenied();
+    return;
+  }
+
+  // Check admin status from cached user
+  if (!PFAuth.isAdmin()) {
+    showAccessDenied();
+    return;
+  }
+
+  // Still support ADMIN_SECRET from URL for API calls (backward compat)
+  // but page access is now controlled by Supabase admin flag
+  $('mainWrap').innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted)"><span class="ts-spinner"></span> Loading admin panel...</div>';
+
+  // Try to validate and fetch latest week
   try {
     const weeksData = await adminFetch('/weeks');
     latestWeek = weeksData.recommendedPickWeek || weeksData.latest || 1;
-    await adminFetch(`/get-week?week=${latestWeek}`);
-    return true;
   } catch (e) {
-    if (lastDebugInfo?.status === 401) return false;
-    return true;
+    console.warn('Could not fetch weeks:', e.message);
   }
-}
 
-window.addEventListener('DOMContentLoaded', async () => {
-  if (!ADMIN_SECRET) { showAccessDenied(); return; }
-  $('mainWrap').innerHTML = '<div style="text-align:center;padding:40px;color:#ccc">Validating access...</div>';
-  const isValid = await validateSecret();
-  if (!isValid) { showAccessDenied(); return; }
   initAdminUI();
   if (latestWeek) { $('week').value = latestWeek; currentWeek = latestWeek; }
 });

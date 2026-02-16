@@ -2,46 +2,26 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
-  <title>PredictFootball.ai – Match Predictions Inspector</title>
+  <title>TeleStats Fives – Predictions Inspector</title>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <link rel="stylesheet" href="/predict/telestats-theme.css"/>
   <style>
-    :root {
-      --bg:#30A278;
-      --card:#000000;
-      --border:#1a1a1a;
-      --text:#FFFFFF;
-      --muted:#EAEAEA;
-      --accent:#FFFFFF;
-      --accentText:#000000;
-    }
     html, body { height:100%; }
     body {
       margin:0;
-      background:#111;
-      color:#fff;
-      font-family:Inter,system-ui,Arial;
       display:flex;
       justify-content:center;
       align-items:flex-start;
       min-height:100vh;
     }
-    .wrap {
+    .ts-page {
       max-width:900px;
       width:100%;
       margin:24px 12px;
-      background:var(--bg);
-      color:var(--text);
-      border-radius:14px;
       padding:16px;
     }
-    h2 { margin:0 0 8px; }
-
-    .card {
-      background:var(--card);
-      border:1px solid var(--border);
-      border-radius:12px;
-      padding:12px;
-      margin-bottom:12px;
+    .ts-page-title {
+      margin:0 0 8px;
     }
     .row {
       display:flex;
@@ -50,40 +30,22 @@
       align-items:flex-end;
       margin-bottom:8px;
     }
-    label {
-      display:block;
-      font-size:12px;
-      color:var(--muted);
+    .ts-label {
       margin-bottom:4px;
     }
-    input {
-      background:#0e0e0e;
-      color:#fff;
-      border:1px solid #2a2a2a;
-      border-radius:8px;
-      padding:8px 10px;
+    .ts-input {
       min-width:140px;
     }
-    .btn {
-      background:var(--accent);
-      color:var(--accentText);
-      border:0;
-      padding:9px 14px;
-      border-radius:8px;
-      font-weight:800;
-      cursor:pointer;
+    .ts-btn {
       white-space:nowrap;
     }
-    .muted { color:var(--muted); font-size:12px; }
-
-    .status { margin-top:6px; white-space:pre-wrap; font-size:12px; }
-
+    .status {
+      margin-top:6px;
+      white-space:pre-wrap;
+      font-size:12px;
+    }
     .match-card {
       margin-top:10px;
-      border-radius:10px;
-      border:1px solid #2a2a2a;
-      padding:10px;
-      background:#050505;
     }
     .match-header {
       display:flex;
@@ -95,11 +57,10 @@
       display:inline-block;
       padding:3px 8px;
       border-radius:999px;
-      border:1px solid #444;
+      border:1px solid rgba(255,255,255,0.2);
       font-size:11px;
-      color:#ddd;
+      color:var(--text-muted);
     }
-
     table {
       width:100%;
       border-collapse:collapse;
@@ -107,17 +68,16 @@
     }
     th, td {
       padding:6px 6px;
-      border-bottom:1px solid #1f1f1f;
+      border-bottom:1px solid rgba(255,255,255,0.06);
       text-align:left;
     }
     th {
       font-size:11px;
       text-transform:uppercase;
       letter-spacing:.3px;
-      color:#cfcfcf;
+      color:var(--text-muted);
     }
     tr:last-child td { border-bottom:none; }
-
     .right { text-align:right; }
     .mono { font-family:Menlo,Consolas,monospace; font-size:12px; }
     .badge {
@@ -125,44 +85,33 @@
       padding:1px 6px;
       border-radius:999px;
       font-size:11px;
-      border:1px solid #444;
+      border:1px solid rgba(255,255,255,0.2);
     }
-    .badge-good { border-color:#7CFC00; color:#7CFC00; }
-    .badge-bad  { border-color:#FF6B6B; color:#FF6B6B; }
-
-    .error { color:#FF6B6B; }
-    .success { color:#7CFC00; }
+    .badge-good { border-color:var(--accent-green); color:var(--accent-green); }
+    .badge-bad  { border-color:var(--danger); color:var(--danger); }
+    .error { color:var(--danger); }
+    .success { color:var(--accent-green); }
+    .ts-muted { color:var(--text-muted); font-size:12px; }
+    .access-denied {
+      text-align:center;
+      padding:60px 20px;
+    }
+    .access-denied h1 {
+      font-family:'Space Mono',monospace;
+      font-size:28px;
+      color:var(--danger);
+      margin-bottom:12px;
+    }
+    .access-denied p {
+      color:var(--text-muted);
+      font-size:14px;
+    }
   </style>
 </head>
 <body>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/predict/auth.js"></script>
-  <div class="wrap">
-    <h2>Match Predictions Inspector</h2>
-    <p class="muted">
-      Enter one or more Match IDs (e.g. <span class="mono">88</span> or <span class="mono">88,89,90</span>) to see all predictions for those fixtures.
-      Prediction IDs are shown so you can edit/delete them via admin tools.
-    </p>
-
-    <div class="card">
-      <div class="row">
-        <div>
-          <label for="matchIds">Match ID(s)</label>
-          <input id="matchIds" placeholder="e.g. 88 or 88,89,90"/>
-        </div>
-        <div>
-          <label for="secret">Admin Secret</label>
-          <input id="secret" type="password" placeholder="x-admin-secret"/>
-        </div>
-        <div>
-          <button id="loadBtn" class="btn">Load Predictions</button>
-        </div>
-      </div>
-      <div id="status" class="status muted"></div>
-    </div>
-
-    <div id="results"></div>
-  </div>
+  <div id="mainContainer"></div>
 
 <script>
 const base = '/.netlify/functions';
@@ -179,9 +128,23 @@ function setStatus(msg, type){
   const el = $('status');
   if (!el) return;
   el.textContent = msg || '';
-  el.classList.remove('error','success');
+  el.classList.remove('error','success','ts-muted');
   if (type) el.classList.add(type);
 }
+
+// Read ADMIN_SECRET from URL query param
+function getAdminSecret() {
+  const params = new URLSearchParams(location.search);
+  const raw = params.get('ADMIN_SECRET');
+  if (!raw) return '';
+  try {
+    return decodeURIComponent(raw);
+  } catch {
+    return raw;
+  }
+}
+
+const ADMIN_SECRET = getAdminSecret();
 
 async function fetchJSON(url, secret){
   const res = await fetch(url, {
@@ -209,8 +172,8 @@ function renderResults(data){
 
   if (!data || !Array.isArray(data.rows) || data.rows.length === 0){
     const div = document.createElement('div');
-    div.className = 'card';
-    div.innerHTML = '<span class="muted">No predictions found for those match IDs.</span>';
+    div.className = 'ts-card';
+    div.innerHTML = '<span class="ts-muted">No predictions found for those match IDs.</span>';
     container.appendChild(div);
     return;
   }
@@ -227,7 +190,7 @@ function renderResults(data){
     const list = byMatch[mid];
 
     const card = document.createElement('div');
-    card.className = 'card match-card';
+    card.className = 'ts-card match-card';
 
     const header = document.createElement('div');
     header.className = 'match-header';
@@ -282,27 +245,98 @@ function renderResults(data){
   });
 }
 
-$('loadBtn').addEventListener('click', async ()=>{
-  const matchIdsRaw = $('matchIds').value.trim();
-  const secret = $('secret').value.trim();
+function showAccessDenied() {
+  const container = $('mainContainer');
+  container.innerHTML = `
+    <div class="access-denied">
+      <h1>Access Denied</h1>
+      <p>Admin access requires a valid session or ADMIN_SECRET in the URL.</p>
+      <p style="color:var(--text-muted);font-size:14px;margin-top:20px">
+        Usage: admin_predictions.html?ADMIN_SECRET=your_secret_here
+      </p>
+    </div>
+  `;
+}
 
-  if (!matchIdsRaw){
-    setStatus('Please enter at least one Match ID.', 'error');
+function initUI() {
+  const container = $('mainContainer');
+  container.innerHTML = `
+    <div class="ts-page">
+      <h2 class="ts-page-title">Match Predictions Inspector</h2>
+      <p class="ts-muted">
+        Enter one or more Match IDs (e.g. <span class="mono">88</span> or <span class="mono">88,89,90</span>) to see all predictions for those fixtures.
+        Prediction IDs are shown so you can edit/delete them via admin tools.
+      </p>
+
+      <div class="ts-card">
+        <div class="row">
+          <div>
+            <label for="matchIds" class="ts-label">Match ID(s)</label>
+            <input id="matchIds" class="ts-input" placeholder="e.g. 88 or 88,89,90"/>
+          </div>
+          <div>
+            <label for="secret" class="ts-label">Admin Secret</label>
+            <input id="secret" class="ts-input" type="password" placeholder="x-admin-secret"/>
+          </div>
+          <div>
+            <button id="loadBtn" class="ts-btn ts-btn-primary">Load Predictions</button>
+          </div>
+        </div>
+        <div id="status" class="status ts-muted"></div>
+      </div>
+
+      <div id="results"></div>
+    </div>
+  `;
+
+  $('loadBtn').addEventListener('click', async ()=>{
+    const matchIdsRaw = $('matchIds').value.trim();
+    const secret = $('secret').value.trim();
+
+    if (!matchIdsRaw){
+      setStatus('Please enter at least one Match ID.', 'error');
+      return;
+    }
+
+    setStatus('Loading predictions...', 'ts-muted');
+    $('results').innerHTML = '';
+
+    try {
+      const url = `${base}/admin-get-predictions-by-match?matchId=${encodeURIComponent(matchIdsRaw)}`;
+      const data = await fetchJSON(url, secret);
+      setStatus(`Loaded ${data.total || 0} predictions for matchId(s): ${data.requestedMatchIds.join(', ')}`, 'success');
+      renderResults(data);
+    } catch (e) {
+      console.error(e);
+      setStatus('Error: ' + e.message, 'error');
+    }
+  });
+}
+
+// Check auth and initialize page
+window.addEventListener('DOMContentLoaded', async () => {
+  // Initialize auth to get user session and admin status
+  try {
+    await PFAuth.initAuth();
+  } catch (e) {
+    // initAuth may redirect if no session, but catch for safety
+    console.warn('Auth init issue:', e);
+  }
+
+  // Render navigation
+  PFAuth.renderNav();
+
+  // Check if user is admin OR if ADMIN_SECRET is provided in URL
+  const isAdmin = PFAuth.isAdmin();
+  const hasUrlSecret = !!ADMIN_SECRET;
+
+  if (!isAdmin && !hasUrlSecret) {
+    showAccessDenied();
     return;
   }
 
-  setStatus('Loading predictions...', 'muted');
-  $('results').innerHTML = '';
-
-  try {
-    const url = `${base}/admin-get-predictions-by-match?matchId=${encodeURIComponent(matchIdsRaw)}`;
-    const data = await fetchJSON(url, secret);
-    setStatus(`Loaded ${data.total || 0} predictions for matchId(s): ${data.requestedMatchIds.join(', ')}`, 'success');
-    renderResults(data);
-  } catch (e) {
-    console.error(e);
-    setStatus('Error: ' + e.message, 'error');
-  }
+  // Valid access — show UI
+  initUI();
 });
 </script>
 </body>

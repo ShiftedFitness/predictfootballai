@@ -3,65 +3,39 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>PredictFootball.ai – Tables</title>
+<title>TeleStats Fives – League Table</title>
+<link rel="stylesheet" href="/predict/telestats-theme.css"/>
 <style>
-  :root{
-    --bg:#30A278; --card:#000000; --border:#1a1a1a; --text:#FFFFFF; --muted:#EAEAEA;
-    --accent:#FFFFFF; --accentText:#000000; --points-bg:rgba(255,255,255,0.1); --points-color:#FFD700;
-  }
-  html, body { height:100%; }
-  body{
-    margin:0; background:#111; color:#fff; font-family:Inter,system-ui,Arial;
-    display:flex; justify-content:center; align-items:flex-start; min-height:100vh;
-  }
-  .wrap{ max-width:750px; width:100%; margin:24px 12px; background:var(--bg); color:var(--text); border-radius:14px; padding:16px; }
-  h2{ margin:0 0 12px; }
-
-  .tabs{ display:flex; gap:8px; margin-bottom:12px }
-  .tab{ background:#0e0e0e; color:#fff; border:1px solid #2a2a2a; padding:8px 12px; border-radius:999px; cursor:pointer }
-  .tab.active{ background:#fff; color:#000; font-weight:800 }
-
-  .card{ background:var(--card); color:var(--text); border:1px solid var(--border); border-radius:12px; padding:12px; margin-bottom:12px; }
-  .muted{ color:var(--muted) }
-  .scroll{ max-height:520px; overflow:auto; border-radius:12px }
-
-  .table{ width:100%; border-collapse:collapse; font-size:14px }
-  .table th, .table td{ padding:10px 8px; border-bottom:1px solid #1f1f1f; text-align:left; white-space:nowrap }
-  .table th{ font-size:12px; letter-spacing:.3px; color:#cfcfcf; text-transform:uppercase }
-
   .pos{ width:64px }
   .user{ max-width:260px; overflow:hidden; text-overflow:ellipsis }
   .acc{ width:90px; text-align:right }
   .center{ text-align:center }
-
-  .pts{ width:90px; text-align:right; font-weight:700; background:var(--points-bg); color:var(--points-color); border-radius:6px }
-  .highlight{ background:var(--accent); color:var(--accentText) !important }
-  .highlight td{ color:var(--accentText) !important }
-  .highlight td.pts{ background:var(--accent); color:var(--accentText) !important }
-
-  .tick{ color:#7CFC00; font-weight:900 }
-  .cross{ color:#FF6B6B; font-weight:900 }
-  .small{ font-size:12px; color:#cfcfcf; margin-bottom:6px }
-  select{ background:#0e0e0e; color:#fff; border:1px solid #2a2a2a; border-radius:8px; padding:6px 10px }
+  .pts{ width:90px; text-align:right; font-weight:700; color:var(--accent-yellow); }
+  .highlight td { color:var(--accent-cyan) !important; font-weight:600; }
+  .highlight td.pts { color:var(--accent-yellow) !important; }
+  .tick{ color:var(--accent-green); font-weight:900 }
+  .cross{ color:var(--danger); font-weight:900 }
+  .small{ font-size:12px; color:var(--text-muted); margin-bottom:6px }
   .row{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; justify-content:space-between }
 </style>
 </head>
 <body>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/predict/auth.js"></script>
-  <div class="wrap">
-    <h2>Tables</h2>
 
-    <div class="tabs">
-      <button class="tab active" id="tabOverall">Overall</button>
-      <button class="tab" id="tabWeekly">Matchweek</button>
+  <div class="ts-page">
+    <h2 class="ts-page-title">League Table</h2>
+
+    <div class="ts-tabs">
+      <button class="ts-tab active" id="tabOverall">Overall</button>
+      <button class="ts-tab" id="tabWeekly">Matchweek</button>
     </div>
 
     <!-- Overall -->
-    <div id="overall" class="card">
-      <div class="muted" id="overallCount"></div>
-      <div class="scroll">
-        <table class="table" id="overallTbl">
+    <div id="overall" class="ts-card">
+      <div class="ts-muted" id="overallCount"></div>
+      <div class="ts-scroll">
+        <table class="ts-table" id="overallTbl">
           <thead>
             <tr>
               <th class="pos">Pos</th>
@@ -75,24 +49,24 @@
           <tbody></tbody>
         </table>
       </div>
-      <div class="muted" style="margin-top:8px">Sorted by points, then FH, then accuracy.</div>
+      <div class="ts-muted" style="margin-top:8px">Sorted by points, then FH, then accuracy.</div>
     </div>
 
     <!-- Weekly -->
-    <div id="weekly" class="card" style="display:none">
+    <div id="weekly" class="ts-card" style="display:none">
       <div class="row" style="margin-bottom:8px">
         <div>
-          <span class="muted">Week</span>
-          <select id="weekSel"></select>
+          <span class="ts-muted">Week</span>
+          <select id="weekSel" class="ts-select"></select>
         </div>
-        <div class="muted" id="lockedMsg"></div>
+        <div class="ts-muted" id="lockedMsg"></div>
       </div>
 
       <!-- Match order reminder -->
       <div id="matchMap" class="small"></div>
 
-      <div class="scroll">
-        <table class="table" id="weeklyTbl">
+      <div class="ts-scroll">
+        <table class="ts-table" id="weeklyTbl">
           <thead>
             <tr>
               <th class="pos">Pos</th>
@@ -108,16 +82,15 @@
           <tbody></tbody>
         </table>
       </div>
-      <div class="muted" style="margin-top:8px">✓/✗ appear once results are scored. Before that, cells show your pick (1 = Home, 2 = Away, X = Draw).</div>
+      <div class="ts-muted" style="margin-top:8px">Ticks/crosses appear once results are scored. Before that, cells show your pick (1 = Home, 2 = Away, X = Draw).</div>
     </div>
   </div>
 
 <script>
-const DEBUG = false; // Set to true to enable debug logging
+const DEBUG = false;
 const base = '/.netlify/functions';
 const qs = new URLSearchParams(location.search);
 
-// currentWeek will be set properly during init; URL param is just a hint
 let currentWeek = qs.get('week') ? Number(qs.get('week')) : null;
 let weeklyInitialized = false;
 let highlightUserId = qs.get('userId') || '';
@@ -128,7 +101,7 @@ function debugLog(...args) {
 
 /* ---------- helpers ---------- */
 function escapeHTML(s){ return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
-function pct(acc){ return (Math.round(acc*1000)/10).toFixed(1); } // 1 decimal
+function pct(acc){ return (Math.round(acc*1000)/10).toFixed(1); }
 
 /* ---------- OVERALL ---------- */
 function trOverall(row){
@@ -159,7 +132,7 @@ async function loadOverall(){
 /* ---------- WEEKLY ---------- */
 function toSymbol(p){ return p==='HOME'?'1':(p==='AWAY'?'2':(p==='DRAW'?'X':'-')); }
 function cellFor(pick, resultIsSet, isCorrect){
-  if (resultIsSet) return isCorrect ? '<span class="tick">✓</span>' : '<span class="cross">✗</span>';
+  if (resultIsSet) return isCorrect ? '<span class="tick">&#10003;</span>' : '<span class="cross">&#10007;</span>';
   return `<span>${toSymbol(pick)}</span>`;
 }
 function trWeekly(row, resultSetFlags){
@@ -177,12 +150,9 @@ function trWeekly(row, resultSetFlags){
 
 async function loadWeekly(week) {
   debugLog('loadWeekly called with week:', week);
-
-  // Ensure week is a valid number
   const weekNum = Number(week);
   if (!weekNum || isNaN(weekNum)) {
     debugLog('Invalid week, fetching available weeks first...');
-    // Fetch weeks to get a valid default
     try {
       const weeksRes = await fetch(`${base}/weeks`, { cache: 'no-store' });
       if (weeksRes.ok) {
@@ -194,46 +164,33 @@ async function loadWeekly(week) {
     } catch (e) {
       debugLog('Failed to fetch weeks for fallback:', e);
     }
-    return; // Can't proceed without a valid week
+    return;
   }
 
   const r = await fetch(`${base}/weekly-table?week=${weekNum}`, { cache:'no-store' });
-  if (!r.ok) {
-    debugLog('API error:', r.status);
-    alert('Failed to load weekly table');
-    return;
-  }
+  if (!r.ok) { debugLog('API error:', r.status); alert('Failed to load weekly table'); return; }
   const j = await r.json();
   debugLog('API response:', { week: j.week, locked: j.locked, rowCount: (j.rows||[]).length, availableWeeks: j.availableWeeks });
 
   const availableWeeks = j.availableWeeks && j.availableWeeks.length ? j.availableWeeks : [];
-
-  // If the requested week isn't in availableWeeks and there are available weeks,
-  // reload with the first available week (latest locked week)
   if (availableWeeks.length > 0 && !availableWeeks.includes(weekNum)) {
-    const defaultWeek = availableWeeks[0]; // First = latest (descending order)
+    const defaultWeek = availableWeeks[0];
     debugLog('Requested week not available, reloading with:', defaultWeek);
     return loadWeekly(defaultWeek);
   }
 
-  // Update currentWeek to match what we're actually showing
   currentWeek = weekNum;
-
-  // Deadline / availability
   document.getElementById('lockedMsg').textContent =
     j.locked ? 'Live (deadline passed)' : 'Not available (deadline not passed)';
 
-  // Match map header
   const map = (j.matches || []).map((m,i)=> `Match ${i+1}: ${m.home} v ${m.away}`);
-  document.getElementById('matchMap').textContent = map.join('  •  ');
+  document.getElementById('matchMap').textContent = map.join('  \u2022  ');
 
-  // Which columns have an official result?
   const resultSet = (j.matches || []).map(m => {
     const v = (m && typeof m.correct === 'string') ? m.correct.trim().toUpperCase() : '';
     return v === 'HOME' || v === 'AWAY' || v === 'DRAW';
   });
 
-  // Table rows
   const body = document.querySelector('#weeklyTbl tbody');
   body.innerHTML = '';
   (j.rows || []).forEach((r,i)=>{
@@ -241,7 +198,6 @@ async function loadWeekly(week) {
     body.appendChild(trWeekly(row, resultSet));
   });
 
-  // Week selector: build from availableWeeks
   const sel = document.getElementById('weekSel');
   sel.innerHTML = '';
   const weeks = availableWeeks.length ? availableWeeks : [j.week || week];
@@ -255,7 +211,6 @@ async function loadWeekly(week) {
     sel.appendChild(opt);
   });
 
-  // Single onChange handler - calls loadWeekly directly
   sel.onchange = () => loadWeekly(Number(sel.value));
 }
 
@@ -278,16 +233,11 @@ document.getElementById('tabWeekly').onclick = async ()=>{
 /* ---------- Weekly Tab Initialization ---------- */
 async function initWeeklyTab() {
   debugLog('initWeeklyTab called, currentWeek:', currentWeek, 'initialized:', weeklyInitialized);
-
-  // If we already have a valid currentWeek from previous load, use it
   if (currentWeek && weeklyInitialized) {
     debugLog('Using cached currentWeek:', currentWeek);
     await loadWeekly(currentWeek);
     return;
   }
-
-  // First time init OR no valid currentWeek: determine the best default week
-  // loadWeekly will handle fetching a valid week if currentWeek is invalid
   debugLog('Initializing weekly tab, calling loadWeekly with:', currentWeek || 'null (will auto-detect)');
   await loadWeekly(currentWeek);
   weeklyInitialized = true;

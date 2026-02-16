@@ -1,13 +1,13 @@
 <!doctype html>
 <html lang="en">
 <!--
-  PredictFootball – Picks Check
+  TeleStats Fives – Picks Check
 
-  URL Parameter Authentication:
+  URL Parameter Authentication (backward compat):
     PicksCheck.html?ADMIN_SECRET=your_secret_here
 
-  The ADMIN_SECRET query parameter is REQUIRED. Without it, the page shows
-  "Access denied" and no content is rendered.
+  Primary Authentication:
+    Supabase session with admin status (PFAuth.isAdmin())
 
   Purpose:
     Check which users have NOT submitted picks for a given matchweek.
@@ -19,54 +19,49 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>PredictFootball – Picks Check</title>
+<title>TeleStats Fives – Picks Check</title>
+<link rel="stylesheet" href="/predict/telestats-theme.css"/>
 <style>
-  body{margin:0;background:#111;color:#fff;font-family:Inter,system-ui,Arial;display:flex;justify-content:center}
-  .wrap{max-width:780px;width:100%;margin:24px 12px;background:#30A278;color:#fff;border-radius:14px;padding:16px}
-  h2{margin:0 0 12px}
-  .card{background:#000;border:1px solid #1a1a1a;border-radius:12px;padding:12px;margin-bottom:12px}
-  label{display:block;margin-bottom:6px;color:#EAEAEA}
-  input,select{background:#0e0e0e;color:#fff;border:1px solid #2a2a2a;border-radius:8px;padding:8px 10px}
+  body{margin:0;display:flex;justify-content:center}
+  .ts-page{max-width:780px;width:100%;padding:20px 16px 40px}
   .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-  .btn{background:#fff;color:#000;border:0;padding:10px 14px;border-radius:8px;font-weight:800;cursor:pointer}
-  .btn:disabled{opacity:0.5;cursor:not-allowed}
+  .ts-input,.ts-select{min-width:120px}
   .access-denied{text-align:center;padding:60px 20px}
-  .access-denied h1{font-size:2em;margin-bottom:12px}
+  .access-denied h1{font-family:'Space Mono',monospace;font-size:28px;color:var(--danger);margin-bottom:12px}
+  .access-denied p{color:var(--text-muted);font-size:14px}
   .stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:16px 0}
-  .stat-card{background:#1a1a1a;border-radius:10px;padding:16px;text-align:center}
-  .stat-value{font-size:2em;font-weight:800;margin-bottom:4px}
-  .stat-label{color:#888;font-size:12px;text-transform:uppercase}
-  .stat-card.success .stat-value{color:#4ade80}
+  .stat-card{background:var(--bg-panel);border:1px solid rgba(255,255,255,0.04);border-radius:10px;padding:16px;text-align:center}
+  .stat-value{font-size:2em;font-weight:800;margin-bottom:4px;color:var(--text-primary)}
+  .stat-label{color:var(--text-muted);font-size:12px;text-transform:uppercase;letter-spacing:0.5px}
+  .stat-card.success .stat-value{color:var(--accent-green)}
   .stat-card.warning .stat-value{color:#ff9800}
-  .stat-card.danger .stat-value{color:#ff4444}
+  .stat-card.danger .stat-value{color:var(--danger)}
   .user-list{margin-top:16px}
-  .user-list h3{margin:0 0 12px;font-size:14px;color:#EAEAEA}
-  .user-chip{display:inline-block;background:#2a2a2a;padding:6px 12px;border-radius:16px;margin:4px;font-size:13px}
-  .user-chip .id{color:#888;margin-left:4px;font-size:11px}
+  .user-list h3{margin:0 0 12px;font-size:14px;color:var(--text-primary)}
+  .user-chip{display:inline-block;background:var(--bg-panel);padding:6px 12px;border-radius:16px;margin:4px;font-size:13px;border:1px solid rgba(255,255,255,0.06)}
+  .user-chip .id{color:var(--text-muted);margin-left:4px;font-size:11px}
   .match-breakdown{margin-top:16px}
-  .match-item{background:#1a1a1a;border-radius:8px;padding:12px;margin-bottom:8px}
+  .match-item{background:var(--bg-panel);border-radius:8px;padding:12px;margin-bottom:8px;border:1px solid rgba(255,255,255,0.04)}
   .match-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-  .match-fixture{font-weight:600}
-  .match-status{font-size:12px;padding:4px 8px;border-radius:4px}
-  .match-status.complete{background:#4ade80;color:#000}
-  .match-status.incomplete{background:#ff9800;color:#000}
-  .match-missing{font-size:12px;color:#888;margin-top:6px}
-  #status{white-space:pre-wrap;margin-top:6px;color:#EAEAEA}
-  .loading{text-align:center;padding:40px;color:#ccc}
+  .match-fixture{font-weight:600;color:var(--text-primary)}
+  .match-status{font-size:12px;padding:4px 8px;border-radius:4px;font-weight:600}
+  .match-status.complete{background:rgba(50,255,126,0.15);color:var(--accent-green)}
+  .match-status.incomplete{background:rgba(255,152,0,0.15);color:#ff9800}
+  .match-missing{font-size:12px;color:var(--text-muted);margin-top:6px}
+  #status{white-space:pre-wrap;margin-top:6px;color:var(--text-muted)}
+  .loading{text-align:center;padding:40px;color:var(--text-muted)}
   @keyframes spin{to{transform:rotate(360deg)}}
-  .spinner{display:inline-block;width:18px;height:18px;border:2px solid rgba(255,255,255,0.35);border-top-color:#fff;border-radius:50%;margin-right:8px;vertical-align:-3px;animation:spin .7s linear infinite}
-  .all-good{background:#1a3a2a;border:1px solid #4ade80;border-radius:10px;padding:24px;text-align:center;margin-top:16px}
-  .all-good h3{color:#4ade80;margin:0 0 8px}
-  .all-good p{color:#888;margin:0}
+  .spinner{display:inline-block;width:18px;height:18px;border:2px solid rgba(255,255,255,0.2);border-top-color:var(--accent-cyan);border-radius:50%;margin-right:8px;vertical-align:-3px;animation:spin .7s linear infinite}
+  .all-good{background:rgba(50,255,126,0.08);border:1px solid rgba(50,255,126,0.2);border-radius:10px;padding:24px;text-align:center;margin-top:16px}
+  .all-good h3{color:var(--accent-green);margin:0 0 8px}
+  .all-good p{color:var(--text-muted);margin:0}
 </style>
 </head>
 <body>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/predict/auth.js"></script>
 
-<div class="wrap" id="mainWrap">
-  <!-- Content loaded by JS based on auth -->
-</div>
+<div id="mainContainer"></div>
 
 <script>
 const base = '/.netlify/functions';
@@ -235,7 +230,7 @@ function renderResults(data, week) {
     // Per-match breakdown
     html += `
       <div class="match-breakdown">
-        <h3 style="margin:16px 0 12px;font-size:14px;color:#EAEAEA">Per-Match Breakdown</h3>
+        <h3 style="margin:16px 0 12px;font-size:14px;color:var(--text-primary)">Per-Match Breakdown</h3>
         ${matches.map(m => {
           const isComplete = m.missingCount === 0;
           return `
@@ -264,33 +259,35 @@ function renderResults(data, week) {
 
 // Initialize UI
 function initUI() {
-  const wrap = $('mainWrap');
-  wrap.innerHTML = `
-    <h2>Picks Check</h2>
-    <p style="color:#EAEAEA;margin:0 0 16px">Check which users have not submitted picks for a matchweek.</p>
+  const container = $('mainContainer');
+  container.innerHTML = `
+    <div class="ts-page">
+      <h2 class="ts-page-title">Picks Check</h2>
+      <p class="ts-muted" style="margin:0 0 16px">Check which users have not submitted picks for a matchweek.</p>
 
-    <div class="card">
-      <div class="row">
-        <div>
-          <label>Week</label>
-          <select id="weekSelect" style="min-width:120px">
-            <option value="">Loading...</option>
-          </select>
+      <div class="ts-card">
+        <div class="row">
+          <div>
+            <label class="ts-label">Week</label>
+            <select id="weekSelect" class="ts-select">
+              <option value="">Loading...</option>
+            </select>
+          </div>
+          <div>
+            <button class="ts-btn ts-btn-primary" id="checkBtn">Check Picks</button>
+          </div>
         </div>
-        <div>
-          <button class="btn" id="checkBtn">Check Picks</button>
-        </div>
+        <div id="status" style="margin-top:6px"></div>
       </div>
-      <div id="status" style="margin-top:6px"></div>
-    </div>
 
-    <div id="results"></div>
+      <div id="results"></div>
 
-    <div class="card" style="margin-top:16px">
-      <p style="margin:0;font-size:12px;color:#888">
-        <strong>Tip:</strong> This page shows unique users who haven't submitted any picks for the selected week.
-        The per-match breakdown shows which specific matches each user is missing.
-      </p>
+      <div class="ts-card" style="margin-top:16px">
+        <p style="margin:0;font-size:12px;color:var(--text-muted)">
+          <strong>Tip:</strong> This page shows unique users who haven't submitted any picks for the selected week.
+          The per-match breakdown shows which specific matches each user is missing.
+        </p>
+      </div>
     </div>
   `;
 
@@ -331,12 +328,12 @@ function populateWeekDropdown(weeks, selectedWeek) {
 
 // Show access denied page
 function showAccessDenied() {
-  const wrap = $('mainWrap');
-  wrap.innerHTML = `
+  const container = $('mainContainer');
+  container.innerHTML = `
     <div class="access-denied">
       <h1>Access Denied</h1>
-      <p style="color:#ccc">Admin access requires a valid ADMIN_SECRET in the URL.</p>
-      <p style="color:#888;font-size:14px;margin-top:20px">
+      <p>Admin access requires a valid Supabase session or ADMIN_SECRET in the URL.</p>
+      <p style="margin-top:20px">
         Usage: PicksCheck.html?ADMIN_SECRET=your_secret_here
       </p>
     </div>
@@ -358,22 +355,37 @@ async function validateSecret() {
 
 // Initialize on page load
 window.addEventListener('DOMContentLoaded', async () => {
-  if (!ADMIN_SECRET) {
+  // Initialize auth to get user session and admin status
+  try {
+    await PFAuth.initAuth();
+  } catch (e) {
+    // initAuth may redirect if no session, but catch for safety
+    console.warn('Auth init issue:', e);
+  }
+
+  // Render navigation
+  PFAuth.renderNav();
+
+  // Check if user is admin OR if ADMIN_SECRET is provided in URL
+  const isAdmin = PFAuth.isAdmin();
+  const hasUrlSecret = !!ADMIN_SECRET;
+
+  if (!isAdmin && !hasUrlSecret) {
     showAccessDenied();
     return;
   }
 
-  // Show loading state
-  $('mainWrap').innerHTML = '<div class="loading"><span class="spinner"></span>Validating access...</div>';
-
-  const isValid = await validateSecret();
-
-  if (!isValid) {
-    showAccessDenied();
-    return;
+  // If using URL secret, validate it
+  if (hasUrlSecret && !isAdmin) {
+    $('mainContainer').innerHTML = '<div class="loading"><span class="spinner"></span>Validating access...</div>';
+    const isValid = await validateSecret();
+    if (!isValid) {
+      showAccessDenied();
+      return;
+    }
   }
 
-  // Valid secret - show UI
+  // Valid access - show UI
   initUI();
 
   // Fetch available weeks

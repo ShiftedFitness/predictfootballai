@@ -1,0 +1,467 @@
+/*  ============================================================
+    TeleStats Fives — Theme for Predict/Picks pages
+    ============================================================
+    Imports the base TeleStats theme and adds predict-specific
+    styles including navigation, cards, tables, and responsive
+    layout.
+    ============================================================ */
+
+@import url('../telestats-theme.css');
+
+/* ── Reset ──────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ── Top Navigation Bar ─────────────────────────────────────── */
+.ts-nav {
+  width: 100%;
+  background: var(--bg-panel);
+  border-bottom: 2px solid var(--accent-cyan);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.ts-nav-inner {
+  max-width: 780px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 48px;
+  gap: 8px;
+}
+.ts-nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: var(--accent-cyan);
+  font-family: 'Space Mono', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+.ts-nav-brand img {
+  height: 24px;
+  width: auto;
+}
+.ts-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.ts-nav-links a,
+.ts-nav-links button {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-decoration: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  transition: color 0.15s, background 0.15s;
+  background: none;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.ts-nav-links a:hover,
+.ts-nav-links button:hover {
+  color: var(--text-primary);
+  background: var(--bg-elevated);
+}
+.ts-nav-links a.active {
+  color: var(--accent-cyan);
+  background: rgba(0, 229, 255, 0.08);
+}
+.ts-nav-links .nav-admin {
+  color: var(--accent-yellow);
+}
+.ts-nav-links .nav-admin:hover {
+  background: rgba(255, 214, 10, 0.10);
+}
+.ts-nav-user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ts-nav-username {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.3px;
+}
+.ts-nav-logout {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 11px;
+  color: var(--text-muted);
+  background: none;
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: 4px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.ts-nav-logout:hover {
+  color: var(--text-primary);
+  border-color: rgba(255,255,255,0.25);
+}
+
+/* ── Page Container ─────────────────────────────────────────── */
+.ts-page {
+  max-width: 780px;
+  width: 100%;
+  padding: 20px 16px 40px;
+}
+
+/* ── Page Title ─────────────────────────────────────────────── */
+.ts-page-title {
+  font-family: 'Space Mono', monospace;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 16px;
+  letter-spacing: -0.5px;
+}
+
+/* ── Cards ──────────────────────────────────────────────────── */
+.ts-card {
+  background: var(--bg-card);
+  border: 1px solid rgba(255,255,255,0.04);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+
+/* ── Buttons ────────────────────────────────────────────────── */
+.ts-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.12s, opacity 0.12s;
+}
+.ts-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.ts-btn-primary {
+  background: var(--accent-yellow);
+  color: #0B0F12;
+}
+.ts-btn-primary:hover:not(:disabled) {
+  background: #E6C009;
+}
+.ts-btn-secondary {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.ts-btn-secondary:hover:not(:disabled) {
+  border-color: var(--accent-cyan);
+}
+.ts-btn-danger {
+  background: var(--danger);
+  color: #fff;
+}
+
+/* ── Tables ─────────────────────────────────────────────────── */
+.ts-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.ts-table th,
+.ts-table td {
+  padding: 10px 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  text-align: left;
+  white-space: nowrap;
+}
+.ts-table th {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+.ts-table tbody tr:hover {
+  background: rgba(255,255,255,0.02);
+}
+
+/* ── Tabs ───────────────────────────────────────────────────── */
+.ts-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 16px;
+}
+.ts-tab {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.ts-tab:hover {
+  color: var(--text-primary);
+}
+.ts-tab.active {
+  background: rgba(0, 229, 255, 0.10);
+  color: var(--accent-cyan);
+  border-color: var(--accent-cyan);
+}
+
+/* ── Form Inputs ────────────────────────────────────────────── */
+.ts-input,
+.ts-select {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 14px;
+  background: var(--bg-panel);
+  color: var(--text-primary);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  padding: 8px 12px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.ts-input:focus,
+.ts-select:focus {
+  border-color: var(--accent-cyan);
+}
+.ts-input::placeholder {
+  color: var(--text-muted);
+}
+.ts-label {
+  display: block;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+  font-family: 'Space Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ── Stats Grid ─────────────────────────────────────────────── */
+.ts-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.ts-stat {
+  background: var(--bg-panel);
+  border: 1px solid rgba(255,255,255,0.04);
+  border-radius: 10px;
+  padding: 12px;
+  text-align: center;
+}
+.ts-stat-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 4px;
+}
+.ts-stat-value {
+  font-family: 'Space Mono', monospace;
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+/* ── Badges ─────────────────────────────────────────────────── */
+.ts-badge-good { color: var(--accent-green); font-weight: 900; }
+.ts-badge-bad  { color: var(--danger); font-weight: 900; }
+
+/* ── Scroll Container ───────────────────────────────────────── */
+.ts-scroll {
+  max-height: 520px;
+  overflow-y: auto;
+  border-radius: 8px;
+}
+
+/* ── Messages ───────────────────────────────────────────────── */
+.ts-msg {
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+  margin-bottom: 12px;
+  display: none;
+}
+.ts-msg-error {
+  background: rgba(224, 85, 85, 0.15);
+  border: 1px solid rgba(224, 85, 85, 0.3);
+  color: var(--danger);
+}
+.ts-msg-success {
+  background: rgba(50, 255, 126, 0.1);
+  border: 1px solid rgba(50, 255, 126, 0.2);
+  color: var(--accent-green);
+}
+.ts-msg-warning {
+  background: rgba(255, 152, 0, 0.15);
+  border: 1px solid rgba(255, 152, 0, 0.3);
+  color: #ff9800;
+}
+
+/* ── Muted text ─────────────────────────────────────────────── */
+.ts-muted {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+/* ── Picks Panel (replaces old green .panel) ────────────────── */
+.ts-picks-panel {
+  background: var(--bg-card);
+  border: 1px solid rgba(255,255,255,0.04);
+  border-radius: 14px;
+  padding: 16px;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+
+/* ── Highlight row ──────────────────────────────────────────── */
+.ts-table tbody tr.highlight {
+  background: rgba(0, 229, 255, 0.08);
+}
+.ts-table tbody tr.highlight td {
+  color: var(--accent-cyan);
+  font-weight: 600;
+}
+
+/* ── Admin-specific ─────────────────────────────────────────── */
+.ts-admin-mode-switch {
+  display: flex;
+  gap: 0;
+  margin-bottom: 8px;
+}
+.ts-admin-mode-switch button {
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: 8px 14px;
+  cursor: pointer;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.15s;
+}
+.ts-admin-mode-switch button:first-child { border-radius: 8px 0 0 8px; }
+.ts-admin-mode-switch button:last-child  { border-radius: 0 8px 8px 0; }
+.ts-admin-mode-switch button.active {
+  background: rgba(0, 229, 255, 0.10);
+  color: var(--accent-cyan);
+  border-color: var(--accent-cyan);
+}
+
+.ts-debug-panel {
+  background: var(--bg-panel);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  padding: 10px;
+  margin-top: 8px;
+  font-size: 12px;
+  font-family: 'Space Mono', monospace;
+}
+
+/* ── Loading Spinner ────────────────────────────────────────── */
+@keyframes ts-spin { to { transform: rotate(360deg); } }
+.ts-spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255,255,255,0.2);
+  border-top-color: var(--accent-cyan);
+  border-radius: 50%;
+  animation: ts-spin 0.7s linear infinite;
+  vertical-align: -2px;
+  margin-right: 6px;
+}
+
+/* ── Access Denied ──────────────────────────────────────────── */
+.ts-access-denied {
+  text-align: center;
+  padding: 60px 20px;
+}
+.ts-access-denied h1 {
+  font-family: 'Space Mono', monospace;
+  font-size: 28px;
+  color: var(--danger);
+  margin-bottom: 12px;
+}
+.ts-access-denied p {
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+/* ── Responsive ─────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .ts-nav-inner {
+    padding: 0 12px;
+    height: 44px;
+  }
+  .ts-nav-brand span {
+    display: none;
+  }
+  .ts-nav-links a,
+  .ts-nav-links button {
+    font-size: 12px;
+    padding: 5px 7px;
+  }
+  .ts-nav-username {
+    display: none;
+  }
+  .ts-page {
+    padding: 16px 12px 32px;
+  }
+  .ts-page-title {
+    font-size: 18px;
+  }
+  .ts-table {
+    font-size: 13px;
+  }
+  .ts-table th,
+  .ts-table td {
+    padding: 8px 6px;
+  }
+  .ts-stats {
+    grid-template-columns: 1fr 1fr;
+  }
+  .ts-tabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+@media (max-width: 400px) {
+  .ts-nav-links {
+    gap: 2px;
+  }
+  .ts-nav-links a,
+  .ts-nav-links button {
+    font-size: 11px;
+    padding: 4px 6px;
+  }
+}

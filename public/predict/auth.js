@@ -149,35 +149,56 @@
       return u ? !!u.isAdmin : false;
     },
 
-    /** Render a small nav bar with logout. Call after initAuth(). */
+    /**
+     * Render the TeleStats navigation bar. Call after initAuth().
+     * Automatically detects the current page and highlights the active link.
+     * Shows Admin link only for users with is_admin = true.
+     *
+     * @param {string} [containerSelector] - Optional selector to prepend nav into
+     */
     renderNav(containerSelector) {
       const user = getCachedUser();
       if (!user) return;
+
+      // Remove any existing nav to avoid duplicates
+      const existing = document.querySelector('.ts-nav');
+      if (existing) existing.remove();
 
       const target = containerSelector
         ? document.querySelector(containerSelector)
         : null;
 
-      const nav = document.createElement('div');
-      nav.className = 'pf-nav';
-      nav.innerHTML = `
-        <div style="
-          max-width:750px; width:100%; margin:8px auto 0; padding:0 12px;
-          display:flex; justify-content:space-between; align-items:center;
-          font-family:Inter,system-ui,Arial; font-size:13px; color:#aaa;
-        ">
-          <span>${escapeHTML(user.username || user.email)}</span>
-          <div style="display:flex; gap:12px; align-items:center;">
-            <a href="/predict/" style="color:#aaa; text-decoration:none;">Picks</a>
-            <a href="/predict/league.html" style="color:#aaa; text-decoration:none;">Tables</a>
-            <a href="/predict/history.html" style="color:#aaa; text-decoration:none;">History</a>
-            <button id="pf-logout-btn" style="
-              background:none; border:1px solid #555; color:#aaa; padding:4px 10px;
-              border-radius:6px; cursor:pointer; font-size:12px;
-            ">Log out</button>
-          </div>
-        </div>
-      `;
+      // Determine active page
+      const path = location.pathname;
+      const isHome = path.endsWith('/predict/') || path.endsWith('/predict/index.html');
+      const isLeague = path.includes('league.html');
+      const isHistory = path.includes('history.html');
+      const isAdminPage = path.includes('admin.html') || path.includes('PicksCheck.html') || path.includes('admin_predictions.html');
+
+      // Build admin link if user is admin
+      const adminLink = user.isAdmin
+        ? '<a href="/predict/admin.html" class="nav-admin ' + (isAdminPage ? 'active' : '') + '">Admin</a>'
+        : '';
+
+      const nav = document.createElement('nav');
+      nav.className = 'ts-nav';
+      nav.innerHTML =
+        '<div class="ts-nav-inner">' +
+          '<a href="/predict/" class="ts-nav-brand">' +
+            '<img src="https://res.cloudinary.com/dbfvogb95/image/upload/v1770835428/Screenshot_2026-02-11_at_19.43.16_m7urul.png" alt="TeleStats"/>' +
+            '<span>FIVES</span>' +
+          '</a>' +
+          '<div class="ts-nav-links">' +
+            '<a href="/predict/"' + (isHome ? ' class="active"' : '') + '>Picks</a>' +
+            '<a href="/predict/league.html"' + (isLeague ? ' class="active"' : '') + '>League</a>' +
+            '<a href="/predict/history.html"' + (isHistory ? ' class="active"' : '') + '>History</a>' +
+            adminLink +
+          '</div>' +
+          '<div class="ts-nav-user">' +
+            '<span class="ts-nav-username">' + escapeHTML(user.username || user.email) + '</span>' +
+            '<button class="ts-nav-logout" id="pf-logout-btn">Log out</button>' +
+          '</div>' +
+        '</div>';
 
       if (target) {
         target.prepend(nav);

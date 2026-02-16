@@ -3,164 +3,245 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>PredictFootball.ai – Log In</title>
+<title>TeleStats Fives – Log In</title>
+<link rel="stylesheet" href="/predict/telestats-theme.css"/>
 <style>
-  * { box-sizing: border-box; }
   body {
-    margin: 0; background: #111; color: #fff;
-    font-family: Inter, system-ui, Arial;
-    display: flex; justify-content: center; align-items: flex-start; min-height: 100vh;
+    justify-content: center;
+    align-items: flex-start;
+    padding-top: 48px;
   }
-  .wrap {
-    max-width: 420px; width: 100%; margin: 48px 16px;
-    background: #30A278; border-radius: 14px; padding: 28px 24px;
+  .login-wrap {
+    max-width: 420px;
+    width: 100%;
+    margin: 0 16px;
   }
-  h1 { margin: 0 0 4px; font-size: 22px; }
-  .subtitle { opacity: .8; font-size: 14px; margin-bottom: 24px; }
+  .login-header {
+    text-align: center;
+    margin-bottom: 24px;
+  }
+  .login-header img {
+    height: 40px;
+    width: auto;
+    margin-bottom: 12px;
+  }
+  .login-header h1 {
+    font-family: 'Space Mono', monospace;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.5px;
+    margin-bottom: 4px;
+  }
+  .login-header h1 .accent { color: var(--accent-cyan); }
+  .login-header .subtitle {
+    color: var(--text-muted);
+    font-size: 14px;
+  }
 
+  .login-card {
+    background: var(--bg-card);
+    border: 1px solid rgba(255,255,255,0.04);
+    border-radius: 14px;
+    padding: 28px 24px;
+  }
   .form-group { margin-bottom: 16px; }
-  label { display: block; font-size: 13px; margin-bottom: 4px; opacity: .9; }
-  input[type="email"], input[type="password"] {
-    width: 100%; padding: 12px 14px; border: 1px solid rgba(255,255,255,.3);
-    border-radius: 10px; background: rgba(0,0,0,.25); color: #fff;
-    font-size: 15px; outline: none;
+  .form-group label {
+    display: block;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
   }
-  input::placeholder { color: rgba(255,255,255,.5); }
-  input:focus { border-color: #fff; }
+  .form-group input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    background: var(--bg-panel);
+    color: var(--text-primary);
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .form-group input::placeholder { color: var(--text-muted); }
+  .form-group input:focus { border-color: var(--accent-cyan); }
 
-  .btn {
-    width: 100%; padding: 13px; border: none; border-radius: 10px;
-    font-size: 15px; font-weight: 800; cursor: pointer;
-    transition: opacity .15s;
+  .login-btn {
+    width: 100%;
+    padding: 13px;
+    border: none;
+    border-radius: 10px;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.15s;
   }
-  .btn:hover { opacity: .9; }
-  .btn:disabled { opacity: .5; cursor: not-allowed; }
-  .btn-primary { background: #fff; color: #000; }
-  .btn-secondary { background: rgba(0,0,0,.3); color: #fff; border: 1px solid rgba(255,255,255,.3); }
+  .login-btn:hover { opacity: 0.9; }
+  .login-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .login-btn-primary {
+    background: var(--accent-yellow);
+    color: #0B0F12;
+  }
+  .login-btn-secondary {
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    border: 1px solid rgba(255,255,255,0.1);
+  }
 
   .divider {
-    display: flex; align-items: center; gap: 12px;
-    margin: 20px 0; font-size: 13px; opacity: .7;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 20px 0;
+    font-size: 13px;
+    color: var(--text-muted);
   }
   .divider::before, .divider::after {
-    content: ''; flex: 1; height: 1px; background: rgba(255,255,255,.3);
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(255,255,255,0.1);
   }
 
   .link-btn {
-    background: none; border: none; color: #fff; font-size: 13px;
-    text-decoration: underline; cursor: pointer; padding: 0; opacity: .85;
+    background: none;
+    border: none;
+    color: var(--accent-cyan);
+    font-size: 13px;
+    text-decoration: none;
+    cursor: pointer;
+    padding: 0;
+    opacity: 0.85;
+    font-family: 'Inter', system-ui, sans-serif;
   }
   .link-btn:hover { opacity: 1; }
 
   .msg { padding: 10px 14px; border-radius: 8px; font-size: 14px; margin-bottom: 16px; display: none; }
-  .msg-error { background: rgba(255,50,50,.25); border: 1px solid rgba(255,50,50,.4); }
-  .msg-success { background: rgba(50,255,100,.2); border: 1px solid rgba(50,255,100,.35); }
+  .msg-error { background: rgba(224, 85, 85, 0.15); border: 1px solid rgba(224, 85, 85, 0.3); color: var(--danger); }
+  .msg-success { background: rgba(50, 255, 126, 0.1); border: 1px solid rgba(50, 255, 126, 0.2); color: var(--accent-green); }
 
   .views > div { display: none; }
   .views > div.active { display: block; }
 
-  .footer { margin-top: 20px; text-align: center; font-size: 12px; opacity: .6; }
+  .login-footer {
+    margin-top: 20px;
+    text-align: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    opacity: 0.5;
+  }
 </style>
 </head>
 <body>
 
-<div class="wrap">
-  <h1>PredictFootball.ai</h1>
-  <p class="subtitle">Sign in to make your picks</p>
-
-  <!-- Messages -->
-  <div id="msgError" class="msg msg-error"></div>
-  <div id="msgSuccess" class="msg msg-success"></div>
-
-  <div class="views">
-
-    <!-- LOGIN VIEW -->
-    <div id="viewLogin" class="active">
-      <form id="loginForm">
-        <div class="form-group">
-          <label for="loginEmail">Email</label>
-          <input type="email" id="loginEmail" placeholder="your@email.com" required autocomplete="email"/>
-        </div>
-        <div class="form-group">
-          <label for="loginPass">Password</label>
-          <input type="password" id="loginPass" placeholder="Password" required autocomplete="current-password"/>
-        </div>
-        <button type="submit" class="btn btn-primary" id="loginBtn">Sign In</button>
-      </form>
-
-      <div style="margin-top:12px; text-align:right;">
-        <button class="link-btn" onclick="showView('forgot')">Forgot password?</button>
-      </div>
-
-      <div class="divider">or</div>
-
-      <button class="btn btn-secondary" id="magicBtn" onclick="sendMagicLink()">
-        Send me a magic link instead
-      </button>
-    </div>
-
-    <!-- FORGOT PASSWORD VIEW -->
-    <div id="viewForgot">
-      <p style="margin:0 0 16px; font-size:14px;">
-        Enter your email and we'll send you a link to set a new password.
-      </p>
-      <form id="forgotForm">
-        <div class="form-group">
-          <label for="forgotEmail">Email</label>
-          <input type="email" id="forgotEmail" placeholder="your@email.com" required autocomplete="email"/>
-        </div>
-        <button type="submit" class="btn btn-primary" id="forgotBtn">Send Reset Link</button>
-      </form>
-      <div style="margin-top:12px;">
-        <button class="link-btn" onclick="showView('login')">Back to sign in</button>
-      </div>
-    </div>
-
-    <!-- MAGIC LINK SENT VIEW -->
-    <div id="viewMagicSent">
-      <p style="font-size:15px; line-height:1.5;">
-        Check your inbox for a magic link. Click the link in the email to sign in — no password needed.
-      </p>
-      <button class="btn btn-secondary" onclick="showView('login')" style="margin-top:8px;">Back to sign in</button>
-    </div>
-
-    <!-- RESET SENT VIEW -->
-    <div id="viewResetSent">
-      <p style="font-size:15px; line-height:1.5;">
-        Password reset email sent. Check your inbox and follow the link to set a new password.
-      </p>
-      <button class="btn btn-secondary" onclick="showView('login')" style="margin-top:8px;">Back to sign in</button>
-    </div>
-
-    <!-- UPDATE PASSWORD VIEW (shown after clicking reset link) -->
-    <div id="viewUpdatePassword">
-      <p style="margin:0 0 16px; font-size:14px;">
-        Choose a new password for your account.
-      </p>
-      <form id="updatePasswordForm">
-        <div class="form-group">
-          <label for="newPass">New Password</label>
-          <input type="password" id="newPass" placeholder="New password (min 6 chars)" required minlength="6" autocomplete="new-password"/>
-        </div>
-        <div class="form-group">
-          <label for="confirmPass">Confirm Password</label>
-          <input type="password" id="confirmPass" placeholder="Confirm new password" required minlength="6" autocomplete="new-password"/>
-        </div>
-        <button type="submit" class="btn btn-primary" id="updatePassBtn">Set New Password</button>
-      </form>
-    </div>
-
-    <!-- PASSWORD UPDATED VIEW -->
-    <div id="viewPasswordUpdated">
-      <p style="font-size:15px; line-height:1.5;">
-        Your password has been updated. You can now sign in with your new password.
-      </p>
-      <button class="btn btn-primary" onclick="location.href='/predict/'" style="margin-top:8px;">Continue to App</button>
-    </div>
-
+<div class="login-wrap">
+  <div class="login-header">
+    <img src="https://res.cloudinary.com/dbfvogb95/image/upload/v1770835428/Screenshot_2026-02-11_at_19.43.16_m7urul.png" alt="TeleStats"/>
+    <h1>Tele<span class="accent">Stats</span> Fives</h1>
+    <p class="subtitle">Sign in to make your picks</p>
   </div>
 
-  <div class="footer">PredictFootball.ai</div>
+  <div class="login-card">
+    <!-- Messages -->
+    <div id="msgError" class="msg msg-error"></div>
+    <div id="msgSuccess" class="msg msg-success"></div>
+
+    <div class="views">
+
+      <!-- LOGIN VIEW -->
+      <div id="viewLogin" class="active">
+        <form id="loginForm">
+          <div class="form-group">
+            <label for="loginEmail">Email</label>
+            <input type="email" id="loginEmail" placeholder="your@email.com" required autocomplete="email"/>
+          </div>
+          <div class="form-group">
+            <label for="loginPass">Password</label>
+            <input type="password" id="loginPass" placeholder="Password" required autocomplete="current-password"/>
+          </div>
+          <button type="submit" class="login-btn login-btn-primary" id="loginBtn">Sign In</button>
+        </form>
+
+        <div style="margin-top:12px; text-align:right;">
+          <button class="link-btn" onclick="showView('forgot')">Forgot password?</button>
+        </div>
+
+        <div class="divider">or</div>
+
+        <button class="login-btn login-btn-secondary" id="magicBtn" onclick="sendMagicLink()">
+          Send me a magic link instead
+        </button>
+      </div>
+
+      <!-- FORGOT PASSWORD VIEW -->
+      <div id="viewForgot">
+        <p style="margin:0 0 16px; font-size:14px; color:var(--text-secondary);">
+          Enter your email and we'll send you a link to set a new password.
+        </p>
+        <form id="forgotForm">
+          <div class="form-group">
+            <label for="forgotEmail">Email</label>
+            <input type="email" id="forgotEmail" placeholder="your@email.com" required autocomplete="email"/>
+          </div>
+          <button type="submit" class="login-btn login-btn-primary" id="forgotBtn">Send Reset Link</button>
+        </form>
+        <div style="margin-top:12px;">
+          <button class="link-btn" onclick="showView('login')">Back to sign in</button>
+        </div>
+      </div>
+
+      <!-- MAGIC LINK SENT VIEW -->
+      <div id="viewMagicSent">
+        <p style="font-size:15px; line-height:1.5; color:var(--text-secondary);">
+          Check your inbox for a magic link. Click the link in the email to sign in — no password needed.
+        </p>
+        <button class="login-btn login-btn-secondary" onclick="showView('login')" style="margin-top:8px;">Back to sign in</button>
+      </div>
+
+      <!-- RESET SENT VIEW -->
+      <div id="viewResetSent">
+        <p style="font-size:15px; line-height:1.5; color:var(--text-secondary);">
+          Password reset email sent. Check your inbox and follow the link to set a new password.
+        </p>
+        <button class="login-btn login-btn-secondary" onclick="showView('login')" style="margin-top:8px;">Back to sign in</button>
+      </div>
+
+      <!-- UPDATE PASSWORD VIEW (shown after clicking reset link) -->
+      <div id="viewUpdatePassword">
+        <p style="margin:0 0 16px; font-size:14px; color:var(--text-secondary);">
+          Choose a new password for your account.
+        </p>
+        <form id="updatePasswordForm">
+          <div class="form-group">
+            <label for="newPass">New Password</label>
+            <input type="password" id="newPass" placeholder="New password (min 6 chars)" required minlength="6" autocomplete="new-password"/>
+          </div>
+          <div class="form-group">
+            <label for="confirmPass">Confirm Password</label>
+            <input type="password" id="confirmPass" placeholder="Confirm new password" required minlength="6" autocomplete="new-password"/>
+          </div>
+          <button type="submit" class="login-btn login-btn-primary" id="updatePassBtn">Set New Password</button>
+        </form>
+      </div>
+
+      <!-- PASSWORD UPDATED VIEW -->
+      <div id="viewPasswordUpdated">
+        <p style="font-size:15px; line-height:1.5; color:var(--text-secondary);">
+          Your password has been updated. You can now sign in with your new password.
+        </p>
+        <button class="login-btn login-btn-primary" onclick="location.href='/predict/'" style="margin-top:8px;">Continue to App</button>
+      </div>
+
+    </div>
+
+    <div class="login-footer">TeleStats Fives</div>
+  </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -186,17 +267,15 @@
 
   // Register onAuthStateChange BEFORE getSession() to catch all events
   let recoveryHandled = false;
-  let updatingPassword = false;   // flag to suppress redirect during password update
+  let updatingPassword = false;
   sb.auth.onAuthStateChange(async (event, session) => {
-    if (updatingPassword) return;  // don't redirect while updating password
+    if (updatingPassword) return;
     if ((event === 'SIGNED_IN' || event === 'PASSWORD_RECOVERY') && session) {
-      // If this is a password recovery, show update password form
       if (event === 'PASSWORD_RECOVERY') {
         recoveryHandled = true;
         showView('updatePassword');
         return;
       }
-      // Normal sign-in — redirect
       await handleSuccessfulAuth(session);
     }
   });
@@ -211,7 +290,6 @@
   }
 
   if (session && session.user && !isRecovery) {
-    // Normalise gmail/googlemail variants for lookup
     const email = session.user.email;
     const emailVariants = [email];
     if (email.endsWith('@googlemail.com')) {
@@ -247,7 +325,6 @@
 
   async function handleSuccessfulAuth(session) {
     const email = session.user.email;
-    // Normalise gmail/googlemail variants for lookup
     const emailVariants = [email];
     if (email.endsWith('@googlemail.com')) {
       emailVariants.push(email.replace('@googlemail.com', '@gmail.com'));
@@ -266,10 +343,8 @@
       return;
     }
 
-    // Use adalo_id as the userId for Netlify function calls (Adalo backend compat)
     const effectiveId = row.adalo_id || row.id;
 
-    // Cache user info
     localStorage.setItem('pf_user', JSON.stringify({
       userId: effectiveId,
       email: row.email,
@@ -280,9 +355,6 @@
 
     location.href = redirectTo;
   }
-
-  /* ---- Views ---- */
-  // showView is defined earlier (before onAuthStateChange) so it's available when the callback fires
 
   /* ---- Login form ---- */
   document.getElementById('loginForm').addEventListener('submit', async (e) => {
@@ -351,7 +423,7 @@
     btn.disabled = true;
     btn.textContent = 'Updating…';
 
-    updatingPassword = true;  // suppress onAuthStateChange redirect
+    updatingPassword = true;
     const { error } = await sb.auth.updateUser({ password: newPass });
     updatingPassword = false;
 

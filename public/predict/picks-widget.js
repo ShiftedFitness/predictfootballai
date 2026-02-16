@@ -1,77 +1,80 @@
 (function () {
-  // === THEME ===
+  // === THEME (TeleStats Fives) ===
   const THEME = {
-    bg: '#30A278',
-    card: '#000000',
-    border: '#1a1a1a',
-    text: '#FFFFFF',
-    muted: '#EAEAEA',
-    accent: '#FFFFFF',
-    accentText: '#000000',
-    good: '#7CFC00'
+    bg: '#131920',         // dark panel bg (matches --bg-card)
+    card: '#0F1318',       // card bg (matches --bg-panel)
+    border: 'rgba(255,255,255,0.06)',
+    text: '#F0F0F0',
+    muted: '#7A8A9E',
+    accent: '#FFD60A',     // yellow CTA
+    accentText: '#0B0F12',
+    good: '#32FF7E',       // TeleStats green
+    cyan: '#00E5FF'
   };
 
-  // === STYLES ===
+  // === STYLES (TeleStats dark theme) ===
   const css = `
-    .pf-wrap{ max-width: 750px; margin: 24px auto; padding: 16px; background:${THEME.bg}; color:${THEME.text}; font-family: Inter, system-ui, Arial; border-radius: 14px; }
+    .pf-wrap{ max-width: 750px; margin: 0 auto; padding: 16px 0; color:${THEME.text}; font-family: Inter, system-ui, Arial; }
     .pf-top{ display:flex; justify-content:space-between; align-items:flex-end; gap:12px; flex-wrap:wrap; margin-bottom:12px }
-    .pf-deadline-line{ font-weight:600; color:${THEME.text}; }
-    .pf-countdown{ font-variant-numeric: tabular-nums; line-height: 1; letter-spacing: 0.5px; color:${THEME.text}; white-space: nowrap; }
-    .pf-countdown .pf-digits{ display:block; font-size: 24px; font-weight: 800; padding: 6px 10px; border-radius: 10px; background: rgba(0,0,0,0.25); }
-    .pf-status{ color:${THEME.muted}; margin-bottom: 8px }
+    .pf-deadline-line{ font-weight:600; color:${THEME.text}; font-size:13px }
+    .pf-countdown{ font-variant-numeric: tabular-nums; line-height: 1; letter-spacing: 0.5px; color:${THEME.cyan}; white-space: nowrap; }
+    .pf-countdown .pf-digits{ display:block; font-size: 22px; font-weight: 800; padding: 6px 10px; border-radius: 10px; background: rgba(0,229,255,0.08); font-family: 'Space Mono', monospace; }
+    .pf-status{ color:${THEME.muted}; margin-bottom: 8px; font-size:13px }
     .pf-card{ background:${THEME.card}; color:${THEME.text}; border:1px solid ${THEME.border}; border-radius: 12px; padding:16px; margin-bottom:12px; }
-    .pf-teams{ font-weight:700 }
+    .pf-teams{ font-weight:700; font-size:15px }
     .pf-grid{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin-top:10px }
     .pf-pick{ padding:12px 12px; border-radius:10px; text-align:center; cursor:pointer; background: transparent; color:${THEME.text}; border:1px solid ${THEME.border}; transition: all .15s ease; font-weight:700; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; }
-    .pf-pick:hover{ border-color:#333 }
+    .pf-pick:hover{ border-color: rgba(0,229,255,0.3) }
     .pf-pick.active{ background:${THEME.accent}; color:${THEME.accentText}; border-color:${THEME.accent}; font-weight: 900; }
-    .pf-badge{ display:none; color:${THEME.good}; font-weight:900; }
+    .pf-badge{ display:none; color:${THEME.accentText}; font-weight:900; }
     .pf-pick.active .pf-badge{ display:inline; }
     .pf-pick-pct{ font-size:11px; opacity:0.7; font-weight:600 }
     .pf-pick.active .pf-pick-pct{ opacity:1 }
     .pf-row{ display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap }
     .pf-muted{ color:${THEME.muted} }
-    .pf-bar{ height:8px; background:#1F1F1F; border-radius:8px; overflow:hidden }
-    .pf-bar span{ display:block; height:100%; background:${THEME.accent} }
+    .pf-bar{ height:8px; background:rgba(255,255,255,0.06); border-radius:8px; overflow:hidden }
+    .pf-bar span{ display:block; height:100%; background:${THEME.cyan} }
     .pf-footer{ margin-top: 12px }
-    .pf-btn{ background:${THEME.accent}; color:${THEME.accentText}; border: none; font-weight:900; padding:12px 18px; border-radius:10px; cursor:pointer; font-size:16px; }
-    .pf-btn.secondary{ background:${THEME.accent}; color:${THEME.accentText}; border:1px solid ${THEME.accent}; }
-    .pf-btn[disabled]{ opacity:.6; cursor:not-allowed }
+    .pf-btn{ background:${THEME.accent}; color:${THEME.accentText}; border: none; font-weight:900; padding:12px 18px; border-radius:10px; cursor:pointer; font-size:16px; transition: background .12s }
+    .pf-btn:hover{ background:#E6C009 }
+    .pf-btn.secondary{ background:transparent; color:${THEME.text}; border:1px solid rgba(255,255,255,0.15); }
+    .pf-btn.secondary:hover{ border-color:${THEME.cyan}; color:${THEME.cyan} }
+    .pf-btn[disabled]{ opacity:.5; cursor:not-allowed }
     .pf-btnrow{ display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-start }
-    .pf-spinner{ display:inline-block; width:16px; height:16px; border-radius:50%; border:2px solid rgba(0,0,0,0.25); border-top-color:${THEME.accentText}; animation: pfspin 0.7s linear infinite; vertical-align:-3px; margin-right:8px; }
+    .pf-spinner{ display:inline-block; width:16px; height:16px; border-radius:50%; border:2px solid rgba(255,255,255,0.2); border-top-color:${THEME.cyan}; animation: pfspin 0.7s linear infinite; vertical-align:-3px; margin-right:8px; }
     @keyframes pfspin{ to{ transform: rotate(360deg) } }
     .pf-hidden{ display:none !important; }
-    .pf-error{ background:#7a1111; border:1px solid #aa3a3a; color:#fff; padding:10px 12px; border-radius:10px; margin:8px 0; white-space:pre-wrap }
+    .pf-error{ background:rgba(224,85,85,0.15); border:1px solid rgba(224,85,85,0.3); color:#E05555; padding:10px 12px; border-radius:10px; margin:8px 0; white-space:pre-wrap }
 
     /* Enrichment styles */
-    .pf-enrich{ margin-top:10px; padding-top:10px; border-top:1px solid #1a1a1a }
+    .pf-enrich{ margin-top:10px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.06) }
     .pf-pred-bar{ display:flex; height:24px; border-radius:6px; overflow:hidden; margin:6px 0; font-size:11px; font-weight:700 }
     .pf-pred-seg{ display:flex; align-items:center; justify-content:center; min-width:28px; transition: all .15s }
     .pf-pred-seg.home{ background:#2e7d32; color:#fff }
     .pf-pred-seg.draw{ background:#555; color:#fff }
     .pf-pred-seg.away{ background:#c62828; color:#fff }
     .pf-form-row{ display:flex; align-items:center; gap:5px; margin:4px 0 }
-    .pf-form-label{ font-size:11px; color:#999; min-width:70px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+    .pf-form-label{ font-size:11px; color:${THEME.muted}; min-width:70px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
     .pf-form-badge{ width:20px; height:20px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:10px; font-weight:800; flex-shrink:0 }
-    .pf-form-badge.w{ background:#7CFC00; color:#000 }
+    .pf-form-badge.w{ background:${THEME.good}; color:#000 }
     .pf-form-badge.d{ background:#666; color:#fff }
-    .pf-form-badge.l{ background:#cc3333; color:#fff }
-    .pf-h2h{ font-size:11px; color:#bbb; margin:4px 0 }
-    .pf-advice{ font-size:11px; color:#EAEAEA; font-style:italic; margin-top:4px }
+    .pf-form-badge.l{ background:#E05555; color:#fff }
+    .pf-h2h{ font-size:11px; color:${THEME.muted}; margin:4px 0 }
+    .pf-advice{ font-size:11px; color:${THEME.text}; font-style:italic; margin-top:4px; padding:6px 8px; background:rgba(255,255,255,0.04); border-radius:6px }
 
     /* Probability summary */
-    .pf-prob-card{ background:#000; border:1px solid #1a1a1a; border-radius:12px; padding:16px; margin-bottom:12px }
-    .pf-prob-title{ font-weight:800; font-size:16px; margin-bottom:12px }
+    .pf-prob-card{ background:${THEME.card}; border:1px solid ${THEME.border}; border-radius:12px; padding:16px; margin-bottom:12px }
+    .pf-prob-title{ font-weight:800; font-size:16px; margin-bottom:12px; font-family:'Space Mono',monospace }
     .pf-prob-row{ display:flex; align-items:center; gap:10px; margin:6px 0 }
-    .pf-prob-label{ font-size:13px; color:#EAEAEA; min-width:90px }
-    .pf-prob-bar-wrap{ flex:1; height:20px; background:#1a1a1a; border-radius:6px; overflow:hidden; position:relative }
+    .pf-prob-label{ font-size:13px; color:${THEME.muted}; min-width:90px }
+    .pf-prob-bar-wrap{ flex:1; height:20px; background:rgba(255,255,255,0.06); border-radius:6px; overflow:hidden; position:relative }
     .pf-prob-bar-fill{ height:100%; border-radius:6px; transition:width .3s ease }
     .pf-prob-val{ font-size:13px; font-weight:700; min-width:50px; text-align:right }
-    .pf-commentary{ margin-top:12px; padding:10px 12px; background:#1a1a1a; border-radius:8px; font-size:13px; color:#EAEAEA; line-height:1.5 }
+    .pf-commentary{ margin-top:12px; padding:10px 12px; background:rgba(255,255,255,0.04); border-radius:8px; font-size:13px; color:${THEME.muted}; line-height:1.5 }
     .pf-dist-grid{ display:grid; grid-template-columns:repeat(6,1fr); gap:6px; margin-top:10px }
-    .pf-dist-item{ text-align:center; padding:8px 4px; background:#111; border-radius:8px; border:1px solid #222 }
+    .pf-dist-item{ text-align:center; padding:8px 4px; background:rgba(255,255,255,0.03); border-radius:8px; border:1px solid ${THEME.border} }
     .pf-dist-num{ font-size:18px; font-weight:800; display:block }
-    .pf-dist-label{ font-size:10px; color:#999; margin-top:2px; display:block }
+    .pf-dist-label{ font-size:10px; color:${THEME.muted}; margin-top:2px; display:block }
     .pf-dist-pct{ font-size:12px; font-weight:700; display:block; margin-top:4px }
   `;
   const style = document.createElement('style');

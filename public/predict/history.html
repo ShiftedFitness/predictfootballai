@@ -3,70 +3,52 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>PredictFootball.ai – History</title>
+<title>TeleStats Fives – History</title>
+<link rel="stylesheet" href="/predict/telestats-theme.css"/>
 <style>
-  :root{ --bg:#30A278; --card:#000; --border:#1a1a1a; --text:#fff; --muted:#EAEAEA; --accent:#fff; --accentText:#000; }
-  html, body { height:100% }
-  body{ margin:0; background:#111; color:#fff; font-family:Inter,system-ui,Arial; display:flex; justify-content:center; align-items:flex-start; min-height:100vh; }
-  .wrap{ max-width:750px; width:100%; margin:24px 12px; background:var(--bg); color:var(--text); border-radius:14px; padding:16px; }
-  h2{ margin:0 0 12px }
-  .card{ background:var(--card); border:1px solid var(--border); border-radius:12px; padding:12px; margin-bottom:12px; }
   .row{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; justify-content:space-between }
-  .muted{ color:var(--muted) }
   .controls{ gap:8px; margin-bottom:8px }
-  select{ background:#0e0e0e; color:#fff; border:1px solid #2a2a2a; border-radius:8px; padding:8px 10px; }
-  .btn{ background:var(--accent); color:var(--accentText); border:0; font-weight:800; padding:8px 12px; border-radius:8px; cursor:pointer }
-
-  .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:8px }
-  .stat{ background:#0e0e0e; border:1px solid #1f1f1f; padding:10px; border-radius:10px; text-align:center }
-  .stat h4{ margin:0; font-size:12px; color:#cfcfcf; text-transform:uppercase; letter-spacing:.3px }
-  .stat .v{ font-size:18px; font-weight:800; margin-top:4px }
-
-  .table{ width:100%; border-collapse:collapse; font-size:14px; }
-  .table th, .table td{ padding:10px 8px; border-bottom:1px solid #1f1f1f; text-align:left; }
-  .table th{ font-size:12px; color:#cfcfcf; text-transform:uppercase; letter-spacing:.3px }
-  .table tr:last-child td{ border-bottom:none }
-
   .center{ text-align:center }
-  .good{ color:#7CFC00 }  /* lime for correct */
-  .bad{ color:#FF6B6B }   /* red for wrong */
+  .good{ color:var(--accent-green) }
+  .bad{ color:var(--danger) }
   .pick-badge{ margin-left:6px; font-weight:900 }
 </style>
 </head>
 <body>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/predict/auth.js"></script>
-  <div class="wrap">
-    <h2>Historical Results</h2>
 
-    <div class="card">
+  <div class="ts-page">
+    <h2 class="ts-page-title">Pick History</h2>
+
+    <div class="ts-card">
       <div class="row controls">
         <div>
-          <label class="muted" for="weekSel">Week</label><br/>
-          <select id="weekSel"></select>
+          <label class="ts-label" for="weekSel">Week</label>
+          <select id="weekSel" class="ts-select"></select>
         </div>
         <div>
-          <label class="muted" for="compareSel">Compare With</label><br/>
-          <select id="compareSel" style="min-width:220px"></select>
+          <label class="ts-label" for="compareSel">Compare With</label>
+          <select id="compareSel" class="ts-select" style="min-width:200px"></select>
         </div>
-        <div>
-          <button id="applyBtn" class="btn">Apply</button>
+        <div style="align-self:flex-end;">
+          <button id="applyBtn" class="ts-btn ts-btn-primary">Apply</button>
         </div>
       </div>
-      <div class="muted" id="weekInfo"></div>
+      <div class="ts-muted" id="weekInfo"></div>
     </div>
 
-    <div class="card">
-      <div class="grid2">
-        <div class="stat"><h4>Your Points</h4><div id="myPts" class="v">-</div></div>
-        <div class="stat"><h4><span id="compNamePts">Compare</span> Points</h4><div id="hisPts" class="v">-</div></div>
-        <div class="stat"><h4>Your Accuracy</h4><div id="myAcc" class="v">-</div></div>
-        <div class="stat"><h4><span id="compNameAcc">Compare</span> Accuracy</h4><div id="hisAcc" class="v">-</div></div>
+    <div class="ts-card">
+      <div class="ts-stats">
+        <div class="ts-stat"><div class="ts-stat-label">Your Points</div><div id="myPts" class="ts-stat-value">-</div></div>
+        <div class="ts-stat"><div class="ts-stat-label"><span id="compNamePts">Compare</span> Points</div><div id="hisPts" class="ts-stat-value">-</div></div>
+        <div class="ts-stat"><div class="ts-stat-label">Your Accuracy</div><div id="myAcc" class="ts-stat-value">-</div></div>
+        <div class="ts-stat"><div class="ts-stat-label"><span id="compNameAcc">Compare</span> Accuracy</div><div id="hisAcc" class="ts-stat-value">-</div></div>
       </div>
     </div>
 
-    <div class="card">
-      <table class="table" id="matchTbl">
+    <div class="ts-card">
+      <table class="ts-table" id="matchTbl">
         <thead>
           <tr>
             <th>Fixture</th>
@@ -77,7 +59,7 @@
         </thead>
         <tbody></tbody>
       </table>
-      <div class="muted" id="legends" style="margin-top:6px"></div>
+      <div class="ts-muted" id="legends" style="margin-top:6px"></div>
     </div>
   </div>
 
@@ -105,7 +87,7 @@ async function load({ currentWeek, viewWeek, compareId }) {
 
   const data = await fetchJSON(url.toString());
 
-  // Weeks dropdown (descending), select the week actually shown
+  // Weeks dropdown
   const weekSel = document.getElementById('weekSel');
   weekSel.innerHTML = '';
   (data.availableWeeks || []).forEach(w=>{
@@ -115,7 +97,7 @@ async function load({ currentWeek, viewWeek, compareId }) {
     weekSel.appendChild(opt);
   });
 
-  // Compare dropdown (names), select current compare id
+  // Compare dropdown
   const compareSel = document.getElementById('compareSel');
   compareSel.innerHTML = '';
   (data.users || []).forEach(u=>{
@@ -127,9 +109,9 @@ async function load({ currentWeek, viewWeek, compareId }) {
 
   // Info line
   document.getElementById('weekInfo').textContent =
-    `Viewing Week ${data.viewWeek} • ${data.weekLocked ? 'Locked (results in)' : 'Open'}`;
+    `Viewing Week ${data.viewWeek} \u2022 ${data.weekLocked ? 'Locked (results in)' : 'Open'}`;
 
-  // Stat card labels to use compare user's name
+  // Stat card labels
   document.getElementById('compNamePts').textContent  = data.compare.name || 'Compare';
   document.getElementById('compNameAcc').textContent  = data.compare.name || 'Compare';
   document.getElementById('compNameCol').textContent  = data.compare.name || 'Compare';
@@ -140,7 +122,7 @@ async function load({ currentWeek, viewWeek, compareId }) {
   document.getElementById('myAcc').textContent  = (Math.round(data.me.accuracy*1000)/10).toFixed(1) + '%';
   document.getElementById('hisAcc').textContent = (Math.round(data.compare.accuracy*1000)/10).toFixed(1) + '%';
 
-  // Table rows — put ✓/✗ next to each pick (you + compare)
+  // Table rows
   const tb = document.querySelector('#matchTbl tbody');
   tb.innerHTML = '';
   (data.rows || []).forEach(r=>{
@@ -158,23 +140,23 @@ async function load({ currentWeek, viewWeek, compareId }) {
   });
 
   document.getElementById('legends').textContent =
-    `${data.me.name} vs ${data.compare.name} • Picks shown as HOME / DRAW / AWAY`;
+    `${data.me.name} vs ${data.compare.name} \u2022 Picks shown as HOME / DRAW / AWAY`;
 
-  // Apply = force exact week + selected compare
+  // Apply button
   document.getElementById('applyBtn').onclick = ()=>{
     const selectedWeek = weekSel.value;
     const selectedCompareId = compareSel.value || '1';
     const next = new URL(location.href);
     next.searchParams.set('userId', userId);
-    next.searchParams.set('week', currentWeek || '');   // keep the "current week" for defaulting
-    next.searchParams.set('viewWeek', selectedWeek);     // explicitly show this week next load
+    next.searchParams.set('week', currentWeek || '');
+    next.searchParams.set('viewWeek', selectedWeek);
     next.searchParams.set('compareId', selectedCompareId);
     location.href = next.toString();
   };
 }
 
 function label(x){ return (x || '-'); }
-function badge(ok){ return ok ? ' <span class="pick-badge good">✓</span>' : ' <span class="pick-badge bad">✗</span>'; }
+function badge(ok){ return ok ? ' <span class="pick-badge good">&#10003;</span>' : ' <span class="pick-badge bad">&#10007;</span>'; }
 function escapeHTML(s){ return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 </script>
 </body>
