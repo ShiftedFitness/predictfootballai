@@ -186,7 +186,9 @@
 
   // Register onAuthStateChange BEFORE getSession() to catch all events
   let recoveryHandled = false;
+  let updatingPassword = false;   // flag to suppress redirect during password update
   sb.auth.onAuthStateChange(async (event, session) => {
+    if (updatingPassword) return;  // don't redirect while updating password
     if ((event === 'SIGNED_IN' || event === 'PASSWORD_RECOVERY') && session) {
       // If this is a password recovery, show update password form
       if (event === 'PASSWORD_RECOVERY') {
@@ -349,7 +351,9 @@
     btn.disabled = true;
     btn.textContent = 'Updating…';
 
+    updatingPassword = true;  // suppress onAuthStateChange redirect
     const { error } = await sb.auth.updateUser({ password: newPass });
+    updatingPassword = false;
 
     btn.disabled = false;
     btn.textContent = 'Set New Password';
