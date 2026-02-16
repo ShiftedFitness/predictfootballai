@@ -171,6 +171,15 @@
   const qs = new URLSearchParams(location.search);
   const redirectTo = qs.get('redirect') || '/predict/';
 
+  // Define showView EARLY so it's available when onAuthStateChange fires
+  window.showView = function (name) {
+    document.getElementById('msgError').style.display = 'none';
+    document.getElementById('msgSuccess').style.display = 'none';
+    document.querySelectorAll('.views > div').forEach(d => d.classList.remove('active'));
+    const el = document.getElementById('view' + name.charAt(0).toUpperCase() + name.slice(1));
+    if (el) el.classList.add('active');
+  };
+
   // Check URL hash for recovery type BEFORE getSession() processes the tokens
   const hashParams = new URLSearchParams(location.hash.substring(1));
   const isRecovery = hashParams.get('type') === 'recovery';
@@ -271,12 +280,7 @@
   }
 
   /* ---- Views ---- */
-  window.showView = function (name) {
-    clearMsg();
-    document.querySelectorAll('.views > div').forEach(d => d.classList.remove('active'));
-    const el = document.getElementById('view' + name.charAt(0).toUpperCase() + name.slice(1));
-    if (el) el.classList.add('active');
-  };
+  // showView is defined earlier (before onAuthStateChange) so it's available when the callback fires
 
   /* ---- Login form ---- */
   document.getElementById('loginForm').addEventListener('submit', async (e) => {
