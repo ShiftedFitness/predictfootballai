@@ -132,6 +132,32 @@
       <button class="btn btn-secondary" onclick="showView('login')" style="margin-top:8px;">Back to sign in</button>
     </div>
 
+    <!-- UPDATE PASSWORD VIEW (shown after clicking reset link) -->
+    <div id="viewUpdatePassword">
+      <p style="margin:0 0 16px; font-size:14px;">
+        Choose a new password for your account.
+      </p>
+      <form id="updatePasswordForm">
+        <div class="form-group">
+          <label for="newPass">New Password</label>
+          <input type="password" id="newPass" placeholder="New password (min 6 chars)" required minlength="6" autocomplete="new-password"/>
+        </div>
+        <div class="form-group">
+          <label for="confirmPass">Confirm Password</label>
+          <input type="password" id="confirmPass" placeholder="Confirm new password" required minlength="6" autocomplete="new-password"/>
+        </div>
+        <button type="submit" class="btn btn-primary" id="updatePassBtn">Set New Password</button>
+      </form>
+    </div>
+
+    <!-- PASSWORD UPDATED VIEW -->
+    <div id="viewPasswordUpdated">
+      <p style="font-size:15px; line-height:1.5;">
+        Your password has been updated. You can now sign in with your new password.
+      </p>
+      <button class="btn btn-primary" onclick="location.href='/predict/'" style="margin-top:8px;">Continue to App</button>
+    </div>
+
   </div>
 
   <div class="footer">PredictFootball.ai</div>
@@ -271,6 +297,35 @@
     }
 
     showView('resetSent');
+  });
+
+  /* ---- Update password form ---- */
+  document.getElementById('updatePasswordForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearMsg();
+    const newPass = document.getElementById('newPass').value;
+    const confirmPass = document.getElementById('confirmPass').value;
+    const btn = document.getElementById('updatePassBtn');
+
+    if (newPass !== confirmPass) {
+      showMsg('error', 'Passwords do not match.');
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Updating…';
+
+    const { error } = await sb.auth.updateUser({ password: newPass });
+
+    btn.disabled = false;
+    btn.textContent = 'Set New Password';
+
+    if (error) {
+      showMsg('error', error.message);
+      return;
+    }
+
+    showView('passwordUpdated');
   });
 
   /* ---- Magic link ---- */
