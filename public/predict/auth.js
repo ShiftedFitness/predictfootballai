@@ -53,10 +53,17 @@
 
   /* ---- Lookup predict_users row by email ---- */
   async function lookupUser(email) {
+    // Normalise gmail/googlemail variants for lookup
+    const variants = [email];
+    if (email.endsWith('@googlemail.com')) {
+      variants.push(email.replace('@googlemail.com', '@gmail.com'));
+    } else if (email.endsWith('@gmail.com')) {
+      variants.push(email.replace('@gmail.com', '@googlemail.com'));
+    }
     const { data, error } = await sb()
       .from('predict_users')
       .select('id, email, username, full_name, is_admin, points, correct_results, incorrect_results')
-      .eq('email', email)
+      .in('email', variants)
       .maybeSingle();
 
     if (error) {

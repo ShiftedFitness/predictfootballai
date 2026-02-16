@@ -216,10 +216,17 @@
 
   async function handleSuccessfulAuth(session) {
     const email = session.user.email;
+    // Normalise gmail/googlemail variants for lookup
+    const emailVariants = [email];
+    if (email.endsWith('@googlemail.com')) {
+      emailVariants.push(email.replace('@googlemail.com', '@gmail.com'));
+    } else if (email.endsWith('@gmail.com')) {
+      emailVariants.push(email.replace('@gmail.com', '@googlemail.com'));
+    }
     const { data: row } = await sb
       .from('predict_users')
       .select('id, email, username, full_name, is_admin')
-      .eq('email', email)
+      .in('email', emailVariants)
       .maybeSingle();
 
     if (!row) {
