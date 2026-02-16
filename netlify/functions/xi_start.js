@@ -149,7 +149,7 @@ const SCOPES = [
   // Combined
   { id: 'epl_alltime',      label: 'Premier League (All-time)', type: 'league', clubName: null, category: 'combined' },
   // Wonders
-  { id: 'wonder_onematch',  label: 'One Match Wonders', type: 'wonder', wonderType: 'match', category: 'wonders', visibleObjectives: ['performance'] },
+  { id: 'wonder_onematch',  label: 'One Match Wonders', type: 'wonder', wonderType: 'match', category: 'wonders', visibleObjectives: ['appearances'] },
   { id: 'wonder_onegoal',   label: 'One Goal Wonders',  type: 'wonder', wonderType: 'goal',  category: 'wonders', visibleObjectives: ['goals'] },
   // Nationality XIs
   { id: 'nat_english',  label: 'English XI',  type: 'nationality', nationalityCode: 'ENG', category: 'nationality' },

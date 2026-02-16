@@ -694,13 +694,169 @@ async function qTopScorerSingleSeason(stats, nameMap, scopeLabel, scope) {
   );
 }
 
+// --- Additional generators for 10-question quizzes ---
+
+async function qMostAssists(stats, nameMap, scopeLabel, scope) {
+  // Who has the most assists?
+  const assistMap = new Map();
+  for (const r of stats) {
+    assistMap.set(r.player_uid, (assistMap.get(r.player_uid) || 0) + (r.assists || 0));
+  }
+  const sorted = Array.from(assistMap.entries())
+    .map(([uid, assists]) => ({ uid, assists }))
+    .sort((a, b) => b.assists - a.assists);
+
+  if (sorted.length < 4 || sorted[0].assists < 1) return null;
+
+  const topPlayer = nameMap.get(sorted[0].uid);
+  if (!topPlayer) return null;
+  const correctName = topPlayer.player_name;
+
+  const wrongCandidates = sorted.slice(1, 15);
+  const wrongNames = [];
+  for (const p of wrongCandidates) {
+    const info = nameMap.get(p.uid);
+    if (info && info.player_name !== correctName && !wrongNames.includes(info.player_name)) {
+      wrongNames.push(info.player_name);
+    }
+    if (wrongNames.length >= 3) break;
+  }
+  if (wrongNames.length < 3) return null;
+
+  const subject = scope.type === 'club'
+    ? `${scopeLabel}'s all-time Premier League assist leader`
+    : 'the all-time Premier League assist leader';
+  return buildQuestion(`Who is ${subject}?`, correctName, wrongNames.slice(0, 3), 'medium');
+}
+
+async function qMostGoals(stats, nameMap, scopeLabel, scope) {
+  // How many total goals have been scored?
+  let totalGoals = 0;
+  for (const r of stats) totalGoals += r.goals || 0;
+  if (totalGoals < 10) return null;
+
+  const subject = scope.type === 'club'
+    ? `have been scored by ${scopeLabel} in the Premier League`
+    : 'have been scored in Premier League history';
+  const options = generateRangeOptions(totalGoals);
+  if (!options) return null;
+  return buildQuestion(`Roughly how many total goals ${subject}?`, options.correctLabel, options.wrongLabels, 'easy');
+}
+
+async function qFewestAppearancesTopScorer(stats, nameMap, scopeLabel, scope) {
+  // Among the top 10 scorers, who had the fewest appearances?
+  const goalMap = new Map();
+  const appMap = new Map();
+  for (const r of stats) {
+    goalMap.set(r.player_uid, (goalMap.get(r.player_uid) || 0) + (r.goals || 0));
+    appMap.set(r.player_uid, (appMap.get(r.player_uid) || 0) + (r.appearances || 0));
+  }
+  const topScorers = Array.from(goalMap.entries())
+    .map(([uid, goals]) => ({ uid, goals, apps: appMap.get(uid) || 0 }))
+    .sort((a, b) => b.goals - a.goals)
+    .slice(0, 10);
+
+  if (topScorers.length < 4) return null;
+
+  const fewest = [...topScorers].sort((a, b) => a.apps - b.apps)[0];
+  const correctPlayer = nameMap.get(fewest.uid);
+  if (!correctPlayer) return null;
+
+  const wrongNames = [];
+  for (const p of topScorers) {
+    if (p.uid === fewest.uid) continue;
+    const info = nameMap.get(p.uid);
+    if (info && !wrongNames.includes(info.player_name)) wrongNames.push(info.player_name);
+    if (wrongNames.length >= 3) break;
+  }
+  if (wrongNames.length < 3) return null;
+
+  const subject = scope.type === 'club'
+    ? `${scopeLabel}'s top 10 Premier League scorers`
+    : 'the top 10 Premier League all-time scorers';
+  return buildQuestion(
+    `Among ${subject}, who had the fewest appearances?`,
+    correctPlayer.player_name,
+    wrongNames.slice(0, 3),
+    'hard'
+  );
+}
+
+// --- Special generator: needs supabase + competitionId ---
+
+async function qSharedPlayers(stats, nameMap, scopeLabel, scope, supabase, competitionId) {
+  // Only works for club scopes
+  if (scope.type !== 'club' || !scope.clubId) return null;
+
+  // Get all player_uids who played for this club
+  const clubPlayerUids = [...new Set(stats.map(r => r.player_uid))];
+  if (clubPlayerUids.length < 10) return null;
+
+  // Fetch all EPL rows for these players (across all clubs)
+  const allRows = [];
+  const batchSize = 200;
+  for (let i = 0; i < clubPlayerUids.length; i += batchSize) {
+    const batch = clubPlayerUids.slice(i, i + batchSize);
+    const buildQ = () => supabase
+      .from('v_all_player_season_stats')
+      .select('player_uid, club_id')
+      .eq('competition_id', competitionId)
+      .in('player_uid', batch)
+      .gt('appearances', 0);
+    const rows = await fetchAll(buildQ);
+    allRows.push(...rows);
+  }
+
+  // Count shared players per other club_id
+  const clubShared = new Map(); // club_id -> Set of player_uids
+  for (const row of allRows) {
+    if (row.club_id === scope.clubId) continue;
+    if (!clubShared.has(row.club_id)) clubShared.set(row.club_id, new Set());
+    clubShared.get(row.club_id).add(row.player_uid);
+  }
+
+  if (clubShared.size < 4) return null;
+
+  const sorted = Array.from(clubShared.entries())
+    .map(([cid, players]) => ({ clubId: cid, count: players.size }))
+    .sort((a, b) => b.count - a.count);
+
+  // Look up club names for top candidates
+  const topClubIds = sorted.slice(0, 10).map(s => s.clubId);
+  const { data: clubRows } = await supabase
+    .from('clubs')
+    .select('club_id, club_name')
+    .in('club_id', topClubIds);
+  if (!clubRows || clubRows.length < 4) return null;
+
+  const clubNameMap = new Map(clubRows.map(c => [c.club_id, c.club_name]));
+  const correctClubName = clubNameMap.get(sorted[0].clubId);
+  if (!correctClubName) return null;
+
+  const wrongNames = [];
+  for (let i = 1; i < sorted.length && wrongNames.length < 3; i++) {
+    const name = clubNameMap.get(sorted[i].clubId);
+    if (name && name !== correctClubName && !wrongNames.includes(name)) {
+      wrongNames.push(name);
+    }
+  }
+  if (wrongNames.length < 3) return null;
+
+  return buildQuestion(
+    `Which club has ${scopeLabel} shared the most Premier League players with?`,
+    correctClubName,
+    wrongNames.slice(0, 3),
+    'hard'
+  );
+}
+
 // ============================================================
 // QUIZ GENERATION
 // ============================================================
 
-const EASY_GENERATORS = [qCountSeasons, qTopScorer, qCountPlayers];
-const MEDIUM_GENERATORS = [qMostAppearances, qMostCommonPosition, qLongestCareer];
-const HARD_GENERATORS = [qCountNationalities, qMostCommonNonEnglish, qTopScorerSingleSeason];
+const EASY_GENERATORS = [qCountSeasons, qTopScorer, qCountPlayers, qMostGoals];
+const MEDIUM_GENERATORS = [qMostAppearances, qMostCommonPosition, qLongestCareer, qMostAssists];
+const HARD_GENERATORS = [qCountNationalities, qMostCommonNonEnglish, qTopScorerSingleSeason, qFewestAppearancesTopScorer];
 
 /**
  * Try generators from a pool until we get the required number of questions.
@@ -722,7 +878,7 @@ async function generateFromPool(pool, needed, stats, nameMap, scopeLabel, scope)
 }
 
 /**
- * Generate 5 quiz questions: 2 easy, 2 medium, 1 hard.
+ * Generate 10 quiz questions: 3 easy, 4 medium, 3 hard.
  */
 async function generateQuiz(supabase, scopeId) {
   const scopeDef = SCOPES.find(s => s.id === scopeId);
@@ -750,16 +906,23 @@ async function generateQuiz(supabase, scopeId) {
   const uniqueUids = [...new Set(stats.map(r => r.player_uid))];
   const nameMap = await fetchPlayerNames(supabase, uniqueUids);
 
-  // Generate questions by difficulty
-  const easyQs = await generateFromPool(EASY_GENERATORS, 2, stats, nameMap, scopeLabel, scope);
-  const mediumQs = await generateFromPool(MEDIUM_GENERATORS, 2, stats, nameMap, scopeLabel, scope);
-  const hardQs = await generateFromPool(HARD_GENERATORS, 1, stats, nameMap, scopeLabel, scope);
+  // Generate questions by difficulty (10 total: 3 easy, 4 medium, 3 hard)
+  const easyQs = await generateFromPool(EASY_GENERATORS, 3, stats, nameMap, scopeLabel, scope);
+  const mediumQs = await generateFromPool(MEDIUM_GENERATORS, 4, stats, nameMap, scopeLabel, scope);
+  const hardQs = await generateFromPool(HARD_GENERATORS, 3, stats, nameMap, scopeLabel, scope);
+
+  // Try the special "shared players" generator (needs supabase + competitionId)
+  let sharedQ = null;
+  try {
+    sharedQ = await qSharedPlayers(stats, nameMap, scopeLabel, scope, supabase, competitionId);
+  } catch (_) { /* skip if fails */ }
 
   // If we didn't get enough in a tier, try to fill from adjacent tiers
   const allQuestions = [...easyQs, ...mediumQs, ...hardQs];
+  if (sharedQ) allQuestions.push(sharedQ);
 
-  // If we have fewer than 5, try remaining generators from any pool
-  if (allQuestions.length < 5) {
+  // If we have fewer than 10, try remaining generators from any pool
+  if (allQuestions.length < 10) {
     const usedGenerators = new Set();
     for (const q of allQuestions) usedGenerators.add(q); // questions themselves aren't generators, but we track by count
     const allGenerators = [...EASY_GENERATORS, ...MEDIUM_GENERATORS, ...HARD_GENERATORS];
@@ -770,7 +933,7 @@ async function generateQuiz(supabase, scopeId) {
     }));
 
     for (const gen of remainingGenerators) {
-      if (allQuestions.length >= 5) break;
+      if (allQuestions.length >= 10) break;
       try {
         const q = await gen(stats, nameMap, scopeLabel, scope);
         if (q) {
@@ -788,8 +951,8 @@ async function generateQuiz(supabase, scopeId) {
 
   return {
     scope: { id: scope.id, label: scope.label, type: scope.type },
-    questions: allQuestions.slice(0, 5),
-    totalQuestions: Math.min(allQuestions.length, 5),
+    questions: allQuestions.slice(0, 10),
+    totalQuestions: Math.min(allQuestions.length, 10),
   };
 }
 

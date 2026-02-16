@@ -108,7 +108,7 @@ body {
 <div class="container">
   <div class="ts-header">
     <img src="https://res.cloudinary.com/dbfvogb95/image/upload/v1770835428/Screenshot_2026-02-11_at_19.43.16_m7urul.png" alt="TeleStats" class="ts-logo"/>
-    <span>EPL &bull; HIGHER OR LOWER</span>
+    <span>HIGHER OR LOWER</span>
     <span class="ts-time" id="tsClock">--:--</span>
   </div>
 
@@ -189,11 +189,15 @@ body {
 const API_BASE = '/.netlify/functions';
 const $ = id => document.getElementById(id);
 
-const CLUB_COLOURS = {
-  'club_liverpool': '#C8102E', 'club_arsenal': '#EF0107', 'club_chelsea': '#034694',
-  'club_manutd': '#DA291C', 'club_sunderland': '#EB172B',
+const LEAGUE_ICONS = {
+  epl: '\uD83C\uDFF4\uDB40\uDC67\uDB40\uDC62\uDB40\uDC65\uDB40\uDC6E\uDB40\uDC67\uDB40\uDC7F',
+  laliga: '\uD83C\uDDEA\uD83C\uDDF8',
+  seriea: '\uD83C\uDDEE\uD83C\uDDF9',
+  bundesliga: '\uD83C\uDDE9\uD83C\uDDEA',
+  ligue1: '\uD83C\uDDEB\uD83C\uDDF7',
 };
 
+let leagues = [];
 let scopes = [];
 let selectedScope = null;
 let selectedStat = 'appearances';
@@ -211,6 +215,7 @@ async function init() {
       body: JSON.stringify({ action: 'get_scopes' }),
     });
     const data = await res.json();
+    leagues = data.leagues || [];
     scopes = data.scopes || [];
     renderScopes();
   } catch (err) {
@@ -222,56 +227,57 @@ function renderScopes() {
   const container = $('scopeList');
   container.innerHTML = '';
 
-  // League scope
-  const leagueScopes = scopes.filter(s => s.type === 'league');
-  const clubScopes = scopes.filter(s => s.type === 'club');
+  for (let i = 0; i < leagues.length; i++) {
+    const league = leagues[i];
+    const leagueScopes = scopes.filter(s => s.league === league.key);
+    const overallScope = leagueScopes.find(s => s.type === 'league');
+    const clubScopes = leagueScopes.filter(s => s.type === 'club');
 
-  // Combined section (open by default)
-  if (leagueScopes.length > 0) {
-    const sec = makeSection('Combined', leagueScopes, true);
-    container.appendChild(sec);
-  }
+    const sec = document.createElement('div');
+    sec.className = 'section' + (i === 0 ? ' open' : '');
 
-  // Teams section
-  if (clubScopes.length > 0) {
-    const sec = makeSection('Teams (' + clubScopes.length + ')', clubScopes, false);
+    const icon = LEAGUE_ICONS[league.key] || '\u26BD';
+    const header = document.createElement('div');
+    header.className = 'section-header';
+    header.innerHTML = `<div class="section-title">${icon} ${league.name} <span class="section-count">(${clubScopes.length + (overallScope ? 1 : 0)})</span></div><div class="chev">\u25BC</div>`;
+    header.onclick = () => {
+      // Accordion: close others
+      container.querySelectorAll('.section').forEach(s => { if (s !== sec) s.classList.remove('open'); });
+      sec.classList.toggle('open');
+    };
+    sec.appendChild(header);
+
+    const body = document.createElement('div');
+    body.className = 'section-body';
+
+    // Overall scope first
+    if (overallScope) {
+      body.appendChild(makeScopeCard(overallScope));
+    }
+    for (const s of clubScopes) {
+      body.appendChild(makeScopeCard(s));
+    }
+
+    sec.appendChild(body);
     container.appendChild(sec);
   }
 }
 
-function makeSection(title, items, open) {
-  const sec = document.createElement('div');
-  sec.className = 'section' + (open ? ' open' : '');
-
-  const header = document.createElement('div');
-  header.className = 'section-header';
-  header.innerHTML = `<div class="section-title">${title}</div><div class="chev">\u25BC</div>`;
-  header.onclick = () => sec.classList.toggle('open');
-  sec.appendChild(header);
-
-  const body = document.createElement('div');
-  body.className = 'section-body';
-
-  for (const s of items) {
-    const card = document.createElement('div');
-    card.className = 'scope-card' + (s.id === selectedScope ? ' selected' : '');
-    const colour = CLUB_COLOURS[s.id];
-    if (s.type === 'league') {
-      card.innerHTML = `<span class="sc-icon">\uD83C\uDFC6</span><span class="sc-label">${s.label}</span><span class="sc-arrow">\u203A</span>`;
-    } else {
-      card.innerHTML = `<span class="sc-dot" style="background:${colour || '#555'}"></span><span class="sc-label">${s.label}</span><span class="sc-arrow">\u203A</span>`;
-    }
-    card.onclick = () => {
-      $('scopeList').querySelectorAll('.scope-card').forEach(c => c.classList.remove('selected'));
-      card.classList.add('selected');
-      selectedScope = s.id;
-      $('startBtn').disabled = false;
-    };
-    body.appendChild(card);
+function makeScopeCard(s) {
+  const card = document.createElement('div');
+  card.className = 'scope-card' + (s.id === selectedScope ? ' selected' : '');
+  if (s.type === 'league') {
+    card.innerHTML = `<span class="sc-icon">\uD83C\uDFC6</span><span class="sc-label">${s.label}</span><span class="sc-arrow">\u203A</span>`;
+  } else {
+    card.innerHTML = `<span class="sc-dot" style="background:#555"></span><span class="sc-label">${s.label}</span><span class="sc-arrow">\u203A</span>`;
   }
-
-  sec.appendChild(body);
-  return sec;
+  card.onclick = () => {
+    $('scopeList').querySelectorAll('.scope-card').forEach(c => c.classList.remove('selected'));
+    card.classList.add('selected');
+    selectedScope = s.id;
+    $('startBtn').disabled = false;
+  };
+  return card;
 }
 
 function selectStat(stat) {
@@ -333,12 +339,13 @@ function showRound() {
   $('leftName').textContent = curr.name;
   $('leftStat').textContent = curr[selectedStat];
   $('leftStat').classList.remove('hidden-stat');
-  $('leftLabel').textContent = selectedStat === 'goals' ? 'PL Goals' : 'PL Appearances';
+  const statLabel = selectedStat === 'goals' ? 'Goals' : 'Appearances';
+  $('leftLabel').textContent = statLabel;
 
   $('rightName').textContent = next.name;
   $('rightStat').textContent = '?';
   $('rightStat').classList.add('hidden-stat');
-  $('rightLabel').textContent = selectedStat === 'goals' ? 'PL Goals' : 'PL Appearances';
+  $('rightLabel').textContent = statLabel;
 
   // Enable buttons
   $('guessBtns').querySelectorAll('.guess-btn').forEach(b => b.disabled = false);
@@ -371,7 +378,7 @@ function guess(dir) {
   if (correct) {
     streak++;
     flash.classList.add('correct');
-    flash.textContent = '\u2713 Correct! ' + next.name + ' has ' + nextVal + ' ' + (selectedStat === 'goals' ? 'goals' : 'apps');
+    flash.textContent = '\u2713 Correct! ' + next.name + ' has ' + nextVal + ' ' + (selectedStat === 'goals' ? 'goals' : 'appearances');
     updateStreak();
 
     // Move to next after delay
@@ -388,7 +395,7 @@ function guess(dir) {
     }, 1200);
   } else {
     flash.classList.add('wrong');
-    flash.textContent = '\u2717 Wrong! ' + next.name + ' has ' + nextVal + ' ' + (selectedStat === 'goals' ? 'goals' : 'apps');
+    flash.textContent = '\u2717 Wrong! ' + next.name + ' has ' + nextVal + ' ' + (selectedStat === 'goals' ? 'goals' : 'appearances');
 
     setTimeout(() => {
       gameOver();
