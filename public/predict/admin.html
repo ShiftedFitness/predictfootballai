@@ -797,8 +797,18 @@ function renderEnrichmentPreview() {
 
     const card = document.createElement('div');
     card.className = 'enrich-card';
+    // Position badges
+    const posHtml = (en.homePosition && en.awayPosition)
+      ? `<div style="display:flex;gap:8px;align-items:center;margin-bottom:6px;font-size:12px">
+           <span style="background:#1a1a1a;padding:2px 8px;border-radius:4px;font-weight:700">${en.homePosition}${ordinalSuffix(en.homePosition)} (${en.homePoints ?? '?'}pts)</span>
+           <span style="color:#666">vs</span>
+           <span style="background:#1a1a1a;padding:2px 8px;border-radius:4px;font-weight:700">${en.awayPosition}${ordinalSuffix(en.awayPosition)} (${en.awayPoints ?? '?'}pts)</span>
+         </div>`
+      : '';
+
     card.innerHTML = `
       <div class="enrich-teams">${fix.homeTeam} v ${fix.awayTeam}</div>
+      ${posHtml}
 
       <div class="pred-bar">
         <div class="seg home" style="width:${pred.home / total * 100}%">${pred.home}%</div>
@@ -815,7 +825,7 @@ function renderEnrichmentPreview() {
         ${formBadges(en.awayForm)}
       </div>
 
-      ${en.h2h && en.h2h.length > 0 ? `<div class="h2h-row">H2H: ${h2hSummary(en.h2h, fix.homeTeam, fix.awayTeam)}</div>` : ''}
+      ${en.h2h && en.h2h.length > 0 ? `<div class="h2h-row">H2H: ${h2hSummary(en.h2h, fix.homeTeam, fix.awayTeam)}</div>` : '<div class="h2h-row" style="color:#666">No H2H data available</div>'}
       ${en.advice ? `<div class="advice-text">${en.advice}</div>` : ''}
     `;
     container.appendChild(card);
@@ -1101,7 +1111,7 @@ function setupEventListeners() {
     }));
 
     try {
-      setSeedStatus('Fetching predictions, form & H2H... (this uses ~15 API calls)', '');
+      setSeedStatus('Loading H2H, form & predictions... this takes ~35 seconds (rate limited to 10 API calls/min)', '');
       const data = await adminFetch('/api-football-fixtures?action=enrich', {
         method: 'POST',
         body: JSON.stringify({ fixtures: payload })
@@ -1111,7 +1121,11 @@ function setupEventListeners() {
       (data.enrichment || []).forEach(en => { enrichmentMap[en.fixtureId] = en; });
 
       const enriched = Object.keys(enrichmentMap).length;
-      setSeedStatus(`Loaded stats for ${enriched}/${selectedFixtureIds.size} fixtures`, enriched > 0 ? 'success' : 'error');
+      const warningCount = (data.warnings || []).length;
+      let statusMsg = `Loaded stats for ${enriched}/${selectedFixtureIds.size} fixtures`;
+      if (warningCount > 0) statusMsg += ` (${warningCount} warning${warningCount > 1 ? 's' : ''} — check console)`;
+      setSeedStatus(statusMsg, enriched > 0 ? 'success' : 'error');
+      if (data.warnings) console.log('Enrichment warnings:', data.warnings);
       renderEnrichmentPreview();
     } catch (e) {
       setSeedStatus(`Failed to load enrichment: ${e.message}`, 'error');
