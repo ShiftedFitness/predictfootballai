@@ -28,7 +28,9 @@
       if (!window.supabase || !window.supabase.createClient) {
         throw new Error('Supabase JS SDK not loaded. Include the CDN script before auth.js');
       }
-      _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+        auth: { flowType: 'implicit' }
+      });
     }
     return _sb;
   }
