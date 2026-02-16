@@ -40,7 +40,8 @@ async function fdFetch(path) {
   return res.json();
 }
 
-const delay = (ms = 700) => new Promise(r => setTimeout(r, ms));
+// football-data.org free tier = 10 req/min. Auto-score checks max 5 matches.
+const delay = (ms = 6500) => new Promise(r => setTimeout(r, ms));
 
 // Determine match result from final score
 function resultFromScore(homeGoals, awayGoals) {
