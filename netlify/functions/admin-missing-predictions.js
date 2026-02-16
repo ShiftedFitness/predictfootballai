@@ -32,66 +32,49 @@
 //     ]
 //   }
 
-const { ADALO, listAll } = require('./_adalo.js');
-
-// robust relation helper
-function relId(v) {
-  if (!v) return '';
-
-  if (Array.isArray(v)) return v[0] ?? '';
-
-  if (typeof v === 'object' && v.id != null) return v.id;
-
-  if (typeof v === 'string') {
-    try {
-      const parsed = JSON.parse(v);
-      if (Array.isArray(parsed)) return parsed[0] ?? '';
-      if (typeof parsed === 'object' && parsed !== null && parsed.id != null) return parsed.id;
-    } catch {
-      // plain string like "55"
-    }
-    return v;
-  }
-
-  return v;
-}
-
-const respond = (status, body) => ({
-  statusCode: status,
-  headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
-  body: JSON.stringify(body),
-});
+const { sb, respond, requireAdmin, handleOptions } = require('./_supabase.js');
 
 const displayName = (u) =>
-  u?.['Username'] || u?.['Name'] || u?.['Full Name'] || `User ${u?.id ?? ''}`;
+  u?.username || u?.full_name || `User ${u?.id ?? ''}`;
 
 exports.handler = async (event) => {
+  const corsResponse = handleOptions(event);
+  if (corsResponse) return corsResponse;
+
   try {
     if (event.httpMethod !== 'GET') {
-      return respond(405, { error: 'GET only' });
+      return respond(405, 'GET only');
     }
 
-    const secret = (event.headers['x-admin-secret'] || event.headers['X-Admin-Secret'] || '').trim();
-    if (process.env.ADMIN_SECRET && secret !== process.env.ADMIN_SECRET) {
-      return respond(401, { error: 'Unauthorised' });
-    }
+    const adminErr = requireAdmin(event);
+    if (adminErr) return adminErr;
 
     const q = event.queryStringParameters || {};
     const weekFilterRaw = q.week;
     const weekFilter = weekFilterRaw ? Number(weekFilterRaw) : null;
 
+    const client = sb();
+
     // 1) Load matches, predictions, users
-    const [matchesAll, predsAll, usersAll] = await Promise.all([
-      listAll(ADALO.col.matches, 1000),
-      listAll(ADALO.col.predictions, 20000),
-      listAll(ADALO.col.users, 5000),
+    const [
+      { data: matchesAll, error: matchError },
+      { data: predsAll, error: predError },
+      { data: usersAll, error: usersError }
+    ] = await Promise.all([
+      client.from('predict_matches').select('*'),
+      client.from('predict_predictions').select('*'),
+      client.from('predict_users').select('*')
     ]);
 
-    const matchesSafe = matchesAll || [];
-    const predsSafe   = predsAll   || [];
-    const usersSafe   = usersAll   || [];
+    if (matchError) throw new Error(`Failed to fetch matches: ${matchError.message}`);
+    if (predError) throw new Error(`Failed to fetch predictions: ${predError.message}`);
+    if (usersError) throw new Error(`Failed to fetch users: ${usersError.message}`);
 
-    // expected users = all users in the table (you can refine later if needed)
+    const matchesSafe = matchesAll || [];
+    const predsSafe = predsAll || [];
+    const usersSafe = usersAll || [];
+
+    // expected users = all users in the table
     const expectedUsers = usersSafe.map(u => ({
       id: String(u.id),
       name: displayName(u),
@@ -102,15 +85,15 @@ exports.handler = async (event) => {
     const matchesFiltered = matchesSafe
       .filter(m => {
         if (!weekFilter) return true;
-        const w = Number(m['Week']);
+        const w = Number(m.week_number);
         return !Number.isNaN(w) && w === weekFilter;
       })
-      .sort((a,b)=> Number(a.id) - Number(b.id));
+      .sort((a, b) => Number(a.id) - Number(b.id));
 
     // group predictions by match
     const predsByMatch = {};
     for (const p of predsSafe) {
-      const mid = String(relId(p['Match']));
+      const mid = String(p.match_id);
       if (!mid) continue;
       if (!predsByMatch[mid]) predsByMatch[mid] = [];
       predsByMatch[mid].push(p);
@@ -121,14 +104,14 @@ exports.handler = async (event) => {
 
     for (const m of matchesFiltered) {
       const mid = String(m.id);
-      const wk  = Number(m['Week']);
-      const fixture = `${m['Home Team']} v ${m['Away Team']}`;
+      const wk = Number(m.week_number);
+      const fixture = `${m.home_team} v ${m.away_team}`;
 
       const predsForMatch = predsByMatch[mid] || [];
 
       // who has made a prediction for this match
       const havePredUserIds = new Set(
-        predsForMatch.map(p => String(relId(p['User'])))
+        predsForMatch.map(p => String(p.user_id))
       );
 
       // who is missing
@@ -167,6 +150,6 @@ exports.handler = async (event) => {
     });
   } catch (e) {
     console.error('admin-missing-predictions error:', e);
-    return respond(500, { error: e.message || 'Unknown error' });
+    return respond(500, e.message || 'Unknown error');
   }
 };

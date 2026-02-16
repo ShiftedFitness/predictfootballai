@@ -1,50 +1,14 @@
 // netlify/functions/history.js
-const { ADALO, adaloFetch, listAll } = require('./_adalo.js');
+const { sb, respond, handleOptions } = require('./_supabase.js');
 
-// ---------- helpers ----------
 const toKey = (x) => String(x ?? '').trim().toUpperCase(); // HOME/DRAW/AWAY
 
-function getRelId(v) {
-  if (!v) return '';
-
-  // Case 1: Array: [66]
-  if (Array.isArray(v)) return v[0] ?? '';
-
-  // Case 2: Object: { id: 66 }
-  if (typeof v === 'object' && v.id != null) return v.id;
-
-  // Case 3: String numeric or JSON string
-  if (typeof v === 'string') {
-    try {
-      const parsed = JSON.parse(v);
-      if (Array.isArray(parsed)) return parsed[0] ?? '';
-      if (typeof parsed === 'object' && parsed !== null && parsed.id != null) return parsed.id;
-    } catch {
-      // not JSON, just plain string like "66"
-    }
-    return v;
-  }
-
-  // Fallback: number etc.
-  return v;
+function sameId(a, b) {
+  return String(a) === String(b);
 }
 
-const sameId = (a, b) => String(a) === String(b);
-
-const ok = (body) => ({
-  statusCode: 200,
-  headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
-  body: JSON.stringify(body),
-});
-
-const fail = (code, msg) => ({
-  statusCode: code,
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ error: msg }),
-});
-
 function displayName(u) {
-  return u?.['Username'] || u?.['Name'] || u?.['Full Name'] || `User ${u?.id ?? ''}`;
+  return u?.username || u?.full_name || `User ${u?.id ?? ''}`;
 }
 
 function safePoints(pick, correct, pointsAwarded) {
@@ -53,8 +17,10 @@ function safePoints(pick, correct, pointsAwarded) {
   return toKey(pick) === toKey(correct) ? 1 : 0;
 }
 
-// ---------- handler ----------
 exports.handler = async (event) => {
+  const corsResponse = handleOptions(event);
+  if (corsResponse) return corsResponse;
+
   try {
     const q = event.queryStringParameters || {};
     const userIdParam = q.userId;
@@ -62,21 +28,24 @@ exports.handler = async (event) => {
     const viewWeekQ = q.viewWeek;
     const compareIdQ = q.compareId;
 
-    if (!userIdParam) return fail(400, 'userId required');
+    if (!userIdParam) return respond(400, 'userId required');
     const userId = String(userIdParam);
     const compareId = String(compareIdQ || '1'); // default AI=1
 
-    // 1) Load matches + users (small enough)
-    let matchesAll = [], usersAll = [];
-    try {
-      [matchesAll, usersAll] = await Promise.all([
-        listAll(ADALO.col.matches, 1000),
-        listAll(ADALO.col.users, 2000),
-      ]);
-    } catch (e) {
-      console.error('Adalo fetch failed (matches/users)', e);
-      return fail(500, 'Failed to fetch data from Adalo – check env vars/IDs');
-    }
+    const client = sb();
+
+    // 1) Load matches + users
+    const [
+      { data: matchesAll, error: matchError },
+      { data: usersAll, error: usersError }
+    ] = await Promise.all([
+      client.from('predict_matches').select('*'),
+      client.from('predict_users').select('*')
+    ]);
+
+    if (matchError) throw new Error(`Failed to fetch matches: ${matchError.message}`);
+    if (usersError) throw new Error(`Failed to fetch users: ${usersError.message}`);
+
     matchesAll = matchesAll || [];
     usersAll = usersAll || [];
 
@@ -84,23 +53,23 @@ exports.handler = async (event) => {
     const weeksAsc = Array.from(
       new Set(
         matchesAll
-          .map((m) => Number(m['Week']))
+          .map((m) => Number(m.week_number))
           .filter((n) => !Number.isNaN(n))
       )
     ).sort((a, b) => a - b);
     const weeksDesc = [...weeksAsc].reverse();
 
     const isWeekLocked = (wk) => {
-      const ms = matchesAll.filter((m) => Number(m['Week']) === Number(wk));
+      const ms = matchesAll.filter((m) => Number(m.week_number) === Number(wk));
       if (!ms.length) return false;
       const earliest = ms
-        .map((m) => (m['Lockout Time'] ? new Date(m['Lockout Time']) : null))
+        .map((m) => (m.lockout_time ? new Date(m.lockout_time) : null))
         .filter(Boolean)
         .sort((a, b) => a - b)[0];
       const now = new Date();
       return (
         (earliest && now >= earliest.getTime()) ||
-        ms.some((m) => m['Locked'] === true)
+        ms.some((m) => m.locked === true)
       );
     };
 
@@ -131,11 +100,11 @@ exports.handler = async (event) => {
 
     // 4) Matches for viewWeek
     const matches = matchesAll
-      .filter((m) => Number(m['Week']) === Number(viewWeek))
+      .filter((m) => Number(m.week_number) === Number(viewWeek))
       .sort((a, b) => Number(a.id) - Number(b.id));
 
     const correctByMatch = Object.fromEntries(
-      matches.map((m) => [String(m.id), toKey(m['Correct Result'])])
+      matches.map((m) => [String(m.id), toKey(m.correct_result)])
     );
     const matchIdSet = new Set(matches.map((m) => String(m.id)));
 
@@ -143,39 +112,18 @@ exports.handler = async (event) => {
 
     // 5) Only fetch predictions if the week is locked.
     if (weekLocked) {
-      try {
-        const page = await adaloFetch(
-          `${ADALO.col.predictions}?filterKey=Week&filterValue=${encodeURIComponent(
-            viewWeek
-          )}`
-        );
-        const predsForWeek = page?.records ?? page ?? [];
-        weekPreds = predsForWeek.filter((p) =>
-          matchIdSet.has(String(getRelId(p['Match'])))
-        );
-      } catch (e) {
-        console.error(
-          'history.js: Week-filtered predictions fetch failed, will fallback to listAll',
-          e
-        );
-        weekPreds = [];
-      }
+      const { data: predRows, error: predError } = await client
+        .from('predict_predictions')
+        .select('*')
+        .eq('week_number', viewWeek);
 
-      // Fallback for old data without Week set
-      if (!weekPreds.length) {
-        try {
-          const predsAll = await listAll(ADALO.col.predictions, 20000);
-          weekPreds = (predsAll || []).filter((p) =>
-            matchIdSet.has(String(getRelId(p['Match'])))
-          );
-        } catch (e) {
-          console.error('history.js: fallback listAll(predictions) failed', e);
-          return fail(500, 'Failed to fetch predictions');
-        }
+      if (predError) {
+        console.error('history.js: predictions fetch failed', predError);
+      } else {
+        weekPreds = (predRows || []).filter((p) =>
+          matchIdSet.has(String(p.match_id))
+        );
       }
-    } else {
-      // Not locked: do not fetch any predictions at all
-      weekPreds = [];
     }
 
     // 6) Users list for dropdown (locked weeks only)
@@ -185,7 +133,7 @@ exports.handler = async (event) => {
     }));
     if (!usersList.length && weekPreds.length) {
       const uniq = Array.from(
-        new Set(weekPreds.map((p) => String(getRelId(p['User']))))
+        new Set(weekPreds.map((p) => String(p.user_id)))
       );
       usersList = uniq.map((id) => ({ id, name: `User ${id}` }));
     }
@@ -194,10 +142,10 @@ exports.handler = async (event) => {
     // 7) Per-user predictions
     const forUser = (uid) =>
       weekPreds
-        .filter((p) => sameId(getRelId(p['User']), uid))
+        .filter((p) => sameId(p.user_id, uid))
         .sort(
           (a, b) =>
-            Number(getRelId(a['Match'])) - Number(getRelId(b['Match']))
+            Number(a.match_id) - Number(b.match_id)
         );
 
     const mine = forUser(userId);
@@ -206,39 +154,35 @@ exports.handler = async (event) => {
     // 8) Rows for the table
     const rows = matches.map((m) => {
       const mid = String(m.id);
-      const me = mine.find(
-        (p) => String(getRelId(p['Match'])) === mid
-      );
-      const him = theirs.find(
-        (p) => String(getRelId(p['Match'])) === mid
-      );
+      const me = mine.find((p) => String(p.match_id) === mid);
+      const him = theirs.find((p) => String(p.match_id) === mid);
 
-      const myPick = weekLocked ? toKey(me?.['Pick'] || '') : '';
-      const hisPick = weekLocked ? toKey(him?.['Pick'] || '') : '';
+      const myPick = weekLocked ? toKey(me?.pick || '') : '';
+      const hisPick = weekLocked ? toKey(him?.pick || '') : '';
       const correct = correctByMatch[mid] || '';
 
       const myPt = weekLocked
         ? safePoints(
-            myPick,
-            correct,
-            typeof me?.['Points Awarded'] === 'number'
-              ? me['Points Awarded']
-              : undefined
-          )
+          myPick,
+          correct,
+          typeof me?.points_awarded === 'number'
+            ? me.points_awarded
+            : undefined
+        )
         : 0;
       const hisPt = weekLocked
         ? safePoints(
-            hisPick,
-            correct,
-            typeof him?.['Points Awarded'] === 'number'
-              ? him['Points Awarded']
-              : undefined
-          )
+          hisPick,
+          correct,
+          typeof him?.points_awarded === 'number'
+            ? him.points_awarded
+            : undefined
+        )
         : 0;
 
       return {
         match_id: m.id,
-        fixture: `${m['Home Team']} v ${m['Away Team']}`,
+        fixture: `${m.home_team} v ${m.away_team}`,
         myPick,
         hisPick,
         correct,
@@ -266,7 +210,7 @@ exports.handler = async (event) => {
     const meUser = usersAll.find((u) => sameId(u.id, userId));
     const himUser = usersAll.find((u) => sameId(u.id, compareId));
 
-    return ok({
+    return respond(200, {
       currentWeek,
       viewWeek,
       availableWeeks: lockedWeeks,      // only locked weeks are navigable
@@ -285,7 +229,7 @@ exports.handler = async (event) => {
         name: himUser
           ? displayName(himUser)
           : usersList.find((u) => sameId(u.id, compareId))?.name ||
-            `User ${compareId}`,
+          `User ${compareId}`,
         correct: hisCorrect,
         total: hisTotal,
         accuracy: hisAcc,
@@ -295,6 +239,6 @@ exports.handler = async (event) => {
     });
   } catch (e) {
     console.error('history.js top-level error:', e);
-    return fail(500, String(e));
+    return respond(500, e.message);
   }
 };

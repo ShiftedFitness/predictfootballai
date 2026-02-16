@@ -22,6 +22,7 @@
 <body>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/predict/auth.js"></script>
+  <script src="/predict/predict-data.js"></script>
 
   <div class="ts-page">
     <h2 class="ts-page-title">League Table</h2>
@@ -119,14 +120,16 @@ function trOverall(row){
 }
 
 async function loadOverall(){
-  const res = await fetch(`${base}/leaderboard`, { cache: 'no-store' });
-  if (!res.ok) { alert('Failed to load leaderboard'); return; }
-  const data = await res.json();
-  const rows = data.leaderboard || [];
-  const body = document.querySelector('#overallTbl tbody');
-  body.innerHTML = '';
-  rows.forEach(r => body.appendChild(trOverall(r)));
-  document.getElementById('overallCount').textContent = `${rows.length} players`;
+  try {
+    const rows = await PredictData.getLeaderboard();
+    const body = document.querySelector('#overallTbl tbody');
+    body.innerHTML = '';
+    rows.forEach(r => body.appendChild(trOverall(r)));
+    document.getElementById('overallCount').textContent = `${rows.length} players`;
+  } catch (e) {
+    console.error('loadOverall failed', e);
+    alert('Failed to load leaderboard');
+  }
 }
 
 /* ---------- WEEKLY ---------- */
@@ -154,22 +157,22 @@ async function loadWeekly(week) {
   if (!weekNum || isNaN(weekNum)) {
     debugLog('Invalid week, fetching available weeks first...');
     try {
-      const weeksRes = await fetch(`${base}/weeks`, { cache: 'no-store' });
-      if (weeksRes.ok) {
-        const weeksData = await weeksRes.json();
-        const fallbackWeek = weeksData.recommendedViewWeek || weeksData.latest || 1;
-        debugLog('Using fallback week:', fallbackWeek);
-        return loadWeekly(fallbackWeek);
-      }
+      const weeksData = await PredictData.getWeeks();
+      const fallbackWeek = weeksData.recommendedViewWeek || weeksData.latest || 1;
+      debugLog('Using fallback week:', fallbackWeek);
+      return loadWeekly(fallbackWeek);
     } catch (e) {
       debugLog('Failed to fetch weeks for fallback:', e);
     }
     return;
   }
 
-  const r = await fetch(`${base}/weekly-table?week=${weekNum}`, { cache:'no-store' });
-  if (!r.ok) { debugLog('API error:', r.status); alert('Failed to load weekly table'); return; }
-  const j = await r.json();
+  let j;
+  try {
+    j = await PredictData.getWeeklyTable(weekNum);
+  } catch (e) {
+    debugLog('API error:', e); alert('Failed to load weekly table'); return;
+  }
   debugLog('API response:', { week: j.week, locked: j.locked, rowCount: (j.rows||[]).length, availableWeeks: j.availableWeeks });
 
   const availableWeeks = j.availableWeeks && j.availableWeeks.length ? j.availableWeeks : [];

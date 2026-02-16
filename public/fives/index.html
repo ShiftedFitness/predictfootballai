@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>TeleStats Fives – Football Predictions</title>
+<link rel="stylesheet" href="/telestats-theme.css"/>
+<style>
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .hero {
+    max-width: 860px;
+    width: 100%;
+    padding: 60px 24px;
+    text-align: center;
+  }
+
+  .hero-logo {
+    height: 56px;
+    margin-bottom: 16px;
+  }
+
+  .hero h1 {
+    font-family: 'Space Mono', monospace;
+    font-size: 56px;
+    font-weight: 700;
+    letter-spacing: 6px;
+    color: var(--accent-yellow);
+    margin: 0 0 12px;
+  }
+
+  .hero-tagline {
+    font-size: 18px;
+    color: var(--text-secondary);
+    margin-bottom: 36px;
+    line-height: 1.5;
+  }
+
+  .cta-btn {
+    display: inline-block;
+    background: var(--accent-yellow);
+    color: #0B0F12;
+    padding: 16px 36px;
+    border-radius: 12px;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-weight: 800;
+    font-size: 17px;
+    text-decoration: none;
+    transition: background 0.15s, transform 0.1s;
+  }
+  .cta-btn:hover {
+    background: #E6C009;
+    transform: translateY(-1px);
+  }
+
+  .features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-top: 56px;
+    text-align: left;
+  }
+
+  .feature-card {
+    background: var(--bg-card);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 12px;
+    padding: 20px;
+  }
+
+  .feature-icon {
+    font-size: 24px;
+    margin-bottom: 10px;
+  }
+
+  .feature-card h3 {
+    font-family: 'Space Mono', monospace;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--accent-cyan);
+    margin: 0 0 8px;
+    letter-spacing: 0.3px;
+  }
+
+  .feature-card p {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.55;
+    margin: 0;
+  }
+
+  .footer {
+    margin-top: 48px;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .footer a {
+    color: var(--accent-cyan);
+    text-decoration: none;
+  }
+  .footer a:hover { text-decoration: underline; }
+
+  @media (max-width: 600px) {
+    .hero { padding: 40px 16px; }
+    .hero h1 { font-size: 40px; letter-spacing: 4px; }
+    .hero-tagline { font-size: 16px; }
+    .features { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 400px) {
+    .features { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+  <div class="hero">
+    <img
+      src="https://res.cloudinary.com/dbfvogb95/image/upload/v1770835428/Screenshot_2026-02-11_at_19.43.16_m7urul.png"
+      alt="TeleStats"
+      class="hero-logo"
+    />
+    <h1>FIVES</h1>
+    <p class="hero-tagline">
+      Predict the Premier League. Beat your mates. Win bragging rights.
+    </p>
+    <a href="/predict/login.html" class="cta-btn">Start Predicting</a>
+
+    <div class="features">
+      <div class="feature-card">
+        <div class="feature-icon">5</div>
+        <h3>5 PICKS PER WEEK</h3>
+        <p>Choose your predictions before kickoff. Every correct call earns a point. Get all five right for a bonus.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#9650;</div>
+        <h3>LIVE LEADERBOARD</h3>
+        <p>Track your position against every player. See who tops the table week by week and across the season.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#9881;</div>
+        <h3>SMART ANALYSIS</h3>
+        <p>AI-powered match insights with form guides, head-to-head records, and probability calculations.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#8644;</div>
+        <h3>HISTORY &amp; COMPARE</h3>
+        <p>Dive into your pick history. Compare your calls against other players and see who really knows football.</p>
+      </div>
+    </div>
+
+    <p class="footer">
+      Part of <a href="/">TeleStats</a> &mdash; football data, visualised.
+    </p>
+  </div>
+</body>
+</html>

@@ -373,10 +373,14 @@
       `);
       container.appendChild(wrap);
 
-      // Load week + picks
+      // Load week + picks (via Supabase data layer)
       let data;
       try {
-        data = await j(`${base}/get-week?week=${encodeURIComponent(week)}&userId=${encodeURIComponent(userId)}`);
+        if (window.PredictData) {
+          data = await PredictData.getWeek(week, userId);
+        } else {
+          data = await j(`${base}/get-week?week=${encodeURIComponent(week)}&userId=${encodeURIComponent(userId)}`);
+        }
       } catch (e) {
         showError(wrap, `Failed to load week data.\n${e.message}`);
         return;
@@ -515,11 +519,15 @@
           matchesEl.querySelectorAll('.pf-pick').forEach(b => b.disabled = true);
 
           try {
-            await j(`${base}/submit-picks`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ userId, week: Number(data.week || week), picks: payload })
-            });
+            if (window.PredictData) {
+              await PredictData.submitPicks(userId, Number(data.week || week), payload);
+            } else {
+              await j(`${base}/submit-picks`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId, week: Number(data.week || week), picks: payload })
+              });
+            }
             editMode = false;
             render();
           } catch (e) {
@@ -570,7 +578,11 @@
 
         let sum;
         try {
-          sum = await j(`${base}/summary?week=${encodeURIComponent(data.week || week)}&userId=${encodeURIComponent(userId)}`);
+          if (window.PredictData) {
+            sum = await PredictData.getSummary(data.week || week, userId);
+          } else {
+            sum = await j(`${base}/summary?week=${encodeURIComponent(data.week || week)}&userId=${encodeURIComponent(userId)}`);
+          }
         } catch (e) {
           showError(wrap, `Failed to load summary.\n${e.message}`);
           return;

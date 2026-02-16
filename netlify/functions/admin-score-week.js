@@ -3,7 +3,7 @@
 // Re-scores a single week:
 // - Recomputes Points Awarded for each prediction in that week
 // - For each user who made predictions in that week, adds weekly points,
-//   FH (full houses) and Blanks (0-correct weeks).
+//   full_houses and blanks (0-correct weeks).
 //
 // Request:
 //   POST with header x-admin-secret
@@ -12,102 +12,69 @@
 // Response:
 //   { ok:true, week:12, predictionsUpdated:..., usersUpdated:..., ... }
 
-const { ADALO, adaloFetch, listAll } = require('./_adalo.js');
+const { sb, respond, requireAdmin, handleOptions } = require('./_supabase.js');
 
-// Helpers
 const U = (s) => String(s || '').trim().toUpperCase();
 
-function relId(v) {
-  if (!v) return '';
-
-  if (Array.isArray(v)) return v[0] ?? '';
-
-  if (typeof v === 'object' && v.id != null) return v.id;
-
-  if (typeof v === 'string') {
-    try {
-      const parsed = JSON.parse(v);
-      if (Array.isArray(parsed)) return parsed[0] ?? '';
-      if (typeof parsed === 'object' && parsed !== null && parsed.id != null) return parsed.id;
-    } catch {
-      // plain string
-    }
-    return v;
-  }
-
-  return v;
-}
-
-const respond = (status, body) => ({
-  statusCode: status,
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify(body),
-});
-
-const nameOf = (u) =>
-  u?.['Username'] || u?.['Name'] || u?.['Full Name'] || `User ${u?.id ?? ''}`;
-
-function findKey(rec, label) {
-  const want = label.toLowerCase().replace(/\s+/g, '').replace(/_/g, '');
-  for (const k of Object.keys(rec)) {
-    const norm = k.toLowerCase().replace(/\s+/g, '').replace(/_/g, '');
-    if (norm === want) return k;
-  }
-  return null;
-}
-
 exports.handler = async (event) => {
-  try {
-    if (event.httpMethod !== 'POST') return respond(405, { error: 'POST only' });
+  const corsResponse = handleOptions(event);
+  if (corsResponse) return corsResponse;
 
-    const secret = (event.headers['x-admin-secret'] || event.headers['X-Admin-Secret'] || '').trim();
-    if (process.env.ADMIN_SECRET && secret !== process.env.ADMIN_SECRET) {
-      return respond(401, { error: 'Unauthorised' });
-    }
+  try {
+    if (event.httpMethod !== 'POST') return respond(405, 'POST only');
+
+    const adminErr = requireAdmin(event);
+    if (adminErr) return adminErr;
 
     const { week, force } = JSON.parse(event.body || '{}');
-    if (!week) return respond(400, { error: 'week required' });
+    if (!week) return respond(400, 'week required');
 
     const weekNum = Number(week);
-
     const FORCE_OVERRIDE = process.env.FORCE_SCORE_WEEK === 'true';
     const allowForce = !!force || FORCE_OVERRIDE;
 
+    const client = sb();
+
     // 1) Load matches + users
-    const [matchesAll, usersAll] = await Promise.all([
-      listAll(ADALO.col.matches, 1000),
-      listAll(ADALO.col.users, 5000),
+    const [
+      { data: matchesAll, error: matchError },
+      { data: usersAll, error: usersError }
+    ] = await Promise.all([
+      client.from('predict_matches').select('*'),
+      client.from('predict_users').select('*')
     ]);
 
+    if (matchError) throw new Error(`Failed to fetch matches: ${matchError.message}`);
+    if (usersError) throw new Error(`Failed to fetch users: ${usersError.message}`);
+
     const matches = (matchesAll || [])
-      .filter(m => Number(m['Week']) === weekNum)
+      .filter(m => Number(m.week_number) === weekNum)
       .sort((a, b) => Number(a.id) - Number(b.id));
 
     if (!matches.length) {
-      return respond(400, { error: `No matches for week ${weekNum}` });
+      return respond(400, `No matches for week ${weekNum}`);
     }
 
     const usersSafe = usersAll || [];
 
-    const isWeekLocked = (wk) => {
-      const ms = matchesAll.filter(m => Number(m['Week']) === Number(wk));
+    const isWeekLocked = (wk, allMatches) => {
+      const ms = (allMatches || []).filter(m => Number(m.week_number) === Number(wk));
       if (!ms.length) return false;
       const earliest = ms
-        .map(m => m['Lockout Time'] ? new Date(m['Lockout Time']) : null)
-        .filter(Boolean).sort((a,b)=>a-b)[0];
+        .map(m => m.lockout_time ? new Date(m.lockout_time) : null)
+        .filter(Boolean)
+        .sort((a, b) => a - b)[0];
       const now = new Date();
-      return (earliest && now >= earliest) || ms.some(m => m['Locked'] === true);
+      return (earliest && now >= earliest) || ms.some(m => m.locked === true);
     };
 
     // Guard: prevent accidental double-scoring (unless forced)
     if (!allowForce) {
       const scoredUsers = [];
       for (const u of usersSafe) {
-        const ck = findKey(u, 'Current Week');
-        if (!ck) continue;
-        const currW = Number(u[ck] || 0);
+        const currW = Number(u.current_week || 0);
         if (currW > weekNum) {
-          scoredUsers.push(nameOf(u));
+          scoredUsers.push(u.username || u.full_name || `User ${u.id}`);
         }
       }
 
@@ -129,32 +96,21 @@ exports.handler = async (event) => {
 
     // 2) Matches + correct results
     const correctByMatch = Object.fromEntries(
-      matches.map(m => [String(m.id), U(m['Correct Result'])])
+      matches.map(m => [String(m.id), U(m.correct_result)])
     );
     const matchIds = new Set(matches.map(m => String(m.id)));
 
     // 3) Load predictions for THIS week
-    let predsForWeek = [];
-    try {
-      const page = await adaloFetch(
-        `${ADALO.col.predictions}?filterKey=Week&filterValue=${encodeURIComponent(weekNum)}`
-      );
-      const arr = page?.records ?? page ?? [];
-      predsForWeek = (arr || []).filter(p =>
-        matchIds.has(String(relId(p['Match'])))
-      );
-    } catch (e) {
-      console.error('admin-score-week: Week-filtered predictions fetch failed, fallback to listAll', e);
-      predsForWeek = [];
-    }
+    const { data: predsForWeek, error: predError } = await client
+      .from('predict_predictions')
+      .select('*')
+      .eq('week_number', weekNum);
 
-    if (!predsForWeek.length) {
-      // Fallback for old data without Week set
-      const predsAll = await listAll(ADALO.col.predictions, 20000);
-      predsForWeek = (predsAll || []).filter(p =>
-        matchIds.has(String(relId(p['Match'])))
-      );
-    }
+    if (predError) throw new Error(`Failed to fetch predictions: ${predError.message}`);
+
+    const validPreds = (predsForWeek || []).filter(p =>
+      matchIds.has(String(p.match_id))
+    );
 
     // 4) Recompute Points Awarded *and* collect per-user stats
     let predictionsUpdated = 0;
@@ -162,12 +118,12 @@ exports.handler = async (event) => {
     // statsByUser: uid -> { predCount, correctCount }
     const statsByUser = {};
 
-    for (const p of predsForWeek) {
-      const uid = String(relId(p['User']));
-      const mid = String(relId(p['Match']));
+    for (const p of validPreds) {
+      const uid = String(p.user_id);
+      const mid = String(p.match_id);
       if (!uid || !matchIds.has(mid)) continue;
 
-      const pick = U(p['Pick']);
+      const pick = U(p.pick);
       const correct = correctByMatch[mid];
       const should = (pick && correct && pick === correct) ? 1 : 0;
 
@@ -179,12 +135,14 @@ exports.handler = async (event) => {
       statsByUser[uid].correctCount += should;
 
       // update Points Awarded if needed
-      const current = (typeof p['Points Awarded'] === 'number') ? Number(p['Points Awarded']) : null;
+      const current = (typeof p.points_awarded === 'number') ? Number(p.points_awarded) : null;
       if (current === null || current !== should) {
-        await adaloFetch(`${ADALO.col.predictions}/${p.id}`, {
-          method: 'PUT',
-          body: JSON.stringify({ 'Points Awarded': should })
-        });
+        const { error: updateError } = await client
+          .from('predict_predictions')
+          .update({ points_awarded: should })
+          .eq('id', p.id);
+
+        if (updateError) throw new Error(`Failed to update prediction: ${updateError.message}`);
         predictionsUpdated++;
       }
     }
@@ -200,38 +158,36 @@ exports.handler = async (event) => {
 
       const stats = statsByUser[uid];
       const weeklyCorrectFinal = stats.correctCount;  // 0..5
-      const bonus    = (weeklyCorrectFinal === 5) ? 5 : 0;
-      const fhInc    = (weeklyCorrectFinal === 5) ? 1 : 0;
+      const bonus = (weeklyCorrectFinal === 5) ? 5 : 0;
+      const fhInc = (weeklyCorrectFinal === 5) ? 1 : 0;
       const blankInc = (weeklyCorrectFinal === 0) ? 1 : 0;  // played but 0 correct
 
       const pointsToAdd = weeklyCorrectFinal + bonus;
 
-      const newPoints   = Number(u['Points'] ?? 0) + pointsToAdd;
-      const newCorrect  = Number(u['Correct Results'] ?? 0) + weeklyCorrectFinal;
-      const newIncorrect= Number(u['Incorrect Results'] ?? 0) + (stats.predCount - weeklyCorrectFinal);
-      const newFH       = Number(u['FH'] ?? 0) + fhInc;
-      const newBlanks   = Number(u['Blanks'] ?? 0) + blankInc;
+      const newPoints = Number(u.points ?? 0) + pointsToAdd;
+      const newCorrect = Number(u.correct_results ?? 0) + weeklyCorrectFinal;
+      const newIncorrect = Number(u.incorrect_results ?? 0) + (stats.predCount - weeklyCorrectFinal);
+      const newFH = Number(u.full_houses ?? 0) + fhInc;
+      const newBlanks = Number(u.blanks ?? 0) + blankInc;
+      const newCurrentWeek = (Number(u.current_week ?? weekNum)) + 1;
 
-      const ck = findKey(u, 'Current Week');
-      const currW = ck ? Number(u[ck] ?? weekNum) : weekNum;
+      const { error: userUpdateError } = await client
+        .from('predict_users')
+        .update({
+          points: newPoints,
+          correct_results: newCorrect,
+          incorrect_results: newIncorrect,
+          full_houses: newFH,
+          blanks: newBlanks,
+          current_week: newCurrentWeek
+        })
+        .eq('id', u.id);
 
-      const body = {
-        'Points': newPoints,
-        'Correct Results': newCorrect,
-        'Incorrect Results': newIncorrect,
-        'FH': newFH,
-        'Blanks': newBlanks,
-        [ck || 'Current Week']: currW + 1
-      };
-
-      await adaloFetch(`${ADALO.col.users}/${uid}`, {
-        method: 'PUT',
-        body: JSON.stringify(body)
-      });
+      if (userUpdateError) throw new Error(`Failed to update user: ${userUpdateError.message}`);
 
       updates.push({
         uid,
-        name: nameOf(u),
+        name: u.username || u.full_name || `User ${u.id}`,
         weeklyCorrectFinal,
         bonusApplied: bonus,
         pointsAdded: pointsToAdd,
@@ -243,7 +199,7 @@ exports.handler = async (event) => {
     }
 
     const fullHouseNames = updates.filter(u => u.weeklyCorrectFinal === 5).map(u => u.name);
-    const blanksNames    = updates.filter(u => u.weeklyCorrectFinal === 0).map(u => u.name);
+    const blanksNames = updates.filter(u => u.weeklyCorrectFinal === 0).map(u => u.name);
 
     return respond(200, {
       ok: true,
@@ -257,13 +213,12 @@ exports.handler = async (event) => {
         week: weekNum,
         matchesForWeek: matches.length,
         matchIds: matches.map(m => m.id),
-        predsForWeekCount: predsForWeek.length,
+        predsForWeekCount: validPreds.length,
         usersTotal: usersSafe.length
       }
     });
-
   } catch (e) {
     console.error('admin-score-week error:', e);
-    return respond(500, { error: e.message || 'Unknown error' });
+    return respond(500, e.message || 'Unknown error');
   }
 };

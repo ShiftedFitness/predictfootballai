@@ -7,56 +7,28 @@
 // Optional: support multiple IDs:
 //   ?matchId=88,89,90
 
-const { ADALO, adaloFetch, listAll } = require('./_adalo.js');
-
-// robust relation helper (same style as elsewhere)
-function relId(v) {
-  if (!v) return '';
-
-  if (Array.isArray(v)) return v[0] ?? '';
-
-  if (typeof v === 'object' && v.id != null) return v.id;
-
-  if (typeof v === 'string') {
-    try {
-      const parsed = JSON.parse(v);
-      if (Array.isArray(parsed)) return parsed[0] ?? '';
-      if (typeof parsed === 'object' && parsed !== null && parsed.id != null) return parsed.id;
-    } catch {
-      // plain string like "88"
-    }
-    return v;
-  }
-
-  return v;
-}
-
-const respond = (status, body) => ({
-  statusCode: status,
-  headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
-  body: JSON.stringify(body),
-});
+const { sb, respond, requireAdmin, handleOptions } = require('./_supabase.js');
 
 const displayName = (u) =>
-  u?.['Username'] || u?.['Name'] || u?.['Full Name'] || `User ${u?.id ?? ''}`;
+  u?.username || u?.full_name || `User ${u?.id ?? ''}`;
 
 exports.handler = async (event) => {
+  const corsResponse = handleOptions(event);
+  if (corsResponse) return corsResponse;
+
   try {
     if (event.httpMethod !== 'GET') {
-      return respond(405, { error: 'GET only' });
+      return respond(405, 'GET only');
     }
 
-    // admin auth
-    const secret = (event.headers['x-admin-secret'] || event.headers['X-Admin-Secret'] || '').trim();
-    if (process.env.ADMIN_SECRET && secret !== process.env.ADMIN_SECRET) {
-      return respond(401, { error: 'Unauthorised' });
-    }
+    const adminErr = requireAdmin(event);
+    if (adminErr) return adminErr;
 
     const q = event.queryStringParameters || {};
     const matchIdParam = q.matchId;
 
     if (!matchIdParam) {
-      return respond(400, { error: 'matchId query param required (e.g. ?matchId=88 or ?matchId=88,89)' });
+      return respond(400, 'matchId query param required (e.g. ?matchId=88 or ?matchId=88,89)');
     }
 
     // support comma-separated IDs: "88,89,90"
@@ -66,26 +38,34 @@ exports.handler = async (event) => {
       .filter(Boolean);
 
     if (!matchIdsRequested.length) {
-      return respond(400, { error: 'No valid match IDs provided' });
+      return respond(400, 'No valid match IDs provided');
     }
+
+    const client = sb();
+
+    // Load predictions + users
+    const [
+      { data: predsAll, error: predError },
+      { data: usersAll, error: usersError }
+    ] = await Promise.all([
+      client.from('predict_predictions').select('*'),
+      client.from('predict_users').select('*')
+    ]);
+
+    if (predError) throw new Error(`Failed to fetch predictions: ${predError.message}`);
+    if (usersError) throw new Error(`Failed to fetch users: ${usersError.message}`);
+
+    const usersById = Object.fromEntries(
+      (usersAll || []).map(u => [String(u.id), u])
+    );
 
     const matchIdSet = new Set(matchIdsRequested.map(String));
 
-    // Load predictions + users
-    const [predsAll, usersAll] = await Promise.all([
-      listAll(ADALO.col.predictions, 20000),
-      listAll(ADALO.col.users, 5000),
-    ]);
-
-    const usersById = Object.fromEntries(
-      (usersAll || []).map(u => [ String(u.id), u ])
-    );
-
     const rows = (predsAll || [])
-      .filter(p => matchIdSet.has(String(relId(p['Match']))))
+      .filter(p => matchIdSet.has(String(p.match_id)))
       .map(p => {
-        const uid = String(relId(p['User']));
-        const mid = String(relId(p['Match']));
+        const uid = String(p.user_id);
+        const mid = String(p.match_id);
         const user = usersById[uid];
 
         return {
@@ -93,10 +73,10 @@ exports.handler = async (event) => {
           userId: uid,
           userName: displayName(user),
           matchId: mid,
-          week: Number(p['Week'] ?? 0),
-          pick: p['Pick'] || null,
-          pointsAwarded: typeof p['Points Awarded'] === 'number'
-            ? Number(p['Points Awarded'])
+          week: Number(p.week_number ?? 0),
+          pick: p.pick || null,
+          pointsAwarded: typeof p.points_awarded === 'number'
+            ? Number(p.points_awarded)
             : null,
           raw: p                            // include full record in case you want it
         };
@@ -116,6 +96,6 @@ exports.handler = async (event) => {
     });
   } catch (e) {
     console.error('admin-get-predictions-by-match error:', e);
-    return respond(500, { error: e.message || String(e) });
+    return respond(500, e.message || String(e));
   }
 };
