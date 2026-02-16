@@ -62,7 +62,7 @@
     }
     const { data, error } = await sb()
       .from('predict_users')
-      .select('id, email, username, full_name, is_admin, points, correct_results, incorrect_results')
+      .select('id, adalo_id, email, username, full_name, is_admin, points, correct_results, incorrect_results')
       .in('email', variants)
       .maybeSingle();
 
@@ -102,14 +102,16 @@
         // Lookup from DB
         const row = await lookupUser(email);
         if (row) {
+          // Use adalo_id as the userId for Netlify function calls (Adalo backend compat)
+          const effectiveId = row.adalo_id || row.id;
           setCachedUser({
-            userId: row.id,
+            userId: effectiveId,
             email: row.email,
             username: row.username,
             fullName: row.full_name,
             isAdmin: row.is_admin
           });
-          return String(row.id);
+          return String(effectiveId);
         }
         // Auth user exists but no predict_users row — shouldn't happen for migrated users
         console.error('Authenticated but no predict_users row for', email);

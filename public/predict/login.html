@@ -225,7 +225,7 @@
     }
     const { data: row } = await sb
       .from('predict_users')
-      .select('id, email, username, full_name, is_admin')
+      .select('id, adalo_id, email, username, full_name, is_admin')
       .in('email', emailVariants)
       .maybeSingle();
 
@@ -235,9 +235,12 @@
       return;
     }
 
+    // Use adalo_id as the userId for Netlify function calls (Adalo backend compat)
+    const effectiveId = row.adalo_id || row.id;
+
     // Cache user info
     localStorage.setItem('pf_user', JSON.stringify({
-      userId: row.id,
+      userId: effectiveId,
       email: row.email,
       username: row.username,
       fullName: row.full_name,
