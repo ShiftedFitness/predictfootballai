@@ -171,26 +171,17 @@
   const qs = new URLSearchParams(location.search);
   const redirectTo = qs.get('redirect') || '/predict/';
 
-  // If already logged in, redirect immediately
-  const { data: { session } } = await sb.auth.getSession();
-  if (session && session.user) {
-    // Verify they have a predict_users row
-    const { data: row } = await sb
-      .from('predict_users')
-      .select('id')
-      .eq('email', session.user.email)
-      .maybeSingle();
-    if (row) {
-      location.href = redirectTo;
-      return;
-    }
-  }
+  // Check URL hash for recovery type BEFORE getSession() processes the tokens
+  const hashParams = new URLSearchParams(location.hash.substring(1));
+  const isRecovery = hashParams.get('type') === 'recovery';
 
-  // Listen for auth state changes (handles magic link & password reset callbacks)
+  // Register onAuthStateChange BEFORE getSession() to catch all events
+  let recoveryHandled = false;
   sb.auth.onAuthStateChange(async (event, session) => {
     if ((event === 'SIGNED_IN' || event === 'PASSWORD_RECOVERY') && session) {
-      // If this is a password recovery, redirect to update password flow
+      // If this is a password recovery, show update password form
       if (event === 'PASSWORD_RECOVERY') {
+        recoveryHandled = true;
         showView('updatePassword');
         return;
       }
@@ -198,6 +189,35 @@
       await handleSuccessfulAuth(session);
     }
   });
+
+  // Now process the session (this consumes hash tokens)
+  const { data: { session } } = await sb.auth.getSession();
+
+  // If URL indicated recovery but onAuthStateChange didn't fire yet, show form
+  if (isRecovery && session && !recoveryHandled) {
+    showView('updatePassword');
+    return;
+  }
+
+  if (session && session.user && !isRecovery) {
+    // Normalise gmail/googlemail variants for lookup
+    const email = session.user.email;
+    const emailVariants = [email];
+    if (email.endsWith('@googlemail.com')) {
+      emailVariants.push(email.replace('@googlemail.com', '@gmail.com'));
+    } else if (email.endsWith('@gmail.com')) {
+      emailVariants.push(email.replace('@gmail.com', '@googlemail.com'));
+    }
+    const { data: row } = await sb
+      .from('predict_users')
+      .select('id')
+      .in('email', emailVariants)
+      .maybeSingle();
+    if (row) {
+      location.href = redirectTo;
+      return;
+    }
+  }
 
   /* ---- Helpers ---- */
   function showMsg(type, text) {
