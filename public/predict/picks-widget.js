@@ -48,19 +48,25 @@
 
     /* Enrichment styles */
     .pf-enrich{ margin-top:10px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.06) }
-    .pf-pred-bar{ display:flex; height:24px; border-radius:6px; overflow:hidden; margin:6px 0; font-size:11px; font-weight:700 }
+    .pf-section-label{ font-size:10px; text-transform:uppercase; letter-spacing:1px; color:${THEME.muted}; font-weight:700; margin:8px 0 4px }
+    .pf-pred-bar{ display:flex; height:28px; border-radius:6px; overflow:hidden; margin:4px 0; font-size:11px; font-weight:700 }
     .pf-pred-seg{ display:flex; align-items:center; justify-content:center; min-width:28px; transition: all .15s }
     .pf-pred-seg.home{ background:#00E5FF; color:#0B0F12 }
     .pf-pred-seg.draw{ background:#FFD60A; color:#0B0F12 }
     .pf-pred-seg.away{ background:#32FF7E; color:#0B0F12 }
+    .pf-legend{ display:flex; gap:12px; margin:4px 0 2px; font-size:10px; color:${THEME.muted} }
+    .pf-legend-dot{ width:8px; height:8px; border-radius:50%; display:inline-block; margin-right:3px; vertical-align:middle }
     .pf-form-row{ display:flex; align-items:center; gap:5px; margin:4px 0 }
     .pf-form-label{ font-size:11px; color:${THEME.muted}; min-width:70px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
     .pf-form-badge{ width:20px; height:20px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:10px; font-weight:800; flex-shrink:0 }
     .pf-form-badge.w{ background:${THEME.good}; color:#000 }
     .pf-form-badge.d{ background:#666; color:#fff }
     .pf-form-badge.l{ background:#E05555; color:#fff }
-    .pf-h2h{ font-size:11px; color:${THEME.muted}; margin:4px 0 }
-    .pf-advice{ font-size:11px; color:${THEME.text}; font-style:italic; margin-top:4px; padding:6px 8px; background:rgba(255,255,255,0.04); border-radius:6px }
+    .pf-h2h{ font-size:12px; color:${THEME.text}; margin:2px 0 }
+    .pf-advice{ font-size:12px; color:${THEME.text}; margin-top:2px; padding:8px 10px; background:rgba(255,255,255,0.04); border-radius:8px; line-height:1.4 }
+
+    /* Preview mode pick chips */
+    .pf-pick-chip{ display:inline-block; padding:4px 12px; border-radius:8px; font-weight:800; font-size:13px; background:${THEME.accent}; color:${THEME.accentText} }
 
     /* Probability summary */
     .pf-prob-card{ background:${THEME.card}; border:1px solid ${THEME.border}; border-radius:12px; padding:16px; margin-bottom:12px }
@@ -129,7 +135,7 @@
   }
 
   function formBadgesHtml(formStr) {
-    if (!formStr) return '<span style="color:#555">-</span>';
+    if (!formStr) return '';
     return formStr.split('').map(c => {
       const cls = c.toUpperCase() === 'W' ? 'w' : c.toUpperCase() === 'D' ? 'd' : 'l';
       return `<span class="pf-form-badge ${cls}">${c.toUpperCase()}</span>`;
@@ -157,9 +163,10 @@
         if (h.homeWinner) homeWins++; else if (h.awayWinner) awayWins++; else draws++;
       }
     });
-    return `H2H (last ${h2hArr.length}): ${homeWins}W ${draws}D ${awayWins}L`;
+    return `Last ${h2hArr.length} meetings: ${homeWins} home wins, ${draws} draws, ${awayWins} away wins`;
   }
 
+  // Render enrichment HTML for EDIT MODE — full detail to help users pick
   function renderEnrichmentHtml(m) {
     if (!hasEnrichment(m)) return '';
 
@@ -171,25 +178,48 @@
     const h2h = parseH2H(m);
     const h2hText = h2hSummaryText(h2h, homeTeam);
 
-    return `
-      <div class="pf-enrich">
+    let html = '<div class="pf-enrich">';
+
+    // Predicted outcome bar with label and legend
+    if (pred.home || pred.draw || pred.away) {
+      html += `
+        <div class="pf-section-label">Predicted Outcome</div>
         <div class="pf-pred-bar">
           <div class="pf-pred-seg home" style="width:${pred.home/total*100}%">${pred.home}%</div>
           <div class="pf-pred-seg draw" style="width:${pred.draw/total*100}%">${pred.draw}%</div>
           <div class="pf-pred-seg away" style="width:${pred.away/total*100}%">${pred.away}%</div>
         </div>
-        ${m['Home Form'] ? `<div class="pf-form-row">
-          <span class="pf-form-label">${homeTeam}</span>
-          ${formBadgesHtml(m['Home Form'])}
-        </div>` : ''}
-        ${m['Away Form'] ? `<div class="pf-form-row">
-          <span class="pf-form-label">${awayTeam}</span>
-          ${formBadgesHtml(m['Away Form'])}
-        </div>` : ''}
-        ${h2hText ? `<div class="pf-h2h">${h2hText}</div>` : ''}
-        ${advice ? `<div class="pf-advice">${advice}</div>` : ''}
-      </div>
-    `;
+        <div class="pf-legend">
+          <span><span class="pf-legend-dot" style="background:#00E5FF"></span>Home Win</span>
+          <span><span class="pf-legend-dot" style="background:#FFD60A"></span>Draw</span>
+          <span><span class="pf-legend-dot" style="background:#32FF7E"></span>Away Win</span>
+        </div>
+      `;
+    }
+
+    // Form (only if data exists)
+    if (m['Home Form'] || m['Away Form']) {
+      html += '<div class="pf-section-label">Recent Form</div>';
+      if (m['Home Form']) {
+        html += `<div class="pf-form-row"><span class="pf-form-label">${homeTeam}</span>${formBadgesHtml(m['Home Form'])}</div>`;
+      }
+      if (m['Away Form']) {
+        html += `<div class="pf-form-row"><span class="pf-form-label">${awayTeam}</span>${formBadgesHtml(m['Away Form'])}</div>`;
+      }
+    }
+
+    // H2H
+    if (h2hText) {
+      html += `<div class="pf-section-label">Head to Head</div><div class="pf-h2h">${h2hText}</div>`;
+    }
+
+    // Analysis / advice
+    if (advice) {
+      html += `<div class="pf-section-label">Analysis</div><div class="pf-advice">${advice}</div>`;
+    }
+
+    html += '</div>';
+    return html;
   }
 
   // === PROBABILITY CALCULATIONS ===
@@ -232,7 +262,6 @@
     const expected = probs.reduce((s, p) => s + p, 0);
 
     // Risk profile
-    const avgProb = probs.reduce((s, p) => s + p, 0) / n;
     const favourites = probs.filter(p => p >= 0.40).length;
 
     let commentary = '';
@@ -282,25 +311,25 @@
         <div class="pf-prob-row">
           <span class="pf-prob-label">Full House</span>
           <div class="pf-prob-bar-wrap">
-            <div class="pf-prob-bar-fill" style="width:${Math.min(calc.fullHouse*100, 100)}%;background:#00e676"></div>
+            <div class="pf-prob-bar-fill" style="width:${Math.min(calc.fullHouse*100, 100)}%;background:${THEME.good}"></div>
           </div>
-          <span class="pf-prob-val" style="color:#00e676">${fmtPct(calc.fullHouse)}</span>
+          <span class="pf-prob-val" style="color:${THEME.good}">${fmtPct(calc.fullHouse)}</span>
         </div>
 
         <div class="pf-prob-row">
           <span class="pf-prob-label">Blanks</span>
           <div class="pf-prob-bar-wrap">
-            <div class="pf-prob-bar-fill" style="width:${Math.min(calc.blanks*100, 100)}%;background:#cc3333"></div>
+            <div class="pf-prob-bar-fill" style="width:${Math.min(calc.blanks*100, 100)}%;background:#E05555"></div>
           </div>
-          <span class="pf-prob-val" style="color:#cc3333">${fmtPct(calc.blanks)}</span>
+          <span class="pf-prob-val" style="color:#E05555">${fmtPct(calc.blanks)}</span>
         </div>
 
         <div class="pf-prob-row">
           <span class="pf-prob-label">Expected</span>
           <div class="pf-prob-bar-wrap">
-            <div class="pf-prob-bar-fill" style="width:${calc.expected/5*100}%;background:#ff9800"></div>
+            <div class="pf-prob-bar-fill" style="width:${calc.expected/5*100}%;background:${THEME.accent}"></div>
           </div>
-          <span class="pf-prob-val" style="color:#ff9800">${calc.expected.toFixed(1)} / 5</span>
+          <span class="pf-prob-val" style="color:${THEME.accent}">${calc.expected.toFixed(1)} / 5</span>
         </div>
 
         ${distHtml}
@@ -356,9 +385,9 @@
           </div>
 
           <div id="pf-status" class="pf-status"></div>
+          <div id="pf-prob-summary"></div>
           <div id="pf-matches"></div>
           <div id="pf-actions" class="pf-footer"></div>
-          <div id="pf-prob-summary"></div>
           <div id="pf-summary" style="margin-top:24px"></div>
         </div>
       `);
@@ -437,6 +466,7 @@
         }
       }
 
+      // === EDIT MODE: full enrichment to help users decide ===
       function renderEdit() {
         statusEl.textContent = '';
         matchesEl.innerHTML = '';
@@ -518,28 +548,29 @@
         });
       }
 
+      // === PREVIEW MODE: clean, just picks + analysis at top ===
       function renderPreView() {
-        statusEl.textContent = 'Your saved picks.';
+        statusEl.textContent = 'Your saved picks';
         matchesEl.innerHTML = '';
         actionsEl.innerHTML = '';
         summaryEl.innerHTML = '';
         probSummaryEl.innerHTML = '';
 
+        // Show analysis FIRST (at top)
+        updateProbSummary();
+
+        // Then show clean pick cards — NO enrichment clutter
         matches.forEach(m => {
           const mid = String(m.id);
           const myPick = picks[mid] || '(none)';
           const card = el(`<div class="pf-card">
             <div class="pf-row" style="justify-content:space-between">
               <div class="pf-teams">${m['Home Team']} v ${m['Away Team']}</div>
-              <div><span class="pf-muted">Your pick:</span> <strong>${myPick}</strong></div>
+              <span class="pf-pick-chip">${myPick}</span>
             </div>
-            ${renderEnrichmentHtml(m)}
           </div>`);
           matchesEl.appendChild(card);
         });
-
-        // Show probability summary
-        updateProbSummary();
 
         const btnRow = el(`<div class="pf-btnrow"></div>`);
         const editBtn = el(`<button class="pf-btn secondary" style="font-size:18px;padding:14px 18px;">Edit picks</button>`);
@@ -548,12 +579,16 @@
         actionsEl.appendChild(btnRow);
       }
 
+      // === POST MODE: locked, show summary ===
       async function renderPost() {
         statusEl.textContent = 'Deadline passed. Picks locked.';
         matchesEl.innerHTML = '';
         actionsEl.innerHTML = '';
         summaryEl.innerHTML = '';
         probSummaryEl.innerHTML = '';
+
+        // Show analysis at top
+        updateProbSummary();
 
         let sum;
         try {
@@ -575,9 +610,8 @@
           const card = el(`<div class="pf-card">
             <div class="pf-row" style="justify-content:space-between">
               <div class="pf-teams">${m['Home Team']} v ${m['Away Team']}</div>
-              <div><span class="pf-muted">Your pick:</span> <strong>${myPick}</strong></div>
+              <span class="pf-pick-chip">${myPick}</span>
             </div>
-            ${renderEnrichmentHtml(m)}
             <div class="pf-muted" style="margin-top:8px">HOME ${pm.pct.HOME}%</div>
             <div class="pf-bar"><span style="width:${pm.pct.HOME}%"></span></div>
             <div class="pf-muted" style="margin-top:6px">DRAW ${pm.pct.DRAW}%</div>
@@ -588,9 +622,6 @@
           </div>`);
           summaryEl.appendChild(card);
         });
-
-        // Show probability analysis
-        updateProbSummary();
 
         const matchesMsg = (sum.samePickUsers || []).length
           ? `<strong>${(sum.samePickUsers||[]).length}</strong> user(s) have the exact same 5-pick combo as you.`
