@@ -253,7 +253,8 @@
 <script src="/predict/auth.js"></script>
 <script>
 (async function () {
-  const sb = PFAuth.supabase;
+  // Use a getter so we always get the current (possibly refreshed) Supabase client
+  const getSb = () => PFAuth.supabase;
   const qs = new URLSearchParams(location.search);
   const redirectTo = qs.get('redirect') || '/predict/';
 
@@ -273,7 +274,7 @@
   // Register onAuthStateChange BEFORE getSession() to catch all events
   let recoveryHandled = false;
   let updatingPassword = false;
-  sb.auth.onAuthStateChange(async (event, session) => {
+  getSb().auth.onAuthStateChange(async (event, session) => {
     if (updatingPassword) return;
     if ((event === 'SIGNED_IN' || event === 'PASSWORD_RECOVERY') && session) {
       if (event === 'PASSWORD_RECOVERY') {
@@ -285,16 +286,24 @@
     }
   });
 
-  // Now process the session (this consumes hash tokens)
-  // Wrapped in try-catch: getSession() can throw AbortError on some browsers,
-  // and we must not crash the IIFE or the magic-link / forgot-password handlers
-  // won't be registered.
-  let session = null;
-  try {
-    const result = await sb.auth.getSession();
-    session = result.data?.session || null;
-  } catch (e) {
-    console.warn('getSession() failed (non-fatal):', e.message);
+  // Now process the session — uses AbortError-resilient wrapper from auth.js
+  // (Supabase v2 has a known bug where getSession/setSession can throw AbortError;
+  //  safeGetSession creates a fresh client if needed)
+  let session = await PFAuth.safeGetSession();
+
+  // Fallback: if no session but we have hash tokens (magic link / recovery),
+  // manually extract and set the session so the user isn't stuck on the login page.
+  if (!session && location.hash) {
+    const hp = new URLSearchParams(location.hash.substring(1));
+    const accessToken = hp.get('access_token');
+    const refreshToken = hp.get('refresh_token');
+    if (accessToken && refreshToken) {
+      console.log('Setting session from URL hash tokens');
+      session = await PFAuth.safeSetSession(accessToken, refreshToken);
+      if (session) {
+        history.replaceState(null, '', location.pathname + location.search);
+      }
+    }
   }
 
   // If URL indicated recovery but onAuthStateChange didn't fire yet, show form
@@ -311,7 +320,7 @@
     } else if (email.endsWith('@gmail.com')) {
       emailVariants.push(email.replace('@gmail.com', '@googlemail.com'));
     }
-    const { data: row } = await sb
+    const { data: row } = await getSb()
       .from('predict_users')
       .select('id')
       .in('email', emailVariants)
@@ -345,7 +354,7 @@
     } else if (email.endsWith('@gmail.com')) {
       emailVariants.push(email.replace('@gmail.com', '@googlemail.com'));
     }
-    const { data: row } = await sb
+    const { data: row } = await getSb()
       .from('predict_users')
       .select('id, email, username, full_name, is_admin')
       .in('email', emailVariants)
@@ -353,7 +362,7 @@
 
     if (!row) {
       showMsg('error', 'Your email is not registered in the game. Contact the admin.');
-      await sb.auth.signOut();
+      await getSb().auth.signOut();
       return;
     }
 
@@ -380,7 +389,7 @@
     btn.disabled = true;
     btn.textContent = 'Signing in…';
 
-    const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
+    const { data, error } = await getSb().auth.signInWithPassword({ email, password: pass });
 
     btn.disabled = false;
     btn.textContent = 'Sign In';
@@ -405,7 +414,7 @@
     btn.disabled = true;
     btn.textContent = 'Sending…';
 
-    const { error } = await sb.auth.resetPasswordForEmail(email, {
+    const { error } = await getSb().auth.resetPasswordForEmail(email, {
       redirectTo: location.origin + '/predict/login.html'
     });
 
@@ -437,7 +446,7 @@
     btn.textContent = 'Updating…';
 
     updatingPassword = true;
-    const { error } = await sb.auth.updateUser({ password: newPass });
+    const { error } = await getSb().auth.updateUser({ password: newPass });
     updatingPassword = false;
 
     btn.disabled = false;
@@ -464,7 +473,7 @@
     btn.disabled = true;
     btn.textContent = 'Sending…';
 
-    const { error } = await sb.auth.signInWithOtp({
+    const { error } = await getSb().auth.signInWithOtp({
       email,
       options: { emailRedirectTo: location.origin + '/predict/login.html?redirect=' + encodeURIComponent(redirectTo) }
     });

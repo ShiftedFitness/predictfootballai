@@ -35,6 +35,71 @@
     return _sb;
   }
 
+  /**
+   * Resilient getSession wrapper.
+   * Supabase v2 has a known bug where the internal AbortController fires randomly,
+   * causing getSession()/getUser()/setSession() to throw "AbortError: signal is
+   * aborted without reason". When this happens, creating a fresh Supabase client
+   * resolves the issue.
+   * See: https://github.com/supabase/supabase/issues/41968
+   */
+  async function safeGetSession() {
+    try {
+      const result = await sb().auth.getSession();
+      return result.data?.session || null;
+    } catch (e) {
+      if (e.name === 'AbortError') {
+        console.warn('getSession() AbortError — retrying with fresh client');
+        // Destroy the corrupted singleton and create a fresh one
+        _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+          auth: { flowType: 'implicit' }
+        });
+        try {
+          const result = await _sb.auth.getSession();
+          return result.data?.session || null;
+        } catch (e2) {
+          console.warn('getSession() failed even with fresh client:', e2.message);
+          return null;
+        }
+      }
+      console.warn('getSession() failed:', e.message);
+      return null;
+    }
+  }
+
+  /**
+   * Resilient setSession wrapper — same AbortError retry logic.
+   */
+  async function safeSetSession(accessToken, refreshToken) {
+    const trySet = async (client) => {
+      const { data, error } = await client.auth.setSession({
+        access_token: accessToken,
+        refresh_token: refreshToken
+      });
+      if (error) throw error;
+      return data.session;
+    };
+
+    try {
+      return await trySet(sb());
+    } catch (e) {
+      if (e.name === 'AbortError') {
+        console.warn('setSession() AbortError — retrying with fresh client');
+        _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+          auth: { flowType: 'implicit' }
+        });
+        try {
+          return await trySet(_sb);
+        } catch (e2) {
+          console.warn('setSession() failed even with fresh client:', e2.message);
+          return null;
+        }
+      }
+      console.warn('setSession() failed:', e.message);
+      return null;
+    }
+  }
+
   /* ---- Local cache helpers ---- */
   function getCachedUser() {
     try {
@@ -88,8 +153,22 @@
      * @returns {Promise<string>} The integer predict_users.id as a string
      */
     async initAuth() {
-      // 1. Check Supabase session
-      const { data: { session } } = await sb().auth.getSession();
+      // 1. Check Supabase session (uses AbortError-resilient wrapper)
+      let session = await safeGetSession();
+
+      // Fallback: if no session but URL has hash tokens (magic link redirect),
+      // manually set the session from the tokens.
+      if (!session && location.hash) {
+        const hp = new URLSearchParams(location.hash.substring(1));
+        const accessToken = hp.get('access_token');
+        const refreshToken = hp.get('refresh_token');
+        if (accessToken && refreshToken) {
+          session = await safeSetSession(accessToken, refreshToken);
+          if (session) {
+            history.replaceState(null, '', location.pathname + location.search);
+          }
+        }
+      }
 
       if (session && session.user) {
         const email = session.user.email;
@@ -224,6 +303,10 @@
     return String(s).replace(/[&<>"']/g, m =>
       ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
   }
+
+  // Expose safe session helpers for login.html and other pages
+  PFAuth.safeGetSession = safeGetSession;
+  PFAuth.safeSetSession = safeSetSession;
 
   // Expose globally
   window.PFAuth = PFAuth;
