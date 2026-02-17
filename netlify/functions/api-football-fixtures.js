@@ -282,10 +282,27 @@ async function listFixtures(requestedMatchday) {
   return { ok: true, round, matchday, count: fixtures.length, fixtures };
 }
 
-// ── ACTION: enrich ────────────────────────────────────────────────────────────
+// ── ACTION: enrich-one ────────────────────────────────────────────────────────
+// Enriches a SINGLE fixture: standings + 1 H2H call.
+// Total API calls: 1 (standings) + 1 (H2H) = 2 calls, ~8s with rate limit delay.
+// Called from client-side sequentially, one fixture at a time, to avoid
+// Netlify function timeout (10s free / 26s pro).
+async function enrichOneFixture(body) {
+  const fix = body || {};
+  if (!fix.fixtureId || !fix.homeTeamId || !fix.awayTeamId) {
+    throw Object.assign(new Error('fixtureId, homeTeamId, awayTeamId required'), { status: 400 });
+  }
+
+  const standings = await getStandings();
+  const warnings = [];
+  const enrichment = await enrichSingleFixture(fix, standings, warnings, true);
+  return { ok: true, enrichment: [enrichment], warnings: warnings.length > 0 ? warnings : undefined };
+}
+
+// ── ACTION: enrich (batch — kept for backward compat) ─────────────────────────
 // Accepts array of selected fixtures (max 5), returns H2H detail + form + predictions.
-// Uses standings for form (free — no extra calls) and fetches H2H per fixture.
-// Total API calls: 1 (standings, usually cached) + N (H2H per fixture) = ~6 calls.
+// WARNING: Will timeout on Netlify free tier (10s) if >1 fixture due to rate limiting.
+// Prefer enrich-one called per fixture from client side.
 async function enrichFixtures(body) {
   const { fixtures } = body || {};
   if (!Array.isArray(fixtures) || fixtures.length === 0) {
@@ -299,112 +316,121 @@ async function enrichFixtures(body) {
   const warnings = [];
 
   for (const fix of fixtures) {
-    const item = {
-      fixtureId: fix.fixtureId,
-      predictions: null,
-      homeForm: '',
-      awayForm: '',
-      h2h: [],
-      advice: '',
-      homePosition: null,
-      awayPosition: null,
-      homePoints: null,
-      awayPoints: null
-    };
-
-    // Standings data (position + form — no extra API calls!)
-    const homeS = standings[fix.homeTeamId] || {};
-    const awayS = standings[fix.awayTeamId] || {};
-    item.homePosition = homeS.position || null;
-    item.awayPosition = awayS.position || null;
-    item.homePoints = homeS.points ?? null;
-    item.awayPoints = awayS.points ?? null;
-
-    // Form from standings: "W,L,W,D,W" → "WLWDW"
-    const rawHomeForm = homeS.form || '';
-    const rawAwayForm = awayS.form || '';
-    item.homeForm = rawHomeForm.replace(/,/g, '').slice(-5);
-    item.awayForm = rawAwayForm.replace(/,/g, '').slice(-5);
-
-    if (!item.homeForm) warnings.push(`No form data for home team (id:${fix.homeTeamId})`);
-    if (!item.awayForm) warnings.push(`No form data for away team (id:${fix.awayTeamId})`);
-
-    // H2H + predictions
-    let h2hAgg = null;
-    try {
-      await delay();
-      const h2hData = await fdFetch(`matches/${fix.fixtureId}/head2head?limit=10`);
-      h2hAgg = h2hData.aggregates || null;
-      const h2hMatches = h2hData.matches || [];
-
-      // Map H2H matches to our format
-      item.h2h = h2hMatches.slice(0, 5).map(h => ({
-        date:       h.utcDate,
-        homeTeam:   h.homeTeam?.name || '',
-        awayTeam:   h.awayTeam?.name || '',
-        homeGoals:  h.score?.fullTime?.home ?? null,
-        awayGoals:  h.score?.fullTime?.away ?? null,
-        homeWinner: h.score?.winner === 'HOME_TEAM',
-        awayWinner: h.score?.winner === 'AWAY_TEAM'
-      }));
-
-      if (!h2hAgg || h2hAgg.numberOfMatches === 0) {
-        warnings.push(`No H2H history for fixture ${fix.fixtureId}`);
-      }
-    } catch (e) {
-      console.warn(`H2H failed for fixture ${fix.fixtureId}:`, e.message);
-      warnings.push(`H2H fetch failed for fixture ${fix.fixtureId}: ${e.message}`);
-    }
-
-    // Compute prediction from position + form + H2H
-    item.predictions = computePrediction(fix.homeTeamId, fix.awayTeamId, standings, h2hAgg);
-
-    // Generate advice text
-    const posGap = Math.abs((homeS.position || 10) - (awayS.position || 10));
-    const homeHigher = (homeS.position || 10) < (awayS.position || 10);
-
-    let adviceParts = [];
-
-    // Position context
-    if (homeS.position && awayS.position) {
-      const higher = homeHigher ? homeS : awayS;
-      const lower = homeHigher ? awayS : homeS;
-      adviceParts.push(`${homeHigher ? 'Home' : 'Away'} side sit ${higher.position}${ordinal(higher.position)} (${higher.points || '?'}pts) vs ${lower.position}${ordinal(lower.position)} (${lower.points || '?'}pts).`);
-    }
-
-    // Form context
-    if (item.homeForm && item.awayForm) {
-      const homeWins = (item.homeForm.match(/W/g) || []).length;
-      const awayWins = (item.awayForm.match(/W/g) || []).length;
-      if (Math.abs(homeWins - awayWins) >= 2) {
-        const betterSide = homeWins > awayWins ? 'Home' : 'Away';
-        adviceParts.push(`${betterSide} side in better recent form.`);
-      }
-    }
-
-    // H2H context
-    if (h2hAgg && h2hAgg.numberOfMatches > 0) {
-      const hw = h2hAgg.homeTeam?.wins || 0;
-      const aw = h2hAgg.awayTeam?.wins || 0;
-      const dr = h2hAgg.homeTeam?.draws || 0;
-      adviceParts.push(`H2H: ${hw}W-${dr}D-${aw}L from ${h2hAgg.numberOfMatches} meetings.`);
-    }
-
-    // Verdict
-    if (posGap >= 12) {
-      adviceParts.push(homeHigher ? 'Strong home favourite.' : 'Away side heavily favoured despite travelling.');
-    } else if (posGap >= 6) {
-      adviceParts.push(homeHigher ? 'Home advantage + table position points to a home win.' : 'Away side fancied but home advantage could be a factor.');
-    } else {
-      adviceParts.push('Close in the table — this one could go either way.');
-    }
-
-    item.advice = adviceParts.join(' ');
-
+    const item = await enrichSingleFixture(fix, standings, warnings, fixtures.length <= 1);
     enrichment.push(item);
   }
 
   return { ok: true, enrichment, warnings: warnings.length > 0 ? warnings : undefined };
+}
+
+// ── Shared: enrich a single fixture ──────────────────────────────────────────
+// Extracts standings data, fetches H2H (with optional rate-limit delay),
+// computes prediction model, and generates advice text.
+// `useDelay`: whether to add a rate-limit delay before H2H call (skip if only 1 fixture)
+async function enrichSingleFixture(fix, standings, warnings, skipInitialDelay = false) {
+  const item = {
+    fixtureId: fix.fixtureId,
+    predictions: null,
+    homeForm: '',
+    awayForm: '',
+    h2h: [],
+    advice: '',
+    homePosition: null,
+    awayPosition: null,
+    homePoints: null,
+    awayPoints: null
+  };
+
+  // Standings data (position + form — no extra API calls!)
+  const homeS = standings[fix.homeTeamId] || {};
+  const awayS = standings[fix.awayTeamId] || {};
+  item.homePosition = homeS.position || null;
+  item.awayPosition = awayS.position || null;
+  item.homePoints = homeS.points ?? null;
+  item.awayPoints = awayS.points ?? null;
+
+  // Form from standings: "W,L,W,D,W" → "WLWDW"
+  const rawHomeForm = homeS.form || '';
+  const rawAwayForm = awayS.form || '';
+  item.homeForm = rawHomeForm.replace(/,/g, '').slice(-5);
+  item.awayForm = rawAwayForm.replace(/,/g, '').slice(-5);
+
+  if (!item.homeForm) warnings.push(`No form data for home team (id:${fix.homeTeamId})`);
+  if (!item.awayForm) warnings.push(`No form data for away team (id:${fix.awayTeamId})`);
+
+  // H2H + predictions
+  let h2hAgg = null;
+  try {
+    if (!skipInitialDelay) await delay();
+    const h2hData = await fdFetch(`matches/${fix.fixtureId}/head2head?limit=10`);
+    h2hAgg = h2hData.aggregates || null;
+    const h2hMatches = h2hData.matches || [];
+
+    // Map H2H matches to our format
+    item.h2h = h2hMatches.slice(0, 5).map(h => ({
+      date:       h.utcDate,
+      homeTeam:   h.homeTeam?.name || '',
+      awayTeam:   h.awayTeam?.name || '',
+      homeGoals:  h.score?.fullTime?.home ?? null,
+      awayGoals:  h.score?.fullTime?.away ?? null,
+      homeWinner: h.score?.winner === 'HOME_TEAM',
+      awayWinner: h.score?.winner === 'AWAY_TEAM'
+    }));
+
+    if (!h2hAgg || h2hAgg.numberOfMatches === 0) {
+      warnings.push(`No H2H history for fixture ${fix.fixtureId}`);
+    }
+  } catch (e) {
+    console.warn(`H2H failed for fixture ${fix.fixtureId}:`, e.message);
+    warnings.push(`H2H fetch failed for fixture ${fix.fixtureId}: ${e.message}`);
+  }
+
+  // Compute prediction from position + form + H2H
+  item.predictions = computePrediction(fix.homeTeamId, fix.awayTeamId, standings, h2hAgg);
+
+  // Generate advice text
+  const posGap = Math.abs((homeS.position || 10) - (awayS.position || 10));
+  const homeHigher = (homeS.position || 10) < (awayS.position || 10);
+
+  let adviceParts = [];
+
+  // Position context
+  if (homeS.position && awayS.position) {
+    const higher = homeHigher ? homeS : awayS;
+    const lower = homeHigher ? awayS : homeS;
+    adviceParts.push(`${homeHigher ? 'Home' : 'Away'} side sit ${higher.position}${ordinal(higher.position)} (${higher.points || '?'}pts) vs ${lower.position}${ordinal(lower.position)} (${lower.points || '?'}pts).`);
+  }
+
+  // Form context
+  if (item.homeForm && item.awayForm) {
+    const homeWins = (item.homeForm.match(/W/g) || []).length;
+    const awayWins = (item.awayForm.match(/W/g) || []).length;
+    if (Math.abs(homeWins - awayWins) >= 2) {
+      const betterSide = homeWins > awayWins ? 'Home' : 'Away';
+      adviceParts.push(`${betterSide} side in better recent form.`);
+    }
+  }
+
+  // H2H context
+  if (h2hAgg && h2hAgg.numberOfMatches > 0) {
+    const hw = h2hAgg.homeTeam?.wins || 0;
+    const aw = h2hAgg.awayTeam?.wins || 0;
+    const dr = h2hAgg.homeTeam?.draws || 0;
+    adviceParts.push(`H2H: ${hw}W-${dr}D-${aw}L from ${h2hAgg.numberOfMatches} meetings.`);
+  }
+
+  // Verdict
+  if (posGap >= 12) {
+    adviceParts.push(homeHigher ? 'Strong home favourite.' : 'Away side heavily favoured despite travelling.');
+  } else if (posGap >= 6) {
+    adviceParts.push(homeHigher ? 'Home advantage + table position points to a home win.' : 'Away side fancied but home advantage could be a factor.');
+  } else {
+    adviceParts.push('Close in the table — this one could go either way.');
+  }
+
+  item.advice = adviceParts.join(' ');
+
+  return item;
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -440,6 +466,13 @@ exports.handler = async (event) => {
       return resp(200, result);
     }
 
+    if (action === 'enrich-one') {
+      if (event.httpMethod !== 'POST') return resp(405, 'POST only for action=enrich-one');
+      const body = JSON.parse(event.body || '{}');
+      const result = await enrichOneFixture(body);
+      return resp(200, result);
+    }
+
     if (action === 'enrich') {
       if (event.httpMethod !== 'POST') return resp(405, 'POST only for action=enrich');
       const body = JSON.parse(event.body || '{}');
@@ -447,7 +480,7 @@ exports.handler = async (event) => {
       return resp(200, result);
     }
 
-    return resp(400, 'action parameter required: list or enrich');
+    return resp(400, 'action parameter required: list, enrich-one, or enrich');
   } catch (e) {
     const status = e.status || 500;
     return resp(status, e.message);

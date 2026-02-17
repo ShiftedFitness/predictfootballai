@@ -1102,39 +1102,52 @@ function setupEventListeners() {
     }
   });
 
-  // ── Enrich selected fixtures ──
+  // ── Enrich selected fixtures (one at a time to avoid Netlify timeout) ──
   $('enrichBtn').onclick = () => withLoading($('enrichBtn'), async () => {
     if (selectedFixtureIds.size !== 5) { setSeedStatus('Select exactly 5 fixtures first.', 'error'); return; }
 
     const selectedFixtures = fetchedFixtures.filter(f => selectedFixtureIds.has(f.fixtureId));
-    const payload = selectedFixtures.map(f => ({
-      fixtureId: f.fixtureId,
-      homeTeamId: f.homeTeamId,
-      awayTeamId: f.awayTeamId,
-      quickPrediction: f.quickPrediction || null
-    }));
+    enrichmentMap = {};
+    const allWarnings = [];
+    let enrichedCount = 0;
 
-    try {
-      setSeedStatus('Loading H2H, form & predictions... this takes ~35 seconds (rate limited to 10 API calls/min)', '');
-      const data = await adminFetch('/api-football-fixtures?action=enrich', {
-        method: 'POST',
-        body: JSON.stringify({ fixtures: payload })
-      });
+    for (let i = 0; i < selectedFixtures.length; i++) {
+      const f = selectedFixtures[i];
+      setSeedStatus(`Loading stats for fixture ${i + 1}/${selectedFixtures.length}: ${f.homeTeam} v ${f.awayTeam}...`, '');
 
-      enrichmentMap = {};
-      (data.enrichment || []).forEach(en => { enrichmentMap[en.fixtureId] = en; });
+      try {
+        const data = await adminFetch('/api-football-fixtures?action=enrich-one', {
+          method: 'POST',
+          body: JSON.stringify({
+            fixtureId: f.fixtureId,
+            homeTeamId: f.homeTeamId,
+            awayTeamId: f.awayTeamId,
+            quickPrediction: f.quickPrediction || null
+          })
+        });
 
-      const enriched = Object.keys(enrichmentMap).length;
-      const warningCount = (data.warnings || []).length;
-      let statusMsg = `Loaded stats for ${enriched}/${selectedFixtureIds.size} fixtures`;
-      if (warningCount > 0) statusMsg += ` (${warningCount} warning${warningCount > 1 ? 's' : ''} — check console)`;
-      setSeedStatus(statusMsg, enriched > 0 ? 'success' : 'error');
-      if (data.warnings) console.log('Enrichment warnings:', data.warnings);
-      renderEnrichmentPreview();
-    } catch (e) {
-      setSeedStatus(`Failed to load enrichment: ${e.message}`, 'error');
-      showDebugInfo();
+        (data.enrichment || []).forEach(en => { enrichmentMap[en.fixtureId] = en; });
+        if (data.warnings) allWarnings.push(...data.warnings);
+        enrichedCount++;
+
+        // Small client-side delay between calls to stay within API rate limits
+        if (i < selectedFixtures.length - 1) {
+          setSeedStatus(`Loaded ${i + 1}/${selectedFixtures.length}... waiting for rate limit before next fixture`, '');
+          await new Promise(r => setTimeout(r, 7000));
+        }
+      } catch (e) {
+        allWarnings.push(`Failed to enrich ${f.homeTeam} v ${f.awayTeam}: ${e.message}`);
+        console.warn(`Enrichment failed for fixture ${f.fixtureId}:`, e);
+      }
     }
+
+    let statusMsg = `Loaded stats for ${enrichedCount}/${selectedFixtures.length} fixtures`;
+    if (allWarnings.length > 0) {
+      statusMsg += ` (${allWarnings.length} warning${allWarnings.length > 1 ? 's' : ''} — check console)`;
+      console.log('Enrichment warnings:', allWarnings);
+    }
+    setSeedStatus(statusMsg, enrichedCount > 0 ? 'success' : 'error');
+    renderEnrichmentPreview();
   });
 
   // ── Seed via API (with enrichment) ──
