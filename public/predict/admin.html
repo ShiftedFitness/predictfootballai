@@ -65,7 +65,19 @@
   .fix-card.selected .fix-check::after{content:'\\2713';color:#0B0F12;font-weight:900;font-size:13px}
   .fix-count{font-size:13px;color:var(--text-secondary);margin-top:8px}
   .enrich-card{background:var(--bg-panel);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:12px;margin-top:10px}
+  .enrich-card.loading{border-color:rgba(0,229,255,0.25);animation:pulse-border 1.5s ease-in-out infinite}
+  .enrich-card.done{border-color:rgba(50,255,126,0.3)}
+  .enrich-card.failed{border-color:rgba(224,85,85,0.3)}
+  @keyframes pulse-border{0%,100%{border-color:rgba(0,229,255,0.15)}50%{border-color:rgba(0,229,255,0.45)}}
   .enrich-teams{font-weight:700;font-size:15px;margin-bottom:8px}
+  .enrich-status-row{display:flex;align-items:center;gap:6px;margin-bottom:8px;font-size:12px}
+  .enrich-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700}
+  .enrich-badge.ok{background:rgba(50,255,126,0.15);color:#7CFC00}
+  .enrich-badge.missing{background:rgba(224,85,85,0.15);color:#ff6666}
+  .enrich-badge.loading{background:rgba(0,229,255,0.1);color:var(--accent-cyan)}
+  .enrich-timer{display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--bg-panel);border-radius:10px;margin:8px 0;font-size:13px;color:var(--text-secondary);border:1px solid rgba(255,255,255,0.06)}
+  .enrich-timer .timer-bar{flex:1;height:6px;background:var(--bg-elevated);border-radius:3px;overflow:hidden}
+  .enrich-timer .timer-fill{height:100%;background:var(--accent-cyan);border-radius:3px;transition:width 0.3s linear}
   .pred-bar{display:flex;height:28px;border-radius:6px;overflow:hidden;margin:8px 0;font-size:12px;font-weight:700}
   .pred-bar .seg{display:flex;align-items:center;justify-content:center;min-width:30px}
   .pred-bar .seg.home{background:#2e7d32;color:#fff}
@@ -489,7 +501,8 @@ function setSeedStatus(msg, type) {
   const el = $('seedStatus');
   if (!el) return;
   el.textContent = msg;
-  el.className = type === 'error' ? 'error-banner' : type === 'success' ? 'success-banner' : '';
+  el.style.whiteSpace = 'pre-wrap';
+  el.className = type === 'error' ? 'error-banner' : type === 'success' ? 'success-banner' : type === 'warning' ? 'warning-banner' : '';
   el.style.display = msg ? 'block' : 'none';
 }
 
@@ -903,7 +916,8 @@ function initAdminUI() {
         <div id="enrichPreview"></div>
 
         <div style="margin-top:12px">
-          <button class="btn" id="seedApiBtn" style="font-size:16px;padding:12px 20px">Confirm & Create 5 Matches</button>
+          <button class="btn" id="seedApiBtn" disabled style="font-size:16px;padding:12px 20px">Confirm & Create 5 Matches</button>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:4px">Load stats first — seed button enables once all fixtures are enriched</div>
         </div>
       </div>
 
@@ -1102,7 +1116,7 @@ function setupEventListeners() {
     }
   });
 
-  // ── Enrich selected fixtures (one at a time to avoid Netlify timeout) ──
+  // ── Enrich selected fixtures: queued with progress + timer ──
   $('enrichBtn').onclick = () => withLoading($('enrichBtn'), async () => {
     if (selectedFixtureIds.size !== 5) { setSeedStatus('Select exactly 5 fixtures first.', 'error'); return; }
 
@@ -1111,9 +1125,134 @@ function setupEventListeners() {
     const allWarnings = [];
     let enrichedCount = 0;
 
+    // Disable seed button while enriching
+    const seedBtn = $('seedApiBtn');
+    if (seedBtn) { seedBtn.disabled = true; seedBtn.textContent = 'Waiting for enrichment...'; }
+
+    // Build queue status UI
+    const preview = $('enrichPreview');
+    preview.innerHTML = '';
+    const queueCards = {};
+
+    selectedFixtures.forEach((f, i) => {
+      const card = document.createElement('div');
+      card.className = 'enrich-card';
+      card.id = `eq-${f.fixtureId}`;
+      card.innerHTML = `
+        <div class="enrich-teams">${f.homeTeam} v ${f.awayTeam}</div>
+        <div class="enrich-status-row">
+          <span class="enrich-badge loading" id="eqs-${f.fixtureId}">⏳ Queued (${i+1}/5)</span>
+        </div>
+        <div id="eqd-${f.fixtureId}"></div>
+      `;
+      preview.appendChild(card);
+      queueCards[f.fixtureId] = card;
+    });
+
+    // Timer element (shown between calls)
+    const timerEl = document.createElement('div');
+    timerEl.className = 'enrich-timer';
+    timerEl.id = 'enrichTimer';
+    timerEl.style.display = 'none';
+    timerEl.innerHTML = `
+      <span id="timerText">⏱ Waiting for rate limit...</span>
+      <div class="timer-bar"><div class="timer-fill" id="timerFill" style="width:0%"></div></div>
+      <span id="timerCount">0s</span>
+    `;
+    preview.insertBefore(timerEl, preview.firstChild);
+
+    // Countdown helper
+    async function waitWithTimer(ms) {
+      timerEl.style.display = 'flex';
+      const start = Date.now();
+      const total = ms;
+      return new Promise(resolve => {
+        const iv = setInterval(() => {
+          const elapsed = Date.now() - start;
+          const pct = Math.min(100, (elapsed / total) * 100);
+          const remaining = Math.max(0, Math.ceil((total - elapsed) / 1000));
+          document.getElementById('timerFill').style.width = pct + '%';
+          document.getElementById('timerCount').textContent = remaining + 's';
+          if (elapsed >= total) {
+            clearInterval(iv);
+            timerEl.style.display = 'none';
+            resolve();
+          }
+        }, 200);
+      });
+    }
+
+    // Helper: check data completeness for a fixture
+    function dataStatus(en) {
+      const hasForm = !!(en.homeForm && en.awayForm);
+      const hasH2H = Array.isArray(en.h2h) && en.h2h.length > 0;
+      const hasPred = !!(en.predictions && (en.predictions.home || en.predictions.draw || en.predictions.away));
+      return { hasForm, hasH2H, hasPred };
+    }
+
+    function renderCardDone(fixtureId, en, fix) {
+      const card = queueCards[fixtureId];
+      if (!card) return;
+
+      const ds = dataStatus(en);
+      card.className = 'enrich-card done';
+
+      const statusBadge = document.getElementById(`eqs-${fixtureId}`);
+      if (statusBadge) statusBadge.outerHTML = `
+        <span class="enrich-badge ok">✓ Loaded</span>
+        <span class="enrich-badge ${ds.hasForm ? 'ok' : 'missing'}">${ds.hasForm ? '✓' : '✗'} Form</span>
+        <span class="enrich-badge ${ds.hasH2H ? 'ok' : 'missing'}">${ds.hasH2H ? '✓' : '✗'} H2H</span>
+        <span class="enrich-badge ${ds.hasPred ? 'ok' : 'missing'}">${ds.hasPred ? '✓' : '✗'} Predictions</span>
+      `;
+
+      // Render detail
+      const detail = document.getElementById(`eqd-${fixtureId}`);
+      if (!detail) return;
+
+      const pred = en.predictions || { home: 0, draw: 0, away: 0 };
+      const total = pred.home + pred.draw + pred.away || 1;
+      const posHtml = (en.homePosition && en.awayPosition)
+        ? `<div style="display:flex;gap:8px;align-items:center;margin-bottom:6px;font-size:12px">
+             <span style="background:#1a1a1a;padding:2px 8px;border-radius:4px;font-weight:700">${en.homePosition}${ordinalSuffix(en.homePosition)} (${en.homePoints ?? '?'}pts)</span>
+             <span style="color:#666">vs</span>
+             <span style="background:#1a1a1a;padding:2px 8px;border-radius:4px;font-weight:700">${en.awayPosition}${ordinalSuffix(en.awayPosition)} (${en.awayPoints ?? '?'}pts)</span>
+           </div>` : '';
+
+      detail.innerHTML = `
+        ${posHtml}
+        <div class="pred-bar">
+          <div class="seg home" style="width:${pred.home/total*100}%">${pred.home}%</div>
+          <div class="seg draw" style="width:${pred.draw/total*100}%">${pred.draw}%</div>
+          <div class="seg away" style="width:${pred.away/total*100}%">${pred.away}%</div>
+        </div>
+        <div class="form-row"><span class="form-label">${fix.homeTeam}</span>${formBadges(en.homeForm)}</div>
+        <div class="form-row"><span class="form-label">${fix.awayTeam}</span>${formBadges(en.awayForm)}</div>
+        ${en.h2h && en.h2h.length > 0 ? `<div class="h2h-row">H2H: ${h2hSummary(en.h2h, fix.homeTeam, fix.awayTeam)}</div>` : '<div class="h2h-row" style="color:#ff6666">⚠ No H2H data returned by API</div>'}
+        ${en.advice ? `<div class="advice-text">${en.advice}</div>` : ''}
+      `;
+    }
+
+    function renderCardFailed(fixtureId, errorMsg) {
+      const card = queueCards[fixtureId];
+      if (!card) return;
+      card.className = 'enrich-card failed';
+      const statusBadge = document.getElementById(`eqs-${fixtureId}`);
+      if (statusBadge) statusBadge.outerHTML = `<span class="enrich-badge missing">✗ Failed: ${errorMsg}</span>`;
+    }
+
+    function renderCardLoading(fixtureId, index) {
+      const card = queueCards[fixtureId];
+      if (!card) return;
+      card.className = 'enrich-card loading';
+      const statusBadge = document.getElementById(`eqs-${fixtureId}`);
+      if (statusBadge) statusBadge.outerHTML = `<span class="enrich-badge loading" id="eqs-${fixtureId}">⏳ Loading... (${index+1}/5)</span>`;
+    }
+
+    // Process queue
     for (let i = 0; i < selectedFixtures.length; i++) {
       const f = selectedFixtures[i];
-      setSeedStatus(`Loading stats for fixture ${i + 1}/${selectedFixtures.length}: ${f.homeTeam} v ${f.awayTeam}...`, '');
+      renderCardLoading(f.fixtureId, i);
+      setSeedStatus(`Enriching fixture ${i+1}/5: ${f.homeTeam} v ${f.awayTeam}`, '');
 
       try {
         const data = await adminFetch('/api-football-fixtures?action=enrich-one', {
@@ -1126,28 +1265,57 @@ function setupEventListeners() {
           })
         });
 
-        (data.enrichment || []).forEach(en => { enrichmentMap[en.fixtureId] = en; });
-        if (data.warnings) allWarnings.push(...data.warnings);
-        enrichedCount++;
-
-        // Small client-side delay between calls to stay within API rate limits
-        if (i < selectedFixtures.length - 1) {
-          setSeedStatus(`Loaded ${i + 1}/${selectedFixtures.length}... waiting for rate limit before next fixture`, '');
-          await new Promise(r => setTimeout(r, 7000));
+        const en = (data.enrichment || [])[0];
+        if (en) {
+          enrichmentMap[en.fixtureId] = en;
+          renderCardDone(f.fixtureId, en, f);
+          enrichedCount++;
+        } else {
+          renderCardFailed(f.fixtureId, 'No data returned');
+          allWarnings.push(`No enrichment data for ${f.homeTeam} v ${f.awayTeam}`);
         }
+        if (data.warnings) allWarnings.push(...data.warnings);
       } catch (e) {
-        allWarnings.push(`Failed to enrich ${f.homeTeam} v ${f.awayTeam}: ${e.message}`);
+        renderCardFailed(f.fixtureId, e.message);
+        allWarnings.push(`Failed: ${f.homeTeam} v ${f.awayTeam}: ${e.message}`);
         console.warn(`Enrichment failed for fixture ${f.fixtureId}:`, e);
+      }
+
+      // Rate limit wait with visible timer (skip after last fixture)
+      if (i < selectedFixtures.length - 1) {
+        await waitWithTimer(8000);
       }
     }
 
-    let statusMsg = `Loaded stats for ${enrichedCount}/${selectedFixtures.length} fixtures`;
-    if (allWarnings.length > 0) {
-      statusMsg += ` (${allWarnings.length} warning${allWarnings.length > 1 ? 's' : ''} — check console)`;
-      console.log('Enrichment warnings:', allWarnings);
+    // Final summary
+    const missingData = selectedFixtures.filter(f => {
+      const en = enrichmentMap[f.fixtureId];
+      if (!en) return true;
+      const ds = dataStatus(en);
+      return !ds.hasForm || !ds.hasH2H || !ds.hasPred;
+    });
+
+    if (enrichedCount === 5 && missingData.length === 0) {
+      setSeedStatus(`✓ All 5 fixtures enriched with complete data — ready to seed!`, 'success');
+      if (seedBtn) { seedBtn.disabled = false; seedBtn.textContent = 'Confirm & Create 5 Matches'; }
+    } else if (enrichedCount === 5) {
+      const gaps = missingData.map(f => {
+        const en = enrichmentMap[f.fixtureId] || {};
+        const ds = dataStatus(en);
+        const missing = [];
+        if (!ds.hasForm) missing.push('form');
+        if (!ds.hasH2H) missing.push('H2H');
+        if (!ds.hasPred) missing.push('predictions');
+        return `${f.homeTeam} v ${f.awayTeam}: missing ${missing.join(', ')}`;
+      });
+      setSeedStatus(`⚠ All fixtures loaded but some data is incomplete:\n${gaps.join('\n')}\nYou can still seed — predictions will use position data only where H2H/form is missing.`, 'warning');
+      if (seedBtn) { seedBtn.disabled = false; seedBtn.textContent = 'Confirm & Create 5 Matches (some data incomplete)'; }
+    } else {
+      setSeedStatus(`✗ Only ${enrichedCount}/5 fixtures enriched. Check errors above.`, 'error');
+      if (seedBtn) { seedBtn.disabled = true; seedBtn.textContent = 'Cannot seed — enrichment incomplete'; }
     }
-    setSeedStatus(statusMsg, enrichedCount > 0 ? 'success' : 'error');
-    renderEnrichmentPreview();
+
+    if (allWarnings.length > 0) console.log('Enrichment warnings:', allWarnings);
   });
 
   // ── Seed via API (with enrichment) ──
@@ -1181,7 +1349,7 @@ function setupEventListeners() {
 
     try {
       await PredictData.seedWeek(week, lockoutIso, fixtures);
-      setSeedStatus(`Week ${week} seeded with 5 matches + enrichment data!`, 'success');
+      setSeedStatus(`✓ Week ${week} seeded with 5 matches + enrichment data!`, 'success');
       // Reset state
       fetchedFixtures = [];
       selectedFixtureIds = new Set();
@@ -1189,6 +1357,8 @@ function setupEventListeners() {
       $('fixtureGrid').innerHTML = '';
       $('enrichPreview').innerHTML = '';
       updateFixtureCount();
+      const seedBtn = $('seedApiBtn');
+      if (seedBtn) { seedBtn.disabled = true; seedBtn.textContent = 'Confirm & Create 5 Matches'; }
     } catch (e) {
       setSeedStatus(`Failed to seed week: ${e.message}`, 'error');
       showDebugInfo();
