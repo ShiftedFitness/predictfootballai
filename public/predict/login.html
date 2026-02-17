@@ -353,7 +353,8 @@
       email: row.email,
       username: row.username,
       fullName: row.full_name,
-      isAdmin: row.is_admin
+      isAdmin: row.is_admin,
+      _ts: Date.now()
     }));
 
     location.href = redirectTo;

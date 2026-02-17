@@ -83,8 +83,7 @@
      * Initialise auth for the current page.
      *
      * 1. If a valid Supabase session exists → resolve userId
-     * 2. Else if ?userId= URL param exists → use it (Adalo backward compat)
-     * 3. Else → redirect to login page
+     * 2. Else → redirect to login page
      *
      * @returns {Promise<string>} The integer predict_users.id as a string
      */
@@ -94,12 +93,22 @@
 
       if (session && session.user) {
         const email = session.user.email;
-        // Try cached user first
+
+        // Try cached user — trust only if email matches AND cache is < 1 hour old
         const cached = getCachedUser();
-        if (cached && cached.email === email && cached.userId) {
+        const cacheFresh = cached
+          && cached.email === email
+          && cached.userId
+          && cached._ts
+          && (Date.now() - cached._ts) < 3600000;
+
+        if (cacheFresh) {
           return String(cached.userId);
         }
-        // Lookup from DB
+
+        // Cache miss, stale, or email mismatch — clear and re-lookup from DB
+        clearCachedUser();
+
         const row = await lookupUser(email);
         if (row) {
           setCachedUser({
@@ -107,22 +116,22 @@
             email: row.email,
             username: row.username,
             fullName: row.full_name,
-            isAdmin: row.is_admin
+            isAdmin: row.is_admin,
+            _ts: Date.now()
           });
           return String(row.id);
         }
-        // Auth user exists but no predict_users row — shouldn't happen for migrated users
+
+        // Auth user exists but no predict_users row — sign out and redirect
         console.error('Authenticated but no predict_users row for', email);
+        await sb().auth.signOut();
+        clearCachedUser();
+      } else {
+        // No valid session — clear any stale cached user data
+        clearCachedUser();
       }
 
-      // 2. Fallback: URL param (backward compat with Adalo)
-      const qs = new URLSearchParams(location.search);
-      const urlUser = qs.get('userId');
-      if (urlUser && urlUser !== 'undefined' && urlUser !== 'null' && urlUser.trim() !== '') {
-        return urlUser.trim();
-      }
-
-      // 3. No auth — redirect to login
+      // 2. No auth — redirect to login
       const redirect = encodeURIComponent(location.href);
       location.href = `${LOGIN_PATH}?redirect=${redirect}`;
       // Return a never-resolving promise so the calling code doesn't continue
