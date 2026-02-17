@@ -325,7 +325,7 @@
       const base = cfg.base || '/.netlify/functions';
 
       let week = String(qs.get('week') ?? cfg.week);
-      let userId = String(qs.get('userId') ?? cfg.userId);
+      let userId = String(cfg.userId);
 
       // HARD STOP if not logged in / missing user id
       const userIdOk =
@@ -373,14 +373,10 @@
       `);
       container.appendChild(wrap);
 
-      // Load week + picks (via Supabase data layer)
+      // Load week + picks via Supabase data layer
       let data;
       try {
-        if (window.PredictData) {
-          data = await PredictData.getWeek(week, userId);
-        } else {
-          data = await j(`${base}/get-week?week=${encodeURIComponent(week)}&userId=${encodeURIComponent(userId)}`);
-        }
+        data = await PredictData.getWeek(week, userId);
       } catch (e) {
         showError(wrap, `Failed to load week data.\n${e.message}`);
         return;
@@ -578,11 +574,7 @@
 
         let sum;
         try {
-          if (window.PredictData) {
-            sum = await PredictData.getSummary(data.week || week, userId);
-          } else {
-            sum = await j(`${base}/summary?week=${encodeURIComponent(data.week || week)}&userId=${encodeURIComponent(userId)}`);
-          }
+          sum = await PredictData.getSummary(data.week || week, userId);
         } catch (e) {
           showError(wrap, `Failed to load summary.\n${e.message}`);
           return;
