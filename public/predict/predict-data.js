@@ -31,7 +31,7 @@
 
   /**
    * Normalise a Supabase match row into the field names the
-   * picks-widget and other pages expect (Adalo-compatible keys).
+   * picks-widget and other pages expect.
    */
   function normaliseMatch(m) {
     return {

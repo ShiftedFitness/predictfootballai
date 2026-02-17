@@ -89,12 +89,11 @@
 
 <script>
 const DEBUG = false;
-const base = '/.netlify/functions';
 const qs = new URLSearchParams(location.search);
 
 let currentWeek = qs.get('week') ? Number(qs.get('week')) : null;
 let weeklyInitialized = false;
-let highlightUserId = qs.get('userId') || '';
+let highlightUserId = '';
 
 function debugLog(...args) {
   if (DEBUG) console.log('[league_v2]', ...args);

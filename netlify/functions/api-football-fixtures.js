@@ -24,7 +24,7 @@
  *   enrich = 6 calls (standings + 5 H2H) — ~35s with rate limiting
  */
 
-const { requireAdmin } = require('./_supabase');
+const { requireAdmin } = require('./_supabase.js');
 
 const FD_BASE = 'https://api.football-data.org/v4';
 const EPL_CODE = 'PL';   // Premier League competition code

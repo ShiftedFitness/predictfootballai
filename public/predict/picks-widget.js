@@ -82,14 +82,6 @@
   document.head.appendChild(style);
 
   // === HELPERS ===
-  async function j(url, opt) {
-    const r = await fetch(url, opt);
-    if (!r.ok) {
-      const t = await r.text().catch(() => String(r.status));
-      throw new Error(`HTTP ${r.status}: ${t}`);
-    }
-    return r.json();
-  }
   function el(html) {
     const d = document.createElement('div');
     d.innerHTML = html.trim();
@@ -322,7 +314,6 @@
   async function renderPicks(container, cfg) {
     try {
       const qs = new URLSearchParams(location.search);
-      const base = cfg.base || '/.netlify/functions';
 
       let week = String(qs.get('week') ?? cfg.week);
       let userId = String(cfg.userId);
@@ -515,15 +506,7 @@
           matchesEl.querySelectorAll('.pf-pick').forEach(b => b.disabled = true);
 
           try {
-            if (window.PredictData) {
-              await PredictData.submitPicks(userId, Number(data.week || week), payload);
-            } else {
-              await j(`${base}/submit-picks`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId, week: Number(data.week || week), picks: payload })
-              });
-            }
+            await PredictData.submitPicks(userId, Number(data.week || week), payload);
             editMode = false;
             render();
           } catch (e) {

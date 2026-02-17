@@ -3,11 +3,9 @@
 <!--
   TeleStats Fives – Picks Check
 
-  URL Parameter Authentication (backward compat):
-    PicksCheck.html?ADMIN_SECRET=your_secret_here
-
-  Primary Authentication:
+  Authentication:
     Supabase session with admin status (PFAuth.isAdmin())
+    Fallback: ADMIN_SECRET URL parameter
 
   Purpose:
     Check which users have NOT submitted picks for a given matchweek.
@@ -65,18 +63,14 @@
 <div id="mainContainer"></div>
 
 <script>
-const base = '/.netlify/functions';
+const NETLIFY_BASE = '/.netlify/functions';
 
-// Read ADMIN_SECRET from URL query param (support URL-encoded values like "=" chars)
+// Read ADMIN_SECRET from URL query param (backward compat for API calls)
 function getAdminSecret() {
   const params = new URLSearchParams(location.search);
   const raw = params.get('ADMIN_SECRET');
   if (!raw) return '';
-  try {
-    return decodeURIComponent(raw);
-  } catch {
-    return raw;
-  }
+  try { return decodeURIComponent(raw); } catch { return raw; }
 }
 
 const ADMIN_SECRET = getAdminSecret();
@@ -92,12 +86,21 @@ function $(id) {
   return el;
 }
 
-// Helper: safe fetch with admin secret header
+// Helper: safe fetch with Supabase JWT auth + admin secret fallback
 async function adminFetch(url, options = {}) {
-  const fullUrl = url.startsWith('http') ? url : `${base}${url}`;
+  const fullUrl = url.startsWith('http') ? url : `${NETLIFY_BASE}${url}`;
+
+  // Get Supabase session token for auth
+  let authToken = '';
+  try {
+    const { data: { session } } = await PFAuth.supabase.auth.getSession();
+    if (session && session.access_token) authToken = session.access_token;
+  } catch (e) { console.warn('Could not get Supabase token for admin fetch:', e); }
+
   const headers = {
     'Content-Type': 'application/json',
-    'x-admin-secret': ADMIN_SECRET,
+    ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {}),
+    ...(ADMIN_SECRET ? { 'x-admin-secret': ADMIN_SECRET } : {}),
     ...(options.headers || {})
   };
 
@@ -333,18 +336,17 @@ function showAccessDenied() {
   container.innerHTML = `
     <div class="access-denied">
       <h1>Access Denied</h1>
-      <p>Admin access requires a valid Supabase session or ADMIN_SECRET in the URL.</p>
+      <p>You need admin privileges to access this page.</p>
       <p style="margin-top:20px">
-        Usage: PicksCheck.html?ADMIN_SECRET=your_secret_here
+        <a href="/predict/" style="color:var(--accent-cyan)">Back to Picks</a>
       </p>
     </div>
   `;
 }
 
-// Validate secret by making a test API call (kept for backward compat)
+// Validate admin secret (backward compat for URL-based access)
 async function validateSecret() {
   if (!ADMIN_SECRET) return false;
-  // With PredictData, we rely on Supabase auth; this is a no-op for URL secret users
   return true;
 }
 

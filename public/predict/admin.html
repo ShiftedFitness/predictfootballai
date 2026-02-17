@@ -141,8 +141,6 @@
 </div>
 
 <script>
-const base = '/.netlify/functions';
-
 // Read ADMIN_SECRET from URL query param (backward compat for API calls)
 function getAdminSecret() {
   const params = new URLSearchParams(location.search);
@@ -174,8 +172,9 @@ function $(id) {
 }
 
 // Helper: safe fetch with Supabase JWT auth + admin secret fallback + debug info
+const NETLIFY_BASE = '/.netlify/functions';
 async function adminFetch(url, options = {}) {
-  const fullUrl = url.startsWith('http') ? url : `${base}${url}`;
+  const fullUrl = url.startsWith('http') ? url : `${NETLIFY_BASE}${url}`;
 
   // Get Supabase session token for auth
   let authToken = '';
@@ -200,7 +199,7 @@ async function adminFetch(url, options = {}) {
     try { data = JSON.parse(text); } catch { data = { raw: text }; }
 
     lastDebugInfo = {
-      endpoint: fullUrl.replace(base, ''),
+      endpoint: fullUrl.replace(NETLIFY_BASE, ''),
       status: response.status,
       ok: response.ok,
       time: Date.now() - startTime,
@@ -211,7 +210,7 @@ async function adminFetch(url, options = {}) {
     return data;
   } catch (e) {
     lastDebugInfo = {
-      endpoint: fullUrl.replace(base, ''),
+      endpoint: fullUrl.replace(NETLIFY_BASE, ''),
       status: response?.status || 0,
       ok: false,
       time: Date.now() - startTime,
@@ -516,7 +515,7 @@ function renderSimulator() {
     return;
   }
 
-  // Build mock match objects that look like what picks-widget receives from Adalo
+  // Build mock match objects matching the picks-widget data format
   const mockMatches = selectedFixtures.map((fix, i) => {
     const en = enrichmentMap[fix.fixtureId] || {};
     const pred = en.predictions || fix.quickPrediction || { home: 0, draw: 0, away: 0 };

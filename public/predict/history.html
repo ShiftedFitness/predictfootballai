@@ -65,9 +65,8 @@
   </div>
 
 <script>
-const base = '/.netlify/functions';
 const qs   = new URLSearchParams(location.search);
-let userId         = qs.get('userId') || '';
+let userId         = '';
 const currentWeek  = qs.get('week') || '';
 const compareIdQ   = qs.get('compareId') || '1';
 
@@ -147,7 +146,7 @@ async function load({ currentWeek, viewWeek, compareId }) {
     const selectedWeek = weekSel.value;
     const selectedCompareId = compareSel.value || '1';
     const next = new URL(location.href);
-    next.searchParams.set('userId', userId);
+    next.searchParams.delete('userId');
     next.searchParams.set('week', currentWeek || '');
     next.searchParams.set('viewWeek', selectedWeek);
     next.searchParams.set('compareId', selectedCompareId);
