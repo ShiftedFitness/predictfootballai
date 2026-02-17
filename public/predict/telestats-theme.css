@@ -297,7 +297,7 @@ body {
 
 /* ── Scroll Container ───────────────────────────────────────── */
 .ts-scroll {
-  max-height: 520px;
+  max-height: 80vh;
   overflow-y: auto;
   border-radius: 8px;
 }

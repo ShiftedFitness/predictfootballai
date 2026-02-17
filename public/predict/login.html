@@ -338,7 +338,7 @@
     }
     const { data: row } = await sb
       .from('predict_users')
-      .select('id, adalo_id, email, username, full_name, is_admin')
+      .select('id, email, username, full_name, is_admin')
       .in('email', emailVariants)
       .maybeSingle();
 
@@ -348,10 +348,8 @@
       return;
     }
 
-    const effectiveId = row.adalo_id || row.id;
-
     localStorage.setItem('pf_user', JSON.stringify({
-      userId: effectiveId,
+      userId: row.id,
       email: row.email,
       username: row.username,
       fullName: row.full_name,

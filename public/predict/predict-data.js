@@ -36,7 +36,7 @@
   function normaliseMatch(m) {
     return {
       id:                String(m.id),
-      'Week':            m.week_number,
+      'Week':            m.match_week_id,
       'Home Team':       m.home_team,
       'Away Team':       m.away_team,
       'Lockout Time':    m.lockout_time,
@@ -60,13 +60,13 @@
    * Normalise a Supabase prediction row into the field names
    * the picks-widget expects.
    */
-  function normalisePrediction(p) {
+  function normalisePrediction(p, week) {
     return {
       id:               String(p.id),
       'User':           String(p.user_id),
       'Match':          String(p.match_id),
       'Pick':           p.pick,
-      'Week':           p.week_number,
+      'Week':           week,
       'Points Awarded': p.points_awarded
     };
   }
@@ -97,7 +97,7 @@
       var _ref = await sb()
         .from('predict_matches')
         .select('*')
-        .eq('week_number', week)
+        .eq('match_week_id', week)
         .order('id', { ascending: true });
 
       if (_ref.error) throw new Error('getWeekMatches: ' + _ref.error.message);
@@ -126,11 +126,10 @@
         .from('predict_predictions')
         .select('*')
         .eq('user_id', parseInt(userId))
-        .eq('week_number', week)
         .in('match_id', matchIds);
 
       if (_ref2.error) throw new Error('getWeek predictions: ' + _ref2.error.message);
-      var predictions = (_ref2.data || []).map(normalisePrediction);
+      var predictions = (_ref2.data || []).map(function (p) { return normalisePrediction(p, week); });
 
       return {
         week: week,
@@ -150,8 +149,8 @@
       // Get all matches (need lockout info per week)
       var _ref = await sb()
         .from('predict_matches')
-        .select('week_number, lockout_time, locked')
-        .order('week_number', { ascending: true });
+        .select('match_week_id, lockout_time, locked')
+        .order('match_week_id', { ascending: true });
 
       if (_ref.error) throw new Error('getWeeks: ' + _ref.error.message);
 
@@ -162,7 +161,7 @@
 
       // Deduplicate week numbers
       var weekSet = {};
-      matches.forEach(function (m) { weekSet[m.week_number] = true; });
+      matches.forEach(function (m) { weekSet[m.match_week_id] = true; });
       var weekNumbers = Object.keys(weekSet).map(Number).sort(function (a, b) { return a - b; });
 
       var latest = weekNumbers[weekNumbers.length - 1];
@@ -170,7 +169,7 @@
 
       // Per-week lock status & earliest lockout
       var detail = weekNumbers.map(function (w) {
-        var wMatches = matches.filter(function (m) { return m.week_number === w; });
+        var wMatches = matches.filter(function (m) { return m.match_week_id === w; });
         var lockouts = wMatches
           .map(function (m) { return m.lockout_time ? new Date(m.lockout_time).getTime() : null; })
           .filter(Boolean)
@@ -225,7 +224,6 @@
         return {
           user_id: parseInt(userId),
           match_id: parseInt(p.match_id),
-          week_number: parseInt(week),
           pick: pick
         };
       });
@@ -254,7 +252,6 @@
       var _ref = await sb()
         .from('predict_predictions')
         .select('*')
-        .eq('week_number', week)
         .in('match_id', matchIds);
 
       if (_ref.error) throw new Error('getSummary: ' + _ref.error.message);
@@ -368,7 +365,6 @@
       var _ref = await sb()
         .from('predict_predictions')
         .select('*')
-        .eq('week_number', week)
         .in('match_id', matchIds);
 
       if (_ref.error) throw new Error('getWeeklyTable: ' + _ref.error.message);
@@ -493,7 +489,6 @@
       var _refPreds = await sb()
         .from('predict_predictions')
         .select('*')
-        .eq('week_number', viewWeek)
         .in('match_id', matchIds)
         .in('user_id', userIds);
 
@@ -586,7 +581,6 @@
           home_team: f.home,
           away_team: f.away,
           match_week_id: parseInt(week),
-          week_number: parseInt(week),
           lockout_time: lockIso,
           locked: false,
           correct_result: null,
@@ -702,7 +696,7 @@
       var _m = await sb()
         .from('predict_matches')
         .select('id, correct_result')
-        .eq('week_number', week);
+        .eq('match_week_id', week);
       if (_m.error) throw new Error('scoreWeek matches: ' + _m.error.message);
       var matches = _m.data || [];
 
@@ -721,7 +715,6 @@
       var _p = await sb()
         .from('predict_predictions')
         .select('id, user_id, match_id, pick, points_awarded')
-        .eq('week_number', week)
         .in('match_id', matchIds);
       if (_p.error) throw new Error('scoreWeek predictions: ' + _p.error.message);
       var preds = _p.data || [];
@@ -789,7 +782,7 @@
 
         var _allPreds = await sb()
           .from('predict_predictions')
-          .select('points_awarded, week_number')
+          .select('points_awarded, match_id, predict_matches(match_week_id)')
           .eq('user_id', uid)
           .not('points_awarded', 'is', null);
 
@@ -806,9 +799,11 @@
           if (p.points_awarded === 1) totalCorrect++;
           else totalIncorrect++;
 
-          if (!weekGroups[p.week_number]) weekGroups[p.week_number] = { correct: 0, total: 0 };
-          weekGroups[p.week_number].total++;
-          if (p.points_awarded === 1) weekGroups[p.week_number].correct++;
+          var pWeek = p.predict_matches ? p.predict_matches.match_week_id : null;
+          if (pWeek == null) return;
+          if (!weekGroups[pWeek]) weekGroups[pWeek] = { correct: 0, total: 0 };
+          weekGroups[pWeek].total++;
+          if (p.points_awarded === 1) weekGroups[pWeek].correct++;
         });
 
         var userFullHouses = 0;
@@ -854,7 +849,7 @@
       var _m = await sb()
         .from('predict_matches')
         .select('id, home_team, away_team')
-        .eq('week_number', week);
+        .eq('match_week_id', week);
       if (_m.error) throw new Error('getMissingPredictions matches: ' + _m.error.message);
       var matches = _m.data || [];
       var matchIds = matches.map(function (m) { return m.id; });
@@ -868,7 +863,6 @@
       var _p = await sb()
         .from('predict_predictions')
         .select('user_id, match_id')
-        .eq('week_number', week)
         .in('match_id', matchIds);
       if (_p.error) throw new Error('getMissingPredictions predictions: ' + _p.error.message);
       var preds = _p.data || [];
@@ -914,7 +908,7 @@
 
       var _p = await sb()
         .from('predict_predictions')
-        .select('id, user_id, match_id, pick, week_number, points_awarded')
+        .select('id, user_id, match_id, pick, points_awarded, predict_matches(match_week_id)')
         .in('match_id', ids)
         .order('match_id', { ascending: true });
       if (_p.error) throw new Error('getPredictionsByMatch: ' + _p.error.message);
@@ -945,7 +939,7 @@
           userName: nameMap[p.user_id] || ('User ' + p.user_id),
           matchId: p.match_id,
           pick: p.pick,
-          week: p.week_number,
+          week: p.predict_matches ? p.predict_matches.match_week_id : null,
           pointsAwarded: p.points_awarded
         };
       });
