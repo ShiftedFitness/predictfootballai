@@ -21,7 +21,7 @@ exports.handler = async (event) => {
       return respond(405, 'GET only');
     }
 
-    const adminErr = requireAdmin(event);
+    const adminErr = await requireAdmin(event);
     if (adminErr) return adminErr;
 
     const q = event.queryStringParameters || {};

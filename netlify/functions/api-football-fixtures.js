@@ -13,7 +13,7 @@
  *   - FACTOR: Home advantage (~8% boost, based on EPL historical average)
  *   - FACTOR: Recent form (last 5 matches from standings)
  *
- * Auth: x-admin-secret header required.
+ * Auth: x-admin-secret header OR Supabase JWT (admin user) required.
  * Env:  FOOTBALL_DATA_KEY (API token from football-data.org)
  *
  * football-data.org free tier: 10 requests/minute, EPL included forever.
@@ -23,6 +23,8 @@
  *   list  = 2-3 calls (standings + optional comp info + matchday) — fast!
  *   enrich = 6 calls (standings + 5 H2H) — ~35s with rate limiting
  */
+
+const { requireAdmin } = require('./_supabase');
 
 const FD_BASE = 'https://api.football-data.org/v4';
 const EPL_CODE = 'PL';   // Premier League competition code
@@ -417,12 +419,15 @@ exports.handler = async (event) => {
   // Reset standings cache per invocation
   standingsCache = null;
 
+  // Handle CORS preflight
+  if (event.httpMethod === 'OPTIONS') {
+    return resp(204, '');
+  }
+
   try {
-    // Auth check
-    const secret = (event.headers['x-admin-secret'] || event.headers['X-Admin-Secret'] || '').trim();
-    if (process.env.ADMIN_SECRET && secret !== process.env.ADMIN_SECRET) {
-      return resp(401, 'Unauthorised');
-    }
+    // Auth check: accepts x-admin-secret OR Supabase JWT (admin user)
+    const authError = await requireAdmin(event);
+    if (authError) return authError;
 
     const url = new URL(event.rawUrl);
     const action = url.searchParams.get('action');
@@ -455,6 +460,8 @@ function resp(status, body) {
     headers: {
       'Content-Type': 'application/json',
       'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Headers': 'Content-Type, x-admin-secret, Authorization',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
       'Cache-Control': 'no-store'
     },
     body: typeof body === 'string' ? JSON.stringify({ error: body }) : JSON.stringify(body)

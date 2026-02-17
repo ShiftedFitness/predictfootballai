@@ -173,9 +173,12 @@
       const isHistory = path.includes('history.html');
       const isAdminPage = path.includes('admin.html') || path.includes('PicksCheck.html') || path.includes('admin_predictions.html');
 
-      // Build admin link if user is admin
+      const isPicksCheck = path.includes('PicksCheck.html');
+
+      // Build admin links if user is admin
       const adminLink = user.isAdmin
-        ? '<a href="/predict/admin.html" class="nav-admin ' + (isAdminPage ? 'active' : '') + '">Admin</a>'
+        ? '<a href="/predict/admin.html" class="nav-admin ' + (isAdminPage && !isPicksCheck ? 'active' : '') + '">Admin</a>' +
+          '<a href="/predict/PicksCheck.html" class="nav-admin ' + (isPicksCheck ? 'active' : '') + '">Picks Check</a>'
         : '';
 
       const nav = document.createElement('nav');

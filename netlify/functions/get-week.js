@@ -14,7 +14,7 @@ exports.handler = async (event) => {
     const userId = String(url.searchParams.get('userId') || '').trim();
 
     // Check for admin access via x-admin-secret header
-    const adminCheckErr = requireAdmin(event);
+    const adminCheckErr = await requireAdmin(event);
     const isAdmin = !adminCheckErr;
 
     // Require week always; require userId OR admin access

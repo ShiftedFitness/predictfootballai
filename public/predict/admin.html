@@ -173,12 +173,21 @@ function $(id) {
   return el;
 }
 
-// Helper: safe fetch with admin secret header + debug info
+// Helper: safe fetch with Supabase JWT auth + admin secret fallback + debug info
 async function adminFetch(url, options = {}) {
   const fullUrl = url.startsWith('http') ? url : `${base}${url}`;
+
+  // Get Supabase session token for auth
+  let authToken = '';
+  try {
+    const { data: { session } } = await PFAuth.supabase.auth.getSession();
+    if (session && session.access_token) authToken = session.access_token;
+  } catch (e) { console.warn('Could not get Supabase token for admin fetch:', e); }
+
   const headers = {
     'Content-Type': 'application/json',
-    'x-admin-secret': ADMIN_SECRET,
+    ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {}),
+    ...(ADMIN_SECRET ? { 'x-admin-secret': ADMIN_SECRET } : {}),
     ...(options.headers || {})
   };
 
@@ -831,6 +840,10 @@ function initAdminUI() {
   const wrap = $('mainWrap');
   wrap.innerHTML = `
     <h2 class="ts-page-title">Admin – Results & Scoring</h2>
+    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+      <a href="/predict/PicksCheck.html" class="btn small" style="text-decoration:none;background:var(--bg-elevated);color:var(--text-primary);border:1px solid rgba(255,255,255,0.1)">📋 Picks Check</a>
+      <a href="/predict/admin_predictions.html" class="btn small" style="text-decoration:none;background:var(--bg-elevated);color:var(--text-primary);border:1px solid rgba(255,255,255,0.1)">🔍 Predictions Inspector</a>
+    </div>
 
     <div class="ts-card">
       <div class="mode-switch">

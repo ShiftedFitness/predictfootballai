@@ -23,7 +23,7 @@ exports.handler = async (event) => {
   try {
     if (event.httpMethod !== 'POST') return respond(405, 'POST only');
 
-    const adminErr = requireAdmin(event);
+    const adminErr = await requireAdmin(event);
     if (adminErr) return adminErr;
 
     const { week, force } = JSON.parse(event.body || '{}');
