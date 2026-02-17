@@ -43,6 +43,26 @@
    * resolves the issue.
    * See: https://github.com/supabase/supabase/issues/41968
    */
+  /**
+   * Create a clean, isolated Supabase client for retry attempts.
+   * Key differences from the primary client:
+   *   - detectSessionInUrl: false — prevents racing with the primary client
+   *     over URL hash tokens (which causes the AbortError in the first place)
+   *   - autoRefreshToken: false — prevents background refresh conflicts
+   *   - persistSession: true — still stores to localStorage so subsequent
+   *     page loads can find the session
+   */
+  function createFreshClient() {
+    return window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: {
+        flowType: 'implicit',
+        detectSessionInUrl: false,
+        autoRefreshToken: false,
+        persistSession: true
+      }
+    });
+  }
+
   async function safeGetSession() {
     try {
       const result = await sb().auth.getSession();
@@ -50,10 +70,7 @@
     } catch (e) {
       if (e.name === 'AbortError') {
         console.warn('getSession() AbortError — retrying with fresh client');
-        // Destroy the corrupted singleton and create a fresh one
-        _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-          auth: { flowType: 'implicit' }
-        });
+        _sb = createFreshClient();
         try {
           const result = await _sb.auth.getSession();
           return result.data?.session || null;
@@ -85,9 +102,7 @@
     } catch (e) {
       if (e.name === 'AbortError') {
         console.warn('setSession() AbortError — retrying with fresh client');
-        _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-          auth: { flowType: 'implicit' }
-        });
+        _sb = createFreshClient();
         try {
           return await trySet(_sb);
         } catch (e2) {
