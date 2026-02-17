@@ -589,32 +589,54 @@
         matchWeekId = _mw.data[0].id;
       }
 
-      // Build match rows
+      // Build match rows — core columns that always exist
       var lockIso = new Date(lockoutTime).toISOString();
-      var matchRows = fixtures.map(function (f) {
+      var coreRows = fixtures.map(function (f) {
         return {
           home_team: f.home,
           away_team: f.away,
           match_week_id: matchWeekId,
           lockout_time: lockIso,
           locked: false,
-          correct_result: null,
-          api_fixture_id: f.apiFixtureId || null,
-          home_form: f.homeForm || null,
-          away_form: f.awayForm || null,
-          prediction_home: f.predictionHome || null,
-          prediction_draw: f.predictionDraw || null,
-          prediction_away: f.predictionAway || null,
-          prediction_advice: f.predictionAdvice || null,
-          h2h_summary: f.h2hSummary || null,
-          match_stats: f.matchStats || null
+          correct_result: null
         };
+      });
+
+      // Enrichment columns — may or may not exist in the table
+      var enrichKeys = ['api_fixture_id', 'home_form', 'away_form', 'prediction_home',
+        'prediction_draw', 'prediction_away', 'prediction_advice', 'h2h_summary', 'match_stats'];
+      var enrichMap = {
+        api_fixture_id: function(f) { return f.apiFixtureId || null; },
+        home_form: function(f) { return f.homeForm || null; },
+        away_form: function(f) { return f.awayForm || null; },
+        prediction_home: function(f) { return f.predictionHome || null; },
+        prediction_draw: function(f) { return f.predictionDraw || null; },
+        prediction_away: function(f) { return f.predictionAway || null; },
+        prediction_advice: function(f) { return f.predictionAdvice || null; },
+        h2h_summary: function(f) { return f.h2hSummary || null; },
+        match_stats: function(f) { return f.matchStats || null; }
+      };
+
+      // Try inserting with enrichment columns first
+      var fullRows = fixtures.map(function (f, i) {
+        var row = Object.assign({}, coreRows[i]);
+        enrichKeys.forEach(function (k) { row[k] = enrichMap[k](f); });
+        return row;
       });
 
       var _ins = await sb()
         .from('predict_matches')
-        .insert(matchRows)
+        .insert(fullRows)
         .select();
+
+      // If it fails due to missing columns, retry with core columns only
+      if (_ins.error && _ins.error.message && _ins.error.message.indexOf('column') !== -1) {
+        console.warn('seedWeek: enrichment columns not in table, retrying with core columns only. Error:', _ins.error.message);
+        _ins = await sb()
+          .from('predict_matches')
+          .insert(coreRows)
+          .select();
+      }
       if (_ins.error) throw new Error('seedWeek insert matches: ' + _ins.error.message);
 
       return { ok: true, week: week, matchesCreated: (_ins.data || []).length };
