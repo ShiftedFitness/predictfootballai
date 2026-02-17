@@ -286,7 +286,16 @@
   });
 
   // Now process the session (this consumes hash tokens)
-  const { data: { session } } = await sb.auth.getSession();
+  // Wrapped in try-catch: getSession() can throw AbortError on some browsers,
+  // and we must not crash the IIFE or the magic-link / forgot-password handlers
+  // won't be registered.
+  let session = null;
+  try {
+    const result = await sb.auth.getSession();
+    session = result.data?.session || null;
+  } catch (e) {
+    console.warn('getSession() failed (non-fatal):', e.message);
+  }
 
   // If URL indicated recovery but onAuthStateChange didn't fire yet, show form
   if (isRecovery && session && !recoveryHandled) {
