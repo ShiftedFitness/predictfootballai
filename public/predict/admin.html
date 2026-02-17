@@ -277,12 +277,11 @@ function checkAllResultsSet() {
 
 async function fetchLatestWeek() {
   try {
-    const data = await adminFetch('/weeks');
-    latestWeek = data.recommendedPickWeek || data.latest || data.weeks?.[data.weeks.length - 1] || 1;
+    const data = await PredictData.getWeeks();
+    latestWeek = data.recommendedPickWeek || data.latest || (data.weeks && data.weeks.length ? data.weeks[data.weeks.length - 1] : 1);
     return latestWeek;
   } catch (e) {
     setStatus(`Failed to fetch latest week: ${e.message}`);
-    showDebugInfo();
     return null;
   }
 }
@@ -291,10 +290,9 @@ async function loadMatches(week) {
   const loadBtn = $('load');
   return withLoading(loadBtn, async () => {
     try {
-      const data = await adminFetch(`/get-week?week=${encodeURIComponent(week)}`);
-      loadedMatches = data.matches || [];
+      const matchesRaw = await PredictData.getWeekMatches(week);
+      loadedMatches = matchesRaw;
       setStatus(`Loaded ${loadedMatches.length} matches for week ${week}`);
-      showDebugInfo();
       $('matches').innerHTML = loadedMatches.length ? `
         <table>
           <thead><tr><th>ID</th><th>Fixture</th><th>Correct Result</th><th class="right">Live Score</th></tr></thead>
@@ -308,7 +306,6 @@ async function loadMatches(week) {
       $('nextWeek').value = String(week + 1);
     } catch (e) {
       setStatus(`Failed to load matches: ${e.message}`);
-      showDebugInfo();
       $('matches').innerHTML = '';
       loadedMatches = [];
     }
@@ -984,13 +981,12 @@ function setupEventListeners() {
     if (!['HOME', 'DRAW', 'AWAY'].includes(correct)) { setStatus('Pick a correct result first (HOME/DRAW/AWAY)'); return; }
     await withLoading(btn, async () => {
       try {
-        await adminFetch('/admin-set-results', { method: 'POST', body: JSON.stringify({ week, results: [{ match_id: matchId, correct }] }) });
-        const scoreData = await adminFetch('/score-match', { method: 'POST', body: JSON.stringify({ match_id: matchId }) });
+        await PredictData.setResults(week, [{ match_id: matchId, correct }]);
+        const scoreData = await PredictData.scoreMatch(matchId);
         tr.setAttribute('data-has-result', 'true');
         checkAllResultsSet();
         setStatus(`Match ${matchId} saved & scored (updated ${scoreData.updated || 0} predictions)`);
-        showDebugInfo();
-      } catch (e) { setStatus(`Failed to save/score match ${matchId}: ${e.message}`); showDebugInfo(); }
+      } catch (e) { setStatus(`Failed to save/score match ${matchId}: ${e.message}`); }
     });
   });
 
@@ -1002,27 +998,26 @@ function setupEventListeners() {
       .filter(r => ['HOME', 'DRAW', 'AWAY'].includes(r.correct.toUpperCase()));
     if (!results.length) { setStatus('No valid results to apply.'); return; }
     try {
-      const data = await adminFetch('/admin-set-results', { method: 'POST', body: JSON.stringify({ week, results }) });
+      const data = await PredictData.setResults(week, results);
       rows.forEach(r => { if (['HOME', 'DRAW', 'AWAY'].includes(r.querySelector('select').value.toUpperCase())) r.setAttribute('data-has-result', 'true'); });
       checkAllResultsSet();
       setStatus(`Results applied: ${data.updated || results.length} matches updated`);
-      showDebugInfo();
-    } catch (e) { setStatus(`Failed to apply results: ${e.message}`); showDebugInfo(); }
+    } catch (e) { setStatus(`Failed to apply results: ${e.message}`); }
   });
 
   // ── Score week ──
   scoreBtn.onclick = () => withLoading(scoreBtn, async () => {
     const week = Number(weekInput.value);
     try {
-      const data = await adminFetch('/admin-score-week', { method: 'POST', body: JSON.stringify({ week }) });
+      const data = await PredictData.scoreWeek(week, false);
       let message = 'Week scored successfully!';
       if (data.ok) {
         const winners = data.fullHouseNames || []; const blanks = data.blanksNames || [];
         if (winners.length) message += `  |  BONUS: ${winners.join(', ')}`; else message += '  |  No full houses';
         if (blanks.length) message += `  |  BLANKS: ${blanks.join(', ')}`;
       }
-      setStatus(message); showDebugInfo();
-    } catch (e) { setStatus(`Scoring failed: ${e.message}`); showDebugInfo(); }
+      setStatus(message);
+    } catch (e) { setStatus(`Scoring failed: ${e.message}`); }
   });
 
   // ── Force rescore ──
@@ -1032,15 +1027,15 @@ function setupEventListeners() {
     if (!confirm(`ARE YOU SURE?\n\nThis will FORCE RESCORE week ${week} and may change existing user totals.`)) return;
     withLoading(forceBtn, async () => {
       try {
-        const data = await adminFetch('/admin-score-week', { method: 'POST', body: JSON.stringify({ week, force: true }) });
+        const data = await PredictData.scoreWeek(week, true);
         let message = 'Week FORCE RESCORED!';
         if (data.ok) {
           const winners = data.fullHouseNames || []; const blanks = data.blanksNames || [];
           if (winners.length) message += `  |  BONUS: ${winners.join(', ')}`;
           if (blanks.length) message += `  |  BLANKS: ${blanks.join(', ')}`;
         }
-        setStatus(message); showDebugInfo();
-      } catch (e) { setStatus(`Force rescore failed: ${e.message}`); showDebugInfo(); }
+        setStatus(message);
+      } catch (e) { setStatus(`Force rescore failed: ${e.message}`); }
     });
   };
 
@@ -1160,12 +1155,8 @@ function setupEventListeners() {
     });
 
     try {
-      await adminFetch('/admin-seed-week', {
-        method: 'POST',
-        body: JSON.stringify({ week, lockoutTime: lockoutIso, fixtures })
-      });
+      await PredictData.seedWeek(week, lockoutIso, fixtures);
       setSeedStatus(`Week ${week} seeded with 5 matches + enrichment data!`, 'success');
-      showDebugInfo();
       // Reset state
       fetchedFixtures = [];
       selectedFixtureIds = new Set();
@@ -1200,12 +1191,10 @@ function setupEventListeners() {
     const fixtures = rows.map(r => ({ home: r.querySelector('.home').value.trim(), away: r.querySelector('.away').value.trim() }));
     if (fixtures.some(f => !f.home || !f.away)) { setSeedStatus('Please fill all 5 fixtures', 'error'); return; }
     try {
-      await adminFetch('/admin-seed-week', { method: 'POST', body: JSON.stringify({ week, lockoutTime: lockoutIso, fixtures }) });
+      await PredictData.seedWeek(week, lockoutIso, fixtures);
       setSeedStatus(`Week ${week} seeded with 5 matches (manual)`, 'success');
-      showDebugInfo();
     } catch (e) {
       setSeedStatus(`Failed to seed week: ${e.message}`, 'error');
-      showDebugInfo();
     }
   });
 }
@@ -1233,7 +1222,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
   // Try to validate and fetch latest week
   try {
-    const weeksData = await adminFetch('/weeks');
+    const weeksData = await PredictData.getWeeks();
     latestWeek = weeksData.recommendedPickWeek || weeksData.latest || 1;
   } catch (e) {
     console.warn('Could not fetch weeks:', e.message);

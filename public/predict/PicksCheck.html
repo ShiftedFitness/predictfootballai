@@ -139,9 +139,9 @@ function withLoading(btn, fn) {
 // Fetch available weeks
 async function fetchWeeks() {
   try {
-    const data = await adminFetch('/weeks');
+    const data = await PredictData.getWeeks();
     availableWeeks = data.weeks || [];
-    latestWeek = data.recommendedPickWeek || data.latest || availableWeeks[availableWeeks.length - 1] || 1;
+    latestWeek = data.recommendedPickWeek || data.latest || (availableWeeks.length ? availableWeeks[availableWeeks.length - 1] : 1);
     return { weeks: availableWeeks, latest: latestWeek };
   } catch (e) {
     setStatus(`Failed to fetch weeks: ${e.message}`);
@@ -154,7 +154,7 @@ async function loadPicksCheck(week) {
   const checkBtn = $('checkBtn');
   return withLoading(checkBtn, async () => {
     try {
-      const data = await adminFetch(`/admin-missing-predictions?week=${week}`);
+      const data = await PredictData.getMissingPredictions(week);
       renderResults(data, week);
       currentWeek = week;
     } catch (e) {
@@ -341,17 +341,11 @@ function showAccessDenied() {
   `;
 }
 
-// Validate secret by making a test API call
+// Validate secret by making a test API call (kept for backward compat)
 async function validateSecret() {
   if (!ADMIN_SECRET) return false;
-
-  try {
-    // Test admin access with the missing predictions endpoint
-    await adminFetch('/admin-missing-predictions');
-    return true;
-  } catch (e) {
-    return false;
-  }
+  // With PredictData, we rely on Supabase auth; this is a no-op for URL secret users
+  return true;
 }
 
 // Initialize on page load

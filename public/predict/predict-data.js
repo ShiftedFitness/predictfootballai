@@ -554,6 +554,403 @@
         compare: userStats(compareId),
         rows: rows
       };
+    },
+
+    /* ================================================================
+       ADMIN METHODS
+       ================================================================ */
+
+    /* ────────────────────────────────────────────────────────────
+       seedWeek(week, lockoutTime, fixtures)
+       Create match_week + matches for a new week.
+       fixtures: [ { home, away, apiFixtureId?, homeForm?, awayForm?,
+                     predictionHome?, predictionDraw?, predictionAway?,
+                     predictionAdvice?, h2hSummary?, matchStats? } ]
+       ──────────────────────────────────────────────────────────── */
+    async seedWeek(week, lockoutTime, fixtures) {
+      if (!week || !lockoutTime || !Array.isArray(fixtures) || fixtures.length === 0) {
+        throw new Error('week, lockoutTime, and fixtures array required');
+      }
+
+      // Upsert the match_week row
+      var _mw = await sb()
+        .from('predict_match_weeks')
+        .upsert({ id: parseInt(week), week_number: parseInt(week), status: 'open' }, { onConflict: 'id' })
+        .select();
+      if (_mw.error) throw new Error('seedWeek match_week: ' + _mw.error.message);
+
+      // Build match rows
+      var lockIso = new Date(lockoutTime).toISOString();
+      var matchRows = fixtures.map(function (f) {
+        return {
+          home_team: f.home,
+          away_team: f.away,
+          match_week_id: parseInt(week),
+          week_number: parseInt(week),
+          lockout_time: lockIso,
+          locked: false,
+          correct_result: null,
+          api_fixture_id: f.apiFixtureId || null,
+          home_form: f.homeForm || null,
+          away_form: f.awayForm || null,
+          prediction_home: f.predictionHome || null,
+          prediction_draw: f.predictionDraw || null,
+          prediction_away: f.predictionAway || null,
+          prediction_advice: f.predictionAdvice || null,
+          h2h_summary: f.h2hSummary || null,
+          match_stats: f.matchStats || null
+        };
+      });
+
+      var _ins = await sb()
+        .from('predict_matches')
+        .insert(matchRows)
+        .select();
+      if (_ins.error) throw new Error('seedWeek insert matches: ' + _ins.error.message);
+
+      return { ok: true, week: week, matchesCreated: (_ins.data || []).length };
+    },
+
+    /* ────────────────────────────────────────────────────────────
+       setResults(week, results)
+       Set correct_result on matches and lock them.
+       results: [ { match_id, correct } ]  correct = 'HOME'/'DRAW'/'AWAY'
+       ──────────────────────────────────────────────────────────── */
+    async setResults(week, results) {
+      if (!week || !Array.isArray(results)) throw new Error('week and results required');
+
+      var updated = 0;
+      for (var i = 0; i < results.length; i++) {
+        var r = results[i];
+        var correct = String(r.correct).toUpperCase();
+        if (['HOME', 'DRAW', 'AWAY'].indexOf(correct) === -1) continue;
+
+        var _upd = await sb()
+          .from('predict_matches')
+          .update({ correct_result: correct, locked: true })
+          .eq('id', parseInt(r.match_id));
+        if (_upd.error) throw new Error('setResults match ' + r.match_id + ': ' + _upd.error.message);
+        updated++;
+      }
+
+      // Also close the match week
+      await sb()
+        .from('predict_match_weeks')
+        .update({ status: 'closed' })
+        .eq('id', parseInt(week));
+
+      return { ok: true, updated: updated };
+    },
+
+    /* ────────────────────────────────────────────────────────────
+       scoreMatch(matchId)
+       Score all predictions for a single match.
+       Returns count of updated predictions.
+       ──────────────────────────────────────────────────────────── */
+    async scoreMatch(matchId) {
+      if (!matchId) throw new Error('matchId required');
+      matchId = parseInt(matchId);
+
+      // Get the match result
+      var _m = await sb()
+        .from('predict_matches')
+        .select('id, correct_result')
+        .eq('id', matchId)
+        .single();
+      if (_m.error) throw new Error('scoreMatch match: ' + _m.error.message);
+
+      var correct = (_m.data.correct_result || '').toUpperCase();
+      if (['HOME', 'DRAW', 'AWAY'].indexOf(correct) === -1) {
+        throw new Error('Match ' + matchId + ' has no valid result set');
+      }
+
+      // Get all predictions for this match
+      var _p = await sb()
+        .from('predict_predictions')
+        .select('id, pick')
+        .eq('match_id', matchId);
+      if (_p.error) throw new Error('scoreMatch predictions: ' + _p.error.message);
+
+      var preds = _p.data || [];
+      var updated = 0;
+
+      for (var i = 0; i < preds.length; i++) {
+        var pick = (preds[i].pick || '').toUpperCase();
+        var pts = (pick === correct) ? 1 : 0;
+        var _u = await sb()
+          .from('predict_predictions')
+          .update({ points_awarded: pts })
+          .eq('id', preds[i].id);
+        if (!_u.error) updated++;
+      }
+
+      return { ok: true, updated: updated };
+    },
+
+    /* ────────────────────────────────────────────────────────────
+       scoreWeek(week, force)
+       Score all predictions for a week.
+       1 point per correct pick, 5 bonus for all 5 correct.
+       Updates predict_predictions.points_awarded and
+       predict_users.points/correct_results/incorrect_results/full_houses/blanks.
+       ──────────────────────────────────────────────────────────── */
+    async scoreWeek(week, force) {
+      if (!week) throw new Error('week required');
+      week = parseInt(week);
+
+      // 1. Get all matches for this week with results
+      var _m = await sb()
+        .from('predict_matches')
+        .select('id, correct_result')
+        .eq('week_number', week);
+      if (_m.error) throw new Error('scoreWeek matches: ' + _m.error.message);
+      var matches = _m.data || [];
+
+      var resultMap = {};
+      matches.forEach(function (m) {
+        if (m.correct_result) resultMap[m.id] = m.correct_result.toUpperCase();
+      });
+
+      var matchIds = matches.map(function (m) { return m.id; });
+      if (matchIds.length === 0) throw new Error('No matches found for week ' + week);
+
+      var allSet = matches.every(function (m) { return !!m.correct_result; });
+      if (!allSet && !force) throw new Error('Not all match results set for week ' + week);
+
+      // 2. Get all predictions for this week
+      var _p = await sb()
+        .from('predict_predictions')
+        .select('id, user_id, match_id, pick, points_awarded')
+        .eq('week_number', week)
+        .in('match_id', matchIds);
+      if (_p.error) throw new Error('scoreWeek predictions: ' + _p.error.message);
+      var preds = _p.data || [];
+
+      // 3. Score each prediction
+      var predUpdates = [];
+      preds.forEach(function (p) {
+        var correct = resultMap[p.match_id];
+        if (!correct) return;
+        var pick = (p.pick || '').toUpperCase();
+        var pts = (pick === correct) ? 1 : 0;
+        predUpdates.push({ id: p.id, user_id: p.user_id, points_awarded: pts });
+      });
+
+      for (var i = 0; i < predUpdates.length; i++) {
+        var pu = predUpdates[i];
+        await sb()
+          .from('predict_predictions')
+          .update({ points_awarded: pu.points_awarded })
+          .eq('id', pu.id);
+      }
+
+      // 4. Aggregate per-user stats for this week
+      var affectedUserIds = [];
+      predUpdates.forEach(function (u) {
+        if (affectedUserIds.indexOf(u.user_id) === -1) affectedUserIds.push(u.user_id);
+      });
+
+      // 5. Get user names for reporting
+      var nameMap = {};
+      if (affectedUserIds.length > 0) {
+        var _names = await sb()
+          .from('predict_users')
+          .select('id, username, full_name')
+          .in('id', affectedUserIds);
+        if (!_names.error && _names.data) {
+          _names.data.forEach(function (u) { nameMap[u.id] = u.username || u.full_name || ('User ' + u.id); });
+        }
+      }
+
+      // 6. Determine FH/blanks for this week
+      var weekUserStats = {};
+      predUpdates.forEach(function (u) {
+        if (!weekUserStats[u.user_id]) weekUserStats[u.user_id] = { correct: 0, total: 0 };
+        weekUserStats[u.user_id].total++;
+        if (u.points_awarded === 1) weekUserStats[u.user_id].correct++;
+      });
+
+      var fullHouseNames = [];
+      var blanksNames = [];
+
+      Object.keys(weekUserStats).forEach(function (uid) {
+        var s = weekUserStats[uid];
+        if (s.total === 5 && s.correct === 5) {
+          fullHouseNames.push(nameMap[parseInt(uid)] || ('User ' + uid));
+        }
+        if (s.total >= 5 && s.correct === 0) {
+          blanksNames.push(nameMap[parseInt(uid)] || ('User ' + uid));
+        }
+      });
+
+      // 7. Recalculate all-time totals for each affected user
+      for (var j = 0; j < affectedUserIds.length; j++) {
+        var uid = affectedUserIds[j];
+
+        var _allPreds = await sb()
+          .from('predict_predictions')
+          .select('points_awarded, week_number')
+          .eq('user_id', uid)
+          .not('points_awarded', 'is', null);
+
+        if (_allPreds.error) continue;
+
+        var allUserPreds = _allPreds.data || [];
+        var totalPoints = 0;
+        var totalCorrect = 0;
+        var totalIncorrect = 0;
+        var weekGroups = {};
+
+        allUserPreds.forEach(function (p) {
+          totalPoints += (p.points_awarded || 0);
+          if (p.points_awarded === 1) totalCorrect++;
+          else totalIncorrect++;
+
+          if (!weekGroups[p.week_number]) weekGroups[p.week_number] = { correct: 0, total: 0 };
+          weekGroups[p.week_number].total++;
+          if (p.points_awarded === 1) weekGroups[p.week_number].correct++;
+        });
+
+        var userFullHouses = 0;
+        var userBlanks = 0;
+        Object.keys(weekGroups).forEach(function (wk) {
+          var g = weekGroups[wk];
+          if (g.total === 5 && g.correct === 5) {
+            userFullHouses++;
+            totalPoints += 5;
+          }
+          if (g.total >= 5 && g.correct === 0) userBlanks++;
+        });
+
+        await sb()
+          .from('predict_users')
+          .update({
+            points: totalPoints,
+            correct_results: totalCorrect,
+            incorrect_results: totalIncorrect,
+            full_houses: userFullHouses,
+            blanks: userBlanks
+          })
+          .eq('id', uid);
+      }
+
+      return {
+        ok: true,
+        week: week,
+        predictionsScored: predUpdates.length,
+        fullHouseNames: fullHouseNames,
+        blanksNames: blanksNames
+      };
+    },
+
+    /* ────────────────────────────────────────────────────────────
+       getMissingPredictions(week)
+       Returns users who haven't submitted picks for a given week.
+       ──────────────────────────────────────────────────────────── */
+    async getMissingPredictions(week) {
+      if (!week) throw new Error('week required');
+      week = parseInt(week);
+
+      var _m = await sb()
+        .from('predict_matches')
+        .select('id, home_team, away_team')
+        .eq('week_number', week);
+      if (_m.error) throw new Error('getMissingPredictions matches: ' + _m.error.message);
+      var matches = _m.data || [];
+      var matchIds = matches.map(function (m) { return m.id; });
+
+      var _u = await sb()
+        .from('predict_users')
+        .select('id, username, full_name');
+      if (_u.error) throw new Error('getMissingPredictions users: ' + _u.error.message);
+      var allUsers = _u.data || [];
+
+      var _p = await sb()
+        .from('predict_predictions')
+        .select('user_id, match_id')
+        .eq('week_number', week)
+        .in('match_id', matchIds);
+      if (_p.error) throw new Error('getMissingPredictions predictions: ' + _p.error.message);
+      var preds = _p.data || [];
+
+      var matchResults = matches.map(function (m) {
+        var predUserIds = preds
+          .filter(function (p) { return p.match_id === m.id; })
+          .map(function (p) { return p.user_id; });
+
+        var missing = allUsers.filter(function (u) {
+          return predUserIds.indexOf(u.id) === -1;
+        });
+
+        return {
+          matchId: m.id,
+          fixture: m.home_team + ' v ' + m.away_team,
+          predictionsCount: predUserIds.length,
+          expectedUsers: allUsers.length,
+          missingCount: missing.length,
+          missingUsers: missing.map(function (u) {
+            return { id: u.id, name: u.username || u.full_name || ('User ' + u.id) };
+          })
+        };
+      });
+
+      return { week: week, expectedUsers: allUsers.length, matches: matchResults };
+    },
+
+    /* ────────────────────────────────────────────────────────────
+       getPredictionsByMatch(matchIds)
+       Returns all predictions for given match IDs (admin inspector).
+       ──────────────────────────────────────────────────────────── */
+    async getPredictionsByMatch(matchIds) {
+      if (!matchIds) throw new Error('matchIds required');
+
+      var ids;
+      if (typeof matchIds === 'string') {
+        ids = matchIds.split(',').map(function (s) { return parseInt(s.trim()); }).filter(function (n) { return !isNaN(n); });
+      } else {
+        ids = matchIds.map(function (n) { return parseInt(n); });
+      }
+      if (ids.length === 0) throw new Error('No valid match IDs');
+
+      var _p = await sb()
+        .from('predict_predictions')
+        .select('id, user_id, match_id, pick, week_number, points_awarded')
+        .in('match_id', ids)
+        .order('match_id', { ascending: true });
+      if (_p.error) throw new Error('getPredictionsByMatch: ' + _p.error.message);
+      var preds = _p.data || [];
+
+      var userIds = [];
+      preds.forEach(function (p) {
+        if (userIds.indexOf(p.user_id) === -1) userIds.push(p.user_id);
+      });
+
+      var nameMap = {};
+      if (userIds.length > 0) {
+        var _u = await sb()
+          .from('predict_users')
+          .select('id, username, full_name')
+          .in('id', userIds);
+        if (!_u.error && _u.data) {
+          _u.data.forEach(function (u) {
+            nameMap[u.id] = u.username || u.full_name || ('User ' + u.id);
+          });
+        }
+      }
+
+      var rows = preds.map(function (p) {
+        return {
+          id: p.id,
+          userId: p.user_id,
+          userName: nameMap[p.user_id] || ('User ' + p.user_id),
+          matchId: p.match_id,
+          pick: p.pick,
+          week: p.week_number,
+          pointsAwarded: p.points_awarded
+        };
+      });
+
+      return { requestedMatchIds: ids, total: rows.length, rows: rows };
     }
   };
 

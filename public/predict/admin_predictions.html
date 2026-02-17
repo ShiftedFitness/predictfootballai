@@ -303,8 +303,7 @@ function initUI() {
     $('results').innerHTML = '';
 
     try {
-      const url = `${base}/admin-get-predictions-by-match?matchId=${encodeURIComponent(matchIdsRaw)}`;
-      const data = await fetchJSON(url, secret);
+      const data = await PredictData.getPredictionsByMatch(matchIdsRaw);
       setStatus(`Loaded ${data.total || 0} predictions for matchId(s): ${data.requestedMatchIds.join(', ')}`, 'success');
       renderResults(data);
     } catch (e) {
