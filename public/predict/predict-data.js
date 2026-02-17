@@ -26,6 +26,44 @@
   }
 
   /* ================================================================
+     Week ID ↔ Week Number lookup
+     ================================================================
+     predict_match_weeks.id is auto-generated and may differ from
+     week_number.  We cache the mapping so every layer can translate
+     match_week_id (FK) → the human week number and vice-versa.
+     ================================================================ */
+  var _weekLookup = null; // { idToNum: {54→27}, numToId: {27→54} }
+
+  async function ensureWeekLookup() {
+    if (_weekLookup) return _weekLookup;
+    var _ref = await sb()
+      .from('predict_match_weeks')
+      .select('id, week_number')
+      .order('week_number', { ascending: true });
+    if (_ref.error) throw new Error('week lookup: ' + _ref.error.message);
+    var idToNum = {};
+    var numToId = {};
+    (_ref.data || []).forEach(function (w) {
+      idToNum[w.id] = w.week_number;
+      numToId[w.week_number] = w.id;
+    });
+    _weekLookup = { idToNum: idToNum, numToId: numToId };
+    return _weekLookup;
+  }
+
+  /** Resolve a week_number to the actual match_week_id (FK). Falls back to the input if not found (old data). */
+  async function resolveWeekId(weekNum) {
+    var lookup = await ensureWeekLookup();
+    return lookup.numToId[weekNum] != null ? lookup.numToId[weekNum] : weekNum;
+  }
+
+  /** Resolve a match_week_id to the human week_number. Falls back to the input (old data). */
+  function weekIdToNumber(matchWeekId) {
+    if (!_weekLookup) return matchWeekId;
+    return _weekLookup.idToNum[matchWeekId] != null ? _weekLookup.idToNum[matchWeekId] : matchWeekId;
+  }
+
+  /* ================================================================
      Helpers
      ================================================================ */
 
@@ -36,7 +74,7 @@
   function normaliseMatch(m) {
     return {
       id:                String(m.id),
-      'Week':            m.match_week_id,
+      'Week':            weekIdToNumber(m.match_week_id),
       'Home Team':       m.home_team,
       'Away Team':       m.away_team,
       'Lockout Time':    m.lockout_time,
@@ -94,10 +132,11 @@
        Returns normalised match array for a week.
        ──────────────────────────────────────────────────────────── */
     async getWeekMatches(week) {
+      var matchWeekId = await resolveWeekId(week);
       var _ref = await sb()
         .from('predict_matches')
         .select('*')
-        .eq('match_week_id', week)
+        .eq('match_week_id', matchWeekId)
         .order('id', { ascending: true });
 
       if (_ref.error) throw new Error('getWeekMatches: ' + _ref.error.message);
@@ -146,6 +185,9 @@
        Drop-in replacement for GET /weeks.
        ──────────────────────────────────────────────────────────── */
     async getWeeks() {
+      // Ensure week lookup is loaded so we can translate match_week_id → week_number
+      await ensureWeekLookup();
+
       // Get all matches (need lockout info per week)
       var _ref = await sb()
         .from('predict_matches')
@@ -159,17 +201,27 @@
         return { weeks: [], latest: null, recommendedPickWeek: null, recommendedViewWeek: null, detail: [] };
       }
 
-      // Deduplicate week numbers
-      var weekSet = {};
-      matches.forEach(function (m) { weekSet[m.match_week_id] = true; });
-      var weekNumbers = Object.keys(weekSet).map(Number).sort(function (a, b) { return a - b; });
+      // Deduplicate by match_week_id, then map to human week_number
+      var weekIdSet = {};
+      matches.forEach(function (m) { weekIdSet[m.match_week_id] = true; });
+
+      // Convert match_week_ids to week_numbers for display
+      var weekNumbers = Object.keys(weekIdSet).map(function (id) {
+        return weekIdToNumber(Number(id));
+      }).sort(function (a, b) { return a - b; });
+
+      // Remove duplicates (in case old data and new data overlap)
+      weekNumbers = weekNumbers.filter(function (w, i, arr) { return arr.indexOf(w) === i; });
 
       var latest = weekNumbers[weekNumbers.length - 1];
       var now = Date.now();
 
       // Per-week lock status & earliest lockout
-      var detail = weekNumbers.map(function (w) {
-        var wMatches = matches.filter(function (m) { return m.match_week_id === w; });
+      var detail = weekNumbers.map(function (weekNum) {
+        // Find matches whose match_week_id maps to this weekNum
+        var wMatches = matches.filter(function (m) {
+          return weekIdToNumber(m.match_week_id) === weekNum;
+        });
         var lockouts = wMatches
           .map(function (m) { return m.lockout_time ? new Date(m.lockout_time).getTime() : null; })
           .filter(Boolean)
@@ -179,7 +231,7 @@
                      (lockouts.length > 0 && lockouts[0] <= now);
 
         return {
-          week: w,
+          week: weekNum,
           earliest: lockouts.length ? new Date(lockouts[0]).toISOString() : null,
           locked: locked
         };
@@ -639,6 +691,9 @@
       }
       if (_ins.error) throw new Error('seedWeek insert matches: ' + _ins.error.message);
 
+      // Invalidate week lookup cache so new week is picked up
+      _weekLookup = null;
+
       return { ok: true, week: week, matchesCreated: (_ins.data || []).length };
     },
 
@@ -730,10 +785,11 @@
       week = parseInt(week);
 
       // 1. Get all matches for this week with results
+      var weekId = await resolveWeekId(week);
       var _m = await sb()
         .from('predict_matches')
         .select('id, correct_result')
-        .eq('match_week_id', week);
+        .eq('match_week_id', weekId);
       if (_m.error) throw new Error('scoreWeek matches: ' + _m.error.message);
       var matches = _m.data || [];
 
@@ -836,7 +892,8 @@
           if (p.points_awarded === 1) totalCorrect++;
           else totalIncorrect++;
 
-          var pWeek = p.predict_matches ? p.predict_matches.match_week_id : null;
+          var pWeekId = p.predict_matches ? p.predict_matches.match_week_id : null;
+          var pWeek = pWeekId != null ? weekIdToNumber(pWeekId) : null;
           if (pWeek == null) return;
           if (!weekGroups[pWeek]) weekGroups[pWeek] = { correct: 0, total: 0 };
           weekGroups[pWeek].total++;
@@ -883,10 +940,11 @@
       if (!week) throw new Error('week required');
       week = parseInt(week);
 
+      var weekId = await resolveWeekId(week);
       var _m = await sb()
         .from('predict_matches')
         .select('id, home_team, away_team')
-        .eq('match_week_id', week);
+        .eq('match_week_id', weekId);
       if (_m.error) throw new Error('getMissingPredictions matches: ' + _m.error.message);
       var matches = _m.data || [];
       var matchIds = matches.map(function (m) { return m.id; });
@@ -976,7 +1034,7 @@
           userName: nameMap[p.user_id] || ('User ' + p.user_id),
           matchId: p.match_id,
           pick: p.pick,
-          week: p.predict_matches ? p.predict_matches.match_week_id : null,
+          week: p.predict_matches ? weekIdToNumber(p.predict_matches.match_week_id) : null,
           pointsAwarded: p.points_awarded
         };
       });

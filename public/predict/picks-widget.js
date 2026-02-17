@@ -50,9 +50,9 @@
     .pf-enrich{ margin-top:10px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.06) }
     .pf-pred-bar{ display:flex; height:24px; border-radius:6px; overflow:hidden; margin:6px 0; font-size:11px; font-weight:700 }
     .pf-pred-seg{ display:flex; align-items:center; justify-content:center; min-width:28px; transition: all .15s }
-    .pf-pred-seg.home{ background:#2e7d32; color:#fff }
-    .pf-pred-seg.draw{ background:#555; color:#fff }
-    .pf-pred-seg.away{ background:#c62828; color:#fff }
+    .pf-pred-seg.home{ background:#00E5FF; color:#0B0F12 }
+    .pf-pred-seg.draw{ background:#FFD60A; color:#0B0F12 }
+    .pf-pred-seg.away{ background:#32FF7E; color:#0B0F12 }
     .pf-form-row{ display:flex; align-items:center; gap:5px; margin:4px 0 }
     .pf-form-label{ font-size:11px; color:${THEME.muted}; min-width:70px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
     .pf-form-badge{ width:20px; height:20px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:10px; font-weight:800; flex-shrink:0 }
@@ -178,14 +178,14 @@
           <div class="pf-pred-seg draw" style="width:${pred.draw/total*100}%">${pred.draw}%</div>
           <div class="pf-pred-seg away" style="width:${pred.away/total*100}%">${pred.away}%</div>
         </div>
-        <div class="pf-form-row">
+        ${m['Home Form'] ? `<div class="pf-form-row">
           <span class="pf-form-label">${homeTeam}</span>
           ${formBadgesHtml(m['Home Form'])}
-        </div>
-        <div class="pf-form-row">
+        </div>` : ''}
+        ${m['Away Form'] ? `<div class="pf-form-row">
           <span class="pf-form-label">${awayTeam}</span>
           ${formBadgesHtml(m['Away Form'])}
-        </div>
+        </div>` : ''}
         ${h2hText ? `<div class="pf-h2h">${h2hText}</div>` : ''}
         ${advice ? `<div class="pf-advice">${advice}</div>` : ''}
       </div>
