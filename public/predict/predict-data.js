@@ -567,12 +567,27 @@
         throw new Error('week, lockoutTime, and fixtures array required');
       }
 
-      // Upsert the match_week row
-      var _mw = await sb()
+      // Check if match_week already exists by week_number
+      var weekNum = parseInt(week);
+      var _existing = await sb()
         .from('predict_match_weeks')
-        .upsert({ id: parseInt(week), week_number: parseInt(week), status: 'open' }, { onConflict: 'id' })
-        .select();
-      if (_mw.error) throw new Error('seedWeek match_week: ' + _mw.error.message);
+        .select('id')
+        .eq('week_number', weekNum)
+        .limit(1);
+      if (_existing.error) throw new Error('seedWeek check week: ' + _existing.error.message);
+
+      var matchWeekId;
+      if (_existing.data && _existing.data.length > 0) {
+        matchWeekId = _existing.data[0].id;
+      } else {
+        // Create new week — let the DB auto-generate id
+        var _mw = await sb()
+          .from('predict_match_weeks')
+          .insert({ week_number: weekNum, status: 'open' })
+          .select();
+        if (_mw.error) throw new Error('seedWeek match_week: ' + _mw.error.message);
+        matchWeekId = _mw.data[0].id;
+      }
 
       // Build match rows
       var lockIso = new Date(lockoutTime).toISOString();
@@ -580,7 +595,7 @@
         return {
           home_team: f.home,
           away_team: f.away,
-          match_week_id: parseInt(week),
+          match_week_id: matchWeekId,
           lockout_time: lockIso,
           locked: false,
           correct_result: null,
