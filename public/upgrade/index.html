@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Upgrade — TeleStats</title>
+  <link rel="stylesheet" href="/telestats-theme.css"/>
+  <style>
+    .up-container { max-width: 800px; margin: 80px auto 40px; padding: 0 16px; }
+    .up-hero { text-align: center; margin-bottom: 40px; }
+    .up-hero h1 { font-size: 2rem; font-weight: 700; margin-bottom: 8px; }
+    .up-hero p { color: var(--muted); font-size: 1.05rem; }
+    .up-plans { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 40px; }
+    .up-plan { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 24px; text-align: center; position: relative; }
+    .up-plan.featured { border-color: var(--accent); box-shadow: 0 0 20px rgba(0,229,255,.15); }
+    .up-plan-badge { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: var(--accent); color: #000; font-size: .7rem; font-weight: 700; padding: 3px 12px; border-radius: 10px; text-transform: uppercase; }
+    .up-plan-name { font-size: 1.1rem; font-weight: 600; margin-bottom: 8px; margin-top: 8px; }
+    .up-plan-price { font-size: 2rem; font-weight: 700; margin-bottom: 4px; }
+    .up-plan-price small { font-size: .8rem; font-weight: 400; color: var(--muted); }
+    .up-plan-desc { color: var(--muted); font-size: .85rem; margin-bottom: 16px; }
+    .up-features { list-style: none; padding: 0; margin: 0 0 20px; text-align: left; }
+    .up-features li { padding: 6px 0; font-size: .85rem; display: flex; align-items: flex-start; gap: 8px; }
+    .up-features li::before { content: '\2713'; color: var(--accent); font-weight: 700; flex-shrink: 0; }
+    .up-features li.disabled::before { content: '\2717'; color: #555; }
+    .up-features li.disabled { color: var(--muted); }
+    .up-plan-btn { display: block; width: 100%; padding: 12px; border-radius: 10px; font-size: .95rem; font-weight: 600; cursor: pointer; border: none; transition: all .2s; }
+    .up-plan-btn.primary { background: var(--accent); color: #000; }
+    .up-plan-btn.primary:hover { filter: brightness(1.1); }
+    .up-plan-btn.secondary { background: var(--bg); border: 1px solid var(--border); color: var(--fg); }
+    .up-plan-btn.secondary:hover { border-color: var(--accent); }
+    .up-divider { text-align: center; margin: 32px 0; position: relative; }
+    .up-divider::before { content: ''; position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: var(--border); }
+    .up-divider span { position: relative; background: var(--bg); padding: 0 16px; color: var(--muted); font-size: .9rem; }
+    .up-referral { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 28px; text-align: center; margin-bottom: 32px; }
+    .up-referral h2 { font-size: 1.3rem; margin-bottom: 8px; }
+    .up-referral p { color: var(--muted); font-size: .9rem; margin-bottom: 16px; }
+    .up-ref-code { display: flex; align-items: center; gap: 8px; justify-content: center; margin-bottom: 16px; }
+    .up-ref-code-val { background: var(--bg); border: 1px dashed var(--accent); padding: 10px 20px; border-radius: 8px; font-family: monospace; font-size: 1.1rem; font-weight: 600; letter-spacing: .1em; color: var(--accent); }
+    .up-ref-copy { padding: 10px 16px; border-radius: 8px; background: var(--accent); border: none; color: #000; cursor: pointer; font-weight: 600; font-size: .85rem; }
+    .up-ref-progress { margin-top: 12px; }
+    .up-ref-bar { height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; max-width: 300px; margin: 8px auto; }
+    .up-ref-fill { height: 100%; background: linear-gradient(90deg, var(--accent), #32FF7E); border-radius: 4px; transition: width .4s; }
+    .up-ref-status { font-size: .85rem; color: var(--muted); }
+    .up-ref-share { display: flex; gap: 8px; justify-content: center; margin-top: 12px; }
+    .up-ref-share-btn { padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border); background: var(--card); color: var(--fg); cursor: pointer; font-size: .85rem; }
+    .up-ref-share-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .up-compare { margin-bottom: 32px; }
+    .up-compare h2 { font-size: 1.2rem; text-align: center; margin-bottom: 16px; }
+    .up-table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+    .up-table th { padding: 10px; text-align: center; border-bottom: 1px solid var(--border); color: var(--muted); font-size: .75rem; text-transform: uppercase; }
+    .up-table td { padding: 10px; text-align: center; border-bottom: 1px solid var(--border); }
+    .up-table td:first-child { text-align: left; color: var(--muted); }
+    .up-table .check { color: var(--accent); font-weight: 700; }
+    .up-table .cross { color: #555; }
+    .up-faq { margin-bottom: 32px; }
+    .up-faq h2 { font-size: 1.2rem; margin-bottom: 16px; text-align: center; }
+    .up-faq-item { margin-bottom: 12px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+    .up-faq-q { padding: 14px 16px; font-weight: 600; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+    .up-faq-q::after { content: '+'; font-size: 1.2rem; color: var(--muted); }
+    .up-faq-item.open .up-faq-q::after { content: '\2212'; }
+    .up-faq-a { padding: 0 16px 14px; color: var(--muted); font-size: .85rem; line-height: 1.5; display: none; }
+    .up-faq-item.open .up-faq-a { display: block; }
+    @media (max-width: 640px) {
+      .up-container { margin-top: 70px; }
+      .up-plans { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="up-container">
+    <div class="up-hero">
+      <h1>Unlock the Full TeleStats Experience</h1>
+      <p>More plays, all categories, community creation, and zero limits</p>
+    </div>
+
+    <div class="up-plans">
+      <!-- Free -->
+      <div class="up-plan">
+        <div class="up-plan-name">Free</div>
+        <div class="up-plan-price">£0 <small>forever</small></div>
+        <div class="up-plan-desc">Get started with the basics</div>
+        <ul class="up-features">
+          <li>5 plays per game per day</li>
+          <li>Free category access</li>
+          <li>XP and levelling</li>
+          <li>Global leaderboard</li>
+          <li class="disabled">Locked categories</li>
+          <li class="disabled">Community game creation</li>
+        </ul>
+        <button class="up-plan-btn secondary" id="upFreeBtn">Current Plan</button>
+      </div>
+
+      <!-- Referral -->
+      <div class="up-plan">
+        <div class="up-plan-name">Referral Unlocked</div>
+        <div class="up-plan-price">Free <small>invite 5 friends</small></div>
+        <div class="up-plan-desc">Unlock more by sharing</div>
+        <ul class="up-features">
+          <li>8 plays per game per day</li>
+          <li>All categories unlocked</li>
+          <li>XP and levelling</li>
+          <li>Global leaderboard</li>
+          <li>All premium categories</li>
+          <li class="disabled">Community game creation</li>
+        </ul>
+        <button class="up-plan-btn secondary" onclick="document.getElementById('upReferral').scrollIntoView({behavior:'smooth'})">Invite Friends</button>
+      </div>
+
+      <!-- Paid -->
+      <div class="up-plan featured">
+        <div class="up-plan-badge">Best Value</div>
+        <div class="up-plan-name">Pro</div>
+        <div class="up-plan-price">£4.99 <small>one-off</small></div>
+        <div class="up-plan-desc">Unlimited everything, forever</div>
+        <ul class="up-features">
+          <li>Unlimited plays</li>
+          <li>All categories unlocked</li>
+          <li>XP and levelling</li>
+          <li>Global leaderboard</li>
+          <li>All premium categories</li>
+          <li>Create community games</li>
+        </ul>
+        <button class="up-plan-btn primary" id="upBuyBtn">Buy Pro — £4.99</button>
+      </div>
+    </div>
+
+    <div class="up-divider"><span>or unlock for free</span></div>
+
+    <div class="up-referral" id="upReferral">
+      <h2>Invite Friends, Unlock More</h2>
+      <p>Share your referral code. When 5 friends sign up, you both get premium categories and extra daily plays.</p>
+      <div class="up-ref-code" id="upRefCode" style="display:none">
+        <span class="up-ref-code-val" id="upRefVal"></span>
+        <button class="up-ref-copy" id="upRefCopy">Copy</button>
+      </div>
+      <div class="up-ref-progress" id="upRefProgress" style="display:none">
+        <div class="up-ref-bar"><div class="up-ref-fill" id="upRefFill"></div></div>
+        <div class="up-ref-status" id="upRefStatus"></div>
+      </div>
+      <div class="up-ref-share" id="upRefShare" style="display:none">
+        <button class="up-ref-share-btn" id="upShareLink">Copy Invite Link</button>
+        <button class="up-ref-share-btn" id="upShareWhatsApp">WhatsApp</button>
+        <button class="up-ref-share-btn" id="upShareTwitter">X / Twitter</button>
+      </div>
+      <p id="upRefLogin" style="display:none;margin-top:12px;"><button class="up-plan-btn secondary" onclick="TSNav.showAuthModal('signup')" style="max-width:200px;margin:0 auto;">Sign Up to Get Code</button></p>
+    </div>
+
+    <div class="up-compare">
+      <h2>Feature Comparison</h2>
+      <table class="up-table">
+        <thead>
+          <tr><th></th><th>Anonymous</th><th>Free</th><th>Referral</th><th>Pro</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Daily plays</td><td>3 total</td><td>5/game</td><td>8/game</td><td class="check">Unlimited</td></tr>
+          <tr><td>Free categories</td><td class="check">&#10003;</td><td class="check">&#10003;</td><td class="check">&#10003;</td><td class="check">&#10003;</td></tr>
+          <tr><td>Premium categories</td><td class="cross">&#10007;</td><td class="cross">&#10007;</td><td class="check">&#10003;</td><td class="check">&#10003;</td></tr>
+          <tr><td>XP &amp; levelling</td><td class="check">&#10003;</td><td class="check">&#10003;</td><td class="check">&#10003;</td><td class="check">&#10003;</td></tr>
+          <tr><td>Leaderboard</td><td class="cross">&#10007;</td><td class="check">&#10003;</td><td class="check">&#10003;</td><td class="check">&#10003;</td></tr>
+          <tr><td>Profile page</td><td class="cross">&#10007;</td><td class="check">&#10003;</td><td class="check">&#10003;</td><td class="check">&#10003;</td></tr>
+          <tr><td>Create games</td><td class="cross">&#10007;</td><td class="cross">&#10007;</td><td class="cross">&#10007;</td><td class="check">&#10003;</td></tr>
+          <tr><td>Price</td><td>Free</td><td>Free</td><td>Free</td><td>£4.99</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="up-faq">
+      <h2>FAQ</h2>
+      <div class="up-faq-item">
+        <div class="up-faq-q">Is the Pro upgrade a subscription?</div>
+        <div class="up-faq-a">No! It's a one-time payment of £4.99. Pay once, keep Pro forever.</div>
+      </div>
+      <div class="up-faq-item">
+        <div class="up-faq-q">What happens to my progress if I upgrade?</div>
+        <div class="up-faq-a">Everything carries over — your XP, level, achievements, and game history are all preserved.</div>
+      </div>
+      <div class="up-faq-item">
+        <div class="up-faq-q">Can I get premium categories without paying?</div>
+        <div class="up-faq-a">Yes! Invite 5 friends using your referral code and you'll both unlock premium categories and extra daily plays.</div>
+      </div>
+      <div class="up-faq-item">
+        <div class="up-faq-q">What payment methods do you accept?</div>
+        <div class="up-faq-a">We accept all major credit and debit cards through Stripe. Your payment information is never stored on our servers.</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/js/ts-auth.js"></script>
+  <script src="/js/ts-data.js"></script>
+  <script src="/js/ts-nav.js"></script>
+  <script>
+    (async function () {
+      await TSAuth.init();
+      TSNav.render();
+
+      const user = TSAuth.getUser();
+      const isAnon = TSAuth.isAnonymous();
+
+      // Update plan button states
+      const freeBtn = document.getElementById('upFreeBtn');
+      const buyBtn = document.getElementById('upBuyBtn');
+
+      if (isAnon) {
+        freeBtn.textContent = 'Sign Up Free';
+        freeBtn.addEventListener('click', () => TSNav.showAuthModal('signup'));
+      } else if (user?.tier === 'paid') {
+        freeBtn.textContent = 'Free';
+        buyBtn.textContent = 'Current Plan';
+        buyBtn.disabled = true;
+        buyBtn.style.opacity = '.5';
+      } else {
+        freeBtn.textContent = 'Current Plan';
+        freeBtn.disabled = true;
+        freeBtn.style.opacity = '.5';
+      }
+
+      // Buy button — placeholder
+      buyBtn.addEventListener('click', () => {
+        if (isAnon) { TSNav.showAuthModal('signup'); return; }
+        alert('Payment integration coming soon! For now, enjoy the free tier.');
+      });
+
+      // Referral section
+      const refCode = document.getElementById('upRefCode');
+      const refVal = document.getElementById('upRefVal');
+      const refCopy = document.getElementById('upRefCopy');
+      const refProgress = document.getElementById('upRefProgress');
+      const refFill = document.getElementById('upRefFill');
+      const refStatus = document.getElementById('upRefStatus');
+      const refShare = document.getElementById('upRefShare');
+      const refLogin = document.getElementById('upRefLogin');
+
+      if (!isAnon && user?.referral_code) {
+        refCode.style.display = 'flex';
+        refVal.textContent = user.referral_code;
+        refProgress.style.display = 'block';
+        refShare.style.display = 'flex';
+
+        const count = user.referral_count || 0;
+        const pct = Math.min(100, Math.round((count / 5) * 100));
+        refFill.style.width = pct + '%';
+
+        if (user.referral_unlocked) {
+          refStatus.textContent = `Unlocked! You've referred ${count} friends.`;
+        } else {
+          refStatus.textContent = `${count}/5 friends referred — ${5 - count} more to unlock!`;
+        }
+
+        // Copy code
+        refCopy.addEventListener('click', async () => {
+          try {
+            await navigator.clipboard.writeText(user.referral_code);
+            refCopy.textContent = 'Copied!';
+            setTimeout(() => refCopy.textContent = 'Copy', 2000);
+          } catch {}
+        });
+
+        // Share buttons
+        const inviteUrl = `https://telestats.net/?ref=${user.referral_code}`;
+        const shareText = `Join me on TeleStats — the ultimate Premier League quiz! Use my referral code: ${user.referral_code}\n${inviteUrl}`;
+
+        document.getElementById('upShareLink').addEventListener('click', async () => {
+          try {
+            await navigator.clipboard.writeText(inviteUrl);
+            document.getElementById('upShareLink').textContent = 'Copied!';
+            setTimeout(() => document.getElementById('upShareLink').textContent = 'Copy Invite Link', 2000);
+          } catch {}
+        });
+
+        document.getElementById('upShareWhatsApp').addEventListener('click', () => {
+          window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, '_blank');
+        });
+
+        document.getElementById('upShareTwitter').addEventListener('click', () => {
+          window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`, '_blank');
+        });
+      } else if (isAnon) {
+        refLogin.style.display = 'block';
+      } else {
+        refCode.style.display = 'none';
+        refStatus.textContent = 'No referral code assigned yet. Contact support.';
+        refProgress.style.display = 'block';
+      }
+
+      // FAQ toggle
+      document.querySelectorAll('.up-faq-item').forEach(item => {
+        item.querySelector('.up-faq-q').addEventListener('click', () => {
+          item.classList.toggle('open');
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

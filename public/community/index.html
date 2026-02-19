@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Community — TeleStats</title>
+  <link rel="stylesheet" href="/telestats-theme.css"/>
+  <style>
+    .comm-container { max-width: 900px; margin: 80px auto 40px; padding: 0 16px; }
+    .comm-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+    .comm-title { font-size: 1.6rem; font-weight: 700; }
+    .comm-subtitle { color: var(--muted); font-size: .9rem; margin-top: 4px; }
+    .comm-create-btn { padding: 10px 20px; border-radius: 10px; background: var(--accent); border: none; color: #000; font-weight: 600; cursor: pointer; font-size: .9rem; }
+    .comm-create-btn:disabled { opacity: .4; cursor: not-allowed; }
+    .comm-filters { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+    .comm-filter { padding: 6px 14px; border-radius: 8px; background: var(--card); border: 1px solid var(--border); color: var(--muted); cursor: pointer; font-size: .8rem; transition: all .2s; }
+    .comm-filter:hover { border-color: var(--accent); }
+    .comm-filter.active { background: var(--accent); color: #000; border-color: var(--accent); font-weight: 600; }
+    .comm-sort { display: flex; gap: 8px; margin-bottom: 20px; }
+    .comm-sort-btn { padding: 5px 12px; border-radius: 6px; background: transparent; border: 1px solid var(--border); color: var(--muted); cursor: pointer; font-size: .8rem; }
+    .comm-sort-btn.active { color: var(--fg); border-color: var(--fg); }
+    .comm-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+    .comm-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px; transition: transform .2s, border-color .2s; cursor: pointer; }
+    .comm-card:hover { transform: translateY(-2px); border-color: var(--accent); }
+    .comm-card-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .comm-card-type { font-size: .7rem; text-transform: uppercase; letter-spacing: .05em; color: var(--accent); font-weight: 600; }
+    .comm-card-votes { display: flex; align-items: center; gap: 6px; }
+    .comm-vote-btn { background: none; border: none; cursor: pointer; font-size: 1rem; padding: 2px; opacity: .5; transition: opacity .2s; }
+    .comm-vote-btn:hover { opacity: 1; }
+    .comm-vote-btn.voted { opacity: 1; }
+    .comm-vote-count { font-size: .85rem; font-weight: 600; color: var(--fg); min-width: 20px; text-align: center; }
+    .comm-card-title { font-size: 1.05rem; font-weight: 600; margin-bottom: 6px; }
+    .comm-card-desc { font-size: .8rem; color: var(--muted); margin-bottom: 10px; line-height: 1.4; }
+    .comm-card-footer { display: flex; align-items: center; justify-content: space-between; font-size: .75rem; color: var(--muted); }
+    .comm-card-creator a { color: var(--muted); text-decoration: none; }
+    .comm-card-creator a:hover { color: var(--accent); }
+    .comm-card-plays { display: flex; align-items: center; gap: 4px; }
+    .comm-empty { text-align: center; padding: 48px 16px; color: var(--muted); }
+    .comm-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 16px; }
+    .comm-modal { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 28px; width: 100%; max-width: 500px; }
+    .comm-modal h2 { margin-bottom: 16px; font-size: 1.2rem; }
+    .comm-modal label { display: block; font-size: .85rem; color: var(--muted); margin-bottom: 4px; margin-top: 12px; }
+    .comm-modal input, .comm-modal select, .comm-modal textarea { width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--fg); font-size: .9rem; margin-bottom: 4px; box-sizing: border-box; }
+    .comm-modal textarea { min-height: 80px; resize: vertical; }
+    .comm-modal-actions { display: flex; gap: 8px; margin-top: 16px; }
+    .comm-modal-actions button { flex: 1; padding: 10px; border-radius: 8px; font-size: .9rem; cursor: pointer; }
+    .comm-modal .btn-cancel { background: var(--bg); border: 1px solid var(--border); color: var(--fg); }
+    .comm-modal .btn-submit { background: var(--accent); border: none; color: #000; font-weight: 600; }
+    .comm-modal .comm-msg { margin-top: 8px; font-size: .85rem; }
+    .comm-modal .comm-msg.error { color: #E05555; }
+    @media (max-width: 640px) {
+      .comm-container { margin-top: 70px; }
+      .comm-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="comm-container">
+    <div class="comm-header">
+      <div>
+        <h1 class="comm-title">Community Games</h1>
+        <p class="comm-subtitle">Player-created quiz rounds for everyone to enjoy</p>
+      </div>
+      <button class="comm-create-btn" id="commCreateBtn">+ Create Game</button>
+    </div>
+
+    <div class="comm-filters" id="commFilters">
+      <button class="comm-filter active" data-type="all">All</button>
+      <button class="comm-filter" data-type="bullseye">Bullseye</button>
+      <button class="comm-filter" data-type="starting_xi">Starting XI</button>
+      <button class="comm-filter" data-type="who_am_i">Who Am I?</button>
+      <button class="comm-filter" data-type="pop_quiz">Pop Quiz</button>
+      <button class="comm-filter" data-type="higher_lower">Higher or Lower</button>
+      <button class="comm-filter" data-type="player_alphabet">Alphabet</button>
+    </div>
+
+    <div class="comm-sort" id="commSort">
+      <button class="comm-sort-btn active" data-sort="popular">Most Played</button>
+      <button class="comm-sort-btn" data-sort="rated">Highest Rated</button>
+      <button class="comm-sort-btn" data-sort="newest">Newest</button>
+    </div>
+
+    <div class="comm-grid" id="commGrid">
+      <div class="comm-empty"><p>Loading community games...</p></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/js/ts-auth.js"></script>
+  <script src="/js/ts-data.js"></script>
+  <script src="/js/ts-nav.js"></script>
+  <script>
+    (async function () {
+      await TSAuth.init();
+      TSNav.render();
+
+      const grid = document.getElementById('commGrid');
+      const filtersEl = document.getElementById('commFilters');
+      const sortEl = document.getElementById('commSort');
+      const createBtn = document.getElementById('commCreateBtn');
+
+      let currentType = 'all';
+      let currentSort = 'popular';
+
+      // Check create eligibility
+      const user = TSAuth.getUser();
+      const canCreate = user && (user.tier === 'paid' || (user.level || 1) >= 6);
+      if (!canCreate) {
+        createBtn.disabled = true;
+        createBtn.title = 'Reach Level 6 or upgrade to create games';
+      }
+
+      // Filters
+      filtersEl.querySelectorAll('.comm-filter').forEach(btn => {
+        btn.addEventListener('click', () => {
+          filtersEl.querySelectorAll('.comm-filter').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          currentType = btn.dataset.type;
+          loadGames();
+        });
+      });
+
+      // Sort
+      sortEl.querySelectorAll('.comm-sort-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          sortEl.querySelectorAll('.comm-sort-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          currentSort = btn.dataset.sort;
+          loadGames();
+        });
+      });
+
+      // Create button
+      createBtn.addEventListener('click', () => {
+        if (!canCreate) {
+          if (TSAuth.isAnonymous()) {
+            TSNav.showAuthModal('signup');
+          } else {
+            alert('You need to be Level 6 or have a paid account to create games.');
+          }
+          return;
+        }
+        showCreateModal();
+      });
+
+      async function loadGames() {
+        grid.innerHTML = '<div class="comm-empty"><p>Loading...</p></div>';
+        const games = await TSData.getCommunityGames(currentType, currentSort, 30);
+
+        if (!games.length) {
+          grid.innerHTML = '<div class="comm-empty"><p>No community games yet. Be the first to create one!</p></div>';
+          return;
+        }
+
+        grid.innerHTML = games.map(g => {
+          const creator = g.ts_users;
+          const creatorName = creator ? (creator.username || creator.display_name || 'Anonymous') : 'Anonymous';
+          const typeLabel = TSData.GAME_TYPE_LABELS[g.game_type] || g.game_type;
+          const votes = (g.upvotes || 0) - (g.downvotes || 0);
+
+          return `<div class="comm-card" data-id="${g.id}">
+            <div class="comm-card-top">
+              <span class="comm-card-type">${esc(typeLabel)}</span>
+              <div class="comm-card-votes">
+                <button class="comm-vote-btn" data-vote="1" data-game="${g.id}" title="Upvote">\u25B2</button>
+                <span class="comm-vote-count">${votes}</span>
+                <button class="comm-vote-btn" data-vote="-1" data-game="${g.id}" title="Downvote">\u25BC</button>
+              </div>
+            </div>
+            <div class="comm-card-title">${esc(g.title)}</div>
+            <div class="comm-card-desc">${esc(g.description || '')}</div>
+            <div class="comm-card-footer">
+              <span class="comm-card-creator">by <a href="/profile/?user=${encodeURIComponent(creator?.username || '')}">${esc(creatorName)}</a></span>
+              <span class="comm-card-plays">\u25B6 ${g.play_count || 0} plays</span>
+            </div>
+          </div>`;
+        }).join('');
+
+        // Vote handlers
+        grid.querySelectorAll('.comm-vote-btn').forEach(btn => {
+          btn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            if (TSAuth.isAnonymous()) { TSNav.showAuthModal('login'); return; }
+            const gameId = btn.dataset.game;
+            const vote = parseInt(btn.dataset.vote);
+            const result = await TSData.voteCommunityGame(gameId, vote);
+            if (result.success) loadGames();
+          });
+        });
+      }
+
+      function showCreateModal() {
+        const overlay = document.createElement('div');
+        overlay.className = 'comm-modal-overlay';
+        overlay.innerHTML = `
+          <div class="comm-modal">
+            <h2>Create Community Game</h2>
+            <label>Game Type</label>
+            <select id="commGameType">
+              <option value="pop_quiz">Pop Quiz</option>
+              <option value="who_am_i">Who Am I?</option>
+              <option value="starting_xi">Starting XI</option>
+              <option value="bullseye">Bullseye</option>
+              <option value="higher_lower">Higher or Lower</option>
+              <option value="player_alphabet">Player Alphabet</option>
+            </select>
+            <label>Title</label>
+            <input type="text" id="commTitle" placeholder="e.g. Premier League 2024 Special" maxlength="100"/>
+            <label>Description</label>
+            <textarea id="commDesc" placeholder="What makes this game special?" maxlength="500"></textarea>
+            <label>Game Data (JSON)</label>
+            <textarea id="commData" placeholder='{"questions": [...]}' style="font-family:monospace;font-size:.8rem;"></textarea>
+            <div class="comm-msg" id="commMsg"></div>
+            <div class="comm-modal-actions">
+              <button class="btn-cancel" id="commCancel">Cancel</button>
+              <button class="btn-submit" id="commSubmit">Publish</button>
+            </div>
+          </div>`;
+
+        document.body.appendChild(overlay);
+
+        document.getElementById('commCancel').addEventListener('click', () => overlay.remove());
+        overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+
+        document.getElementById('commSubmit').addEventListener('click', async () => {
+          const msg = document.getElementById('commMsg');
+          const title = document.getElementById('commTitle').value.trim();
+          const desc = document.getElementById('commDesc').value.trim();
+          const gameType = document.getElementById('commGameType').value;
+          const dataStr = document.getElementById('commData').value.trim();
+
+          if (!title) { msg.textContent = 'Title is required'; msg.className = 'comm-msg error'; return; }
+
+          let gameData = {};
+          if (dataStr) {
+            try { gameData = JSON.parse(dataStr); }
+            catch { msg.textContent = 'Invalid JSON in game data'; msg.className = 'comm-msg error'; return; }
+          }
+
+          msg.textContent = 'Publishing...';
+          msg.className = 'comm-msg';
+
+          const result = await TSData.createCommunityGame({
+            game_type: gameType,
+            title,
+            description: desc,
+            game_data: gameData,
+            status: 'published'
+          });
+
+          if (result.error) {
+            msg.textContent = result.error;
+            msg.className = 'comm-msg error';
+          } else {
+            overlay.remove();
+            loadGames();
+          }
+        });
+      }
+
+      function esc(s) {
+        return String(s).replace(/[&<>"']/g, m =>
+          ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+      }
+
+      await loadGames();
+    })();
+  </script>
+</body>
+</html>

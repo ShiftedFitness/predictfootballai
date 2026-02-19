@@ -3,121 +3,437 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
-<title>TeleStats</title>
+<title>TeleStats — Premier League Games &amp; Predictions</title>
+<meta name="description" content="Test your Premier League knowledge with Bullseye, Starting XI, Who Am I?, Pop Quiz and more. Track your stats, climb the leaderboard."/>
 <link rel="stylesheet" href="telestats-theme.css"/>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
+body { min-height: 100vh; padding-bottom: 40px; }
+.container { max-width: 640px; margin: 0 auto; padding: 0 16px; }
+
+/* Hero */
+.hero {
+  text-align: center;
+  padding: 40px 16px 32px;
 }
-.container {
-  max-width: 520px;
-  width: 100%;
+.hero-logo { height: 56px; width: auto; margin-bottom: 16px; }
+.hero h1 { font-size: 36px; font-weight: 800; letter-spacing: -1px; margin-bottom: 6px; }
+.hero h1 .accent { color: var(--accent-cyan); }
+.hero .tagline { color: var(--text-muted); font-size: 15px; margin-bottom: 24px; }
+.hero-cta {
+  display: inline-block;
+  background: var(--accent-yellow);
+  color: #0B0F12;
+  font-size: 16px;
+  font-weight: 700;
+  padding: 14px 32px;
+  border-radius: 10px;
+  text-decoration: none;
+  transition: background 0.15s, transform 0.15s;
+}
+.hero-cta:hover { background: #E6C009; transform: translateY(-1px); }
+
+/* User welcome (shown when logged in) */
+.user-welcome {
+  background: var(--bg-card);
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  border: 1px solid rgba(255,255,255,0.04);
+}
+.user-welcome-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.user-welcome-name { font-size: 16px; font-weight: 700; }
+.user-welcome-streak {
+  font-size: 13px;
+  color: var(--accent-yellow);
+  font-weight: 700;
+  font-family: 'Space Mono', monospace;
+}
+.user-xp-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.user-xp-row .ts-xp-bar { flex: 1; }
+.user-xp-label { white-space: nowrap; font-family: 'Space Mono', monospace; }
+
+/* Signup banner (shown when anonymous) */
+.signup-banner {
+  background: linear-gradient(135deg, rgba(0,229,255,0.08), rgba(255,214,10,0.08));
+  border: 1px solid rgba(0,229,255,0.2);
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
   text-align: center;
 }
-.logo {
-  height: 64px;
-  width: auto;
+.signup-banner p { color: var(--text-secondary); font-size: 14px; margin-bottom: 10px; line-height: 1.4; }
+.signup-banner-btn {
+  display: inline-block;
+  background: var(--accent-cyan);
+  color: #0B0F12;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 8px 20px;
+  border-radius: 6px;
+  text-decoration: none;
+  cursor: pointer;
+  border: none;
+  transition: background 0.15s;
+}
+.signup-banner-btn:hover { background: #00B8D4; }
+
+/* Section headers */
+.section-title {
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 12px;
+  padding-left: 4px;
+}
+
+/* Game cards grid */
+.games-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
   margin-bottom: 24px;
 }
-h1 {
-  font-size: 36px;
-  font-weight: 800;
-  letter-spacing: -1px;
-  color: var(--text-primary);
-  margin-bottom: 8px;
-}
-h1 .accent { color: var(--accent-cyan); }
-.tagline {
-  color: var(--text-muted);
-  font-size: 15px;
-  font-family: 'Inter', sans-serif;
-  margin-bottom: 32px;
-}
-.link-card {
-  display: block;
+.game-card-mini {
+  display: flex;
+  flex-direction: column;
   background: var(--bg-card);
-  border-radius: 14px;
-  padding: 20px 24px;
+  border-radius: 12px;
+  padding: 16px;
   text-decoration: none;
   color: var(--text-primary);
   border: 1px solid rgba(255,255,255,0.04);
   transition: all 0.15s;
-  margin-bottom: 12px;
   position: relative;
 }
-.link-card:hover {
+.game-card-mini:hover {
   border-color: var(--accent-cyan);
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.3);
 }
-.link-card .card-title {
-  font-size: 18px;
-  font-weight: 700;
-  letter-spacing: -0.4px;
-}
-.link-card .card-desc {
-  font-size: 13px;
-  color: var(--text-secondary);
-  margin-top: 4px;
-  font-family: 'Inter', sans-serif;
-}
-.link-card .arrow {
+.game-card-mini .gc-icon { font-size: 28px; margin-bottom: 8px; }
+.game-card-mini .gc-name { font-size: 14px; font-weight: 700; letter-spacing: -0.3px; margin-bottom: 4px; }
+.game-card-mini .gc-desc { font-size: 11px; color: var(--text-muted); line-height: 1.4; }
+.game-card-mini .gc-badge {
   position: absolute;
-  top: 50%;
-  right: 20px;
-  transform: translateY(-50%);
-  font-size: 20px;
-  color: var(--text-muted);
-  transition: color 0.2s;
+  top: 8px;
+  right: 8px;
+  background: var(--accent-yellow);
+  color: #0B0F12;
+  font-size: 8px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-family: 'Space Mono', monospace;
 }
-.link-card:hover .arrow { color: var(--accent-cyan); }
-.coming-soon {
+
+/* Leaderboard widget */
+.lb-widget {
+  background: var(--bg-card);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 24px;
+  border: 1px solid rgba(255,255,255,0.04);
+}
+.lb-row {
+  display: flex;
+  align-items: center;
+  padding: 8px 0;
+  gap: 10px;
+}
+.lb-row + .lb-row { border-top: 1px solid rgba(255,255,255,0.04); }
+.lb-rank {
+  width: 24px;
+  font-family: 'Space Mono', monospace;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text-muted);
+  text-align: center;
+}
+.lb-rank.gold { color: var(--accent-yellow); }
+.lb-rank.silver { color: #C0C0C0; }
+.lb-rank.bronze { color: #CD7F32; }
+.lb-name { flex: 1; font-size: 14px; font-weight: 600; }
+.lb-level { margin-right: 4px; }
+.lb-xp {
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  color: var(--accent-yellow);
+  font-weight: 700;
+}
+.lb-empty {
+  text-align: center;
   color: var(--text-muted);
   font-size: 13px;
-  margin-top: 32px;
+  padding: 20px;
+}
+.lb-footer {
+  text-align: center;
+  margin-top: 10px;
+}
+.lb-footer a {
+  color: var(--accent-cyan);
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+}
+.lb-footer a:hover { text-decoration: underline; }
+
+/* Community spotlight */
+.comm-grid {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+.comm-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg-card);
+  border-radius: 10px;
+  padding: 12px 14px;
+  text-decoration: none;
+  color: var(--text-primary);
+  border: 1px solid rgba(255,255,255,0.04);
+  transition: border-color 0.15s;
+}
+.comm-card:hover { border-color: var(--accent-cyan); }
+.comm-icon { font-size: 24px; flex-shrink: 0; }
+.comm-info { flex: 1; min-width: 0; }
+.comm-title { font-size: 14px; font-weight: 600; }
+.comm-meta { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.comm-plays {
   font-family: 'Space Mono', monospace;
-  opacity: 0.6;
+  font-size: 11px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+/* Stat of the day */
+.stat-banner {
+  background: linear-gradient(135deg, var(--bg-card), var(--bg-elevated));
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+  border: 1px solid rgba(255,255,255,0.04);
+}
+.stat-banner .stat-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent-cyan);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 6px;
+  font-family: 'Space Mono', monospace;
+}
+.stat-banner .stat-text {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* Footer */
+footer {
+  text-align: center;
+  padding: 32px 16px 16px;
+  font-size: 11px;
+  color: var(--text-muted);
+  opacity: 0.5;
+  font-family: 'Space Mono', monospace;
+}
+
+@media (max-width: 400px) {
+  .games-grid { grid-template-columns: 1fr; }
+  .hero h1 { font-size: 28px; }
 }
 </style>
 </head>
 <body>
 
-<div class="ts-header">
-  <img src="https://res.cloudinary.com/dbfvogb95/image/upload/v1770835428/Screenshot_2026-02-11_at_19.43.16_m7urul.png" alt="TeleStats" class="ts-logo"/>
-  <span>TeleStats.net</span>
-  <span class="ts-time" id="tsTime"></span>
-</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/js/ts-auth.js"></script>
+<script src="/js/ts-data.js"></script>
+<script src="/js/ts-nav.js"></script>
 
 <div class="container">
-  <img src="https://res.cloudinary.com/dbfvogb95/image/upload/v1770835428/Screenshot_2026-02-11_at_19.43.16_m7urul.png" alt="TeleStats" class="logo"/>
-  <h1>Tele<span class="accent">Stats</span></h1>
-  <div class="tagline">Premier League data, games &amp; predictions</div>
+  <div class="hero">
+    <img src="https://res.cloudinary.com/dbfvogb95/image/upload/v1770835428/Screenshot_2026-02-11_at_19.43.16_m7urul.png" alt="TeleStats" class="hero-logo"/>
+    <h1>Tele<span class="accent">Stats</span></h1>
+    <div class="tagline">Premier League data, games &amp; predictions</div>
+    <a href="/games/" class="hero-cta">Play Now</a>
+  </div>
 
-  <a href="/games/" class="link-card">
-    <div class="card-title">Games</div>
-    <div class="card-desc">Bullseye, Starting XI, Who Am I?, Pop Quiz</div>
-    <span class="arrow">&rarr;</span>
-  </a>
+  <!-- Dynamic: user welcome or signup banner -->
+  <div id="userSection"></div>
 
-  <div class="coming-soon">More coming soon.</div>
+  <!-- Stat of the day -->
+  <div class="stat-banner" id="statBanner" style="display:none">
+    <div class="stat-label">Did You Know?</div>
+    <div class="stat-text" id="statText"></div>
+  </div>
+
+  <!-- Games -->
+  <div class="section-title">Games</div>
+  <div class="games-grid">
+    <a href="/games/bullseye.html" class="game-card-mini">
+      <span class="gc-icon">&#127919;</span>
+      <div class="gc-name">Bullseye</div>
+      <div class="gc-desc">Darts-style football 501</div>
+    </a>
+    <a href="/games/xi.html" class="game-card-mini">
+      <span class="gc-icon">&#9917;</span>
+      <div class="gc-name">Starting XI</div>
+      <div class="gc-desc">Name the lineup</div>
+    </a>
+    <a href="/games/whoami.html" class="game-card-mini">
+      <span class="gc-icon">&#128373;&#65039;</span>
+      <div class="gc-name">Who Am I?</div>
+      <div class="gc-desc">Guess the mystery player</div>
+    </a>
+    <a href="/games/quiz.html" class="game-card-mini">
+      <span class="gc-icon">&#129504;</span>
+      <div class="gc-name">Pop Quiz</div>
+      <div class="gc-desc">5 data-powered questions</div>
+    </a>
+    <a href="/games/hol.html" class="game-card-mini">
+      <span class="gc-icon">&#127183;</span>
+      <div class="gc-name">Higher or Lower</div>
+      <div class="gc-desc">Guess the stat</div>
+      <span class="gc-badge">New</span>
+    </a>
+    <a href="/games/alpha.html" class="game-card-mini">
+      <span class="gc-icon">&#128292;</span>
+      <div class="gc-name">Player Alphabet</div>
+      <div class="gc-desc">A-Z player names</div>
+      <span class="gc-badge">New</span>
+    </a>
+  </div>
+
+  <!-- Leaderboard widget -->
+  <div class="section-title">Leaderboard</div>
+  <div class="lb-widget" id="lbWidget">
+    <div class="lb-empty">Loading...</div>
+  </div>
+
+  <!-- Community spotlight -->
+  <div class="section-title">Community</div>
+  <div class="comm-grid" id="commGrid">
+    <div class="lb-empty">No community games yet. Be the first to create one!</div>
+  </div>
 </div>
 
+<footer>
+  TeleStats.net &middot; Built with Supabase
+</footer>
+
 <script>
-function updateClock() {
-  const now = new Date();
-  const hh = String(now.getHours()).padStart(2, '0');
-  const mm = String(now.getMinutes()).padStart(2, '0');
-  const el = document.getElementById('tsTime');
-  if (el) el.textContent = hh + ':' + mm;
+(async function() {
+  // Init auth (creates anonymous user if needed)
+  await TSAuth.init();
+  TSNav.render();
+
+  const user = TSAuth.getUser();
+  const userSection = document.getElementById('userSection');
+
+  if (user && !TSAuth.isAnonymous()) {
+    // Logged-in welcome card
+    const xp = TSAuth.getXPProgress();
+    const streak = user.current_streak || 0;
+    userSection.innerHTML = `
+      <div class="user-welcome">
+        <div class="user-welcome-top">
+          <span class="user-welcome-name">${escHTML(user.username || user.display_name || 'Player')}</span>
+          ${streak > 0 ? `<span class="user-welcome-streak">\uD83D\uDD25 ${streak} day streak</span>` : ''}
+        </div>
+        <div class="user-xp-row">
+          <span class="user-xp-label">Lv.${xp.level} ${escHTML(xp.levelName)}</span>
+          <div class="ts-xp-bar"><div class="ts-xp-bar-fill" style="width:${xp.pct}%"></div></div>
+          <span class="user-xp-label">${xp.current.toLocaleString()} XP</span>
+        </div>
+      </div>`;
+  } else {
+    // Anonymous signup banner
+    userSection.innerHTML = `
+      <div class="signup-banner">
+        <p>Create a free account to track your stats, earn XP, and compete on leaderboards.</p>
+        <button class="signup-banner-btn" id="signupBannerBtn">Create Free Account</button>
+      </div>`;
+    document.getElementById('signupBannerBtn')?.addEventListener('click', () => TSNav.showAuthModal('signup'));
+  }
+
+  // Load leaderboard
+  try {
+    const lb = await TSData.getGlobalLeaderboard(5);
+    const widget = document.getElementById('lbWidget');
+    if (lb.length === 0) {
+      widget.innerHTML = '<div class="lb-empty">No ranked players yet. Play some games to get started!</div>';
+    } else {
+      const rankClass = (i) => i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
+      widget.innerHTML = lb.map((p, i) => `
+        <div class="lb-row">
+          <span class="lb-rank ${rankClass(i)}">${i + 1}</span>
+          <span class="lb-name">${escHTML(p.username || p.display_name || 'Player')}</span>
+          <span class="lb-xp">${(p.total_xp || 0).toLocaleString()} XP</span>
+        </div>`).join('') +
+        '<div class="lb-footer"><a href="/leaderboard/">View Full Leaderboard &rarr;</a></div>';
+    }
+  } catch (e) { console.warn('Leaderboard load failed:', e); }
+
+  // Load community spotlight
+  try {
+    const games = await TSData.getCommunityGames('all', 'popular', 3);
+    const grid = document.getElementById('commGrid');
+    if (games.length > 0) {
+      grid.innerHTML = games.map(g => `
+        <a href="/community/?game=${g.id}" class="comm-card">
+          <span class="comm-icon">${TSData.GAME_TYPE_ICONS[g.game_type] || ''}</span>
+          <div class="comm-info">
+            <div class="comm-title">${escHTML(g.title)}</div>
+            <div class="comm-meta">by ${escHTML(g.ts_users?.username || 'Unknown')} &middot; ${TSData.GAME_TYPE_LABELS[g.game_type] || g.game_type}</div>
+          </div>
+          <span class="comm-plays">${g.play_count || 0} plays</span>
+        </a>`).join('') +
+        '<div class="lb-footer"><a href="/community/">Browse All &rarr;</a></div>';
+    }
+  } catch (e) { console.warn('Community load failed:', e); }
+
+  // Load a random stat
+  try {
+    const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:8888/.netlify/functions' : '/.netlify/functions';
+    const res = await fetch(API_BASE + '/meta');
+    if (res.ok) {
+      const meta = await res.json();
+      if (meta.current_season_last_updated?.value !== 'never') {
+        const banner = document.getElementById('statBanner');
+        const text = document.getElementById('statText');
+        // Simple stat from metadata
+        text.textContent = 'Current season data is loaded and ready. Play Bullseye to test your knowledge of this season\'s stats!';
+        banner.style.display = '';
+      }
+    }
+  } catch (e) { /* silent */ }
+})();
+
+function escHTML(s) {
+  return String(s).replace(/[&<>"']/g, m =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
 }
-updateClock();
-setInterval(updateClock, 30000);
 </script>
 </body>
 </html>

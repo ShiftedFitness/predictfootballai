@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Profile — TeleStats</title>
+  <link rel="stylesheet" href="/telestats-theme.css"/>
+  <style>
+    .prof-container { max-width: 800px; margin: 80px auto 40px; padding: 0 16px; }
+    .prof-header { display: flex; align-items: center; gap: 20px; padding: 24px; background: var(--card); border-radius: 16px; border: 1px solid var(--border); margin-bottom: 24px; }
+    .prof-avatar { width: 72px; height: 72px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), #7C3AED); display: flex; align-items: center; justify-content: center; font-size: 1.8rem; font-weight: 700; color: #fff; flex-shrink: 0; }
+    .prof-info { flex: 1; }
+    .prof-name { font-size: 1.4rem; font-weight: 700; }
+    .prof-username { color: var(--muted); font-size: .9rem; margin-top: 2px; }
+    .prof-meta { display: flex; gap: 16px; margin-top: 8px; flex-wrap: wrap; }
+    .prof-meta-item { font-size: .8rem; color: var(--muted); }
+    .prof-meta-item strong { color: var(--fg); }
+    .prof-xp-section { margin-top: 12px; }
+    .prof-xp-label { display: flex; justify-content: space-between; font-size: .8rem; color: var(--muted); margin-bottom: 4px; }
+    .prof-xp-bar { height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+    .prof-xp-fill { height: 100%; background: linear-gradient(90deg, var(--accent), #32FF7E); border-radius: 4px; transition: width .6s ease; }
+    .prof-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 24px; }
+    .prof-stat { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; text-align: center; }
+    .prof-stat-val { font-size: 1.5rem; font-weight: 700; color: var(--accent); }
+    .prof-stat-label { font-size: .75rem; color: var(--muted); margin-top: 4px; text-transform: uppercase; letter-spacing: .04em; }
+    .prof-section { margin-bottom: 24px; }
+    .prof-section-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+    .prof-achievements { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
+    .prof-achieve { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px; text-align: center; transition: transform .2s; }
+    .prof-achieve:hover { transform: translateY(-2px); }
+    .prof-achieve.locked { opacity: .35; }
+    .prof-achieve-icon { font-size: 1.6rem; margin-bottom: 4px; }
+    .prof-achieve-name { font-size: .75rem; font-weight: 600; }
+    .prof-achieve-desc { font-size: .65rem; color: var(--muted); margin-top: 2px; }
+    .prof-recent { display: flex; flex-direction: column; gap: 8px; }
+    .prof-game-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; }
+    .prof-game-info { display: flex; align-items: center; gap: 10px; }
+    .prof-game-icon { font-size: 1.2rem; }
+    .prof-game-type { font-weight: 600; font-size: .85rem; }
+    .prof-game-cat { font-size: .75rem; color: var(--muted); }
+    .prof-game-result { text-align: right; }
+    .prof-game-score { font-weight: 600; color: var(--accent); }
+    .prof-game-xp { font-size: .75rem; color: var(--muted); }
+    .prof-game-date { font-size: .7rem; color: var(--muted); }
+    .prof-empty { text-align: center; padding: 32px; color: var(--muted); }
+    .prof-share-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 8px; background: var(--card); border: 1px solid var(--border); color: var(--fg); cursor: pointer; font-size: .85rem; transition: all .2s; }
+    .prof-share-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .prof-edit-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 8px; background: var(--accent); border: none; color: #000; cursor: pointer; font-size: .85rem; font-weight: 600; }
+    .prof-actions { display: flex; gap: 8px; margin-top: 12px; }
+    .prof-ratings { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+    .prof-rating-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px; }
+    .prof-rating-game { font-weight: 600; font-size: .9rem; margin-bottom: 6px; }
+    .prof-rating-rank { color: var(--accent); font-size: .85rem; }
+    .prof-rating-avg { color: var(--muted); font-size: .8rem; margin-top: 4px; }
+    @media (max-width: 640px) {
+      .prof-container { margin-top: 70px; }
+      .prof-header { flex-direction: column; text-align: center; }
+      .prof-meta { justify-content: center; }
+      .prof-actions { justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+  <div class="prof-container" id="profileContent">
+    <div class="prof-empty"><p>Loading profile...</p></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/js/ts-auth.js"></script>
+  <script src="/js/ts-data.js"></script>
+  <script src="/js/ts-nav.js"></script>
+  <script>
+    (async function () {
+      await TSAuth.init();
+      TSNav.render();
+
+      const container = document.getElementById('profileContent');
+      const params = new URLSearchParams(location.search);
+      const targetUser = params.get('user');
+
+      let profile;
+      let isOwnProfile = false;
+
+      if (targetUser) {
+        profile = await TSData.getProfileByUsername(targetUser);
+        if (!profile) {
+          container.innerHTML = '<div class="prof-empty"><h2>Player not found</h2><p>No player with that username exists.</p><a href="/leaderboard/" class="btn-primary" style="margin-top:12px;display:inline-block;">View Leaderboard</a></div>';
+          return;
+        }
+        isOwnProfile = profile.user.id === TSAuth.getUserId();
+      } else {
+        const userId = TSAuth.getUserId();
+        if (!userId || TSAuth.isAnonymous()) {
+          container.innerHTML = '<div class="prof-empty"><h2>Create an account to view your profile</h2><p>Sign up to track your stats, earn XP, and compete on the leaderboard.</p><button class="btn-primary" style="margin-top:12px;" onclick="TSNav.showAuthModal(\'signup\')">Sign Up</button></div>';
+          return;
+        }
+        profile = await TSData.getProfile(userId);
+        isOwnProfile = true;
+      }
+
+      if (!profile || !profile.user) {
+        container.innerHTML = '<div class="prof-empty"><p>Could not load profile.</p></div>';
+        return;
+      }
+
+      const u = profile.user;
+      const xp = getXPProgress(u);
+      const initial = (u.username || u.display_name || '?')[0].toUpperCase();
+      const memberSince = u.created_at ? new Date(u.created_at).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' }) : '';
+
+      document.title = `${u.username || u.display_name || 'Player'} — TeleStats`;
+
+      let html = `
+        <div class="prof-header">
+          <div class="prof-avatar">${initial}</div>
+          <div class="prof-info">
+            <div class="prof-name">${esc(u.display_name || u.username || 'Player')}
+              <span class="ts-level-badge" style="border-color:${levelColor(u.level)};color:${levelColor(u.level)};margin-left:8px;" title="${esc(u.level_name || '')}">${u.level || 1}</span>
+            </div>
+            ${u.username ? `<div class="prof-username">@${esc(u.username)}</div>` : ''}
+            <div class="prof-meta">
+              <span class="prof-meta-item"><strong>${(u.total_xp || 0).toLocaleString()}</strong> XP</span>
+              <span class="prof-meta-item"><strong>${u.level_name || 'Grassroots'}</strong></span>
+              ${u.current_streak ? `<span class="prof-meta-item">\uD83D\uDD25 <strong>${u.current_streak}</strong> day streak</span>` : ''}
+              ${memberSince ? `<span class="prof-meta-item">Joined ${memberSince}</span>` : ''}
+            </div>
+            <div class="prof-xp-section">
+              <div class="prof-xp-label">
+                <span>Level ${u.level || 1} — ${u.level_name || 'Grassroots'}</span>
+                <span>${xp.pct}%</span>
+              </div>
+              <div class="prof-xp-bar"><div class="prof-xp-fill" style="width:${xp.pct}%"></div></div>
+            </div>
+            <div class="prof-actions">
+              ${isOwnProfile ? '<button class="prof-edit-btn" onclick="TSNav.showAuthModal(\'login\')">Edit Profile</button>' : ''}
+              <button class="prof-share-btn" id="profShareBtn">Share Profile</button>
+            </div>
+          </div>
+        </div>`;
+
+      // Stats grid
+      html += `
+        <div class="prof-stats">
+          <div class="prof-stat"><div class="prof-stat-val">${u.total_games_played || 0}</div><div class="prof-stat-label">Games Played</div></div>
+          <div class="prof-stat"><div class="prof-stat-val">${u.perfect_rounds || 0}</div><div class="prof-stat-label">Perfect Rounds</div></div>
+          <div class="prof-stat"><div class="prof-stat-val">${u.longest_streak || 0}</div><div class="prof-stat-label">Best Streak</div></div>
+          <div class="prof-stat"><div class="prof-stat-val">${u.games_created || 0}</div><div class="prof-stat-label">Games Created</div></div>
+        </div>`;
+
+      // Game Ratings
+      if (profile.ratings && profile.ratings.length) {
+        html += `<div class="prof-section">
+          <h2 class="prof-section-title">Game Rankings</h2>
+          <div class="prof-ratings">`;
+        profile.ratings.forEach(r => {
+          const label = TSData.GAME_TYPE_LABELS[r.game_type] || r.game_type;
+          const icon = TSData.GAME_TYPE_ICONS[r.game_type] || '';
+          html += `<div class="prof-rating-card">
+            <div class="prof-rating-game">${icon} ${esc(label)}</div>
+            <div class="prof-rating-rank">${esc(r.rank_title || 'Unranked')}</div>
+            <div class="prof-rating-avg">Avg: ${r.rolling_avg != null ? r.rolling_avg.toFixed(1) : '-'} | Best: ${r.personal_best != null ? r.personal_best : '-'} | Played: ${r.games_played || 0}</div>
+          </div>`;
+        });
+        html += '</div></div>';
+      }
+
+      // Achievements
+      if (isOwnProfile) {
+        const allAchievements = await TSData.getAllAchievements();
+        const earnedIds = new Set(profile.achievements.map(a => a.achievement_id));
+
+        html += `<div class="prof-section">
+          <h2 class="prof-section-title">Achievements (${profile.achievements.length}/${allAchievements.length})</h2>
+          <div class="prof-achievements">`;
+        allAchievements.forEach(a => {
+          const earned = earnedIds.has(a.id);
+          html += `<div class="prof-achieve${earned ? '' : ' locked'}" title="${esc(a.description)}">
+            <div class="prof-achieve-icon">${a.icon || '\uD83C\uDFC6'}</div>
+            <div class="prof-achieve-name">${esc(a.name)}</div>
+            <div class="prof-achieve-desc">${earned ? esc(a.description) : 'Locked'}</div>
+          </div>`;
+        });
+        html += '</div></div>';
+      } else if (profile.achievements.length) {
+        html += `<div class="prof-section">
+          <h2 class="prof-section-title">Achievements (${profile.achievements.length})</h2>
+          <div class="prof-achievements">`;
+        profile.achievements.forEach(a => {
+          const ach = a.ts_achievements;
+          if (!ach) return;
+          html += `<div class="prof-achieve">
+            <div class="prof-achieve-icon">${ach.icon || '\uD83C\uDFC6'}</div>
+            <div class="prof-achieve-name">${esc(ach.name)}</div>
+            <div class="prof-achieve-desc">${esc(ach.description)}</div>
+          </div>`;
+        });
+        html += '</div></div>';
+      }
+
+      // Recent games
+      if (profile.recentGames && profile.recentGames.length) {
+        html += `<div class="prof-section">
+          <h2 class="prof-section-title">Recent Activity</h2>
+          <div class="prof-recent">`;
+        profile.recentGames.forEach(g => {
+          const icon = TSData.GAME_TYPE_ICONS[g.game_type] || '';
+          const label = TSData.GAME_TYPE_LABELS[g.game_type] || g.game_type;
+          let scoreText = '';
+          if (g.game_type === 'bullseye') scoreText = `${g.darts_used || '?'} darts`;
+          else if (g.game_type === 'starting_xi') scoreText = `${g.players_named || 0}/11`;
+          else if (g.game_type === 'who_am_i') scoreText = `${g.guesses_used || '?'} clues`;
+          else if (g.game_type === 'pop_quiz') scoreText = `${g.correct_answers || 0}/${g.total_questions || 5}`;
+          else if (g.game_type === 'higher_lower') scoreText = `Streak: ${g.score || 0}`;
+          else if (g.game_type === 'player_alphabet') scoreText = `${g.correct_answers || 0}/26`;
+          const date = g.played_at ? new Date(g.played_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '';
+
+          html += `<div class="prof-game-row">
+            <div class="prof-game-info">
+              <span class="prof-game-icon">${icon}</span>
+              <div>
+                <div class="prof-game-type">${esc(label)}</div>
+                ${g.game_category ? `<div class="prof-game-cat">${esc(g.game_category)}</div>` : ''}
+              </div>
+            </div>
+            <div class="prof-game-result">
+              <div class="prof-game-score">${scoreText}${g.is_perfect_round ? ' \u2B50' : ''}</div>
+              <div class="prof-game-xp">${g.xp_earned ? `+${g.xp_earned} XP` : ''}</div>
+              <div class="prof-game-date">${date}</div>
+            </div>
+          </div>`;
+        });
+        html += '</div></div>';
+      }
+
+      container.innerHTML = html;
+
+      // Share profile button
+      const shareBtn = document.getElementById('profShareBtn');
+      if (shareBtn) {
+        shareBtn.addEventListener('click', async () => {
+          const shareText = `Check out ${u.username || 'my'} profile on TeleStats!\nLevel ${u.level || 1} ${u.level_name || 'Grassroots'} | ${(u.total_xp || 0).toLocaleString()} XP\ntelestats.net/profile/?user=${encodeURIComponent(u.username || u.id)}`;
+          if (navigator.share) {
+            try { await navigator.share({ text: shareText }); } catch {}
+          } else {
+            try { await navigator.clipboard.writeText(shareText); shareBtn.textContent = 'Copied!'; setTimeout(() => shareBtn.textContent = 'Share Profile', 2000); } catch {}
+          }
+        });
+      }
+
+      function getXPProgress(user) {
+        const levels = [
+          { level: 1, xp: 0 }, { level: 2, xp: 100 }, { level: 3, xp: 300 },
+          { level: 4, xp: 600 }, { level: 5, xp: 1000 }, { level: 6, xp: 2000 },
+          { level: 7, xp: 3500 }, { level: 8, xp: 5500 }, { level: 9, xp: 8000 },
+          { level: 10, xp: 12000 }
+        ];
+        const cur = levels.find(l => l.level === (user.level || 1)) || levels[0];
+        const next = levels.find(l => l.level === (user.level || 1) + 1);
+        const inLevel = (user.total_xp || 0) - cur.xp;
+        const needed = next ? next.xp - cur.xp : 1;
+        return { pct: next ? Math.min(100, Math.round((inLevel / needed) * 100)) : 100 };
+      }
+
+      function levelColor(level) {
+        const colors = { 1:'#6F7A83',2:'#9BA7B0',3:'#00E5FF',4:'#00B8D4',5:'#32FF7E',6:'#FFD60A',7:'#FF9F1C',8:'#FF2E9F',9:'#E05555',10:'#FFD60A' };
+        return colors[level] || '#6F7A83';
+      }
+
+      function esc(s) {
+        return String(s).replace(/[&<>"']/g, m =>
+          ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+      }
+    })();
+  </script>
+</body>
+</html>

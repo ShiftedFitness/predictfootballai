@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Leaderboard — TeleStats</title>
+  <link rel="stylesheet" href="/telestats-theme.css"/>
+  <style>
+    .lb-container { max-width: 900px; margin: 80px auto 40px; padding: 0 16px; }
+    .lb-tabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 24px; -webkit-overflow-scrolling: touch; }
+    .lb-tab { padding: 8px 16px; border-radius: 8px; background: var(--card); border: 1px solid var(--border); color: var(--muted); cursor: pointer; white-space: nowrap; font-size: .85rem; transition: all .2s; }
+    .lb-tab:hover { border-color: var(--accent); color: var(--fg); }
+    .lb-tab.active { background: var(--accent); color: #000; border-color: var(--accent); font-weight: 600; }
+    .lb-title { font-size: 1.6rem; font-weight: 700; margin-bottom: 8px; }
+    .lb-subtitle { color: var(--muted); margin-bottom: 24px; font-size: .9rem; }
+    .lb-table { width: 100%; border-collapse: collapse; }
+    .lb-table th { text-align: left; padding: 10px 12px; font-size: .75rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); border-bottom: 1px solid var(--border); }
+    .lb-table td { padding: 12px; border-bottom: 1px solid var(--border); }
+    .lb-table tr:hover { background: rgba(255,255,255,.03); }
+    .lb-rank { font-weight: 700; font-size: 1.1rem; width: 40px; }
+    .lb-rank-1 { color: #FFD60A; }
+    .lb-rank-2 { color: #C0C0C0; }
+    .lb-rank-3 { color: #CD7F32; }
+    .lb-user { display: flex; align-items: center; gap: 10px; }
+    .lb-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--card); display: flex; align-items: center; justify-content: center; font-size: .8rem; border: 1px solid var(--border); }
+    .lb-username { font-weight: 600; }
+    .lb-username a { color: var(--fg); text-decoration: none; }
+    .lb-username a:hover { color: var(--accent); }
+    .lb-xp { font-weight: 600; color: var(--accent); }
+    .lb-stat { color: var(--muted); font-size: .85rem; }
+    .lb-streak { color: #FF9F1C; }
+    .lb-you { background: rgba(0, 229, 255, .08) !important; }
+    .lb-you td { border-color: var(--accent); }
+    .lb-your-pos { position: sticky; bottom: 0; background: var(--bg); border-top: 2px solid var(--accent); padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; border-radius: 12px 12px 0 0; margin-top: 16px; }
+    .lb-your-pos .lb-rank { font-size: 1.3rem; }
+    .lb-empty { text-align: center; padding: 48px 16px; color: var(--muted); }
+    .lb-empty p { margin-bottom: 16px; }
+    .lb-period-toggle { display: flex; gap: 8px; margin-bottom: 16px; }
+    .lb-period-btn { padding: 6px 14px; border-radius: 6px; background: transparent; border: 1px solid var(--border); color: var(--muted); cursor: pointer; font-size: .8rem; }
+    .lb-period-btn.active { background: var(--card); color: var(--fg); border-color: var(--fg); }
+    .lb-game-stats { display: flex; gap: 8px; flex-wrap: wrap; }
+    .lb-game-stat { font-size: .75rem; background: var(--card); padding: 2px 8px; border-radius: 4px; color: var(--muted); }
+    @media (max-width: 640px) {
+      .lb-container { margin-top: 70px; }
+      .lb-table th:nth-child(4), .lb-table td:nth-child(4) { display: none; }
+      .lb-table th:nth-child(5), .lb-table td:nth-child(5) { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="lb-container">
+    <h1 class="lb-title">Leaderboard</h1>
+    <p class="lb-subtitle">See how you stack up against other TeleStats players</p>
+
+    <div class="lb-tabs" id="lbTabs">
+      <button class="lb-tab active" data-tab="global">Global</button>
+      <button class="lb-tab" data-tab="bullseye">Bullseye</button>
+      <button class="lb-tab" data-tab="starting_xi">Starting XI</button>
+      <button class="lb-tab" data-tab="who_am_i">Who Am I?</button>
+      <button class="lb-tab" data-tab="pop_quiz">Pop Quiz</button>
+      <button class="lb-tab" data-tab="higher_lower">Higher or Lower</button>
+      <button class="lb-tab" data-tab="player_alphabet">Alphabet</button>
+    </div>
+
+    <div id="lbContent">
+      <div class="lb-empty"><p>Loading leaderboard...</p></div>
+    </div>
+
+    <div id="lbYourPos" style="display:none"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/js/ts-auth.js"></script>
+  <script src="/js/ts-data.js"></script>
+  <script src="/js/ts-nav.js"></script>
+  <script>
+    (async function () {
+      await TSAuth.init();
+      TSNav.render();
+
+      const tabs = document.querySelectorAll('.lb-tab');
+      const content = document.getElementById('lbContent');
+      const yourPos = document.getElementById('lbYourPos');
+      let currentTab = 'global';
+
+      tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          tabs.forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          currentTab = tab.dataset.tab;
+          loadLeaderboard(currentTab);
+        });
+      });
+
+      async function loadLeaderboard(tab) {
+        content.innerHTML = '<div class="lb-empty"><p>Loading...</p></div>';
+        yourPos.style.display = 'none';
+
+        try {
+          if (tab === 'global') {
+            await loadGlobal();
+          } else {
+            await loadGame(tab);
+          }
+        } catch (e) {
+          console.error('[Leaderboard]', e);
+          content.innerHTML = '<div class="lb-empty"><p>Failed to load leaderboard.</p></div>';
+        }
+      }
+
+      async function loadGlobal() {
+        const data = await TSData.getGlobalLeaderboard(50);
+        if (!data.length) {
+          content.innerHTML = '<div class="lb-empty"><p>No players yet. Be the first!</p><a href="/games/" class="btn-primary">Play Now</a></div>';
+          return;
+        }
+
+        const userId = TSAuth.getUserId();
+        let html = `<table class="lb-table">
+          <thead><tr>
+            <th>#</th><th>Player</th><th>Level</th><th>XP</th><th>Games</th><th>Streak</th>
+          </tr></thead><tbody>`;
+
+        data.forEach((row, i) => {
+          const rank = i + 1;
+          const rankClass = rank <= 3 ? ` lb-rank-${rank}` : '';
+          const isYou = row.id === userId;
+          const rowClass = isYou ? ' lb-you' : '';
+          const initial = (row.username || row.display_name || '?')[0].toUpperCase();
+
+          html += `<tr class="${rowClass}">
+            <td class="lb-rank${rankClass}">${rank}</td>
+            <td><div class="lb-user">
+              <div class="lb-avatar">${initial}</div>
+              <div>
+                <div class="lb-username"><a href="/profile/?user=${encodeURIComponent(row.username || row.id)}">${esc(row.username || row.display_name || 'Anonymous')}</a></div>
+                ${row.level_name ? `<span class="lb-stat">${esc(row.level_name)}</span>` : ''}
+              </div>
+            </div></td>
+            <td><span class="ts-level-badge" style="border-color:${levelColor(row.level)};color:${levelColor(row.level)}">${row.level || 1}</span></td>
+            <td class="lb-xp">${(row.total_xp || 0).toLocaleString()}</td>
+            <td class="lb-stat">${row.total_games_played || 0}</td>
+            <td class="lb-stat">${row.current_streak ? `<span class="lb-streak">\uD83D\uDD25 ${row.current_streak}</span>` : '-'}</td>
+          </tr>`;
+        });
+
+        html += '</tbody></table>';
+        content.innerHTML = html;
+
+        // Show your position if logged in and not in top 50
+        if (userId && !data.find(r => r.id === userId)) {
+          showYourPosition(userId);
+        }
+      }
+
+      async function loadGame(gameType) {
+        const data = await TSData.getGameLeaderboard(gameType, 50);
+        const label = TSData.GAME_TYPE_LABELS[gameType] || gameType;
+
+        if (!data.length) {
+          content.innerHTML = `<div class="lb-empty"><p>No ${label} scores yet.</p><a href="/games/" class="btn-primary">Play ${label}</a></div>`;
+          return;
+        }
+
+        const userId = TSAuth.getUserId();
+        let html = `<table class="lb-table">
+          <thead><tr>
+            <th>#</th><th>Player</th><th>Rank</th><th>Rating</th><th>Best</th><th>Played</th>
+          </tr></thead><tbody>`;
+
+        data.forEach((row, i) => {
+          const rank = i + 1;
+          const rankClass = rank <= 3 ? ` lb-rank-${rank}` : '';
+          const isYou = row.user_id === userId;
+          const rowClass = isYou ? ' lb-you' : '';
+          const initial = (row.username || row.display_name || '?')[0].toUpperCase();
+
+          html += `<tr class="${rowClass}">
+            <td class="lb-rank${rankClass}">${rank}</td>
+            <td><div class="lb-user">
+              <div class="lb-avatar">${initial}</div>
+              <div class="lb-username"><a href="/profile/?user=${encodeURIComponent(row.username || row.user_id)}">${esc(row.username || row.display_name || 'Anonymous')}</a></div>
+            </div></td>
+            <td class="lb-stat">${esc(row.rank_title || '-')}</td>
+            <td class="lb-xp">${row.rolling_avg != null ? row.rolling_avg.toFixed(1) : '-'}</td>
+            <td class="lb-stat">${row.personal_best != null ? row.personal_best : '-'}</td>
+            <td class="lb-stat">${row.games_played || 0}</td>
+          </tr>`;
+        });
+
+        html += '</tbody></table>';
+        content.innerHTML = html;
+      }
+
+      async function showYourPosition(userId) {
+        // Fetch from global leaderboard view with user filter
+        const { data } = await TSAuth.supabase
+          .from('ts_leaderboard_global')
+          .select('*')
+          .eq('id', userId)
+          .maybeSingle();
+
+        if (!data) return;
+
+        yourPos.style.display = 'flex';
+        yourPos.className = 'lb-your-pos';
+        yourPos.innerHTML = `
+          <div style="display:flex;align-items:center;gap:12px;">
+            <span class="lb-rank">—</span>
+            <span class="lb-username">${esc(data.username || 'You')}</span>
+          </div>
+          <div class="lb-xp">${(data.total_xp || 0).toLocaleString()} XP</div>`;
+      }
+
+      function levelColor(level) {
+        const colors = {
+          1: '#6F7A83', 2: '#9BA7B0', 3: '#00E5FF', 4: '#00B8D4',
+          5: '#32FF7E', 6: '#FFD60A', 7: '#FF9F1C', 8: '#FF2E9F',
+          9: '#E05555', 10: '#FFD60A'
+        };
+        return colors[level] || '#6F7A83';
+      }
+
+      function esc(s) {
+        return String(s).replace(/[&<>"']/g, m =>
+          ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+      }
+
+      // Initial load
+      await loadLeaderboard('global');
+    })();
+  </script>
+</body>
+</html>
