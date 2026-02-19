@@ -695,5 +695,53 @@ setInterval(() => {
 }, 1000);
 $('tsClock').textContent = new Date().toTimeString().slice(0, 5);
 </script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/js/ts-auth.js"></script>
+<script src="/js/ts-data.js"></script>
+<script src="/js/ts-nav.js"></script>
+<script>
+(async function tsIntegrate() {
+  await TSAuth.init();
+  TSNav.render();
+
+  // Hook endGame to log session
+  const _origEndGame = window.endGame;
+  window.endGame = function () {
+    _origEndGame();
+    tsLogAlphaSession();
+  };
+
+  async function tsLogAlphaSession() {
+    try {
+      const scopeLabel = selectedScope || '';
+      const playableLetters = alphabetData.filter(l => l.count > 0).length;
+      const rawScore = playableLetters > 0
+        ? Math.round(((scoreCorrect + scoreRevealed * 0.5) / playableLetters) * 100)
+        : 0;
+      const result = await TSData.logGameSession({
+        game_type: 'player_alphabet',
+        game_category: scopeLabel,
+        score: rawScore,
+        max_possible_score: 100,
+        correct_answers: scoreCorrect,
+        total_questions: playableLetters,
+        is_perfect_round: scoreCorrect === playableLetters && scoreMissed === 0,
+        completed: true
+      });
+      if (result && !result.error) {
+        TSNav.showXPToast(result);
+        TSNav.showShareCard({
+          game_type: 'player_alphabet',
+          game_category: scopeLabel,
+          correct_answers: scoreCorrect,
+          score: rawScore,
+          is_perfect_round: scoreCorrect === playableLetters && scoreMissed === 0,
+          xp_earned: result.xp_earned
+        });
+      }
+    } catch (e) { console.warn('[TS] session log failed:', e); }
+  }
+})();
+</script>
 </body>
 </html>

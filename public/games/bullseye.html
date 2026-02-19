@@ -3781,5 +3781,53 @@ function retroBlockReveal(wrap) {
 <footer style="text-align:center;padding:16px;font-size:11px;color:var(--muted);opacity:0.6;">
   Build: 2026-02-16 | TeleStats Bullseye v1.1
 </footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/js/ts-auth.js"></script>
+<script src="/js/ts-data.js"></script>
+<script src="/js/ts-nav.js"></script>
+<script>
+(async function tsIntegrate() {
+  await TSAuth.init();
+  TSNav.render();
+
+  // Hook into recordWin and recordGameEnd to log sessions
+  const _origRecordWin = window.recordWin;
+  window.recordWin = function () {
+    _origRecordWin();
+    tsLogBullseyeSession(true);
+  };
+  const _origRecordGameEnd = window.recordGameEnd;
+  window.recordGameEnd = function () {
+    _origRecordGameEnd();
+    tsLogBullseyeSession(false);
+  };
+
+  async function tsLogBullseyeSession(won) {
+    try {
+      const catLabel = currentCategory ? (currentCategory.title || currentCategory.id || 'Unknown') : 'Unknown';
+      const dartsUsed = state ? state.turnCount : null;
+      const result = await TSData.logGameSession({
+        game_type: 'bullseye',
+        game_category: catLabel,
+        score: won ? 501 : null,
+        darts_used: dartsUsed,
+        checkout_score: won ? 501 : null,
+        is_perfect_round: won && dartsUsed && dartsUsed <= 9,
+        completed: true
+      });
+      if (result && !result.error) {
+        TSNav.showXPToast(result);
+        TSNav.showShareCard({
+          game_type: 'bullseye',
+          game_category: catLabel,
+          is_perfect_round: won && dartsUsed && dartsUsed <= 9,
+          darts_used: dartsUsed,
+          xp_earned: result.xp_earned
+        });
+      }
+    } catch (e) { console.warn('[TS] session log failed:', e); }
+  }
+})();
+</script>
 </body>
 </html>

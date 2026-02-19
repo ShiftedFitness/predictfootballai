@@ -2352,5 +2352,71 @@ setInterval(() => {
 }, 1000);
 document.getElementById('tsClock').textContent = new Date().toTimeString().slice(0,5);
 </script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/js/ts-auth.js"></script>
+<script src="/js/ts-data.js"></script>
+<script src="/js/ts-nav.js"></script>
+<script>
+(async function tsIntegrate() {
+  await TSAuth.init();
+  TSNav.render();
+
+  // Hook giveUp to log session
+  const _origGiveUp = window.giveUp;
+  window.giveUp = async function () {
+    await _origGiveUp();
+    tsLogXISession();
+  };
+
+  // Hook revealAnswers to log session
+  const _origReveal = window.revealAnswers;
+  window.revealAnswers = async function () {
+    await _origReveal();
+    tsLogXISession();
+  };
+
+  let _xiLogged = false;
+  async function tsLogXISession() {
+    if (_xiLogged) return;
+    _xiLogged = true;
+    try {
+      const correct = Object.values(slotResults).filter(r => r.correct && !r.revealed).length;
+      const total = slots.length;
+      const scopeLabel = typeof selectedScope === 'string' ? selectedScope : '';
+      const result = await TSData.logGameSession({
+        game_type: 'starting_xi',
+        game_category: scopeLabel,
+        score: correct,
+        max_possible_score: total,
+        correct_answers: correct,
+        total_questions: total,
+        players_named: correct,
+        is_perfect_round: correct === total,
+        completed: true
+      });
+      if (result && !result.error) {
+        TSNav.showXPToast(result);
+        TSNav.showShareCard({
+          game_type: 'starting_xi',
+          game_category: scopeLabel,
+          players_named: correct,
+          is_perfect_round: correct === total,
+          xp_earned: result.xp_earned
+        });
+      }
+    } catch (e) { console.warn('[TS] session log failed:', e); }
+  }
+
+  // Reset flag on new game
+  const _origNewGame = window.newGame || window.resetToSetup;
+  if (_origNewGame) {
+    const fnName = window.newGame ? 'newGame' : 'resetToSetup';
+    window[fnName] = function () {
+      _xiLogged = false;
+      return _origNewGame.apply(this, arguments);
+    };
+  }
+})();
+</script>
 </body>
 </html>

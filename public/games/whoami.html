@@ -1172,5 +1172,48 @@ function updateClock() {
 updateClock();
 setInterval(updateClock, 30000);
 </script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/js/ts-auth.js"></script>
+<script src="/js/ts-data.js"></script>
+<script src="/js/ts-nav.js"></script>
+<script>
+(async function tsIntegrate() {
+  await TSAuth.init();
+  TSNav.render();
+
+  // Hook showResult to log session
+  const _origShowResult = window.showResult;
+  window.showResult = function (won, player) {
+    _origShowResult(won, player);
+    tsLogWhoAmISession(won);
+  };
+
+  async function tsLogWhoAmISession(won) {
+    try {
+      const scopeLabel = selectedScope || '';
+      const result = await TSData.logGameSession({
+        game_type: 'who_am_i',
+        game_category: scopeLabel,
+        score: won ? Math.max(1, 6 - cluesRevealed) : 0,
+        correct_answers: won ? 1 : 0,
+        total_questions: 1,
+        guesses_used: guessCount,
+        is_perfect_round: won && cluesRevealed <= 1,
+        completed: true
+      });
+      if (result && !result.error) {
+        TSNav.showXPToast(result);
+        TSNav.showShareCard({
+          game_type: 'who_am_i',
+          game_category: scopeLabel,
+          guesses_used: guessCount,
+          is_perfect_round: won && cluesRevealed <= 1,
+          xp_earned: result.xp_earned
+        });
+      }
+    } catch (e) { console.warn('[TS] session log failed:', e); }
+  }
+})();
+</script>
 </body>
 </html>

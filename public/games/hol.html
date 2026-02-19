@@ -494,5 +494,46 @@ setInterval(() => {
 }, 1000);
 $('tsClock').textContent = new Date().toTimeString().slice(0, 5);
 </script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/js/ts-auth.js"></script>
+<script src="/js/ts-data.js"></script>
+<script src="/js/ts-nav.js"></script>
+<script>
+(async function tsIntegrate() {
+  await TSAuth.init();
+  TSNav.render();
+
+  // Hook gameOver to log session
+  const _origGameOver = window.gameOver;
+  window.gameOver = function () {
+    _origGameOver();
+    tsLogHoLSession();
+  };
+
+  async function tsLogHoLSession() {
+    try {
+      const scopeLabel = selectedScope || '';
+      const result = await TSData.logGameSession({
+        game_type: 'higher_lower',
+        game_category: scopeLabel,
+        score: streak,
+        correct_answers: streak,
+        is_perfect_round: streak >= 10,
+        completed: true
+      });
+      if (result && !result.error) {
+        TSNav.showXPToast(result);
+        TSNav.showShareCard({
+          game_type: 'higher_lower',
+          game_category: scopeLabel,
+          score: streak,
+          is_perfect_round: streak >= 10,
+          xp_earned: result.xp_earned
+        });
+      }
+    } catch (e) { console.warn('[TS] session log failed:', e); }
+  }
+})();
+</script>
 </body>
 </html>

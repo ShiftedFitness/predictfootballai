@@ -215,5 +215,15 @@ setInterval(updateClock, 30000);
   } catch(e) { /* silently fail */ }
 })();
 </script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/js/ts-auth.js"></script>
+<script src="/js/ts-data.js"></script>
+<script src="/js/ts-nav.js"></script>
+<script>
+(async function () {
+  await TSAuth.init();
+  TSNav.render();
+})();
+</script>
 </body>
 </html>

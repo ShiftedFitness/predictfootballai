@@ -622,5 +622,50 @@ function updateClock() {
 updateClock();
 setInterval(updateClock, 30000);
 </script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/js/ts-auth.js"></script>
+<script src="/js/ts-data.js"></script>
+<script src="/js/ts-nav.js"></script>
+<script>
+(async function tsIntegrate() {
+  await TSAuth.init();
+  TSNav.render();
+
+  // Hook showResults to log session
+  const _origShowResults = window.showResults;
+  window.showResults = function () {
+    _origShowResults();
+    tsLogQuizSession();
+  };
+
+  async function tsLogQuizSession() {
+    try {
+      const total = quizData ? quizData.questions.length : 5;
+      const scopeLabel = selectedScope || '';
+      const result = await TSData.logGameSession({
+        game_type: 'pop_quiz',
+        game_category: scopeLabel,
+        score: score,
+        max_possible_score: total,
+        correct_answers: score,
+        total_questions: total,
+        is_perfect_round: score === total,
+        completed: true
+      });
+      if (result && !result.error) {
+        TSNav.showXPToast(result);
+        TSNav.showShareCard({
+          game_type: 'pop_quiz',
+          game_category: scopeLabel,
+          correct_answers: score,
+          total_questions: total,
+          is_perfect_round: score === total,
+          xp_earned: result.xp_earned
+        });
+      }
+    } catch (e) { console.warn('[TS] session log failed:', e); }
+  }
+})();
+</script>
 </body>
 </html>
