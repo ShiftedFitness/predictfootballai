@@ -26,7 +26,9 @@ exports.handler = async (event) => {
   const stats = [];
 
   try {
-    // 1. Bullseye: Is there a player with exactly 501 appearances? (direct checkout!)
+    // 1. Bullseye: Is there a player with exactly 501 appearances?
+    // Bullseye uses per-club appearances (each row = one club), so 501 at a single club = direct checkout
+    // But let's also check if anyone's total across clubs sums to 501
     const { data: exact501 } = await client
       .from('v_game_player_club_comp')
       .select('player_name, appearances')
@@ -38,13 +40,30 @@ exports.handler = async (event) => {
     if (exact501) {
       stats.push({
         type: 'bullseye_501',
-        text: `${exact501.player_name} has exactly 501 Premier League appearances — a one-pick Bullseye checkout!`
+        text: `${exact501.player_name} has exactly 501 Premier League appearances at one club — a one-pick Bullseye checkout!`
       });
     } else {
-      stats.push({
-        type: 'bullseye_501',
-        text: `No player has exactly 501 Premier League appearances. A one-pick Bullseye checkout remains impossible… for now.`
-      });
+      // Check closest to 501
+      const { data: close501 } = await client
+        .from('v_game_player_club_comp')
+        .select('player_name, appearances')
+        .eq('competition_name', 'Premier League')
+        .gte('appearances', 490)
+        .lte('appearances', 510)
+        .order('appearances', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (close501) {
+        stats.push({
+          type: 'bullseye_501',
+          text: `${close501.player_name} is tantalisingly close to 501 with ${close501.appearances} appearances at one club. The perfect one-pick Bullseye checkout is still up for grabs!`
+        });
+      } else {
+        stats.push({
+          type: 'bullseye_501',
+          text: `No player has exactly 501 Premier League appearances. A one-pick Bullseye checkout remains impossible… for now.`
+        });
+      }
     }
 
     // 2. How many players have only ever had 1 EPL match?
@@ -133,20 +152,31 @@ exports.handler = async (event) => {
       });
     }
 
-    // 7. Highest-scoring player (goals)
-    const { data: topScorer } = await client
+    // 7. Highest-scoring player (goals — aggregated across all clubs)
+    // v_game_player_club_comp is per-player-per-club, so we must sum across clubs
+    const { data: allEPLScorers } = await client
       .from('v_game_player_club_comp')
-      .select('player_name, goals')
+      .select('player_uid, player_name, goals')
       .eq('competition_name', 'Premier League')
+      .gt('goals', 50)
       .order('goals', { ascending: false })
-      .limit(1)
-      .maybeSingle();
+      .limit(500);
 
-    if (topScorer) {
-      stats.push({
-        type: 'top_scorer',
-        text: `${topScorer.player_name} is the all-time EPL top scorer with ${topScorer.goals} goals. Worth ${topScorer.goals} points in a Goals Bullseye!`
-      });
+    if (allEPLScorers && allEPLScorers.length > 0) {
+      // Aggregate goals across clubs for each player
+      const goalMap = {};
+      for (const r of allEPLScorers) {
+        if (!goalMap[r.player_uid]) goalMap[r.player_uid] = { name: r.player_name, goals: 0 };
+        goalMap[r.player_uid].goals += r.goals;
+      }
+      const sorted = Object.values(goalMap).sort((a, b) => b.goals - a.goals);
+      const top = sorted[0];
+      if (top) {
+        stats.push({
+          type: 'top_scorer',
+          text: `${top.name} is the all-time EPL top scorer with ${top.goals} goals. Worth ${top.goals} points in a Goals Bullseye!`
+        });
+      }
     }
 
     // 8. User's personal stats (if logged in)

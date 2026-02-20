@@ -124,6 +124,16 @@
     .builder-msg.error { color: var(--danger); }
     .builder-msg.success { color: var(--accent-green); }
 
+    /* Retro loading animations */
+    .retro-loader { font-family: 'Space Mono', monospace; margin: 0 auto; text-align: center; min-height: 100px; display: flex; align-items: center; justify-content: center; flex-direction: column; padding: 20px; }
+    .retro-loader .retro-bar { font-size: 16px; letter-spacing: 2px; color: var(--accent-cyan); }
+    .retro-loader .retro-label { font-size: 11px; color: var(--muted); margin-top: 8px; text-transform: uppercase; letter-spacing: 1px; }
+    .retro-loader .retro-ascii { font-size: 14px; line-height: 1.2; color: var(--accent-yellow); white-space: pre; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Parsed filter badges */
+    .parsed-badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; margin: 2px; background: rgba(0,229,255,.1); color: var(--accent-cyan); border: 1px solid rgba(0,229,255,.2); }
+
     @media (max-width: 640px) {
       .comm-container { margin-top: 70px; }
       .comm-grid { grid-template-columns: 1fr; }
@@ -230,6 +240,29 @@
           <div id="perfNote" style="display:none;font-size:11px;color:var(--accent-yellow);margin-top:6px;">Performance measure is EPL-only</div>
         </div>
 
+        <div class="builder-section" id="builderClubSection">
+          <div class="builder-section-label">Club <span style="font-weight:400;text-transform:none;letter-spacing:0;">(optional — pick clubs to filter by)</span></div>
+          <div class="builder-chip-grid" id="builderClubs">
+            <div class="builder-chip" data-val="Arsenal">Arsenal</div>
+            <div class="builder-chip" data-val="Chelsea">Chelsea</div>
+            <div class="builder-chip" data-val="Liverpool">Liverpool</div>
+            <div class="builder-chip" data-val="Manchester City">Man City</div>
+            <div class="builder-chip" data-val="Manchester United">Man Utd</div>
+            <div class="builder-chip" data-val="Tottenham Hotspur">Spurs</div>
+            <div class="builder-chip" data-val="Newcastle United">Newcastle</div>
+            <div class="builder-chip" data-val="Aston Villa">A. Villa</div>
+            <div class="builder-chip" data-val="Everton">Everton</div>
+            <div class="builder-chip" data-val="West Ham United">West Ham</div>
+            <div class="builder-chip" data-val="Leeds United">Leeds</div>
+            <div class="builder-chip" data-val="Leicester City">Leicester</div>
+          </div>
+          <div id="clubModeRow" style="display:none;margin-top:8px;align-items:center;gap:8px;">
+            <span style="font-size:11px;color:var(--muted);">Players who played at:</span>
+            <button class="builder-chip selected" id="clubModeAll" onclick="setClubMode('all')" style="padding:4px 10px;font-size:11px;">ALL selected clubs</button>
+            <button class="builder-chip" id="clubModeAny" onclick="setClubMode('any')" style="padding:4px 10px;font-size:11px;">ANY selected club</button>
+          </div>
+        </div>
+
         <div class="builder-section" id="builderNatSection">
           <div class="builder-section-label">Nationality <span style="font-weight:400;text-transform:none;letter-spacing:0;">(optional)</span></div>
           <div class="builder-chip-grid" id="builderNats">
@@ -242,14 +275,24 @@
             <div class="builder-chip" data-val="ARG">&#127462;&#127479; ARG</div>
             <div class="builder-chip" data-val="NED">&#127475;&#127473; NED</div>
             <div class="builder-chip" data-val="POR">&#127477;&#127481; POR</div>
+            <div class="builder-chip" data-val="BEL">&#127463;&#127466; BEL</div>
             <div class="builder-chip" data-val="WAL">&#127988;&#917607;&#917602;&#917607;&#917612;&#917619;&#917631; WAL</div>
             <div class="builder-chip" data-val="SCO">&#127988;&#917607;&#917602;&#917619;&#917603;&#917620;&#917631; SCO</div>
             <div class="builder-chip" data-val="IRL">&#127470;&#127466; IRL</div>
+            <div class="builder-chip" data-val="NGA">&#127475;&#127468; NGA</div>
+            <div class="builder-chip" data-val="IRN">&#127470;&#127479; IRN</div>
+            <div class="builder-chip" data-val="JPN">&#127471;&#127477; JPN</div>
+            <div class="builder-chip" data-val="KOR">&#127472;&#127479; KOR</div>
+            <div class="builder-chip" data-val="USA">&#127482;&#127480; USA</div>
+            <div class="builder-chip" data-val="SEN">&#127480;&#127475; SEN</div>
+            <div class="builder-chip" data-val="CIV">&#127464;&#127470; CIV</div>
+            <div class="builder-chip" data-val="GHA">&#127468;&#127469; GHA</div>
+            <div class="builder-chip" data-val="AUS">&#127462;&#127482; AUS</div>
           </div>
         </div>
 
         <div class="builder-or">&#9473; or describe your game &#9473;</div>
-        <textarea class="builder-freetext" id="builderFreetext" placeholder="e.g. English players who played for Man Utd and Liverpool by appearances"></textarea>
+        <textarea class="builder-freetext" id="builderFreetext" placeholder="e.g. Players who played for Man Utd and Liverpool, Iranian players across all leagues"></textarea>
 
         <div class="builder-actions">
           <button class="builder-btn-back" onclick="goToStep(1)">&larr; Back</button>
@@ -415,6 +458,8 @@
       let builderState = {
         gameType: null,
         competitions: ['Premier League'],
+        clubs: [],
+        clubMode: 'all',
         measure: 'appearances',
         nationalities: [],
         freeText: '',
@@ -426,6 +471,8 @@
         builderState = {
           gameType: presetType || null,
           competitions: ['Premier League'],
+          clubs: [],
+          clubMode: 'all',
           measure: 'appearances',
           nationalities: [],
           freeText: '',
@@ -439,10 +486,12 @@
           c.classList.toggle('selected', c.dataset.val === 'Premier League');
           c.classList.remove('locked');
         });
+        document.querySelectorAll('#builderClubs .builder-chip').forEach(c => c.classList.remove('selected'));
         document.querySelectorAll('#builderNats .builder-chip').forEach(c => c.classList.remove('selected'));
         document.querySelectorAll('.builder-measure-btn').forEach(b => {
           b.classList.toggle('selected', b.dataset.val === 'appearances');
         });
+        document.getElementById('clubModeRow').style.display = 'none';
         document.getElementById('builderFreetext').value = '';
         document.getElementById('builderTitle').value = '';
         document.getElementById('builderDesc').value = '';
@@ -542,6 +591,23 @@
         });
       });
 
+      // Club chip toggles
+      document.querySelectorAll('#builderClubs .builder-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+          chip.classList.toggle('selected');
+          builderState.clubs = [...document.querySelectorAll('#builderClubs .builder-chip.selected')]
+            .map(c => c.dataset.val);
+          // Show/hide club mode row when 2+ clubs selected
+          document.getElementById('clubModeRow').style.display = builderState.clubs.length >= 2 ? 'flex' : 'none';
+        });
+      });
+
+      window.setClubMode = function(mode) {
+        builderState.clubMode = mode;
+        document.getElementById('clubModeAll').classList.toggle('selected', mode === 'all');
+        document.getElementById('clubModeAny').classList.toggle('selected', mode === 'any');
+      };
+
       // Nationality chip toggles
       document.querySelectorAll('#builderNats .builder-chip').forEach(chip => {
         chip.addEventListener('click', () => {
@@ -587,14 +653,109 @@
       }
 
       // ============================================================
+      // RETRO LOADING ANIMATIONS (ported from Bullseye)
+      // ============================================================
+      let retroLoaderInterval = null;
+
+      function stopRetroLoader() {
+        if (retroLoaderInterval) { clearInterval(retroLoaderInterval); retroLoaderInterval = null; }
+      }
+
+      function startRetroLoader(container) {
+        stopRetroLoader();
+        const animations = [retroProgressBar, retroBounceBall, retroTeletextFlip, retroBlockReveal];
+        const anim = animations[Math.floor(Math.random() * animations.length)];
+        anim(container);
+      }
+
+      function retroProgressBar(wrap) {
+        const total = 20;
+        let filled = 0;
+        wrap.innerHTML = '<div class="retro-loader"><div class="retro-bar" id="rBar"></div><div class="retro-label">Fetching player data...</div></div>';
+        retroLoaderInterval = setInterval(() => {
+          filled = Math.min(filled + 1, total);
+          const bar = '\u2588'.repeat(filled) + '\u2591'.repeat(total - filled);
+          const el = document.getElementById('rBar');
+          if (el) el.textContent = '[' + bar + ']';
+          if (filled >= total) filled = 0;
+        }, 200);
+      }
+
+      function retroBounceBall(wrap) {
+        const width = 18;
+        let pos = 0, dir = 1;
+        wrap.innerHTML = '<div class="retro-loader"><div class="retro-bar" id="rBall"></div><div class="retro-label">Searching the database...</div></div>';
+        retroLoaderInterval = setInterval(() => {
+          const line = '\u00B7'.repeat(pos) + '\u26BD' + '\u00B7'.repeat(width - pos - 1);
+          const el = document.getElementById('rBall');
+          if (el) el.textContent = line;
+          pos += dir;
+          if (pos >= width - 1 || pos <= 0) dir *= -1;
+        }, 100);
+      }
+
+      function retroTeletextFlip(wrap) {
+        const chars = '\u2588\u2593\u2592\u2591 ';
+        const w = 16, h = 4;
+        wrap.innerHTML = '<div class="retro-loader"><div class="retro-ascii" id="rFlip"></div><div class="retro-label">Teletext page loading...</div></div>';
+        retroLoaderInterval = setInterval(() => {
+          let block = '';
+          for (let r = 0; r < h; r++) {
+            for (let c = 0; c < w; c++) {
+              block += chars[Math.floor(Math.random() * chars.length)];
+            }
+            if (r < h - 1) block += '\n';
+          }
+          const el = document.getElementById('rFlip');
+          if (el) el.textContent = block;
+        }, 150);
+      }
+
+      function retroBlockReveal(wrap) {
+        const w = 16, h = 3;
+        let revealed = 0;
+        const grid = Array.from({ length: h }, () => Array(w).fill('\u2591'));
+        const order = [];
+        for (let r = 0; r < h; r++) for (let c = 0; c < w; c++) order.push([r, c]);
+        for (let i = order.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [order[i], order[j]] = [order[j], order[i]];
+        }
+        wrap.innerHTML = '<div class="retro-loader"><div class="retro-ascii" id="rBlock"></div><div class="retro-label">Building match roster...</div></div>';
+        retroLoaderInterval = setInterval(() => {
+          if (revealed < order.length) {
+            const [r, c] = order[revealed];
+            grid[r][c] = '\u2588';
+            revealed++;
+          } else {
+            revealed = 0;
+            for (let r = 0; r < h; r++) for (let c = 0; c < w; c++) grid[r][c] = '\u2591';
+          }
+          const el = document.getElementById('rBlock');
+          if (el) el.textContent = grid.map(row => row.join('')).join('\n');
+        }, 60);
+      }
+
+      // ============================================================
       // STEP 3: Preview
       // ============================================================
+      function buildFiltersPayload() {
+        return {
+          competitions: builderState.competitions,
+          clubs: builderState.clubs,
+          clubMode: builderState.clubs.length >= 2 ? builderState.clubMode : 'any',
+          nationalities: builderState.nationalities,
+          measure: builderState.measure,
+          freeText: builderState.freeText || undefined,
+        };
+      }
+
       window.previewGame = async function() {
         builderState.freeText = document.getElementById('builderFreetext').value.trim();
 
         goToStep(3);
         const preview = document.getElementById('builderPreview');
-        preview.innerHTML = '<div style="text-align:center;color:var(--muted);padding:20px;"><span class="spinner" style="display:inline-block;width:20px;height:20px;border:2px solid var(--muted);border-top-color:var(--accent-cyan);border-radius:50%;animation:spin .6s linear infinite;"></span><br>Analyzing filters...</div>';
+        startRetroLoader(preview);
         document.getElementById('step3Next').disabled = true;
 
         try {
@@ -604,22 +765,34 @@
             body: JSON.stringify({
               action: 'preview',
               gameType: builderState.gameType,
-              filters: {
-                competitions: builderState.competitions,
-                nationalities: builderState.nationalities,
-                measure: builderState.measure,
-              },
+              filters: buildFiltersPayload(),
             }),
           });
+          stopRetroLoader();
           const data = await res.json();
           builderState.previewData = data;
 
           if (!data.playerCount || data.playerCount === 0) {
-            preview.innerHTML = '<div style="text-align:center;color:var(--danger);padding:20px;">No players found matching these filters. Try broader filters.</div>';
+            let msg = data.message || 'No players found matching these filters. Try broader filters.';
+            preview.innerHTML = '<div style="text-align:center;color:var(--danger);padding:20px;">' + esc(msg) + '</div>';
             return;
           }
 
           let html = '';
+
+          // Show parsed filters if free text was used
+          if (data.parsedFilters && data.parsedFilters.freeText) {
+            html += '<div style="margin-bottom:12px;font-size:11px;color:var(--muted);">Parsed from text: ';
+            if (data.parsedFilters.clubs && data.parsedFilters.clubs.length > 0) {
+              html += data.parsedFilters.clubs.map(c => '<span class="parsed-badge">' + esc(c) + '</span>').join(' ');
+              if (data.parsedFilters.clubMode === 'all') html += ' <span style="color:var(--accent-yellow);font-size:10px;">(played at ALL)</span>';
+            }
+            if (data.parsedFilters.nationalities && data.parsedFilters.nationalities.length > 0) {
+              html += ' ' + data.parsedFilters.nationalities.map(n => '<span class="parsed-badge">' + esc(n) + '</span>').join(' ');
+            }
+            html += '</div>';
+          }
+
           html += '<div class="builder-preview-stat"><span class="builder-preview-label">Players Found</span><span class="builder-preview-value">' + data.playerCount + '</span></div>';
           html += '<div class="builder-preview-stat"><span class="builder-preview-label">Feasible</span><span class="builder-preview-value ' + (data.feasible ? 'feasible' : 'infeasible') + '">' + (data.feasible ? 'Yes' : 'Not enough players') + '</span></div>';
           html += '<div class="builder-preview-stat"><span class="builder-preview-label">Difficulty</span><span class="builder-preview-value">' + data.difficulty + '</span></div>';
@@ -630,7 +803,8 @@
             html += '<div class="builder-section-label" style="margin-top:14px;">Top Players</div>';
             html += '<div class="builder-sample-list">';
             data.samplePlayers.forEach(p => {
-              html += '<div class="builder-sample-item">' + esc(p.name) + '<span>' + p.stat + '</span></div>';
+              const clubsStr = p.clubs && p.clubs.length > 0 ? ' <span style="font-size:10px;color:var(--muted);">(' + p.clubs.join(', ') + ')</span>' : '';
+              html += '<div class="builder-sample-item">' + esc(p.name) + clubsStr + '<span>' + p.stat + '</span></div>';
             });
             html += '</div>';
           }
@@ -640,13 +814,15 @@
 
           // Pre-fill title suggestion
           const compLabel = builderState.competitions.length === 1 ? builderState.competitions[0] : builderState.competitions.length + ' Leagues';
-          const measureLabel = builderState.measure === 'goals' ? 'Goals' : 'Appearances';
+          const clubLabel = (data.clubs || builderState.clubs).length > 0 ? (data.clubs || builderState.clubs).slice(0, 2).join(' & ') : '';
+          const measureLabel = builderState.measure === 'goals' ? 'Goals' : builderState.measure === 'performance' ? 'Performance' : 'Appearances';
           const titleInput = document.getElementById('builderTitle');
           if (!titleInput.value) {
-            titleInput.value = compLabel + ' — ' + measureLabel;
+            titleInput.value = clubLabel ? clubLabel + ' — ' + measureLabel : compLabel + ' — ' + measureLabel;
           }
 
         } catch (e) {
+          stopRetroLoader();
           console.error('[builder]', e);
           preview.innerHTML = '<div style="text-align:center;color:var(--danger);padding:20px;">Failed to preview. Please try again.</div>';
         }
@@ -680,11 +856,7 @@
             body: JSON.stringify({
               action: 'generate',
               gameType: builderState.gameType,
-              filters: {
-                competitions: builderState.competitions,
-                nationalities: builderState.nationalities,
-                measure: builderState.measure,
-              },
+              filters: buildFiltersPayload(),
             }),
           });
           const genData = await genRes.json();
