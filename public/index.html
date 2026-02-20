@@ -372,7 +372,7 @@ function renderLoggedOut(page) {
   page.innerHTML = `
     <div class="hero-out">
       <h1>Tele<span class="accent">Stats</span></h1>
-      <div class="tagline">Retro-inspired football games &mdash; from the birth of modern football in 1992 to today. Test your knowledge across 30+ seasons of Premier League data.</div>
+      <div class="tagline">Retro-inspired football games &mdash; from the birth of modern football in 1992 to today. Test your knowledge across 30+ seasons of global football data.</div>
       <div class="hero-stats">
         <div class="hero-stat">
           <span class="hero-stat-number">30+</span>
@@ -427,19 +427,19 @@ async function renderLoggedIn(user, page) {
     <!-- Featured Player -->
     <div id="featuredPlayer"></div>
 
-    ${GAMES_HTML}
-
-    <!-- Did You Know -->
+    <!-- Did You Know — game-specific stats to get them hooked -->
     <div class="stat-banner" id="statBanner" style="display:none">
       <div class="stat-label">Did You Know?</div>
       <div class="stat-text" id="statText"></div>
     </div>
 
-    <!-- Leaderboard -->
-    <div class="section-title">Leaderboard</div>
+    <!-- Your Top Scores -->
+    <div class="section-title">Your Top Scores</div>
     <div class="lb-widget" id="lbWidget">
       <div class="lb-empty">Loading...</div>
     </div>
+
+    ${GAMES_HTML}
 
     <!-- Community -->
     <div class="section-title">Community</div>
@@ -501,19 +501,43 @@ async function loadDidYouKnow(user) {
 }
 
 async function loadLeaderboard() {
+  const GAME_ICONS = { bullseye: '\u{1F3AF}', starting_xi: '\u26BD', who_am_i: '\u{1F575}\uFE0F', pop_quiz: '\u{1F9E0}', higher_lower: '\u{1F0CF}', player_alphabet: '\u{1F524}' };
+  const GAME_NAMES = { bullseye: 'Bullseye', starting_xi: 'Starting XI', who_am_i: 'Who Am I?', pop_quiz: 'Pop Quiz', higher_lower: 'Higher or Lower', player_alphabet: 'Alphabet' };
   try {
-    const lb = await TSData.getGlobalLeaderboard(5);
     const widget = document.getElementById('lbWidget');
     if (!widget) return;
-    if (lb.length === 0) {
-      widget.innerHTML = '<div class="lb-empty">No ranked players yet. Play some games to get started!</div>';
+    // Try to get user's personal best scores per game type
+    const user = TSAuth.getUser();
+    if (!user?.id) {
+      widget.innerHTML = '<div class="lb-empty">Play some games to see your top scores!</div>';
+      return;
+    }
+    let scores = [];
+    if (typeof TSData.getUserTopScores === 'function') {
+      scores = await TSData.getUserTopScores(user.id);
+    }
+    if (!scores || scores.length === 0) {
+      // Fallback: show global leaderboard
+      const lb = await TSData.getGlobalLeaderboard(5);
+      if (lb.length === 0) {
+        widget.innerHTML = '<div class="lb-empty">Play some games to see your top scores here!</div>';
+      } else {
+        const rankClass = (i) => i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
+        widget.innerHTML = '<div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;font-family:Space Mono,monospace;">Global Leaderboard</div>' +
+          lb.map((p, i) => `
+          <div class="lb-row">
+            <span class="lb-rank ${rankClass(i)}">${i + 1}</span>
+            <span class="lb-name">${escHTML(p.username || p.display_name || 'Player')}</span>
+            <span class="lb-xp">${(p.total_xp || 0).toLocaleString()} XP</span>
+          </div>`).join('') +
+          '<div class="lb-footer"><a href="/leaderboard/">View Full Leaderboard &rarr;</a></div>';
+      }
     } else {
-      const rankClass = (i) => i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
-      widget.innerHTML = lb.map((p, i) => `
+      widget.innerHTML = scores.map(s => `
         <div class="lb-row">
-          <span class="lb-rank ${rankClass(i)}">${i + 1}</span>
-          <span class="lb-name">${escHTML(p.username || p.display_name || 'Player')}</span>
-          <span class="lb-xp">${(p.total_xp || 0).toLocaleString()} XP</span>
+          <span style="font-size:18px;width:28px;text-align:center;">${GAME_ICONS[s.game_type] || '\u{1F3AE}'}</span>
+          <span class="lb-name">${escHTML(GAME_NAMES[s.game_type] || s.game_type)}</span>
+          <span class="lb-xp">${s.best_score || 0}</span>
         </div>`).join('') +
         '<div class="lb-footer"><a href="/leaderboard/">View Full Leaderboard &rarr;</a></div>';
     }

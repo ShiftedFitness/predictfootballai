@@ -145,8 +145,6 @@
       <button class="comm-filter active" data-type="all">All</button>
       <button class="comm-filter" data-type="bullseye">Bullseye</button>
       <button class="comm-filter" data-type="starting_xi">Starting XI</button>
-      <button class="comm-filter" data-type="who_am_i">Who Am I?</button>
-      <button class="comm-filter" data-type="pop_quiz">Pop Quiz</button>
       <button class="comm-filter" data-type="higher_lower">Higher or Lower</button>
       <button class="comm-filter" data-type="player_alphabet">Alphabet</button>
     </div>
@@ -227,7 +225,9 @@
           <div class="builder-measure-toggle">
             <button class="builder-measure-btn selected" data-val="appearances" onclick="selectMeasure('appearances',this)">&#128202; Appearances</button>
             <button class="builder-measure-btn" data-val="goals" onclick="selectMeasure('goals',this)">&#9917; Goals</button>
+            <button class="builder-measure-btn" data-val="performance" id="builderPerfBtn" onclick="selectMeasure('performance',this)">&#11088; Performance</button>
           </div>
+          <div id="perfNote" style="display:none;font-size:11px;color:var(--accent-yellow);margin-top:6px;">Performance measure is EPL-only</div>
         </div>
 
         <div class="builder-section" id="builderNatSection">
@@ -538,6 +538,7 @@
             chip.classList.add('selected');
             builderState.competitions = [chip.dataset.val];
           }
+          updatePerfButton();
         });
       });
 
@@ -551,10 +552,39 @@
       });
 
       window.selectMeasure = function(val, el) {
+        // Performance is EPL-only
+        if (val === 'performance') {
+          const isEPLOnly = builderState.competitions.length === 1 && builderState.competitions[0] === 'Premier League';
+          if (!isEPLOnly) return; // can't select if non-EPL
+        }
         document.querySelectorAll('.builder-measure-btn').forEach(b => b.classList.remove('selected'));
         el.classList.add('selected');
         builderState.measure = val;
       };
+
+      function updatePerfButton() {
+        const perfBtn = document.getElementById('builderPerfBtn');
+        const perfNote = document.getElementById('perfNote');
+        if (!perfBtn) return;
+        const isEPLOnly = builderState.competitions.length === 1 && builderState.competitions[0] === 'Premier League';
+        if (isEPLOnly) {
+          perfBtn.classList.remove('locked');
+          perfBtn.style.opacity = '1';
+          perfBtn.style.cursor = 'pointer';
+          if (perfNote) perfNote.style.display = 'none';
+        } else {
+          perfBtn.classList.add('locked');
+          perfBtn.style.opacity = '0.3';
+          perfBtn.style.cursor = 'not-allowed';
+          if (perfNote) perfNote.style.display = 'block';
+          // If performance was selected, switch to appearances
+          if (builderState.measure === 'performance') {
+            builderState.measure = 'appearances';
+            document.querySelectorAll('.builder-measure-btn').forEach(b => b.classList.remove('selected'));
+            document.querySelector('.builder-measure-btn[data-val="appearances"]').classList.add('selected');
+          }
+        }
+      }
 
       // ============================================================
       // STEP 3: Preview
@@ -593,7 +623,8 @@
           html += '<div class="builder-preview-stat"><span class="builder-preview-label">Players Found</span><span class="builder-preview-value">' + data.playerCount + '</span></div>';
           html += '<div class="builder-preview-stat"><span class="builder-preview-label">Feasible</span><span class="builder-preview-value ' + (data.feasible ? 'feasible' : 'infeasible') + '">' + (data.feasible ? 'Yes' : 'Not enough players') + '</span></div>';
           html += '<div class="builder-preview-stat"><span class="builder-preview-label">Difficulty</span><span class="builder-preview-value">' + data.difficulty + '</span></div>';
-          html += '<div class="builder-preview-stat"><span class="builder-preview-label">Measure</span><span class="builder-preview-value">' + (data.measure === 'goals' ? 'Goals' : 'Appearances') + '</span></div>';
+          const measureLabels = { goals: 'Goals', appearances: 'Appearances', performance: 'Performance' };
+          html += '<div class="builder-preview-stat"><span class="builder-preview-label">Measure</span><span class="builder-preview-value">' + (measureLabels[data.measure] || data.measure) + '</span></div>';
 
           if (data.samplePlayers && data.samplePlayers.length > 0) {
             html += '<div class="builder-section-label" style="margin-top:14px;">Top Players</div>';

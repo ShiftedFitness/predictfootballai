@@ -1,5 +1,8 @@
 /**
- * did-you-know.js — Return dynamic stats for the homepage "Did You Know?" section
+ * did-you-know.js — Return dynamic, game-specific stats for the homepage
+ *
+ * Designed to hook players with interesting data tidbits that make them
+ * want to dig deeper into the games.
  *
  * POST body (optional): { userId: number }
  * Returns: { stats: [{ type, text }] }
@@ -23,7 +26,51 @@ exports.handler = async (event) => {
   const stats = [];
 
   try {
-    // 1. Top ranked player by performance score (overall)
+    // 1. Bullseye: Is there a player with exactly 501 appearances? (direct checkout!)
+    const { data: exact501 } = await client
+      .from('v_game_player_club_comp')
+      .select('player_name, appearances')
+      .eq('competition_name', 'Premier League')
+      .eq('appearances', 501)
+      .limit(1)
+      .maybeSingle();
+
+    if (exact501) {
+      stats.push({
+        type: 'bullseye_501',
+        text: `${exact501.player_name} has exactly 501 Premier League appearances — a one-pick Bullseye checkout!`
+      });
+    } else {
+      stats.push({
+        type: 'bullseye_501',
+        text: `No player has exactly 501 Premier League appearances. A one-pick Bullseye checkout remains impossible… for now.`
+      });
+    }
+
+    // 2. How many players have only ever had 1 EPL match?
+    const { data: oneMatchData } = await client
+      .from('v_game_player_club_comp')
+      .select('player_uid', { count: 'exact', head: true })
+      .eq('competition_name', 'Premier League')
+      .eq('appearances', 1);
+
+    if (oneMatchData !== null) {
+      // oneMatchData is null when head: true, use count instead
+      const { count: oneMatchCount } = await client
+        .from('v_game_player_club_comp')
+        .select('player_uid', { count: 'exact', head: true })
+        .eq('competition_name', 'Premier League')
+        .eq('appearances', 1);
+
+      if (oneMatchCount) {
+        stats.push({
+          type: 'one_match_wonders',
+          text: `${oneMatchCount.toLocaleString()} players have made just 1 Premier League appearance — true one-match wonders. Can you name any?`
+        });
+      }
+    }
+
+    // 3. Best XI performance rating holder
     const { data: topPerf } = await client
       .from('player_performance_scores')
       .select('player_name, performance_score, position_bucket')
@@ -34,12 +81,31 @@ exports.handler = async (event) => {
 
     if (topPerf) {
       stats.push({
-        type: 'top_performer',
-        text: `${topPerf.player_name} holds the highest performance rating across all ${topPerf.position_bucket}s in Premier League history`
+        type: 'xi_top_rated',
+        text: `${topPerf.player_name} holds the highest Starting XI performance rating (${topPerf.performance_score.toFixed(1)}) across all ${topPerf.position_bucket}s in EPL history`
       });
     }
 
-    // 2. Total perfect Bullseye checkouts
+    // 4. Player who played for the most EPL clubs
+    const { data: mostClubs } = await client
+      .rpc('sql', { query: `
+        SELECT player_name, COUNT(DISTINCT club_name) as club_count
+        FROM v_game_player_club_comp
+        WHERE competition_name = 'Premier League' AND appearances > 0
+        GROUP BY player_uid, player_name
+        ORDER BY club_count DESC
+        LIMIT 1
+      `}).maybeSingle();
+
+    // If RPC doesn't work, skip this stat silently
+    if (mostClubs && mostClubs.player_name) {
+      stats.push({
+        type: 'most_clubs',
+        text: `${mostClubs.player_name} played for ${mostClubs.club_count} different Premier League clubs — the ultimate journeyman. Perfect for Alphabet!`
+      });
+    }
+
+    // 5. Total perfect Bullseye checkouts
     const { count: perfectCount } = await client
       .from('ts_game_sessions')
       .select('id', { count: 'exact', head: true })
@@ -50,12 +116,12 @@ exports.handler = async (event) => {
       stats.push({
         type: 'bullseye_checkouts',
         text: perfectCount > 0
-          ? `${perfectCount} perfect Bullseye checkout${perfectCount !== 1 ? 's have' : ' has'} been achieved so far. Can you add to it?`
-          : `Nobody has hit a perfect Bullseye checkout yet. Will you be the first?`
+          ? `Only ${perfectCount} perfect Bullseye checkout${perfectCount !== 1 ? 's have' : ' has'} been achieved. Can you join the elite?`
+          : `Nobody has hit a perfect Bullseye checkout yet. Will you be the first to hit exactly zero?`
       });
     }
 
-    // 3. Total number of players in the database
+    // 6. Total players in database
     const { count: playerCount } = await client
       .from('players')
       .select('player_uid', { count: 'exact', head: true });
@@ -63,23 +129,27 @@ exports.handler = async (event) => {
     if (playerCount) {
       stats.push({
         type: 'player_count',
-        text: `The TeleStats database contains ${playerCount.toLocaleString()} players across 30+ seasons of Premier League football`
+        text: `${playerCount.toLocaleString()} players across 5 European leagues are in the TeleStats database — and growing`
       });
     }
 
-    // 4. Total community games created
-    const { count: communityCount } = await client
-      .from('ts_community_games')
-      .select('id', { count: 'exact', head: true });
+    // 7. Highest-scoring player (goals)
+    const { data: topScorer } = await client
+      .from('v_game_player_club_comp')
+      .select('player_name, goals')
+      .eq('competition_name', 'Premier League')
+      .order('goals', { ascending: false })
+      .limit(1)
+      .maybeSingle();
 
-    if (communityCount !== null && communityCount > 0) {
+    if (topScorer) {
       stats.push({
-        type: 'community_games',
-        text: `The community has created ${communityCount} custom game${communityCount !== 1 ? 's' : ''} — browse and play them all`
+        type: 'top_scorer',
+        text: `${topScorer.player_name} is the all-time EPL top scorer with ${topScorer.goals} goals. Worth ${topScorer.goals} points in a Goals Bullseye!`
       });
     }
 
-    // 5. User's personal stats (if logged in)
+    // 8. User's personal stats (if logged in)
     if (userId) {
       const { data: userStats } = await client
         .from('ts_users')
@@ -95,7 +165,7 @@ exports.handler = async (event) => {
       }
     }
 
-    // Shuffle and return 2-3 stats
+    // Shuffle and return 3 stats
     const shuffled = stats.sort(() => Math.random() - 0.5).slice(0, 3);
 
     return respond(200, { stats: shuffled });
