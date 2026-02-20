@@ -4,6 +4,17 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Upgrade — TeleStats</title>
+  <meta name="description" content="Unlock the full TeleStats experience. More plays, all categories, community creation, and zero limits."/>
+  <meta property="og:site_name" content="TeleStats"/>
+  <meta property="og:type" content="website"/>
+  <meta property="og:title" content="Upgrade — TeleStats"/>
+  <meta property="og:description" content="Unlock the full TeleStats experience. More plays, all categories, community creation."/>
+  <meta property="og:image" content="https://res.cloudinary.com/dbfvogb95/image/upload/v1770835428/Screenshot_2026-02-11_at_19.43.16_m7urul.png"/>
+  <meta property="og:url" content="https://telestats.net/upgrade/"/>
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content="Upgrade — TeleStats"/>
+  <meta name="twitter:description" content="Unlock the full TeleStats experience. Unlimited plays, all categories."/>
+  <meta name="twitter:image" content="https://res.cloudinary.com/dbfvogb95/image/upload/v1770835428/Screenshot_2026-02-11_at_19.43.16_m7urul.png"/>
   <link rel="stylesheet" href="/telestats-theme.css"/>
   <style>
     .up-container { max-width: 800px; margin: 80px auto 40px; padding: 0 16px; }
@@ -122,6 +133,17 @@
         </ul>
         <button class="up-plan-btn primary" id="upBuyBtn">Buy Pro — £4.99</button>
       </div>
+    </div>
+
+    <!-- Promo Code -->
+    <div style="text-align:center;margin-bottom:32px;">
+      <p style="color:var(--muted);font-size:.9rem;margin-bottom:10px;">Have a promo code?</p>
+      <div style="display:flex;gap:8px;justify-content:center;max-width:340px;margin:0 auto;">
+        <input type="text" id="promoInput" placeholder="Enter code"
+               style="flex:1;padding:10px 14px;border-radius:8px;border:1px dashed var(--accent);background:var(--bg);color:var(--fg);text-transform:uppercase;font-family:'Space Mono',monospace;text-align:center;font-size:.9rem;"/>
+        <button id="promoBtn" class="up-plan-btn primary" style="width:auto;padding:10px 20px;white-space:nowrap;">Redeem</button>
+      </div>
+      <div id="promoMsg" style="margin-top:8px;font-size:.85rem;min-height:20px;"></div>
     </div>
 
     <div class="up-divider"><span>or unlock for free</span></div>
@@ -282,6 +304,43 @@
         refStatus.textContent = 'No referral code assigned yet. Contact support.';
         refProgress.style.display = 'block';
       }
+
+      // Promo code redemption
+      const promoBtn = document.getElementById('promoBtn');
+      const promoInput = document.getElementById('promoInput');
+      const promoMsg = document.getElementById('promoMsg');
+
+      promoBtn.addEventListener('click', async () => {
+        const code = promoInput.value.trim();
+        promoMsg.style.color = '';
+        if (!code) {
+          promoMsg.textContent = 'Enter a promo code';
+          promoMsg.style.color = 'var(--danger, #e05555)';
+          return;
+        }
+        if (isAnon) {
+          TSNav.showAuthModal('signup');
+          return;
+        }
+        promoBtn.disabled = true;
+        promoMsg.textContent = 'Redeeming...';
+        promoMsg.style.color = 'var(--muted)';
+        const result = await TSAuth.redeemPromo(code);
+        if (result.error) {
+          promoMsg.textContent = result.error;
+          promoMsg.style.color = 'var(--danger, #e05555)';
+          promoBtn.disabled = false;
+        } else {
+          promoMsg.textContent = '🎉 ' + (result.message || 'Upgraded to Pro!');
+          promoMsg.style.color = 'var(--accent-green, #32FF7E)';
+          setTimeout(() => location.reload(), 1500);
+        }
+      });
+
+      // Allow Enter key to submit promo code
+      promoInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') promoBtn.click();
+      });
 
       // FAQ toggle
       document.querySelectorAll('.up-faq-item').forEach(item => {

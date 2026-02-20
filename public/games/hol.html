@@ -4,6 +4,17 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
 <title>TeleStats - Higher or Lower</title>
+<meta name="description" content="Guess if the next player has more or fewer appearances or goals. Keep your streak going as long as you can!"/>
+<meta property="og:site_name" content="TeleStats"/>
+<meta property="og:type" content="website"/>
+<meta property="og:title" content="Higher or Lower — TeleStats"/>
+<meta property="og:description" content="Guess if the next player has more or fewer appearances or goals. How long can you keep your streak?"/>
+<meta property="og:image" content="https://res.cloudinary.com/dbfvogb95/image/upload/v1770835428/Screenshot_2026-02-11_at_19.43.16_m7urul.png"/>
+<meta property="og:url" content="https://telestats.net/games/hol.html"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="Higher or Lower — TeleStats"/>
+<meta name="twitter:description" content="Guess if the next player has more or fewer appearances or goals."/>
+<meta name="twitter:image" content="https://res.cloudinary.com/dbfvogb95/image/upload/v1770835428/Screenshot_2026-02-11_at_19.43.16_m7urul.png"/>
 <link rel="stylesheet" href="../telestats-theme.css"/>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -119,6 +130,10 @@ body {
     <div class="subtitle">Guess if the next player has more or fewer. How long can you keep your streak?</div>
   </div>
 
+  <div class="game-meta-links">
+    <button class="game-meta-link" onclick="showRules()">&#9432; How to Play</button>
+  </div>
+
   <!-- SETUP -->
   <div id="step1">
     <div class="card">
@@ -181,8 +196,25 @@ body {
   </div>
 </div>
 
+<!-- How to Play Modal -->
+<div class="game-rules-overlay" id="rulesOverlay" onclick="if(event.target===this)closeRules()">
+  <div class="game-rules-modal">
+    <button class="game-rules-close" onclick="closeRules()">&times;</button>
+    <h3>How to Play Higher or Lower</h3>
+    <div class="rule-step"><div class="rule-num">1</div><div class="rule-text">Choose a <strong>stat</strong> to compare — appearances or goals.</div></div>
+    <div class="rule-step"><div class="rule-num">2</div><div class="rule-text">Pick a <strong>team or league</strong> to play with.</div></div>
+    <div class="rule-step"><div class="rule-num">3</div><div class="rule-text">You'll see two players side by side. Guess if the next player has <strong>higher or lower</strong> stats than the current one.</div></div>
+    <div class="rule-step"><div class="rule-num">4</div><div class="rule-text">Get it right to <strong>keep your streak</strong> going. Get it wrong and the game ends.</div></div>
+    <div class="rule-step"><div class="rule-num">5</div><div class="rule-text">Try to beat your <strong>personal best</strong> streak!</div></div>
+  </div>
+</div>
+<script>
+function showRules(){document.getElementById('rulesOverlay').classList.add('active');}
+function closeRules(){document.getElementById('rulesOverlay').classList.remove('active');}
+</script>
+
 <footer style="text-align:center;padding:16px 16px 72px;font-size:11px;color:var(--muted);opacity:0.6;">
-  Build: 2026-02-14 | TeleStats HoL v1.0
+  TeleStats.net &middot; Built by <a href="https://shiftedlabs.io" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">Shifted.Labs</a>
 </footer>
 
 <script>

@@ -4,6 +4,17 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
 <title>TeleStats - Bullseye</title>
+<meta name="description" content="Name players to subtract their stats from 501. Go bust and you lose. A darts-style football trivia game."/>
+<meta property="og:site_name" content="TeleStats"/>
+<meta property="og:type" content="website"/>
+<meta property="og:title" content="Bullseye — TeleStats"/>
+<meta property="og:description" content="Name players to subtract their stats from 501. A darts-style football trivia game."/>
+<meta property="og:image" content="https://res.cloudinary.com/dbfvogb95/image/upload/v1770835428/Screenshot_2026-02-11_at_19.43.16_m7urul.png"/>
+<meta property="og:url" content="https://telestats.net/games/bullseye.html"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="Bullseye — TeleStats"/>
+<meta name="twitter:description" content="Name players to subtract their stats from 501. A darts-style football trivia game."/>
+<meta name="twitter:image" content="https://res.cloudinary.com/dbfvogb95/image/upload/v1770835428/Screenshot_2026-02-11_at_19.43.16_m7urul.png"/>
 <link rel="stylesheet" href="../telestats-theme.css"/>
 <style>
 * { box-sizing: border-box; }
@@ -763,6 +774,11 @@ button {
   <span class="ts-time" id="tsClock">--:--</span>
 </div>
 
+<div class="game-meta-links">
+  <button class="game-meta-link" onclick="showRules()">&#9432; How to Play</button>
+  <button class="game-meta-link" onclick="showGameSettings()">&#9881; Settings</button>
+</div>
+
 <div class="card" id="setupCard">
   <!-- Step 1: Game Mode Selection -->
   <div id="step1">
@@ -834,31 +850,15 @@ button {
     <h2>Choose Category</h2>
     <p class="subtitle">Select a game mode to start</p>
 
-    <!-- Build Your Own (always visible, highlighted) -->
-    <div class="section build-your-own" id="sec-chat-global">
-      <div class="section-header" onclick="toggleSection('sec-chat-global')">
-        <div class="section-title">&#128172; Build Your Own</div>
-        <div class="chev">&#9660;</div>
-      </div>
-      <div class="section-desc">Type what you want and we'll build it. Works with any league.</div>
-      <div class="section-body" id="chatBuilderGlobal">
-        <div class="chat-builder">
-          <div class="field">
-            <label>Describe your game</label>
-            <textarea id="chatInputGlobal" placeholder="e.g. English players who played for Sunderland, Man Utd, Liverpool and Spurs by appearances" rows="3"></textarea>
-          </div>
-          <div id="chatProposalGlobal" class="chat-proposal hidden">
-            <div class="chat-proposal-header">Proposed Game</div>
-            <div class="chat-proposal-content" id="chatProposalContentGlobal"></div>
-            <div class="chat-proposal-feasibility" id="chatFeasibilityGlobal"></div>
-          </div>
-          <div id="chatWarningGlobal" class="chat-warning hidden"></div>
-          <div class="chat-buttons">
-            <button class="btn-primary" id="submitChatGlobal">Build</button>
-            <button class="btn-primary" id="startChatGlobal" disabled style="display:none">Start Game</button>
-          </div>
+    <!-- Build in Community Hub -->
+    <div class="section build-your-own" id="sec-community-link">
+      <a href="/community/?builder=bullseye" style="display:flex;align-items:center;padding:14px 16px;text-decoration:none;color:var(--fg);">
+        <div style="flex:1">
+          <div class="section-title" style="margin-bottom:4px;">&#128172; Build Your Own</div>
+          <div style="font-size:12px;color:var(--muted);">Create custom Bullseye games in the Community Hub</div>
         </div>
-      </div>
+        <span style="color:var(--accent);font-size:18px;">&rarr;</span>
+      </a>
     </div>
 
     <!-- PREMIER LEAGUE -->
@@ -1612,17 +1612,12 @@ function clearExpiredCache() {
 
 // ============== SETUP FLOW ==============
 
-// Single Player: skip gameplay options if prefs already saved
+// Single Player: go straight to category selection (settings via in-game gear)
 $('singlePlayerBtn').onclick = () => {
   window.gameSetup = { names: ['You'], isSinglePlayer: true };
   hide('step1');
-  const hasSavedPrefs = !!localStorage.getItem(PREFS_KEY);
-  if (hasSavedPrefs) {
-    buildCategorySections();
-    show('step3');
-  } else {
-    show('stepOptions');
-  }
+  buildCategorySections();
+  show('step3');
 };
 
 // Multiplayer: go to player count selection
@@ -1657,6 +1652,7 @@ $('backToStep1').onclick = () => {
 };
 
 // From step2 (names) to stepOptions (or skip to categories if prefs saved)
+// From step2 (names) → straight to categories (settings via in-game gear)
 $('toStepOptions').onclick = () => {
   const n = parseInt($('numPlayers').value, 10);
   const names = [];
@@ -1666,13 +1662,8 @@ $('toStepOptions').onclick = () => {
   }
   window.gameSetup = { names };
   hide('step2');
-  const hasSavedPrefs = !!localStorage.getItem(PREFS_KEY);
-  if (hasSavedPrefs) {
-    buildCategorySections();
-    show('step3');
-  } else {
-    show('stepOptions');
-  }
+  buildCategorySections();
+  show('step3');
 };
 
 // In-game settings panel
@@ -3778,8 +3769,55 @@ function retroBlockReveal(wrap) {
   }, 40);
 }
 </script>
+<!-- How to Play Modal -->
+<div class="game-rules-overlay" id="rulesOverlay" onclick="if(event.target===this)closeRules()">
+  <div class="game-rules-modal">
+    <button class="game-rules-close" onclick="closeRules()">&times;</button>
+    <h3>How to Play Bullseye</h3>
+    <div class="rule-step"><div class="rule-num">1</div><div class="rule-text">You start with <strong>501 points</strong> — just like darts!</div></div>
+    <div class="rule-step"><div class="rule-num">2</div><div class="rule-text">Search for Premier League players and select them to <strong>subtract their stat</strong> (appearances, goals, etc.) from your total.</div></div>
+    <div class="rule-step"><div class="rule-num">3</div><div class="rule-text">Try to reach <strong>exactly 0</strong> — that's the bullseye! Get as close as you can without going below zero.</div></div>
+    <div class="rule-step"><div class="rule-num">4</div><div class="rule-text">If you <strong>go bust</strong> (below zero), that pick doesn't count. Choose a player with a smaller stat.</div></div>
+    <div class="rule-step"><div class="rule-num">5</div><div class="rule-text">You can <strong>check out</strong> at any time to lock in your score, or keep going to get closer to zero.</div></div>
+  </div>
+</div>
+
+<!-- Settings Modal -->
+<div class="game-rules-overlay" id="settingsOverlay" onclick="if(event.target===this)closeGameSettings()">
+  <div class="game-rules-modal">
+    <button class="game-rules-close" onclick="closeGameSettings()">&times;</button>
+    <h3>Settings</h3>
+    <div class="game-settings-row">
+      <div class="game-settings-label">Timer<small>Adds time pressure per pick</small></div>
+      <label class="toggle-switch"><input type="checkbox" id="settingsTimerToggle" onchange="updateBullseyeSetting('timer',this.checked)"/><span class="toggle-slider"></span></label>
+    </div>
+    <div class="game-settings-row">
+      <div class="game-settings-label">Player Suggestions<small>Show autocomplete while typing</small></div>
+      <label class="toggle-switch"><input type="checkbox" id="settingsSuggestToggle" checked onchange="updateBullseyeSetting('suggestions',this.checked)"/><span class="toggle-slider"></span></label>
+    </div>
+  </div>
+</div>
+
+<script>
+function showRules(){document.getElementById('rulesOverlay').classList.add('active');}
+function closeRules(){document.getElementById('rulesOverlay').classList.remove('active');}
+function showGameSettings(){
+  // Sync toggles with current state if available
+  const tp=document.getElementById('settingsTimerToggle');
+  const sp=document.getElementById('settingsSuggestToggle');
+  if(typeof window.timerMode!=='undefined') tp.checked=window.timerMode;
+  if(typeof window.suggestionsEnabled!=='undefined') sp.checked=window.suggestionsEnabled;
+  document.getElementById('settingsOverlay').classList.add('active');
+}
+function closeGameSettings(){document.getElementById('settingsOverlay').classList.remove('active');}
+function updateBullseyeSetting(key,val){
+  if(key==='timer'&&typeof window.timerMode!=='undefined') window.timerMode=val;
+  if(key==='suggestions'&&typeof window.suggestionsEnabled!=='undefined') window.suggestionsEnabled=val;
+}
+</script>
+
 <footer style="text-align:center;padding:16px;font-size:11px;color:var(--muted);opacity:0.6;">
-  Build: 2026-02-16 | TeleStats Bullseye v1.1
+  TeleStats.net &middot; Built by <a href="https://shiftedlabs.io" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">Shifted.Labs</a>
 </footer>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/js/ts-auth.js"></script>

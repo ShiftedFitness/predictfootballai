@@ -4,6 +4,17 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Community — TeleStats</title>
+  <meta name="description" content="Browse and play community-created football games. Build your own Bullseye, Starting XI, Higher or Lower and more."/>
+  <meta property="og:site_name" content="TeleStats"/>
+  <meta property="og:type" content="website"/>
+  <meta property="og:title" content="Community — TeleStats"/>
+  <meta property="og:description" content="Browse and play community-created football games. Build your own and share with the world."/>
+  <meta property="og:image" content="https://res.cloudinary.com/dbfvogb95/image/upload/v1770835428/Screenshot_2026-02-11_at_19.43.16_m7urul.png"/>
+  <meta property="og:url" content="https://telestats.net/community/"/>
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content="Community — TeleStats"/>
+  <meta name="twitter:description" content="Browse and play community-created football games."/>
+  <meta name="twitter:image" content="https://res.cloudinary.com/dbfvogb95/image/upload/v1770835428/Screenshot_2026-02-11_at_19.43.16_m7urul.png"/>
   <link rel="stylesheet" href="/telestats-theme.css"/>
   <style>
     .comm-container { max-width: 900px; margin: 80px auto 40px; padding: 0 16px; }
@@ -36,21 +47,87 @@
     .comm-card-creator a:hover { color: var(--accent); }
     .comm-card-plays { display: flex; align-items: center; gap: 4px; }
     .comm-empty { text-align: center; padding: 48px 16px; color: var(--muted); }
-    .comm-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 16px; }
-    .comm-modal { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 28px; width: 100%; max-width: 500px; }
-    .comm-modal h2 { margin-bottom: 16px; font-size: 1.2rem; }
-    .comm-modal label { display: block; font-size: .85rem; color: var(--muted); margin-bottom: 4px; margin-top: 12px; }
-    .comm-modal input, .comm-modal select, .comm-modal textarea { width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--fg); font-size: .9rem; margin-bottom: 4px; box-sizing: border-box; }
-    .comm-modal textarea { min-height: 80px; resize: vertical; }
-    .comm-modal-actions { display: flex; gap: 8px; margin-top: 16px; }
-    .comm-modal-actions button { flex: 1; padding: 10px; border-radius: 8px; font-size: .9rem; cursor: pointer; }
-    .comm-modal .btn-cancel { background: var(--bg); border: 1px solid var(--border); color: var(--fg); }
-    .comm-modal .btn-submit { background: var(--accent); border: none; color: #000; font-weight: 600; }
-    .comm-modal .comm-msg { margin-top: 8px; font-size: .85rem; }
-    .comm-modal .comm-msg.error { color: #E05555; }
+
+    /* Builder Modal */
+    .builder-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.75); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 16px; backdrop-filter: blur(4px); opacity: 0; pointer-events: none; transition: opacity .2s; }
+    .builder-overlay.active { opacity: 1; pointer-events: auto; }
+    .builder-modal { background: var(--bg-card); border: 1px solid rgba(255,255,255,.08); border-radius: 16px; padding: 28px; width: 100%; max-width: 520px; max-height: 85vh; overflow-y: auto; position: relative; }
+    .builder-modal h2 { font-family: 'Space Mono', monospace; font-size: 1.1rem; margin: 0 0 4px; color: var(--accent-cyan); }
+    .builder-close { position: absolute; top: 12px; right: 12px; background: none; border: none; color: var(--muted); font-size: 22px; cursor: pointer; padding: 4px; min-height: auto; width: auto; line-height: 1; }
+    .builder-close:hover { color: var(--fg); }
+
+    /* Steps */
+    .builder-steps { display: flex; gap: 4px; margin-bottom: 20px; }
+    .builder-step-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--bg-elevated); transition: background .2s; }
+    .builder-step-dot.active { background: var(--accent-cyan); }
+    .builder-step-dot.done { background: var(--accent-green); }
+
+    .builder-panel { display: none; }
+    .builder-panel.active { display: block; }
+
+    /* Game type selector */
+    .builder-type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+    .builder-type-btn { padding: 14px; border-radius: 10px; background: var(--bg-panel); border: 1px solid rgba(255,255,255,.06); cursor: pointer; text-align: center; transition: all .2s; }
+    .builder-type-btn:hover { border-color: var(--accent-cyan); }
+    .builder-type-btn.selected { border-color: var(--accent-cyan); background: rgba(0,229,255,.08); }
+    .builder-type-btn .type-icon { font-size: 24px; margin-bottom: 6px; }
+    .builder-type-btn .type-name { font-size: 13px; font-weight: 600; }
+    .builder-type-btn .type-desc { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    /* Filter chips */
+    .builder-section { margin-bottom: 16px; }
+    .builder-section-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-bottom: 8px; }
+    .builder-chip-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+    .builder-chip { padding: 6px 12px; border-radius: 6px; background: var(--bg-panel); border: 1px solid rgba(255,255,255,.06); cursor: pointer; font-size: 12px; color: var(--text-secondary); transition: all .15s; }
+    .builder-chip:hover { border-color: var(--accent-cyan); color: var(--fg); }
+    .builder-chip.selected { border-color: var(--accent-cyan); background: rgba(0,229,255,.1); color: var(--fg); font-weight: 600; }
+    .builder-chip.locked { opacity: .4; cursor: not-allowed; }
+
+    /* Measure toggle */
+    .builder-measure-toggle { display: flex; gap: 8px; }
+    .builder-measure-btn { flex: 1; padding: 10px; border-radius: 8px; background: var(--bg-panel); border: 1px solid rgba(255,255,255,.06); cursor: pointer; text-align: center; font-size: 13px; font-weight: 600; transition: all .15s; color: var(--text-secondary); }
+    .builder-measure-btn.selected { border-color: var(--accent-cyan); background: rgba(0,229,255,.08); color: var(--fg); }
+
+    /* Free text */
+    .builder-freetext { width: 100%; padding: 12px; border-radius: 8px; background: var(--bg-panel); border: 1px solid rgba(255,255,255,.08); color: var(--fg); font-size: 13px; resize: vertical; min-height: 60px; margin-top: 8px; box-sizing: border-box; }
+    .builder-freetext::placeholder { color: var(--muted); }
+    .builder-freetext:focus { outline: none; border-color: var(--accent-cyan); }
+    .builder-or { text-align: center; font-size: 11px; color: var(--muted); margin: 12px 0; text-transform: uppercase; letter-spacing: .1em; }
+
+    /* Preview */
+    .builder-preview { background: var(--bg-panel); border-radius: 10px; padding: 16px; margin-bottom: 16px; }
+    .builder-preview-stat { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,.04); }
+    .builder-preview-stat:last-child { border-bottom: none; }
+    .builder-preview-label { font-size: 12px; color: var(--muted); }
+    .builder-preview-value { font-size: 13px; font-weight: 600; font-family: 'Space Mono', monospace; }
+    .builder-preview-value.feasible { color: var(--accent-green); }
+    .builder-preview-value.infeasible { color: var(--danger); }
+    .builder-sample-list { margin-top: 10px; }
+    .builder-sample-item { font-size: 12px; color: var(--text-secondary); padding: 3px 0; }
+    .builder-sample-item span { color: var(--accent-yellow); font-family: 'Space Mono', monospace; margin-left: 6px; }
+
+    /* Actions */
+    .builder-actions { display: flex; gap: 8px; margin-top: 16px; }
+    .builder-actions button { flex: 1; padding: 12px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; }
+    .builder-btn-back { background: var(--bg-panel); border: 1px solid rgba(255,255,255,.08); color: var(--fg); }
+    .builder-btn-next { background: var(--accent-cyan); border: none; color: #0B0F12; }
+    .builder-btn-next:disabled { background: var(--bg-elevated); color: var(--muted); cursor: not-allowed; }
+    .builder-btn-publish { background: var(--accent-yellow); border: none; color: #0B0F12; }
+    .builder-btn-publish:disabled { background: var(--bg-elevated); color: var(--muted); cursor: not-allowed; }
+
+    /* Details form */
+    .builder-input { width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,.08); background: var(--bg-panel); color: var(--fg); font-size: 13px; margin-bottom: 10px; box-sizing: border-box; }
+    .builder-input:focus { outline: none; border-color: var(--accent-cyan); }
+    .builder-input::placeholder { color: var(--muted); }
+    .builder-textarea { min-height: 60px; resize: vertical; }
+    .builder-msg { font-size: 13px; margin-top: 8px; min-height: 18px; }
+    .builder-msg.error { color: var(--danger); }
+    .builder-msg.success { color: var(--accent-green); }
+
     @media (max-width: 640px) {
       .comm-container { margin-top: 70px; }
       .comm-grid { grid-template-columns: 1fr; }
+      .builder-type-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -85,6 +162,140 @@
     </div>
   </div>
 
+  <!-- Builder Overlay -->
+  <div class="builder-overlay" id="builderOverlay" onclick="if(event.target===this)closeBuilder()">
+    <div class="builder-modal">
+      <button class="builder-close" onclick="closeBuilder()">&times;</button>
+
+      <!-- Step dots -->
+      <div class="builder-steps" id="builderSteps">
+        <div class="builder-step-dot active"></div>
+        <div class="builder-step-dot"></div>
+        <div class="builder-step-dot"></div>
+        <div class="builder-step-dot"></div>
+      </div>
+
+      <!-- Step 1: Game Type -->
+      <div class="builder-panel active" id="builderStep1">
+        <h2>1. Pick Game Type</h2>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:14px;">What kind of game do you want to create?</p>
+        <div class="builder-type-grid">
+          <div class="builder-type-btn" data-type="bullseye" onclick="selectBuilderType('bullseye',this)">
+            <div class="type-icon">&#127919;</div>
+            <div class="type-name">Bullseye</div>
+            <div class="type-desc">Subtract stats from 501</div>
+          </div>
+          <div class="builder-type-btn" data-type="starting_xi" onclick="selectBuilderType('starting_xi',this)">
+            <div class="type-icon">&#9917;</div>
+            <div class="type-name">Starting XI</div>
+            <div class="type-desc">Build the best squad</div>
+          </div>
+          <div class="builder-type-btn" data-type="higher_lower" onclick="selectBuilderType('higher_lower',this)">
+            <div class="type-icon">&#8593;&#8595;</div>
+            <div class="type-name">Higher or Lower</div>
+            <div class="type-desc">Guess the bigger stat</div>
+          </div>
+          <div class="builder-type-btn" data-type="player_alphabet" onclick="selectBuilderType('player_alphabet',this)">
+            <div class="type-icon">&#127280;</div>
+            <div class="type-name">Alphabet</div>
+            <div class="type-desc">A-Z player challenge</div>
+          </div>
+        </div>
+        <div class="builder-actions">
+          <button class="builder-btn-next" id="step1Next" disabled onclick="goToStep(2)">Next &rarr;</button>
+        </div>
+      </div>
+
+      <!-- Step 2: Filters -->
+      <div class="builder-panel" id="builderStep2">
+        <h2>2. Set Filters</h2>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:14px;">Choose leagues, clubs, and nationalities — or describe your game below.</p>
+
+        <div class="builder-section">
+          <div class="builder-section-label">League</div>
+          <div class="builder-chip-grid" id="builderLeagues">
+            <div class="builder-chip selected" data-val="Premier League">&#127988;&#917607;&#917602;&#917605;&#917614;&#917607;&#917631; EPL</div>
+            <div class="builder-chip" data-val="La Liga">&#127466;&#127480; La Liga</div>
+            <div class="builder-chip" data-val="Bundesliga">&#127465;&#127466; Bundesliga</div>
+            <div class="builder-chip" data-val="Serie A">&#127470;&#127481; Serie A</div>
+            <div class="builder-chip" data-val="Ligue 1">&#127467;&#127479; Ligue 1</div>
+          </div>
+        </div>
+
+        <div class="builder-section">
+          <div class="builder-section-label">Measure</div>
+          <div class="builder-measure-toggle">
+            <button class="builder-measure-btn selected" data-val="appearances" onclick="selectMeasure('appearances',this)">&#128202; Appearances</button>
+            <button class="builder-measure-btn" data-val="goals" onclick="selectMeasure('goals',this)">&#9917; Goals</button>
+          </div>
+        </div>
+
+        <div class="builder-section" id="builderNatSection">
+          <div class="builder-section-label">Nationality <span style="font-weight:400;text-transform:none;letter-spacing:0;">(optional)</span></div>
+          <div class="builder-chip-grid" id="builderNats">
+            <div class="builder-chip" data-val="ENG">&#127988;&#917607;&#917602;&#917605;&#917614;&#917607;&#917631; ENG</div>
+            <div class="builder-chip" data-val="FRA">&#127467;&#127479; FRA</div>
+            <div class="builder-chip" data-val="ESP">&#127466;&#127480; ESP</div>
+            <div class="builder-chip" data-val="GER">&#127465;&#127466; GER</div>
+            <div class="builder-chip" data-val="ITA">&#127470;&#127481; ITA</div>
+            <div class="builder-chip" data-val="BRA">&#127463;&#127479; BRA</div>
+            <div class="builder-chip" data-val="ARG">&#127462;&#127479; ARG</div>
+            <div class="builder-chip" data-val="NED">&#127475;&#127473; NED</div>
+            <div class="builder-chip" data-val="POR">&#127477;&#127481; POR</div>
+            <div class="builder-chip" data-val="WAL">&#127988;&#917607;&#917602;&#917607;&#917612;&#917619;&#917631; WAL</div>
+            <div class="builder-chip" data-val="SCO">&#127988;&#917607;&#917602;&#917619;&#917603;&#917620;&#917631; SCO</div>
+            <div class="builder-chip" data-val="IRL">&#127470;&#127466; IRL</div>
+          </div>
+        </div>
+
+        <div class="builder-or">&#9473; or describe your game &#9473;</div>
+        <textarea class="builder-freetext" id="builderFreetext" placeholder="e.g. English players who played for Man Utd and Liverpool by appearances"></textarea>
+
+        <div class="builder-actions">
+          <button class="builder-btn-back" onclick="goToStep(1)">&larr; Back</button>
+          <button class="builder-btn-next" id="step2Next" onclick="previewGame()">Preview &rarr;</button>
+        </div>
+      </div>
+
+      <!-- Step 3: Preview -->
+      <div class="builder-panel" id="builderStep3">
+        <h2>3. Preview</h2>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:14px;">Check the game looks right before adding details.</p>
+
+        <div class="builder-preview" id="builderPreview">
+          <div style="text-align:center;color:var(--muted);padding:20px;">Loading preview...</div>
+        </div>
+
+        <div class="builder-actions">
+          <button class="builder-btn-back" onclick="goToStep(2)">&larr; Back</button>
+          <button class="builder-btn-next" id="step3Next" disabled onclick="goToStep(4)">Add Details &rarr;</button>
+        </div>
+      </div>
+
+      <!-- Step 4: Title + Publish -->
+      <div class="builder-panel" id="builderStep4">
+        <h2>4. Details & Publish</h2>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:14px;">Give your game a name and description.</p>
+
+        <div class="builder-section-label">Title</div>
+        <input type="text" class="builder-input" id="builderTitle" placeholder="e.g. Premier League Legends" maxlength="100"/>
+
+        <div class="builder-section-label">Description <span style="font-weight:400;text-transform:none;letter-spacing:0;">(optional)</span></div>
+        <textarea class="builder-input builder-textarea" id="builderDesc" placeholder="What makes this game special?" maxlength="500"></textarea>
+
+        <div class="builder-msg" id="builderMsg"></div>
+
+        <div class="builder-actions">
+          <button class="builder-btn-back" onclick="goToStep(3)">&larr; Back</button>
+          <button class="builder-btn-publish" id="builderPublishBtn" onclick="publishGame()">Publish</button>
+        </div>
+        <p id="builderUpgradeHint" style="display:none;font-size:12px;color:var(--muted);text-align:center;margin-top:10px;">
+          Free users can build &amp; preview games. <a href="/upgrade/" style="color:var(--accent-yellow);font-weight:600;">Upgrade to Pro</a> to publish.
+        </p>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/js/ts-auth.js"></script>
   <script src="/js/ts-data.js"></script>
@@ -94,6 +305,10 @@
       await TSAuth.init();
       TSNav.render();
 
+      const API_BASE = window.location.hostname === 'localhost'
+        ? 'http://localhost:8888/.netlify/functions'
+        : '/.netlify/functions';
+
       const grid = document.getElementById('commGrid');
       const filtersEl = document.getElementById('commFilters');
       const sortEl = document.getElementById('commSort');
@@ -102,13 +317,10 @@
       let currentType = 'all';
       let currentSort = 'popular';
 
-      // Check create eligibility
+      // Any signed-in user can open the builder now
       const user = TSAuth.getUser();
-      const canCreate = user && (user.tier === 'paid' || (user.level || 1) >= 6);
-      if (!canCreate) {
-        createBtn.disabled = true;
-        createBtn.title = 'Reach Level 6 or upgrade to create games';
-      }
+      const isSignedIn = user && !TSAuth.isAnonymous();
+      const isPaid = user && user.tier === 'paid';
 
       // Filters
       filtersEl.querySelectorAll('.comm-filter').forEach(btn => {
@@ -132,17 +344,25 @@
 
       // Create button
       createBtn.addEventListener('click', () => {
-        if (!canCreate) {
-          if (TSAuth.isAnonymous()) {
-            TSNav.showAuthModal('signup');
-          } else {
-            alert('You need to be Level 6 or have a paid account to create games.');
-          }
+        if (!isSignedIn) {
+          TSNav.showAuthModal('signup');
           return;
         }
-        showCreateModal();
+        openBuilder();
       });
 
+      // Handle ?builder= URL param
+      const urlParams = new URLSearchParams(window.location.search);
+      const preselect = urlParams.get('builder');
+      if (preselect && isSignedIn) {
+        setTimeout(() => {
+          openBuilder(preselect);
+        }, 500);
+      }
+
+      // ============================================================
+      // GAME FEED
+      // ============================================================
       async function loadGames() {
         grid.innerHTML = '<div class="comm-empty"><p>Loading...</p></div>';
         const games = await TSData.getCommunityGames(currentType, currentSort, 30);
@@ -189,74 +409,293 @@
         });
       }
 
-      function showCreateModal() {
-        const overlay = document.createElement('div');
-        overlay.className = 'comm-modal-overlay';
-        overlay.innerHTML = `
-          <div class="comm-modal">
-            <h2>Create Community Game</h2>
-            <label>Game Type</label>
-            <select id="commGameType">
-              <option value="pop_quiz">Pop Quiz</option>
-              <option value="who_am_i">Who Am I?</option>
-              <option value="starting_xi">Starting XI</option>
-              <option value="bullseye">Bullseye</option>
-              <option value="higher_lower">Higher or Lower</option>
-              <option value="player_alphabet">Player Alphabet</option>
-            </select>
-            <label>Title</label>
-            <input type="text" id="commTitle" placeholder="e.g. Premier League 2024 Special" maxlength="100"/>
-            <label>Description</label>
-            <textarea id="commDesc" placeholder="What makes this game special?" maxlength="500"></textarea>
-            <label>Game Data (JSON)</label>
-            <textarea id="commData" placeholder='{"questions": [...]}' style="font-family:monospace;font-size:.8rem;"></textarea>
-            <div class="comm-msg" id="commMsg"></div>
-            <div class="comm-modal-actions">
-              <button class="btn-cancel" id="commCancel">Cancel</button>
-              <button class="btn-submit" id="commSubmit">Publish</button>
-            </div>
-          </div>`;
+      // ============================================================
+      // BUILDER STATE
+      // ============================================================
+      let builderState = {
+        gameType: null,
+        competitions: ['Premier League'],
+        measure: 'appearances',
+        nationalities: [],
+        freeText: '',
+        previewData: null,
+        generatedData: null,
+      };
 
-        document.body.appendChild(overlay);
+      function openBuilder(presetType) {
+        builderState = {
+          gameType: presetType || null,
+          competitions: ['Premier League'],
+          measure: 'appearances',
+          nationalities: [],
+          freeText: '',
+          previewData: null,
+          generatedData: null,
+        };
 
-        document.getElementById('commCancel').addEventListener('click', () => overlay.remove());
-        overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+        // Reset UI
+        document.querySelectorAll('.builder-type-btn').forEach(b => b.classList.remove('selected'));
+        document.querySelectorAll('#builderLeagues .builder-chip').forEach(c => {
+          c.classList.toggle('selected', c.dataset.val === 'Premier League');
+          c.classList.remove('locked');
+        });
+        document.querySelectorAll('#builderNats .builder-chip').forEach(c => c.classList.remove('selected'));
+        document.querySelectorAll('.builder-measure-btn').forEach(b => {
+          b.classList.toggle('selected', b.dataset.val === 'appearances');
+        });
+        document.getElementById('builderFreetext').value = '';
+        document.getElementById('builderTitle').value = '';
+        document.getElementById('builderDesc').value = '';
+        document.getElementById('builderMsg').textContent = '';
+        document.getElementById('step1Next').disabled = !presetType;
 
-        document.getElementById('commSubmit').addEventListener('click', async () => {
-          const msg = document.getElementById('commMsg');
-          const title = document.getElementById('commTitle').value.trim();
-          const desc = document.getElementById('commDesc').value.trim();
-          const gameType = document.getElementById('commGameType').value;
-          const dataStr = document.getElementById('commData').value.trim();
+        // If preset type, select it
+        if (presetType) {
+          const btn = document.querySelector(`.builder-type-btn[data-type="${presetType}"]`);
+          if (btn) {
+            btn.classList.add('selected');
+            applyTypeRestrictions(presetType);
+          }
+        }
 
-          if (!title) { msg.textContent = 'Title is required'; msg.className = 'comm-msg error'; return; }
+        // Show/hide upgrade hint
+        const upgradeHint = document.getElementById('builderUpgradeHint');
+        const publishBtn = document.getElementById('builderPublishBtn');
+        if (!isPaid) {
+          upgradeHint.style.display = 'block';
+          publishBtn.disabled = true;
+          publishBtn.textContent = 'Upgrade to Publish';
+        } else {
+          upgradeHint.style.display = 'none';
+          publishBtn.disabled = false;
+          publishBtn.textContent = 'Publish';
+        }
 
-          let gameData = {};
-          if (dataStr) {
-            try { gameData = JSON.parse(dataStr); }
-            catch { msg.textContent = 'Invalid JSON in game data'; msg.className = 'comm-msg error'; return; }
+        goToStep(presetType ? 2 : 1);
+        document.getElementById('builderOverlay').classList.add('active');
+      }
+
+      function closeBuilder() {
+        document.getElementById('builderOverlay').classList.remove('active');
+      }
+      window.closeBuilder = closeBuilder;
+
+      function goToStep(n) {
+        for (let i = 1; i <= 4; i++) {
+          const panel = document.getElementById(`builderStep${i}`);
+          panel.classList.toggle('active', i === n);
+        }
+        // Update step dots
+        const dots = document.querySelectorAll('.builder-step-dot');
+        dots.forEach((dot, i) => {
+          dot.classList.remove('active', 'done');
+          if (i + 1 === n) dot.classList.add('active');
+          else if (i + 1 < n) dot.classList.add('done');
+        });
+      }
+      window.goToStep = goToStep;
+
+      // ============================================================
+      // STEP 1: Game Type
+      // ============================================================
+      window.selectBuilderType = function(type, el) {
+        document.querySelectorAll('.builder-type-btn').forEach(b => b.classList.remove('selected'));
+        el.classList.add('selected');
+        builderState.gameType = type;
+        document.getElementById('step1Next').disabled = false;
+        applyTypeRestrictions(type);
+      };
+
+      function applyTypeRestrictions(type) {
+        const leagueChips = document.querySelectorAll('#builderLeagues .builder-chip');
+        if (type === 'starting_xi') {
+          // Starting XI is EPL only
+          leagueChips.forEach(c => {
+            if (c.dataset.val === 'Premier League') {
+              c.classList.add('selected');
+            } else {
+              c.classList.remove('selected');
+              c.classList.add('locked');
+            }
+          });
+          builderState.competitions = ['Premier League'];
+        } else {
+          leagueChips.forEach(c => c.classList.remove('locked'));
+        }
+      }
+
+      // ============================================================
+      // STEP 2: Filters
+      // ============================================================
+      // League chip toggles
+      document.querySelectorAll('#builderLeagues .builder-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+          if (chip.classList.contains('locked')) return;
+          chip.classList.toggle('selected');
+          builderState.competitions = [...document.querySelectorAll('#builderLeagues .builder-chip.selected')]
+            .map(c => c.dataset.val);
+          if (builderState.competitions.length === 0) {
+            chip.classList.add('selected');
+            builderState.competitions = [chip.dataset.val];
+          }
+        });
+      });
+
+      // Nationality chip toggles
+      document.querySelectorAll('#builderNats .builder-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+          chip.classList.toggle('selected');
+          builderState.nationalities = [...document.querySelectorAll('#builderNats .builder-chip.selected')]
+            .map(c => c.dataset.val);
+        });
+      });
+
+      window.selectMeasure = function(val, el) {
+        document.querySelectorAll('.builder-measure-btn').forEach(b => b.classList.remove('selected'));
+        el.classList.add('selected');
+        builderState.measure = val;
+      };
+
+      // ============================================================
+      // STEP 3: Preview
+      // ============================================================
+      window.previewGame = async function() {
+        builderState.freeText = document.getElementById('builderFreetext').value.trim();
+
+        goToStep(3);
+        const preview = document.getElementById('builderPreview');
+        preview.innerHTML = '<div style="text-align:center;color:var(--muted);padding:20px;"><span class="spinner" style="display:inline-block;width:20px;height:20px;border:2px solid var(--muted);border-top-color:var(--accent-cyan);border-radius:50%;animation:spin .6s linear infinite;"></span><br>Analyzing filters...</div>';
+        document.getElementById('step3Next').disabled = true;
+
+        try {
+          const res = await fetch(API_BASE + '/community-builder', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'preview',
+              gameType: builderState.gameType,
+              filters: {
+                competitions: builderState.competitions,
+                nationalities: builderState.nationalities,
+                measure: builderState.measure,
+              },
+            }),
+          });
+          const data = await res.json();
+          builderState.previewData = data;
+
+          if (!data.playerCount || data.playerCount === 0) {
+            preview.innerHTML = '<div style="text-align:center;color:var(--danger);padding:20px;">No players found matching these filters. Try broader filters.</div>';
+            return;
           }
 
-          msg.textContent = 'Publishing...';
-          msg.className = 'comm-msg';
+          let html = '';
+          html += '<div class="builder-preview-stat"><span class="builder-preview-label">Players Found</span><span class="builder-preview-value">' + data.playerCount + '</span></div>';
+          html += '<div class="builder-preview-stat"><span class="builder-preview-label">Feasible</span><span class="builder-preview-value ' + (data.feasible ? 'feasible' : 'infeasible') + '">' + (data.feasible ? 'Yes' : 'Not enough players') + '</span></div>';
+          html += '<div class="builder-preview-stat"><span class="builder-preview-label">Difficulty</span><span class="builder-preview-value">' + data.difficulty + '</span></div>';
+          html += '<div class="builder-preview-stat"><span class="builder-preview-label">Measure</span><span class="builder-preview-value">' + (data.measure === 'goals' ? 'Goals' : 'Appearances') + '</span></div>';
 
+          if (data.samplePlayers && data.samplePlayers.length > 0) {
+            html += '<div class="builder-section-label" style="margin-top:14px;">Top Players</div>';
+            html += '<div class="builder-sample-list">';
+            data.samplePlayers.forEach(p => {
+              html += '<div class="builder-sample-item">' + esc(p.name) + '<span>' + p.stat + '</span></div>';
+            });
+            html += '</div>';
+          }
+
+          preview.innerHTML = html;
+          document.getElementById('step3Next').disabled = !data.feasible;
+
+          // Pre-fill title suggestion
+          const compLabel = builderState.competitions.length === 1 ? builderState.competitions[0] : builderState.competitions.length + ' Leagues';
+          const measureLabel = builderState.measure === 'goals' ? 'Goals' : 'Appearances';
+          const titleInput = document.getElementById('builderTitle');
+          if (!titleInput.value) {
+            titleInput.value = compLabel + ' — ' + measureLabel;
+          }
+
+        } catch (e) {
+          console.error('[builder]', e);
+          preview.innerHTML = '<div style="text-align:center;color:var(--danger);padding:20px;">Failed to preview. Please try again.</div>';
+        }
+      };
+
+      // ============================================================
+      // STEP 4: Publish
+      // ============================================================
+      window.publishGame = async function() {
+        if (!isPaid) return;
+
+        const title = document.getElementById('builderTitle').value.trim();
+        const desc = document.getElementById('builderDesc').value.trim();
+        const msg = document.getElementById('builderMsg');
+
+        if (!title) {
+          msg.textContent = 'Please enter a title.';
+          msg.className = 'builder-msg error';
+          return;
+        }
+
+        msg.textContent = 'Generating game data...';
+        msg.className = 'builder-msg';
+        document.getElementById('builderPublishBtn').disabled = true;
+
+        try {
+          // Generate game data
+          const genRes = await fetch(API_BASE + '/community-builder', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'generate',
+              gameType: builderState.gameType,
+              filters: {
+                competitions: builderState.competitions,
+                nationalities: builderState.nationalities,
+                measure: builderState.measure,
+              },
+            }),
+          });
+          const genData = await genRes.json();
+
+          if (genData.error) {
+            msg.textContent = genData.error;
+            msg.className = 'builder-msg error';
+            document.getElementById('builderPublishBtn').disabled = false;
+            return;
+          }
+
+          msg.textContent = 'Publishing to community...';
+
+          // Publish to community games
           const result = await TSData.createCommunityGame({
-            game_type: gameType,
+            game_type: builderState.gameType,
             title,
             description: desc,
-            game_data: gameData,
-            status: 'published'
+            game_data: genData.gameData,
+            status: 'published',
           });
 
           if (result.error) {
             msg.textContent = result.error;
-            msg.className = 'comm-msg error';
+            msg.className = 'builder-msg error';
+            document.getElementById('builderPublishBtn').disabled = false;
           } else {
-            overlay.remove();
-            loadGames();
+            msg.textContent = 'Published successfully!';
+            msg.className = 'builder-msg success';
+            setTimeout(() => {
+              closeBuilder();
+              loadGames();
+            }, 1000);
           }
-        });
-      }
+
+        } catch (e) {
+          console.error('[builder publish]', e);
+          msg.textContent = 'Failed to publish. Please try again.';
+          msg.className = 'builder-msg error';
+          document.getElementById('builderPublishBtn').disabled = false;
+        }
+      };
 
       function esc(s) {
         return String(s).replace(/[&<>"']/g, m =>

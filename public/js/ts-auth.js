@@ -335,6 +335,28 @@
       return { success: true };
     },
 
+    /** Redeem a promo code for Pro access */
+    async redeemPromo(code) {
+      const userId = this.getUserId();
+      if (!userId) return { error: 'No user' };
+      const API_BASE = window.location.hostname === 'localhost'
+        ? 'http://localhost:8888/.netlify/functions'
+        : '/.netlify/functions';
+      try {
+        const res = await fetch(API_BASE + '/redeem-promo', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code, userId })
+        });
+        const data = await res.json();
+        if (!res.ok) return { error: data.error || 'Failed to redeem' };
+        await this.refreshProfile();
+        return { success: true, message: data.message };
+      } catch (e) {
+        return { error: 'Network error' };
+      }
+    },
+
     /** Get XP progress to next level */
     getXPProgress() {
       const u = this.getUser();

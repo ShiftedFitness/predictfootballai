@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192">
+  <rect width="192" height="192" rx="24" fill="#0B0F12"/>
+  <text x="96" y="70" text-anchor="middle" font-family="monospace" font-size="32" font-weight="800" fill="#F2F5F7">Tele</text>
+  <text x="96" y="110" text-anchor="middle" font-family="monospace" font-size="32" font-weight="800" fill="#00E5FF">Stats</text>
+  <circle cx="150" cy="90" r="18" fill="none" stroke="#00E5FF" stroke-width="2.5"/>
+  <path d="M140,90 L148,85 L156,90 L148,95 Z" fill="#00E5FF" opacity="0.5"/>
+</svg>

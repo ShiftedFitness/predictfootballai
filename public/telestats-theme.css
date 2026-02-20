@@ -406,6 +406,25 @@ select:focus {
   transition: color 0.15s;
 }
 .ts-nav-logout-btn:hover { color: var(--danger); }
+.ts-nav-pro-btn {
+  display: inline-block;
+  background: transparent;
+  border: 1px solid var(--accent-yellow);
+  color: var(--accent-yellow);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-family: 'Space Mono', monospace;
+  letter-spacing: 0.5px;
+  transition: all 0.15s;
+  margin-left: 4px;
+}
+.ts-nav-pro-btn:hover {
+  background: var(--accent-yellow);
+  color: #0B0F12;
+}
 .ts-level-badge {
   display: inline-flex;
   align-items: center;
@@ -683,4 +702,140 @@ select:focus {
   text-transform: uppercase;
   letter-spacing: 0.5px;
   font-family: 'Space Mono', monospace;
+}
+
+/* ============================================================
+   Game Meta Links (How to Play / Settings)
+   ============================================================ */
+.game-meta-links {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin: 4px 0 12px;
+}
+.game-meta-link {
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: color 0.15s, background 0.15s;
+  font-family: 'Inter', system-ui, sans-serif;
+  text-decoration: none;
+}
+.game-meta-link:hover {
+  color: var(--accent-cyan);
+  background: rgba(0, 229, 255, 0.06);
+}
+.game-meta-link svg {
+  display: inline-block;
+  vertical-align: -2px;
+  margin-right: 4px;
+}
+
+/* Rules / Settings Modal Overlay */
+.game-rules-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 16px;
+  backdrop-filter: blur(4px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+.game-rules-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+.game-rules-modal {
+  background: var(--bg-card);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 24px;
+  max-width: 440px;
+  width: 100%;
+  position: relative;
+  max-height: 85vh;
+  overflow-y: auto;
+}
+.game-rules-modal h3 {
+  font-family: 'Space Mono', monospace;
+  font-size: 18px;
+  margin: 0 0 16px;
+  color: var(--accent-cyan);
+}
+.game-rules-modal .rule-step {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 14px;
+  align-items: flex-start;
+}
+.game-rules-modal .rule-num {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--accent-cyan);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: 'Space Mono', monospace;
+  color: var(--accent-cyan);
+}
+.game-rules-modal .rule-text {
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.5;
+  flex: 1;
+}
+.game-rules-modal .rule-text strong {
+  color: var(--text-primary);
+}
+.game-rules-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 22px;
+  cursor: pointer;
+  padding: 4px;
+  min-height: auto;
+  width: auto;
+  line-height: 1;
+}
+.game-rules-close:hover { color: var(--text-primary); }
+
+/* Settings rows inside modal */
+.game-settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.game-settings-row:last-child { border-bottom: none; }
+.game-settings-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.game-settings-label small {
+  display: block;
+  font-weight: 400;
+  color: var(--text-muted);
+  font-size: 11px;
+  margin-top: 2px;
 }

@@ -54,19 +54,21 @@
 
       let rightHTML;
       if (isAnon) {
+        // Anonymous: single "Get Started" button
         rightHTML = `
           <div class="ts-nav-auth">
-            <a href="/upgrade/" class="ts-nav-link ts-nav-signup">Sign Up</a>
-            <button class="ts-nav-login-btn" id="tsNavLoginBtn">Log In</button>
+            <button class="ts-nav-login-btn" id="tsNavLoginBtn" style="background:var(--accent-yellow);color:#0B0F12;border:none;font-weight:700;padding:6px 16px;border-radius:6px;cursor:pointer;font-size:13px;">Get Started</button>
           </div>`;
       } else {
         const xp = TSAuth.getXPProgress();
+        const isPaid = user.tier === 'paid';
         rightHTML = `
           <a href="/profile/" class="ts-nav-profile">
             ${levelBadgeHTML(xp.level, xp.levelName)}
             <span class="ts-nav-username">${esc(user.username || user.display_name || user.email || 'Player')}</span>
             <span class="ts-nav-xp">${(user.total_xp || 0).toLocaleString()} XP</span>
           </a>
+          ${!isPaid ? '<a href="/upgrade/" class="ts-nav-pro-btn" title="Upgrade to Pro">PRO</a>' : ''}
           <button class="ts-nav-logout-btn" id="tsNavLogoutBtn" title="Log out">&#x2715;</button>`;
       }
 
@@ -86,8 +88,8 @@
         <div class="ts-nav-mobile" id="tsNavMobile">
           ${linksHTML}
           ${isAnon
-            ? '<a href="/upgrade/" class="ts-nav-link">Sign Up</a><a href="#" class="ts-nav-link" id="tsNavMobileLogin">Log In</a>'
-            : '<a href="/profile/" class="ts-nav-link">Profile</a><a href="#" class="ts-nav-link" id="tsNavMobileLogout">Log Out</a>'
+            ? '<a href="#" class="ts-nav-link" id="tsNavMobileLogin">Get Started</a>'
+            : `<a href="/profile/" class="ts-nav-link">Profile</a>${user.tier !== 'paid' ? '<a href="/upgrade/" class="ts-nav-link" style="color:var(--accent-yellow)">Upgrade to Pro</a>' : ''}<a href="#" class="ts-nav-link" id="tsNavMobileLogout">Log Out</a>`
           }
         </div>`;
 
@@ -115,10 +117,76 @@
       [logoutBtn, mobileLogoutBtn].forEach(btn => {
         if (btn) btn.addEventListener('click', (e) => { e.preventDefault(); TSAuth.signOut(); });
       });
+
+      // ── PWA: Register service worker ──
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js').catch(() => {});
+      }
+
+      // ── PWA: Inject manifest + theme-color if not present ──
+      if (!document.querySelector('link[rel="manifest"]')) {
+        const ml = document.createElement('link');
+        ml.rel = 'manifest';
+        ml.href = '/manifest.json';
+        document.head.appendChild(ml);
+      }
+      if (!document.querySelector('meta[name="theme-color"]')) {
+        const tc = document.createElement('meta');
+        tc.name = 'theme-color';
+        tc.content = '#00E5FF';
+        document.head.appendChild(tc);
+      }
+      if (!document.querySelector('link[rel="apple-touch-icon"]')) {
+        const ati = document.createElement('link');
+        ati.rel = 'apple-touch-icon';
+        ati.href = '/icons/icon-192.svg';
+        document.head.appendChild(ati);
+      }
+
+      // ── PWA: Install prompt ──
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        const deferredPrompt = e;
+        // Only show once per session
+        if (sessionStorage.getItem('ts_install_dismissed')) return;
+
+        const banner = document.createElement('div');
+        banner.className = 'ts-install-banner';
+        banner.innerHTML = `
+          <span style="flex:1;font-size:13px;">Install TeleStats for quick access</span>
+          <button id="tsInstallBtn" style="background:var(--accent-yellow);color:#0B0F12;border:none;padding:6px 14px;border-radius:6px;font-weight:700;font-size:12px;cursor:pointer;">Install</button>
+          <button id="tsInstallDismiss" style="background:none;border:none;color:var(--text-muted);font-size:18px;cursor:pointer;padding:0 4px;">&times;</button>`;
+        banner.style.cssText = 'display:flex;align-items:center;gap:10px;padding:10px 16px;background:var(--bg-card,#171F25);border-bottom:1px solid rgba(255,255,255,0.06);font-family:Inter,sans-serif;';
+        nav.after(banner);
+
+        document.getElementById('tsInstallBtn')?.addEventListener('click', async () => {
+          deferredPrompt.prompt();
+          await deferredPrompt.userChoice;
+          banner.remove();
+        });
+        document.getElementById('tsInstallDismiss')?.addEventListener('click', () => {
+          banner.remove();
+          sessionStorage.setItem('ts_install_dismissed', '1');
+        });
+      });
     },
 
-    /** Show login/signup modal */
+    /** Show login/signup modal — context-aware */
     showAuthModal(mode = 'login') {
+      const user = TSAuth.getUser();
+      const isAnon = TSAuth.isAnonymous();
+
+      // If free user triggers signup, redirect to upgrade page
+      if (!isAnon && user && user.tier === 'free' && mode === 'signup') {
+        window.location.href = '/upgrade/';
+        return;
+      }
+      // If paid user, redirect to profile
+      if (!isAnon && user && user.tier === 'paid') {
+        window.location.href = '/profile/';
+        return;
+      }
+
       // Remove existing
       const existing = document.getElementById('tsAuthModal');
       if (existing) existing.remove();
@@ -153,6 +221,9 @@
               <button type="submit" class="btn-primary ts-btn">Create Account</button>
               <p class="ts-auth-note">Your anonymous game progress will be saved to your new account.</p>
               <div class="ts-auth-msg" id="tsSignupMsg"></div>
+              <div style="margin-top:12px;text-align:center;">
+                <a href="/upgrade/#promo" style="color:var(--accent-cyan);font-size:12px;text-decoration:none;">Have a promo code?</a>
+              </div>
             </form>
           </div>
         </div>`;

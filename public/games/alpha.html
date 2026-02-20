@@ -4,6 +4,17 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
 <title>TeleStats - Player Alphabet</title>
+<meta name="description" content="Go A-Z naming players by surname initial. Race the clock or take your time. How many letters can you fill?"/>
+<meta property="og:site_name" content="TeleStats"/>
+<meta property="og:type" content="website"/>
+<meta property="og:title" content="Player Alphabet — TeleStats"/>
+<meta property="og:description" content="Go A-Z naming Premier League players by surname initial. How many letters can you fill?"/>
+<meta property="og:image" content="https://res.cloudinary.com/dbfvogb95/image/upload/v1770835428/Screenshot_2026-02-11_at_19.43.16_m7urul.png"/>
+<meta property="og:url" content="https://telestats.net/games/alpha.html"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="Player Alphabet — TeleStats"/>
+<meta name="twitter:description" content="Go A-Z naming Premier League players by surname initial."/>
+<meta name="twitter:image" content="https://res.cloudinary.com/dbfvogb95/image/upload/v1770835428/Screenshot_2026-02-11_at_19.43.16_m7urul.png"/>
 <link rel="stylesheet" href="../telestats-theme.css"/>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -130,33 +141,24 @@ body {
     <div class="subtitle">Find a player for each letter A-Z by surname. How many can you get?</div>
   </div>
 
+  <div class="game-meta-links">
+    <button class="game-meta-link" onclick="showRules()">&#9432; How to Play</button>
+    <button class="game-meta-link" onclick="showGameSettings()">&#9881; Settings</button>
+  </div>
+
   <!-- SETUP -->
   <div id="step1">
     <div class="card">
-      <h2>1. Timer</h2>
-      <div class="timer-row">
-        <label>Enable timer</label>
-        <label class="toggle-switch">
-          <input type="checkbox" id="timerToggle" checked onchange="toggleTimer()"/>
-          <span class="toggle-slider"></span>
-        </label>
-      </div>
-      <div class="timer-row" id="timerLengthRow">
-        <label>Seconds per letter</label>
-        <select id="timerLength">
-          <option value="10">10s</option>
-          <option value="15">15s</option>
-          <option value="20" selected>20s</option>
-          <option value="30">30s</option>
-          <option value="45">45s</option>
-          <option value="60">60s</option>
-        </select>
-      </div>
-
-      <h2 style="margin-top:16px;">2. Choose Team</h2>
+      <h2>Choose Team</h2>
       <div id="scopeList"></div>
     </div>
   </div>
+
+  <!-- Hidden timer settings (defaults: ON, 20s) — accessible via settings overlay -->
+  <input type="hidden" id="timerToggle" checked/>
+  <select id="timerLength" style="display:none;">
+    <option value="20" selected>20s</option>
+  </select>
 
   <!-- GAME -->
   <div id="step2" class="hidden">
@@ -212,8 +214,54 @@ body {
   <button class="go-btn primary" id="startBtn" onclick="startGame()">Start Game</button>
 </div>
 
+<!-- How to Play Modal -->
+<div class="game-rules-overlay" id="rulesOverlay" onclick="if(event.target===this)closeRules()">
+  <div class="game-rules-modal">
+    <button class="game-rules-close" onclick="closeRules()">&times;</button>
+    <h3>How to Play Alphabet</h3>
+    <div class="rule-step"><div class="rule-num">1</div><div class="rule-text">Choose a <strong>team or league</strong> to play with.</div></div>
+    <div class="rule-step"><div class="rule-num">2</div><div class="rule-text">You'll go through each letter <strong>A to Z</strong>. Name a player whose surname starts with that letter.</div></div>
+    <div class="rule-step"><div class="rule-num">3</div><div class="rule-text">With the timer enabled, you have <strong>20 seconds per letter</strong> (customisable in Settings).</div></div>
+    <div class="rule-step"><div class="rule-num">4</div><div class="rule-text">If you're stuck, you can <strong>reveal an answer</strong> or <strong>skip</strong> the letter.</div></div>
+    <div class="rule-step"><div class="rule-num">5</div><div class="rule-text">Your score is based on how many letters you complete — try to get <strong>all 26</strong>!</div></div>
+  </div>
+</div>
+
+<!-- Settings Modal -->
+<div class="game-rules-overlay" id="settingsOverlay" onclick="if(event.target===this)closeGameSettings()">
+  <div class="game-rules-modal">
+    <button class="game-rules-close" onclick="closeGameSettings()">&times;</button>
+    <h3>Settings</h3>
+    <div class="game-settings-row">
+      <div class="game-settings-label">Timer<small>Time limit per letter</small></div>
+      <label class="toggle-switch"><input type="checkbox" id="settingsTimerToggle" checked onchange="timerEnabled=this.checked"/><span class="toggle-slider"></span></label>
+    </div>
+    <div class="game-settings-row">
+      <div class="game-settings-label">Seconds per letter</div>
+      <select id="settingsTimerLength" style="padding:6px 10px;border-radius:6px;background:var(--bg-elevated);color:var(--text-primary);border:1px solid rgba(255,255,255,0.08);font-size:13px;" onchange="timerSeconds=parseInt(this.value);document.getElementById('timerLength').value=this.value;">
+        <option value="10">10s</option>
+        <option value="15">15s</option>
+        <option value="20" selected>20s</option>
+        <option value="30">30s</option>
+        <option value="45">45s</option>
+        <option value="60">60s</option>
+      </select>
+    </div>
+  </div>
+</div>
+<script>
+function showRules(){document.getElementById('rulesOverlay').classList.add('active');}
+function closeRules(){document.getElementById('rulesOverlay').classList.remove('active');}
+function showGameSettings(){
+  document.getElementById('settingsTimerToggle').checked=timerEnabled;
+  document.getElementById('settingsTimerLength').value=timerSeconds;
+  document.getElementById('settingsOverlay').classList.add('active');
+}
+function closeGameSettings(){document.getElementById('settingsOverlay').classList.remove('active');}
+</script>
+
 <footer style="text-align:center;padding:16px 16px 72px;font-size:11px;color:var(--muted);opacity:0.6;">
-  Build: 2026-02-14 | TeleStats Alphabet v1.0
+  TeleStats.net &middot; Built by <a href="https://shiftedlabs.io" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">Shifted.Labs</a>
 </footer>
 
 <script>
@@ -382,8 +430,8 @@ function makeScopeCard(s) {
 }
 
 function toggleTimer() {
-  timerEnabled = $('timerToggle').checked;
-  $('timerLengthRow').style.display = timerEnabled ? 'flex' : 'none';
+  // Timer defaults to ON (20s). Settings accessible via settings overlay.
+  timerEnabled = true;
 }
 
 async function startGame() {

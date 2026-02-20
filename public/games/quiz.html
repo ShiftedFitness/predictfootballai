@@ -4,6 +4,17 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
 <title>TeleStats - Pop Quiz</title>
+<meta name="description" content="5 data-powered questions from easy to hard. All generated from real Premier League data. How much do you really know?"/>
+<meta property="og:site_name" content="TeleStats"/>
+<meta property="og:type" content="website"/>
+<meta property="og:title" content="Pop Quiz — TeleStats"/>
+<meta property="og:description" content="5 data-powered questions from easy to hard. All generated from real Premier League data."/>
+<meta property="og:image" content="https://res.cloudinary.com/dbfvogb95/image/upload/v1770835428/Screenshot_2026-02-11_at_19.43.16_m7urul.png"/>
+<meta property="og:url" content="https://telestats.net/games/quiz.html"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="Pop Quiz — TeleStats"/>
+<meta name="twitter:description" content="5 data-powered questions from easy to hard. All from real Premier League data."/>
+<meta name="twitter:image" content="https://res.cloudinary.com/dbfvogb95/image/upload/v1770835428/Screenshot_2026-02-11_at_19.43.16_m7urul.png"/>
 <link rel="stylesheet" href="../telestats-theme.css"/>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -276,6 +287,10 @@ body {
     <div class="subtitle">10 questions. Easy to hard. All from real data.</div>
   </div>
 
+  <div class="game-meta-links">
+    <button class="game-meta-link" onclick="showRules()">&#9432; How to Play</button>
+  </div>
+
   <!-- STEP 1: SETUP -->
   <div id="step1">
     <div class="card">
@@ -325,8 +340,25 @@ body {
   </div>
 </div>
 
+<!-- How to Play Modal -->
+<div class="game-rules-overlay" id="rulesOverlay" onclick="if(event.target===this)closeRules()">
+  <div class="game-rules-modal">
+    <button class="game-rules-close" onclick="closeRules()">&times;</button>
+    <h3>How to Play Pop Quiz</h3>
+    <div class="rule-step"><div class="rule-num">1</div><div class="rule-text">Choose a <strong>team or league</strong> for your quiz.</div></div>
+    <div class="rule-step"><div class="rule-num">2</div><div class="rule-text">Answer <strong>10 multiple-choice questions</strong> generated from real Premier League data.</div></div>
+    <div class="rule-step"><div class="rule-num">3</div><div class="rule-text">Questions get <strong>harder as you go</strong> — from easy warm-ups to tricky deep cuts.</div></div>
+    <div class="rule-step"><div class="rule-num">4</div><div class="rule-text">Each correct answer earns points. <strong>Harder questions</strong> are worth more.</div></div>
+    <div class="rule-step"><div class="rule-num">5</div><div class="rule-text">See your final score and try to <strong>beat your personal best</strong>!</div></div>
+  </div>
+</div>
+<script>
+function showRules(){document.getElementById('rulesOverlay').classList.add('active');}
+function closeRules(){document.getElementById('rulesOverlay').classList.remove('active');}
+</script>
+
 <footer style="text-align:center;padding:16px 16px 72px;font-size:11px;color:var(--muted);opacity:0.6;">
-  Build: 2026-02-11 | TeleStats - Pop Quiz v2.0
+  TeleStats.net &middot; Built by <a href="https://shiftedlabs.io" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">Shifted.Labs</a>
 </footer>
 
 <script>

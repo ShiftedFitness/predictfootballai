@@ -4,6 +4,17 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
 <title>TeleStats - Starting XI</title>
+<meta name="description" content="Pick the best starting XI by appearances, goals, or performance. Fill every position correctly to win."/>
+<meta property="og:site_name" content="TeleStats"/>
+<meta property="og:type" content="website"/>
+<meta property="og:title" content="Starting XI — TeleStats"/>
+<meta property="og:description" content="Pick the best starting XI by appearances, goals, or performance."/>
+<meta property="og:image" content="https://res.cloudinary.com/dbfvogb95/image/upload/v1770835428/Screenshot_2026-02-11_at_19.43.16_m7urul.png"/>
+<meta property="og:url" content="https://telestats.net/games/xi.html"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="Starting XI — TeleStats"/>
+<meta name="twitter:description" content="Pick the best starting XI by appearances, goals, or performance."/>
+<meta name="twitter:image" content="https://res.cloudinary.com/dbfvogb95/image/upload/v1770835428/Screenshot_2026-02-11_at_19.43.16_m7urul.png"/>
 <link rel="stylesheet" href="../telestats-theme.css"/>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -869,6 +880,10 @@ body {
     <div class="subtitle">Pick the best Starting XI. How well do you know your squad?</div>
   </div>
 
+  <div class="game-meta-links">
+    <button class="game-meta-link" onclick="showRules()">&#9432; How to Play</button>
+  </div>
+
   <!-- ====== STEP 1: SETUP ====== -->
   <div id="step1">
     <div class="setup-card" id="formationCard">
@@ -1021,8 +1036,25 @@ body {
   </div>
 </div>
 
+<!-- How to Play Modal -->
+<div class="game-rules-overlay" id="rulesOverlay" onclick="if(event.target===this)closeRules()">
+  <div class="game-rules-modal">
+    <button class="game-rules-close" onclick="closeRules()">&times;</button>
+    <h3>How to Play Starting XI</h3>
+    <div class="rule-step"><div class="rule-num">1</div><div class="rule-text">Choose a <strong>formation</strong> (e.g. 4-3-3, 3-5-2) for your team.</div></div>
+    <div class="rule-step"><div class="rule-num">2</div><div class="rule-text">Pick an <strong>objective</strong> — most appearances, most goals, or best performance index.</div></div>
+    <div class="rule-step"><div class="rule-num">3</div><div class="rule-text">Select a <strong>club or era</strong> to build your XI from.</div></div>
+    <div class="rule-step"><div class="rule-num">4</div><div class="rule-text">Fill each position on the pitch with the <strong>best player</strong> for that stat. Search by name and drag into slots.</div></div>
+    <div class="rule-step"><div class="rule-num">5</div><div class="rule-text">Once all 11 positions are filled, <strong>lock in</strong> your team to see your score and the correct answers.</div></div>
+  </div>
+</div>
+<script>
+function showRules(){document.getElementById('rulesOverlay').classList.add('active');}
+function closeRules(){document.getElementById('rulesOverlay').classList.remove('active');}
+</script>
+
 <footer style="text-align:center;padding:16px 16px 72px;font-size:11px;color:var(--muted);opacity:0.6;">
-  Build: 2026-02-11 | TeleStats XI v1.0
+  TeleStats.net &middot; Built by <a href="https://shiftedlabs.io" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">Shifted.Labs</a>
 </footer>
 
 <script>
