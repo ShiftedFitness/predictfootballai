@@ -98,17 +98,16 @@ exports.handler = async (event) => {
     );
     const matchIds = new Set(matches.map(m => String(m.id)));
 
-    // 3) Load predictions for THIS week
+    // 3) Load predictions for THIS week (by match_id, since week_number doesn't exist on predictions)
+    const matchIdArray = matches.map(m => m.id);
     const { data: predsForWeek, error: predError } = await client
       .from('predict_predictions')
       .select('*')
-      .eq('week_number', weekNum);
+      .in('match_id', matchIdArray);
 
     if (predError) throw new Error(`Failed to fetch predictions: ${predError.message}`);
 
-    const validPreds = (predsForWeek || []).filter(p =>
-      matchIds.has(String(p.match_id))
-    );
+    const validPreds = predsForWeek || [];
 
     // 4) Recompute Points Awarded *and* collect per-user stats
     let predictionsUpdated = 0;
@@ -163,13 +162,21 @@ exports.handler = async (event) => {
 
       if (allowForce) {
         // ── Full recalculation: read ALL scored predictions for this user ──
+        // Join through predict_matches to get match_week_id for week grouping
         const { data: allPreds, error: allPredsErr } = await client
           .from('predict_predictions')
-          .select('points_awarded, match_id, week_number')
+          .select('points_awarded, match_id, predict_matches(match_week_id)')
           .eq('user_id', Number(uid))
           .not('points_awarded', 'is', null);
 
         if (allPredsErr) throw new Error(`Failed to fetch all preds for user ${uid}: ${allPredsErr.message}`);
+
+        // Build match_week_id → week_number lookup
+        const { data: allWeeks, error: allWeeksErr } = await client
+          .from('predict_match_weeks')
+          .select('id, week_number');
+        if (allWeeksErr) throw new Error(`Failed to fetch weeks: ${allWeeksErr.message}`);
+        const weekIdToNum = Object.fromEntries((allWeeks || []).map(w => [w.id, w.week_number]));
 
         let totalPts = 0;
         let totalCorrect = 0;
@@ -181,7 +188,8 @@ exports.handler = async (event) => {
           if (p.points_awarded === 1) totalCorrect++;
           else totalIncorrect++;
 
-          const wk = p.week_number;
+          const mwId = p.predict_matches ? p.predict_matches.match_week_id : null;
+          const wk = mwId != null ? weekIdToNum[mwId] : null;
           if (wk == null) continue;
           if (!weekGroups[wk]) weekGroups[wk] = { correct: 0, total: 0 };
           weekGroups[wk].total++;
