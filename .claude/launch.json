@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "dev",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["-e", "const http=require('http'),fs=require('fs'),path=require('path');const dir=path.join(process.cwd(),'public');const mime={'html':'text/html','js':'application/javascript','css':'text/css','json':'application/json','png':'image/png','jpg':'image/jpeg','svg':'image/svg+xml'};http.createServer((req,res)=>{let p=path.join(dir,req.url==='/'?'index.html':req.url);if(!fs.existsSync(p)){if(fs.existsSync(p+'.html'))p+='.html';else{res.writeHead(404);res.end('Not found');return;}}if(fs.statSync(p).isDirectory())p=path.join(p,'index.html');const ext=path.extname(p).slice(1);res.writeHead(200,{'Content-Type':mime[ext]||'application/octet-stream'});fs.createReadStream(p).pipe(res);}).listen(8888,()=>console.log('Server running on port 8888'));"],
+      "port": 8888
+    }
+  ]
+}

@@ -150,26 +150,79 @@ exports.handler = async (event) => {
     const participatingUserIds = Object.keys(statsByUser);
 
     // 5) Update users
+    //    When force=true, recalculate ALL user totals from scratch (safe for rescoring).
+    //    When force=false (first-time scoring), use incremental addition (faster).
     const updates = [];
 
     for (const uid of participatingUserIds) {
       const u = usersSafe.find(x => String(x.id) === uid);
       if (!u) continue;
 
-      const stats = statsByUser[uid];
-      const weeklyCorrectFinal = stats.correctCount;  // 0..5
-      const bonus = (weeklyCorrectFinal === 5) ? 5 : 0;
-      const fhInc = (weeklyCorrectFinal === 5) ? 1 : 0;
-      const blankInc = (weeklyCorrectFinal === 0) ? 1 : 0;  // played but 0 correct
+      const thisWeekStats = statsByUser[uid];
+      const weeklyCorrectFinal = thisWeekStats.correctCount;  // 0..5
 
-      const pointsToAdd = weeklyCorrectFinal + bonus;
+      let newPoints, newCorrect, newIncorrect, newFH, newBlanks, newCurrentWeek;
 
-      const newPoints = Number(u.points ?? 0) + pointsToAdd;
-      const newCorrect = Number(u.correct_results ?? 0) + weeklyCorrectFinal;
-      const newIncorrect = Number(u.incorrect_results ?? 0) + (stats.predCount - weeklyCorrectFinal);
-      const newFH = Number(u.full_houses ?? 0) + fhInc;
-      const newBlanks = Number(u.blanks ?? 0) + blankInc;
-      const newCurrentWeek = (Number(u.current_week ?? weekNum)) + 1;
+      if (allowForce) {
+        // ── Full recalculation: read ALL scored predictions for this user ──
+        const { data: allPreds, error: allPredsErr } = await client
+          .from('predict_predictions')
+          .select('points_awarded, match_id, week_number')
+          .eq('user_id', Number(uid))
+          .not('points_awarded', 'is', null);
+
+        if (allPredsErr) throw new Error(`Failed to fetch all preds for user ${uid}: ${allPredsErr.message}`);
+
+        let totalPts = 0;
+        let totalCorrect = 0;
+        let totalIncorrect = 0;
+        const weekGroups = {};
+
+        for (const p of (allPreds || [])) {
+          totalPts += (p.points_awarded || 0);
+          if (p.points_awarded === 1) totalCorrect++;
+          else totalIncorrect++;
+
+          const wk = p.week_number;
+          if (wk == null) continue;
+          if (!weekGroups[wk]) weekGroups[wk] = { correct: 0, total: 0 };
+          weekGroups[wk].total++;
+          if (p.points_awarded === 1) weekGroups[wk].correct++;
+        }
+
+        let userFH = 0;
+        let userBlanks = 0;
+        for (const wk of Object.keys(weekGroups)) {
+          const g = weekGroups[wk];
+          if (g.total === 5 && g.correct === 5) {
+            userFH++;
+            totalPts += 5;  // full house bonus
+          }
+          if (g.total >= 5 && g.correct === 0) userBlanks++;
+        }
+
+        newPoints = totalPts;
+        newCorrect = totalCorrect;
+        newIncorrect = totalIncorrect;
+        newFH = userFH;
+        newBlanks = userBlanks;
+        // Set current_week to the highest scored week
+        const scoredWeeks = Object.keys(weekGroups).map(Number).filter(Boolean);
+        newCurrentWeek = scoredWeeks.length ? Math.max(...scoredWeeks) + 1 : weekNum + 1;
+      } else {
+        // ── Incremental: add this week's delta to existing totals ──
+        const bonus = (weeklyCorrectFinal === 5) ? 5 : 0;
+        const fhInc = (weeklyCorrectFinal === 5) ? 1 : 0;
+        const blankInc = (weeklyCorrectFinal === 0) ? 1 : 0;
+        const pointsToAdd = weeklyCorrectFinal + bonus;
+
+        newPoints = Number(u.points ?? 0) + pointsToAdd;
+        newCorrect = Number(u.correct_results ?? 0) + weeklyCorrectFinal;
+        newIncorrect = Number(u.incorrect_results ?? 0) + (thisWeekStats.predCount - weeklyCorrectFinal);
+        newFH = Number(u.full_houses ?? 0) + fhInc;
+        newBlanks = Number(u.blanks ?? 0) + blankInc;
+        newCurrentWeek = (Number(u.current_week ?? weekNum)) + 1;
+      }
 
       const { error: userUpdateError } = await client
         .from('predict_users')
@@ -185,14 +238,14 @@ exports.handler = async (event) => {
 
       if (userUpdateError) throw new Error(`Failed to update user: ${userUpdateError.message}`);
 
+      const bonus = (weeklyCorrectFinal === 5) ? 5 : 0;
       updates.push({
         uid,
         name: u.username || u.full_name || `User ${u.id}`,
         weeklyCorrectFinal,
         bonusApplied: bonus,
-        pointsAdded: pointsToAdd,
-        fhInc,
-        blankInc,
+        pointsAdded: weeklyCorrectFinal + bonus,
+        newPoints,
         newFH,
         newBlanks
       });

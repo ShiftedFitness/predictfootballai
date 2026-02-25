@@ -1031,16 +1031,27 @@ function setupEventListeners() {
     } catch (e) { setStatus(`Failed to apply results: ${e.message}`); }
   });
 
-  // ── Score week ──
+  // ── Score week (calls server-side Netlify function with service role key) ──
+  async function callScoreWeek(week, force) {
+    return adminFetch('/admin-score-week', {
+      method: 'POST',
+      body: JSON.stringify({ week, force })
+    });
+  }
+
   scoreBtn.onclick = () => withLoading(scoreBtn, async () => {
     const week = Number(weekInput.value);
     try {
-      const data = await PredictData.scoreWeek(week, false);
+      const data = await callScoreWeek(week, false);
       let message = 'Week scored successfully!';
       if (data.ok) {
-        const winners = data.fullHouseNames || []; const blanks = data.blanksNames || [];
-        if (winners.length) message += `  |  BONUS: ${winners.join(', ')}`; else message += '  |  No full houses';
-        if (blanks.length) message += `  |  BLANKS: ${blanks.join(', ')}`;
+        if (data.detail && Array.isArray(data.detail) && typeof data.detail[0] === 'string') {
+          message = data.detail.join(' ');
+        } else {
+          const winners = data.fullHouseNames || []; const blanks = data.blanksNames || [];
+          if (winners.length) message += `  |  BONUS: ${winners.join(', ')}`; else message += '  |  No full houses';
+          if (blanks.length) message += `  |  BLANKS: ${blanks.join(', ')}`;
+        }
       }
       setStatus(message);
     } catch (e) { setStatus(`Scoring failed: ${e.message}`); }
@@ -1053,7 +1064,7 @@ function setupEventListeners() {
     if (!confirm(`ARE YOU SURE?\n\nThis will FORCE RESCORE week ${week} and may change existing user totals.`)) return;
     withLoading(forceBtn, async () => {
       try {
-        const data = await PredictData.scoreWeek(week, true);
+        const data = await callScoreWeek(week, true);
         let message = 'Week FORCE RESCORED!';
         if (data.ok) {
           const winners = data.fullHouseNames || []; const blanks = data.blanksNames || [];
