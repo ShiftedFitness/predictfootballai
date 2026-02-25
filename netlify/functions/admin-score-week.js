@@ -35,38 +35,36 @@ exports.handler = async (event) => {
 
     const client = sb();
 
-    // 1) Load matches + users
+    // 1) Resolve week number → match_week_id, then load matches + users
+    const { data: weekRow, error: weekError } = await client
+      .from('predict_match_weeks')
+      .select('id')
+      .eq('week_number', weekNum)
+      .maybeSingle();
+
+    if (weekError) throw new Error(`Failed to look up week: ${weekError.message}`);
+    if (!weekRow) return respond(400, `No match_week found for week ${weekNum}`);
+
+    const matchWeekId = weekRow.id;
+
     const [
       { data: matchesAll, error: matchError },
       { data: usersAll, error: usersError }
     ] = await Promise.all([
-      client.from('predict_matches').select('*'),
+      client.from('predict_matches').select('*').eq('match_week_id', matchWeekId),
       client.from('predict_users').select('*')
     ]);
 
     if (matchError) throw new Error(`Failed to fetch matches: ${matchError.message}`);
     if (usersError) throw new Error(`Failed to fetch users: ${usersError.message}`);
 
-    const matches = (matchesAll || [])
-      .filter(m => Number(m.week_number) === weekNum)
-      .sort((a, b) => Number(a.id) - Number(b.id));
+    const matches = (matchesAll || []).sort((a, b) => Number(a.id) - Number(b.id));
 
     if (!matches.length) {
-      return respond(400, `No matches for week ${weekNum}`);
+      return respond(400, `No matches for week ${weekNum} (match_week_id=${matchWeekId})`);
     }
 
     const usersSafe = usersAll || [];
-
-    const isWeekLocked = (wk, allMatches) => {
-      const ms = (allMatches || []).filter(m => Number(m.week_number) === Number(wk));
-      if (!ms.length) return false;
-      const earliest = ms
-        .map(m => m.lockout_time ? new Date(m.lockout_time) : null)
-        .filter(Boolean)
-        .sort((a, b) => a - b)[0];
-      const now = new Date();
-      return (earliest && now >= earliest) || ms.some(m => m.locked === true);
-    };
 
     // Guard: prevent accidental double-scoring (unless forced)
     if (!allowForce) {
