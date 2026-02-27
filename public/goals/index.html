@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no"/>
+<title>Goal Recreator — TeleStats</title>
+<meta name="description" content="Recreate the greatest goals in football history. Sensible Soccer-style retro mini-game."/>
+<meta property="og:title" content="Goal Recreator — TeleStats"/>
+<meta property="og:description" content="Recreate the greatest goals in football history. Can you match Maradona's Goal of the Century?"/>
+<meta property="og:type" content="website"/>
+<meta property="og:url" content="https://telestats.net/goals/"/>
+<link rel="stylesheet" href="../telestats-theme.css"/>
+<link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════
+     INTRO SCREEN
+     ══════════════════════════════════════════════════════════ -->
+<div id="intro-screen" class="gr-container">
+  <div class="gr-header">
+    <span class="tag">NEW</span>
+    <h1>GOAL <span class="accent">RECREATOR</span></h1>
+  </div>
+
+  <div class="level-card">
+    <div class="level-title" id="level-title">MARADONA 1986</div>
+    <div class="level-subtitle" id="level-subtitle">THE GOAL OF THE CENTURY</div>
+    <p class="level-desc" id="level-desc">
+      Dribble past 5 England defenders and score from inside the box.
+    </p>
+    <a id="ref-video" href="https://www.youtube.com/watch?v=1wVho3I0NtU"
+       target="_blank" rel="noopener" class="ref-link">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="5 3 19 12 5 21 5 3"/>
+      </svg>
+      Watch the real goal
+    </a>
+  </div>
+
+  <div class="instructions">
+    <div class="instr-card">
+      <span class="instr-icon">&#127939;</span>
+      <span class="instr-text">Dribble through the gaps</span>
+    </div>
+    <div class="instr-card">
+      <span class="instr-icon">&#10145;&#65039;</span>
+      <span class="instr-text">Follow the arrow trail</span>
+    </div>
+    <div class="instr-card">
+      <span class="instr-icon">&#127919;</span>
+      <span class="instr-text">Enter the finish zone</span>
+    </div>
+    <div class="instr-card">
+      <span class="instr-icon">&#9917;</span>
+      <span class="instr-text">Press SHOOT to score</span>
+    </div>
+  </div>
+
+  <!-- Desktop controls -->
+  <div id="controls-desktop" class="control-hint">
+    <div class="label">Controls</div>
+    <div class="keys">
+      <kbd>&larr;</kbd> <kbd>&uarr;</kbd> <kbd>&darr;</kbd> <kbd>&rarr;</kbd>
+      move &nbsp;&nbsp;
+      <kbd>SPACE</kbd> shoot
+    </div>
+  </div>
+
+  <!-- Mobile controls -->
+  <div id="controls-mobile" class="control-hint hidden">
+    <div class="label">Controls</div>
+    <div class="keys">Joystick to move &middot; SHOOT button to finish</div>
+  </div>
+
+  <button id="play-btn" class="gr-play-btn">PLAY</button>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     GAME SCREEN
+     ══════════════════════════════════════════════════════════ -->
+<div id="game-screen" class="hidden">
+  <div class="game-wrapper">
+    <div class="canvas-container">
+      <canvas id="game-canvas" width="600" height="900"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- Mobile touch controls (outside game-screen for fixed positioning) -->
+<div id="mobile-controls" class="hidden">
+  <div id="joystick-zone">
+    <div id="joystick-base">
+      <div id="joystick-stick"></div>
+    </div>
+  </div>
+  <button id="shoot-btn">SHOOT</button>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     END SCREEN
+     ══════════════════════════════════════════════════════════ -->
+<div id="end-screen" class="gr-container hidden">
+  <div class="gr-header">
+    <h1>GOAL <span class="accent">RECREATOR</span></h1>
+  </div>
+
+  <div class="end-card">
+    <div id="end-header" class="end-title goal">GOAL!</div>
+    <div class="end-subtitle">MARADONA 1986 — Goal of the Century</div>
+
+    <div class="score-grid">
+      <div class="score-item">
+        <div class="label">Goal scored</div>
+        <div id="score-goal" class="val yes">Yes</div>
+      </div>
+      <div class="score-item">
+        <div class="label">Path accuracy</div>
+        <div id="score-path" class="val">72%</div>
+      </div>
+      <div class="score-item">
+        <div class="label">Time bonus</div>
+        <div id="score-time" class="val">4.2s</div>
+      </div>
+      <div class="score-item">
+        <div class="label">Defenders beaten</div>
+        <div id="score-defenders" class="val">4 / 5</div>
+      </div>
+    </div>
+
+    <div id="score-stars" class="stars-row">
+      <span class="star filled">&#9733;</span>
+      <span class="star filled">&#9733;</span>
+      <span class="star filled">&#9733;</span>
+      <span class="star empty">&#9734;</span>
+      <span class="star empty">&#9734;</span>
+    </div>
+  </div>
+
+  <div class="end-actions">
+    <button id="retry-btn" class="gr-retry-btn">RETRY</button>
+    <a href="https://www.youtube.com/watch?v=1wVho3I0NtU"
+       target="_blank" rel="noopener" class="gr-ref-btn">
+      Watch the real goal
+    </a>
+  </div>
+</div>
+
+<div class="gr-footer">
+  TeleStats.net &middot; Goal Recreator v1
+</div>
+
+<!-- Scripts -->
+<script src="levels.js"></script>
+<script src="game.js"></script>
+</body>
+</html>

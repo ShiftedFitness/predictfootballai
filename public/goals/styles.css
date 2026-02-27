@@ -1,0 +1,398 @@
+/* ============================================================
+   Goal Recreator — Styles
+   TeleStats UI chrome around a Sensible Soccer canvas
+   ============================================================ */
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.hidden { display: none !important; }
+
+/* ── Container ───────────────────────────────────────────── */
+.gr-container {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 0 12px 24px;
+}
+
+/* ── Header ──────────────────────────────────────────────── */
+.gr-header {
+  text-align: center;
+  padding: 20px 0 16px;
+}
+.gr-header h1 {
+  font-family: 'Space Mono', monospace;
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  color: var(--text-primary);
+}
+.gr-header h1 .accent { color: var(--accent-cyan); }
+.gr-header .tag {
+  display: inline-block;
+  background: var(--accent-cyan);
+  color: #0B0F12;
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 3px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+
+/* ── Level Card ──────────────────────────────────────────── */
+.level-card {
+  background: var(--bg-card);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 14px;
+  padding: 24px 20px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+.level-card .level-title {
+  font-family: 'Space Mono', monospace;
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--accent-yellow);
+  letter-spacing: -0.5px;
+  margin-bottom: 4px;
+}
+.level-card .level-subtitle {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 12px;
+}
+.level-card .level-desc {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 14px;
+}
+.level-card .ref-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--accent-cyan);
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: opacity 0.15s;
+}
+.level-card .ref-link:hover { opacity: 0.8; }
+.level-card .ref-link svg { width: 14px; height: 14px; }
+
+/* ── Instructions ────────────────────────────────────────── */
+.instructions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.instr-card {
+  background: var(--bg-card);
+  border: 1px solid rgba(255,255,255,0.04);
+  border-radius: 10px;
+  padding: 14px 12px;
+  text-align: center;
+}
+.instr-card .instr-icon {
+  font-size: 24px;
+  margin-bottom: 6px;
+  display: block;
+}
+.instr-card .instr-text {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+/* ── Control hints ───────────────────────────────────────── */
+.control-hint {
+  background: var(--bg-elevated);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+.control-hint .label {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+.control-hint .keys {
+  font-size: 13px;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+.control-hint kbd {
+  display: inline-block;
+  background: var(--bg-card);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  margin: 0 2px;
+}
+
+/* ── Play / Retry Buttons ────────────────────────────────── */
+.gr-play-btn {
+  display: block;
+  width: 100%;
+  padding: 16px;
+  background: var(--accent-yellow);
+  color: #0B0F12;
+  font-family: 'Space Mono', monospace;
+  font-size: 18px;
+  font-weight: 800;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: background 0.12s, transform 0.1s;
+}
+.gr-play-btn:hover {
+  background: #E6C009;
+  transform: translateY(-1px);
+}
+.gr-play-btn:active {
+  transform: translateY(0);
+}
+
+/* ── Game Screen ─────────────────────────────────────────── */
+.game-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+}
+.canvas-container {
+  position: relative;
+  width: 100%;
+  background: #2E6F3E;
+  border-radius: 8px;
+  overflow: hidden;
+  /* Maintain aspect ratio */
+}
+#game-canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+/* ── Mobile Controls ─────────────────────────────────────── */
+#mobile-controls {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+  z-index: 100;
+  height: 200px;
+}
+
+#joystick-zone {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  width: 160px;
+  height: 160px;
+  pointer-events: auto;
+  touch-action: none;
+}
+#joystick-base {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.08);
+  border: 2px solid rgba(255,255,255,0.15);
+  display: none;
+  left: 30px;
+  top: 30px;
+}
+#joystick-base.active { display: block; }
+#joystick-stick {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.35);
+  left: 35px;
+  top: 35px;
+}
+
+#shoot-btn {
+  position: absolute;
+  right: 16px;
+  bottom: 24px;
+  width: 85px;
+  height: 85px;
+  border-radius: 50%;
+  background: var(--accent-yellow);
+  color: #0B0F12;
+  font-family: 'Space Mono', monospace;
+  font-size: 13px;
+  font-weight: 800;
+  border: 3px solid rgba(255,255,255,0.3);
+  pointer-events: auto;
+  touch-action: none;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+  transition: transform 0.08s;
+}
+#shoot-btn:active {
+  transform: scale(0.92);
+}
+
+/* ── End Screen ──────────────────────────────────────────── */
+.end-card {
+  background: var(--bg-card);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 14px;
+  padding: 28px 24px;
+  text-align: center;
+  margin-bottom: 16px;
+}
+.end-title {
+  font-family: 'Space Mono', monospace;
+  font-size: 38px;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+.end-title.goal { color: var(--accent-yellow); }
+.end-title.missed { color: var(--accent-magenta); }
+
+.end-subtitle {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 20px;
+}
+
+/* ── Score breakdown ─────────────────────────────────────── */
+.score-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.score-item {
+  background: var(--bg-panel);
+  border-radius: 10px;
+  padding: 14px 10px;
+}
+.score-item .label {
+  font-size: 10px;
+  font-family: 'Space Mono', monospace;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+.score-item .val {
+  font-family: 'Space Mono', monospace;
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--accent-cyan);
+}
+.score-item .val.yes { color: var(--accent-green); }
+.score-item .val.no  { color: var(--accent-magenta); }
+
+/* ── Stars ───────────────────────────────────────────────── */
+.stars-row {
+  margin-bottom: 20px;
+}
+.star {
+  font-size: 32px;
+  margin: 0 2px;
+}
+.star.filled { color: var(--accent-yellow); }
+.star.empty  { color: var(--bg-elevated); }
+
+/* ── End actions ─────────────────────────────────────────── */
+.end-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.gr-retry-btn {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  background: var(--accent-yellow);
+  color: #0B0F12;
+  font-family: 'Space Mono', monospace;
+  font-size: 16px;
+  font-weight: 800;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: background 0.12s;
+}
+.gr-retry-btn:hover { background: #E6C009; }
+
+.gr-ref-btn {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  background: var(--bg-panel);
+  color: var(--text-primary);
+  font-family: 'Space Mono', monospace;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid var(--accent-cyan);
+  border-radius: 10px;
+  text-decoration: none;
+  text-align: center;
+  transition: background 0.12s;
+}
+.gr-ref-btn:hover { background: var(--bg-elevated); }
+
+/* ── Footer ──────────────────────────────────────────────── */
+.gr-footer {
+  text-align: center;
+  padding: 16px;
+  font-size: 11px;
+  font-family: 'Space Mono', monospace;
+  color: var(--text-muted);
+  opacity: 0.5;
+}
+.gr-footer a { color: inherit; text-decoration: underline; }
+
+/* ── Responsive ──────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .gr-header h1 { font-size: 22px; }
+  .level-card { padding: 18px 14px; }
+  .level-card .level-title { font-size: 18px; }
+  .instructions { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .instr-card { padding: 10px 8px; }
+  .end-title { font-size: 30px; }
+  .score-item .val { font-size: 18px; }
+}
+
+@media (min-width: 640px) {
+  /* Desktop: center the game nicely */
+  .game-wrapper {
+    margin-top: 8px;
+  }
+  #mobile-controls { display: none !important; }
+}
