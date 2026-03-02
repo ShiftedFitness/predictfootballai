@@ -143,7 +143,7 @@
               <div class="prof-xp-bar"><div class="prof-xp-fill" style="width:${xp.pct}%"></div></div>
             </div>
             <div class="prof-actions">
-              ${isOwnProfile ? '<button class="prof-edit-btn" onclick="TSNav.showAuthModal(\'login\')">Edit Profile</button>' : ''}
+              ${isOwnProfile ? '<button class="prof-edit-btn" id="profEditBtn">Edit Profile</button>' : ''}
               <button class="prof-share-btn" id="profShareBtn">Share Profile</button>
             </div>
           </div>
@@ -255,6 +255,53 @@
           } else {
             try { await navigator.clipboard.writeText(shareText); shareBtn.textContent = 'Copied!'; setTimeout(() => shareBtn.textContent = 'Share Profile', 2000); } catch {}
           }
+        });
+      }
+
+      // Edit profile button — inline edit for display_name
+      const editBtn = document.getElementById('profEditBtn');
+      if (editBtn) {
+        editBtn.addEventListener('click', () => {
+          const nameEl = container.querySelector('.prof-name');
+          if (!nameEl || nameEl.querySelector('input')) return;
+
+          const currentName = u.display_name || u.username || '';
+          const badge = nameEl.querySelector('.ts-level-badge');
+          const badgeHTML = badge ? badge.outerHTML : '';
+
+          nameEl.innerHTML = `
+            <input type="text" id="profEditInput" value="${esc(currentName)}"
+              style="font-size:1.2rem;font-weight:700;padding:4px 10px;border-radius:8px;border:1px solid var(--accent);background:var(--bg);color:var(--fg);width:180px;margin-right:8px;"/>
+            <button id="profSaveBtn" style="padding:6px 14px;border-radius:8px;background:var(--accent);border:none;color:#000;font-weight:600;font-size:.8rem;cursor:pointer;margin-right:4px;">Save</button>
+            <button id="profCancelBtn" style="padding:6px 14px;border-radius:8px;background:var(--bg);border:1px solid var(--border);color:var(--fg);font-size:.8rem;cursor:pointer;">Cancel</button>
+          `;
+
+          const input = document.getElementById('profEditInput');
+          input.focus();
+          input.select();
+
+          document.getElementById('profCancelBtn').addEventListener('click', () => {
+            location.reload();
+          });
+
+          document.getElementById('profSaveBtn').addEventListener('click', async () => {
+            const newName = input.value.trim();
+            if (!newName) return;
+            const saveBtn = document.getElementById('profSaveBtn');
+            saveBtn.textContent = 'Saving...';
+            saveBtn.disabled = true;
+            try {
+              const { error } = await TSAuth.supabase
+                .from('ts_users')
+                .update({ display_name: newName })
+                .eq('id', u.id);
+              if (error) throw error;
+              location.reload();
+            } catch (err) {
+              saveBtn.textContent = 'Error';
+              setTimeout(() => { saveBtn.textContent = 'Save'; saveBtn.disabled = false; }, 2000);
+            }
+          });
         });
       }
 

@@ -197,6 +197,29 @@
             await TSAuth.redeemReferral(ref);
           }
         }
+        // Set up auth state change listener for token refresh
+        sb().auth.onAuthStateChange((event, session) => {
+          if (event === 'TOKEN_REFRESHED' && session) {
+            _authSession = session;
+            console.log('[TSAuth] Token refreshed');
+          }
+          if (event === 'SIGNED_OUT') {
+            _currentUser = null;
+            _authSession = null;
+            clearCached();
+          }
+        });
+
+        // Proactive token refresh every 45 minutes for long sessions
+        setInterval(async () => {
+          try {
+            const { data } = await sb().auth.refreshSession();
+            if (data?.session) _authSession = data.session;
+          } catch (e) {
+            console.warn('[TSAuth] Periodic refresh failed:', e.message);
+          }
+        }, 45 * 60 * 1000);
+
         return _currentUser;
       }
 
@@ -225,6 +248,33 @@
     getTier() {
       const u = this.getUser();
       return u ? u.tier : 'anonymous';
+    },
+
+    /** Determine which scopes a user can access based on tier */
+    getAllowedScopes() {
+      const tier = this.getTier();
+      const user = this.getUser();
+      if (tier === 'paid') return { all: true };
+      if (tier === 'free' && user?.referral_unlocked) return { all: true };
+      if (tier === 'free') return { leagues: ['epl'], clubsFor: ['epl'] };
+      // anonymous: random only
+      return { randomOnly: true };
+    },
+
+    /** Check if a specific scope ID is allowed for the current user */
+    isScopeAllowed(scopeId) {
+      const allowed = this.getAllowedScopes();
+      if (allowed.all) return true;
+      if (allowed.randomOnly) return false;
+      // EPL scopes: epl_alltime, epl_club_*, or generic club names under EPL
+      if (!scopeId) return false;
+      const id = scopeId.toLowerCase();
+      if (allowed.leagues) {
+        for (const league of allowed.leagues) {
+          if (id.startsWith(league + '_') || id === league) return true;
+        }
+      }
+      return false;
     },
 
     /** Check if user can play a game type today */

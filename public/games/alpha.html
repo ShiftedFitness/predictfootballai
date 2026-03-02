@@ -128,12 +128,6 @@ body {
 <body>
 
 <div class="container">
-  <div class="ts-header">
-    <img src="https://res.cloudinary.com/dbfvogb95/image/upload/v1770835428/Screenshot_2026-02-11_at_19.43.16_m7urul.png" alt="TeleStats" class="ts-logo"/>
-    <span>ALPHABET</span>
-    <span class="ts-time" id="tsClock">--:--</span>
-  </div>
-
   <a href="index.html" class="back-link">&larr; All Games</a>
 
   <div class="header">
@@ -261,7 +255,7 @@ function closeGameSettings(){document.getElementById('settingsOverlay').classLis
 </script>
 
 <footer style="text-align:center;padding:16px 16px 72px;font-size:11px;color:var(--muted);opacity:0.6;">
-  TeleStats.net &middot; Built by <a href="https://shiftedlabs.io" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">Shifted.Labs</a>
+  TeleStats.net &middot; Built by <a href="https://shiftedlabs.ai" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">Shifted.Labs</a>
 </footer>
 
 <script>
@@ -736,12 +730,6 @@ function backToSetup() {
 
 init();
 
-setInterval(() => {
-  const now = new Date();
-  const el = $('tsClock');
-  if (el) el.textContent = now.toTimeString().slice(0, 5);
-}, 1000);
-$('tsClock').textContent = new Date().toTimeString().slice(0, 5);
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/js/ts-auth.js"></script>
@@ -749,13 +737,100 @@ $('tsClock').textContent = new Date().toTimeString().slice(0, 5);
 <script src="/js/ts-nav.js"></script>
 <script>
 (async function tsIntegrate() {
+  if (window._tsIntegrated) return;
+  window._tsIntegrated = true;
+
   await TSAuth.init();
   TSNav.render();
 
-  // Hook endGame to log session
+  // ── Play limits counter ──
+  const playInfo = await TSData.getRemainingPlays('player_alphabet');
+  if (playInfo.limit !== Infinity) {
+    const counter = TSNav.createPlaysCounter(playInfo.remaining, playInfo.limit);
+    const setupArea = document.querySelector('.card') || document.querySelector('#step1') || document.body;
+    setupArea.prepend(counter);
+  }
+
+  // ── Scope locking ──
+  const tierAccess = TSAuth.getAllowedScopes();
+  function applyScopeLocking() {
+    const scopeList = document.getElementById('scopeList');
+    if (!scopeList) return;
+
+    if (tierAccess.randomOnly) {
+      // Anonymous: lock all scope cards
+      scopeList.querySelectorAll('.scope-card').forEach(c => c.classList.add('ts-locked'));
+      // Add upgrade hint
+      if (!document.getElementById('tsUpgradeHint')) {
+        const hint = document.createElement('div');
+        hint.id = 'tsUpgradeHint';
+        hint.className = 'ts-upgrade-hint';
+        hint.textContent = 'Sign up free to choose your own categories';
+        hint.onclick = () => TSNav.showAuthModal('signup');
+        scopeList.parentElement.insertBefore(hint, scopeList.nextSibling);
+      }
+    } else if (!tierAccess.all) {
+      // Free tier: lock non-EPL sections
+      scopeList.querySelectorAll('.section').forEach(sec => {
+        const header = sec.querySelector('.section-header');
+        if (!header) return;
+        const text = header.textContent.toLowerCase();
+        const isEPL = text.includes('premier') || text.includes('epl');
+        if (!isEPL) sec.classList.add('ts-locked-section');
+      });
+    }
+  }
+
+  // Apply locking after scopes load (use MutationObserver)
+  const scopeContainer = document.getElementById('scopeList');
+  if (scopeContainer) {
+    const observer = new MutationObserver(() => { applyScopeLocking(); });
+    observer.observe(scopeContainer, { childList: true, subtree: true });
+    applyScopeLocking(); // Also apply immediately
+  }
+
+  // ── Roulette selector ──
+  setTimeout(() => {
+    const scopeCards = document.querySelectorAll('#scopeList .scope-card');
+    if (scopeCards.length > 0) {
+      const scopes = [];
+      scopeCards.forEach(card => {
+        const label = card.querySelector('.sc-label');
+        if (label && !card.classList.contains('ts-locked')) {
+          scopes.push({ id: card.dataset.scopeId || label.textContent, label: label.textContent, el: card });
+        }
+      });
+      const rouletteScopes = tierAccess.randomOnly
+        ? Array.from(scopeCards).map(c => {
+            const l = c.querySelector('.sc-label');
+            return { id: c.dataset.scopeId || (l ? l.textContent : ''), label: l ? l.textContent : '', el: c };
+          })
+        : scopes;
+
+      if (rouletteScopes.length > 0) {
+        const roulette = TSNav.createRouletteSelector(rouletteScopes, (scope) => {
+          if (scope.el) scope.el.click();
+        });
+        const scopeListEl = document.getElementById('scopeList');
+        if (scopeListEl) scopeListEl.parentElement.insertBefore(roulette, scopeListEl);
+      }
+    }
+  }, 1500);
+
+  // ── Hook startGame to check play limit ──
+  const _origStartGame = window.startGame;
+  if (typeof _origStartGame === 'function') {
+    window.startGame = async function() {
+      const check = await TSData.checkPlayLimit('player_alphabet');
+      if (!check.canPlay) return;
+      return _origStartGame.apply(this, arguments);
+    };
+  }
+
+  // ── Hook endGame to log session ──
   const _origEndGame = window.endGame;
   window.endGame = function () {
-    _origEndGame();
+    try { _origEndGame(); } catch(e) { console.warn('[TS] endGame error:', e); }
     tsLogAlphaSession();
   };
 

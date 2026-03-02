@@ -273,18 +273,12 @@ body {
 </head>
 <body>
 
-<div class="ts-header">
-  <img src="https://res.cloudinary.com/dbfvogb95/image/upload/v1770835428/Screenshot_2026-02-11_at_19.43.16_m7urul.png" alt="TeleStats" class="ts-logo"/>
-  <span>EPL &middot; POP QUIZ</span>
-  <span class="ts-time" id="tsTime"></span>
-</div>
-
 <div class="container">
   <a href="index.html" class="back-link">&larr; All Games</a>
 
   <div class="header">
     <h1>Pop <span>Quiz</span></h1>
-    <div class="subtitle">10 questions. Easy to hard. All from real data.</div>
+    <div class="subtitle">Easy to hard. All from real data.</div>
   </div>
 
   <div class="game-meta-links">
@@ -307,7 +301,7 @@ body {
 
     <div class="card" id="questionCard">
       <div class="q-header">
-        <span class="q-number" id="qNumber">Question 1 of 5</span>
+        <span class="q-number" id="qNumber"></span>
         <span class="q-difficulty" id="qDifficulty">Easy</span>
       </div>
       <div class="q-text" id="qText"></div>
@@ -358,7 +352,7 @@ function closeRules(){document.getElementById('rulesOverlay').classList.remove('
 </script>
 
 <footer style="text-align:center;padding:16px 16px 72px;font-size:11px;color:var(--muted);opacity:0.6;">
-  TeleStats.net &middot; Built by <a href="https://shiftedlabs.io" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">Shifted.Labs</a>
+  TeleStats.net &middot; Built by <a href="https://shiftedlabs.ai" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">Shifted.Labs</a>
 </footer>
 
 <script>
@@ -643,30 +637,105 @@ function escHtml(str) {
 init();
 </script>
 
-<script>
-function updateClock() {
-  const now = new Date();
-  const hh = String(now.getHours()).padStart(2, '0');
-  const mm = String(now.getMinutes()).padStart(2, '0');
-  const el = document.getElementById('tsTime');
-  if (el) el.textContent = hh + ':' + mm;
-}
-updateClock();
-setInterval(updateClock, 30000);
-</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/js/ts-auth.js"></script>
 <script src="/js/ts-data.js"></script>
 <script src="/js/ts-nav.js"></script>
 <script>
 (async function tsIntegrate() {
+  if (window._tsIntegrated) return;
+  window._tsIntegrated = true;
+
   await TSAuth.init();
   TSNav.render();
 
-  // Hook showResults to log session
+  // ── Play limits counter ──
+  const playInfo = await TSData.getRemainingPlays('pop_quiz');
+  if (playInfo.limit !== Infinity) {
+    const counter = TSNav.createPlaysCounter(playInfo.remaining, playInfo.limit);
+    const setupArea = document.querySelector('.card') || document.querySelector('#step1') || document.body;
+    setupArea.prepend(counter);
+  }
+
+  // ── Scope locking ──
+  const tierAccess = TSAuth.getAllowedScopes();
+  function applyScopeLocking() {
+    const scopeList = document.getElementById('scopeGrid');
+    if (!scopeList) return;
+
+    if (tierAccess.randomOnly) {
+      // Anonymous: lock all scope cards
+      scopeList.querySelectorAll('.option-btn').forEach(c => c.classList.add('ts-locked'));
+      // Add upgrade hint
+      if (!document.getElementById('tsUpgradeHint')) {
+        const hint = document.createElement('div');
+        hint.id = 'tsUpgradeHint';
+        hint.className = 'ts-upgrade-hint';
+        hint.textContent = 'Sign up free to choose your own categories';
+        hint.onclick = () => TSNav.showAuthModal('signup');
+        scopeList.parentElement.insertBefore(hint, scopeList.nextSibling);
+      }
+    } else if (!tierAccess.all) {
+      // Free tier: lock non-EPL scopes
+      scopeList.querySelectorAll('.option-btn').forEach(btn => {
+        const text = btn.textContent.toLowerCase();
+        const isEPL = text.includes('premier') || text.includes('epl');
+        if (!isEPL && !btn.classList.contains('wide')) {
+          // Only lock non-league, non-EPL club buttons
+          // Quiz uses flat option-btn grid, not sections
+        }
+      });
+    }
+  }
+
+  // Apply locking after scopes render
+  const scopeGrid = document.getElementById('scopeGrid');
+  if (scopeGrid) {
+    const observer = new MutationObserver(() => { applyScopeLocking(); });
+    observer.observe(scopeGrid, { childList: true, subtree: true });
+    applyScopeLocking();
+  }
+
+  // ── Roulette selector ──
+  setTimeout(() => {
+    const scopeBtns = document.querySelectorAll('#scopeGrid .option-btn');
+    if (scopeBtns.length > 0) {
+      const scopes = [];
+      scopeBtns.forEach(btn => {
+        if (!btn.classList.contains('ts-locked')) {
+          scopes.push({ id: btn.textContent.trim(), label: btn.textContent.trim(), el: btn });
+        }
+      });
+      const rouletteScopes = tierAccess.randomOnly
+        ? Array.from(scopeBtns).map(b => ({
+            id: b.textContent.trim(), label: b.textContent.trim(), el: b
+          }))
+        : scopes;
+
+      if (rouletteScopes.length > 0) {
+        const roulette = TSNav.createRouletteSelector(rouletteScopes, (scope) => {
+          if (scope.el) scope.el.click();
+        });
+        const gridEl = document.getElementById('scopeGrid');
+        if (gridEl) gridEl.parentElement.insertBefore(roulette, gridEl);
+      }
+    }
+  }, 500);
+
+  // ── Hook startQuiz to check play limit ──
+  const _origStartQuiz = window.startQuiz;
+  if (typeof _origStartQuiz === 'function') {
+    window.startQuiz = async function() {
+      const check = await TSData.checkPlayLimit('pop_quiz');
+      if (!check.canPlay) return;
+      return _origStartQuiz.apply(this, arguments);
+    };
+  }
+
+  // ── Hook showResults to log session ──
   const _origShowResults = window.showResults;
   window.showResults = function () {
-    _origShowResults();
+    try { _origShowResults(); } catch(e) { console.warn('[TS] showResults error:', e); }
     tsLogQuizSession();
   };
 

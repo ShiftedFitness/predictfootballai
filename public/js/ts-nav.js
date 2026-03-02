@@ -169,6 +169,12 @@
           sessionStorage.setItem('ts_install_dismissed', '1');
         });
       });
+
+      // ── iOS-specific install prompt ──
+      this.showIOSInstallPrompt();
+
+      // ── Footer: database last updated ──
+      this.renderFooterMeta();
     },
 
     /** Show login/signup modal — context-aware */
@@ -215,8 +221,9 @@
 
           <div class="ts-tab-panel ${mode === 'signup' ? 'active' : ''}" id="tsSignupPanel">
             <form id="tsSignupForm">
-              <input type="text" placeholder="Username" required class="ts-input" id="tsSignupUsername" minlength="3" maxlength="20" pattern="[a-zA-Z0-9_]+"/>
               <input type="email" placeholder="Email" required class="ts-input" id="tsSignupEmail"/>
+              <input type="text" placeholder="Username" required class="ts-input" id="tsSignupUsername" minlength="3" maxlength="20" pattern="[a-zA-Z0-9_]+"/>
+              <div class="ts-username-status" id="tsUsernameStatus" style="font-size:11px;margin:-4px 0 8px 4px;min-height:16px;"></div>
               <input type="password" placeholder="Password (6+ chars)" required class="ts-input" id="tsSignupPassword" minlength="6"/>
               <button type="submit" class="btn-primary ts-btn">Create Account</button>
               <p class="ts-auth-note">Your anonymous game progress will be saved to your new account.</p>
@@ -282,6 +289,57 @@
         );
         if (result.error) { msg.textContent = result.error; msg.className = 'ts-auth-msg error'; }
         else { modal.remove(); location.reload(); }
+      });
+
+      // ── Username autofill from email ──
+      const signupEmail = document.getElementById('tsSignupEmail');
+      const signupUsername = document.getElementById('tsSignupUsername');
+      const usernameStatus = document.getElementById('tsUsernameStatus');
+      let usernameManuallyEdited = false;
+      let usernameCheckTimeout = null;
+
+      signupUsername.addEventListener('input', () => { usernameManuallyEdited = true; });
+      signupUsername.addEventListener('focus', () => { usernameManuallyEdited = true; });
+
+      signupEmail.addEventListener('input', () => {
+        if (usernameManuallyEdited) return;
+        const email = signupEmail.value;
+        const atIndex = email.indexOf('@');
+        if (atIndex < 1) return;
+
+        let base = email.substring(0, atIndex)
+          .replace(/[^a-zA-Z0-9_]/g, '')
+          .substring(0, 20);
+        if (base.length < 3) return;
+
+        signupUsername.value = base;
+
+        // Check availability with debounce
+        clearTimeout(usernameCheckTimeout);
+        usernameCheckTimeout = setTimeout(async () => {
+          usernameStatus.textContent = 'Checking...';
+          usernameStatus.style.color = 'var(--text-muted)';
+          try {
+            const { data } = await TSAuth.supabase
+              .from('ts_users')
+              .select('id')
+              .eq('username', base)
+              .maybeSingle();
+
+            if (data) {
+              // Username taken — append random digits
+              base = base.substring(0, 16) + Math.floor(Math.random() * 9000 + 1000);
+              signupUsername.value = base;
+              usernameStatus.textContent = 'Suggested: ' + base;
+              usernameStatus.style.color = 'var(--accent-yellow)';
+            } else {
+              usernameStatus.textContent = 'Available';
+              usernameStatus.style.color = 'var(--accent-green, #32FF7E)';
+            }
+          } catch {
+            usernameStatus.textContent = '';
+          }
+        }, 500);
       });
     },
 
@@ -389,6 +447,138 @@
         else if (res.copied) btn.textContent = 'Copied!';
         else btn.textContent = 'Failed';
         setTimeout(() => btn.textContent = navigator.share ? 'Share' : 'Copy to Clipboard', 2000);
+      });
+    }
+  };
+
+    /**
+     * Create a roulette-style random scope selector.
+     * @param {Array} scopes - Array of { id, label } objects
+     * @param {Function} onSelect - Called with selected scope when animation finishes
+     * @returns {HTMLElement} Container element to insert into DOM
+     */
+    createRouletteSelector(scopes, onSelect) {
+      const container = document.createElement('div');
+      container.className = 'ts-roulette-container';
+      container.innerHTML = `
+        <button class="ts-roulette-btn" id="tsRouletteBtn">🎰 Random Category</button>
+        <div class="ts-roulette-display" id="tsRouletteDisplay"></div>`;
+
+      const btn = container.querySelector('#tsRouletteBtn');
+      const display = container.querySelector('#tsRouletteDisplay');
+
+      btn.addEventListener('click', () => {
+        if (!scopes || scopes.length === 0) return;
+        btn.disabled = true;
+        display.style.display = 'flex';
+        display.classList.add('spinning');
+        display.classList.remove('landed');
+
+        let iterations = 0;
+        const totalIterations = 20 + Math.floor(Math.random() * 10);
+        let delay = 60;
+
+        function tick() {
+          const randomScope = scopes[Math.floor(Math.random() * scopes.length)];
+          display.textContent = randomScope.label;
+          iterations++;
+
+          if (iterations >= totalIterations) {
+            display.classList.remove('spinning');
+            display.classList.add('landed');
+            btn.disabled = false;
+            // Final selection
+            const finalScope = scopes[Math.floor(Math.random() * scopes.length)];
+            display.textContent = finalScope.label;
+            setTimeout(() => onSelect(finalScope), 400);
+          } else {
+            delay = 60 + (iterations * 8); // Decelerating
+            setTimeout(tick, delay);
+          }
+        }
+        tick();
+      });
+
+      return container;
+    },
+
+    /**
+     * Show a plays remaining counter on the page.
+     * @param {number} remaining
+     * @param {number} limit
+     * @returns {HTMLElement}
+     */
+    createPlaysCounter(remaining, limit) {
+      const counter = document.createElement('div');
+      counter.id = 'tsPlaysRemaining';
+      counter.className = 'ts-plays-counter';
+      if (limit === Infinity) {
+        counter.textContent = 'Unlimited plays';
+      } else {
+        counter.textContent = `${remaining} play${remaining !== 1 ? 's' : ''} remaining today`;
+        if (remaining <= 1) counter.classList.add('ts-plays-low');
+      }
+      return counter;
+    },
+
+    /**
+     * Fetch and render "Database last updated" in footer.
+     */
+    async renderFooterMeta() {
+      const footer = document.querySelector('footer');
+      if (!footer) return;
+
+      try {
+        const API_BASE = window.location.hostname === 'localhost'
+          ? 'http://localhost:8888/.netlify/functions' : '/.netlify/functions';
+        const res = await fetch(API_BASE + '/meta');
+        if (!res.ok) return;
+        const meta = await res.json();
+        const info = meta.current_season_last_updated;
+        if (info && info.value !== 'never') {
+          const d = new Date(info.updated_at);
+          const formatted = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+          let el = document.getElementById('tsLastUpdated');
+          if (!el) {
+            el = document.createElement('div');
+            el.id = 'tsLastUpdated';
+            el.style.cssText = 'margin-top:4px;opacity:0.5;font-size:0.75em;';
+            footer.appendChild(el);
+          }
+          el.textContent = 'Database updated: ' + formatted;
+        }
+      } catch { /* silent */ }
+    },
+
+    /**
+     * Show iOS-specific install prompt (Safari has no beforeinstallprompt).
+     */
+    showIOSInstallPrompt() {
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+                        || window.navigator.standalone;
+      if (!isIOS || isStandalone || sessionStorage.getItem('ts_install_dismissed')) return;
+
+      const nav = document.querySelector('.ts-nav');
+      if (!nav) return;
+
+      const banner = document.createElement('div');
+      banner.className = 'ts-install-banner';
+      banner.innerHTML = `
+        <span style="flex:1;font-size:13px;">Add TeleStats to your Home Screen: tap
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;">
+            <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/>
+            <polyline points="16 6 12 2 8 6"/>
+            <line x1="12" y1="2" x2="12" y2="15"/>
+          </svg> then "Add to Home Screen"
+        </span>
+        <button id="tsIOSInstallDismiss" style="background:none;border:none;color:var(--text-muted);font-size:18px;cursor:pointer;padding:0 4px;">&times;</button>`;
+      banner.style.cssText = 'display:flex;align-items:center;gap:10px;padding:10px 16px;background:var(--bg-card,#171F25);border-bottom:1px solid rgba(255,255,255,0.06);font-family:Inter,sans-serif;';
+      nav.after(banner);
+
+      document.getElementById('tsIOSInstallDismiss')?.addEventListener('click', () => {
+        banner.remove();
+        sessionStorage.setItem('ts_install_dismissed', '1');
       });
     }
   };

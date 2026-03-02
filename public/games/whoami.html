@@ -409,11 +409,6 @@ body {
 </head>
 <body>
 
-<div class="ts-header">
-  <img src="https://res.cloudinary.com/dbfvogb95/image/upload/v1770835428/Screenshot_2026-02-11_at_19.43.16_m7urul.png" alt="TeleStats" class="ts-logo"/>
-  <span>EPL &middot; WHO AM I?</span>
-  <span class="ts-time" id="tsTime"></span>
-</div>
 
 <div class="container">
   <a href="index.html" class="back-link">&larr; All Games</a>
@@ -516,7 +511,7 @@ function closeRules(){document.getElementById('rulesOverlay').classList.remove('
 </script>
 
 <footer style="text-align:center;padding:16px 16px 72px;font-size:11px;color:var(--muted);opacity:0.6;">
-  TeleStats.net &middot; Built by <a href="https://shiftedlabs.io" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">Shifted.Labs</a>
+  TeleStats.net &middot; Built by <a href="https://shiftedlabs.ai" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">Shifted.Labs</a>
 </footer>
 
 <script>
@@ -1210,8 +1205,77 @@ setInterval(updateClock, 30000);
 <script src="/js/ts-nav.js"></script>
 <script>
 (async function tsIntegrate() {
+  if (window._tsIntegrated) return;
+  window._tsIntegrated = true;
+
   await TSAuth.init();
   TSNav.render();
+
+  // Play limits counter
+  const playInfo = await TSData.getRemainingPlays('who_am_i');
+  if (playInfo.limit !== Infinity) {
+    const counter = TSNav.createPlaysCounter(playInfo.remaining, playInfo.limit);
+    const setupArea = document.querySelector('.card') || document.querySelector('#step1') || document.body;
+    setupArea.prepend(counter);
+  }
+
+  // Scope locking
+  const tierAccess = TSAuth.getAllowedScopes();
+  function applyScopeLocking() {
+    const scopeGrid = document.getElementById('scopeGrid');
+    if (!scopeGrid) return;
+    if (tierAccess.randomOnly) {
+      scopeGrid.querySelectorAll('.scope-card').forEach(c => c.classList.add('ts-locked'));
+      if (!document.getElementById('tsUpgradeHint')) {
+        const hint = document.createElement('div');
+        hint.id = 'tsUpgradeHint';
+        hint.className = 'ts-upgrade-hint';
+        hint.textContent = 'Sign up free to choose your own categories';
+        hint.onclick = () => TSNav.showAuthModal('signup');
+        scopeGrid.parentElement.insertBefore(hint, scopeGrid.nextSibling);
+      }
+    } else if (!tierAccess.all) {
+      scopeGrid.querySelectorAll('.section').forEach(sec => {
+        const header = sec.querySelector('.section-header');
+        if (!header) return;
+        const text = header.textContent.toLowerCase();
+        const isEPL = text.includes('premier') || text.includes('epl') || text.includes('combined') || text.includes('teams');
+        if (!isEPL) sec.classList.add('ts-locked-section');
+      });
+    }
+  }
+  const scopeContainer = document.getElementById('scopeGrid');
+  if (scopeContainer) {
+    new MutationObserver(() => applyScopeLocking()).observe(scopeContainer, { childList: true, subtree: true });
+    applyScopeLocking();
+  }
+
+  // Roulette selector
+  setTimeout(() => {
+    const scopeCards = document.querySelectorAll('#scopeGrid .scope-card');
+    if (scopeCards.length > 0) {
+      const allScopes = Array.from(scopeCards).map(c => {
+        const l = c.querySelector('.sc-label');
+        return { id: c.dataset.scopeId || (l ? l.textContent : ''), label: l ? l.textContent : '', el: c };
+      });
+      const rouletteScopes = tierAccess.randomOnly ? allScopes : allScopes.filter(s => !s.el.classList.contains('ts-locked'));
+      if (rouletteScopes.length > 0) {
+        const roulette = TSNav.createRouletteSelector(rouletteScopes, (scope) => { if (scope.el) scope.el.click(); });
+        const scopeGridEl = document.getElementById('scopeGrid');
+        if (scopeGridEl) scopeGridEl.parentElement.insertBefore(roulette, scopeGridEl);
+      }
+    }
+  }, 1500);
+
+  // Hook startGame for play limit check
+  const _origStartGame = window.startGame;
+  if (typeof _origStartGame === 'function') {
+    window.startGame = async function() {
+      const check = await TSData.checkPlayLimit('who_am_i');
+      if (!check.canPlay) return;
+      return _origStartGame.apply(this, arguments);
+    };
+  }
 
   // Hook showResult to log session
   const _origShowResult = window.showResult;
@@ -1222,15 +1286,17 @@ setInterval(updateClock, 30000);
 
   async function tsLogWhoAmISession(won) {
     try {
-      const scopeLabel = selectedScope || '';
+      const scopeLabel = typeof selectedScope !== 'undefined' ? selectedScope : '';
+      const gc = typeof guessCount !== 'undefined' ? guessCount : 0;
+      const cr = typeof cluesRevealed !== 'undefined' ? cluesRevealed : 0;
       const result = await TSData.logGameSession({
         game_type: 'who_am_i',
         game_category: scopeLabel,
-        score: won ? Math.max(1, 6 - cluesRevealed) : 0,
+        score: won ? Math.max(1, 6 - cr) : 0,
         correct_answers: won ? 1 : 0,
         total_questions: 1,
-        guesses_used: guessCount,
-        is_perfect_round: won && cluesRevealed <= 1,
+        guesses_used: gc,
+        is_perfect_round: won && cr <= 1,
         completed: true
       });
       if (result && !result.error) {
@@ -1238,8 +1304,8 @@ setInterval(updateClock, 30000);
         TSNav.showShareCard({
           game_type: 'who_am_i',
           game_category: scopeLabel,
-          guesses_used: guessCount,
-          is_perfect_round: won && cluesRevealed <= 1,
+          guesses_used: gc,
+          is_perfect_round: won && cr <= 1,
           xp_earned: result.xp_earned
         });
       }

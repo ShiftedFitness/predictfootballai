@@ -42,10 +42,7 @@
       const userId = TSAuth.getUserId();
       if (!userId) return { error: 'No user' };
 
-      // Increment daily play count
-      await this.incrementDailyPlay(sessionData.game_type);
-
-      // Insert game session
+      // Insert game session FIRST (increment daily play only after success)
       const { data: session, error: insertErr } = await sb()
         .from('ts_game_sessions')
         .insert({
@@ -71,6 +68,9 @@
         console.error('[TSData] Failed to log session:', insertErr);
         return { error: insertErr.message };
       }
+
+      // Increment daily play count AFTER successful insert
+      await this.incrementDailyPlay(sessionData.game_type);
 
       // Award XP via RPC
       const { data: xpResult, error: xpErr } = await sb()
@@ -144,6 +144,21 @@
         .maybeSingle();
       const used = data?.play_count || 0;
       return { remaining: Math.max(0, limit - used), limit };
+    },
+
+    /**
+     * Check play limits and show overlay if exceeded.
+     * Returns { canPlay: true/false, remaining, limit }
+     */
+    async checkPlayLimit(gameType) {
+      const playInfo = await this.getRemainingPlays(gameType);
+      if (playInfo.remaining <= 0) {
+        if (typeof TSNav !== 'undefined' && TSNav.showPlayLimitOverlay) {
+          TSNav.showPlayLimitOverlay(gameType);
+        }
+        return { canPlay: false, ...playInfo };
+      }
+      return { canPlay: true, ...playInfo };
     },
 
     /** Fetch a user profile with achievements and ratings */

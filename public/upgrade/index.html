@@ -101,22 +101,6 @@
         <button class="up-plan-btn secondary" id="upFreeBtn">Current Plan</button>
       </div>
 
-      <!-- Referral -->
-      <div class="up-plan">
-        <div class="up-plan-name">Referral Unlocked</div>
-        <div class="up-plan-price">Free <small>invite 5 friends</small></div>
-        <div class="up-plan-desc">Unlock more by sharing</div>
-        <ul class="up-features">
-          <li>5 plays per game per day</li>
-          <li>All categories unlocked</li>
-          <li>XP and levelling</li>
-          <li>Global leaderboard</li>
-          <li>All premium categories</li>
-          <li class="disabled">Community game creation</li>
-        </ul>
-        <button class="up-plan-btn secondary" onclick="document.getElementById('upReferral').scrollIntoView({behavior:'smooth'})">Invite Friends</button>
-      </div>
-
       <!-- Paid -->
       <div class="up-plan featured">
         <div class="up-plan-badge">Best Value</div>
@@ -132,6 +116,22 @@
           <li>New leagues &amp; international data as they launch</li>
         </ul>
         <button class="up-plan-btn primary" id="upBuyBtn">Buy Pro — £4.99</button>
+      </div>
+
+      <!-- Referral -->
+      <div class="up-plan">
+        <div class="up-plan-name">Referral Unlocked</div>
+        <div class="up-plan-price">Free <small>invite 5 friends</small></div>
+        <div class="up-plan-desc">Unlock more by sharing</div>
+        <ul class="up-features">
+          <li>5 plays per game per day</li>
+          <li>All categories unlocked</li>
+          <li>XP and levelling</li>
+          <li>Global leaderboard</li>
+          <li>All premium categories</li>
+          <li class="disabled">Community game creation</li>
+        </ul>
+        <button class="up-plan-btn secondary" onclick="document.getElementById('upReferral').scrollIntoView({behavior:'smooth'})">Invite Friends</button>
       </div>
     </div>
 
@@ -162,7 +162,6 @@
       <div class="up-ref-share" id="upRefShare" style="display:none">
         <button class="up-ref-share-btn" id="upShareLink">Copy Invite Link</button>
         <button class="up-ref-share-btn" id="upShareWhatsApp">WhatsApp</button>
-        <button class="up-ref-share-btn" id="upShareTwitter">X / Twitter</button>
       </div>
       <p id="upRefLogin" style="display:none;margin-top:12px;"><button class="up-plan-btn secondary" onclick="TSNav.showAuthModal('signup')" style="max-width:200px;margin:0 auto;">Sign Up to Get Code</button></p>
     </div>
@@ -238,10 +237,74 @@
         freeBtn.style.opacity = '.5';
       }
 
-      // Buy button — placeholder
-      buyBtn.addEventListener('click', () => {
+      // Handle payment return from Stripe
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('payment') === 'success') {
+        // Refresh profile to get updated tier
+        await TSAuth.refreshProfile();
+        const updated = TSAuth.getUser();
+        if (updated?.tier === 'paid') {
+          buyBtn.textContent = 'Current Plan';
+          buyBtn.disabled = true;
+          buyBtn.style.opacity = '.5';
+          freeBtn.textContent = 'Free';
+          freeBtn.disabled = false;
+          freeBtn.style.opacity = '1';
+        }
+        // Show success message
+        const hero = document.querySelector('.up-hero');
+        const banner = document.createElement('div');
+        banner.style.cssText = 'background:var(--accent);color:#000;padding:14px 20px;border-radius:12px;font-weight:600;text-align:center;margin-bottom:20px;font-size:1rem;';
+        banner.textContent = '🎉 Welcome to TeleStats Pro! You now have unlimited access.';
+        hero.after(banner);
+        // Clean URL
+        history.replaceState(null, '', '/upgrade/');
+      } else if (params.get('payment') === 'cancelled') {
+        const hero = document.querySelector('.up-hero');
+        const banner = document.createElement('div');
+        banner.style.cssText = 'background:var(--card);border:1px solid var(--border);color:var(--muted);padding:14px 20px;border-radius:12px;text-align:center;margin-bottom:20px;font-size:.9rem;';
+        banner.textContent = 'Payment cancelled. No worries — you can upgrade anytime.';
+        hero.after(banner);
+        history.replaceState(null, '', '/upgrade/');
+      }
+
+      // Buy button — Stripe Checkout
+      buyBtn.addEventListener('click', async () => {
         if (isAnon) { TSNav.showAuthModal('signup'); return; }
-        alert('Payment integration coming soon! For now, enjoy the free tier.');
+        if (user?.tier === 'paid') return;
+
+        buyBtn.disabled = true;
+        buyBtn.textContent = 'Redirecting...';
+
+        const API_BASE = window.location.hostname === 'localhost'
+          ? 'http://localhost:8888/.netlify/functions'
+          : '/.netlify/functions';
+
+        try {
+          const res = await fetch(API_BASE + '/create-checkout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: user.id })
+          });
+          const data = await res.json();
+
+          if (!res.ok) {
+            throw new Error(data.error || 'Failed to create checkout');
+          }
+
+          // Redirect to Stripe Checkout
+          window.location.href = data.url;
+        } catch (err) {
+          console.error('Checkout error:', err);
+          buyBtn.disabled = false;
+          buyBtn.textContent = 'Buy Pro — £4.99';
+          // Show error
+          const msg = document.createElement('div');
+          msg.style.cssText = 'color:var(--danger,#e05555);font-size:.85rem;text-align:center;margin-top:8px;';
+          msg.textContent = err.message || 'Something went wrong. Please try again.';
+          buyBtn.parentElement.appendChild(msg);
+          setTimeout(() => msg.remove(), 5000);
+        }
       });
 
       // Referral section
@@ -295,9 +358,6 @@
           window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, '_blank');
         });
 
-        document.getElementById('upShareTwitter').addEventListener('click', () => {
-          window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`, '_blank');
-        });
       } else if (isAnon) {
         refLogin.style.display = 'block';
       } else {

@@ -46,6 +46,8 @@
     .comm-card-creator a { color: var(--muted); text-decoration: none; }
     .comm-card-creator a:hover { color: var(--accent); }
     .comm-card-plays { display: flex; align-items: center; gap: 4px; }
+    .comm-share-btn { background: none; border: none; cursor: pointer; font-size: 14px; padding: 2px 4px; opacity: .5; transition: opacity .2s; color: var(--muted); }
+    .comm-share-btn:hover { opacity: 1; color: var(--accent-cyan); }
     .comm-empty { text-align: center; padding: 48px 16px; color: var(--muted); }
 
     /* Builder Modal */
@@ -256,10 +258,18 @@
             <div class="builder-chip" data-val="Leeds United">Leeds</div>
             <div class="builder-chip" data-val="Leicester City">Leicester</div>
           </div>
-          <div id="clubModeRow" style="display:none;margin-top:8px;align-items:center;gap:8px;">
-            <span style="font-size:11px;color:var(--muted);">Players who played at:</span>
-            <button class="builder-chip selected" id="clubModeAll" onclick="setClubMode('all')" style="padding:4px 10px;font-size:11px;">ALL selected clubs</button>
-            <button class="builder-chip" id="clubModeAny" onclick="setClubMode('any')" style="padding:4px 10px;font-size:11px;">ANY selected club</button>
+          <div id="clubModeRow" style="display:none;margin-top:10px;">
+            <div style="font-size:11px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;font-weight:600;">Player Selection Mode</div>
+            <div style="display:flex;gap:6px;">
+              <button class="builder-chip selected" id="clubModeAny" onclick="setClubMode('any')" style="padding:6px 12px;font-size:11px;flex:1;text-align:center;line-height:1.3;">
+                <span style="font-weight:700;">Either Club</span><br/>
+                <span style="font-size:10px;color:var(--muted);">Liverpool OR Man Utd</span>
+              </button>
+              <button class="builder-chip" id="clubModeAll" onclick="setClubMode('all')" style="padding:6px 12px;font-size:11px;flex:1;text-align:center;line-height:1.3;">
+                <span style="font-weight:700;">Combined XI</span><br/>
+                <span style="font-size:10px;color:var(--muted);">Played at BOTH clubs</span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -434,7 +444,10 @@
             <div class="comm-card-desc">${esc(g.description || '')}</div>
             <div class="comm-card-footer">
               <span class="comm-card-creator">by <a href="/profile/?user=${encodeURIComponent(creator?.username || '')}">${esc(creatorName)}</a></span>
-              <span class="comm-card-plays">\u25B6 ${g.play_count || 0} plays</span>
+              <span style="display:flex;align-items:center;gap:8px;">
+                <span class="comm-card-plays">\u25B6 ${g.play_count || 0} plays</span>
+                <button class="comm-share-btn" data-share-title="${esc(g.title)}" title="Share">\u{1F517}</button>
+              </span>
             </div>
           </div>`;
         }).join('');
@@ -450,6 +463,23 @@
             if (result.success) loadGames();
           });
         });
+
+        // Share handlers
+        grid.querySelectorAll('.comm-share-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const gameTitle = btn.dataset.shareTitle;
+            const shareText = 'Check out this TeleStats game: ' + gameTitle + ' - telestats.net/community/';
+            if (navigator.share) {
+              navigator.share({ text: shareText }).catch(() => {});
+            } else {
+              navigator.clipboard.writeText(shareText).then(() => {
+                btn.textContent = '\u2705';
+                setTimeout(() => { btn.textContent = '\u{1F517}'; }, 1500);
+              }).catch(() => {});
+            }
+          });
+        });
       }
 
       // ============================================================
@@ -459,7 +489,7 @@
         gameType: null,
         competitions: ['Premier League'],
         clubs: [],
-        clubMode: 'all',
+        clubMode: 'any',
         measure: 'appearances',
         nationalities: [],
         freeText: '',
@@ -472,7 +502,7 @@
           gameType: presetType || null,
           competitions: ['Premier League'],
           clubs: [],
-          clubMode: 'all',
+          clubMode: 'any',
           measure: 'appearances',
           nationalities: [],
           freeText: '',
@@ -598,7 +628,7 @@
           builderState.clubs = [...document.querySelectorAll('#builderClubs .builder-chip.selected')]
             .map(c => c.dataset.val);
           // Show/hide club mode row when 2+ clubs selected
-          document.getElementById('clubModeRow').style.display = builderState.clubs.length >= 2 ? 'flex' : 'none';
+          document.getElementById('clubModeRow').style.display = builderState.clubs.length >= 2 ? 'block' : 'none';
         });
       });
 

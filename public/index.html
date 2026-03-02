@@ -144,11 +144,34 @@ body { min-height: 100vh; padding-bottom: 40px; }
   pointer-events: none;
 }
 .fp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 1.5px;
   color: var(--accent-cyan);
   margin-bottom: 8px;
+}
+.fp-next-btn {
+  background: none;
+  border: 1px solid var(--accent-cyan);
+  color: var(--accent-cyan);
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: 3px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all 0.15s;
+  position: relative;
+  z-index: 1;
+}
+.fp-next-btn:hover {
+  background: var(--accent-cyan);
+  color: #0B0F12;
 }
 .fp-name { font-size: 20px; font-weight: 800; margin-bottom: 2px; }
 .fp-meta { font-size: 11px; color: var(--text-muted); margin-bottom: 12px; }
@@ -306,7 +329,7 @@ footer {
 </div>
 
 <footer>
-  TeleStats.net &middot; Built by <a href="https://shiftedlabs.io" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">Shifted.Labs</a>
+  TeleStats.net &middot; Built by <a href="https://shiftedlabs.ai" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">Shifted.Labs</a>
 </footer>
 
 <script>
@@ -338,7 +361,7 @@ const GAMES_HTML = `
     <a href="/games/quiz.html" class="game-card-mini">
       <span class="gc-icon">&#129504;</span>
       <div class="gc-name">Pop Quiz</div>
-      <div class="gc-desc">5 data-powered questions</div>
+      <div class="gc-desc">Data-powered questions</div>
     </a>
     <a href="/games/hol.html" class="game-card-mini">
       <span class="gc-icon">&#127183;</span>
@@ -459,16 +482,21 @@ async function renderLoggedIn(user, page) {
 
 async function loadFeaturedPlayer() {
   try {
+    const el = document.getElementById('featuredPlayer');
+    if (!el) return;
     const res = await fetch(API_BASE + '/featured-player');
     if (!res.ok) return;
     const fp = await res.json();
-    const el = document.getElementById('featuredPlayer');
-    if (!el || !fp.name) return;
+    if (!fp.name) return;
+    const seasonsLabel = fp.active ? 'Current' : fp.seasons + ' season' + (fp.seasons !== 1 ? 's' : '');
     el.innerHTML = `
       <div class="featured-player">
-        <div class="fp-header">Featured Player</div>
+        <div class="fp-header">
+          <span>Featured Player</span>
+          <button class="fp-next-btn" id="fpNextBtn">Next &#9654;</button>
+        </div>
         <div class="fp-name">${escHTML(fp.name)}</div>
-        <div class="fp-meta">${escHTML(fp.nationality)}${fp.position ? ' &middot; ' + escHTML(fp.position) : ''} &middot; ${fp.seasons} season${fp.seasons !== 1 ? 's' : ''}</div>
+        <div class="fp-meta">${escHTML(fp.nationality)}${fp.position ? ' &middot; ' + escHTML(fp.position) : ''} &middot; ${seasonsLabel}</div>
         <div class="fp-stats">
           <div class="fp-stat"><span class="fp-val">${fp.appearances}</span><span class="fp-lbl">Apps</span></div>
           <div class="fp-stat"><span class="fp-val">${fp.goals}</span><span class="fp-lbl">Goals</span></div>
@@ -476,6 +504,7 @@ async function loadFeaturedPlayer() {
         </div>
         <div class="fp-clubs">${fp.clubs.map(c => escHTML(c)).join(' &middot; ')}</div>
       </div>`;
+    document.getElementById('fpNextBtn').addEventListener('click', () => loadFeaturedPlayer());
   } catch (e) { /* silent */ }
 }
 

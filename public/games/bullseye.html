@@ -768,11 +768,6 @@ button {
   <a href="index.html" class="back-link" style="text-decoration:none;font-size:13px;">&larr; All Games</a>
 </div>
 
-<div class="ts-header" style="max-width:560px;">
-  <img src="https://res.cloudinary.com/dbfvogb95/image/upload/v1770835428/Screenshot_2026-02-11_at_19.43.16_m7urul.png" alt="TeleStats" class="ts-logo"/>
-  <span>EPL &bull; BULLSEYE</span>
-  <span class="ts-time" id="tsClock">--:--</span>
-</div>
 
 <div class="game-meta-links">
   <button class="game-meta-link" onclick="showRules()">&#9432; How to Play</button>
@@ -3817,7 +3812,7 @@ function updateBullseyeSetting(key,val){
 </script>
 
 <footer style="text-align:center;padding:16px;font-size:11px;color:var(--muted);opacity:0.6;">
-  TeleStats.net &middot; Built by <a href="https://shiftedlabs.io" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">Shifted.Labs</a>
+  TeleStats.net &middot; Built by <a href="https://shiftedlabs.ai" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">Shifted.Labs</a>
 </footer>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/js/ts-auth.js"></script>
@@ -3825,8 +3820,84 @@ function updateBullseyeSetting(key,val){
 <script src="/js/ts-nav.js"></script>
 <script>
 (async function tsIntegrate() {
+  if (window._tsIntegrated) return;
+  window._tsIntegrated = true;
+
   await TSAuth.init();
   TSNav.render();
+
+  // Play limits counter
+  const playInfo = await TSData.getRemainingPlays('bullseye');
+  if (playInfo.limit !== Infinity) {
+    const counter = TSNav.createPlaysCounter(playInfo.remaining, playInfo.limit);
+    const setupArea = document.getElementById('step3') || document.querySelector('.card') || document.body;
+    setupArea.prepend(counter);
+  }
+
+  // Category / league-group locking
+  const tierAccess = TSAuth.getAllowedScopes();
+  function applyCategoryLocking() {
+    const step3 = document.getElementById('step3');
+    if (!step3) return;
+    if (tierAccess.randomOnly) {
+      // Anonymous: lock ALL game-cards
+      step3.querySelectorAll('.game-card').forEach(c => c.classList.add('ts-locked'));
+      if (!document.getElementById('tsUpgradeHint')) {
+        const hint = document.createElement('div');
+        hint.id = 'tsUpgradeHint';
+        hint.className = 'ts-upgrade-hint';
+        hint.textContent = 'Sign up free to choose your own categories';
+        hint.onclick = () => TSNav.showAuthModal('signup');
+        step3.appendChild(hint);
+      }
+    } else if (!tierAccess.all) {
+      // Free tier: lock non-EPL league groups
+      step3.querySelectorAll('.league-group').forEach(lg => {
+        const header = lg.querySelector('.league-group-header');
+        if (!header) return;
+        const text = header.textContent.toLowerCase();
+        const isEPL = text.includes('premier') || text.includes('epl');
+        if (!isEPL) lg.classList.add('ts-locked-section');
+      });
+    }
+  }
+  const step3El = document.getElementById('step3');
+  if (step3El) {
+    new MutationObserver(() => applyCategoryLocking()).observe(step3El, { childList: true, subtree: true });
+    applyCategoryLocking();
+  }
+
+  // Roulette selector for bullseye categories
+  setTimeout(() => {
+    const gameCards = document.querySelectorAll('#step3 .game-card');
+    if (gameCards.length > 0) {
+      const allCats = Array.from(gameCards).map(c => {
+        const titleEl = c.querySelector('.title');
+        return { id: titleEl ? titleEl.textContent : '', label: titleEl ? titleEl.textContent : '', el: c };
+      });
+      const rouletteCats = tierAccess.randomOnly ? allCats : allCats.filter(s => !s.el.classList.contains('ts-locked'));
+      if (rouletteCats.length > 0) {
+        const roulette = TSNav.createRouletteSelector(rouletteCats, (cat) => { if (cat.el) cat.el.click(); });
+        const step3 = document.getElementById('step3');
+        const firstLeague = step3 ? step3.querySelector('.league-group') : null;
+        if (firstLeague) {
+          step3.insertBefore(roulette, firstLeague);
+        } else if (step3) {
+          step3.prepend(roulette);
+        }
+      }
+    }
+  }, 2500);
+
+  // Hook chooseCategory for play limit check
+  const _origChooseCategory = window.chooseCategory;
+  if (typeof _origChooseCategory === 'function') {
+    window.chooseCategory = async function(cat) {
+      const check = await TSData.checkPlayLimit('bullseye');
+      if (!check.canPlay) return;
+      return _origChooseCategory.apply(this, arguments);
+    };
+  }
 
   // Hook into recordWin and recordGameEnd to log sessions
   const _origRecordWin = window.recordWin;
@@ -3842,8 +3913,8 @@ function updateBullseyeSetting(key,val){
 
   async function tsLogBullseyeSession(won) {
     try {
-      const catLabel = currentCategory ? (currentCategory.title || currentCategory.id || 'Unknown') : 'Unknown';
-      const dartsUsed = state ? state.turnCount : null;
+      const catLabel = typeof currentCategory !== 'undefined' && currentCategory ? (currentCategory.title || currentCategory.id || 'Unknown') : 'Unknown';
+      const dartsUsed = typeof state !== 'undefined' && state ? state.turnCount : null;
       const result = await TSData.logGameSession({
         game_type: 'bullseye',
         game_category: catLabel,
