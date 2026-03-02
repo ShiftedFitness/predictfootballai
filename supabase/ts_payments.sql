@@ -6,7 +6,7 @@
 -- 1. Create the payments table
 CREATE TABLE IF NOT EXISTS ts_payments (
   id            BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-  user_id       BIGINT NOT NULL REFERENCES ts_users(id) ON DELETE CASCADE,
+  user_id       UUID NOT NULL REFERENCES ts_users(id) ON DELETE CASCADE,
   stripe_session_id     TEXT NOT NULL UNIQUE,     -- Stripe Checkout Session ID (cs_...)
   stripe_payment_intent TEXT,                     -- Stripe PaymentIntent ID (pi_...)
   stripe_customer_email TEXT,                     -- Email used at checkout

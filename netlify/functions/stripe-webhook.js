@@ -57,7 +57,7 @@ exports.handler = async (event) => {
       const { error: updateErr } = await client
         .from('ts_users')
         .update({ tier: 'paid' })
-        .eq('id', parseInt(userId, 10));
+        .eq('id', userId);
 
       if (updateErr) {
         console.error('Failed to upgrade user:', updateErr.message);
@@ -68,7 +68,7 @@ exports.handler = async (event) => {
       const { error: paymentErr } = await client
         .from('ts_payments')
         .insert({
-          user_id: parseInt(userId, 10),
+          user_id: userId,
           stripe_session_id: session.id,
           stripe_payment_intent: session.payment_intent,
           stripe_customer_email: session.customer_email || email,
