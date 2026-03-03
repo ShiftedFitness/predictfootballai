@@ -2,6 +2,27 @@
   functions = "netlify/functions"
   publish = "public"
 
+# Cache headers: HTML pages should always revalidate, static assets can cache longer
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/*/index.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
 # Auto-score: runs daily at 22:00 UTC (10pm) and 07:00 UTC (7am)
 # Covers evening matches (checked next morning) and afternoon matches (checked same evening)
 [functions."auto-score"]

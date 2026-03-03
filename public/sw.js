@@ -1,17 +1,18 @@
 /**
  * TeleStats Service Worker
- * Strategy: Cache static assets, network-first for API calls, offline fallback.
+ * Strategy:
+ *   - Navigation requests (HTML pages): network-first, cache fallback
+ *   - Static assets (CSS, JS, images): stale-while-revalidate
+ *   - API calls / Supabase: network-only (no caching)
  */
 
-const CACHE_NAME = 'telestats-v1';
+const CACHE_NAME = 'telestats-v2';
 
 const STATIC_ASSETS = [
-  '/',
   '/telestats-theme.css',
   '/js/ts-auth.js',
   '/js/ts-data.js',
   '/js/ts-nav.js',
-  '/games/',
   '/offline.html'
 ];
 
@@ -35,7 +36,7 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Fetch: network-first for API, cache-first for static assets
+// Fetch handler
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
@@ -50,25 +51,43 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Cache-first for static assets, with network fallback
-  event.respondWith(
-    caches.match(request).then(cached => {
-      if (cached) return cached;
-      return fetch(request)
+  // Navigation requests (HTML pages): network-first, cache fallback
+  if (request.mode === 'navigate') {
+    event.respondWith(
+      fetch(request)
         .then(response => {
-          // Cache successful responses for same-origin
-          if (response.ok && url.origin === self.location.origin) {
+          // Cache the fresh response for offline use
+          if (response.ok) {
             const clone = response.clone();
             caches.open(CACHE_NAME).then(cache => cache.put(request, clone));
           }
           return response;
         })
         .catch(() => {
-          // Offline fallback for navigation requests
-          if (request.mode === 'navigate') {
-            return caches.match('/offline.html');
+          // Offline: try cache, then offline page
+          return caches.match(request)
+            .then(cached => cached || caches.match('/offline.html'));
+        })
+    );
+    return;
+  }
+
+  // Static assets: stale-while-revalidate
+  // Return cached version immediately, but fetch fresh copy in background
+  event.respondWith(
+    caches.match(request).then(cached => {
+      const fetchPromise = fetch(request)
+        .then(response => {
+          if (response.ok && url.origin === self.location.origin) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put(request, clone));
           }
-        });
+          return response;
+        })
+        .catch(() => cached);
+
+      // Return cached immediately if available, otherwise wait for network
+      return cached || fetchPromise;
     })
   );
 });
