@@ -3947,7 +3947,7 @@ function updateBullseyeSetting(key,val){
         const hint = document.createElement('div');
         hint.id = 'tsUpgradeHint';
         hint.className = 'ts-upgrade-hint';
-        hint.innerHTML = '\uD83D\uDD13 <a href="/upgrade/" style="color:var(--accent-cyan);text-decoration:underline;">Upgrade to Pro</a> to unlock all leagues';
+        hint.innerHTML = '🔒 <a href="/upgrade/">Upgrade to Pro</a> to unlock all leagues';
         const eplGroup = document.getElementById('lg-epl');
         if (eplGroup && eplGroup.nextElementSibling) {
           eplGroup.parentElement.insertBefore(hint, eplGroup.nextElementSibling);
@@ -4025,7 +4025,7 @@ function updateBullseyeSetting(key,val){
         darts_used: dartsUsed,
         checkout_score: won ? 501 : null,
         is_perfect_round: won && dartsUsed && dartsUsed <= 9,
-        completed: true
+        completed: won
       });
       if (result && !result.error) {
         TSNav.showXPToast(result);

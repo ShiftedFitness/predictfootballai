@@ -750,10 +750,10 @@
 
       const bar = document.createElement('div');
       bar.id = 'tsGameContext';
-      bar.style.cssText = 'position:fixed;top:56px;left:0;right:0;z-index:90;background:linear-gradient(90deg,rgba(0,229,255,.12),rgba(50,255,126,.08));border-bottom:1px solid rgba(0,229,255,.2);padding:8px 16px;text-align:center;font-size:13px;font-family:"Space Mono",monospace;backdrop-filter:blur(8px);';
+      bar.style.cssText = 'position:fixed;top:56px;left:0;right:0;z-index:90;background:linear-gradient(90deg,rgba(0,229,255,.15),rgba(50,255,126,.10));border-bottom:1px solid rgba(0,229,255,.25);padding:10px 16px;text-align:center;font-size:15px;font-family:"Space Mono",monospace;backdrop-filter:blur(8px);';
       bar.innerHTML = '<span style="color:var(--accent-cyan);font-weight:700;">' + (typeLabels[gameType] || gameType) + '</span>'
-        + ' <span style="color:var(--text-secondary);margin:0 6px;">\u2014</span> '
-        + '<span style="color:var(--fg);">' + categoryLabel + '</span>';
+        + ' <span style="color:var(--text-secondary);margin:0 8px;">\u2014</span> '
+        + '<span style="color:#fff;font-weight:600;">' + categoryLabel + '</span>';
 
       document.body.prepend(bar);
     },
