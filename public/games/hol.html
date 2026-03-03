@@ -364,6 +364,8 @@ function makeScopeCard(s) {
     card.classList.add('selected');
     selectedScope = s.id;
     $('startBtn').disabled = false;
+    // Scroll start button into view so it's obvious
+    setTimeout(() => $('startBtn').scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
   };
   return card;
 }

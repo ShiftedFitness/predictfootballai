@@ -2400,6 +2400,22 @@ document.getElementById('tsClock').textContent = new Date().toTimeString().slice
     setupArea.prepend(counter);
   }
 
+  // Anonymous users: lock objective to appearances only
+  if (isAnon) {
+    const objGrid = document.getElementById('objectiveGrid');
+    if (objGrid) {
+      const btns = objGrid.querySelectorAll('.option-btn');
+      btns.forEach(btn => {
+        if (!btn.textContent.includes('Appearances')) {
+          btn.style.opacity = '0.35';
+          btn.style.pointerEvents = 'none';
+        } else {
+          btn.click(); // auto-select appearances
+        }
+      });
+    }
+  }
+
   // Scope locking
   const tierAccess = TSAuth.getAllowedScopes();
   function applyScopeLocking() {

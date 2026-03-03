@@ -54,10 +54,10 @@
 
       let rightHTML;
       if (isAnon) {
-        // Anonymous: single "Get Started" button
+        // Anonymous: single "Log In" button
         rightHTML = `
           <div class="ts-nav-auth">
-            <button class="ts-nav-login-btn" id="tsNavLoginBtn" style="background:var(--accent-yellow);color:#0B0F12;border:none;font-weight:700;padding:6px 16px;border-radius:6px;cursor:pointer;font-size:13px;">Get Started</button>
+            <button class="ts-nav-login-btn" id="tsNavLoginBtn" style="background:var(--accent-yellow);color:#0B0F12;border:none;font-weight:700;padding:6px 16px;border-radius:6px;cursor:pointer;font-size:13px;">Log In</button>
           </div>`;
       } else {
         const xp = TSAuth.getXPProgress();
@@ -88,7 +88,7 @@
         <div class="ts-nav-mobile" id="tsNavMobile">
           ${linksHTML}
           ${isAnon
-            ? '<a href="#" class="ts-nav-link" id="tsNavMobileLogin">Get Started</a>'
+            ? '<a href="#" class="ts-nav-link" id="tsNavMobileLogin">Log In</a>'
             : `<a href="/profile/" class="ts-nav-link">Profile</a>${user.tier !== 'paid' ? '<a href="/upgrade/" class="ts-nav-link" style="color:var(--accent-yellow)">Upgrade to Pro</a>' : ''}<a href="#" class="ts-nav-link" id="tsNavMobileLogout">Log Out</a>`
           }
         </div>`;
@@ -170,8 +170,8 @@
         });
       });
 
-      // ── iOS-specific install prompt ──
-      this.showIOSInstallPrompt();
+      // ── Mobile install prompt (iOS + Android) ──
+      this.showInstallPrompt();
 
       // ── Footer: database last updated ──
       this.renderFooterMeta();
@@ -666,7 +666,11 @@
       if (limit === Infinity) {
         counter.textContent = 'Unlimited plays';
       } else {
+        const isAnon = TSAuth.isAnonymous();
         counter.textContent = `${remaining} play${remaining !== 1 ? 's' : ''} remaining today`;
+        if (isAnon && remaining < limit) {
+          counter.innerHTML += ' · <a href="#" style="color:var(--accent-cyan);text-decoration:underline;font-size:inherit;" onclick="TSNav.showAuthModal(\'signup\');return false;">Sign up for more</a>';
+        }
         if (remaining <= 1) counter.classList.add('ts-plays-low');
       }
       return counter;
@@ -704,30 +708,30 @@
     /**
      * Show iOS-specific install prompt (Safari has no beforeinstallprompt).
      */
-    showIOSInstallPrompt() {
-      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    showInstallPrompt() {
+      const isMobileOrTablet = /Android|iPad|iPhone|iPod/i.test(navigator.userAgent) && !window.MSStream;
       const isStandalone = window.matchMedia('(display-mode: standalone)').matches
                         || window.navigator.standalone;
-      if (!isIOS || isStandalone || sessionStorage.getItem('ts_install_dismissed')) return;
+      const isGamePage = /\/games\/\w+\.html/.test(window.location.pathname);
+      if (!isMobileOrTablet || isStandalone || isGamePage || sessionStorage.getItem('ts_install_dismissed')) return;
 
       const nav = document.querySelector('.ts-nav');
       if (!nav) return;
 
+      const isIOS = /iPad|iPhone|iPod/i.test(navigator.userAgent);
+      const installText = isIOS
+        ? 'Add TeleStats to your Home Screen: tap <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg> then "Add to Home Screen"'
+        : 'Add TeleStats to your Home Screen: tap ⋮ then "Install app" or "Add to Home Screen"';
+
       const banner = document.createElement('div');
       banner.className = 'ts-install-banner';
       banner.innerHTML = `
-        <span style="flex:1;font-size:13px;">Add TeleStats to your Home Screen: tap
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;">
-            <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/>
-            <polyline points="16 6 12 2 8 6"/>
-            <line x1="12" y1="2" x2="12" y2="15"/>
-          </svg> then "Add to Home Screen"
-        </span>
-        <button id="tsIOSInstallDismiss" style="background:none;border:none;color:var(--text-muted);font-size:18px;cursor:pointer;padding:0 4px;">&times;</button>`;
+        <span style="flex:1;font-size:13px;">${installText}</span>
+        <button id="tsInstallDismiss" style="background:none;border:none;color:var(--text-muted);font-size:18px;cursor:pointer;padding:0 4px;">&times;</button>`;
       banner.style.cssText = 'display:flex;align-items:center;gap:10px;padding:10px 16px;background:var(--bg-card,#171F25);border-bottom:1px solid rgba(255,255,255,0.06);font-family:Inter,sans-serif;';
       nav.after(banner);
 
-      document.getElementById('tsIOSInstallDismiss')?.addEventListener('click', () => {
+      document.getElementById('tsInstallDismiss')?.addEventListener('click', () => {
         banner.remove();
         sessionStorage.setItem('ts_install_dismissed', '1');
       });

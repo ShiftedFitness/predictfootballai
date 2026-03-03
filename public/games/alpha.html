@@ -180,6 +180,9 @@ body {
       <button class="reveal-btn" id="revealBtn" onclick="revealAnswer()">Show a valid answer</button>
       <button class="reveal-btn" id="skipBtn" onclick="skipLetter()" style="margin-left:8px;">Skip letter</button>
     </div>
+    <div style="text-align:center;margin-top:16px;">
+      <button class="reveal-btn" id="endGameBtn" onclick="endGameEarly()" style="color:var(--danger,#ff4444);opacity:0.7;">End Game</button>
+    </div>
   </div>
 
   <!-- GAME OVER -->
@@ -677,6 +680,21 @@ function skipLetter() {
     currentLetterIdx++;
     advanceToNextLetter();
   }, 1200);
+}
+
+function endGameEarly() {
+  if (!confirm('End this game? Remaining letters will be counted as missed.')) return;
+  // Mark all remaining letters as missed
+  while (currentLetterIdx < 26) {
+    const letter = String.fromCharCode(65 + currentLetterIdx);
+    const entry = alphabetData.find(e => e.letter === letter);
+    if (entry && entry.count > 0 && !letterResults[letter]) {
+      letterResults[letter] = { status: 'missed', answer: entry.players?.[0]?.name || '' };
+      scoreMissed++;
+    }
+    currentLetterIdx++;
+  }
+  endGame();
 }
 
 function endGame() {
