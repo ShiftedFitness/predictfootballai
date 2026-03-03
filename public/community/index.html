@@ -371,9 +371,9 @@
       let currentSort = 'popular';
 
       // Any signed-in user can open the builder now
-      const user = TSAuth.getUser();
+      let user = TSAuth.getUser();
       const isSignedIn = user && !TSAuth.isAnonymous();
-      const isPaid = user && user.tier === 'paid';
+      let isPaid = user && user.tier === 'paid';
 
       // Filters
       filtersEl.querySelectorAll('.comm-filter').forEach(btn => {
@@ -497,7 +497,16 @@
         generatedData: null,
       };
 
-      function openBuilder(presetType) {
+      async function openBuilder(presetType) {
+        // Refresh profile from DB to get current tier (handles recent upgrades)
+        if (isSignedIn) {
+          const freshUser = await TSAuth.refreshProfile();
+          if (freshUser) {
+            user = freshUser;
+            isPaid = user.tier === 'paid';
+          }
+        }
+
         builderState = {
           gameType: presetType || null,
           competitions: ['Premier League'],
@@ -900,11 +909,11 @@
           html += '<div class="builder-preview-stat"><span class="builder-preview-label">Measure</span><span class="builder-preview-value">' + (measureLabels[data.measure] || data.measure) + '</span></div>';
 
           if (data.samplePlayers && data.samplePlayers.length > 0) {
-            html += '<div class="builder-section-label" style="margin-top:14px;">Top Players</div>';
+            html += '<div class="builder-section-label" style="margin-top:14px;">Sample Players</div>';
             html += '<div class="builder-sample-list">';
             data.samplePlayers.forEach(p => {
               const clubsStr = p.clubs && p.clubs.length > 0 ? ' <span style="font-size:10px;color:var(--muted);">(' + p.clubs.join(', ') + ')</span>' : '';
-              html += '<div class="builder-sample-item">' + esc(p.name) + clubsStr + '<span>' + p.stat + '</span></div>';
+              html += '<div class="builder-sample-item">' + esc(p.name) + clubsStr + '</div>';
             });
             html += '</div>';
           }
@@ -932,7 +941,18 @@
       // STEP 4: Publish
       // ============================================================
       window.publishGame = async function() {
-        if (!isPaid) return;
+        // Re-check tier from DB in case it changed
+        const freshUser = await TSAuth.refreshProfile();
+        if (freshUser) {
+          user = freshUser;
+          isPaid = user.tier === 'paid';
+        }
+        if (!isPaid) {
+          const msg = document.getElementById('builderMsg');
+          msg.textContent = 'Pro account required to publish. Please upgrade.';
+          msg.className = 'builder-msg error';
+          return;
+        }
 
         const title = document.getElementById('builderTitle').value.trim();
         const desc = document.getElementById('builderDesc').value.trim();

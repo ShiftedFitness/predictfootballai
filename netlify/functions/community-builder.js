@@ -29,6 +29,23 @@
 const { sb, respond, handleOptions } = require('./_supabase');
 
 /**
+ * Fix mojibake: UTF-8 bytes misread as Latin-1.
+ * e.g. "SuÃ¡rez" → "Suárez"
+ */
+function fixMojibake(str) {
+  if (!str) return str;
+  try {
+    // Detect UTF-8 byte sequences misinterpreted as Latin-1
+    if (/[\xC0-\xDF][\x80-\xBF]/.test(str)) {
+      const bytes = Buffer.from(str, 'latin1');
+      const decoded = bytes.toString('utf8');
+      if (decoded && !decoded.includes('\uFFFD')) return decoded;
+    }
+  } catch (_) { /* ignore */ }
+  return str;
+}
+
+/**
  * Paginated fetch — Supabase returns max 1000 rows per request.
  */
 async function fetchAll(queryBuilder) {
@@ -276,6 +293,52 @@ function parseFreeText(text) {
   return { clubs: foundClubs, nationalities: foundNats, clubMode };
 }
 
+/**
+ * DB club_name aliases — the clubs table may store names differently
+ * from the canonical names used in CLUB_ALIASES above.
+ * Maps canonical name → array of all DB variants to query with.
+ * (Same pattern as match_start.js aliases)
+ */
+const DB_CLUB_ALIASES = {
+  'Manchester United': ['Manchester United', 'Manchester Utd'],
+  'Newcastle United': ['Newcastle United', 'Newcastle Utd'],
+  'Nottingham Forest': ['Nottingham Forest', 'Nottm Forest'],
+  'Tottenham Hotspur': ['Tottenham Hotspur', 'Tottenham'],
+  'Queens Park Rangers': ['Queens Park Rangers', 'QPR'],
+  'Sheffield United': ['Sheffield United', 'Sheffield Utd'],
+  'Sheffield Weds': ['Sheffield Weds', 'Sheffield Wednesday'],
+  'West Bromwich Albion': ['West Bromwich Albion', 'West Brom'],
+  'West Ham United': ['West Ham United', 'West Ham'],
+  'Brighton & Hove Albion': ['Brighton & Hove Albion', 'Brighton'],
+  'Wolves': ['Wolves', 'Wolverhampton Wanderers'],
+  'Bournemouth': ['Bournemouth', 'AFC Bournemouth'],
+};
+
+/**
+ * Expand club names to include all DB variants for querying.
+ */
+function expandClubNames(clubs) {
+  const expanded = new Set();
+  for (const c of clubs) {
+    expanded.add(c);
+    const aliases = DB_CLUB_ALIASES[c];
+    if (aliases) aliases.forEach(a => expanded.add(a));
+  }
+  return [...expanded];
+}
+
+/**
+ * Reverse-map a DB club_name back to its canonical form.
+ * e.g. 'Manchester Utd' → 'Manchester United'
+ */
+const _reverseClubMap = {};
+for (const [canonical, variants] of Object.entries(DB_CLUB_ALIASES)) {
+  for (const v of variants) _reverseClubMap[v] = canonical;
+}
+function canonicalClubName(dbName) {
+  return _reverseClubMap[dbName] || dbName;
+}
+
 exports.handler = async (event) => {
   const cors = handleOptions(event);
   if (cors) return cors;
@@ -329,6 +392,9 @@ exports.handler = async (event) => {
       return respond(400, 'Performance measure is only available for Premier League');
     }
 
+    // Expand club names to include DB aliases (e.g. 'Manchester United' → also 'Manchester Utd')
+    const dbClubs = clubs.length > 0 ? expandClubNames(clubs) : [];
+
     // Build query using v_game_player_club_comp
     const buildQuery = () => {
       let query = client
@@ -342,12 +408,12 @@ exports.handler = async (event) => {
         query = query.in('competition_name', competitions);
       }
 
-      // Filter by clubs — for 'all' mode we still fetch rows matching ANY club,
-      // then do the intersection in-memory
-      if (clubs.length === 1) {
-        query = query.eq('club_name', clubs[0]);
-      } else if (clubs.length > 1) {
-        query = query.in('club_name', clubs);
+      // Filter by clubs — use expanded names to handle DB naming variations
+      // For 'all' mode we still fetch rows matching ANY club, then do the intersection in-memory
+      if (dbClubs.length === 1) {
+        query = query.eq('club_name', dbClubs[0]);
+      } else if (dbClubs.length > 1) {
+        query = query.in('club_name', dbClubs);
       }
 
       // Filter by nationality (skip if too many — filter in-memory)
@@ -381,7 +447,7 @@ exports.handler = async (event) => {
       if (!playerMap[row.player_uid]) {
         playerMap[row.player_uid] = {
           player_uid: row.player_uid,
-          player_name: row.player_name || row.player_uid.split('|')[0],
+          player_name: fixMojibake(row.player_name || row.player_uid.split('|')[0]),
           nationality: row.nationality_norm || '',
           totalApps: 0,
           totalGoals: 0,
@@ -409,11 +475,13 @@ exports.handler = async (event) => {
     }
 
     // CRITICAL: For clubMode 'all', filter to only players who played at ALL listed clubs
+    // Use canonical names to handle DB name variations (e.g. 'Manchester Utd' matches 'Manchester United')
     if (clubMode === 'all' && clubs.length > 1) {
-      const clubSet = new Set(clubs);
+      const canonicalClubs = new Set(clubs.map(c => canonicalClubName(c)));
       players = players.filter(p => {
-        for (const c of clubSet) {
-          if (!p.clubs.has(c)) return false;
+        const playerCanonicalClubs = new Set([...p.clubs].map(c => canonicalClubName(c)));
+        for (const c of canonicalClubs) {
+          if (!playerCanonicalClubs.has(c)) return false;
         }
         return true;
       });
@@ -460,9 +528,10 @@ exports.handler = async (event) => {
     else if (count <= 150) difficulty = 'Medium';
 
     if (action === 'preview') {
-      const sample = players.slice(0, 5).map(p => ({
+      // Shuffle sample players to avoid revealing rankings/answers
+      const shuffled = [...players].sort(() => Math.random() - 0.5);
+      const sample = shuffled.slice(0, 5).map(p => ({
         name: p.player_name,
-        stat: measure === 'performance' ? p.performance : p[sortKey],
         clubs: [...p.clubs].slice(0, 3),
       }));
 
