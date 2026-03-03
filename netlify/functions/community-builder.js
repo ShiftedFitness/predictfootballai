@@ -569,16 +569,32 @@ exports.handler = async (event) => {
         })),
       };
     } else if (gameType === 'starting_xi') {
-      // Look up positions
+      // Look up positions from the same view the main XI game uses
       const uids = players.slice(0, 200).map(p => p.player_uid);
-      const { data: posData } = await client
-        .from('players')
-        .select('player_uid, position_bucket')
-        .in('player_uid', uids);
+      const posQuery = () => client
+        .from('v_all_player_season_stats')
+        .select('player_uid, position_bucket, appearances')
+        .in('player_uid', uids)
+        .not('position_bucket', 'is', null);
+      const posRows = await fetchAll(posQuery);
 
+      // For each player, pick the position where they have the most appearances
+      const posAgg = {};
+      if (posRows) {
+        for (const r of posRows) {
+          if (!r.position_bucket) continue;
+          if (!posAgg[r.player_uid]) posAgg[r.player_uid] = {};
+          posAgg[r.player_uid][r.position_bucket] = (posAgg[r.player_uid][r.position_bucket] || 0) + (r.appearances || 0);
+        }
+      }
       const posMap = {};
-      if (posData) {
-        for (const r of posData) posMap[r.player_uid] = r.position_bucket;
+      for (const [uid, buckets] of Object.entries(posAgg)) {
+        // Pick bucket with most appearances
+        let best = null, bestApps = -1;
+        for (const [bucket, apps] of Object.entries(buckets)) {
+          if (apps > bestApps) { best = bucket; bestApps = apps; }
+        }
+        if (best) posMap[uid] = best;
       }
 
       gameData = {
