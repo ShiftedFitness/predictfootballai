@@ -574,18 +574,33 @@ exports.handler = async (event) => {
         })),
       };
     } else if (gameType === 'starting_xi') {
-      // Look up positions from the same view the main XI game uses
-      // Batch UIDs to avoid URL length limits with .in()
-      const uids = players.slice(0, 200).map(p => p.player_uid);
+      // Look up competition_id so we can scope the position query
+      // (Starting XI is EPL-only, so competitions[0] is always 'Premier League')
+      const { data: compData } = await client
+        .from('competitions')
+        .select('competition_id')
+        .eq('competition_name', competitions[0])
+        .single();
+      const competitionId = compData?.competition_id;
+
+      // Look up positions for ALL players — not just top N.
+      // GKs rank low on performance/goals, so slicing by measure rank
+      // would exclude them entirely and they'd default to MID.
+      const uids = players.map(p => p.player_uid);
       let posRows = [];
-      const POS_BATCH = 50;
+      const POS_BATCH = 200;
       for (let i = 0; i < uids.length; i += POS_BATCH) {
         const batch = uids.slice(i, i + POS_BATCH);
-        const posQuery = () => client
-          .from('v_all_player_season_stats')
-          .select('player_uid, position_bucket, appearances')
-          .in('player_uid', batch)
-          .not('position_bucket', 'is', null);
+        const posQuery = () => {
+          let q = client
+            .from('v_all_player_season_stats')
+            .select('player_uid, position_bucket, appearances')
+            .in('player_uid', batch)
+            .not('position_bucket', 'is', null);
+          // Filter by competition to reduce data volume
+          if (competitionId) q = q.eq('competition_id', competitionId);
+          return q;
+        };
         const batchRows = await fetchAll(posQuery);
         if (batchRows) posRows = posRows.concat(batchRows);
       }
