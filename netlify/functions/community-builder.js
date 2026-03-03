@@ -502,6 +502,11 @@ exports.handler = async (event) => {
     let sortKey = 'totalApps';
     if (measure === 'goals') sortKey = 'totalGoals';
     if (measure === 'performance') {
+      // Apply minimum appearances filter (matches xi_start.js thresholds)
+      // 20 for single club, 40 for multi-club or league-wide
+      const MIN_APPS_PERF = clubs.length === 1 ? 20 : 40;
+      players = players.filter(p => p.totalApps >= MIN_APPS_PERF);
+
       // Performance index: (goals * 3 + assists * 2 + appearances) / appearances
       players.forEach(p => {
         p.performance = p.totalApps > 0
