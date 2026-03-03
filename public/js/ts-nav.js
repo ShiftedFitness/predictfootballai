@@ -448,8 +448,7 @@
         else btn.textContent = 'Failed';
         setTimeout(() => btn.textContent = navigator.share ? 'Share' : 'Copy to Clipboard', 2000);
       });
-    }
-  };
+    },
 
     /**
      * Create a roulette-style random scope selector.
