@@ -742,6 +742,7 @@ init();
 
   await TSAuth.init();
   TSNav.render();
+  const isAnon = TSAuth.isAnonymous();
 
   // ── Play limits counter ──
   const playInfo = await TSData.getRemainingPlays('player_alphabet');
@@ -809,9 +810,16 @@ init();
 
       if (rouletteScopes.length > 0) {
         const roulette = TSNav.createRouletteSelector(rouletteScopes, (scope) => {
+          TSNav.showGameContext(scope.label, 'alpha');
           if (scope.el) scope.el.click();
         });
         const scopeListEl = document.getElementById('scopeList');
+        if (isAnon) {
+          const note = document.createElement('div');
+          note.style.cssText = 'text-align:center;font-size:12px;color:var(--accent-yellow);padding:8px 0 4px;';
+          note.innerHTML = '\uD83C\uDFB2 Random play only — <a href="#" style="color:var(--accent-cyan);text-decoration:underline;" onclick="TSNav.showAuthModal(\'signup\');return false;">sign up free</a> to choose your own';
+          if (scopeListEl) scopeListEl.parentElement.insertBefore(note, scopeListEl);
+        }
         if (scopeListEl) scopeListEl.parentElement.insertBefore(roulette, scopeListEl);
       }
     }
@@ -863,6 +871,7 @@ init();
         });
       }
     } catch (e) { console.warn('[TS] session log failed:', e); }
+    if (isAnon) { setTimeout(() => TSNav.showPostGameSignup(), 1500); }
   }
 })();
 </script>

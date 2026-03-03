@@ -547,6 +547,8 @@ select:focus {
   font-size: 14px;
   margin-bottom: 10px;
   transition: border-color 0.2s;
+  box-sizing: border-box;
+  font-family: inherit;
 }
 .ts-input:focus { border-color: var(--accent-cyan); outline: none; }
 .ts-input::placeholder { color: var(--text-muted); }
@@ -685,7 +687,7 @@ select:focus {
   pointer-events: none;
 }
 .ts-locked::after {
-  content: '\uD83D\uDD12';
+  content: '\1F512';
   position: absolute;
   top: 8px;
   right: 8px;

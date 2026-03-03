@@ -288,7 +288,37 @@
           document.getElementById('tsSignupUsername').value
         );
         if (result.error) { msg.textContent = result.error; msg.className = 'ts-auth-msg error'; }
-        else { modal.remove(); location.reload(); }
+        else {
+          msg.textContent = 'Account created!';
+          msg.className = 'ts-auth-msg success';
+          // Show welcome and redirect to upgrade page to see tier options
+          setTimeout(() => {
+            modal.remove();
+            // Show tier overview prompt
+            const welcome = document.createElement('div');
+            welcome.id = 'tsWelcomeOverlay';
+            welcome.className = 'ts-modal-overlay';
+            welcome.innerHTML = `
+              <div class="ts-modal" style="text-align:center;padding:32px 24px;">
+                <div style="font-size:32px;margin-bottom:12px;">\u26BD</div>
+                <h2 style="font-family:'Space Mono',monospace;font-size:1.1rem;margin-bottom:8px;color:var(--accent-cyan);">Welcome to TeleStats!</h2>
+                <p style="font-size:13px;color:var(--text-secondary);margin-bottom:20px;line-height:1.5;">
+                  You're on the <strong style="color:var(--fg);">Free</strong> plan with access to all EPL categories.<br/>
+                  Upgrade to <strong style="color:var(--accent-yellow);">Pro</strong> for unlimited plays and all leagues.
+                </p>
+                <div style="display:flex;gap:8px;justify-content:center;">
+                  <button id="tsWelcomePlay" class="btn-primary ts-btn" style="flex:1;max-width:160px;">Start Playing</button>
+                  <a href="/upgrade/" class="btn-secondary ts-btn" style="flex:1;max-width:160px;text-align:center;line-height:2.4;text-decoration:none;">View Plans</a>
+                </div>
+              </div>`;
+            document.body.appendChild(welcome);
+            document.getElementById('tsWelcomePlay')?.addEventListener('click', () => {
+              welcome.remove();
+              location.reload();
+            });
+            welcome.addEventListener('click', (e) => { if (e.target === welcome) { welcome.remove(); location.reload(); } });
+          }, 600);
+        }
       });
 
       // ── Username autofill from email ──
@@ -486,10 +516,17 @@
             display.classList.remove('spinning');
             display.classList.add('landed');
             btn.disabled = false;
-            // Final selection
+            // Final selection — flash highlight then pause before loading
             const finalScope = scopes[Math.floor(Math.random() * scopes.length)];
-            display.textContent = finalScope.label;
-            setTimeout(() => onSelect(finalScope), 400);
+            display.textContent = '\u26BD ' + finalScope.label + ' \u26BD';
+            display.style.color = 'var(--accent-cyan)';
+            display.style.transform = 'scale(1.15)';
+            display.style.transition = 'transform 0.3s ease, color 0.3s ease';
+            // Hold for 2 seconds so user can read the selection
+            setTimeout(() => {
+              display.style.transform = 'scale(1)';
+              onSelect(finalScope);
+            }, 2000);
           } else {
             delay = 60 + (iterations * 8); // Decelerating
             setTimeout(tick, delay);
@@ -578,6 +615,62 @@
       document.getElementById('tsIOSInstallDismiss')?.addEventListener('click', () => {
         banner.remove();
         sessionStorage.setItem('ts_install_dismissed', '1');
+      });
+    },
+
+    /**
+     * Show a persistent game context banner so users know what they're playing.
+     * @param {string} categoryLabel - e.g. "West Ham Players — Premier League Era"
+     * @param {string} gameType - e.g. "bullseye", "xi", "hol"
+     */
+    showGameContext(categoryLabel, gameType) {
+      const existing = document.getElementById('tsGameContext');
+      if (existing) existing.remove();
+      if (!categoryLabel) return;
+
+      const typeLabels = {
+        bullseye: 'Bullseye', xi: 'Starting XI', hol: 'Higher or Lower',
+        alpha: 'Alphabet', quiz: 'Pop Quiz', whoami: 'Who Am I?'
+      };
+
+      const bar = document.createElement('div');
+      bar.id = 'tsGameContext';
+      bar.style.cssText = 'position:fixed;top:56px;left:0;right:0;z-index:90;background:linear-gradient(90deg,rgba(0,229,255,.12),rgba(50,255,126,.08));border-bottom:1px solid rgba(0,229,255,.2);padding:8px 16px;text-align:center;font-size:13px;font-family:"Space Mono",monospace;backdrop-filter:blur(8px);';
+      bar.innerHTML = '<span style="color:var(--accent-cyan);font-weight:700;">' + (typeLabels[gameType] || gameType) + '</span>'
+        + ' <span style="color:var(--text-secondary);margin:0 6px;">\u2014</span> '
+        + '<span style="color:var(--fg);">' + categoryLabel + '</span>';
+
+      document.body.prepend(bar);
+    },
+
+    /**
+     * Show a post-game prompt for anonymous users to sign up.
+     */
+    showPostGameSignup() {
+      if (!window.TSAuth || !TSAuth.isAnonymous()) return;
+      const existing = document.getElementById('tsPostGameSignup');
+      if (existing) existing.remove();
+
+      const overlay = document.createElement('div');
+      overlay.id = 'tsPostGameSignup';
+      overlay.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:200;background:linear-gradient(0deg,rgba(11,15,18,.98) 60%,transparent);padding:32px 20px 24px;text-align:center;';
+      overlay.innerHTML = `
+        <div style="max-width:400px;margin:0 auto;">
+          <div style="font-size:20px;margin-bottom:8px;">\u26BD</div>
+          <div style="font-size:16px;font-weight:700;margin-bottom:6px;color:var(--fg);">Want to choose your own games?</div>
+          <div style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;">Sign up for free to unlock all EPL categories, track your XP, and climb the leaderboard.</div>
+          <button id="tsPostGameSignupBtn" style="padding:12px 32px;border-radius:10px;background:var(--accent-cyan);border:none;color:#000;font-weight:700;font-size:15px;cursor:pointer;margin-bottom:8px;">Sign Up Free</button>
+          <div><button id="tsPostGameDismiss" style="background:none;border:none;color:var(--text-muted);font-size:12px;cursor:pointer;padding:8px;">Keep playing as guest</button></div>
+        </div>`;
+
+      document.body.appendChild(overlay);
+
+      document.getElementById('tsPostGameSignupBtn')?.addEventListener('click', () => {
+        overlay.remove();
+        TSNav.showAuthModal('signup');
+      });
+      document.getElementById('tsPostGameDismiss')?.addEventListener('click', () => {
+        overlay.remove();
       });
     }
   };

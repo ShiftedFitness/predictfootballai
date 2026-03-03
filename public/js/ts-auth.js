@@ -291,27 +291,31 @@
       const { data: authData, error: authError } = await sb().auth.signUp({ email, password });
       if (authError) return { error: authError.message };
 
-      // Create ts_users row
+      // Create/migrate ts_users row via server-side function (bypasses RLS)
+      const API_BASE = window.location.hostname === 'localhost'
+        ? 'http://localhost:8888/.netlify/functions'
+        : '/.netlify/functions';
       const anonId = getAnonId();
-      let row;
-      if (anonId) {
-        // Migrate anonymous user
-        const { data, error } = await sb().from('ts_users')
-          .update({ auth_id: authData.user.id, email, username, tier: 'free' })
-          .eq('id', anonId)
-          .select('*').single();
-        if (!error) { row = data; localStorage.removeItem(ANON_KEY); }
+      try {
+        const res = await fetch(API_BASE + '/register-user', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            authId: authData.user.id,
+            email,
+            username,
+            anonId: anonId || undefined
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) return { error: data.error || 'Registration failed' };
+        if (data.migrated) localStorage.removeItem(ANON_KEY);
+        _currentUser = data.user;
+        setCached(data.user);
+        return { user: data.user };
+      } catch (e) {
+        return { error: 'Network error during registration' };
       }
-      if (!row) {
-        const { data, error } = await sb().from('ts_users')
-          .insert({ auth_id: authData.user.id, email, username, tier: 'free' })
-          .select('*').single();
-        if (error) return { error: error.message };
-        row = data;
-      }
-      _currentUser = row;
-      setCached(row);
-      return { user: row };
     },
 
     /** Sign in with email + password */

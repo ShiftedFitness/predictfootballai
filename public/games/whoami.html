@@ -1210,6 +1210,7 @@ setInterval(updateClock, 30000);
 
   await TSAuth.init();
   TSNav.render();
+  const isAnon = TSAuth.isAnonymous();
 
   // Play limits counter
   const playInfo = await TSData.getRemainingPlays('who_am_i');
@@ -1260,9 +1261,20 @@ setInterval(updateClock, 30000);
       });
       const rouletteScopes = tierAccess.randomOnly ? allScopes : allScopes.filter(s => !s.el.classList.contains('ts-locked'));
       if (rouletteScopes.length > 0) {
-        const roulette = TSNav.createRouletteSelector(rouletteScopes, (scope) => { if (scope.el) scope.el.click(); });
+        const roulette = TSNav.createRouletteSelector(rouletteScopes, (scope) => {
+          TSNav.showGameContext(scope.label, 'whoami');
+          if (scope.el) scope.el.click();
+        });
         const scopeGridEl = document.getElementById('scopeGrid');
-        if (scopeGridEl) scopeGridEl.parentElement.insertBefore(roulette, scopeGridEl);
+        if (scopeGridEl) {
+          if (isAnon) {
+            const note = document.createElement('div');
+            note.style.cssText = 'text-align:center;font-size:12px;color:var(--accent-yellow);padding:8px 0 4px;';
+            note.innerHTML = '\uD83C\uDFB2 Random play only — <a href="#" style="color:var(--accent-cyan);text-decoration:underline;" onclick="TSNav.showAuthModal(\'signup\');return false;">sign up free</a> to choose your own';
+            scopeGridEl.parentElement.insertBefore(note, scopeGridEl);
+          }
+          scopeGridEl.parentElement.insertBefore(roulette, scopeGridEl);
+        }
       }
     }
   }, 1500);
@@ -1310,6 +1322,7 @@ setInterval(updateClock, 30000);
         });
       }
     } catch (e) { console.warn('[TS] session log failed:', e); }
+    if (isAnon) { setTimeout(() => TSNav.showPostGameSignup(), 1500); }
   }
 })();
 </script>

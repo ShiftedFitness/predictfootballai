@@ -3897,6 +3897,15 @@ function updateBullseyeSetting(key,val){
   await TSAuth.init();
   TSNav.render();
 
+  const isAnon = TSAuth.isAnonymous();
+  const tierAccess = TSAuth.getAllowedScopes();
+
+  // Anonymous: hide Multiplayer button, force single player only
+  if (isAnon) {
+    const mpBtn = document.getElementById('multiplayerBtn');
+    if (mpBtn) mpBtn.style.display = 'none';
+  }
+
   // Play limits counter
   const playInfo = await TSData.getRemainingPlays('bullseye');
   if (playInfo.limit !== Infinity) {
@@ -3906,18 +3915,17 @@ function updateBullseyeSetting(key,val){
   }
 
   // Category / league-group locking
-  const tierAccess = TSAuth.getAllowedScopes();
   function applyCategoryLocking() {
     const step3 = document.getElementById('step3');
     if (!step3) return;
     if (tierAccess.randomOnly) {
-      // Anonymous: lock ALL game-cards
+      // Anonymous: lock ALL game-cards and show signup prompt
       step3.querySelectorAll('.game-card').forEach(c => c.classList.add('ts-locked'));
       if (!document.getElementById('tsUpgradeHint')) {
         const hint = document.createElement('div');
         hint.id = 'tsUpgradeHint';
         hint.className = 'ts-upgrade-hint';
-        hint.textContent = 'Sign up free to choose your own categories';
+        hint.innerHTML = '\uD83D\uDD12 Sign up free to choose your own categories &rarr;';
         hint.onclick = () => TSNav.showAuthModal('signup');
         step3.appendChild(hint);
       }
@@ -3948,13 +3956,22 @@ function updateBullseyeSetting(key,val){
       });
       const rouletteCats = tierAccess.randomOnly ? allCats : allCats.filter(s => !s.el.classList.contains('ts-locked'));
       if (rouletteCats.length > 0) {
-        const roulette = TSNav.createRouletteSelector(rouletteCats, (cat) => { if (cat.el) cat.el.click(); });
+        const roulette = TSNav.createRouletteSelector(rouletteCats, (cat) => {
+          // Show game context banner before starting
+          TSNav.showGameContext(cat.label, 'bullseye');
+          if (cat.el) cat.el.click();
+        });
         const step3 = document.getElementById('step3');
-        const firstLeague = step3 ? step3.querySelector('.league-group') : null;
-        if (firstLeague) {
-          step3.insertBefore(roulette, firstLeague);
-        } else if (step3) {
+        // Place roulette at TOP, before all categories
+        if (step3) {
           step3.prepend(roulette);
+          // For anonymous: add label above roulette
+          if (isAnon) {
+            const note = document.createElement('div');
+            note.style.cssText = 'text-align:center;font-size:12px;color:var(--accent-yellow);padding:8px 0 4px;';
+            note.innerHTML = '\uD83C\uDFB2 Random play only &mdash; <a href="#" style="color:var(--accent-cyan);text-decoration:underline;" onclick="TSNav.showAuthModal(\'signup\');return false;">sign up free</a> to choose your own';
+            step3.prepend(note);
+          }
         }
       }
     }
@@ -4006,6 +4023,10 @@ function updateBullseyeSetting(key,val){
         });
       }
     } catch (e) { console.warn('[TS] session log failed:', e); }
+    // Show signup prompt for anonymous users after game ends
+    if (isAnon) {
+      setTimeout(() => TSNav.showPostGameSignup(), 1500);
+    }
   }
 })();
 </script>
