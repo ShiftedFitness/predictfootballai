@@ -431,7 +431,7 @@
           const typeLabel = TSData.GAME_TYPE_LABELS[g.game_type] || g.game_type;
           const votes = (g.upvotes || 0) - (g.downvotes || 0);
 
-          return `<div class="comm-card" data-id="${g.id}">
+          return `<div class="comm-card" data-id="${g.id}" data-game-type="${g.game_type}">
             <div class="comm-card-top">
               <span class="comm-card-type">${esc(typeLabel)}</span>
               <div class="comm-card-votes">
@@ -478,6 +478,20 @@
                 setTimeout(() => { btn.textContent = '\u{1F517}'; }, 1500);
               }).catch(() => {});
             }
+          });
+        });
+
+        // Card click → launch community game
+        const gameTypeToPage = {
+          bullseye: 'bullseye', starting_xi: 'xi', higher_lower: 'hol',
+          player_alphabet: 'alpha', pop_quiz: 'quiz', who_am_i: 'whoami'
+        };
+        grid.querySelectorAll('.comm-card').forEach(card => {
+          card.addEventListener('click', () => {
+            const id = card.dataset.id;
+            const type = card.dataset.gameType;
+            const page = gameTypeToPage[type] || type;
+            window.location.href = `/games/${page}.html?community=${id}`;
           });
         });
       }

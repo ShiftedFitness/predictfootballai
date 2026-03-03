@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS public.ts_promo_codes (
 -- Redemption log
 CREATE TABLE IF NOT EXISTS public.ts_promo_redemptions (
   id          SERIAL PRIMARY KEY,
-  user_id     INTEGER NOT NULL REFERENCES public.ts_users(id),
+  user_id     UUID NOT NULL REFERENCES public.ts_users(id),
   code        TEXT NOT NULL,
   redeemed_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   UNIQUE(user_id, code)
