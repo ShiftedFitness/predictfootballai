@@ -607,21 +607,47 @@ exports.handler = async (event) => {
         if (best) posMap[uid] = best;
       }
 
+      // Assign positions to ALL players (not just top 200)
+      for (const p of players) {
+        p._position = posMap[p.player_uid] || 'MID';
+      }
+
+      // Build pool ensuring all position buckets are represented
+      // The regular XI game searches per-position, so we must guarantee GK/DEF/MID/FWD
+      const byBucket = { GK: [], DEF: [], MID: [], FWD: [] };
+      for (const p of players) {
+        if (byBucket[p._position]) byBucket[p._position].push(p);
+      }
+
+      // Take top N per bucket proportional to a 4-3-3 formation
+      // GK: need at least 5, DEF: 50, MID: 50, FWD: 50 — rest fill up to 200
+      const bucketTargets = { GK: 10, DEF: 60, MID: 60, FWD: 60 };
+      let xiPlayers = [];
+      for (const [bucket, target] of Object.entries(bucketTargets)) {
+        const available = byBucket[bucket] || [];
+        xiPlayers = xiPlayers.concat(available.slice(0, target));
+      }
+      // If we have room left, add more players sorted by value
+      if (xiPlayers.length < 200) {
+        const usedUids = new Set(xiPlayers.map(p => p.player_uid));
+        const remaining = players.filter(p => !usedUids.has(p.player_uid));
+        xiPlayers = xiPlayers.concat(remaining.slice(0, 200 - xiPlayers.length));
+      }
+
       // Log position distribution for debugging
-      const posCounts = { GK: 0, DEF: 0, MID: 0, FWD: 0, unknown: 0 };
-      for (const p of players.slice(0, 200)) {
-        const pos = posMap[p.player_uid] || 'unknown';
-        posCounts[pos] = (posCounts[pos] || 0) + 1;
+      const posCounts = { GK: 0, DEF: 0, MID: 0, FWD: 0 };
+      for (const p of xiPlayers) {
+        posCounts[p._position] = (posCounts[p._position] || 0) + 1;
       }
       console.log('[community-builder] XI position distribution:', JSON.stringify(posCounts));
 
       gameData = {
         measure,
-        players: players.slice(0, 200).map(p => ({
+        players: xiPlayers.map(p => ({
           uid: p.player_uid,
           name: p.player_name,
           value: getValue(p),
-          position: posMap[p.player_uid] || 'MID',
+          position: p._position,
           clubs: [...p.clubs],
         })),
       };
