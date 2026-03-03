@@ -243,10 +243,19 @@
         .select('*')
         .single();
       if (error) return { error: error.message };
-      // Increment creator's games_created count
-      await sb().from('ts_users')
-        .update({ games_created: (TSAuth.getUser()?.games_created || 0) + 1 })
-        .eq('id', userId);
+      // Increment creator's games_created count (via server function to bypass RLS)
+      const apiBase = window.location.hostname === 'localhost'
+        ? 'http://localhost:8888/.netlify/functions'
+        : '/.netlify/functions';
+      try {
+        await fetch(apiBase + '/update-user-stat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId, field: 'games_created' })
+        });
+      } catch (e) {
+        console.warn('[TSData] games_created increment failed:', e.message);
+      }
       return { game: data };
     },
 

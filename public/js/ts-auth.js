@@ -100,26 +100,35 @@
   function getAnonId() { return localStorage.getItem(ANON_KEY); }
   function setAnonId(id) { localStorage.setItem(ANON_KEY, id); }
 
-  // ── Ensure anonymous user exists ──
+  // ── API base URL ──
+  function apiBase() {
+    return window.location.hostname === 'localhost'
+      ? 'http://localhost:8888/.netlify/functions'
+      : '/.netlify/functions';
+  }
+
+  // ── Ensure anonymous user exists (via server-side function to bypass RLS) ──
   async function ensureAnonUser() {
     const existingId = getAnonId();
-    if (existingId) {
-      // Verify it still exists in DB
-      const { data } = await sb().from('ts_users').select('id, tier, total_xp, level, level_name, current_streak, total_games_played, referral_code').eq('id', existingId).maybeSingle();
-      if (data) {
-        setCached({ ...data, isAnonymous: true });
-        return data;
+    try {
+      const res = await fetch(apiBase() + '/ensure-anon-user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ anonId: existingId || undefined })
+      });
+      const result = await res.json();
+      if (!res.ok || !result.user) {
+        console.error('[TSAuth] ensure-anon-user failed:', result.error || 'Unknown error');
+        return null;
       }
-    }
-    // Create new anonymous user (no auth_id)
-    const { data, error } = await sb().from('ts_users').insert({ tier: 'anonymous' }).select('id, tier, total_xp, level, level_name, current_streak, total_games_played, referral_code').single();
-    if (error) {
-      console.error('[TSAuth] Failed to create anonymous user:', error);
+      const user = result.user;
+      setAnonId(user.id);
+      setCached({ ...user, isAnonymous: true });
+      return user;
+    } catch (e) {
+      console.error('[TSAuth] Failed to create anonymous user:', e.message);
       return null;
     }
-    setAnonId(data.id);
-    setCached({ ...data, isAnonymous: true });
-    return data;
   }
 
   // ── Lookup ts_users row by auth_id ──
@@ -168,23 +177,27 @@
         clearCached();
         let row = await lookupByAuth(session.user.id);
         if (!row) {
-          // First login — create ts_users row, migrate anon if exists
+          // First login — create/migrate ts_users row via server function (bypasses RLS)
           const anonId = getAnonId();
-          if (anonId) {
-            // Migrate anonymous user to authenticated
-            const { data } = await sb().from('ts_users')
-              .update({ auth_id: session.user.id, email: session.user.email, tier: 'free' })
-              .eq('id', anonId)
-              .select('*')
-              .single();
-            if (data) { row = data; localStorage.removeItem(ANON_KEY); }
-          }
-          if (!row) {
-            const { data } = await sb().from('ts_users')
-              .insert({ auth_id: session.user.id, email: session.user.email, tier: 'free' })
-              .select('*')
-              .single();
-            row = data;
+          try {
+            const res = await fetch(apiBase() + '/register-user', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                authId: session.user.id,
+                email: session.user.email,
+                anonId: anonId || undefined
+              })
+            });
+            const result = await res.json();
+            if (res.ok && result.user) {
+              row = result.user;
+              if (result.migrated) localStorage.removeItem(ANON_KEY);
+            } else {
+              console.error('[TSAuth] register-user fallback failed:', result.error);
+            }
+          } catch (e) {
+            console.error('[TSAuth] register-user fallback error:', e.message);
           }
         }
         if (row) {
@@ -292,12 +305,9 @@
       if (authError) return { error: authError.message };
 
       // Create/migrate ts_users row via server-side function (bypasses RLS)
-      const API_BASE = window.location.hostname === 'localhost'
-        ? 'http://localhost:8888/.netlify/functions'
-        : '/.netlify/functions';
       const anonId = getAnonId();
       try {
-        const res = await fetch(API_BASE + '/register-user', {
+        const res = await fetch(apiBase() + '/register-user', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -358,46 +368,31 @@
       return data;
     },
 
-    /** Redeem a referral code */
+    /** Redeem a referral code (via server function to bypass RLS) */
     async redeemReferral(code) {
       const userId = this.getUserId();
       if (!userId) return { error: 'No user' };
-
-      // Find referrer
-      const { data: referrer } = await sb().from('ts_users').select('id, referral_count').eq('referral_code', code).maybeSingle();
-      if (!referrer) return { error: 'Invalid referral code' };
-      if (referrer.id === userId) return { error: 'Cannot refer yourself' };
-
-      // Insert referral record
-      const { error: refErr } = await sb().from('ts_referrals').insert({ referrer_id: referrer.id, referred_id: userId });
-      if (refErr) return { error: refErr.message };
-
-      // Update referred user
-      await sb().from('ts_users').update({ referred_by: referrer.id }).eq('id', userId);
-
-      // Increment referrer count
-      const newCount = (referrer.referral_count || 0) + 1;
-      const updates = { referral_count: newCount };
-      if (newCount >= 5) updates.referral_unlocked = true;
-      await sb().from('ts_users').update(updates).eq('id', referrer.id);
-
-      // If referrer hit 5, also unlock the referred user
-      if (newCount >= 5) {
-        await sb().from('ts_users').update({ referral_unlocked: true }).eq('id', userId);
+      try {
+        const res = await fetch(apiBase() + '/redeem-referral', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code, userId })
+        });
+        const data = await res.json();
+        if (!res.ok) return { error: data.error || 'Failed to redeem referral' };
+        await this.refreshProfile();
+        return { success: true };
+      } catch (e) {
+        return { error: 'Network error during referral redemption' };
       }
-
-      return { success: true };
     },
 
     /** Redeem a promo code for Pro access */
     async redeemPromo(code) {
       const userId = this.getUserId();
       if (!userId) return { error: 'No user' };
-      const API_BASE = window.location.hostname === 'localhost'
-        ? 'http://localhost:8888/.netlify/functions'
-        : '/.netlify/functions';
       try {
-        const res = await fetch(API_BASE + '/redeem-promo', {
+        const res = await fetch(apiBase() + '/redeem-promo', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ code, userId })
