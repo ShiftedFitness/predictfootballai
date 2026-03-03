@@ -68,7 +68,7 @@
             <span class="ts-nav-username">${esc(user.username || user.display_name || user.email || 'Player')}</span>
             <span class="ts-nav-xp">${(user.total_xp || 0).toLocaleString()} XP</span>
           </a>
-          ${!isPaid ? '<a href="/upgrade/" class="ts-nav-pro-btn" title="Upgrade to Pro">PRO</a>' : ''}
+          ${!isPaid ? '<a href="/upgrade/" class="ts-nav-pro-btn" title="Upgrade to Pro">Get Pro</a>' : '<span class="ts-nav-pro-badge" title="Pro Member">Pro</span>'}
           <button class="ts-nav-logout-btn" id="tsNavLogoutBtn" title="Log out">&#x2715;</button>`;
       }
 
