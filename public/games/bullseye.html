@@ -3900,6 +3900,37 @@ function updateBullseyeSetting(key,val){
   const isAnon = TSAuth.isAnonymous();
   const tierAccess = TSAuth.getAllowedScopes();
 
+  // ── Community game mode ──
+  const communityId = new URLSearchParams(window.location.search).get('community');
+  if (communityId) {
+    try {
+      const game = await TSData.getCommunityGameById(communityId);
+      if (game && game.game_data) {
+        const gd = game.game_data;
+        const measureLabel = gd.measure === 'goals' ? 'Goals' : gd.measure === 'performance' ? 'Perf' : 'Apps';
+        // Map game_data players to eligiblePlayers format
+        eligiblePlayers = gd.players.map(p => ({
+          playerId: p.uid,
+          name: p.name,
+          normalized: p.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z ]/g, ''),
+          nationality: '',
+          subtractValue: p.value,
+          overlay: { apps: p.value, goals: 0, mins: 0 },
+          clubs: p.clubs || [],
+        }));
+        currentCategory = { id: 'community_' + communityId, title: game.title };
+        currentMeta = { metricLabel: measureLabel };
+        matchDataReady = true;
+        window.gameSetup = { isSinglePlayer: true, names: ['You'] };
+        // Hide setup, show game directly
+        hide('setupCard');
+        TSNav.showGameContext(game.title, 'bullseye');
+        startMatch(['You']);
+        TSData.incrementCommunityPlayCount(communityId);
+      }
+    } catch (e) { console.warn('[TS] community load failed:', e); }
+  }
+
   // Anonymous: hide Multiplayer button, force single player only
   if (isAnon) {
     const mpBtn = document.getElementById('multiplayerBtn');

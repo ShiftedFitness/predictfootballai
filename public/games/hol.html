@@ -528,6 +528,42 @@ init();
   TSNav.render();
   const isAnon = TSAuth.isAnonymous();
 
+  // ── Community game mode ──
+  const communityId = new URLSearchParams(window.location.search).get('community');
+  if (communityId) {
+    try {
+      const game = await TSData.getCommunityGameById(communityId);
+      if (game && game.game_data) {
+        const gd = game.game_data;
+        // Map game_data players to HoL format
+        const statKey = gd.measure === 'goals' ? 'goals' : 'appearances';
+        selectedStat = statKey;
+        players = gd.players.map(p => ({
+          name: p.name,
+          appearances: statKey === 'appearances' ? p.value : 0,
+          goals: statKey === 'goals' ? p.value : 0,
+        }));
+        // Shuffle players for variety
+        for (let i = players.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [players[i], players[j]] = [players[j], players[i]];
+        }
+        // Start game directly
+        currentIdx = 0;
+        streak = 0;
+        waiting = false;
+        $('step1').classList.add('hidden');
+        $('step2').classList.remove('hidden');
+        $('step3').classList.add('hidden');
+        $('resultFlash').classList.add('hidden');
+        updateStreak();
+        showRound();
+        TSNav.showGameContext(game.title, 'higher_lower');
+        TSData.incrementCommunityPlayCount(communityId);
+      }
+    } catch (e) { console.warn('[TS] community load failed:', e); }
+  }
+
   // ── Play limits counter ──
   const playInfo = await TSData.getRemainingPlays('higher_lower');
   if (playInfo.limit !== Infinity) {

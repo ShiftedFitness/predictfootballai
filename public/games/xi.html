@@ -2392,6 +2392,271 @@ document.getElementById('tsClock').textContent = new Date().toTimeString().slice
   TSNav.render();
   const isAnon = TSAuth.isAnonymous();
 
+  // ── Community game mode ──
+  const communityId = new URLSearchParams(window.location.search).get('community');
+  if (communityId) {
+    try {
+      const game = await TSData.getCommunityGameById(communityId);
+      if (game && game.game_data) {
+        const gd = game.game_data;
+        const communityPlayers = gd.players || [];
+        const communityMeasure = gd.measure || 'appearances';
+
+        // Wait for gameConfig to load (init() fetches formations from server)
+        let waitAttempts = 0;
+        while (!gameConfig && waitAttempts < 30) {
+          await new Promise(r => setTimeout(r, 200));
+          waitAttempts++;
+        }
+        if (!gameConfig) throw new Error('Game config not loaded');
+
+        // Auto-select formation (default 4-3-3 or first available)
+        const defaultFormation = gameConfig.formations.find(f => f.id === '4-3-3') || gameConfig.formations[0];
+        selectedFormation = defaultFormation.id;
+        selectedObjective = communityMeasure;
+        selectedScope = 'community_' + communityId;
+
+        // Set up slots from formation
+        slots = defaultFormation.slots.map(s => ({ ...s, player: null }));
+        attempts = 0;
+        lockedSlots = new Set();
+        lastResults = null;
+        scoredOnce = false;
+        slotResults = {};
+        previousAttempts = [];
+        currentPicksTab = 'current';
+
+        // Show game badge
+        $('gameBadge').innerHTML = `<span class="dot"></span> ${game.title} &middot; ${selectedFormation} &middot; ${communityMeasure}`;
+        $('step1').classList.add('hidden');
+        $('step2').classList.remove('hidden');
+        $('scoreBanner').classList.add('hidden');
+        $('actionBtns').classList.add('hidden');
+        $('picksFab').classList.remove('hidden');
+        $('giveUpBtn').classList.remove('hidden');
+        $('giveUpBtn').disabled = false;
+        $('giveUpBtn').innerHTML = '&#9873; Give Up &mdash; Show All Answers';
+        $('viewRankingsBtn').classList.add('hidden');
+        $('perfInfoTab').classList.toggle('hidden', communityMeasure !== 'performance');
+        renderPitch();
+        updateSubmitBtn();
+        $('submitXIBtn').onclick = submitXI;
+        $('resetBtn').onclick = resetPicks;
+        $('giveUpBtn').onclick = giveUp;
+
+        TSNav.showGameContext(game.title, 'starting_xi');
+        TSData.incrementCommunityPlayCount(communityId);
+
+        // Override search to use client-side filtering of community players
+        window._communityXIPlayers = communityPlayers;
+        window._communityXIMeasure = communityMeasure;
+
+        const _origDoSearch = window.doSearch;
+        window.doSearch = async function() {
+          const query = $('searchInput').value.trim().toLowerCase();
+          const slot = slots.find(s => s.idx === activeSlotIdx);
+          if (!slot || query.length < 2) {
+            $('suggestionList').innerHTML = '';
+            $('noResults').classList.add('hidden');
+            $('searchLoading').classList.add('hidden');
+            return;
+          }
+
+          $('suggestionList').innerHTML = '';
+          $('noResults').classList.add('hidden');
+          $('searchLoading').classList.remove('hidden');
+
+          // Normalize query for accent-insensitive search
+          const normQuery = query.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+          // Filter community players by name and position bucket
+          const matches = window._communityXIPlayers.filter(p => {
+            const normName = p.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            if (!normName.includes(normQuery)) return false;
+            // Match position bucket
+            if (p.position && slot.bucket) {
+              const posBucket = { GK: 'GK', DEF: 'DEF', MID: 'MID', FWD: 'FWD' };
+              const posMap = { Goalkeeper: 'GK', Defender: 'DEF', Midfielder: 'MID', Forward: 'FWD',
+                               GK: 'GK', DEF: 'DEF', MID: 'MID', FWD: 'FWD' };
+              const playerBucket = posMap[p.position] || p.position;
+              return playerBucket === slot.bucket;
+            }
+            return true;
+          });
+
+          // Filter out already-picked
+          const pickedIds = new Set(
+            slots.filter(s => s.player && s.idx !== activeSlotIdx).map(s => s.player.playerId)
+          );
+          const filtered = matches.filter(p => !pickedIds.has(p.uid));
+
+          $('searchLoading').classList.add('hidden');
+
+          if (filtered.length === 0) {
+            $('noResults').textContent = 'No players found matching your search.';
+            $('noResults').classList.remove('hidden');
+            return;
+          }
+
+          $('noResults').classList.add('hidden');
+          $('suggestionList').innerHTML = filtered.map(p => `
+            <li class="suggestion-item" data-pid="${p.uid}" data-name="${escHtml(p.name)}" data-nat="" data-apps="${p.value}" data-goals="${p.value}">
+              <div>
+                <span class="suggestion-name">${escHtml(p.name)}</span>
+              </div>
+              <span class="suggestion-meta">${p.value} ${window._communityXIMeasure === 'goals' ? 'goals' : 'apps'}</span>
+            </li>
+          `).join('');
+
+          $('suggestionList').querySelectorAll('.suggestion-item').forEach(li => {
+            li.onclick = () => selectPlayer(li);
+          });
+        };
+
+        // Override submitXI to use client-side scoring for community games
+        const _origSubmitXI = window.submitXI;
+        window.submitXI = async function() {
+          // Build correct answers: for each position bucket, sort community players by value desc
+          // and pick top N for that bucket based on formation
+          const measure = window._communityXIMeasure;
+          const cPlayers = window._communityXIPlayers;
+
+          // Group correct players by position bucket
+          const bucketPlayers = {};
+          for (const p of cPlayers) {
+            const posMap = { Goalkeeper: 'GK', Defender: 'DEF', Midfielder: 'MID', Forward: 'FWD',
+                             GK: 'GK', DEF: 'DEF', MID: 'MID', FWD: 'FWD' };
+            const bucket = posMap[p.position] || p.position;
+            if (!bucketPlayers[bucket]) bucketPlayers[bucket] = [];
+            bucketPlayers[bucket].push(p);
+          }
+          // Sort each bucket by value descending
+          for (const bucket in bucketPlayers) {
+            bucketPlayers[bucket].sort((a, b) => b.value - a.value);
+          }
+
+          // For each slot, determine how many slots are in that bucket
+          const bucketSlotCounts = {};
+          for (const slot of slots) {
+            bucketSlotCounts[slot.bucket] = (bucketSlotCounts[slot.bucket] || 0) + 1;
+          }
+
+          // Determine correct player IDs per bucket (top N)
+          const correctPerBucket = {};
+          for (const bucket in bucketPlayers) {
+            const count = bucketSlotCounts[bucket] || 1;
+            correctPerBucket[bucket] = new Set(bucketPlayers[bucket].slice(0, count).map(p => p.uid));
+          }
+
+          // Score each slot
+          let correctCount = 0;
+          for (const slot of slots) {
+            if (lockedSlots.has(slot.idx)) {
+              correctCount++;
+              continue;
+            }
+            if (!slot.player) continue;
+
+            const isCorrect = correctPerBucket[slot.bucket] && correctPerBucket[slot.bucket].has(slot.player.playerId);
+            const playerData = cPlayers.find(p => p.uid === slot.player.playerId);
+            const allInBucket = bucketPlayers[slot.bucket] || [];
+            const rank = allInBucket.findIndex(p => p.uid === slot.player.playerId) + 1;
+
+            slotResults[slot.idx] = {
+              slotIdx: slot.idx,
+              correct: isCorrect,
+              userRank: rank || null,
+              userStatValue: playerData ? { appearances: playerData.value, goals: playerData.value } : null,
+            };
+
+            if (isCorrect) {
+              lockedSlots.add(slot.idx);
+              correctCount++;
+            }
+          }
+
+          attempts++;
+          scoredOnce = true;
+          lastResults = { results: Object.values(slotResults) };
+
+          // Update UI
+          $('scoreBanner').classList.remove('hidden');
+          $('scoreBig').textContent = correctCount + '/11';
+          $('attemptBadge').textContent = 'Attempt ' + attempts;
+
+          renderPitch();
+          // Add slot context + animations
+          for (const slot of slots) {
+            const sr = slotResults[slot.idx];
+            if (!sr) continue;
+            const container = $('pitchContainer');
+            const slotEl = container.querySelector(`.slot[data-idx="${slot.idx}"]`);
+            if (slotEl) {
+              const contextHtml = buildSlotContext(sr, slot);
+              if (contextHtml) slotEl.insertAdjacentHTML('beforeend', contextHtml);
+              if (sr.correct) slotEl.classList.add('anim-correct');
+              else slotEl.classList.add('anim-wrong');
+            }
+          }
+
+          if (correctCount === slots.length) {
+            // Perfect — all correct!
+            $('actionBtns').classList.remove('hidden');
+            $('submitXIBtn').classList.add('hidden');
+            $('giveUpBtn').classList.add('hidden');
+          } else {
+            $('actionBtns').classList.remove('hidden');
+            $('submitXIBtn').textContent = 'GO \u2014 Submit XI';
+            $('submitXIBtn').disabled = true;
+          }
+
+          updateSubmitBtn();
+        };
+
+        // Override giveUp for community mode
+        const _origGiveUpComm = window.giveUp;
+        window.giveUp = async function() {
+          if (!confirm('Give up and reveal all answers?')) return;
+          const measure = window._communityXIMeasure;
+          const cPlayers = window._communityXIPlayers;
+
+          const bucketPlayers = {};
+          for (const p of cPlayers) {
+            const posMap = { Goalkeeper: 'GK', Defender: 'DEF', Midfielder: 'MID', Forward: 'FWD',
+                             GK: 'GK', DEF: 'DEF', MID: 'MID', FWD: 'FWD' };
+            const bucket = posMap[p.position] || p.position;
+            if (!bucketPlayers[bucket]) bucketPlayers[bucket] = [];
+            bucketPlayers[bucket].push(p);
+          }
+          for (const bucket in bucketPlayers) {
+            bucketPlayers[bucket].sort((a, b) => b.value - a.value);
+          }
+
+          // Fill each slot with the correct player
+          const bucketUsed = {};
+          for (const slot of slots) {
+            if (lockedSlots.has(slot.idx)) continue;
+            const bucket = slot.bucket;
+            if (!bucketUsed[bucket]) bucketUsed[bucket] = 0;
+            const correctPlayer = (bucketPlayers[bucket] || [])[bucketUsed[bucket]];
+            bucketUsed[bucket]++;
+
+            if (correctPlayer) {
+              slot.player = { playerId: correctPlayer.uid, name: correctPlayer.name, nationality: '' };
+              slotResults[slot.idx] = { slotIdx: slot.idx, correct: true, revealed: true };
+              lockedSlots.add(slot.idx);
+            }
+          }
+
+          renderPitch();
+          $('submitXIBtn').classList.add('hidden');
+          $('giveUpBtn').classList.add('hidden');
+          $('actionBtns').classList.remove('hidden');
+        };
+      }
+    } catch (e) { console.warn('[TS] community load failed:', e); }
+  }
+
   // Play limits counter
   const playInfo = await TSData.getRemainingPlays('starting_xi');
   if (playInfo.limit !== Infinity) {

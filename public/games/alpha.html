@@ -762,6 +762,56 @@ init();
   TSNav.render();
   const isAnon = TSAuth.isAnonymous();
 
+  // ── Community game mode ──
+  const communityId = new URLSearchParams(window.location.search).get('community');
+  if (communityId) {
+    try {
+      const game = await TSData.getCommunityGameById(communityId);
+      if (game && game.game_data) {
+        const gd = game.game_data;
+        // Build alphabetData from game_data players grouped by surname initial
+        const letterMap = {};
+        for (const p of gd.players) {
+          // Extract surname (last word of name)
+          const parts = p.name.trim().split(/\s+/);
+          const surname = parts[parts.length - 1];
+          const letter = surname.charAt(0).toUpperCase();
+          if (letter >= 'A' && letter <= 'Z') {
+            if (!letterMap[letter]) letterMap[letter] = [];
+            letterMap[letter].push(p.name);
+          }
+        }
+        // Build full A-Z alphabetData
+        alphabetData = [];
+        for (let i = 0; i < 26; i++) {
+          const letter = String.fromCharCode(65 + i);
+          const playerNames = letterMap[letter] || [];
+          alphabetData.push({ letter, count: playerNames.length, players: playerNames });
+        }
+        // Initialize game state
+        currentLetterIdx = 0;
+        scoreCorrect = 0;
+        scoreMissed = 0;
+        scoreSkipped = 0;
+        scoreRevealed = 0;
+        letterResults = {};
+        processing = false;
+        currentLetterRevealed = false;
+        timerSeconds = parseInt($('timerLength').value) || 20;
+        // Start game directly
+        $('step1').classList.add('hidden');
+        $('step2').classList.remove('hidden');
+        $('step3').classList.add('hidden');
+        $('startFooter').classList.remove('visible');
+        renderLetterStrip();
+        updateScores();
+        advanceToNextLetter();
+        TSNav.showGameContext(game.title, 'player_alphabet');
+        TSData.incrementCommunityPlayCount(communityId);
+      }
+    } catch (e) { console.warn('[TS] community load failed:', e); }
+  }
+
   // ── Play limits counter ──
   const playInfo = await TSData.getRemainingPlays('player_alphabet');
   if (playInfo.limit !== Infinity) {

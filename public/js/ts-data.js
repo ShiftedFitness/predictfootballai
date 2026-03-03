@@ -341,6 +341,37 @@
       } catch {
         return { error: 'Failed to copy' };
       }
+    },
+
+    /**
+     * Fetch a community game by ID for playing.
+     * Returns the full game record including game_data.
+     */
+    async getCommunityGameById(id) {
+      const { data, error } = await sb()
+        .from('ts_community_games')
+        .select('*')
+        .eq('id', id)
+        .single();
+      if (error) return null;
+      return data;
+    },
+
+    /**
+     * Increment play count for a community game.
+     */
+    async incrementCommunityPlayCount(id) {
+      const { data } = await sb()
+        .from('ts_community_games')
+        .select('play_count')
+        .eq('id', id)
+        .single();
+      if (data) {
+        await sb()
+          .from('ts_community_games')
+          .update({ play_count: (data.play_count || 0) + 1 })
+          .eq('id', id);
+      }
     }
   };
 
