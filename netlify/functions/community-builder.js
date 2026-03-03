@@ -570,22 +570,27 @@ exports.handler = async (event) => {
       };
     } else if (gameType === 'starting_xi') {
       // Look up positions from the same view the main XI game uses
+      // Batch UIDs to avoid URL length limits with .in()
       const uids = players.slice(0, 200).map(p => p.player_uid);
-      const posQuery = () => client
-        .from('v_all_player_season_stats')
-        .select('player_uid, position_bucket, appearances')
-        .in('player_uid', uids)
-        .not('position_bucket', 'is', null);
-      const posRows = await fetchAll(posQuery);
+      let posRows = [];
+      const POS_BATCH = 50;
+      for (let i = 0; i < uids.length; i += POS_BATCH) {
+        const batch = uids.slice(i, i + POS_BATCH);
+        const posQuery = () => client
+          .from('v_all_player_season_stats')
+          .select('player_uid, position_bucket, appearances')
+          .in('player_uid', batch)
+          .not('position_bucket', 'is', null);
+        const batchRows = await fetchAll(posQuery);
+        if (batchRows) posRows = posRows.concat(batchRows);
+      }
 
       // For each player, pick the position where they have the most appearances
       const posAgg = {};
-      if (posRows) {
-        for (const r of posRows) {
-          if (!r.position_bucket) continue;
-          if (!posAgg[r.player_uid]) posAgg[r.player_uid] = {};
-          posAgg[r.player_uid][r.position_bucket] = (posAgg[r.player_uid][r.position_bucket] || 0) + (r.appearances || 0);
-        }
+      for (const r of posRows) {
+        if (!r.position_bucket) continue;
+        if (!posAgg[r.player_uid]) posAgg[r.player_uid] = {};
+        posAgg[r.player_uid][r.position_bucket] = (posAgg[r.player_uid][r.position_bucket] || 0) + (r.appearances || 0);
       }
       const posMap = {};
       for (const [uid, buckets] of Object.entries(posAgg)) {
@@ -596,6 +601,14 @@ exports.handler = async (event) => {
         }
         if (best) posMap[uid] = best;
       }
+
+      // Log position distribution for debugging
+      const posCounts = { GK: 0, DEF: 0, MID: 0, FWD: 0, unknown: 0 };
+      for (const p of players.slice(0, 200)) {
+        const pos = posMap[p.player_uid] || 'unknown';
+        posCounts[pos] = (posCounts[pos] || 0) + 1;
+      }
+      console.log('[community-builder] XI position distribution:', JSON.stringify(posCounts));
 
       gameData = {
         measure,
