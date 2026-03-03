@@ -3680,9 +3680,80 @@ function startRetroLoader() {
   const wrap = $('retroLoaderWrap');
   if (!wrap) return;
 
-  const animations = [retroProgressBar, retroBounceBall, retroTeletextFlip, retroCountdown, retroBlockReveal];
+  const animations = [retroProgressBar, retroBounceBall, retroTeletextFlip, retroCountdown, retroBlockReveal, retroTrophyLift, retroPitchBall, retroGoalSpell];
   const anim = animations[Math.floor(Math.random() * animations.length)];
   anim(wrap);
+}
+
+function retroTrophyLift(wrap) {
+  const frames = [
+    '        🏆        \n     \\  |  /     \n      \\ | /      \n       \\|/       \n        |        \n      __|__      ',
+    '      🏆🏆🏆      \n     \\  |  /     \n      \\ | /      \n       \\|/       \n        |        \n      __|__      ',
+    '    ✨🏆🏆🏆✨    \n     \\  |  /     \n      \\ | /      \n       \\|/       \n        |        \n      __|__      ',
+    '  ✨✨🏆🏆🏆✨✨  \n   ✨\\  |  /✨   \n      \\ | /      \n       \\|/       \n        |        \n      __|__      ',
+    '✨✨✨🏆🏆🏆✨✨✨\n ✨✨\\  |  /✨✨ \n   ✨\\ | /✨   \n     ✨\\|/✨     \n        |        \n      __|__      ',
+    '  ✨✨🏆🏆🏆✨✨  \n   ✨\\  |  /✨   \n      \\ | /      \n       \\|/       \n        |        \n      __|__      ',
+  ];
+  let idx = 0;
+  wrap.innerHTML = '<div class="retro-ascii" id="rTrophy"></div><div class="retro-label">Champions!</div>';
+  retroLoaderInterval = setInterval(() => {
+    const el = $('rTrophy');
+    if (el) el.textContent = frames[idx % frames.length];
+    idx++;
+  }, 400);
+}
+
+function retroPitchBall(wrap) {
+  const W = 20, H = 5;
+  let bx = 1, by = 2, dx = 1, dy = 1;
+  wrap.innerHTML = '<div class="retro-ascii" id="rPitch"></div><div class="retro-label">On the pitch...</div>';
+  retroLoaderInterval = setInterval(() => {
+    const grid = [];
+    for (let r = 0; r < H; r++) {
+      let row = '';
+      for (let c = 0; c < W; c++) {
+        if (r === 0 || r === H - 1) { row += '─'; }
+        else if (c === 0 || c === W - 1) { row += '│'; }
+        else if (c === Math.floor(W / 2) && r > 0 && r < H - 1) { row += '┊'; }
+        else if (r === by && c === bx) { row += '⚽'; }
+        else { row += ' '; }
+      }
+      grid.push(row);
+    }
+    const el = $('rPitch');
+    if (el) el.textContent = grid.join('\n');
+    bx += dx; by += dy;
+    if (bx >= W - 2 || bx <= 1) dx *= -1;
+    if (by >= H - 2 || by <= 1) dy *= -1;
+  }, 120);
+}
+
+function retroGoalSpell(wrap) {
+  const word = 'G O A L !';
+  let revealed = 0;
+  const flicker = '░▒▓█';
+  wrap.innerHTML = '<div class="retro-bar" id="rGoal" style="font-size:24px;letter-spacing:4px;"></div><div class="retro-label">Incoming...</div>';
+  retroLoaderInterval = setInterval(() => {
+    let display = '';
+    for (let i = 0; i < word.length; i++) {
+      if (word[i] === ' ') { display += ' '; continue; }
+      if (i < revealed) {
+        display += word[i];
+      } else if (i === revealed) {
+        display += flicker[Math.floor(Math.random() * flicker.length)];
+      } else {
+        display += '·';
+      }
+    }
+    const el = $('rGoal');
+    if (el) el.textContent = display;
+    if (Math.random() > 0.5) revealed++;
+    if (revealed > word.length) {
+      // Flash the full word then reset
+      if (el) el.textContent = '⚽ G O A L ! ⚽';
+      setTimeout(() => { revealed = 0; }, 800);
+    }
+  }, 100);
 }
 
 function retroProgressBar(wrap) {
