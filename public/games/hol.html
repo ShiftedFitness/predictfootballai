@@ -559,8 +559,19 @@ init();
         if (!header) return;
         const text = header.textContent.toLowerCase();
         const isEPL = text.includes('premier') || text.includes('epl');
-        if (!isEPL) sec.classList.add('ts-locked-section');
+        if (!isEPL) {
+          sec.classList.add('ts-locked-section');
+          sec.querySelectorAll('.scope-card').forEach(c => c.classList.add('ts-locked'));
+        }
       });
+      // Add upgrade hint
+      if (!document.getElementById('tsUpgradeHint')) {
+        const hint = document.createElement('div');
+        hint.id = 'tsUpgradeHint';
+        hint.className = 'ts-upgrade-hint';
+        hint.innerHTML = '\uD83D\uDD13 <a href="/upgrade/" style="color:var(--accent-cyan);text-decoration:underline;">Upgrade to Pro</a> to unlock all leagues';
+        scopeList.parentElement.insertBefore(hint, scopeList.nextSibling);
+      }
     }
   }
 

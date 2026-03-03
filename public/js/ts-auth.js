@@ -155,15 +155,23 @@
      * Returns the ts_users row (or creates an anonymous one).
      */
     async init() {
-      // 1. Check for magic link hash tokens
+      // 1. Check for magic link / email confirmation hash tokens
       let session = await safeGetSession();
+      let _justConfirmed = false;
       if (!session && location.hash) {
         const hp = new URLSearchParams(location.hash.substring(1));
         const at = hp.get('access_token');
         const rt = hp.get('refresh_token');
+        const tokenType = hp.get('type');
         if (at && rt) {
           session = await safeSetSession(at, rt);
-          if (session) history.replaceState(null, '', location.pathname + location.search);
+          if (session) {
+            history.replaceState(null, '', location.pathname + location.search);
+            // Flag if user just confirmed their email (type=signup or type=email)
+            if (tokenType === 'signup' || tokenType === 'email') {
+              _justConfirmed = true;
+            }
+          }
         }
       }
 
@@ -203,6 +211,11 @@
         if (row) {
           _currentUser = row;
           setCached(row);
+
+          // Flag if this is a freshly confirmed email
+          if (_justConfirmed) {
+            TSAuth._justConfirmedEmail = true;
+          }
 
           // Process referral code from URL if present
           const ref = new URLSearchParams(location.search).get('ref');

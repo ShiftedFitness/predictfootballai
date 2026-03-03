@@ -678,14 +678,21 @@ init();
       }
     } else if (!tierAccess.all) {
       // Free tier: lock non-EPL scopes
-      scopeList.querySelectorAll('.option-btn').forEach(btn => {
-        const text = btn.textContent.toLowerCase();
-        const isEPL = text.includes('premier') || text.includes('epl');
-        if (!isEPL && !btn.classList.contains('wide')) {
-          // Only lock non-league, non-EPL club buttons
-          // Quiz uses flat option-btn grid, not sections
+      const btns = scopeList.querySelectorAll('.option-btn');
+      btns.forEach((btn, i) => {
+        const scope = SCOPES[i];
+        if (scope && !TSAuth.isScopeAllowed(scope.id)) {
+          btn.classList.add('ts-locked');
         }
       });
+      // Add upgrade hint
+      if (!document.getElementById('tsUpgradeHint')) {
+        const hint = document.createElement('div');
+        hint.id = 'tsUpgradeHint';
+        hint.className = 'ts-upgrade-hint';
+        hint.innerHTML = '\uD83D\uDD13 <a href="/upgrade/" style="color:var(--accent-cyan);text-decoration:underline;">Upgrade to Pro</a> to unlock all leagues';
+        scopeList.parentElement.insertBefore(hint, scopeList.nextSibling);
+      }
     }
   }
 

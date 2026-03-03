@@ -175,6 +175,58 @@
 
       // ── Footer: database last updated ──
       this.renderFooterMeta();
+
+      // ── Welcome screen after email confirmation ──
+      if (TSAuth._justConfirmedEmail) {
+        TSAuth._justConfirmedEmail = false;
+        this.showWelcomeOverlay();
+      }
+    },
+
+    /**
+     * Show the welcome overlay for newly confirmed users.
+     * Explains their entitlements and prompts upgrade.
+     */
+    showWelcomeOverlay() {
+      const existing = document.getElementById('tsWelcomeOverlay');
+      if (existing) existing.remove();
+
+      const user = TSAuth.getUser();
+      const username = user?.username || user?.display_name || 'Player';
+
+      const welcome = document.createElement('div');
+      welcome.id = 'tsWelcomeOverlay';
+      welcome.className = 'ts-modal-overlay';
+      welcome.innerHTML = `
+        <div class="ts-modal" style="text-align:center;padding:32px 24px;max-width:420px;">
+          <div style="font-size:36px;margin-bottom:12px;">\u26BD</div>
+          <h2 style="font-family:'Space Mono',monospace;font-size:1.15rem;margin-bottom:4px;color:var(--accent-cyan);">Welcome, ${esc(username)}!</h2>
+          <p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;line-height:1.5;">
+            Your email is confirmed and your account is active.
+          </p>
+          <div style="background:rgba(0,229,255,.06);border:1px solid rgba(0,229,255,.12);border-radius:10px;padding:16px;margin-bottom:16px;text-align:left;">
+            <div style="font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--accent-cyan);margin-bottom:8px;font-weight:700;">Your Free Plan includes:</div>
+            <div style="font-size:13px;color:var(--fg);line-height:1.8;">
+              \u2705 All EPL categories<br/>
+              \u2705 5 plays per game per day<br/>
+              \u2705 XP, levels & leaderboard<br/>
+              \u2705 Community games access<br/>
+              \u274C Other leagues (La Liga, Bundesliga, etc.)<br/>
+              \u274C Unlimited plays
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;justify-content:center;">
+            <button id="tsWelcomePlay" class="btn-primary ts-btn" style="flex:1;max-width:160px;">Start Playing</button>
+            <a href="/upgrade/" class="btn-secondary ts-btn" style="flex:1;max-width:160px;text-align:center;line-height:2.4;text-decoration:none;">Upgrade to Pro</a>
+          </div>
+        </div>`;
+
+      document.body.appendChild(welcome);
+      document.getElementById('tsWelcomePlay')?.addEventListener('click', () => {
+        welcome.remove();
+        window.location.href = '/games/';
+      });
+      welcome.addEventListener('click', (e) => { if (e.target === welcome) welcome.remove(); });
     },
 
     /** Show login/signup modal — context-aware */
@@ -213,10 +265,20 @@
               <input type="email" placeholder="Email" required class="ts-input" id="tsLoginEmail"/>
               <input type="password" placeholder="Password" required class="ts-input" id="tsLoginPassword"/>
               <button type="submit" class="btn-primary ts-btn">Log In</button>
+              <div style="text-align:right;margin:-4px 0 8px;">
+                <button type="button" id="tsForgotPasswordBtn" style="background:none;border:none;color:var(--accent-cyan);font-size:12px;cursor:pointer;padding:0;text-decoration:underline;">Forgot password?</button>
+              </div>
               <div class="ts-divider-text"><span>or</span></div>
               <button type="button" class="btn-secondary ts-btn" id="tsMagicLinkBtn">Send Magic Link</button>
               <div class="ts-auth-msg" id="tsLoginMsg"></div>
             </form>
+            <div id="tsForgotPanel" style="display:none;">
+              <p style="font-size:13px;color:var(--text-secondary);margin-bottom:12px;">Enter your email and we'll send you a password reset link.</p>
+              <input type="email" placeholder="Email" required class="ts-input" id="tsForgotEmail"/>
+              <button type="button" class="btn-primary ts-btn" id="tsSendResetBtn">Send Reset Link</button>
+              <div class="ts-auth-msg" id="tsForgotMsg"></div>
+              <button type="button" id="tsBackToLogin" style="background:none;border:none;color:var(--accent-cyan);font-size:12px;cursor:pointer;margin-top:8px;text-decoration:underline;">Back to login</button>
+            </div>
           </div>
 
           <div class="ts-tab-panel ${mode === 'signup' ? 'active' : ''}" id="tsSignupPanel">
@@ -261,8 +323,31 @@
           document.getElementById('tsLoginEmail').value,
           document.getElementById('tsLoginPassword').value
         );
-        if (result.error) { msg.textContent = result.error; msg.className = 'ts-auth-msg error'; }
-        else { modal.remove(); location.reload(); }
+        if (result.error) {
+          const errLower = result.error.toLowerCase();
+          if (errLower.includes('email not confirmed') || errLower.includes('not confirmed')) {
+            msg.innerHTML = 'Please confirm your email first. Check your inbox for the confirmation link, or <button type="button" id="tsResendFromLogin" style="background:none;border:none;color:var(--accent-cyan);cursor:pointer;padding:0;text-decoration:underline;font-size:inherit;">resend it</button>.';
+            msg.className = 'ts-auth-msg error';
+            document.getElementById('tsResendFromLogin')?.addEventListener('click', async () => {
+              const email = document.getElementById('tsLoginEmail').value;
+              if (!email) return;
+              try {
+                await TSAuth.supabase.auth.resend({ type: 'signup', email });
+                msg.textContent = 'Confirmation email resent! Check your inbox.';
+                msg.className = 'ts-auth-msg success';
+              } catch { msg.textContent = 'Failed to resend — try again'; }
+            });
+          } else if (errLower.includes('invalid') || errLower.includes('credentials')) {
+            msg.innerHTML = 'Invalid email or password. <button type="button" id="tsLoginForgot" style="background:none;border:none;color:var(--accent-cyan);cursor:pointer;padding:0;text-decoration:underline;font-size:inherit;">Reset password?</button>';
+            msg.className = 'ts-auth-msg error';
+            document.getElementById('tsLoginForgot')?.addEventListener('click', () => {
+              document.getElementById('tsForgotPasswordBtn')?.click();
+            });
+          } else {
+            msg.textContent = result.error;
+            msg.className = 'ts-auth-msg error';
+          }
+        } else { modal.remove(); location.reload(); }
       });
 
       // Magic link
@@ -274,6 +359,35 @@
         const result = await TSAuth.signInMagicLink(email);
         if (result.error) { msg.textContent = result.error; msg.className = 'ts-auth-msg error'; }
         else { msg.textContent = 'Check your email for the magic link!'; msg.className = 'ts-auth-msg success'; }
+      });
+
+      // Forgot password toggle
+      document.getElementById('tsForgotPasswordBtn').addEventListener('click', () => {
+        document.getElementById('tsLoginForm').style.display = 'none';
+        document.getElementById('tsForgotPanel').style.display = 'block';
+        // Pre-fill email if they already typed one
+        const loginEmail = document.getElementById('tsLoginEmail').value;
+        if (loginEmail) document.getElementById('tsForgotEmail').value = loginEmail;
+      });
+      document.getElementById('tsBackToLogin').addEventListener('click', () => {
+        document.getElementById('tsLoginForm').style.display = '';
+        document.getElementById('tsForgotPanel').style.display = 'none';
+      });
+
+      // Send password reset link
+      document.getElementById('tsSendResetBtn').addEventListener('click', async () => {
+        const email = document.getElementById('tsForgotEmail').value;
+        const msg = document.getElementById('tsForgotMsg');
+        if (!email) { msg.textContent = 'Enter your email first'; msg.className = 'ts-auth-msg error'; return; }
+        msg.textContent = 'Sending reset link...';
+        msg.className = 'ts-auth-msg';
+        try {
+          const { error } = await TSAuth.supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: window.location.origin + '/account/reset-password/'
+          });
+          if (error) { msg.textContent = error.message; msg.className = 'ts-auth-msg error'; }
+          else { msg.textContent = 'Check your email for the reset link!'; msg.className = 'ts-auth-msg success'; }
+        } catch (e) { msg.textContent = 'Failed to send reset link'; msg.className = 'ts-auth-msg error'; }
       });
 
       // Signup form
@@ -289,35 +403,36 @@
         );
         if (result.error) { msg.textContent = result.error; msg.className = 'ts-auth-msg error'; }
         else {
-          msg.textContent = 'Account created!';
-          msg.className = 'ts-auth-msg success';
-          // Show welcome and redirect to upgrade page to see tier options
-          setTimeout(() => {
-            modal.remove();
-            // Show tier overview prompt
-            const welcome = document.createElement('div');
-            welcome.id = 'tsWelcomeOverlay';
-            welcome.className = 'ts-modal-overlay';
-            welcome.innerHTML = `
-              <div class="ts-modal" style="text-align:center;padding:32px 24px;">
-                <div style="font-size:32px;margin-bottom:12px;">\u26BD</div>
-                <h2 style="font-family:'Space Mono',monospace;font-size:1.1rem;margin-bottom:8px;color:var(--accent-cyan);">Welcome to TeleStats!</h2>
-                <p style="font-size:13px;color:var(--text-secondary);margin-bottom:20px;line-height:1.5;">
-                  You're on the <strong style="color:var(--fg);">Free</strong> plan with access to all EPL categories.<br/>
-                  Upgrade to <strong style="color:var(--accent-yellow);">Pro</strong> for unlimited plays and all leagues.
+          // Replace signup form with "check your email" message
+          const panel = document.getElementById('tsSignupPanel');
+          if (panel) {
+            panel.innerHTML = `
+              <div style="text-align:center;padding:24px 8px;">
+                <div style="font-size:36px;margin-bottom:12px;">\u2709\uFE0F</div>
+                <h3 style="font-family:'Space Mono',monospace;font-size:1rem;margin-bottom:8px;color:var(--accent-cyan);">Check Your Email</h3>
+                <p style="font-size:13px;color:var(--text-secondary);line-height:1.6;margin-bottom:16px;">
+                  We've sent a confirmation link to<br/>
+                  <strong style="color:var(--fg);">${document.getElementById('tsSignupEmail')?.value || 'your email'}</strong>
                 </p>
-                <div style="display:flex;gap:8px;justify-content:center;">
-                  <button id="tsWelcomePlay" class="btn-primary ts-btn" style="flex:1;max-width:160px;">Start Playing</button>
-                  <a href="/upgrade/" class="btn-secondary ts-btn" style="flex:1;max-width:160px;text-align:center;line-height:2.4;text-decoration:none;">View Plans</a>
+                <p style="font-size:12px;color:var(--text-muted);line-height:1.5;">
+                  Click the link in your email to activate your account.<br/>
+                  Once confirmed, you'll be able to log in and start playing.
+                </p>
+                <div style="margin-top:20px;padding:12px;border-radius:8px;background:rgba(0,229,255,.06);border:1px solid rgba(0,229,255,.15);">
+                  <div style="font-size:11px;color:var(--text-muted);">Didn't receive it? Check your spam folder or</div>
+                  <button id="tsResendConfirm" style="background:none;border:none;color:var(--accent-cyan);font-size:12px;cursor:pointer;padding:4px 0;text-decoration:underline;">resend confirmation email</button>
                 </div>
               </div>`;
-            document.body.appendChild(welcome);
-            document.getElementById('tsWelcomePlay')?.addEventListener('click', () => {
-              welcome.remove();
-              location.reload();
+            // Resend handler
+            document.getElementById('tsResendConfirm')?.addEventListener('click', async () => {
+              const btn = document.getElementById('tsResendConfirm');
+              btn.textContent = 'Sending...';
+              try {
+                await TSAuth.supabase.auth.resend({ type: 'signup', email: result.user?.email || '' });
+                btn.textContent = 'Sent! Check your inbox.';
+              } catch { btn.textContent = 'Failed — try again'; }
             });
-            welcome.addEventListener('click', (e) => { if (e.target === welcome) { welcome.remove(); location.reload(); } });
-          }, 600);
+          }
         }
       });
 

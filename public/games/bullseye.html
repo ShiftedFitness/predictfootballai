@@ -3936,8 +3936,23 @@ function updateBullseyeSetting(key,val){
         if (!header) return;
         const text = header.textContent.toLowerCase();
         const isEPL = text.includes('premier') || text.includes('epl');
-        if (!isEPL) lg.classList.add('ts-locked-section');
+        if (!isEPL) {
+          lg.classList.add('ts-locked-section');
+          // Also mark individual game cards as locked (for roulette filter)
+          lg.querySelectorAll('.game-card').forEach(c => c.classList.add('ts-locked'));
+        }
       });
+      // Add upgrade hint below the EPL section
+      if (!document.getElementById('tsUpgradeHint')) {
+        const hint = document.createElement('div');
+        hint.id = 'tsUpgradeHint';
+        hint.className = 'ts-upgrade-hint';
+        hint.innerHTML = '\uD83D\uDD13 <a href="/upgrade/" style="color:var(--accent-cyan);text-decoration:underline;">Upgrade to Pro</a> to unlock all leagues';
+        const eplGroup = document.getElementById('lg-epl');
+        if (eplGroup && eplGroup.nextElementSibling) {
+          eplGroup.parentElement.insertBefore(hint, eplGroup.nextElementSibling);
+        }
+      }
     }
   }
   const step3El = document.getElementById('step3');

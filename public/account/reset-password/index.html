@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Reset Password — TeleStats</title>
+  <link rel="stylesheet" href="/telestats-theme.css"/>
+  <style>
+    .reset-container { max-width: 400px; margin: 100px auto 40px; padding: 0 16px; }
+    .reset-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px 24px;
+      text-align: center;
+    }
+    .reset-card h2 {
+      font-family: 'Space Mono', monospace;
+      font-size: 1.1rem;
+      margin-bottom: 8px;
+      color: var(--accent-cyan, var(--accent));
+    }
+    .reset-card p {
+      font-size: 13px;
+      color: var(--text-secondary, var(--muted));
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+    .reset-card .ts-input {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--fg);
+      font-size: 14px;
+      box-sizing: border-box;
+      font-family: inherit;
+    }
+    .reset-card .btn-primary {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      background: var(--accent-cyan, var(--accent));
+      color: #000;
+      font-weight: 700;
+      font-size: 15px;
+      border: none;
+      cursor: pointer;
+    }
+    .reset-card .btn-primary:hover { filter: brightness(1.1); }
+    .reset-card .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+    .reset-msg { font-size: 13px; margin-top: 12px; min-height: 20px; }
+    .reset-msg.error { color: #ff4d4d; }
+    .reset-msg.success { color: #32ff7e; }
+    .reset-success { display: none; }
+    .reset-success h2 { color: #32ff7e; }
+  </style>
+</head>
+<body>
+  <div class="reset-container">
+    <div class="reset-card" id="resetForm">
+      <div style="font-size:32px;margin-bottom:12px;">🔑</div>
+      <h2>Reset Your Password</h2>
+      <p>Enter your new password below.</p>
+      <input type="password" placeholder="New password (6+ chars)" required class="ts-input" id="newPassword" minlength="6"/>
+      <input type="password" placeholder="Confirm new password" required class="ts-input" id="confirmPassword" minlength="6"/>
+      <button type="button" class="btn-primary" id="resetBtn">Update Password</button>
+      <div class="reset-msg" id="resetMsg"></div>
+    </div>
+
+    <div class="reset-card reset-success" id="resetSuccess">
+      <div style="font-size:32px;margin-bottom:12px;">✅</div>
+      <h2>Password Updated!</h2>
+      <p>Your password has been reset successfully. You can now log in with your new password.</p>
+      <a href="/games/" class="btn-primary" style="display:block;text-decoration:none;text-align:center;line-height:2.2;">Go to Games</a>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    (function() {
+      const SUPABASE_URL = 'https://cifnegfabbcywcxhtpfn.supabase.co';
+      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNpZm5lZ2ZhYmJjeXdjeGh0cGZuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4MDgyMDQsImV4cCI6MjA4NTM4NDIwNH0.Rkg8FrX3aW3r0MUWmtbQeduNChZQkfvg6a1hU3pYOGU';
+
+      const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+        auth: { flowType: 'implicit' }
+      });
+
+      // Handle the recovery token from the URL hash
+      async function handleRecovery() {
+        const hash = window.location.hash;
+        if (hash) {
+          const params = new URLSearchParams(hash.substring(1));
+          const accessToken = params.get('access_token');
+          const refreshToken = params.get('refresh_token');
+          const type = params.get('type');
+
+          if (accessToken && refreshToken && type === 'recovery') {
+            try {
+              await sb.auth.setSession({
+                access_token: accessToken,
+                refresh_token: refreshToken
+              });
+              // Clean up URL
+              history.replaceState(null, '', window.location.pathname);
+            } catch (e) {
+              document.getElementById('resetMsg').textContent = 'Invalid or expired reset link. Please request a new one.';
+              document.getElementById('resetMsg').className = 'reset-msg error';
+              document.getElementById('resetBtn').disabled = true;
+            }
+          }
+        }
+
+        // Also listen for PASSWORD_RECOVERY event
+        sb.auth.onAuthStateChange((event, session) => {
+          if (event === 'PASSWORD_RECOVERY') {
+            console.log('[Reset] PASSWORD_RECOVERY event received');
+          }
+        });
+      }
+
+      handleRecovery();
+
+      // Reset password form
+      document.getElementById('resetBtn').addEventListener('click', async () => {
+        const newPass = document.getElementById('newPassword').value;
+        const confirmPass = document.getElementById('confirmPassword').value;
+        const msg = document.getElementById('resetMsg');
+
+        if (newPass.length < 6) {
+          msg.textContent = 'Password must be at least 6 characters';
+          msg.className = 'reset-msg error';
+          return;
+        }
+        if (newPass !== confirmPass) {
+          msg.textContent = 'Passwords do not match';
+          msg.className = 'reset-msg error';
+          return;
+        }
+
+        msg.textContent = 'Updating password...';
+        msg.className = 'reset-msg';
+
+        try {
+          const { error } = await sb.auth.updateUser({ password: newPass });
+          if (error) {
+            msg.textContent = error.message;
+            msg.className = 'reset-msg error';
+          } else {
+            document.getElementById('resetForm').style.display = 'none';
+            document.getElementById('resetSuccess').style.display = 'block';
+          }
+        } catch (e) {
+          msg.textContent = 'Failed to update password. Please try again.';
+          msg.className = 'reset-msg error';
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
