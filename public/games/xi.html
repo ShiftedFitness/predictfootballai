@@ -2663,8 +2663,8 @@ document.getElementById('tsClock').textContent = new Date().toTimeString().slice
               name: p.name,
               score: p.value,
               appearances: p.appearances || p.value,
-              goals: 0,
-              assists: 0,
+              goals: p.goals || 0,
+              assists: p.assists || 0,
               cleanSheets: p.cleanSheets || 0,
             }));
           if (bucketList.length > 0) communityRankings[bucket] = bucketList;

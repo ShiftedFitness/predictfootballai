@@ -794,15 +794,20 @@ exports.handler = async (event) => {
 
       gameData = {
         measure,
-        players: xiPlayers.map(p => ({
-          uid: p.player_uid,
-          name: p.player_name,
-          value: getValue(p),
-          position: p._position,
-          clubs: [...p.clubs],
-          cleanSheets: p._cleanSheets || 0,
-          appearances: p._statsApps || p.totalApps,
-        })),
+        players: xiPlayers.map(p => {
+          const s = statsAgg[p.player_uid];
+          return {
+            uid: p.player_uid,
+            name: p.player_name,
+            value: getValue(p),
+            position: p._position,
+            clubs: [...p.clubs],
+            cleanSheets: p._cleanSheets || 0,
+            appearances: p._statsApps || p.totalApps,
+            goals: s ? s.goals : p.totalGoals,
+            assists: s ? s.assists : p.totalAssists,
+          };
+        }),
       };
     } else if (gameType === 'higher_lower') {
       const shuffled = [...players].sort(() => Math.random() - 0.5);
