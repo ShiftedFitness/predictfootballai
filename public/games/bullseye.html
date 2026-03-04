@@ -3944,7 +3944,8 @@ function updateBullseyeSetting(key,val){
     if (mpBtn) mpBtn.style.display = 'none';
   }
 
-  // Play limits counter
+  // Play limits counter + category locking (skip for community games)
+  if (!communityId) {
   const playInfo = await TSData.getRemainingPlays('bullseye');
   if (playInfo.limit !== Infinity) {
     const counter = TSNav.createPlaysCounter(playInfo.remaining, playInfo.limit);
@@ -4029,15 +4030,18 @@ function updateBullseyeSetting(key,val){
       }
     }
   }, 2500);
+  } // end if (!communityId)
 
-  // Hook chooseCategory for play limit check
-  const _origChooseCategory = window.chooseCategory;
-  if (typeof _origChooseCategory === 'function') {
-    window.chooseCategory = async function(cat) {
-      const check = await TSData.checkPlayLimit('bullseye');
-      if (!check.canPlay) return;
-      return _origChooseCategory.apply(this, arguments);
-    };
+  // Hook chooseCategory for play limit check (skip for community games)
+  if (!communityId) {
+    const _origChooseCategory = window.chooseCategory;
+    if (typeof _origChooseCategory === 'function') {
+      window.chooseCategory = async function(cat) {
+        const check = await TSData.checkPlayLimit('bullseye');
+        if (!check.canPlay) return;
+        return _origChooseCategory.apply(this, arguments);
+      };
+    }
   }
 
   // Hook into recordWin and recordGameEnd to log sessions

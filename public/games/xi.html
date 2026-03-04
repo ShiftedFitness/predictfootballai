@@ -2685,7 +2685,8 @@ document.getElementById('tsClock').textContent = new Date().toTimeString().slice
     } catch (e) { console.warn('[TS] community load failed:', e); }
   }
 
-  // Play limits counter
+  // Play limits counter (skip for community games)
+  if (!communityId) {
   const playInfo = await TSData.getRemainingPlays('starting_xi');
   if (playInfo.limit !== Infinity) {
     const counter = TSNav.createPlaysCounter(playInfo.remaining, playInfo.limit);
@@ -2774,15 +2775,18 @@ document.getElementById('tsClock').textContent = new Date().toTimeString().slice
       }
     }
   }, 1500);
+  } // end if (!communityId)
 
-  // Hook startGame for play limit check
-  const _origStartGame = window.startGame;
-  if (typeof _origStartGame === 'function') {
-    window.startGame = async function() {
-      const check = await TSData.checkPlayLimit('starting_xi');
-      if (!check.canPlay) return;
-      return _origStartGame.apply(this, arguments);
-    };
+  // Hook startGame for play limit check (skip for community games)
+  if (!communityId) {
+    const _origStartGame = window.startGame;
+    if (typeof _origStartGame === 'function') {
+      window.startGame = async function() {
+        const check = await TSData.checkPlayLimit('starting_xi');
+        if (!check.canPlay) return;
+        return _origStartGame.apply(this, arguments);
+      };
+    }
   }
 
   // Hook giveUp to log session

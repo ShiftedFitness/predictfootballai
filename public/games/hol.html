@@ -586,7 +586,8 @@ init();
     } catch (e) { console.warn('[TS] community load failed:', e); }
   }
 
-  // ── Play limits counter ──
+  // ── Play limits counter (skip for community games) ──
+  if (!communityId) {
   const playInfo = await TSData.getRemainingPlays('higher_lower');
   if (playInfo.limit !== Infinity) {
     const counter = TSNav.createPlaysCounter(playInfo.remaining, playInfo.limit);
@@ -677,15 +678,18 @@ init();
       }
     }
   }, 1500);
+  } // end if (!communityId)
 
-  // ── Hook startGame to check play limit ──
-  const _origStartGame = window.startGame;
-  if (typeof _origStartGame === 'function') {
-    window.startGame = async function() {
-      const check = await TSData.checkPlayLimit('higher_lower');
-      if (!check.canPlay) return;
-      return _origStartGame.apply(this, arguments);
-    };
+  // ── Hook startGame to check play limit (skip for community games) ──
+  if (!communityId) {
+    const _origStartGame = window.startGame;
+    if (typeof _origStartGame === 'function') {
+      window.startGame = async function() {
+        const check = await TSData.checkPlayLimit('higher_lower');
+        if (!check.canPlay) return;
+        return _origStartGame.apply(this, arguments);
+      };
+    }
   }
 
   // ── Hook gameOver to log session ──

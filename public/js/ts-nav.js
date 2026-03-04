@@ -770,14 +770,20 @@
       const existing = document.getElementById('tsPostGameSignup');
       if (existing) existing.remove();
 
+      const isCommunity = new URLSearchParams(window.location.search).has('community');
+      const headline = isCommunity ? 'Enjoyed the game?' : 'Want to choose your own games?';
+      const subtitle = isCommunity
+        ? 'Create a free account to track your stats, earn XP, and play more games.'
+        : 'Sign up for free to unlock all EPL categories, track your XP, and climb the leaderboard.';
+
       const overlay = document.createElement('div');
       overlay.id = 'tsPostGameSignup';
       overlay.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:200;background:linear-gradient(0deg,rgba(11,15,18,.98) 60%,transparent);padding:32px 20px 24px;text-align:center;';
       overlay.innerHTML = `
         <div style="max-width:400px;margin:0 auto;">
           <div style="font-size:20px;margin-bottom:8px;">\u26BD</div>
-          <div style="font-size:16px;font-weight:700;margin-bottom:6px;color:var(--fg);">Want to choose your own games?</div>
-          <div style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;">Sign up for free to unlock all EPL categories, track your XP, and climb the leaderboard.</div>
+          <div style="font-size:16px;font-weight:700;margin-bottom:6px;color:var(--fg);">${headline}</div>
+          <div style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;">${subtitle}</div>
           <button id="tsPostGameSignupBtn" style="padding:12px 32px;border-radius:10px;background:var(--accent-cyan);border:none;color:#000;font-weight:700;font-size:15px;cursor:pointer;margin-bottom:8px;">Sign Up Free</button>
           <div><button id="tsPostGameDismiss" style="background:none;border:none;color:var(--text-muted);font-size:12px;cursor:pointer;padding:8px;">Keep playing as guest</button></div>
         </div>`;
