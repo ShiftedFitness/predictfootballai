@@ -808,6 +808,30 @@ init();
         advanceToNextLetter();
         TSNav.showGameContext(game.title, 'player_alphabet');
         TSData.incrementCommunityPlayCount(communityId);
+
+        // Hide "Change Team" button — no setup screen in community mode
+        const changeTeamBtn = document.querySelector('#step3 .go-btn.secondary');
+        if (changeTeamBtn) changeTeamBtn.style.display = 'none';
+
+        // Override startGame so "Play Again" restarts from community data
+        // instead of calling the API (which requires scopeId)
+        window.startGame = function() {
+          currentLetterIdx = 0;
+          scoreCorrect = 0;
+          scoreMissed = 0;
+          scoreSkipped = 0;
+          scoreRevealed = 0;
+          letterResults = {};
+          processing = false;
+          currentLetterRevealed = false;
+          timerSeconds = parseInt($('timerLength').value) || 20;
+          $('step1').classList.add('hidden');
+          $('step2').classList.remove('hidden');
+          $('step3').classList.add('hidden');
+          renderLetterStrip();
+          updateScores();
+          advanceToNextLetter();
+        };
       }
     } catch (e) { console.warn('[TS] community load failed:', e); }
   }

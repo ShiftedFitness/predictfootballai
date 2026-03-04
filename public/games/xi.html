@@ -2650,6 +2650,9 @@ document.getElementById('tsClock').textContent = new Date().toTimeString().slice
         TSNav.showGameContext(game.title, 'starting_xi');
         TSData.incrementCommunityPlayCount(communityId);
 
+        // Override "Start New Challenge" to reload community game instead of going to setup
+        $('newGameBtn').onclick = () => window.location.reload();
+
         // ── Build Top 10 Per Position rankings from community data ──
         const communityRankings = {};
         const allBuckets = ['GK', 'DEF', 'MID', 'FWD'];

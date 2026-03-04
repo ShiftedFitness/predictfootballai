@@ -3927,6 +3927,13 @@ function updateBullseyeSetting(key,val){
         TSNav.showGameContext(game.title, 'bullseye');
         startMatch(['You']);
         TSData.incrementCommunityPlayCount(communityId);
+
+        // Override playAgain so "Play Again" restarts from community data
+        // instead of navigating back to category selection
+        window.playAgain = function() {
+          resetMatchState();
+          startMatch(['You']);
+        };
       }
     } catch (e) { console.warn('[TS] community load failed:', e); }
   }
