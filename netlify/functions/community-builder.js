@@ -583,9 +583,19 @@ exports.handler = async (event) => {
         .single();
       const competitionId = compData?.competition_id;
 
-      // Look up positions for ALL players — not just top N.
-      // GKs rank low on performance/goals, so slicing by measure rank
-      // would exclude them entirely and they'd default to MID.
+      // Look up club_ids for scope-correct stat filtering
+      let filterClubIds = [];
+      if (dbClubs.length > 0) {
+        const { data: clubRows } = await client
+          .from('clubs')
+          .select('club_id')
+          .in('club_name', dbClubs);
+        if (clubRows) filterClubIds = clubRows.map(r => r.club_id);
+      }
+
+      // Fetch detailed stats from v_all_player_season_stats for ALL players.
+      // Includes position_bucket + all stats needed for the full performance formula
+      // (matching the SQL in 001_player_performance_scores.sql exactly).
       const uids = players.map(p => p.player_uid);
       let posRows = [];
       const POS_BATCH = 200;
@@ -594,10 +604,9 @@ exports.handler = async (event) => {
         const posQuery = () => {
           let q = client
             .from('v_all_player_season_stats')
-            .select('player_uid, position_bucket, appearances, clean_sheets')
+            .select('player_uid, club_id, position_bucket, appearances, minutes, goals, assists, clean_sheets, tackles_won, interceptions, saves, goals_against, wins')
             .in('player_uid', batch)
             .not('position_bucket', 'is', null);
-          // Filter by competition to reduce data volume
           if (competitionId) q = q.eq('competition_id', competitionId);
           return q;
         };
@@ -605,19 +614,15 @@ exports.handler = async (event) => {
         if (batchRows) posRows = posRows.concat(batchRows);
       }
 
-      // For each player, pick the position where they have the most appearances
-      // Also aggregate clean sheets (needed for GK/DEF rankings display)
+      // 1. Determine each player's position (from ALL their EPL data, not club-scoped)
       const posAgg = {};
-      const csAgg = {};  // player_uid → total clean sheets
       for (const r of posRows) {
         if (!r.position_bucket) continue;
         if (!posAgg[r.player_uid]) posAgg[r.player_uid] = {};
         posAgg[r.player_uid][r.position_bucket] = (posAgg[r.player_uid][r.position_bucket] || 0) + (r.appearances || 0);
-        csAgg[r.player_uid] = (csAgg[r.player_uid] || 0) + (r.clean_sheets || 0);
       }
       const posMap = {};
       for (const [uid, buckets] of Object.entries(posAgg)) {
-        // Pick bucket with most appearances
         let best = null, bestApps = -1;
         for (const [bucket, apps] of Object.entries(buckets)) {
           if (apps > bestApps) { best = bucket; bestApps = apps; }
@@ -625,28 +630,155 @@ exports.handler = async (event) => {
         if (best) posMap[uid] = best;
       }
 
-      // Assign positions and clean sheets to ALL players
+      // 2. Aggregate detailed stats per player (club-scoped if filter active)
+      const statsAgg = {};
+      for (const r of posRows) {
+        // For stats, respect club filter so scores match the community scope
+        if (filterClubIds.length > 0 && !filterClubIds.includes(r.club_id)) continue;
+        if (!statsAgg[r.player_uid]) {
+          statsAgg[r.player_uid] = {
+            appearances: 0, minutes: 0, goals: 0, assists: 0,
+            clean_sheets: 0, tackles_won: 0, interceptions: 0,
+            saves: 0, goals_against: 0, wins: 0,
+          };
+        }
+        const s = statsAgg[r.player_uid];
+        s.appearances += r.appearances || 0;
+        s.minutes += r.minutes || 0;
+        s.goals += r.goals || 0;
+        s.assists += r.assists || 0;
+        s.clean_sheets += r.clean_sheets || 0;
+        s.tackles_won += r.tackles_won || 0;
+        s.interceptions += r.interceptions || 0;
+        s.saves += r.saves || 0;
+        s.goals_against += r.goals_against || 0;
+        s.wins += r.wins || 0;
+      }
+
+      // 3. Assign positions and clean sheets
       for (const p of players) {
         p._position = posMap[p.player_uid] || 'MID';
-        p._cleanSheets = csAgg[p.player_uid] || 0;
+        const s = statsAgg[p.player_uid];
+        p._cleanSheets = s ? s.clean_sheets : 0;
+        p._statsApps = s ? s.appearances : p.totalApps;
+      }
+
+      // 4. For performance measure, compute full position-specific scores
+      //    (exact same formulas as 001_player_performance_scores.sql)
+      if (measure === 'performance') {
+        // Step A: Estimate DEF clean sheets from GK clean sheet rate
+        //   (matches SQL Step B2 — DEF players don't have CS in raw data,
+        //    so prorate from GK CS rate in the same scope)
+        const gkPlayers = players.filter(p => p._position === 'GK' && statsAgg[p.player_uid]);
+        let gkCsRate = 0;
+        const totalGkApps = gkPlayers.reduce((sum, p) => sum + (statsAgg[p.player_uid]?.appearances || 0), 0);
+        const totalGkCs = gkPlayers.reduce((sum, p) => sum + (statsAgg[p.player_uid]?.clean_sheets || 0), 0);
+        if (totalGkApps > 0) gkCsRate = totalGkCs / totalGkApps;
+
+        // Step B: Impute DEF tackles/interceptions for pre-2010 players who have 0
+        //   (matches SQL Step B3 — use average per-90 rate from players who have data)
+        const defWithData = players.filter(p =>
+          p._position === 'DEF' && statsAgg[p.player_uid] &&
+          (statsAgg[p.player_uid].tackles_won + statsAgg[p.player_uid].interceptions) > 0
+        );
+        let avgTacklesP90 = 0, avgIntP90 = 0;
+        if (defWithData.length > 0) {
+          let sumT = 0, sumI = 0;
+          for (const p of defWithData) {
+            const s = statsAgg[p.player_uid];
+            const mins90 = Math.max(s.minutes / 90, 1);
+            sumT += s.tackles_won / mins90;
+            sumI += s.interceptions / mins90;
+          }
+          avgTacklesP90 = sumT / defWithData.length;
+          avgIntP90 = sumI / defWithData.length;
+        }
+
+        // Step C: Compute raw scores per position bucket
+        for (const p of players) {
+          const s = statsAgg[p.player_uid];
+          if (!s || s.appearances === 0) { p._rawScore = 0; continue; }
+          const mins90 = Math.max(s.minutes / 90, 1);
+          const sqrtApps = Math.sqrt(s.appearances);
+
+          switch (p._position) {
+            case 'FWD':
+              // goals weighted highest, per-90 rate × longevity
+              p._rawScore = ((s.goals * 4 + s.assists * 3 + (s.goals + s.assists) * 1) / mins90) * sqrtApps;
+              break;
+            case 'MID':
+              // assists weighted up, goals slightly down vs FWD
+              p._rawScore = ((s.goals * 3 + s.assists * 3.5 + (s.goals + s.assists) * 1) / mins90) * sqrtApps;
+              break;
+            case 'DEF': {
+              // Impute tackles/interceptions for older players with no data
+              let tw = s.tackles_won, intr = s.interceptions;
+              if (tw === 0 && intr === 0 && s.minutes > 0) {
+                tw = Math.round(avgTacklesP90 * s.minutes / 90);
+                intr = Math.round(avgIntP90 * s.minutes / 90);
+              }
+              // Estimate DEF clean sheets from GK rate
+              const defCs = Math.round(gkCsRate * s.appearances);
+              p._cleanSheets = defCs;
+              p._rawScore = (
+                (tw + intr) / mins90 * 2
+                + (s.appearances > 0 ? defCs / s.appearances : 0) * 4
+                + s.goals * 0.3
+                + s.assists * 0.3
+              ) * sqrtApps;
+              break;
+            }
+            case 'GK':
+              p._rawScore = (
+                (s.appearances > 0 ? s.clean_sheets / s.appearances : 0) * 5
+                + (s.appearances > 0 ? s.wins / s.appearances : 0) * 3
+                + ((s.saves + s.goals_against) > 0 ? s.saves / (s.saves + s.goals_against) : 0) * 2
+                - (s.minutes > 0 ? s.goals_against / mins90 : 0) * 1
+              ) * sqrtApps;
+              break;
+            default:
+              p._rawScore = 0;
+          }
+        }
+
+        // Step D: Z-score normalize within each position bucket
+        for (const bucket of ['GK', 'DEF', 'MID', 'FWD']) {
+          const bp = players.filter(p => p._position === bucket && p._rawScore !== undefined);
+          if (bp.length === 0) continue;
+          const mean = bp.reduce((s, p) => s + (p._rawScore || 0), 0) / bp.length;
+          const variance = bp.reduce((s, p) => s + Math.pow((p._rawScore || 0) - mean, 2), 0) / bp.length;
+          const stddev = Math.sqrt(variance);
+          for (const p of bp) {
+            p.performance = stddev > 0
+              ? Math.round(((p._rawScore || 0) - mean) / stddev * 100) / 100
+              : 0;
+          }
+        }
+
+        // Re-sort players by position-specific performance so pool building uses correct order
+        players.sort((a, b) => (b.performance || 0) - (a.performance || 0));
       }
 
       // Build pool ensuring all position buckets are represented
-      // The regular XI game searches per-position, so we must guarantee GK/DEF/MID/FWD
       const byBucket = { GK: [], DEF: [], MID: [], FWD: [] };
       for (const p of players) {
         if (byBucket[p._position]) byBucket[p._position].push(p);
       }
 
-      // Take top N per bucket proportional to a 4-3-3 formation
-      // GK: need at least 5, DEF: 50, MID: 50, FWD: 50 — rest fill up to 200
+      // Sort each bucket by the right measure (performance is already z-scored)
+      if (measure === 'performance') {
+        for (const bucket of Object.keys(byBucket)) {
+          byBucket[bucket].sort((a, b) => (b.performance || 0) - (a.performance || 0));
+        }
+      }
+
+      // Take top N per bucket (GK:10, DEF:60, MID:60, FWD:60)
       const bucketTargets = { GK: 10, DEF: 60, MID: 60, FWD: 60 };
       let xiPlayers = [];
       for (const [bucket, target] of Object.entries(bucketTargets)) {
         const available = byBucket[bucket] || [];
         xiPlayers = xiPlayers.concat(available.slice(0, target));
       }
-      // If we have room left, add more players sorted by value
       if (xiPlayers.length < 200) {
         const usedUids = new Set(xiPlayers.map(p => p.player_uid));
         const remaining = players.filter(p => !usedUids.has(p.player_uid));
@@ -669,6 +801,7 @@ exports.handler = async (event) => {
           position: p._position,
           clubs: [...p.clubs],
           cleanSheets: p._cleanSheets || 0,
+          appearances: p._statsApps || p.totalApps,
         })),
       };
     } else if (gameType === 'higher_lower') {

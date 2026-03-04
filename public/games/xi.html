@@ -2662,7 +2662,7 @@ document.getElementById('tsClock').textContent = new Date().toTimeString().slice
               rank: i + 1,
               name: p.name,
               score: p.value,
-              appearances: p.value,
+              appearances: p.appearances || p.value,
               goals: 0,
               assists: 0,
               cleanSheets: p.cleanSheets || 0,
