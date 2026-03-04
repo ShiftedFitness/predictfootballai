@@ -594,7 +594,7 @@ exports.handler = async (event) => {
         const posQuery = () => {
           let q = client
             .from('v_all_player_season_stats')
-            .select('player_uid, position_bucket, appearances')
+            .select('player_uid, position_bucket, appearances, clean_sheets')
             .in('player_uid', batch)
             .not('position_bucket', 'is', null);
           // Filter by competition to reduce data volume
@@ -606,11 +606,14 @@ exports.handler = async (event) => {
       }
 
       // For each player, pick the position where they have the most appearances
+      // Also aggregate clean sheets (needed for GK/DEF rankings display)
       const posAgg = {};
+      const csAgg = {};  // player_uid → total clean sheets
       for (const r of posRows) {
         if (!r.position_bucket) continue;
         if (!posAgg[r.player_uid]) posAgg[r.player_uid] = {};
         posAgg[r.player_uid][r.position_bucket] = (posAgg[r.player_uid][r.position_bucket] || 0) + (r.appearances || 0);
+        csAgg[r.player_uid] = (csAgg[r.player_uid] || 0) + (r.clean_sheets || 0);
       }
       const posMap = {};
       for (const [uid, buckets] of Object.entries(posAgg)) {
@@ -622,9 +625,10 @@ exports.handler = async (event) => {
         if (best) posMap[uid] = best;
       }
 
-      // Assign positions to ALL players (not just top 200)
+      // Assign positions and clean sheets to ALL players
       for (const p of players) {
         p._position = posMap[p.player_uid] || 'MID';
+        p._cleanSheets = csAgg[p.player_uid] || 0;
       }
 
       // Build pool ensuring all position buckets are represented
@@ -664,6 +668,7 @@ exports.handler = async (event) => {
           value: getValue(p),
           position: p._position,
           clubs: [...p.clubs],
+          cleanSheets: p._cleanSheets || 0,
         })),
       };
     } else if (gameType === 'higher_lower') {

@@ -216,7 +216,7 @@ body {
 .setup-card.collapsed .card-header .chevron { transform: rotate(-90deg); }
 .setup-card .card-body {
   overflow: hidden;
-  max-height: 1200px;
+  max-height: 3000px;
   transition: max-height 0.35s ease, opacity 0.25s ease, padding 0.3s ease;
   opacity: 1;
   padding-top: 12px;
@@ -2467,7 +2467,6 @@ document.getElementById('tsClock').textContent = new Date().toTimeString().slice
               <div>
                 <span class="suggestion-name">${escHtml(p.name)}</span>
               </div>
-              <span class="suggestion-meta">${p.value} ${communityMeasure === 'goals' ? 'goals' : 'apps'}</span>
             </li>
           `).join('');
 
@@ -2567,6 +2566,7 @@ document.getElementById('tsClock').textContent = new Date().toTimeString().slice
             $('actionBtns').classList.remove('hidden');
             $('submitXIBtn').classList.add('hidden');
             $('giveUpBtn').classList.add('hidden');
+            $('viewRankingsBtn').classList.remove('hidden');
           } else {
             $('actionBtns').classList.remove('hidden');
             $('submitXIBtn').textContent = 'GO \u2014 Submit XI';
@@ -2665,13 +2665,13 @@ document.getElementById('tsClock').textContent = new Date().toTimeString().slice
               appearances: p.value,
               goals: 0,
               assists: 0,
-              cleanSheets: 0,
+              cleanSheets: p.cleanSheets || 0,
             }));
           if (bucketList.length > 0) communityRankings[bucket] = bucketList;
         }
         // Populate rankingsData so the existing showRankings() works
+        // Button stays hidden until give-up or all-correct (matching standard XI flow)
         rankingsData = communityRankings;
-        $('viewRankingsBtn').classList.remove('hidden');
 
         // Also override scoreOneSlot for 1-by-1 mode after first submit
         window.scoreOneSlot = function(targetSlot) {
