@@ -1015,7 +1015,7 @@ body {
       <p>Scored on assists (3.5x) and goals (3x) per 90 minutes, scaled by longevity. Creativity is weighted slightly higher than for forwards.</p>
 
       <h4>Defenders</h4>
-      <p>Scored primarily on estimated clean sheet rate (6x, derived from the club&rsquo;s GK data), with a smaller contribution from tackles and interceptions per 90 minutes (0.5x). For players without defensive action data (pre-2010s), average rates are imputed so older defenders aren&rsquo;t penalised. A small bonus is added for goals and assists per appearance.</p>
+      <p>Scored primarily on clean sheet rate (6x), with a smaller contribution from tackles and interceptions per 90 minutes (0.5x). For players without defensive action data (pre-2010s), average rates are imputed so older defenders aren&rsquo;t penalised. A small bonus is added for goals and assists per appearance.</p>
 
       <h4>Goalkeepers</h4>
       <p>Scored on clean sheet rate, win rate, and save percentage, with a penalty for goals conceded per 90 minutes.</p>
@@ -2613,74 +2613,93 @@ document.getElementById('tsClock').textContent = new Date().toTimeString().slice
           $('viewRankingsBtn').classList.remove('hidden');
         }
 
-        // ── Auto-select formation and set up the pitch ──
-        const defaultFormation = gameConfig.formations.find(f => f.id === '4-3-3') || gameConfig.formations[0];
-        selectedFormation = defaultFormation.id;
+        // ── Show formation picker, then start community game ──
         selectedObjective = communityMeasure;
         selectedScope = 'community_' + communityId;
 
-        slots = defaultFormation.slots.map(s => ({ ...s, player: null }));
-        attempts = 0;
-        lockedSlots = new Set();
-        lastResults = null;
-        scoredOnce = false;
-        slotResults = {};
-        previousAttempts = [];
-        currentPicksTab = 'current';
+        // Hide objective & scope cards — only show formation picker
+        $('objectiveCard').style.display = 'none';
+        $('scopeCard').style.display = 'none';
+        $('startGameBtn').style.display = 'none';
 
-        $('gameBadge').innerHTML = `<span class="dot"></span> ${game.title} &middot; ${selectedFormation} &middot; ${communityMeasure}`;
-        $('step1').classList.add('hidden');
-        $('step2').classList.remove('hidden');
-        $('scoreBanner').classList.add('hidden');
-        $('actionBtns').classList.add('hidden');
-        $('picksFab').classList.remove('hidden');
-        $('giveUpBtn').classList.remove('hidden');
-        $('giveUpBtn').disabled = false;
-        $('giveUpBtn').innerHTML = '&#9873; Give Up &mdash; Show All Answers';
-        $('viewRankingsBtn').classList.add('hidden');
-        $('perfInfoTab').classList.toggle('hidden', communityMeasure !== 'performance');
-        renderPitch();
-        updateSubmitBtn();
-
-        // ── Bind onclick handlers AFTER defining overrides ──
-        $('submitXIBtn').onclick = communitySubmitXI;
-        $('resetBtn').onclick = resetPicks;
-        $('giveUpBtn').onclick = communityGiveUp;
+        // Render formation buttons
+        const formGrid = $('formationGrid');
+        formGrid.innerHTML = '';
+        for (const fm of gameConfig.formations) {
+          const btn = document.createElement('button');
+          btn.className = 'formation-btn';
+          btn.textContent = fm.label;
+          btn.onclick = () => startCommunityXI(fm.id);
+          formGrid.appendChild(btn);
+        }
+        expandSection('formationCard');
 
         TSNav.showGameContext(game.title, 'starting_xi');
-        TSData.incrementCommunityPlayCount(communityId);
 
-        // Override "Start New Challenge" to reload community game instead of going to setup
-        $('newGameBtn').onclick = () => window.location.reload();
+        function startCommunityXI(formationId) {
+          const formation = gameConfig.formations.find(f => f.id === formationId);
+          if (!formation) return;
+          selectedFormation = formationId;
 
-        // ── Build Top 10 Per Position rankings from community data ──
-        const communityRankings = {};
-        const allBuckets = ['GK', 'DEF', 'MID', 'FWD'];
-        for (const bucket of allBuckets) {
-          const bucketList = communityPlayers
-            .filter(p => (posMap[p.position] || p.position) === bucket)
-            .sort((a, b) => b.value - a.value)
-            .slice(0, 10)
-            .map((p, i) => ({
-              rank: i + 1,
-              name: p.name,
-              score: p.value,
-              appearances: p.appearances || p.value,
-              goals: p.goals || 0,
-              assists: p.assists || 0,
-              cleanSheets: p.cleanSheets || 0,
-            }));
-          if (bucketList.length > 0) communityRankings[bucket] = bucketList;
+          slots = formation.slots.map(s => ({ ...s, player: null }));
+          attempts = 0;
+          lockedSlots = new Set();
+          lastResults = null;
+          scoredOnce = false;
+          slotResults = {};
+          previousAttempts = [];
+          currentPicksTab = 'current';
+
+          $('gameBadge').innerHTML = `<span class="dot"></span> ${game.title} &middot; ${selectedFormation} &middot; ${communityMeasure}`;
+          $('step1').classList.add('hidden');
+          $('step2').classList.remove('hidden');
+          $('scoreBanner').classList.add('hidden');
+          $('actionBtns').classList.add('hidden');
+          $('picksFab').classList.remove('hidden');
+          $('giveUpBtn').classList.remove('hidden');
+          $('giveUpBtn').disabled = false;
+          $('giveUpBtn').innerHTML = '&#9873; Give Up &mdash; Show All Answers';
+          $('viewRankingsBtn').classList.add('hidden');
+          $('perfInfoTab').classList.toggle('hidden', communityMeasure !== 'performance');
+          renderPitch();
+          updateSubmitBtn();
+
+          // Bind onclick handlers
+          $('submitXIBtn').onclick = communitySubmitXI;
+          $('resetBtn').onclick = resetPicks;
+          $('giveUpBtn').onclick = communityGiveUp;
+
+          TSData.incrementCommunityPlayCount(communityId);
+
+          // Override "Start New Challenge" to reload community game
+          $('newGameBtn').onclick = () => window.location.reload();
+
+          // Build Top 10 Per Position rankings from community data
+          const communityRankings = {};
+          const allBuckets = ['GK', 'DEF', 'MID', 'FWD'];
+          for (const bucket of allBuckets) {
+            const bucketList = communityPlayers
+              .filter(p => (posMap[p.position] || p.position) === bucket)
+              .sort((a, b) => b.value - a.value)
+              .slice(0, 10)
+              .map((p, i) => ({
+                rank: i + 1,
+                name: p.name,
+                score: p.value,
+                appearances: p.appearances || p.value,
+                goals: p.goals || 0,
+                assists: p.assists || 0,
+                cleanSheets: p.cleanSheets || 0,
+              }));
+            if (bucketList.length > 0) communityRankings[bucket] = bucketList;
+          }
+          rankingsData = communityRankings;
+
+          // Override scoreOneSlot for 1-by-1 mode after first submit
+          window.scoreOneSlot = function(targetSlot) {
+            communitySubmitXI();
+          };
         }
-        // Populate rankingsData so the existing showRankings() works
-        // Button stays hidden until give-up or all-correct (matching standard XI flow)
-        rankingsData = communityRankings;
-
-        // Also override scoreOneSlot for 1-by-1 mode after first submit
-        window.scoreOneSlot = function(targetSlot) {
-          // Re-use communitySubmitXI logic for single slot scoring
-          communitySubmitXI();
-        };
       }
     } catch (e) { console.warn('[TS] community load failed:', e); }
   }
