@@ -723,8 +723,8 @@ exports.handler = async (event) => {
               p._rawScore = (
                 (tw + intr) / mins90 * 2
                 + (s.appearances > 0 ? defCs / s.appearances : 0) * 4
-                + s.goals * 0.3
-                + s.assists * 0.3
+                + (s.appearances > 0 ? s.goals / s.appearances : 0) * 2
+                + (s.appearances > 0 ? s.assists / s.appearances : 0) * 2
               ) * sqrtApps;
               break;
             }

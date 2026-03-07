@@ -249,8 +249,8 @@ BEGIN
   SET raw_score = (
     (tackles_won + interceptions)::numeric / GREATEST(minutes::numeric / 90.0, 1.0) * 2.0
     + CASE WHEN appearances > 0 THEN clean_sheets::numeric / appearances ELSE 0 END * 4.0
-    + goals * 0.3
-    + assists * 0.3
+    + CASE WHEN appearances > 0 THEN goals::numeric / appearances ELSE 0 END * 2.0
+    + CASE WHEN appearances > 0 THEN assists::numeric / appearances ELSE 0 END * 2.0
   ) * sqrt(appearances::numeric)
   WHERE position_bucket = 'DEF';
 

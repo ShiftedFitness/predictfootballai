@@ -1,7 +1,7 @@
 /**
  * create-checkout.js — Create a Stripe Checkout session for Pro upgrade
  *
- * POST body: { userId: number }
+ * POST body: { userId: number, plan?: 'lifetime' | 'day_pass' }
  *
  * Environment variables required:
  *   STRIPE_SECRET_KEY  — Stripe secret key (sk_live_... or sk_test_...)
@@ -10,6 +10,19 @@
  */
 
 const { sb, respond, handleOptions } = require('./_supabase');
+
+const PLANS = {
+  lifetime: {
+    name: 'TeleStats Pro',
+    description: 'Unlimited plays, all categories, community game creation — forever.',
+    amount: 499, // £4.99
+  },
+  day_pass: {
+    name: 'TeleStats Day Pass',
+    description: 'Unlimited plays and all categories for 24 hours.',
+    amount: 99, // £0.99
+  }
+};
 
 exports.handler = async (event) => {
   const cors = handleOptions(event);
@@ -33,29 +46,39 @@ exports.handler = async (event) => {
     return respond(400, 'Invalid JSON');
   }
 
-  const { userId } = body;
+  const { userId, plan: planKey = 'lifetime' } = body;
   if (!userId) return respond(400, 'Missing userId');
+
+  const plan = PLANS[planKey];
+  if (!plan) return respond(400, 'Invalid plan. Use "lifetime" or "day_pass".');
 
   const client = sb();
 
   // 1. Look up the user
   const { data: user, error: userErr } = await client
     .from('ts_users')
-    .select('id, tier, email, username')
+    .select('id, tier, email, username, pro_expires_at')
     .eq('id', userId)
     .maybeSingle();
 
   if (userErr || !user) return respond(404, 'User not found');
-  if (user.tier === 'paid') return respond(409, 'Already a Pro member');
   if (!user.email) return respond(400, 'Email required for payment. Please sign up first.');
 
-  // 2. Determine origin for redirect URLs
+  // 2. Check existing tier
+  const isLifetime = user.tier === 'paid' && !user.pro_expires_at;
+  const hasActiveDayPass = user.tier === 'paid' && user.pro_expires_at && new Date(user.pro_expires_at) > new Date();
+
+  if (isLifetime) return respond(409, 'Already a lifetime Pro member');
+  if (hasActiveDayPass && planKey === 'day_pass') return respond(409, 'You already have an active Day Pass');
+  // Allow day_pass → lifetime upgrade
+
+  // 3. Determine origin for redirect URLs
   const origin = event.headers.origin
     || event.headers.referer?.replace(/\/[^\/]*$/, '')
     || 'https://telestats.net';
 
   try {
-    // 3. Create Stripe Checkout Session
+    // 4. Create Stripe Checkout Session
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
       payment_method_types: ['card'],
@@ -65,20 +88,21 @@ exports.handler = async (event) => {
           price_data: {
             currency: 'gbp',
             product_data: {
-              name: 'TeleStats Pro',
-              description: 'Unlimited plays, all categories, community game creation — forever.',
+              name: plan.name,
+              description: plan.description,
               images: ['https://res.cloudinary.com/dbfvogb95/image/upload/v1770835428/Screenshot_2026-02-11_at_19.43.16_m7urul.png']
             },
-            unit_amount: 499, // £4.99 in pence
+            unit_amount: plan.amount,
           },
           quantity: 1,
         }
       ],
       metadata: {
         ts_user_id: String(userId),
-        ts_email: user.email
+        ts_email: user.email,
+        ts_plan: planKey
       },
-      success_url: `${origin}/upgrade/?payment=success`,
+      success_url: `${origin}/upgrade/?payment=success&plan=${planKey}`,
       cancel_url: `${origin}/upgrade/?payment=cancelled`,
     });
 

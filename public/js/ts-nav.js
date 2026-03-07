@@ -61,14 +61,23 @@
           </div>`;
       } else {
         const xp = TSAuth.getXPProgress();
-        const isPaid = user.tier === 'paid';
+        const isPaid = TSAuth.getTier() === 'paid';
+        const dayPassRemaining = TSAuth.getDayPassRemaining();
+        let proBadge;
+        if (!isPaid) {
+          proBadge = '<a href="/upgrade/" class="ts-nav-pro-btn" title="Upgrade to Pro">Get Pro</a>';
+        } else if (dayPassRemaining) {
+          proBadge = `<span class="ts-nav-pro-badge ts-daypass-badge" title="Day Pass — ${dayPassRemaining.text} remaining">Pro ${dayPassRemaining.text}</span>`;
+        } else {
+          proBadge = '<span class="ts-nav-pro-badge" title="Pro Member">Pro</span>';
+        }
         rightHTML = `
           <a href="/profile/" class="ts-nav-profile">
             ${levelBadgeHTML(xp.level, xp.levelName)}
             <span class="ts-nav-username">${esc(user.username || user.display_name || user.email || 'Player')}</span>
             <span class="ts-nav-xp">${(user.total_xp || 0).toLocaleString()} XP</span>
           </a>
-          ${!isPaid ? '<a href="/upgrade/" class="ts-nav-pro-btn" title="Upgrade to Pro">Get Pro</a>' : '<span class="ts-nav-pro-badge" title="Pro Member">Pro</span>'}
+          ${proBadge}
           <button class="ts-nav-logout-btn" id="tsNavLogoutBtn" title="Log out">&#x2715;</button>`;
       }
 
@@ -89,7 +98,7 @@
           ${linksHTML}
           ${isAnon
             ? '<a href="#" class="ts-nav-link" id="tsNavMobileLogin">Log In</a>'
-            : `<a href="/profile/" class="ts-nav-link">Profile</a>${user.tier !== 'paid' ? '<a href="/upgrade/" class="ts-nav-link" style="color:var(--accent-yellow)">Upgrade to Pro</a>' : ''}<a href="#" class="ts-nav-link" id="tsNavMobileLogout">Log Out</a>`
+            : `<a href="/profile/" class="ts-nav-link">Profile</a>${!isPaid ? '<a href="/upgrade/" class="ts-nav-link" style="color:var(--accent-yellow)">Upgrade to Pro</a>' : ''}<a href="#" class="ts-nav-link" id="tsNavMobileLogout">Log Out</a>`
           }
         </div>`;
 
@@ -181,6 +190,11 @@
         TSAuth._justConfirmedEmail = false;
         this.showWelcomeOverlay();
       }
+
+      // ── Day pass banner ──
+      if (TSAuth.hasActiveDayPass()) {
+        this.showDayPassBanner();
+      }
     },
 
     /**
@@ -240,7 +254,7 @@
         return;
       }
       // If paid user, redirect to profile
-      if (!isAnon && user && user.tier === 'paid') {
+      if (!isAnon && user && TSAuth.getTier() === 'paid') {
         window.location.href = '/profile/';
         return;
       }
@@ -500,20 +514,29 @@
       const overlay = document.createElement('div');
       overlay.id = 'tsPlayLimitOverlay';
       overlay.className = 'ts-modal-overlay';
+
+      let actionsHTML;
+      if (isAnon) {
+        actionsHTML = `
+          <p>Anonymous users get 3 plays per day. Create a free account to get 5 plays per game!</p>
+          <div class="ts-limit-actions">
+            <button class="btn-primary ts-btn" id="tsLimitSignup">Create Free Account</button>
+            <button class="btn-secondary ts-btn" id="tsLimitClose">Back to Games</button>
+          </div>`;
+      } else {
+        actionsHTML = `
+          <p>You've used all your plays for today. Go unlimited!</p>
+          <div class="ts-limit-actions" style="flex-direction:column;gap:10px;">
+            <a href="/upgrade/" class="btn-primary ts-btn" style="text-align:center;text-decoration:none;">Day Pass — £0.99 <span style="font-weight:400;font-size:.8em;">(24 hours)</span></a>
+            <a href="/upgrade/" class="btn-primary ts-btn" style="text-align:center;text-decoration:none;background:var(--accent-yellow);color:#000;">Lifetime Pro — £4.99 <span style="font-weight:400;font-size:.8em;">(forever)</span></a>
+            <button class="btn-secondary ts-btn" id="tsLimitClose">Back to Games</button>
+          </div>`;
+      }
+
       overlay.innerHTML = `
         <div class="ts-modal ts-limit-modal">
           <h2>Daily Limit Reached</h2>
-          <p>${isAnon
-            ? 'Anonymous users get 3 plays per day. Create a free account to get 5 plays per game!'
-            : 'You\'ve used all your plays for today. Upgrade to unlimited or invite friends!'
-          }</p>
-          <div class="ts-limit-actions">
-            ${isAnon
-              ? '<button class="btn-primary ts-btn" id="tsLimitSignup">Create Free Account</button>'
-              : '<a href="/upgrade/" class="btn-primary ts-btn">Upgrade — £4.99</a>'
-            }
-            <button class="btn-secondary ts-btn" id="tsLimitClose">Back to Games</button>
-          </div>
+          ${actionsHTML}
         </div>`;
 
       document.body.appendChild(overlay);
@@ -524,7 +547,7 @@
           TSNav.showAuthModal('signup');
         });
       }
-      document.getElementById('tsLimitClose').addEventListener('click', () => {
+      document.getElementById('tsLimitClose')?.addEventListener('click', () => {
         overlay.remove();
         window.location.href = '/games/';
       });
@@ -559,6 +582,46 @@
         toast.classList.remove('show');
         setTimeout(() => toast.remove(), 400);
       }, 3000);
+    },
+
+    /**
+     * Show a fixed bottom banner for active day pass users with countdown.
+     * Called from render() when a day pass is active.
+     */
+    showDayPassBanner() {
+      const existing = document.getElementById('tsDayPassBanner');
+      if (existing) existing.remove();
+
+      const remaining = TSAuth.getDayPassRemaining();
+      if (!remaining) return;
+
+      const banner = document.createElement('div');
+      banner.id = 'tsDayPassBanner';
+      banner.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--accent);padding:8px 16px;display:flex;align-items:center;justify-content:center;gap:12px;z-index:9998;font-size:.85rem;';
+      banner.innerHTML = `
+        <span style="color:var(--accent);">Day Pass</span>
+        <span id="tsDayPassTimer" style="font-family:'Space Mono',monospace;font-weight:600;">${remaining.text}</span>
+        <a href="/upgrade/" style="color:var(--accent-yellow);font-size:.8rem;text-decoration:underline;">Upgrade to Lifetime</a>`;
+      document.body.appendChild(banner);
+
+      // Update every 60s
+      const interval = setInterval(() => {
+        const r = TSAuth.getDayPassRemaining();
+        const timer = document.getElementById('tsDayPassTimer');
+        if (!r || !timer) {
+          clearInterval(interval);
+          if (!r && timer) {
+            // Expired — show expired state
+            banner.innerHTML = `
+              <span style="color:var(--danger,#e05555);">Day Pass Expired</span>
+              <a href="/upgrade/" style="color:var(--accent);font-size:.85rem;text-decoration:underline;">Get another Day Pass or upgrade</a>`;
+            // Refresh profile so tier flips
+            TSAuth.refreshProfile();
+          }
+          return;
+        }
+        timer.textContent = r.text;
+      }, 60000);
     },
 
     /**

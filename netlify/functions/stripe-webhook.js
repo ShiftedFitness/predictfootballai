@@ -51,12 +51,22 @@ exports.handler = async (event) => {
     }
 
     const client = sb();
+    const planType = session.metadata?.ts_plan || 'lifetime';
 
     try {
       // 3. Upgrade user to paid
+      const updateData = { tier: 'paid' };
+      if (planType === 'day_pass') {
+        // Set expiry 24 hours from now
+        updateData.pro_expires_at = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+      } else {
+        // Lifetime — clear any existing day pass expiry
+        updateData.pro_expires_at = null;
+      }
+
       const { error: updateErr } = await client
         .from('ts_users')
-        .update({ tier: 'paid' })
+        .update(updateData)
         .eq('id', userId);
 
       if (updateErr) {
@@ -72,9 +82,10 @@ exports.handler = async (event) => {
           stripe_session_id: session.id,
           stripe_payment_intent: session.payment_intent,
           stripe_customer_email: session.customer_email || email,
-          amount_total: session.amount_total,     // in pence (499 = £4.99)
+          amount_total: session.amount_total,
           currency: session.currency || 'gbp',
-          status: session.payment_status || 'paid'
+          status: session.payment_status || 'paid',
+          plan_type: planType
         });
 
       if (paymentErr) {
@@ -82,8 +93,8 @@ exports.handler = async (event) => {
         console.error('Failed to record payment:', paymentErr.message);
       }
 
-      console.log(`[Stripe] User ${userId} upgraded to Pro (session: ${session.id})`);
-      return respond(200, { received: true, upgraded: true });
+      console.log(`[Stripe] User ${userId} upgraded to ${planType === 'day_pass' ? 'Day Pass' : 'Pro'} (session: ${session.id})`);
+      return respond(200, { received: true, upgraded: true, plan: planType });
 
     } catch (err) {
       console.error('Webhook processing error:', err.message);

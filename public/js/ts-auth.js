@@ -270,10 +270,38 @@
       return !u || u.tier === 'anonymous';
     },
 
-    /** Get user tier */
+    /** Get user tier (expiry-aware for day passes) */
     getTier() {
       const u = this.getUser();
-      return u ? u.tier : 'anonymous';
+      if (!u) return 'anonymous';
+      if (u.tier === 'paid' && u.pro_expires_at && new Date(u.pro_expires_at) <= new Date()) {
+        return 'free'; // Day pass expired
+      }
+      return u.tier;
+    },
+
+    /** Check if user has lifetime Pro (no expiry) */
+    isLifetimePro() {
+      const u = this.getUser();
+      return u && u.tier === 'paid' && !u.pro_expires_at;
+    },
+
+    /** Check if user has an active day pass */
+    hasActiveDayPass() {
+      const u = this.getUser();
+      return u && u.tier === 'paid' && u.pro_expires_at && new Date(u.pro_expires_at) > new Date();
+    },
+
+    /** Get remaining day pass time, or null */
+    getDayPassRemaining() {
+      const u = this.getUser();
+      if (!u || !u.pro_expires_at) return null;
+      const diff = new Date(u.pro_expires_at) - new Date();
+      if (diff <= 0) return null;
+      const hours = Math.floor(diff / 3600000);
+      const minutes = Math.floor((diff % 3600000) / 60000);
+      const text = hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
+      return { hours, minutes, text, ms: diff };
     },
 
     /** Determine which scopes a user can access based on tier */

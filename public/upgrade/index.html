@@ -21,7 +21,7 @@
     .up-hero { text-align: center; margin-bottom: 40px; }
     .up-hero h1 { font-size: 2rem; font-weight: 700; margin-bottom: 8px; }
     .up-hero p { color: var(--muted); font-size: 1.05rem; }
-    .up-plans { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 40px; }
+    .up-plans { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 40px; }
     .up-plan { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 24px; text-align: center; position: relative; }
     .up-plan.featured { border-color: var(--accent); box-shadow: 0 0 20px rgba(0,229,255,.15); }
     .up-plan-badge { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: var(--accent); color: #000; font-size: .7rem; font-weight: 700; padding: 3px 12px; border-radius: 10px; text-transform: uppercase; }
@@ -101,6 +101,22 @@
         <button class="up-plan-btn secondary" id="upFreeBtn">Current Plan</button>
       </div>
 
+      <!-- Day Pass -->
+      <div class="up-plan" id="upDayPassCard">
+        <div class="up-plan-name">Day Pass</div>
+        <div class="up-plan-price">£0.99 <small>24 hours</small></div>
+        <div class="up-plan-desc">Try everything for a day</div>
+        <ul class="up-features">
+          <li>Unlimited plays for 24 hours</li>
+          <li>All categories unlocked</li>
+          <li>XP and levelling</li>
+          <li>Global leaderboard</li>
+          <li class="disabled">Community game creation</li>
+          <li class="disabled">Expires after 24 hours</li>
+        </ul>
+        <button class="up-plan-btn primary" id="upDayPassBtn" style="background:var(--accent-cyan);color:#000;">Day Pass — £0.99</button>
+      </div>
+
       <!-- Paid -->
       <div class="up-plan featured">
         <div class="up-plan-badge">Best Value</div>
@@ -170,18 +186,18 @@
       <h2>Feature Comparison</h2>
       <table class="up-table">
         <thead>
-          <tr><th></th><th>Anonymous</th><th>Free</th><th>Referral</th><th>Pro</th></tr>
+          <tr><th></th><th>Anonymous</th><th>Free</th><th>Day Pass</th><th>Referral</th><th>Pro</th></tr>
         </thead>
         <tbody>
-          <tr><td>Daily plays</td><td>3 total</td><td>5/game</td><td>5/game</td><td class="check">Unlimited</td></tr>
-          <tr><td>Free categories</td><td class="check">&#10003;</td><td class="check">&#10003;</td><td class="check">&#10003;</td><td class="check">&#10003;</td></tr>
-          <tr><td>Premium categories</td><td class="cross">&#10007;</td><td class="cross">&#10007;</td><td class="check">&#10003;</td><td class="check">&#10003;</td></tr>
-          <tr><td>XP &amp; levelling</td><td class="check">&#10003;</td><td class="check">&#10003;</td><td class="check">&#10003;</td><td class="check">&#10003;</td></tr>
-          <tr><td>Leaderboard</td><td class="cross">&#10007;</td><td class="check">&#10003;</td><td class="check">&#10003;</td><td class="check">&#10003;</td></tr>
-          <tr><td>Profile page</td><td class="cross">&#10007;</td><td class="check">&#10003;</td><td class="check">&#10003;</td><td class="check">&#10003;</td></tr>
-          <tr><td>Create games</td><td class="cross">&#10007;</td><td class="cross">&#10007;</td><td class="cross">&#10007;</td><td class="check">&#10003;</td></tr>
-          <tr><td>New leagues &amp; intl data</td><td class="cross">&#10007;</td><td class="cross">&#10007;</td><td class="cross">&#10007;</td><td class="check">&#10003;</td></tr>
-          <tr><td>Price</td><td>Free</td><td>Free</td><td>Free</td><td>£4.99</td></tr>
+          <tr><td>Daily plays</td><td>3 total</td><td>5/game</td><td class="check">Unlimited</td><td>5/game</td><td class="check">Unlimited</td></tr>
+          <tr><td>Free categories</td><td class="check">&#10003;</td><td class="check">&#10003;</td><td class="check">&#10003;</td><td class="check">&#10003;</td><td class="check">&#10003;</td></tr>
+          <tr><td>Premium categories</td><td class="cross">&#10007;</td><td class="cross">&#10007;</td><td class="check">&#10003;</td><td class="check">&#10003;</td><td class="check">&#10003;</td></tr>
+          <tr><td>XP &amp; levelling</td><td class="check">&#10003;</td><td class="check">&#10003;</td><td class="check">&#10003;</td><td class="check">&#10003;</td><td class="check">&#10003;</td></tr>
+          <tr><td>Leaderboard</td><td class="cross">&#10007;</td><td class="check">&#10003;</td><td class="check">&#10003;</td><td class="check">&#10003;</td><td class="check">&#10003;</td></tr>
+          <tr><td>Profile page</td><td class="cross">&#10007;</td><td class="check">&#10003;</td><td class="check">&#10003;</td><td class="check">&#10003;</td><td class="check">&#10003;</td></tr>
+          <tr><td>Create games</td><td class="cross">&#10007;</td><td class="cross">&#10007;</td><td class="cross">&#10007;</td><td class="cross">&#10007;</td><td class="check">&#10003;</td></tr>
+          <tr><td>Duration</td><td>—</td><td>—</td><td>24 hours</td><td>—</td><td>Forever</td></tr>
+          <tr><td>Price</td><td>Free</td><td>Free</td><td>£0.99</td><td>Free</td><td>£4.99</td></tr>
         </tbody>
       </table>
     </div>
@@ -201,6 +217,14 @@
         <div class="up-faq-a">Yes! Invite 5 friends using your referral code and you'll both unlock all game categories.</div>
       </div>
       <div class="up-faq-item">
+        <div class="up-faq-q">How does the Day Pass work?</div>
+        <div class="up-faq-a">The Day Pass gives you 24 hours of unlimited plays and all categories from the moment you purchase it. After 24 hours, you revert to your free plan. You can buy another Day Pass anytime or upgrade to lifetime Pro.</div>
+      </div>
+      <div class="up-faq-item">
+        <div class="up-faq-q">Can I upgrade from Day Pass to lifetime Pro?</div>
+        <div class="up-faq-a">Yes! You can upgrade to lifetime Pro at any time, even while a Day Pass is active. The full £4.99 gives you permanent unlimited access.</div>
+      </div>
+      <div class="up-faq-item">
         <div class="up-faq-q">What payment methods do you accept?</div>
         <div class="up-faq-a">We accept all major credit and debit cards through Stripe. Your payment information is never stored on our servers.</div>
       </div>
@@ -218,19 +242,32 @@
 
       const user = TSAuth.getUser();
       const isAnon = TSAuth.isAnonymous();
+      const effectiveTier = TSAuth.getTier();
+      const isLifetime = TSAuth.isLifetimePro();
+      const hasActiveDayPass = TSAuth.hasActiveDayPass();
 
       // Update plan button states
       const freeBtn = document.getElementById('upFreeBtn');
       const buyBtn = document.getElementById('upBuyBtn');
+      const dayPassBtn = document.getElementById('upDayPassBtn');
+      const dayPassCard = document.getElementById('upDayPassCard');
 
       if (isAnon) {
         freeBtn.textContent = 'Sign Up Free';
         freeBtn.addEventListener('click', () => TSNav.showAuthModal('signup'));
-      } else if (user?.tier === 'paid') {
+      } else if (isLifetime) {
         freeBtn.textContent = 'Free';
         buyBtn.textContent = 'Current Plan';
         buyBtn.disabled = true;
         buyBtn.style.opacity = '.5';
+        // Hide day pass for lifetime users
+        dayPassCard.style.display = 'none';
+      } else if (hasActiveDayPass) {
+        freeBtn.textContent = 'Free';
+        const remaining = TSAuth.getDayPassRemaining();
+        dayPassBtn.textContent = `Active — ${remaining ? remaining.text : ''} left`;
+        dayPassBtn.disabled = true;
+        dayPassBtn.style.opacity = '.7';
       } else {
         freeBtn.textContent = 'Current Plan';
         freeBtn.disabled = true;
@@ -240,24 +277,34 @@
       // Handle payment return from Stripe
       const params = new URLSearchParams(window.location.search);
       if (params.get('payment') === 'success') {
-        // Refresh profile to get updated tier
         await TSAuth.refreshProfile();
+        const returnPlan = params.get('plan') || 'lifetime';
         const updated = TSAuth.getUser();
         if (updated?.tier === 'paid') {
-          buyBtn.textContent = 'Current Plan';
-          buyBtn.disabled = true;
-          buyBtn.style.opacity = '.5';
+          if (!updated.pro_expires_at) {
+            // Lifetime
+            buyBtn.textContent = 'Current Plan';
+            buyBtn.disabled = true;
+            buyBtn.style.opacity = '.5';
+            dayPassCard.style.display = 'none';
+          } else {
+            // Day pass
+            const remaining = TSAuth.getDayPassRemaining();
+            dayPassBtn.textContent = `Active — ${remaining ? remaining.text : '24h'} left`;
+            dayPassBtn.disabled = true;
+            dayPassBtn.style.opacity = '.7';
+          }
           freeBtn.textContent = 'Free';
           freeBtn.disabled = false;
           freeBtn.style.opacity = '1';
         }
-        // Show success message
         const hero = document.querySelector('.up-hero');
         const banner = document.createElement('div');
         banner.style.cssText = 'background:var(--accent);color:#000;padding:14px 20px;border-radius:12px;font-weight:600;text-align:center;margin-bottom:20px;font-size:1rem;';
-        banner.textContent = '🎉 Welcome to TeleStats Pro! You now have unlimited access.';
+        banner.textContent = returnPlan === 'day_pass'
+          ? '\uD83C\uDF89 Day Pass activated! You have 24 hours of unlimited access.'
+          : '\uD83C\uDF89 Welcome to TeleStats Pro! You now have unlimited access.';
         hero.after(banner);
-        // Clean URL
         history.replaceState(null, '', '/upgrade/');
       } else if (params.get('payment') === 'cancelled') {
         const hero = document.querySelector('.up-hero');
@@ -268,44 +315,41 @@
         history.replaceState(null, '', '/upgrade/');
       }
 
-      // Buy button — Stripe Checkout
-      buyBtn.addEventListener('click', async () => {
+      const API_BASE = window.location.hostname === 'localhost'
+        ? 'http://localhost:8888/.netlify/functions'
+        : '/.netlify/functions';
+
+      // Checkout helper
+      async function startCheckout(btn, plan, label) {
         if (isAnon) { TSNav.showAuthModal('signup'); return; }
-        if (user?.tier === 'paid') return;
-
-        buyBtn.disabled = true;
-        buyBtn.textContent = 'Redirecting...';
-
-        const API_BASE = window.location.hostname === 'localhost'
-          ? 'http://localhost:8888/.netlify/functions'
-          : '/.netlify/functions';
-
+        btn.disabled = true;
+        btn.textContent = 'Redirecting...';
         try {
           const res = await fetch(API_BASE + '/create-checkout', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userId: user.id })
+            body: JSON.stringify({ userId: user.id, plan })
           });
           const data = await res.json();
-
-          if (!res.ok) {
-            throw new Error(data.error || 'Failed to create checkout');
-          }
-
-          // Redirect to Stripe Checkout
+          if (!res.ok) throw new Error(data.error || 'Failed to create checkout');
           window.location.href = data.url;
         } catch (err) {
           console.error('Checkout error:', err);
-          buyBtn.disabled = false;
-          buyBtn.textContent = 'Buy Pro — £4.99';
-          // Show error
+          btn.disabled = false;
+          btn.textContent = label;
           const msg = document.createElement('div');
           msg.style.cssText = 'color:var(--danger,#e05555);font-size:.85rem;text-align:center;margin-top:8px;';
           msg.textContent = err.message || 'Something went wrong. Please try again.';
-          buyBtn.parentElement.appendChild(msg);
+          btn.parentElement.appendChild(msg);
           setTimeout(() => msg.remove(), 5000);
         }
-      });
+      }
+
+      // Buy Pro button
+      buyBtn.addEventListener('click', () => startCheckout(buyBtn, 'lifetime', 'Buy Pro — £4.99'));
+
+      // Day Pass button
+      dayPassBtn.addEventListener('click', () => startCheckout(dayPassBtn, 'day_pass', 'Day Pass — £0.99'));
 
       // Referral section
       const refCode = document.getElementById('upRefCode');

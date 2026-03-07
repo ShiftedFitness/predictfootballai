@@ -376,7 +376,7 @@
       // Any signed-in user can open the builder now
       let user = TSAuth.getUser();
       const isSignedIn = user && !TSAuth.isAnonymous();
-      let isPaid = user && user.tier === 'paid';
+      let isPaid = user && TSAuth.getTier() === 'paid';
 
       // Filters
       filtersEl.querySelectorAll('.comm-filter').forEach(btn => {
@@ -535,7 +535,7 @@
           const freshUser = await TSAuth.refreshProfile();
           if (freshUser) {
             user = freshUser;
-            isPaid = user.tier === 'paid';
+            isPaid = TSAuth.getTier() === 'paid';
           }
         }
 
@@ -977,7 +977,7 @@
         const freshUser = await TSAuth.refreshProfile();
         if (freshUser) {
           user = freshUser;
-          isPaid = user.tier === 'paid';
+          isPaid = TSAuth.getTier() === 'paid';
         }
         if (!isPaid) {
           const msg = document.getElementById('builderMsg');
