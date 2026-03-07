@@ -440,15 +440,31 @@ exports.handler = async (event) => {
     if (objective === 'performance') {
       for (const bucket of uniqueBuckets) {
         const buildPerfQuery = () => {
+          // Remap scope for rankings (same logic as game data query)
+          let rankScopeType = scope.type;
+          let rankScopeId = null;
+          if (scope.type === 'nationality' || scope.type === 'wonder') {
+            rankScopeType = 'league';
+          } else if (scope.type === 'club') {
+            rankScopeId = scope.clubId;
+          }
+
           let q = supabase
             .from('player_performance_scores')
             .select('player_uid, player_name, nationality, performance_score, appearances, goals, assists, minutes, clean_sheets, tackles_interceptions, tackles_won, interceptions, saves')
             .eq('position_bucket', bucket)
-            .eq('scope_type', scope.type);
-          if (scope.type === 'club' && scope.clubId) {
-            q = q.eq('scope_id', scope.clubId);
+            .eq('scope_type', rankScopeType);
+          if (rankScopeId) {
+            q = q.eq('scope_id', rankScopeId);
           } else {
             q = q.is('scope_id', null);
+          }
+          if (scope.type === 'nationality' && scope.nationalityCode) {
+            q = q.eq('nationality', scope.nationalityCode.toUpperCase());
+          }
+          if (scope.type === 'wonder') {
+            if (scope.wonderType === 'match') q = q.eq('appearances', 1);
+            else if (scope.wonderType === 'goal') q = q.eq('goals', 1);
           }
           q = q.order('performance_score', { ascending: false });
           return q;
