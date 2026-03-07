@@ -6,7 +6,7 @@
  *   - API calls / Supabase: network-only (no caching)
  */
 
-const CACHE_NAME = 'telestats-v2';
+const CACHE_NAME = 'telestats-v3';
 
 const STATIC_ASSETS = [
   '/telestats-theme.css',

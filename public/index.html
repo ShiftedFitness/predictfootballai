@@ -376,16 +376,34 @@ const GAMES_HTML = `
   </div>`;
 
 (async function() {
-  await TSAuth.init();
-  TSNav.render();
+  const page = document.getElementById('pageContent');
+  try {
+    await TSAuth.init();
+  } catch (e) {
+    console.error('[TeleStats] Auth init failed:', e);
+    // Fall back to logged-out view so page isn't blank
+    try { TSNav.render(); } catch (_) {}
+    renderLoggedOut(page);
+    return;
+  }
+
+  try {
+    TSNav.render();
+  } catch (e) {
+    console.error('[TeleStats] Nav render failed:', e);
+  }
 
   const user = TSAuth.getUser();
   const isLoggedIn = user && !TSAuth.isAnonymous();
-  const page = document.getElementById('pageContent');
 
-  if (isLoggedIn) {
-    renderLoggedIn(user, page);
-  } else {
+  try {
+    if (isLoggedIn) {
+      renderLoggedIn(user, page);
+    } else {
+      renderLoggedOut(page);
+    }
+  } catch (e) {
+    console.error('[TeleStats] Page render failed:', e);
     renderLoggedOut(page);
   }
 })();
