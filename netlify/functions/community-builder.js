@@ -721,8 +721,8 @@ exports.handler = async (event) => {
               const defCs = Math.round(gkCsRate * s.appearances);
               p._cleanSheets = defCs;
               p._rawScore = (
-                (tw + intr) / mins90 * 2
-                + (s.appearances > 0 ? defCs / s.appearances : 0) * 4
+                (tw + intr) / mins90 * 0.5
+                + (s.appearances > 0 ? defCs / s.appearances : 0) * 6
                 + (s.appearances > 0 ? s.goals / s.appearances : 0) * 2
                 + (s.appearances > 0 ? s.assists / s.appearances : 0) * 2
               ) * sqrtApps;
