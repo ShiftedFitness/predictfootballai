@@ -52,6 +52,8 @@
         return `<a href="${link.href}" class="ts-nav-link${active}">${link.label}</a>`;
       }).join('');
 
+      const isPaid = !isAnon && TSAuth.getTier() === 'paid';
+
       let rightHTML;
       if (isAnon) {
         // Anonymous: single "Log In" button
@@ -61,7 +63,6 @@
           </div>`;
       } else {
         const xp = TSAuth.getXPProgress();
-        const isPaid = TSAuth.getTier() === 'paid';
         const dayPassRemaining = TSAuth.getDayPassRemaining();
         let proBadge;
         if (!isPaid) {

@@ -358,8 +358,8 @@
   <script src="/js/ts-nav.js"></script>
   <script>
     (async function () {
-      await TSAuth.init();
-      TSNav.render();
+      try { await TSAuth.init(); } catch (e) { console.error('[TeleStats] Auth init failed:', e); }
+      try { TSNav.render(); } catch (e) { console.error('[TeleStats] Nav render failed:', e); }
 
       const API_BASE = window.location.hostname === 'localhost'
         ? 'http://localhost:8888/.netlify/functions'
