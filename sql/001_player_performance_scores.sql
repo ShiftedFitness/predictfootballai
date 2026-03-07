@@ -241,10 +241,10 @@ BEGIN
   ) * sqrt(appearances::numeric)
   WHERE position_bucket = 'MID';
 
-  -- DEF: defensive actions per-90 + clean sheet bonus + small attacking bonus
-  -- Tackles and interceptions per 90 reward active defenders.
-  -- Estimated CS rate rewards defenders at clubs with solid defensive records.
-  -- Small goals/assists bonus differentiates defenders with similar defensive output.
+  -- DEF: clean sheet rate (dominant) + defensive actions tiebreaker + small attacking bonus
+  -- Estimated CS rate (6x) rewards defenders at clubs with solid defensive records.
+  -- Tackles and interceptions per 90 (0.5x) as a tiebreaker for active defenders.
+  -- Small goals/assists per appearance bonus differentiates defenders with similar output.
   UPDATE player_performance_scores
   SET raw_score = (
     (tackles_won + interceptions)::numeric / GREATEST(minutes::numeric / 90.0, 1.0) * 0.5
