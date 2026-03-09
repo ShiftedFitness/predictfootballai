@@ -21,7 +21,7 @@
     .up-hero { text-align: center; margin-bottom: 40px; }
     .up-hero h1 { font-size: 2rem; font-weight: 700; margin-bottom: 8px; }
     .up-hero p { color: var(--muted); font-size: 1.05rem; }
-    .up-plans { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 40px; }
+    .up-plans { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 40px; }
     .up-plan { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 24px; text-align: center; position: relative; }
     .up-plan.featured { border-color: var(--accent); box-shadow: 0 0 20px rgba(0,229,255,.15); }
     .up-plan-badge { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: var(--accent); color: #000; font-size: .7rem; font-weight: 700; padding: 3px 12px; border-radius: 10px; text-transform: uppercase; }
@@ -277,34 +277,55 @@
       // Handle payment return from Stripe
       const params = new URLSearchParams(window.location.search);
       if (params.get('payment') === 'success') {
-        await TSAuth.refreshProfile();
         const returnPlan = params.get('plan') || 'lifetime';
-        const updated = TSAuth.getUser();
-        if (updated?.tier === 'paid') {
-          if (!updated.pro_expires_at) {
-            // Lifetime
-            buyBtn.textContent = 'Current Plan';
-            buyBtn.disabled = true;
-            buyBtn.style.opacity = '.5';
-            dayPassCard.style.display = 'none';
-          } else {
-            // Day pass
-            const remaining = TSAuth.getDayPassRemaining();
-            dayPassBtn.textContent = `Active — ${remaining ? remaining.text : '24h'} left`;
-            dayPassBtn.disabled = true;
-            dayPassBtn.style.opacity = '.7';
-          }
-          freeBtn.textContent = 'Free';
-          freeBtn.disabled = false;
-          freeBtn.style.opacity = '1';
-        }
         const hero = document.querySelector('.up-hero');
+
+        // Set pending upgrade flag so game pages skip stale cache
+        localStorage.setItem('ts_pending_upgrade', String(Date.now()));
+
+        // Show a verifying banner while we wait for the webhook
         const banner = document.createElement('div');
+        banner.id = 'paymentBanner';
         banner.style.cssText = 'background:var(--accent);color:#000;padding:14px 20px;border-radius:12px;font-weight:600;text-align:center;margin-bottom:20px;font-size:1rem;';
-        banner.textContent = returnPlan === 'day_pass'
-          ? '\uD83C\uDF89 Day Pass activated! You have 24 hours of unlimited access.'
-          : '\uD83C\uDF89 Welcome to TeleStats Pro! You now have unlimited access.';
+        banner.textContent = 'Verifying your payment...';
         hero.after(banner);
+
+        // Poll refreshProfile until tier is 'paid' (webhook race condition fix)
+        let confirmed = false;
+        for (let attempt = 0; attempt < 15; attempt++) {
+          await TSAuth.refreshProfile();
+          const updated = TSAuth.getUser();
+          if (updated?.tier === 'paid') {
+            confirmed = true;
+            // Clear the pending upgrade flag
+            localStorage.removeItem('ts_pending_upgrade');
+            if (!updated.pro_expires_at) {
+              // Lifetime
+              buyBtn.textContent = 'Current Plan';
+              buyBtn.disabled = true;
+              buyBtn.style.opacity = '.5';
+              dayPassCard.style.display = 'none';
+            } else {
+              // Day pass
+              const remaining = TSAuth.getDayPassRemaining();
+              dayPassBtn.textContent = `Active — ${remaining ? remaining.text : '24h'} left`;
+              dayPassBtn.disabled = true;
+              dayPassBtn.style.opacity = '.7';
+            }
+            freeBtn.textContent = 'Free';
+            freeBtn.disabled = false;
+            freeBtn.style.opacity = '1';
+            break;
+          }
+          // Wait 2 seconds before retrying
+          await new Promise(r => setTimeout(r, 2000));
+        }
+
+        banner.textContent = confirmed
+          ? (returnPlan === 'day_pass'
+            ? '\uD83C\uDF89 Day Pass activated! You have 24 hours of unlimited access.'
+            : '\uD83C\uDF89 Welcome to TeleStats Pro! You now have unlimited access.')
+          : '\u2705 Payment received! Your access will activate momentarily — try refreshing the page.';
         history.replaceState(null, '', '/upgrade/');
       } else if (params.get('payment') === 'cancelled') {
         const hero = document.querySelector('.up-hero');

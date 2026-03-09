@@ -250,7 +250,7 @@
       const isAnon = TSAuth.isAnonymous();
 
       // If free user triggers signup, redirect to upgrade page
-      if (!isAnon && user && user.tier === 'free' && mode === 'signup') {
+      if (!isAnon && user && TSAuth.getTier() === 'free' && mode === 'signup') {
         window.location.href = '/upgrade/';
         return;
       }

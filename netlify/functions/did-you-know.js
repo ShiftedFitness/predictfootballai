@@ -132,8 +132,8 @@ async function fetchGeneralStats(client) {
     stats.push({
       type: 'bullseye_checkouts',
       text: perfectCount > 0
-        ? `Only ${perfectCount} perfect Bullseye checkout${perfectCount !== 1 ? 's have' : ' has'} been achieved. Can you join the elite?`
-        : `Nobody has hit a perfect Bullseye checkout yet. Will you be the first to hit exactly zero?`
+        ? `Only ${perfectCount} player${perfectCount !== 1 ? 's have' : ' has'} hit exactly 0 in Bullseye — a perfect checkout. Can you join them?`
+        : `Nobody has hit exactly 0 in Bullseye yet — the elusive perfect checkout. Will you be the first?`
     });
   }
 

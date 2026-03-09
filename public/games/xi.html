@@ -2713,8 +2713,25 @@ document.getElementById('tsClock').textContent = new Date().toTimeString().slice
     setupArea.prepend(counter);
   }
 
-  // Anonymous users: lock objective to appearances only
+  // Anonymous users: lock formation to 4-4-2 and objective to appearances only
   if (isAnon) {
+    // Lock formations — only 4-4-2 allowed
+    const formGrid = document.getElementById('formationGrid');
+    if (formGrid) {
+      const fBtns = formGrid.querySelectorAll('.formation-btn');
+      fBtns.forEach(btn => {
+        if (btn.textContent.trim() === '4-4-2') {
+          btn.click(); // auto-select 4-4-2
+        } else {
+          btn.style.opacity = '0.35';
+          btn.style.pointerEvents = 'none';
+          btn.style.position = 'relative';
+          btn.insertAdjacentHTML('afterend', '');
+          btn.innerHTML = btn.textContent + ' <span style="font-size:11px;opacity:0.6;">&#128274;</span>';
+        }
+      });
+    }
+    // Lock objectives — only appearances allowed
     const objGrid = document.getElementById('objectiveGrid');
     if (objGrid) {
       const btns = objGrid.querySelectorAll('.option-btn');
@@ -2722,6 +2739,7 @@ document.getElementById('tsClock').textContent = new Date().toTimeString().slice
         if (!btn.textContent.includes('Appearances')) {
           btn.style.opacity = '0.35';
           btn.style.pointerEvents = 'none';
+          btn.insertAdjacentHTML('beforeend', '<div style="font-size:11px;opacity:0.6;margin-top:4px;">&#128274; Sign up to unlock</div>');
         } else {
           btn.click(); // auto-select appearances
         }

@@ -179,7 +179,10 @@
       if (session && session.user) {
         _authSession = session;
         const cached = getCached();
-        const fresh = cached && cached.auth_id === session.user.id && cached._ts && (Date.now() - cached._ts) < 3600000;
+        // Skip cache if a recent purchase is pending verification
+        const pendingUpgrade = localStorage.getItem('ts_pending_upgrade');
+        const hasPendingUpgrade = pendingUpgrade && (Date.now() - Number(pendingUpgrade)) < 5 * 60 * 1000;
+        const fresh = !hasPendingUpgrade && cached && cached.auth_id === session.user.id && cached._ts && (Date.now() - cached._ts) < 3600000;
         if (fresh) { _currentUser = cached; return _currentUser; }
 
         clearCached();
@@ -211,6 +214,11 @@
         if (row) {
           _currentUser = row;
           setCached(row);
+
+          // Clear pending upgrade flag once tier is confirmed paid
+          if (hasPendingUpgrade && row.tier === 'paid') {
+            localStorage.removeItem('ts_pending_upgrade');
+          }
 
           // Flag if this is a freshly confirmed email
           if (_justConfirmed) {
