@@ -53,8 +53,10 @@ input, select {
 input:focus, select:focus { outline: none; border-color: var(--accent); }
 input::placeholder { color: #888; }
 
-/* Buttons */
-button {
+/* Buttons (scoped to game area — don't affect nav / install banner) */
+.card button, #step1 button, #step2 button, #stepOptions button,
+#step3 button, #step4 button, #step5 button, #settingsPanel button,
+.row-btns button, .btn-primary, .btn-secondary, .btn-danger, .btn-back, .btn-text {
   width: 100%;
   padding: 14px 20px;
   border: none;
@@ -637,15 +639,19 @@ button {
 .toggle-desc { font-size: 12px; color: var(--muted); margin-top: 2px; }
 .toggle-switch {
   position: relative;
-  width: 48px;
+  width: 50px;
   height: 28px;
-  background: rgba(255,255,255,.15);
+  background: rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.1);
   border-radius: 14px;
   cursor: pointer;
-  transition: background .2s;
+  transition: background .25s ease, border-color .25s ease;
   flex-shrink: 0;
 }
-.toggle-switch.on { background: var(--accent-cyan); }
+.toggle-switch.on {
+  background: var(--accent-cyan);
+  border-color: var(--accent-cyan);
+}
 .toggle-switch::after {
   content: '';
   position: absolute;
@@ -653,11 +659,12 @@ button {
   height: 22px;
   background: #fff;
   border-radius: 50%;
-  top: 3px;
+  top: 2px;
   left: 3px;
-  transition: transform .2s;
+  transition: transform .25s cubic-bezier(.4,.0,.2,1);
+  box-shadow: 0 1px 3px rgba(0,0,0,.3), 0 1px 2px rgba(0,0,0,.2);
 }
-.toggle-switch.on::after { transform: translateX(20px); }
+.toggle-switch.on::after { transform: translateX(22px); }
 
 /* Timer display */
 .timer-bar {
