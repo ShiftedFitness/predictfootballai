@@ -27,3 +27,8 @@
 # Covers evening matches (checked next morning) and afternoon matches (checked same evening)
 [functions."auto-score"]
   schedule = "0 7,22 * * *"
+
+# Picks reminder: checks every 30 minutes for matchweeks with first lockout ~2hrs away
+# Sends personalised email to each user with their picks (or a warning if none submitted)
+[functions."picks-reminder"]
+  schedule = "*/30 * * * *"
