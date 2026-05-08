@@ -212,15 +212,21 @@ exports.handler = async (event) => {
     if (adminErr) return adminErr;
   }
 
+  const body = isManual ? JSON.parse(event.body || '{}') : {};
+  // force=true bypasses the time window and sends to test_email only (or all if omitted)
+  const forceMode = !!body.force;
+  const testEmail = body.test_email || null; // e.g. "babacvafaey@gmail.com"
+
   try {
     const client = sb();
     const now = new Date();
 
-    // 1. Find open matchweeks
+    // 1. Find open matchweeks, sorted soonest first
     const { data: openWeeks, error: weeksErr } = await client
       .from('predict_match_weeks')
       .select('id, week_number, status')
-      .eq('status', 'open');
+      .eq('status', 'open')
+      .order('week_number', { ascending: true });
 
     if (weeksErr) throw new Error(`Failed to fetch weeks: ${weeksErr.message}`);
     if (!openWeeks || openWeeks.length === 0) {
@@ -248,23 +254,31 @@ exports.handler = async (event) => {
       // Cron fires every 30min so this window is hit exactly once
       const inWindow = minutesUntil >= 106 && minutesUntil <= 134;
 
-      if (!inWindow) {
+      if (!forceMode && !inWindow) {
         skippedReason = `Week ${week.week_number}: ${minutesUntil.toFixed(0)} mins until lockout (window is 106–134 mins)`;
         continue;
       }
 
+      // In force mode, pick the soonest upcoming week (positive minutesUntil)
+      if (forceMode && minutesUntil < 0) continue;
+
       weekFired = week.week_number;
 
-      // 3. Get all users + all picks for these matches
+      // 3. Get users + all picks for these matches
       const matchIds = matches.map(m => m.id);
 
-      const [{ data: users, error: usersErr }, { data: allPicks, error: picksErr }] = await Promise.all([
+      const [{ data: allUsers, error: usersErr }, { data: allPicks, error: picksErr }] = await Promise.all([
         client.from('predict_users').select('id, username, full_name, email').order('id'),
         client.from('predict_predictions').select('user_id, match_id, pick').in('match_id', matchIds)
       ]);
 
       if (usersErr) throw new Error(`Failed to fetch users: ${usersErr.message}`);
       if (picksErr) throw new Error(`Failed to fetch picks: ${picksErr.message}`);
+
+      // In force/test mode, restrict to test_email only
+      const users = forceMode && testEmail
+        ? (allUsers || []).filter(u => u.email === testEmail)
+        : (allUsers || []);
 
       // 4. Set up Gmail transporter
       const transporter = nodemailer.createTransport({
