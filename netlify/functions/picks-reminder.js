@@ -205,8 +205,9 @@ exports.handler = async (event) => {
   const corsResponse = handleOptions(event);
   if (corsResponse) return corsResponse;
 
-  // Allow manual trigger via POST with admin secret
-  const isManual = event.httpMethod === 'POST';
+  // Netlify Clockwork invokes scheduled functions as POST — don't require auth for those
+  const isScheduled = (event.headers['user-agent'] || '').includes('Netlify Clockwork');
+  const isManual = event.httpMethod === 'POST' && !isScheduled;
   if (isManual) {
     const adminErr = await requireAdmin(event);
     if (adminErr) return adminErr;
