@@ -292,35 +292,35 @@ exports.handler = async (event) => {
 
       const deadline = formatDeadline(matches[0].lockout_time);
 
-      // 5. Send one email per user
-      const results = [];
-      for (const user of users) {
-        if (!user.email) continue;
-
-        const userPicks = (allPicks || []).filter(p => p.user_id === user.id);
-        const { subject, html, text } = buildEmail({
-          user,
-          weekNumber: week.week_number,
-          matches,
-          picks: userPicks,
-          deadline
+      // 5. Send all emails in parallel
+      const emailJobs = users
+        .filter(u => u.email)
+        .map(async user => {
+          const userPicks = (allPicks || []).filter(p => p.user_id === user.id);
+          const { subject, html, text } = buildEmail({
+            user,
+            weekNumber: week.week_number,
+            matches,
+            picks: userPicks,
+            deadline
+          });
+          try {
+            await transporter.sendMail({
+              from: `TeleStats Fives <${process.env.GMAIL_USER}>`,
+              to: user.email,
+              subject,
+              text,
+              html
+            });
+            return { user: user.username || user.email, status: 'sent', hasPicks: userPicks.length > 0 };
+          } catch (mailErr) {
+            console.error(`Email failed for ${user.email}:`, mailErr.message);
+            return { user: user.username || user.email, status: 'failed', error: mailErr.message };
+          }
         });
 
-        try {
-          await transporter.sendMail({
-            from: `TeleStats Fives <${process.env.GMAIL_USER}>`,
-            to: user.email,
-            subject,
-            text,
-            html
-          });
-          results.push({ user: user.username || user.email, status: 'sent', hasPicks: userPicks.length > 0 });
-          emailsSent++;
-        } catch (mailErr) {
-          console.error(`Email failed for ${user.email}:`, mailErr.message);
-          results.push({ user: user.username || user.email, status: 'failed', error: mailErr.message });
-        }
-      }
+      const results = await Promise.all(emailJobs);
+      emailsSent = results.filter(r => r.status === 'sent').length;
 
       console.log(`picks-reminder: Week ${week.week_number} — sent ${emailsSent} emails`);
 
