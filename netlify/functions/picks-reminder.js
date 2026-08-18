@@ -269,7 +269,12 @@ exports.handler = async (event) => {
       const matchIds = matches.map(m => m.id);
 
       const [{ data: allUsers, error: usersErr }, { data: allPicks, error: picksErr }] = await Promise.all([
-        client.from('predict_users').select('id, username, full_name, email').order('id'),
+        // Skip bots (Picks AI has no inbox) and players who have left.
+        client.from('predict_users')
+          .select('id, username, full_name, email')
+          .eq('is_bot', false)
+          .eq('is_active', true)
+          .order('id'),
         client.from('predict_predictions').select('user_id, match_id, pick').in('match_id', matchIds)
       ]);
 

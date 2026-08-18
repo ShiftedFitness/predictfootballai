@@ -32,3 +32,9 @@
 # Sends personalised email to each user with their picks (or a warning if none submitted)
 [functions."picks-reminder"]
   schedule = "*/30 * * * *"
+
+# Picks AI: runs twice daily; only acts when a matchweek's first lockout is
+# 2-60 hours away AND the bot has no picks for it yet, so the second run of
+# the day is a no-op (and costs nothing) once the week is picked.
+[functions."picks-ai"]
+  schedule = "0 9,18 * * *"
