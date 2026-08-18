@@ -446,3 +446,26 @@ Expected state after deploy, BEFORE week 1 is seeded:
   league Overall → 25 players, all zero
   Matchweek/You v AI → "no matchweeks yet"
   admin        → week field 1, no fixtures listed, ready to seed
+
+## "Can't seed week 1" — mostly a UI trap, now fixed
+"No matches found for this week" comes from loadMatches() in the RESULTS &
+SCORING panel (admin.html:321), which lists EXISTING matches. Week 1 of
+2026/27 does not exist yet, so that message is correct, not a failure.
+Seeding lives in the separate "Seed Next Week" panel further down the page.
+
+But there WAS a real trap for a fresh season:
+- loadMatches() ended with `$('nextWeek').value = String(week + 1)`. On a new
+  season, loading week 1 (empty) set the seed field to 2 — so the obvious
+  next click would have created week 2 and skipped week 1 entirely.
+  → now advances only if the loaded week actually had matches; otherwise it
+    points at that same week, which is the one still to be seeded.
+- Nothing pre-filled the seed week on an empty season.
+  → admin init now detects "no weeks this season", sets nextWeek = 1, and
+    shows an explicit status line saying the Results panel being empty is
+    expected.
+
+NOTE for MW1 seeding: the "suggested 5" ranking and the enrichment
+percentages will be meaningless this week — football-data.org's standings
+table is empty until results exist, so every team resolves to position 10 and
+every fixture lands ~45/28/27. Choose the five fixtures manually. This is the
+MW1 prior issue, still unbuilt.

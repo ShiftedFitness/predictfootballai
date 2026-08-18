@@ -323,7 +323,10 @@ async function loadMatches(week) {
         sel.addEventListener('change', checkAllResultsSet);
       });
       checkAllResultsSet();
-      $('nextWeek').value = String(week + 1);
+      // Only advance if the week you loaded actually exists. If it came back
+      // empty, THAT is the week still waiting to be seeded — otherwise a new
+      // season would offer to create week 2 first.
+      $('nextWeek').value = String(loadedMatches.length ? week + 1 : week);
     } catch (e) {
       setStatus(`Failed to load matches: ${e.message}`);
       $('matches').innerHTML = '';
@@ -1427,8 +1430,10 @@ window.addEventListener('DOMContentLoaded', async () => {
   $('mainWrap').innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted)"><span class="ts-spinner"></span> Loading admin panel...</div>';
 
   // Try to validate and fetch latest week
+  let seasonHasWeeks = true;
   try {
     const weeksData = await PredictData.getWeeks();
+    seasonHasWeeks = !!(weeksData.weeks && weeksData.weeks.length);
     latestWeek = weeksData.recommendedPickWeek || weeksData.latest || 1;
   } catch (e) {
     console.warn('Could not fetch weeks:', e.message);
@@ -1436,6 +1441,17 @@ window.addEventListener('DOMContentLoaded', async () => {
 
   initAdminUI();
   if (latestWeek) { $('week').value = latestWeek; currentWeek = latestWeek; }
+
+  // Fresh season: getWeeks() is scoped to the current season, so an empty
+  // list means nothing has been seeded yet. Point the seed panel at week 1
+  // and say so, rather than leaving the admin to guess.
+  if (!seasonHasWeeks) {
+    $('nextWeek').value = '1';
+    setStatus(
+      'New season — no matchweeks yet. Use "Seed Next Week" below to create Week 1. ' +
+      '(The Results panel showing "no matches" is expected until then.)'
+    );
+  }
 });
 </script>
 </body>
