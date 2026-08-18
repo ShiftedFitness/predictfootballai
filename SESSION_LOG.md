@@ -353,3 +353,36 @@ User says they have not run it — but the 24-row output they sent has exactly
 its column list (stored_points / expected_points / discrepancy /
 unscored_picks). They ran the inline one-liner version pasted in chat, which
 is the same query. The reconciliation IS done and it passed.
+
+## 006 attempt #3 — got much further, failed at section 8
+ERROR 42P16: cannot change name of view column "id" to "season".
+Section 0 worked (different error = different section), so the schema repair
+landed and the migration reached the league table view.
+
+Cause: CREATE OR REPLACE VIEW can only APPEND columns — never reorder or
+rename. 004's predict_league_table starts with `id`; the new one starts with
+`season`.
+Fix: DROP VIEW IF EXISTS before CREATE VIEW. No CASCADE — nothing in the app
+reads that view (frontend and leaderboard.js both read predict_users
+directly), so a dependency error there would be real news, not something to
+steamroll.
+
+## De-risked: bot user creation moved out of 006 → new sql/007
+Checked register-user.js and auth.js for how a predict_users row is normally
+created — there is no insert path in the app at all (users predate it or came
+from the Adalo migration), so predict_users' NOT NULL requirements are
+unverified. Rather than risk a fourth failure on the critical migration, the
+Picks AI INSERT moved to sql/007_roster_and_picks_ai.sql.
+
+Rationale: the season rollover is the critical path and is not retryable
+piecemeal; roster changes are trivially retryable in isolation.
+
+sql/007 contains:
+  1. READ-ONLY column/NOT NULL inventory of predict_users (the query 4 that
+     was never run) — check before inserting
+  2. Picks AI user insert (no auth_id — that is what keeps its picks private;
+     real-looking email so a NOT NULL email cannot break it)
+  3. departing player SOFT DELETE template, with a prominent warning that
+     DELETE cascades to predict_predictions and would destroy the archive
+  4. joiners template
+  5. final roster verification showing 2026/27 and 2025/26 side by side

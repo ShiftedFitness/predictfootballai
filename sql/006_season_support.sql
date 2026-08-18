@@ -324,7 +324,16 @@ END $$;
 -- ── 8. Season-aware league table view ───────────────────────
 -- Replaces the old all-time view over predict_users.
 
-CREATE OR REPLACE VIEW public.predict_league_table AS
+-- CREATE OR REPLACE VIEW can only APPEND columns — it cannot reorder or
+-- rename existing ones, and 004's version of this view starts with `id`
+-- where this one starts with `season`. Hence the drop.
+--   ERROR 42P16: cannot change name of view column "id" to "season"
+-- No CASCADE: nothing in the app reads this view (the frontend and
+-- leaderboard.js both read predict_users directly), so a dependency error
+-- here would be genuine news rather than something to steamroll.
+DROP VIEW IF EXISTS public.predict_league_table;
+
+CREATE VIEW public.predict_league_table AS
 SELECT
   s.season,
   u.id,
@@ -382,14 +391,12 @@ CREATE TRIGGER trg_pus_updated
 --     unreadable via the anon key until pp_select_locked opens them
 --   * picks-reminder.js must skip it (it has no inbox)
 
-INSERT INTO public.predict_users (username, full_name, is_bot, is_active, joined_season)
-SELECT 'Picks AI', 'Picks AI', TRUE, TRUE, '2026/27'
-WHERE NOT EXISTS (SELECT 1 FROM public.predict_users WHERE is_bot = TRUE);
-
--- Give it a 2026/27 standings row like every other player.
-INSERT INTO public.predict_user_seasons (user_id, season)
-SELECT id, '2026/27' FROM public.predict_users WHERE is_bot
-ON CONFLICT (user_id, season) DO NOTHING;
+-- NOTE: creating the Picks AI *user row* has been moved out to
+-- sql/007_roster_and_picks_ai.sql, together with the leaver and joiners.
+-- Reason: this migration is the critical path for the season rollover and
+-- must not be held hostage by an INSERT whose NOT NULL requirements on
+-- predict_users we have not verified. Roster changes are retryable in
+-- isolation; the rollover is not. Run 007 after this commits.
 
 -- Spend audit — one row per picks-ai run, so the season budget is
 -- verifiable rather than assumed.
