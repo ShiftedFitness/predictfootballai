@@ -6,6 +6,7 @@
     "start": "netlify dev"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.117.1",
     "@supabase/supabase-js": "^2.39.0",
     "cheerio": "^1.2.0",
     "node-fetch": "^2.7.0",

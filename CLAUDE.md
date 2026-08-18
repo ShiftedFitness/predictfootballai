@@ -9,7 +9,7 @@ TeleStats (telestats.net) is a Premier League football quiz and game hub featuri
 - **Database:** Supabase (PostgreSQL) with ~15 tables, RLS enabled
 - **Payments:** Stripe (Pro tier £4.99 one-time + day pass option)
 - **Data Source:** FBref Premier League stats cached in Supabase
-- **External API:** API-Football for live fixtures
+- **External API:** football-data.org v4 (`FOOTBALL_DATA_KEY`) for fixtures, standings, H2H and results — free tier, 10 req/min. NOTE: the function is still *named* `api-football-fixtures.js` for legacy reasons but it does NOT call API-Football.
 - **PWA:** Service worker + manifest for offline support
 - **Key deps:** `@supabase/supabase-js`, `stripe`, `cheerio`, `node-fetch`
 
