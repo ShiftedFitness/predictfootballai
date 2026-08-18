@@ -49,6 +49,11 @@ ALTER TABLE public.predict_predictions
   ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
 
+-- predict_users too: section 6d updates it, and if it carries the same
+-- trigger without the column that update would fail the same way.
+ALTER TABLE public.predict_users
+  ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
+
 CREATE OR REPLACE FUNCTION public.predict_set_updated_at()
 RETURNS TRIGGER AS $$
 BEGIN

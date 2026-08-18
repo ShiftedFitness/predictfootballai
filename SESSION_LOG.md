@@ -328,3 +328,28 @@ predict_* table, including ones we have not inspected.
 
 Safe to re-run 006 as-is — every statement is IF NOT EXISTS / idempotent and
 attempt #1 left nothing behind.
+
+## 006 attempt #2 FAILED — same error, but the line number is the clue
+Identical message, including "line 3 at assignment".
+
+That line number rules something out. plpgsql numbers from the start of the
+function body:
+  ORIGINAL (004):  1 blank, 2 BEGIN, 3 NEW.updated_at = NOW()   ← line 3
+  HARDENED (006):  1 blank, 2 BEGIN, 3 IF jsonb_exists…, 4 assignment
+So the failure came from the ORIGINAL function body. Either the copy of 006
+that was run predated section 0, or the trigger resolves to a different
+function object than the one section 0 replaces.
+
+Stopped guessing. Wrote sql/DIAGNOSE_TRIGGER.sql (read-only, 3 queries):
+  1. pg_get_functiondef of predict_set_updated_at — is the hardened body live?
+  2. every trigger calling it + whether that table actually has updated_at
+  3. created_at/updated_at presence across all predict_* tables
+Awaiting output before touching 006 again.
+
+Also extended section 0 to cover predict_users (section 6d updates it).
+
+## Note on FINAL_CHECK_BEFORE_006.sql
+User says they have not run it — but the 24-row output they sent has exactly
+its column list (stored_points / expected_points / discrepancy /
+unscored_picks). They ran the inline one-liner version pasted in chat, which
+is the same query. The reconciliation IS done and it passed.
