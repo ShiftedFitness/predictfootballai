@@ -386,3 +386,29 @@ sql/007 contains:
      DELETE cascades to predict_predictions and would destroy the archive
   4. joiners template
   5. final roster verification showing 2026/27 and 2025/26 side by side
+
+## ✅ 006 + 007 (steps 1-2) APPLIED SUCCESSFULLY — 2026-08-18
+Verification output confirms:
+- Picks AI created as user id 25, is_bot=true, is_active=true,
+  joined_season='2026/27', points_2026_27=0, points_2025_26=NULL (correct —
+  it did not play last season).
+- All 24 humans: is_active=true, joined_season='2025/26', points_2026_27=0,
+  points_2025_26 = their true final total (craigtee 95, Chappers 92,
+  Callum/Nick 87 ... Hawkesy 65).
+=> The 2025/26 archive is intact and 2026/27 has started from zero for
+   everyone. The season rollover is COMPLETE.
+
+Squad is currently 25 (24 humans + Picks AI), before the leaver and joiners.
+
+## Remaining before Saturday 22 Aug
+- [ ] 007 steps 3-4: departing player soft-delete + joiners  ← BLOCKED on names
+- [ ] Deploy the code (season-aware scoring/lookup fixes, picks-ai, You v AI)
+- [ ] Smoke test: POST /picks-ai {dryRun:true, force:true} — never yet run
+      against the live Claude API
+- [ ] Seed 2026/27 week 1 via admin; confirm it lands with season='2026/27'
+- [ ] MW1 prediction prior — NOT BUILT. At MW1 the football-data.org
+      standings table is empty, so api-football-fixtures.js gives every team
+      position 10 and every fixture comes out ~45/28/27. Makes the admin
+      fixture suggestions useless for the first weeks and degrades the form
+      strings Picks AI reads.
+- [ ] Drop the bak_* tables once week 1 is scored
