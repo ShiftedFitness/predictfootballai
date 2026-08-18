@@ -212,9 +212,16 @@ async function loadWeekly(week) {
     debugLog('Invalid week, fetching available weeks first...');
     try {
       const weeksData = await PredictData.getWeeks();
-      const fallbackWeek = weeksData.recommendedViewWeek || weeksData.latest || 1;
+      // No `|| 1` fallback: getWeeks() is scoped to the current season, so
+      // an empty list means the season has not been seeded — and week 1
+      // would otherwise resolve to last season's week 1.
+      const fallbackWeek = weeksData.recommendedViewWeek || weeksData.latest || null;
       debugLog('Using fallback week:', fallbackWeek);
-      return loadWeekly(fallbackWeek);
+      if (fallbackWeek) return loadWeekly(fallbackWeek);
+      document.getElementById('lockedMsg').textContent = 'No matchweeks yet this season';
+      document.querySelector('#weeklyTbl tbody').innerHTML = '';
+      document.getElementById('matchMap').textContent = '';
+      document.getElementById('weekSel').innerHTML = '';
     } catch (e) {
       debugLog('Failed to fetch weeks for fallback:', e);
     }

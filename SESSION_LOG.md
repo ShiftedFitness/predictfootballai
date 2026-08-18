@@ -412,3 +412,37 @@ Squad is currently 25 (24 humans + Picks AI), before the leaver and joiners.
       fixture suggestions useless for the first weeks and degrades the form
       strings Picks AI reads.
 - [ ] Drop the bak_* tables once week 1 is scored
+
+## BUG: app served LAST SEASON's week 1 (fixed) — 2026-08-18
+User reported seeing 2025/26 week 1 data on the picks page and in admin,
+after the migration.
+
+Root cause was MY fallback in predict-data.js, not just an undeployed build:
+
+  resolveWeekId(weekNum) returned `weekNum` itself when the lookup missed.
+  Harmless while week numbers were globally unique. With two seasons and
+  2026/27 not yet seeded, the chain was:
+    getWeeks()            → [] (correctly scoped to current season)
+    index.html            → recommendedPickWeek || latest || 1  → 1
+    resolveWeekId(1)      → miss → falls back to 1
+    .eq('match_week_id',1)→ LAST SEASON's week 1 row
+  i.e. it silently served last year's fixtures and picks as if live.
+
+Fixes:
+- resolveWeekId() now returns NULL when the current season has no such week.
+  The old passthrough is kept ONLY for pre-006 databases (lookup.season null),
+  where there is no season to disambiguate against.
+- getWeekMatches() returns [] on a null id — never issues an unfiltered query.
+- scoreWeek()/getMissingPredictions() throw a clear error instead.
+- index.html no longer defaults to week 1; shows "The new season hasn't
+  started yet" when the season has no weeks.
+- league.html Matchweek tab likewise shows "No matchweeks yet this season".
+- admin.html:1432 and getHistory's `|| 1` left as-is — both are now harmless
+  because resolveWeekId is the single choke point, and defaulting the admin
+  week field to 1 is what you want when seeding a new season.
+
+Expected state after deploy, BEFORE week 1 is seeded:
+  picks page   → "The new season hasn't started yet"
+  league Overall → 25 players, all zero
+  Matchweek/You v AI → "no matchweeks yet"
+  admin        → week field 1, no fixtures listed, ready to seed

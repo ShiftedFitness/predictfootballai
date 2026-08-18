@@ -99,10 +99,24 @@
     return ids;
   }
 
-  /** Resolve a week_number to the actual match_week_id (FK). Falls back to the input if not found (old data). */
+  /**
+   * Resolve a week_number to the actual match_week_id (FK).
+   *
+   * Returns null when the current season has no such week. It used to fall
+   * back to the raw week number, which was harmless while week numbers were
+   * globally unique — but with seasons it is actively dangerous: asking for
+   * "week 1" before this season's week 1 has been seeded resolved to
+   * match_week_id = 1, i.e. LAST season's week 1, and the app cheerfully
+   * served last year's fixtures and picks. Better to return nothing and let
+   * the caller say "not available yet".
+   *
+   * The old fallback is kept for pre-006 databases only, where there is no
+   * season to disambiguate against and the behaviour is unchanged.
+   */
   async function resolveWeekId(weekNum) {
     var lookup = await ensureWeekLookup();
-    return lookup.numToId[weekNum] != null ? lookup.numToId[weekNum] : weekNum;
+    if (lookup.numToId[weekNum] != null) return lookup.numToId[weekNum];
+    return lookup.season ? null : weekNum;
   }
 
   /** Resolve a match_week_id to the human week_number. Falls back to the input (old data). */
@@ -181,6 +195,7 @@
        ──────────────────────────────────────────────────────────── */
     async getWeekMatches(week) {
       var matchWeekId = await resolveWeekId(week);
+      if (matchWeekId == null) return [];   // no such week this season
       var _ref = await sb()
         .from('predict_matches')
         .select('*')
@@ -998,6 +1013,7 @@
 
       // 1. Get all matches for this week with results
       var weekId = await resolveWeekId(week);
+      if (weekId == null) throw new Error('Week ' + week + ' does not exist in the current season.');
       var _m = await sb()
         .from('predict_matches')
         .select('id, correct_result')
@@ -1153,6 +1169,7 @@
       week = parseInt(week);
 
       var weekId = await resolveWeekId(week);
+      if (weekId == null) throw new Error('Week ' + week + ' does not exist in the current season.');
       var _m = await sb()
         .from('predict_matches')
         .select('id, home_team, away_team')

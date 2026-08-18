@@ -55,11 +55,24 @@
       if (!weekToUse) {
         try {
           const weeksData = await PredictData.getWeeks();
-          weekToUse = weeksData.recommendedPickWeek || weeksData.latest || 1;
+          weekToUse = weeksData.recommendedPickWeek || weeksData.latest || null;
         } catch (e) {
           console.warn('getWeeks failed', e);
-          weekToUse = 1;
+          weekToUse = null;
         }
+      }
+
+      // Do NOT default to week 1 here. getWeeks() only returns the current
+      // season's weeks, so "no weeks" means this season has not been seeded
+      // yet — and falling back to 1 used to resolve to LAST season's week 1
+      // and serve last year's fixtures as if they were live.
+      if (!weekToUse) {
+        setStatus(
+          '<strong>The new season hasn\'t started yet.</strong>',
+          'No matchweek has been set up for this season. ' +
+          'Picks will open here as soon as the first week is live.'
+        );
+        return;
       }
 
       const ready = await waitForWidget();
