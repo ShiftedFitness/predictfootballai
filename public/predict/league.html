@@ -41,6 +41,10 @@
            border-left:2px solid var(--accent-cyan) }
   .vs-agree{ font-size:11px; color:var(--text-muted); margin-top:6px }
   .vs-empty{ text-align:center; color:var(--text-muted); padding:26px 10px }
+  .vs-strategy{ background:var(--bg-elevated); border-radius:6px; padding:10px 12px;
+                margin-bottom:14px; font-size:13px; color:var(--text-secondary);
+                border-left:3px solid var(--accent-yellow) }
+  .vs-strategy b{ color:var(--accent-yellow); font-weight:700 }
 </style>
 </head>
 <body>
@@ -127,6 +131,7 @@
         <div class="vs-side"><div class="vs-label" id="vsBotName">Picks AI</div><div class="vs-num" id="vsTheirs">0</div></div>
       </div>
       <div id="vsVerdict" class="vs-verdict"></div>
+      <div id="vsStrategy" class="vs-strategy" style="display:none"></div>
 
       <div id="vsBody"></div>
 
@@ -319,9 +324,12 @@ async function loadVersus(week){
     return;
   }
 
+  const strategyBox = document.getElementById('vsStrategy');
+
   if (!j.available) {
     score.style.display = 'none';
     verdict.textContent = '';
+    strategyBox.style.display = 'none';
     body.innerHTML = `<div class="vs-empty">${
       j.reason === 'no_bot'
         ? 'Picks AI has not joined this season yet.'
@@ -337,6 +345,7 @@ async function loadVersus(week){
   if (!j.locked) {
     score.style.display = 'none';
     verdict.textContent = '';
+    strategyBox.style.display = 'none';
     body.innerHTML = '<div class="vs-empty">Picks AI has made its selections.<br/>' +
       'They unlock when the first match of the week kicks off.</div>';
     return;
@@ -359,6 +368,13 @@ async function loadVersus(week){
     : j.myScore > j.aiScore ? 'You beat Picks AI this week.'
     : j.myScore < j.aiScore ? 'Picks AI beat you this week.'
     : 'Dead heat this week.';
+
+  if (j.strategy) {
+    strategyBox.style.display = '';
+    strategyBox.innerHTML = `<b>Its approach this week:</b> ${escapeHTML(j.strategy)}`;
+  } else {
+    strategyBox.style.display = 'none';
+  }
 
   body.innerHTML = (j.rows || []).map(r => vsMatchHTML(r, j.scored)).join('');
 }

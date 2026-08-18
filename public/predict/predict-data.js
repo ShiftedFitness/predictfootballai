@@ -32,23 +32,71 @@
      week_number.  We cache the mapping so every layer can translate
      match_week_id (FK) → the human week number and vice-versa.
      ================================================================ */
-  var _weekLookup = null; // { idToNum: {54→27}, numToId: {27→54} }
+  var _weekLookup = null; // { idToNum, numToId, seasonById, season }
+  var _seasonPromise = null;
+
+  /**
+   * The season currently being played. Week numbers restart at 1 every
+   * season, so almost every lookup here has to be scoped by it.
+   * Falls back to null on a pre-006 database, which makes the lookups
+   * behave exactly as they did before seasons existed.
+   */
+  async function currentSeason() {
+    if (!_seasonPromise) {
+      _seasonPromise = sb()
+        .from('predict_seasons')
+        .select('season')
+        .eq('is_current', true)
+        .limit(1)
+        .then(function (r) {
+          if (r.error) return null;              // table absent → pre-006
+          return (r.data && r.data[0]) ? r.data[0].season : null;
+        })
+        .catch(function () { return null; });
+    }
+    return _seasonPromise;
+  }
 
   async function ensureWeekLookup() {
     if (_weekLookup) return _weekLookup;
+
+    var season = await currentSeason();
     var _ref = await sb()
       .from('predict_match_weeks')
-      .select('id, week_number')
+      .select('id, week_number, season')
       .order('week_number', { ascending: true });
     if (_ref.error) throw new Error('week lookup: ' + _ref.error.message);
+
     var idToNum = {};
     var numToId = {};
+    var seasonById = {};
+
     (_ref.data || []).forEach(function (w) {
+      // idToNum covers EVERY season — a historical match still needs to be
+      // able to say which week number it was.
       idToNum[w.id] = w.week_number;
-      numToId[w.week_number] = w.id;
+      seasonById[w.id] = w.season || null;
+
+      // numToId is the ambiguous direction: "week 1" exists once per season.
+      // Resolve it against the current season only, so nothing in the live
+      // game can ever land on last season's week 1 by accident.
+      var belongs = season ? (w.season === season) : true;
+      if (belongs) numToId[w.week_number] = w.id;
     });
-    _weekLookup = { idToNum: idToNum, numToId: numToId };
+
+    _weekLookup = {
+      idToNum: idToNum, numToId: numToId,
+      seasonById: seasonById, season: season
+    };
     return _weekLookup;
+  }
+
+  /** Week ids belonging to the current season (all of them pre-006). */
+  async function currentSeasonWeekIds() {
+    var lookup = await ensureWeekLookup();
+    var ids = {};
+    Object.keys(lookup.numToId).forEach(function (n) { ids[lookup.numToId[n]] = true; });
+    return ids;
   }
 
   /** Resolve a week_number to the actual match_week_id (FK). Falls back to the input if not found (old data). */
@@ -196,7 +244,12 @@
 
       if (_ref.error) throw new Error('getWeeks: ' + _ref.error.message);
 
-      var matches = _ref.data || [];
+      // Drop anything from a previous season — week numbers repeat, so
+      // mixing them would collapse two seasons into one list.
+      var seasonIds = await currentSeasonWeekIds();
+      var matches = (_ref.data || []).filter(function (m) {
+        return seasonIds[m.match_week_id];
+      });
       if (!matches.length) {
         return { weeks: [], latest: null, recommendedPickWeek: null, recommendedViewWeek: null, detail: [] };
       }
@@ -594,8 +647,27 @@
         myScore: myScore,
         aiScore: aiScore,
         rows: rows,
+        strategy: await this.getAIWeekNote(week),
         season: await this.getVersusAISeason(userId, bot.id)
       };
+    },
+
+    /* ────────────────────────────────────────────────────────────
+       getAIWeekNote(week)
+       Picks AI's strategy note for a week. Reads predict_ai_week_notes,
+       a view that only returns a row once the week has locked — the same
+       reveal rule as the picks themselves. Returns '' if not yet visible.
+       ──────────────────────────────────────────────────────────── */
+    async getAIWeekNote(week) {
+      var _ref = await sb()
+        .from('predict_ai_week_notes')
+        .select('strategy')
+        .eq('week_number', Number(week))
+        .limit(1);
+      // The view may not exist on an un-migrated database — degrade quietly
+      // rather than breaking the whole tab over a nice-to-have.
+      if (_ref.error) return '';
+      return (_ref.data && _ref.data[0]) ? (_ref.data[0].strategy || '') : '';
     },
 
     /* ────────────────────────────────────────────────────────────
@@ -756,11 +828,14 @@
 
       // Check if match_week already exists by week_number
       var weekNum = parseInt(week);
-      var _existing = await sb()
+      var _season = await currentSeason();
+      var _existingQuery = sb()
         .from('predict_match_weeks')
         .select('id')
-        .eq('week_number', weekNum)
-        .limit(1);
+        .eq('week_number', weekNum);
+      if (_season) _existingQuery = _existingQuery.eq('season', _season);
+
+      var _existing = await _existingQuery.limit(1);
       if (_existing.error) throw new Error('seedWeek check week: ' + _existing.error.message);
 
       var matchWeekId;
@@ -768,9 +843,11 @@
         matchWeekId = _existing.data[0].id;
       } else {
         // Create new week — let the DB auto-generate id
+        var _newWeek = { week_number: weekNum, status: 'open' };
+        if (_season) _newWeek.season = _season;
         var _mw = await sb()
           .from('predict_match_weeks')
-          .insert({ week_number: weekNum, status: 'open' })
+          .insert(_newWeek)
           .select();
         if (_mw.error) throw new Error('seedWeek match_week: ' + _mw.error.message);
         matchWeekId = _mw.data[0].id;

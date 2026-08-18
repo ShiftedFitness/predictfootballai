@@ -123,4 +123,60 @@ function handleOptions(event) {
   return null;
 }
 
-module.exports = { sb, respond, requireAdmin, handleOptions };
+/**
+ * The season currently being played, from the predict_seasons registry.
+ * Cached per invocation. Returns null if migration 006 has not been applied.
+ */
+let _currentSeason;
+async function currentSeason(client) {
+  if (_currentSeason !== undefined) return _currentSeason;
+  const { data, error } = await client
+    .from('predict_seasons')
+    .select('season')
+    .eq('is_current', true)
+    .maybeSingle();
+  if (error) {
+    console.warn('currentSeason lookup failed:', error.message);
+    _currentSeason = null;
+  } else {
+    _currentSeason = data ? data.season : null;
+  }
+  return _currentSeason;
+}
+
+/**
+ * Mirror a user's freshly-scored totals into predict_user_seasons.
+ *
+ * predict_users holds the CURRENT season's running totals (every existing
+ * read path depends on that, so it stays). predict_user_seasons is the
+ * per-season record that the league table's season toggle reads, and it has
+ * to be kept in step or the current season shows zeros all year.
+ *
+ * Never throws — scoring has already been written by the time this runs, and
+ * a standings-mirror failure must not roll back or abort a scored week.
+ */
+async function syncSeasonStandings(client, userId, totals) {
+  try {
+    const season = await currentSeason(client);
+    if (!season) return;   // pre-006 database; nothing to mirror into
+
+    const { error } = await client
+      .from('predict_user_seasons')
+      .upsert([{
+        user_id: userId,
+        season,
+        points: totals.points,
+        correct_results: totals.correct_results,
+        incorrect_results: totals.incorrect_results,
+        full_houses: totals.full_houses,
+        blanks: totals.blanks,
+        current_week: totals.current_week
+      }], { onConflict: 'user_id,season' });
+
+    if (error) console.error(`syncSeasonStandings(user ${userId}):`, error.message);
+  } catch (e) {
+    console.error(`syncSeasonStandings(user ${userId}) threw:`, e.message);
+  }
+}
+
+module.exports = { sb, respond, requireAdmin, handleOptions, currentSeason, syncSeasonStandings };

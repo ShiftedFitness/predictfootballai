@@ -164,3 +164,142 @@ User raised the cap: 5 searches/week, $5/season acceptable.
   horizontal overflow at 375px.
 - NOT verified: the live Claude API call (no local ANTHROPIC_API_KEY). Must be
   smoke-tested on Netlify with {dryRun:true} before Saturday.
+
+## Picks AI made strategic (user request)
+User: "it shouldn't predict in isolation — factor in league position, patterns
+from previous weeks, and the right amount of risk to chase the 5-point bonus."
+
+IMPORTANT MATHS CORRECTION encoded in the prompt: for independent matches,
+picking the argmax outcome in every match maximises BOTH expected correct
+count AND P(all five correct) simultaneously. There is NO safe-vs-bonus
+trade-off, and deliberately picking an upset you don't believe in strictly
+lowers the full-house chance. So "take more risk to chase the bonus" is
+counterproductive as stated.
+
+The real strategic lever is competitive: whether to CORRELATE with the field
+or DIFFERENTIATE from it.
+  - leading / near top  → play the percentages, lead survives
+  - mid-table, time left→ play the percentages, let accuracy compound
+  - well behind, few wks→ differentiate on near-coin-toss matches only
+  - never deviate on a match it is confident about
+This is what the prompt now instructs, and it delivers what the user wanted
+(position-aware, pattern-aware, risk-calibrated) for the correct reason.
+
+Implemented:
+- `gatherStrategicContext()` — league position, points, gap to leader and to
+  the players immediately above/below, weeks played/remaining, its own last 6
+  weekly scores (incl. full houses and blanks), and crowd tendencies mined
+  from ALREADY-LOCKED past weeks (majority-pick accuracy, field pick split vs
+  actual result split, e.g. "the field under-picks draws by N points").
+- `renderStrategicContext()` turns that into a readable brief.
+- `submit_picks` tool gained a required `strategy` string; stored on
+  predict_ai_runs.strategy.
+- Fairness preserved: it never reads the CURRENT week's picks from anyone.
+  Only its own data and locked historical data.
+
+Surfacing the strategy note without leaking it early:
+- predict_ai_runs stays RLS deny-all (keeps spend private).
+- New view `predict_ai_week_notes` exposes ONLY (season, week_number,
+  strategy) and bakes the lockout check into its WHERE clause. Deliberately a
+  non-security_invoker view so it reads past the deny-all RLS; Supabase's
+  linter will flag "security definer view" — that is intended and no cost or
+  token data is reachable through it.
+- `PredictData.getAIWeekNote()` reads the view; degrades to '' if it does not
+  exist (un-migrated DB) rather than breaking the tab.
+- Rendered in the You v AI tab as "Its approach this week: ..." (escaped).
+
+## Gap found in my own migration (fixed)
+predict_user_seasons was created but NOTHING wrote to it, so the current
+season would have shown zeros all year in the season toggle.
+- `_supabase.js` gained `currentSeason()` + `syncSeasonStandings()`.
+- `admin-score-week.js` and `auto-score.js` now mirror every scored total into
+  predict_user_seasons. syncSeasonStandings never throws — a mirror failure
+  must not abort an already-scored week.
+
+## Diagnostic result #2 (user)
+Query 6 (orphan check): orphan_by_user 0, orphan_by_match 0,
+orphan_match_week 0 — referential integrity is clean.
+STILL OUTSTANDING: query 1 (what weeks exist) — needed before running 006,
+because 006 labels EVERY existing week '2025/26'.
+
+## Diagnostic result #3 — weeks (user)
+38 weeks, 5 matches each, first_lockout 2025-08-15 → last 2026-05-24.
+Exactly ONE season. The '2025/26' archive label in 006 is correct. GREEN LIGHT
+on the migration (after a Supabase snapshot).
+
+BUT the output exposed something important: weeks 1-26 are status 'closed',
+weeks 27-38 are still 'open' despite lockouts months in the past. Confirmed by
+grep: **nothing in the codebase ever writes predict_match_weeks.status.**
+It is set to 'open' at seed time and only ever changed by hand. The status
+column is decorative.
+
+That, combined with restarting week numbers at 1, would have broken FOUR
+things once the new season started. All now fixed:
+
+1. auto-score.js picked "the latest week with unscored matches" by week_number
+   across the whole table → last season's week 38 outranks the new season's
+   week 1, so the new season would NEVER have been scored.
+   → now filtered to the current season.
+
+2. admin-score-week.js resolved a week with
+   .eq('week_number', n).maybeSingle() → once week 1 exists in two seasons
+   that throws "multiple rows returned".
+   → now filtered to the current season.
+
+3. predict-data.js ensureWeekLookup() built numToId[week_number] = id across
+   ALL weeks → "week 1" would resolve to whichever season's row was processed
+   last, i.e. the frontend could silently serve last season's fixtures.
+   → idToNum still covers every season (historical matches must still resolve
+     their number), but numToId is now built from the CURRENT season only.
+     getWeeks() filters to current-season week ids. seedWeek()'s existence
+     check is season-scoped and it now stamps season explicitly on insert.
+
+4. picks-ai.js and picks-reminder.js both target status='open' weeks → the 12
+   stale open weeks from last season were permanent candidates.
+   → both now filtered to the current season. picks-ai also stopped counting
+     weeksPlayed via status==='scored' (always 0, since nothing sets it) and
+     counts weeks with actual results instead.
+
+_supabase.js gained currentSeason() (cached per invocation); predict-data.js
+gained its own client-side equivalent. Both degrade to null on a pre-006
+database so every code path behaves exactly as before until 006 is applied.
+
+STILL UNKNOWN: whether weeks 27-38 actually have results in. If they do not,
+last season's archived final table will be incomplete (recoverable — the raw
+predictions are all intact and can be re-scored, then the archive updated).
+
+## Diagnostic result #4 — results (user)
+Weeks 27-38 all show results_in = 5. Every one of last season's 190 matches
+has a correct_result. The stale 'open' status is cosmetic only.
+
+Remaining question before the archive is frozen: results being IN is not the
+same as the week being SCORED (correct_result on the match vs points_awarded
+on each prediction + totals on predict_users). Wrote
+sql/FINAL_CHECK_BEFORE_006.sql to reconcile stored points against
+SUM(points_awarded) + 5*full_houses per player. It doubles as the roster
+query, which is still outstanding.
+PASS condition: unscored_picks = 0 and discrepancy = 0 on every row.
+
+## Diagnostic result #5 — reconciliation PASSED (user)
+All 24 players: discrepancy 0, unscored_picks 0. Last season is fully and
+correctly scored; predict_users totals are safe to freeze as the 2025/26
+final table. (Roster details deliberately not copied into this log — it is
+committed to git and the query returns personal email addresses. Re-run
+sql/FINAL_CHECK_BEFORE_006.sql when the list is needed.)
+
+2025/26 champion: craigtee, 95 pts (90 correct + 1 full house).
+Runner-up: Chappers, 92 pts (82 correct + 2 full houses).
+Squad size 24 → 25 once Picks AI joins, before the leaver/joiners.
+
+**GREEN LIGHT GIVEN** on BACKUP_BEFORE_006.sql then 006_season_support.sql.
+
+## Remaining before Saturday
+- [ ] User runs backup + 006, then deploys
+- [ ] Roster changes: name of the departing player (soft-delete via
+      is_active=false — NEVER DELETE, predict_predictions cascades and would
+      destroy the archive we just verified), plus joiners' usernames + emails
+- [ ] Smoke test picks-ai on Netlify with {dryRun:true, force:true} —
+      the only thing never executed against the live Claude API
+- [ ] Seed 2026/27 week 1 via admin, confirm it lands with season='2026/27'
+- [ ] Verify the MW1 prediction prior problem (standings empty at MW1 makes
+      api-football-fixtures' suggestions meaningless) — NOT YET BUILT

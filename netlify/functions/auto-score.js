@@ -19,7 +19,7 @@
  *   → { ok, week, matchesChecked, resultsSet, weekScored, ... }
  */
 
-const { sb, respond } = require('./_supabase.js');
+const { sb, respond, syncSeasonStandings, currentSeason } = require('./_supabase.js');
 
 const FD_BASE = 'https://api.football-data.org/v4';
 
@@ -130,19 +130,24 @@ async function scoreWeek(client, weekNum, matchWeekId, matches) {
     const blankInc = (weeklyCorrect === 0) ? 1 : 0;
     const pointsToAdd = weeklyCorrect + bonus;
 
+    const newTotals = {
+      points: Number(u.points ?? 0) + pointsToAdd,
+      correct_results: Number(u.correct_results ?? 0) + weeklyCorrect,
+      incorrect_results: Number(u.incorrect_results ?? 0) + (stats.predCount - weeklyCorrect),
+      full_houses: Number(u.full_houses ?? 0) + fhInc,
+      blanks: Number(u.blanks ?? 0) + blankInc,
+      current_week: (Number(u.current_week ?? weekNum)) + 1
+    };
+
     const { error: userUpdateError } = await client
       .from('predict_users')
-      .update({
-        points: Number(u.points ?? 0) + pointsToAdd,
-        correct_results: Number(u.correct_results ?? 0) + weeklyCorrect,
-        incorrect_results: Number(u.incorrect_results ?? 0) + (stats.predCount - weeklyCorrect),
-        full_houses: Number(u.full_houses ?? 0) + fhInc,
-        blanks: Number(u.blanks ?? 0) + blankInc,
-        current_week: (Number(u.current_week ?? weekNum)) + 1
-      })
+      .update(newTotals)
       .eq('id', u.id);
 
     if (userUpdateError) throw new Error(`Failed to update user: ${userUpdateError.message}`);
+
+    // Keep the per-season standings in step (season toggle reads these).
+    await syncSeasonStandings(client, u.id, newTotals);
     updates.push({ uid, name: u.username || u.full_name || `User ${u.id}`, weeklyCorrect, pointsAdded: pointsToAdd, fhInc, blankInc });
   }
 
@@ -171,10 +176,18 @@ exports.handler = async (event) => {
     const client = sb();
 
     // 1. Load all match weeks + their matches, find the latest week with unscored matches
-    const { data: allWeeks, error: weeksErr } = await client
+    // Scope to the current season. Week numbers restart at 1 each season, so
+    // without this the "latest week" is always last season's week 38 and the
+    // new season would never get scored.
+    const season = await currentSeason(client);
+
+    let weeksQuery = client
       .from('predict_match_weeks')
       .select('id, week_number')
       .order('week_number', { ascending: true });
+    if (season) weeksQuery = weeksQuery.eq('season', season);
+
+    const { data: allWeeks, error: weeksErr } = await weeksQuery;
     if (weeksErr) throw new Error(`Failed to fetch weeks: ${weeksErr.message}`);
 
     if (!allWeeks || !allWeeks.length) {

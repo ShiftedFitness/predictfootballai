@@ -12,7 +12,7 @@
 // Response:
 //   { ok:true, week:12, predictionsUpdated:..., usersUpdated:..., ... }
 
-const { sb, respond, requireAdmin, handleOptions } = require('./_supabase.js');
+const { sb, respond, requireAdmin, handleOptions, syncSeasonStandings, currentSeason } = require('./_supabase.js');
 
 const U = (s) => String(s || '').trim().toUpperCase();
 
@@ -36,11 +36,16 @@ exports.handler = async (event) => {
     const client = sb();
 
     // 1) Resolve week number → match_week_id, then load matches + users
-    const { data: weekRow, error: weekError } = await client
+    // Week numbers repeat across seasons, so this must be scoped or
+    // maybeSingle() errors on multiple rows.
+    const season = await currentSeason(client);
+    let weekLookup = client
       .from('predict_match_weeks')
       .select('id')
-      .eq('week_number', weekNum)
-      .maybeSingle();
+      .eq('week_number', weekNum);
+    if (season) weekLookup = weekLookup.eq('season', season);
+
+    const { data: weekRow, error: weekError } = await weekLookup.maybeSingle();
 
     if (weekError) throw new Error(`Failed to look up week: ${weekError.message}`);
     if (!weekRow) return respond(400, `No match_week found for week ${weekNum}`);
@@ -230,19 +235,24 @@ exports.handler = async (event) => {
         newCurrentWeek = (Number(u.current_week ?? weekNum)) + 1;
       }
 
+      const newTotals = {
+        points: newPoints,
+        correct_results: newCorrect,
+        incorrect_results: newIncorrect,
+        full_houses: newFH,
+        blanks: newBlanks,
+        current_week: newCurrentWeek
+      };
+
       const { error: userUpdateError } = await client
         .from('predict_users')
-        .update({
-          points: newPoints,
-          correct_results: newCorrect,
-          incorrect_results: newIncorrect,
-          full_houses: newFH,
-          blanks: newBlanks,
-          current_week: newCurrentWeek
-        })
+        .update(newTotals)
         .eq('id', u.id);
 
       if (userUpdateError) throw new Error(`Failed to update user: ${userUpdateError.message}`);
+
+      // Keep the per-season standings in step (season toggle reads these).
+      await syncSeasonStandings(client, u.id, newTotals);
 
       const bonus = (weeklyCorrectFinal === 5) ? 5 : 0;
       updates.push({

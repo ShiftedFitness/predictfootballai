@@ -21,7 +21,7 @@
  */
 
 const nodemailer = require('nodemailer');
-const { sb, respond, requireAdmin, handleOptions } = require('./_supabase.js');
+const { sb, respond, requireAdmin, handleOptions, currentSeason } = require('./_supabase.js');
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
@@ -223,11 +223,19 @@ exports.handler = async (event) => {
     const now = new Date();
 
     // 1. Find open matchweeks, sorted soonest first
-    const { data: openWeeks, error: weeksErr } = await client
+    // Scope to the current season. predict_match_weeks.status is never
+    // advanced by the app, so last season left weeks stuck on 'open' with
+    // lockouts long past — without this they are scanned every 30 minutes.
+    const season = await currentSeason(client);
+
+    let openWeekQuery = client
       .from('predict_match_weeks')
       .select('id, week_number, status')
       .eq('status', 'open')
       .order('week_number', { ascending: true });
+    if (season) openWeekQuery = openWeekQuery.eq('season', season);
+
+    const { data: openWeeks, error: weeksErr } = await openWeekQuery;
 
     if (weeksErr) throw new Error(`Failed to fetch weeks: ${weeksErr.message}`);
     if (!openWeeks || openWeeks.length === 0) {

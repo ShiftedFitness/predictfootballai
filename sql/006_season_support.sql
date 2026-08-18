@@ -362,11 +362,37 @@ CREATE TABLE IF NOT EXISTS public.predict_ai_runs (
   created_at         TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- The strategy note Picks AI wrote for that week (league position, whether it
+-- played the percentages or differentiated). Revealed to players after lockout
+-- via the view below.
+ALTER TABLE public.predict_ai_runs ADD COLUMN IF NOT EXISTS strategy TEXT;
+
 CREATE INDEX IF NOT EXISTS idx_ai_runs_season ON public.predict_ai_runs(season);
 
 -- Service-role only: no public read policy is created, and RLS with no
--- policy denies every anon/authenticated request.
+-- policy denies every anon/authenticated request. Keeps spend private.
 ALTER TABLE public.predict_ai_runs ENABLE ROW LEVEL SECURITY;
+
+-- ...but the strategy note itself should be readable once the week has locked,
+-- on the same terms as the picks. This view exposes ONLY (season, week, note)
+-- and bakes the lockout check into its WHERE clause. It is intentionally a
+-- non-security_invoker view so it can read past the deny-all RLS above —
+-- Supabase's linter flags that as "security definer view"; it is deliberate,
+-- and no cost or token data is reachable through it.
+CREATE OR REPLACE VIEW public.predict_ai_week_notes AS
+SELECT r.season, r.week_number, r.strategy
+FROM public.predict_ai_runs r
+WHERE r.strategy IS NOT NULL
+  AND EXISTS (
+    SELECT 1
+    FROM public.predict_match_weeks w
+    JOIN public.predict_matches m ON m.match_week_id = w.id
+    WHERE w.season = r.season
+      AND w.week_number = r.week_number
+      AND (m.locked = TRUE OR m.lockout_time <= NOW())
+  );
+
+GRANT SELECT ON public.predict_ai_week_notes TO anon, authenticated;
 
 COMMIT;
 
