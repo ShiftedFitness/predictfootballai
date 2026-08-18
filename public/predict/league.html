@@ -17,6 +17,30 @@
   .cross{ color:var(--danger); font-weight:900 }
   .small{ font-size:12px; color:var(--text-muted); margin-bottom:6px }
   .row{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; justify-content:space-between }
+
+  /* ---- You v AI ---- */
+  .vs-score{ display:flex; align-items:center; justify-content:center; gap:20px; padding:14px 0 6px }
+  .vs-side{ text-align:center; min-width:88px }
+  .vs-label{ font-size:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:.5px }
+  .vs-num{ font-family:'Space Mono',monospace; font-size:40px; font-weight:700; line-height:1.1; color:var(--text-primary) }
+  .vs-dash{ font-size:18px; color:var(--text-muted) }
+  .vs-win .vs-num{ color:var(--accent-green) }
+  .vs-lose .vs-num{ color:var(--danger) }
+  .vs-verdict{ text-align:center; font-weight:700; margin-bottom:12px; min-height:20px }
+
+  .vs-match{ border-top:1px solid var(--bg-elevated); padding:12px 0 }
+  .vs-match:first-child{ border-top:none }
+  .vs-fixture{ font-weight:700; margin-bottom:8px }
+  .vs-picks{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:8px }
+  .vs-pick{ flex:1 1 130px; background:var(--bg-elevated); border-radius:6px; padding:8px 10px }
+  .vs-pick .who{ font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:.5px }
+  .vs-pick .what{ font-family:'Space Mono',monospace; font-weight:700; font-size:15px }
+  .vs-pick.right{ box-shadow:inset 3px 0 0 var(--accent-green) }
+  .vs-pick.wrong{ box-shadow:inset 3px 0 0 var(--danger) }
+  .vs-why{ font-size:13px; color:var(--text-secondary); font-style:italic; padding-left:10px;
+           border-left:2px solid var(--accent-cyan) }
+  .vs-agree{ font-size:11px; color:var(--text-muted); margin-top:6px }
+  .vs-empty{ text-align:center; color:var(--text-muted); padding:26px 10px }
 </style>
 </head>
 <body>
@@ -30,6 +54,7 @@
     <div class="ts-tabs">
       <button class="ts-tab active" id="tabOverall">Overall</button>
       <button class="ts-tab" id="tabWeekly">Matchweek</button>
+      <button class="ts-tab" id="tabVersus">You v AI</button>
     </div>
 
     <!-- Overall -->
@@ -84,6 +109,31 @@
         </table>
       </div>
       <div class="ts-muted" style="margin-top:8px">Ticks/crosses appear once results are scored. Before that, cells show your pick (1 = Home, 2 = Away, X = Draw).</div>
+    </div>
+
+    <!-- You v AI -->
+    <div id="versus" class="ts-card" style="display:none">
+      <div class="row" style="margin-bottom:8px">
+        <div>
+          <span class="ts-muted">Week</span>
+          <select id="vsWeekSel" class="ts-select"></select>
+        </div>
+        <div class="ts-muted" id="vsSeason"></div>
+      </div>
+
+      <div id="vsScore" class="vs-score" style="display:none">
+        <div class="vs-side"><div class="vs-label">You</div><div class="vs-num" id="vsMine">0</div></div>
+        <div class="vs-dash">v</div>
+        <div class="vs-side"><div class="vs-label" id="vsBotName">Picks AI</div><div class="vs-num" id="vsTheirs">0</div></div>
+      </div>
+      <div id="vsVerdict" class="vs-verdict"></div>
+
+      <div id="vsBody"></div>
+
+      <div class="ts-muted" style="margin-top:8px">
+        Picks AI researches each matchweek on its own and submits before the deadline,
+        same as everyone else. Its picks and reasoning stay hidden until the week locks.
+      </div>
     </div>
   </div>
 
@@ -216,20 +266,159 @@ async function loadWeekly(week) {
   sel.onchange = () => loadWeekly(Number(sel.value));
 }
 
+/* ---------- You v AI ---------- */
+const PICK_LABEL = { HOME:'Home win', AWAY:'Away win', DRAW:'Draw' };
+
+function pickText(pick, row){
+  if (!pick) return '— no pick';
+  if (pick === 'HOME') return row.home;
+  if (pick === 'AWAY') return row.away;
+  return 'Draw';
+}
+
+function vsMatchHTML(r, scored){
+  // r.rationale is model-authored text derived from web pages — escape it.
+  const stateCls = (right) => !scored ? '' : (right ? 'right' : 'wrong');
+  return `
+    <div class="vs-match">
+      <div class="vs-fixture">${escapeHTML(r.fixture)}${
+        scored && r.correct ? ` <span class="ts-muted">— ${escapeHTML(PICK_LABEL[r.correct] || r.correct)}</span>` : ''
+      }</div>
+      <div class="vs-picks">
+        <div class="vs-pick ${stateCls(r.myRight)}">
+          <div class="who">You</div>
+          <div class="what">${escapeHTML(pickText(r.myPick, r))}</div>
+        </div>
+        <div class="vs-pick ${stateCls(r.aiRight)}">
+          <div class="who">Picks AI</div>
+          <div class="what">${escapeHTML(pickText(r.aiPick, r))}</div>
+        </div>
+      </div>
+      ${r.rationale ? `<div class="vs-why">${escapeHTML(r.rationale)}</div>` : ''}
+      ${r.agreed ? '<div class="vs-agree">You and Picks AI agreed on this one.</div>' : ''}
+    </div>`;
+}
+
+function seasonLine(s, botName){
+  if (!s || !s.weeks) return '';
+  const bits = [`${s.wins}W`, `${s.draws}D`, `${s.losses}L`];
+  return `Season v ${botName}: ${bits.join(' ')} in ${s.weeks} ${s.weeks === 1 ? 'week' : 'weeks'}`;
+}
+
+async function loadVersus(week){
+  const body = document.getElementById('vsBody');
+  const score = document.getElementById('vsScore');
+  const verdict = document.getElementById('vsVerdict');
+
+  let j;
+  try {
+    j = await PredictData.getVersusAI(week, highlightUserId);
+  } catch (e) {
+    debugLog('getVersusAI error:', e);
+    body.innerHTML = '<div class="vs-empty">Could not load this week.</div>';
+    return;
+  }
+
+  if (!j.available) {
+    score.style.display = 'none';
+    verdict.textContent = '';
+    body.innerHTML = `<div class="vs-empty">${
+      j.reason === 'no_bot'
+        ? 'Picks AI has not joined this season yet.'
+        : 'No fixtures for this week.'
+    }</div>`;
+    return;
+  }
+
+  currentWeek = Number(j.week);
+  document.getElementById('vsBotName').textContent = j.botName || 'Picks AI';
+  document.getElementById('vsSeason').textContent = seasonLine(j.season, j.botName || 'Picks AI');
+
+  if (!j.locked) {
+    score.style.display = 'none';
+    verdict.textContent = '';
+    body.innerHTML = '<div class="vs-empty">Picks AI has made its selections.<br/>' +
+      'They unlock when the first match of the week kicks off.</div>';
+    return;
+  }
+
+  score.style.display = '';
+  document.getElementById('vsMine').textContent = j.myScore;
+  document.getElementById('vsTheirs').textContent = j.aiScore;
+
+  const sides = score.querySelectorAll('.vs-side');
+  sides.forEach(s => s.classList.remove('vs-win','vs-lose'));
+  if (j.scored && j.myScore !== j.aiScore) {
+    const iWon = j.myScore > j.aiScore;
+    sides[0].classList.add(iWon ? 'vs-win' : 'vs-lose');
+    sides[1].classList.add(iWon ? 'vs-lose' : 'vs-win');
+  }
+
+  verdict.textContent = !j.scored
+    ? 'Results still to come.'
+    : j.myScore > j.aiScore ? 'You beat Picks AI this week.'
+    : j.myScore < j.aiScore ? 'Picks AI beat you this week.'
+    : 'Dead heat this week.';
+
+  body.innerHTML = (j.rows || []).map(r => vsMatchHTML(r, j.scored)).join('');
+}
+
+async function initVersusTab(){
+  const sel = document.getElementById('vsWeekSel');
+  const weeksData = await PredictData.getWeeks();
+  const locked = (weeksData.detail || [])
+    .filter(d => d.locked).map(d => d.week).sort((a,b) => b - a);
+
+  // Include the current unlocked week so players can see that Picks AI is in.
+  const weeks = locked.slice();
+  if (weeksData.latest != null && !weeks.includes(weeksData.latest)) weeks.unshift(weeksData.latest);
+  if (!weeks.length) {
+    document.getElementById('vsBody').innerHTML =
+      '<div class="vs-empty">No matchweeks yet.</div>';
+    return;
+  }
+
+  // Open on the newest *locked* week — that is where there is something to
+  // read. The current week stays selectable, but it only says "not yet".
+  const view = weeks.includes(currentWeek) ? currentWeek : (locked[0] ?? weeks[0]);
+  sel.innerHTML = '';
+  weeks.forEach(w => {
+    const opt = document.createElement('option');
+    opt.value = w;
+    opt.textContent = `Week ${w}`;
+    if (Number(w) === Number(view)) opt.selected = true;
+    sel.appendChild(opt);
+  });
+  sel.onchange = () => loadVersus(Number(sel.value));
+
+  await loadVersus(view);
+}
+
 /* ---------- Tabs ---------- */
-document.getElementById('tabOverall').onclick = ()=>{
-  document.getElementById('tabOverall').classList.add('active');
-  document.getElementById('tabWeekly').classList.remove('active');
-  document.getElementById('overall').style.display='';
-  document.getElementById('weekly').style.display='none';
-};
+const TABS = [
+  { btn:'tabOverall', panel:'overall' },
+  { btn:'tabWeekly',  panel:'weekly'  },
+  { btn:'tabVersus',  panel:'versus'  }
+];
+
+function showTab(id){
+  TABS.forEach(t => {
+    const active = t.btn === id;
+    document.getElementById(t.btn).classList.toggle('active', active);
+    document.getElementById(t.panel).style.display = active ? '' : 'none';
+  });
+}
+
+document.getElementById('tabOverall').onclick = () => showTab('tabOverall');
 
 document.getElementById('tabWeekly').onclick = async ()=>{
-  document.getElementById('tabWeekly').classList.add('active');
-  document.getElementById('tabOverall').classList.remove('active');
-  document.getElementById('overall').style.display='none';
-  document.getElementById('weekly').style.display='';
+  showTab('tabWeekly');
   await initWeeklyTab();
+};
+
+document.getElementById('tabVersus').onclick = async ()=>{
+  showTab('tabVersus');
+  await initVersusTab();
 };
 
 /* ---------- Weekly Tab Initialization ---------- */

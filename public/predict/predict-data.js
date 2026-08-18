@@ -499,6 +499,141 @@
     },
 
     /* ────────────────────────────────────────────────────────────
+       getVersusAI(week, userId)
+       You v Picks AI for one week, plus the season head-to-head.
+
+       Reveal rule: Picks AI's selections and reasoning must not be
+       visible before the week locks. That is enforced in Postgres, not
+       here — the bot row has no auth_id, so the pp_select_own policy
+       never matches it, and pp_select_locked only exposes a prediction
+       once locked = true or lockout_time has passed. This function runs
+       on the anon key so those policies apply. Never re-implement it on
+       top of a service-role Netlify function, which bypasses RLS.
+       ──────────────────────────────────────────────────────────── */
+    async getVersusAI(week, userId) {
+      if (!week) throw new Error('week required');
+      week = Number(week);
+
+      // Locate the bot. is_bot is readable via the public predict_users
+      // select policy; its *predictions* are what RLS protects.
+      var _bot = await sb()
+        .from('predict_users')
+        .select('id, username')
+        .eq('is_bot', true)
+        .limit(1);
+      if (_bot.error) throw new Error('getVersusAI bot: ' + _bot.error.message);
+      var bot = (_bot.data || [])[0];
+      if (!bot) return { available: false, reason: 'no_bot' };
+
+      var matches = await this.getWeekMatches(week);
+      if (!matches.length) return { available: false, reason: 'no_matches', week: week };
+
+      var locked = isWeekLocked(matches.map(function (m) { return m._raw; }));
+      var matchIds = matches.map(function (m) { return parseInt(m.id); });
+
+      if (!locked) {
+        // Deliberately fetch nothing. RLS would return an empty set anyway;
+        // returning early keeps the intent obvious to the next reader.
+        return {
+          available: true, week: week, locked: false,
+          botName: bot.username, rows: [], season: null
+        };
+      }
+
+      var _preds = await sb()
+        .from('predict_predictions')
+        .select('*')
+        .in('match_id', matchIds)
+        .in('user_id', [parseInt(userId), bot.id]);
+      if (_preds.error) throw new Error('getVersusAI preds: ' + _preds.error.message);
+
+      var mine = {}, theirs = {};
+      (_preds.data || []).forEach(function (p) {
+        if (String(p.user_id) === String(bot.id)) theirs[p.match_id] = p;
+        else mine[p.match_id] = p;
+      });
+
+      var myScore = 0, aiScore = 0;
+      var rows = matches.map(function (m) {
+        var mid = parseInt(m.id);
+        var mp = mine[mid], ap = theirs[mid];
+        var correct = m['Correct Result'] || null;
+        var myPick = mp ? mp.pick : null;
+        var aiPick = ap ? ap.pick : null;
+        var myRight = !!(myPick && correct && myPick === correct);
+        var aiRight = !!(aiPick && correct && aiPick === correct);
+        if (myRight) myScore++;
+        if (aiRight) aiScore++;
+
+        return {
+          matchId: mid,
+          fixture: m['Home Team'] + ' v ' + m['Away Team'],
+          home: m['Home Team'],
+          away: m['Away Team'],
+          correct: correct,
+          myPick: myPick,
+          aiPick: aiPick,
+          myRight: myRight,
+          aiRight: aiRight,
+          agreed: !!(myPick && aiPick && myPick === aiPick),
+          // Untrusted model text — the caller MUST escape before rendering.
+          rationale: ap ? (ap.rationale || '') : '',
+          confidence: ap ? ap.confidence : null
+        };
+      });
+
+      var scored = rows.some(function (r) { return !!r.correct; });
+
+      return {
+        available: true,
+        week: week,
+        locked: true,
+        scored: scored,
+        botName: bot.username,
+        botId: bot.id,
+        myScore: myScore,
+        aiScore: aiScore,
+        rows: rows,
+        season: await this.getVersusAISeason(userId, bot.id)
+      };
+    },
+
+    /* ────────────────────────────────────────────────────────────
+       getVersusAISeason(userId, botId)
+       Season-long win/draw/loss record against Picks AI, counting only
+       weeks where both sides submitted and results are in.
+       ──────────────────────────────────────────────────────────── */
+    async getVersusAISeason(userId, botId) {
+      var _preds = await sb()
+        .from('predict_predictions')
+        .select('user_id, week_number, points_awarded')
+        .in('user_id', [parseInt(userId), parseInt(botId)])
+        .not('points_awarded', 'is', null);
+      if (_preds.error) throw new Error('getVersusAISeason: ' + _preds.error.message);
+
+      var byWeek = {};
+      (_preds.data || []).forEach(function (p) {
+        var w = p.week_number;
+        if (w == null) return;
+        if (!byWeek[w]) byWeek[w] = { me: null, ai: null };
+        var side = String(p.user_id) === String(botId) ? 'ai' : 'me';
+        byWeek[w][side] = (byWeek[w][side] || 0) + (p.points_awarded || 0);
+      });
+
+      var wins = 0, draws = 0, losses = 0, weeks = 0;
+      Object.keys(byWeek).forEach(function (w) {
+        var g = byWeek[w];
+        if (g.me == null || g.ai == null) return;   // one side sat the week out
+        weeks++;
+        if (g.me > g.ai) wins++;
+        else if (g.me < g.ai) losses++;
+        else draws++;
+      });
+
+      return { weeks: weeks, wins: wins, draws: draws, losses: losses };
+    },
+
+    /* ────────────────────────────────────────────────────────────
        getHistory(userId, viewWeek, compareId)
        Head-to-head pick comparison.
        Drop-in replacement for GET /history.

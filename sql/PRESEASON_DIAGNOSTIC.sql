@@ -29,27 +29,34 @@ ORDER BY points DESC NULLS LAST, full_houses DESC NULLS LAST;
 
 
 -- 3. THE BIG ONE: is week_number actually populated?
---    The frontend (PredictData) never writes it, but 7 serverless
---    functions filter on it. If either null_count is > 0 those
---    functions have been returning empty rows.
-SELECT 'predict_matches'     AS tbl,
-       COUNT(*)                                        AS rows,
-       COUNT(*) FILTER (WHERE week_number IS NULL)     AS null_week_number,
-       COUNT(*) FILTER (WHERE match_week_id IS NULL)   AS null_match_week_id
-FROM predict_matches
-UNION ALL
-SELECT 'predict_predictions',
-       COUNT(*),
-       COUNT(*) FILTER (WHERE week_number IS NULL),
-       NULL
-FROM predict_predictions;
+--    NOTE: an earlier run of this proved predict_matches.week_number DOES NOT
+--    EXIST, so the plain COUNT version errored. This version asks
+--    information_schema instead and works whether or not the column is there.
+--    Migration 006 now recreates the column, so this is mainly a before/after
+--    check. Run it again after 006 and every 'present' should say true.
+SELECT
+  t.table_name,
+  EXISTS (
+    SELECT 1 FROM information_schema.columns c
+    WHERE c.table_schema = 'public' AND c.table_name = t.table_name
+      AND c.column_name = 'week_number'
+  ) AS week_number_present,
+  EXISTS (
+    SELECT 1 FROM information_schema.columns c
+    WHERE c.table_schema = 'public' AND c.table_name = t.table_name
+      AND c.column_name = 'season'
+  ) AS season_present
+FROM (VALUES ('predict_matches'), ('predict_predictions'), ('predict_match_weeks'))
+  AS t(table_name);
 
 
--- 3b. And where it IS populated, does it agree with match_week_id?
-SELECT COUNT(*) AS mismatched_rows
-FROM predict_matches m
-JOIN predict_match_weeks w ON w.id = m.match_week_id
-WHERE m.week_number IS DISTINCT FROM w.week_number;
+-- 3b. ONLY run this once 006 has been applied (before that, the column is
+--     missing and it will error). Every count should be zero.
+-- SELECT
+--   COUNT(*) FILTER (WHERE m.week_number IS NULL)                   AS matches_missing_week,
+--   COUNT(*) FILTER (WHERE m.week_number IS DISTINCT FROM w.week_number) AS matches_mismatched
+-- FROM predict_matches m
+-- JOIN predict_match_weeks w ON w.id = m.match_week_id;
 
 
 -- 4. Actual column definitions + defaults (004 may have drifted).

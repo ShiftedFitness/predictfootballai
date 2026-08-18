@@ -17,10 +17,11 @@
  *   - It researches independently: it does not read the admin's enrichment
  *     predictions (prediction_home/draw/away), only public fixture facts.
  *
- * COST CONTROL — target is under $2 per 38-week season (~5.3c per week):
+ * COST CONTROL — budget is $5 per 38-week season (~13c per week):
  *   Web search is the dominant cost at $0.01 per search, NOT the tokens.
  *   Haiku 4.5 is $1/$5 per Mtok in/out.
- *   Budget per run: 3 searches (3c) + ~25K in / 1.5K out (3.3c) ~= 5.5c.
+ *   Budget per run: 5 searches (5c) + ~30K in / 2K out (4c) ~= 9c,
+ *   so ~$3.40 a season with headroom for the odd re-run.
  *   Guards: MAX_SEARCHES, max_tokens, one-run-per-week DB check, and every
  *   run logs its actual usage + estimated cost to predict_ai_runs.
  *
@@ -36,7 +37,7 @@ const { sb, respond, requireAdmin, handleOptions } = require('./_supabase.js');
 // ── Cost knobs ──────────────────────────────────────────────────────────────
 // Override MODEL via env to upgrade (e.g. claude-sonnet-5) — costs more.
 const MODEL = process.env.PICKS_AI_MODEL || 'claude-haiku-4-5';
-const MAX_SEARCHES = Number(process.env.PICKS_AI_MAX_SEARCHES || 3);
+const MAX_SEARCHES = Number(process.env.PICKS_AI_MAX_SEARCHES || 5);
 const MAX_TOKENS = 2000;
 const MAX_TURNS = 8;            // safety net on the server-tool pause_turn loop
 
@@ -111,7 +112,7 @@ const SYSTEM_PROMPT = `You are "Picks AI", a competitor in a Premier League pred
 Scoring: 1 point per correct result, plus a 5 point bonus for getting all five right. There is no partial credit and no penalty for a wrong pick, so always commit to the most likely single outcome.
 
 Research method:
-- You have a web search tool with a hard limit of ${MAX_SEARCHES} searches for the whole matchweek, so spend them well. Search for the matchweek as a whole (team news, injuries, predicted line-ups, previews) rather than one search per fixture.
+- You have a web search tool with a hard limit of ${MAX_SEARCHES} searches for the whole matchweek. That is roughly one per fixture, so spend them on the matches you are least sure about rather than confirming what you already know. Look for team news, injuries and suspensions, predicted line-ups, and previews.
 - Weigh recent form, home advantage, injuries and suspensions, fixture congestion, and motivation. League position alone is a weak signal early in a season.
 - Draws are roughly a quarter of Premier League results. Do not avoid them, but do not pick one simply because a match looks hard to call.
 

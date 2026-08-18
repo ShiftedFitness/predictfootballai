@@ -94,6 +94,21 @@ CREATE INDEX IF NOT EXISTS idx_pmw_season ON public.predict_match_weeks(season);
 ALTER TABLE public.predict_matches
   ADD COLUMN IF NOT EXISTS season TEXT;
 
+-- SCHEMA REPAIR: migration 004 declared predict_matches.week_number NOT NULL,
+-- but it is absent from the live database — PredictData.seedWeek() only ever
+-- wrote match_week_id, so the column was never created (or was dropped).
+-- Seven serverless functions filter on it and have therefore been returning
+-- nothing. Recreate it nullable, backfill below, and keep it correct with the
+-- trigger further down. Same story on predict_predictions.
+ALTER TABLE public.predict_matches
+  ADD COLUMN IF NOT EXISTS week_number INTEGER;
+
+ALTER TABLE public.predict_predictions
+  ADD COLUMN IF NOT EXISTS week_number INTEGER;
+
+CREATE INDEX IF NOT EXISTS idx_pm_week_number  ON public.predict_matches(week_number);
+CREATE INDEX IF NOT EXISTS idx_pp_week_number  ON public.predict_predictions(week_number);
+
 UPDATE public.predict_matches m
 SET    season = w.season
 FROM   public.predict_match_weeks w

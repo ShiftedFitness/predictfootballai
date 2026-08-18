@@ -108,3 +108,59 @@ via the anon key until the week locks. Requirements:
 - PRE-EXISTING LEAK: `summary.js` (service role) returns per-match pick
   distribution with NO lock check. Not AI-specific, but it means the crowd
   split is visible pre-lockout. Flag to user.
+
+## Diagnostic result #1 (user, 2026-08-18)
+Query 3 errored: `column "week_number" does not exist`.
+→ **CONFIRMED: `predict_matches.week_number` is absent from the live DB.**
+The schema drifted from migration 004. `PredictData.seedWeek()` only ever
+wrote `match_week_id`, so the column was never created (or was later dropped).
+
+Consequence: these seven functions filter on `predict_matches.week_number`
+and have therefore been returning **nothing** — they are dead code, and the
+frontend `PredictData` path is the only live one:
+  get-week.js, weekly-table.js, summary.js, history.js, weeks.js,
+  leaderboard.js, submit-picks.js
+
+Fix applied (not "remove the references" — repair the column, which revives
+those functions too):
+- `sql/006_season_support.sql` §3 now does
+  `ALTER TABLE ... ADD COLUMN IF NOT EXISTS week_number INTEGER` on BOTH
+  predict_matches and predict_predictions, before anything reads or writes it,
+  plus indexes. The existing backfill + triggers then keep it correct.
+- `sql/PRESEASON_DIAGNOSTIC.sql` query 3 rewritten to use information_schema
+  so it can no longer fail on a missing column; 3b (the null/mismatch counts)
+  is commented out until 006 has run.
+
+STILL NEEDED from the user: diagnostic queries 1, 2 and 4.
+
+## Budget revised (user, 2026-08-18)
+User raised the cap: 5 searches/week, $5/season acceptable.
+- `MAX_SEARCHES` default 3 → 5, system prompt updated (5 searches ~= one per
+  fixture, so spend them on the least certain matches).
+- Revised estimate on Haiku 4.5: 5 searches (5c) + ~30K in / 2K out (4c)
+  = ~9c/week = **~$3.40/season**, comfortably inside $5 with re-run headroom.
+- Sonnet 5 at the same shape would be ~$5.60-6.50/season — slightly over cap,
+  so staying on Haiku. `PICKS_AI_MODEL` env var switches it if wanted.
+
+## Built this session
+- `netlify/functions/picks-ai.js` — NEW. Researches via Claude + web search,
+  submits picks through a strict `submit_picks` tool, validates every pick
+  against the week's match_ids, upserts with source='ai' + rationale, logs
+  spend to predict_ai_runs. Handles pause_turn and refusal. Guarded by a
+  one-run-per-week check so retries cannot double-spend.
+- `netlify.toml` — picks-ai scheduled `0 9,18 * * *`.
+- `picks-reminder.js` — now excludes `is_bot` and inactive players.
+- `predict-data.js` — `getVersusAI()` + `getVersusAISeason()`, on the anon
+  key so RLS does the reveal-gating.
+- `league.html` — third tab "You v AI": scoreline, verdict, per-match pick
+  comparison, AI rationale, season W/D/L. Opens on the newest LOCKED week.
+- `package.json` — added @anthropic-ai/sdk ^0.117.1.
+
+## Verified
+- All JS syntax-checked (node --check), incl. league.html inline block.
+- You v AI tab driven in a browser against stubbed data: correct default week,
+  score 3-4, verdict text, 5 fixtures, 5 rationales, 7 right / 3 wrong markers,
+  agreement notes, winner/loser colouring, theme variables resolving, no
+  horizontal overflow at 375px.
+- NOT verified: the live Claude API call (no local ANTHROPIC_API_KEY). Must be
+  smoke-tested on Netlify with {dryRun:true} before Saturday.
