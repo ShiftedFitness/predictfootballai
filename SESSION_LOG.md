@@ -303,3 +303,28 @@ Squad size 24 → 25 once Picks AI joins, before the leaver/joiners.
 - [ ] Seed 2026/27 week 1 via admin, confirm it lands with season='2026/27'
 - [ ] Verify the MW1 prediction prior problem (standings empty at MW1 makes
       api-football-fixtures' suggestions meaningless) — NOT YET BUILT
+
+## 006 attempt #1 FAILED — more schema drift (fixed)
+ERROR 42703: record "new" has no field "updated_at", from
+predict_set_updated_at(). Transaction rolled back, DB untouched; the bak_
+tables from BACKUP_BEFORE_006.sql survived (separate transaction).
+
+Cause: same drift class as the missing week_number. Migration 004 declared
+updated_at on predict_match_weeks / predict_matches / predict_predictions and
+attached the trigger, but the live tables lack the column while still
+carrying the trigger. The first UPDATE in 006 (section 2, on
+predict_match_weeks) tripped it.
+
+Fix — new SECTION 0, placed before any UPDATE runs:
+  (a) ADD COLUMN IF NOT EXISTS created_at/updated_at on all three tables,
+      restoring 004's intent
+  (b) harden predict_set_updated_at() to skip the assignment when the row has
+      no updated_at field. plpgsql resolves record fields at runtime, so the
+      guarded branch is never compiled for a table lacking it. Uses
+      jsonb_exists() rather than the `?` operator, which some SQL clients
+      mistake for a bind-parameter placeholder.
+(b) means this class of failure cannot take the migration down again, on any
+predict_* table, including ones we have not inspected.
+
+Safe to re-run 006 as-is — every statement is IF NOT EXISTS / idempotent and
+attempt #1 left nothing behind.

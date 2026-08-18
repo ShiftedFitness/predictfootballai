@@ -20,6 +20,46 @@
 
 BEGIN;
 
+-- ── 0. Schema repair (run before anything issues an UPDATE) ─────────────
+-- Migration 004 declared updated_at on these tables and attached the
+-- predict_set_updated_at() trigger to them, but the live schema drifted:
+-- the trigger is there and the column is not, so the very first UPDATE in
+-- this migration failed with
+--   ERROR 42703: record "new" has no field "updated_at"
+-- Same class of drift that lost predict_matches.week_number.
+--
+-- Two fixes, belt and braces:
+--   (a) recreate the missing columns, restoring 004's intent
+--   (b) make the trigger function tolerate a table without the column, so
+--       this can never take the migration down again. plpgsql resolves
+--       record fields at runtime, so the guarded assignment is never
+--       compiled for a table that lacks the field. jsonb_exists() is used
+--       rather than the `?` operator, which some SQL clients mistake for a
+--       bind-parameter placeholder.
+
+ALTER TABLE public.predict_match_weeks
+  ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
+
+ALTER TABLE public.predict_matches
+  ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
+
+ALTER TABLE public.predict_predictions
+  ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
+
+CREATE OR REPLACE FUNCTION public.predict_set_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF jsonb_exists(to_jsonb(NEW), 'updated_at') THEN
+    NEW.updated_at = NOW();
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+
 -- ── 1. Season registry ──────────────────────────────────────
 
 CREATE TABLE IF NOT EXISTS public.predict_seasons (
