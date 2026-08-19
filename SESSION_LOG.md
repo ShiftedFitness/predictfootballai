@@ -704,3 +704,27 @@ Simulated the full week — behaves exactly as intended:
   Sat 02:00   9.5h  SKIP
   ... every later tick SKIPs
 Cost of the extra run: one additional ~$0.08, i.e. ~$0.16 for this week.
+
+## curl failed for the user — replaced with a script
+User got repeated "curl: (3) URL rejected: Malformed input to a URL
+function" plus "Bad hostname". Cause is copying a long single-line curl out
+of rendered text: smart quotes or injected line breaks make curl treat
+fragments as extra URLs. Not worth debugging their clipboard.
+
+Added:
+- scripts/picks-ai-run.sh
+    bash scripts/picks-ai-run.sh            # dry run, writes nothing
+    bash scripts/picks-ai-run.sh live       # writes picks
+    bash scripts/picks-ai-run.sh live 3     # specific week
+  Reads ADMIN_SECRET from env or prompts with hidden input (never lands in
+  shell history). Builds the JSON body with printf so nothing can be mangled.
+  SITE_URL overridable. 300s timeout — a real run with 5 web searches is slow.
+- scripts/_format_picks_ai.py
+  Pretty-prints the response. Deliberately a SEPARATE FILE: the first version
+  inlined it in the bash heredoc, which needed '"'"' escaping that is easy to
+  get subtly wrong and impossible to test in isolation. My own test harness
+  tripped over it, which was the hint to split it out.
+
+Both verified: bash -n clean, python parses, and the formatter renders a
+realistic dry-run response correctly (picks + rationales, strategy note,
+cost, token usage, provisional/final note).
