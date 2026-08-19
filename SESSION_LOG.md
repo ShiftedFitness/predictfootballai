@@ -728,3 +728,29 @@ Added:
 Both verified: bash -n clean, python parses, and the formatter renders a
 realistic dry-run response correctly (picks + rationales, strategy note,
 cost, token usage, provisional/final note).
+
+## 403 on the manual run — Netlify blocks HTTP calls to SCHEDULED functions
+User's dry run returned 403 Forbidden, text/plain, 367ms. That is Netlify's
+edge, not our auth (ours returns JSON via respond()).
+
+CONFIRMED (Netlify support forums): "Attempting to invoke a scheduled
+function using a URL will result in 403 Forbidden. This is by design." A
+function with a `schedule` in netlify.toml cannot be reached over HTTP in
+production at all — only via the cron, or locally under `netlify dev`.
+
+Consequence beyond picks-ai: the manual/admin trigger code inside
+auto-score.js and picks-reminder.js has NEVER been usable in production
+either. picks-reminder's force/test_email mode in particular looks like it
+was written to be used and cannot be. FLAGGED to user, not yet fixed.
+
+Fix for picks-ai — split scheduled from HTTP:
+- picks-ai.js: handler body extracted into `async function run({requestedWeek,
+  dryRun, force})`, exported. `exports.handler = async () => run()` is the
+  scheduled entry point and takes no options.
+- NEW netlify/functions/picks-ai-trigger.js: no schedule, so reachable over
+  HTTP. Does requireAdmin, parses the body, calls run(). Cannot drift from
+  the scheduled path because it is literally the same function.
+- scripts/picks-ai-run.sh now posts to picks-ai-trigger.
+
+Slip while doing it: my first refactor replaced `try {` with `{`, orphaning
+the catch. node --check caught it immediately; fixed.

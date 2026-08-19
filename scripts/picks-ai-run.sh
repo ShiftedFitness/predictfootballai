@@ -2,6 +2,10 @@
 #
 # picks-ai-run.sh — trigger Picks AI on the deployed site.
 #
+# Calls picks-ai-trigger, NOT picks-ai. Netlify blocks HTTP calls to
+# scheduled functions with a 403 at the edge, so the manual trigger has to
+# live in its own unscheduled function.
+#
 # Exists because pasting a long curl command into a terminal is a reliable
 # way to get "URL rejected: Malformed input to a URL function" — copying
 # from rendered text can turn straight quotes into smart quotes or insert
@@ -51,7 +55,7 @@ else
   BODY=$(printf '{"force":true,"dryRun":%s}' "$DRY")
 fi
 
-echo "→ ${SITE}/.netlify/functions/picks-ai"
+echo "→ ${SITE}/.netlify/functions/picks-ai-trigger"
 echo "→ ${BODY}"
 if [ "$MODE" = "dry" ]; then
   echo "→ DRY RUN: researches and reports, writes nothing"
@@ -61,7 +65,7 @@ fi
 echo
 
 RESPONSE=$(curl -sS -X POST \
-  "${SITE}/.netlify/functions/picks-ai" \
+  "${SITE}/.netlify/functions/picks-ai-trigger" \
   -H "x-admin-secret: ${SECRET}" \
   -H "Content-Type: application/json" \
   --max-time 300 \

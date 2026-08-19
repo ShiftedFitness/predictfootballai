@@ -575,25 +575,16 @@ exports._internal = {
   LAST_CHANCE_HOURS
 };
 
-exports.handler = async (event) => {
-  const corsResponse = handleOptions(event);
-  if (corsResponse) return corsResponse;
-
-  // Netlify Clockwork invokes scheduled functions as POST with its own UA.
-  const isScheduled =
-    !event.httpMethod ||
-    (event.headers?.['user-agent'] || '').includes('Netlify Clockwork');
-
-  if (!isScheduled) {
-    const adminErr = await requireAdmin(event);
-    if (adminErr) return adminErr;
-  }
-
-  const body = isScheduled ? {} : JSON.parse(event.body || '{}');
-  const requestedWeek = body.week ? Number(body.week) : null;
-  const dryRun = !!body.dryRun;
-  const force = !!body.force;
-
+/**
+ * The actual work, callable two ways.
+ *
+ * IMPORTANT: this file carries a `schedule` in netlify.toml, and Netlify
+ * BLOCKS HTTP invocation of scheduled functions with a 403 at the edge —
+ * the request never reaches this code. So the manual trigger lives in a
+ * separate function (picks-ai-trigger.js) that requires this module and
+ * calls run() directly. Do not add HTTP handling here; it cannot work.
+ */
+async function run({ requestedWeek = null, dryRun = false, force = false } = {}) {
   try {
     if (!process.env.ANTHROPIC_API_KEY) {
       throw new Error('ANTHROPIC_API_KEY not configured');
@@ -863,4 +854,13 @@ exports.handler = async (event) => {
     console.error('picks-ai error:', e);
     return respond(500, e.message || 'Unknown error');
   }
-};
+}
+
+exports.run = run;
+
+/**
+ * Scheduled entry point. Netlify's Clockwork invokes this on the cron in
+ * netlify.toml. It takes no options — the window logic decides whether
+ * there is anything to do.
+ */
+exports.handler = async () => run();
