@@ -469,3 +469,98 @@ percentages will be meaningless this week — football-data.org's standings
 table is empty until results exist, so every team resolves to position 10 and
 every fixture lands ~45/28/27. Choose the five fixtures manually. This is the
 MW1 prior issue, still unbuilt.
+
+## Roster settled (user, 2026-08-18)
+- Departing: **WombleDan** (id 14, 80 pts in 2025/26, 190 picks). Written into
+  sql/007 step 3 as a SOFT DELETE (is_active=false, left_season='2025/26')
+  plus removal of their 2026/27 standings row. Their picks and archived
+  finish stay intact.
+- Joiners: **none**. Step 4 marked as nothing to run, with a template kept
+  in comments for a mid-season addition.
+=> 2026/27 squad = 23 humans + Picks AI = 24.
+
+## MW1 predictions — where the numbers actually come from
+User asked whether the API supplies a predicted outcome we could piggyback on.
+VERIFIED via https://docs.football-data.org/general/v4/index.html:
+football-data.org exposes Area / Competition / Match / Team / Person / Trend
+and **provides no predictions, probabilities or odds of any kind.**
+The prediction_home/draw/away percentages are computed by OUR OWN code in
+api-football-fixtures.js:120 (sigmoid over league-position gap + form + H2H),
+which is exactly why they flatten to ~45/28/27 at MW1 — the input table is
+empty.
+
+Alternatives investigated:
+- API-Football (api-sports.io): free plan is 100 req/day and all endpoints
+  including /predictions are available on it. Would need a new signup + key.
+  UNVERIFIED RISK: the free plan has historically restricted which SEASONS
+  are accessible; pricing page returned HTTP 403 to WebFetch so this was not
+  confirmed. Must be checked before relying on it for 2026/27.
+- Polymarket (user's suggestion — they have a working repo elsewhere):
+  conceptually the best source, since market prices are calibrated
+  probabilities and have no cold-start problem at MW1.
+  Probed the public Gamma API directly: /markets ordered by volume returned
+  no football; /events ignores slug_contains and caps at 100 per page, and a
+  100-event scan for all 20 PL club names found ZERO EPL markets. Coverage of
+  individual PL fixtures is therefore UNCONFIRMED — stopped rather than keep
+  guessing at an API the user already has working code for.
+  → ASKED the user to point at their Polymarket repo.
+
+## Polymarket as the prediction source — BUILT & VERIFIED against live API
+User's idea, and it is strictly better than the last-season prior I was about
+to build: market prices are calibrated probabilities AND have no cold-start
+problem, which was the entire MW1 issue.
+
+Verified live (no auth needed — public read):
+  GET https://gamma-api.polymarket.com/events?tag_slug=epl&closed=false
+  - 15 clean three-way match-result markets currently open, INCLUDING every
+    fixture for Sat 22 Aug
+  - overround 1.000-1.015 → prices are near-pure probabilities
+  - team naming matches football-data.org exactly ("Crystal Palace FC")
+  - kickoff date is in the SLUG (epl-eve-cry-2026-08-22), NOT startDate
+    (startDate is when the market opened — a trap)
+  - real examples: Everton v Palace 45/28/27, Hull v Man Utd 10/19/71,
+    Arsenal v Coventry 83/11/6
+  - liquidity $180k-$560k per fixture
+
+NOTE: the user does NOT need the Relayer API key they were about to create.
+Relayer is for submitting wallet transactions (trading). We only read public
+market data. Told them so — no trading credential should go near this app.
+
+New netlify/functions/_polymarket.js:
+  - fetchEplMatchMarkets(): one unauthenticated call for the whole matchweek
+  - parseGameEvent(): rejects derivative markets (halftime / second half /
+    first team to score) — the real match-result market is the ONLY one
+    containing a draw leg, which is the discriminator used
+  - findMarketForFixture(): normalised team matching (strips FC/AFC, maps
+    united→utd, token-overlap fallback) + slug-date matching within 2 days
+  - MIN_LIQUIDITY 5000 — a thin book at a silly price is worse than no price
+  - percentages derive the third from the other two so they sum to EXACTLY
+    100 (independent rounding gave 101 and would have biased the
+    Poisson-binomial)
+  - returns [] on ANY failure → caller falls back to the model. Never fatal.
+
+api-football-fixtures.js:
+  - new resolvePrediction(): market first, in-house model as fallback
+  - used in BOTH listFixtures and enrichSingleFixture
+  - exposes predictionSource ('market'|'model'), marketSlug, marketLiquidity
+  - form + H2H still come from football-data.org and are still displayed —
+    they just no longer drive the percentages (as the user asked)
+  - advice text now states which source produced the number
+admin.html: enrich payload now sends homeTeam/awayTeam/date, which the
+  server needs for the market lookup (it previously sent only IDs, so the
+  lookup would have silently fallen back to the model every time).
+
+KNOCK-ON, exactly as the user wanted: picks-widget.js calculateProbabilities()
+already runs an exact Poisson-binomial over prediction_home/draw/away, so the
+"chance of getting 1, 2, 3... correct" numbers become market-backed with NO
+change to that code.
+
+## Decision changed: Picks AI now sees the market odds
+Originally hidden, because they were the admin's own model and reading them
+would not have been "independent research". That reasoning died with the
+source change: the numbers are now market prices that every human player sees
+on the picks page before choosing. Hiding them would HANDICAP Picks AI, not
+keep it honest.
+So it now gets market parity, plus prompt guidance to treat the price as a
+starting point and move off it only for concrete late news or when its league
+position calls for differentiation. Flagged to the user as a reversible call.

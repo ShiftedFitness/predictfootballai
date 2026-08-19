@@ -14,8 +14,9 @@
  *   - The bot row has no auth_id, so pp_select_own never matches it. Its picks
  *     are unreadable via the anon key until lockout. Do NOT expose them
  *     through a service-role function before then.
- *   - It researches independently: it does not read the admin's enrichment
- *     predictions (prediction_home/draw/away), only public fixture facts.
+ *   - It sees the same market odds every human player sees on the picks
+ *     page, and nothing more. It never sees anyone else's picks for the
+ *     current week — RLS blocks that, and it would be cheating.
  *
  * COST CONTROL — budget is $5 per 38-week season (~13c per week):
  *   Web search is the dominant cost at $0.01 per search, NOT the tokens.
@@ -130,6 +131,16 @@ WHEN TO DEVIATE ANYWAY. There is exactly one good reason, and it is your league 
 
 You cannot see what anyone has picked for this week, and you should not try to — those picks are hidden until the deadline, for you and for everyone. What you do get is the historical record of how the field behaves, which tells you which outcomes tend to be under-backed.
 
+USING THE ODDS. Where a fixture shows market odds, those are live
+prediction-market prices — real money, and better calibrated than any view
+you can form from reading previews. Treat them as your starting point, not as
+a suggestion to rubber-stamp. Your research is worth something only where it
+knows something the market may not have absorbed yet: team news published in
+the last day or two, a manager confirming rotation, an injury announced
+late. Move off the market price when your research gives you a concrete
+reason, or when your league position calls for differentiation — not because
+a scoreline feels wrong.
+
 Research method:
 - You have a web search tool with a hard limit of ${MAX_SEARCHES} searches for the whole matchweek. That is roughly one per fixture, so spend them on the matches you are least sure about rather than confirming what you already know. Look for team news, injuries and suspensions, predicted line-ups, and previews.
 - Weigh recent form, home advantage, injuries and suspensions, fixture congestion, and motivation. League position alone is a weak signal early in a season.
@@ -161,8 +172,18 @@ function sumUsage(a, b) {
   };
 }
 
-/** Build the fixture brief. Deliberately excludes the admin's own prediction
- *  columns so Picks AI's research is genuinely independent. */
+/** Build the fixture brief.
+ *
+ *  This used to hide the prediction_* columns, because they were the admin's
+ *  own position+form model and reading them would not have been independent
+ *  research. That reasoning no longer holds: those columns are now live
+ *  prediction-market prices, and every human player sees them on the picks
+ *  page before choosing. Withholding them would handicap Picks AI relative
+ *  to the field rather than keep it honest.
+ *
+ *  So it gets market parity with the players, and differentiation comes from
+ *  the strategy layer — deliberately deviating when it is behind — rather
+ *  than from ignorance of the odds. */
 function buildFixtureBrief(matches, weekNumber, strategicBrief) {
   const lines = matches.map((m, i) => {
     const bits = [
@@ -175,6 +196,14 @@ function buildFixtureBrief(matches, weekNumber, strategicBrief) {
     // Form strings come from football-data.org standings, e.g. "W,D,L,W,W".
     if (m.home_form) bits.push(`   ${m.home_team} recent form: ${m.home_form}`);
     if (m.away_form) bits.push(`   ${m.away_team} recent form: ${m.away_form}`);
+
+    // Market odds — the same numbers shown to every human player.
+    if (m.prediction_home != null && m.prediction_away != null) {
+      bits.push(
+        `   market odds: ${m.home_team} ${m.prediction_home}%, ` +
+        `draw ${m.prediction_draw}%, ${m.away_team} ${m.prediction_away}%`
+      );
+    }
     return bits.join('\n');
   });
 

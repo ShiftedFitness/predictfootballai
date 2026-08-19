@@ -25,6 +25,7 @@
  */
 
 const { requireAdmin } = require('./_supabase.js');
+const { fetchEplMatchMarkets, findMarketForFixture } = require('./_polymarket.js');
 
 const FD_BASE = 'https://api.football-data.org/v4';
 const EPL_CODE = 'PL';   // Premier League competition code
@@ -188,6 +189,36 @@ function computePrediction(homeTeamId, awayTeamId, standings, h2hAgg) {
   return { home, draw, away };
 }
 
+// ── Prediction source ────────────────────────────────────────────────────────
+// Prefer Polymarket's match-result prices; fall back to the in-house
+// position+form model when there is no market (or Polymarket is down).
+//
+// This matters most in August: the model needs a populated standings table
+// and there isn't one until results exist, so at MW1 it returns ~45/28/27
+// for everything. A market is priced regardless.
+//
+// Form and H2H still come from football-data.org and are still shown to
+// players — they are just no longer what drives the percentages.
+function resolvePrediction(markets, fixture, standings, h2hAgg) {
+  const market = findMarketForFixture(
+    markets, fixture.homeTeam, fixture.awayTeam, fixture.date
+  );
+  if (market) {
+    return {
+      predictions: { home: market.home, draw: market.draw, away: market.away },
+      source: 'market',
+      marketSlug: market.slug,
+      marketLiquidity: Math.round(market.liquidity)
+    };
+  }
+  return {
+    predictions: computePrediction(fixture.homeTeamId, fixture.awayTeamId, standings, h2hAgg),
+    source: 'model',
+    marketSlug: null,
+    marketLiquidity: null
+  };
+}
+
 // ── ACTION: list ──────────────────────────────────────────────────────────────
 // Returns all EPL fixtures for the given or next upcoming matchday.
 // Uses 2-3 API calls only: standings + optional comp info + matchday fixtures.
@@ -196,6 +227,10 @@ function computePrediction(homeTeamId, awayTeamId, standings, h2hAgg) {
 async function listFixtures(requestedMatchday) {
   // 1. Fetch standings (gives position + form for all 20 teams)
   const standings = await getStandings();
+
+  // Market prices for the whole matchweek in a single unauthenticated call.
+  // Never fatal — an empty list simply means every fixture uses the model.
+  const markets = await fetchEplMatchMarkets();
 
   let matchday;
 
@@ -243,8 +278,15 @@ async function listFixtures(requestedMatchday) {
     const homeS = standings[m.homeTeam?.id] || {};
     const awayS = standings[m.awayTeam?.id] || {};
 
-    // Compute quick prediction from position + form (no H2H — saves API calls)
-    const pred = computePrediction(m.homeTeam?.id, m.awayTeam?.id, standings, null);
+    // Market price where one exists, model otherwise.
+    const resolved = resolvePrediction(markets, {
+      homeTeam:   m.homeTeam?.name || m.homeTeam?.shortName || '',
+      awayTeam:   m.awayTeam?.name || m.awayTeam?.shortName || '',
+      homeTeamId: m.homeTeam?.id,
+      awayTeamId: m.awayTeam?.id,
+      date:       m.utcDate
+    }, standings, null);
+    const pred = resolved.predictions;
 
     // Shannon entropy for difficulty (higher = closer to three-way toss-up)
     const total = pred.home + pred.draw + pred.away || 1;
@@ -270,6 +312,9 @@ async function listFixtures(requestedMatchday) {
       awayPoints:  awayS.points ?? null,
       awayFormRaw: awayS.form || '',
       quickPrediction: pred,
+      predictionSource: resolved.source,      // 'market' | 'model'
+      marketSlug: resolved.marketSlug,
+      marketLiquidity: resolved.marketLiquidity,
       difficulty
     };
   });
@@ -385,11 +430,25 @@ async function enrichSingleFixture(fix, standings, warnings, skipInitialDelay = 
     warnings.push(`H2H fetch failed for fixture ${fix.fixtureId}: ${e.message}`);
   }
 
-  // Compute prediction from position + form + H2H
-  item.predictions = computePrediction(fix.homeTeamId, fix.awayTeamId, standings, h2hAgg);
+  // Market price where one exists, model (position + form + H2H) otherwise.
+  const markets = await fetchEplMatchMarkets();
+  const resolved = resolvePrediction(markets, {
+    homeTeam:   fix.homeTeam,
+    awayTeam:   fix.awayTeam,
+    homeTeamId: fix.homeTeamId,
+    awayTeamId: fix.awayTeamId,
+    date:       fix.date
+  }, standings, h2hAgg);
+  item.predictions = resolved.predictions;
+  item.predictionSource = resolved.source;
+  item.marketSlug = resolved.marketSlug;
+  item.marketLiquidity = resolved.marketLiquidity;
 
   // Generate advice text
   const posGap = Math.abs((homeS.position || 10) - (awayS.position || 10));
+  const sourceNote = resolved.source === 'market'
+    ? 'Odds from live prediction markets.'
+    : 'Estimated from league position and form.';
   const homeHigher = (homeS.position || 10) < (awayS.position || 10);
 
   let adviceParts = [];
@@ -428,6 +487,7 @@ async function enrichSingleFixture(fix, standings, warnings, skipInitialDelay = 
     adviceParts.push('Close in the table — this one could go either way.');
   }
 
+  adviceParts.push(sourceNote);
   item.advice = adviceParts.join(' ');
 
   return item;

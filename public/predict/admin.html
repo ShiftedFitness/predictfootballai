@@ -1275,6 +1275,11 @@ function setupEventListeners() {
             fixtureId: f.fixtureId,
             homeTeamId: f.homeTeamId,
             awayTeamId: f.awayTeamId,
+            // Names + kickoff are needed server-side to look up the
+            // Polymarket match-result market for this fixture.
+            homeTeam: f.homeTeam,
+            awayTeam: f.awayTeam,
+            date: f.date,
             quickPrediction: f.quickPrediction || null
           })
         });

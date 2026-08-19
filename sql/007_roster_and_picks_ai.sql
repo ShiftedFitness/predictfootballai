@@ -52,52 +52,55 @@ FROM public.predict_users WHERE is_bot;
 
 
 -- ============================================================
--- STEP 3 — the departing player
+-- STEP 3 — the departing player: WombleDan (id 14)
 --
 -- SOFT DELETE ONLY. Do not DELETE this row.
 -- predict_predictions.user_id references predict_users ON DELETE
--- CASCADE, so a DELETE would silently destroy every pick they
--- have ever made — which would tear a hole in the 2025/26 archive
--- we just spent four queries verifying, and break the weekly
--- tables and head-to-head history for everyone else too.
+-- CASCADE, so a DELETE would destroy all 190 of their picks —
+-- tearing a hole in the 2025/26 archive (they finished on 80
+-- points) and breaking the weekly tables and head-to-head history
+-- for everyone else, since those pages join across all players.
 --
--- Setting is_active = false removes them from this season's
--- league table, the reminder emails and the leaderboard, while
--- leaving their 2025/26 finishing position intact.
---
--- >>> REPLACE 'USERNAME_HERE' BEFORE RUNNING <<<
+-- is_active = false removes them from this season's league table,
+-- the reminder emails and the leaderboard, while leaving their
+-- 2025/26 finishing position permanently intact.
 -- ============================================================
--- UPDATE public.predict_users
--- SET    is_active   = FALSE,
---        left_season = '2025/26'
--- WHERE  username    = 'USERNAME_HERE';
+UPDATE public.predict_users
+SET    is_active   = FALSE,
+       left_season = '2025/26'
+WHERE  username    = 'WombleDan';
 
--- Their 2026/27 standings row should not exist. Remove it if 006
--- created one before they were marked inactive.
--- DELETE FROM public.predict_user_seasons
--- WHERE  season = '2026/27'
---   AND  user_id IN (SELECT id FROM public.predict_users WHERE NOT is_active);
+-- 006 gave every then-active player a 2026/27 standings row, which
+-- includes WombleDan. Remove it so they do not appear in this
+-- season's table on zero points.
+DELETE FROM public.predict_user_seasons
+WHERE  season = '2026/27'
+  AND  user_id IN (SELECT id FROM public.predict_users WHERE NOT is_active);
+
+-- Confirm: one row, is_active false, 2025/26 points still 80.
+SELECT u.id, u.username, u.is_active, u.left_season,
+       (SELECT points FROM public.predict_user_seasons
+        WHERE user_id = u.id AND season = '2025/26') AS points_2025_26,
+       (SELECT COUNT(*) FROM public.predict_predictions WHERE user_id = u.id) AS picks_kept
+FROM public.predict_users u
+WHERE u.username = 'WombleDan';
 
 
 -- ============================================================
 -- STEP 4 — new players
 --
--- >>> REPLACE THE PLACEHOLDER ROWS BEFORE RUNNING <<<
--- Add one line per joiner. joined_season marks them as new this
--- season so their blank 2025/26 record is never mistaken for a
--- last-place finish.
+-- NONE this season (confirmed 2026-08-18). Nothing to run.
+-- If someone joins mid-season, add them with joined_season set so
+-- their blank 2025/26 record is never read as a last-place finish:
+--
+--   INSERT INTO public.predict_users
+--     (username, full_name, email, is_active, joined_season)
+--   VALUES ('THEIR_USERNAME', '', 'their.email@example.com', TRUE, '2026/27');
+--
+--   INSERT INTO public.predict_user_seasons (user_id, season)
+--   SELECT id, '2026/27' FROM public.predict_users WHERE is_active
+--   ON CONFLICT (user_id, season) DO NOTHING;
 -- ============================================================
--- INSERT INTO public.predict_users (username, full_name, email, is_active, joined_season)
--- VALUES
---   ('NEW_USERNAME_1', '', 'their.email@example.com', TRUE, '2026/27'),
---   ('NEW_USERNAME_2', '', 'their.email@example.com', TRUE, '2026/27')
--- ON CONFLICT DO NOTHING;
-
--- Give every active player a 2026/27 standings row (idempotent —
--- safe to run after adding joiners, catches anyone missed).
--- INSERT INTO public.predict_user_seasons (user_id, season)
--- SELECT id, '2026/27' FROM public.predict_users WHERE is_active
--- ON CONFLICT (user_id, season) DO NOTHING;
 
 
 -- ============================================================
