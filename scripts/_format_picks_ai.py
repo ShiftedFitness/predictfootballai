@@ -25,6 +25,34 @@ def main():
         print(json.dumps(d, indent=2))
         return 0
 
+    # GET picks-ai-trigger returns a list of recorded runs.
+    if "runs" in d:
+        runs = d.get("runs") or []
+        if not runs:
+            print("No runs recorded yet.")
+            return 0
+        for r in runs:
+            detail = r.get("detail") or {}
+            kind = "DRY RUN" if detail.get("dryRun") else (
+                "FINAL" if r.get("is_final") else "PROVISIONAL")
+            print("{0}  week {1}  [{2}]".format(
+                (r.get("created_at") or "")[:19].replace("T", " "),
+                r.get("week_number"), kind))
+            if r.get("strategy"):
+                print("  strategy: " + r["strategy"])
+            picks = detail.get("proposedPicks") or []
+            for p in picks:
+                print("    {0:<5} (conf {1}/5)  {2}".format(
+                    p.get("pick"), p.get("confidence"), p.get("rationale") or ""))
+            print("    {0} picks written | {1} searches | ${2} | {3} in / {4} out".format(
+                r.get("picks_written"), r.get("web_searches"),
+                r.get("estimated_cost_usd"), r.get("input_tokens"), r.get("output_tokens")))
+            hrs = detail.get("hoursBeforeLockout")
+            if hrs is not None:
+                print("    {0}h before lockout".format(hrs))
+            print()
+        return 0
+
     if d.get("message"):
         print(d["message"])
         print()

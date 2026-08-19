@@ -778,6 +778,27 @@ async function run({ requestedWeek = null, dryRun = false, force = false } = {})
     const cost = estimateCost(usage, searches);
 
     if (dryRun) {
+      // Log it. A dry run started as a background invocation returns 202
+      // with no body, so the run log is the only way to see the result.
+      const { error: dryErr } = await db.from('predict_ai_runs').insert([{
+        season: week.season,
+        week_number: week.week_number,
+        model: MODEL,
+        input_tokens: usage.input_tokens,
+        output_tokens: usage.output_tokens,
+        web_searches: searches,
+        estimated_cost_usd: cost,
+        picks_written: 0,             // dry run — nothing saved
+        is_final: false,              // never blocks a real run
+        strategy: strategy,
+        detail: {
+          dryRun: true, searchNotes, turns,
+          hoursBeforeLockout: Number(hoursUntil.toFixed(1)),
+          proposedPicks: picks
+        }
+      }]);
+      if (dryErr) console.error('picks-ai: dry-run log failed:', dryErr.message);
+
       return respond(200, {
         ok: true, dryRun: true, week: week.week_number, oddsRefreshed, strategy, picks,
         strategicContext: strategicCtx,
@@ -859,8 +880,41 @@ async function run({ requestedWeek = null, dryRun = false, force = false } = {})
 exports.run = run;
 
 /**
- * Scheduled entry point. Netlify's Clockwork invokes this on the cron in
- * netlify.toml. It takes no options — the window logic decides whether
- * there is anything to do.
+ * Scheduled entry point.
+ *
+ * It does NOT do the work. Netlify caps scheduled functions at 30 seconds,
+ * and a real run — five server-side web searches plus the model turn — does
+ * not reliably fit. So this fires the background function (15-minute limit)
+ * and returns immediately.
+ *
+ * Fire-and-forget on purpose: the background function replies 202 as soon as
+ * it is accepted, and everything after that is its problem, recorded in
+ * predict_ai_runs.
  */
-exports.handler = async () => run();
+exports.handler = async () => {
+  const base = process.env.URL || process.env.DEPLOY_URL;
+  const secret = process.env.ADMIN_SECRET;
+
+  if (!base) {
+    console.error('picks-ai: no site URL in env; cannot reach the background function');
+    return respond(500, 'Site URL unavailable');
+  }
+  if (!secret) {
+    console.error('picks-ai: ADMIN_SECRET not set; background function would reject the call');
+    return respond(500, 'ADMIN_SECRET not configured');
+  }
+
+  const target = `${base}/.netlify/functions/picks-ai-background`;
+  try {
+    const res = await fetch(target, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-admin-secret': secret },
+      body: JSON.stringify({})
+    });
+    console.log(`picks-ai: handed off to background function (${res.status})`);
+    return respond(202, { ok: true, handedOff: true, status: res.status });
+  } catch (e) {
+    console.error('picks-ai: handoff failed:', e.message);
+    return respond(500, `Handoff failed: ${e.message}`);
+  }
+};

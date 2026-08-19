@@ -46,6 +46,15 @@
 [functions."picks-ai"]
   schedule = "0 */2 * * *"
 
+# The work itself runs as a BACKGROUND function. A real run makes five
+# server-side web searches plus a model call, which does not fit inside the
+# 30-second ceiling Netlify applies to scheduled functions. Background
+# functions get 15 minutes. picks-ai (cron) and picks-ai-trigger (manual)
+# both hand off to this; it records every run in predict_ai_runs because a
+# background function returns 202 with an empty body and cannot report back.
+[functions."picks-ai-background"]
+  background = true
+
 # Odds refresh: re-reads Polymarket every 12 hours and updates the stored
 # percentages for fixtures that have not locked yet. Scheduled a few hours
 # ahead of each picks-ai run (09:00/18:00) so Picks AI always reasons over

@@ -754,3 +754,40 @@ Fix for picks-ai — split scheduled from HTTP:
 
 Slip while doing it: my first refactor replaced `try {` with `{`, orphaning
 the catch. node --check caught it immediately; fixed.
+
+## Gateway timeout on the manual run — Netlify function time limits
+User's run died with an "Inactivity Timeout" gateway page.
+
+VERIFIED limits (Netlify docs + support):
+  scheduled functions    30 seconds
+  background functions   15 minutes, reply 202 immediately, empty body
+A real Picks AI run is five SERVER-SIDE web searches plus a model turn —
+comfortably more than 30s. So this was not just a manual-trigger problem:
+**the scheduled run would have timed out too**, and Picks AI would never
+have picked at all. Caught before Saturday only because the user tried the
+manual run.
+
+Restructured into three functions sharing one implementation:
+  picks-ai.js             scheduled (cron). Does NO work — fires the
+                          background function via fetch to process.env.URL
+                          with ADMIN_SECRET, returns 202. Exports run().
+  picks-ai-background.js  background=true (netlify.toml). Requires
+                          x-admin-secret (it is a public endpoint and would
+                          otherwise let anyone spend API budget). Calls run().
+  picks-ai-trigger.js     no schedule, so HTTP-reachable. POST hands off to
+                          background; GET reads back recent runs.
+
+Because a background function returns 202 with an empty body, results cannot
+come back on the request. So run() now logs DRY RUNS to predict_ai_runs too
+(picks_written 0, is_final false, proposedPicks in detail) — the run log is
+the only channel. GET picks-ai-trigger reads it.
+
+scripts/picks-ai-run.sh rewritten: counts existing runs, POSTs, then polls
+GET every 5s for up to 5 minutes and prints the new run.
+  bash scripts/picks-ai-run.sh          # dry run
+  bash scripts/picks-ai-run.sh live     # write picks
+  bash scripts/picks-ai-run.sh status   # just read recent runs
+_format_picks_ai.py extended to render the runs list.
+
+User confirmed: not fixing the manual-trigger gap in auto-score /
+picks-reminder, since their scheduled paths work by design.
