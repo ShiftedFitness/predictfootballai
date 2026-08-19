@@ -4,6 +4,22 @@
    Supports: DRIBBLE mode (Maradona) + VOLLEY mode (Van Basten)
    ============================================================ */
 
+/* ------------------------------------------------------------------
+   TODO (analytics): Goal Recreator is not in circulation, so it is
+   deliberately NOT instrumented with gameplay events. The page itself
+   still loads GA4 (page views only) via /js/ts-analytics.js.
+
+   If this game goes live, add:
+     startGame(idx)     -> window.TSAnalytics.gameStart('goal_recreator',
+                             { level: lvl.id, mode: lvl.type })
+     showEndScreen()    -> window.TSAnalytics.gameComplete('goal_recreator',
+                             { level: level.id, mode: level.type,
+                               score: score.stars, outcome: endReason })
+   The Retry button calls straight back into startGame(), so TSAnalytics
+   reports later rounds as game_replay automatically. Both calls were
+   built and verified working before being held back.
+   ------------------------------------------------------------------ */
+
 (function () {
   'use strict';
 

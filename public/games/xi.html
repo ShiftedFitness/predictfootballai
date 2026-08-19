@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<!-- Analytics: GA4 via the central TeleStats helper (never loaded on /fives*) -->
+<script src="/js/ts-analytics.js"></script>
 <title>TeleStats - Starting XI</title>
 <meta name="description" content="Pick the best starting XI by appearances, goals, or performance. Fill every position correctly to win."/>
 <meta property="og:site_name" content="TeleStats"/>
@@ -1989,6 +1991,12 @@ async function processResults(data) {
   updateScoreBanner();
 
   if (correct === total) {
+    // Analytics: a perfect XI ends the round without going through
+    // giveUp/revealAnswers, so no session is logged and game_complete has
+    // to be reported here. TSAnalytics fires at most once per round.
+    if (window.TSAnalytics) {
+      TSAnalytics.gameComplete('starting_xi', { score: correct, rounds: total, perfect: true });
+    }
     // Perfect — show new game button only
     $('actionBtns').classList.remove('hidden');
     $('retryBtn').classList.add('hidden');
@@ -2567,6 +2575,13 @@ document.getElementById('tsClock').textContent = new Date().toTimeString().slice
             $('submitXIBtn').classList.add('hidden');
             $('giveUpBtn').classList.add('hidden');
             $('viewRankingsBtn').classList.remove('hidden');
+            // Analytics: community XI does not log a session, so the
+            // completion is reported directly. TSAnalytics fires once.
+            if (window.TSAnalytics) {
+              TSAnalytics.gameComplete('starting_xi', {
+                score: correctCount, rounds: slots.length, perfect: true
+              });
+            }
           } else {
             $('actionBtns').classList.remove('hidden');
             $('submitXIBtn').textContent = 'GO \u2014 Submit XI';
@@ -2579,6 +2594,14 @@ document.getElementById('tsClock').textContent = new Date().toTimeString().slice
         // ── Define community giveUp ──
         function communityGiveUp() {
           if (!confirm('Give up and reveal all answers?')) return;
+
+          // Analytics: end of a community round (see note above).
+          if (window.TSAnalytics) {
+            TSAnalytics.gameComplete('starting_xi', {
+              score: Object.values(slotResults).filter(r => r.correct).length,
+              rounds: slots.length
+            });
+          }
 
           const bucketPlayers = {};
           for (const p of communityPlayers) {
@@ -2670,6 +2693,12 @@ document.getElementById('tsClock').textContent = new Date().toTimeString().slice
           $('giveUpBtn').onclick = communityGiveUp;
 
           TSData.incrementCommunityPlayCount(communityId);
+
+          // Analytics: community XI never goes through window.startGame,
+          // so the start is reported from here instead.
+          if (window.TSAnalytics) {
+            TSAnalytics.gameStart('starting_xi', { mode: 'community', formation: formationId });
+          }
 
           // Override "Start New Challenge" to reload community game
           $('newGameBtn').onclick = () => window.location.reload();
@@ -2839,6 +2868,19 @@ document.getElementById('tsClock').textContent = new Date().toTimeString().slice
     await _origReveal();
     tsLogXISession();
   };
+
+  // ── Analytics: game_start / game_replay ──────────────────────────
+  // "Start New Challenge" returns the player to the setup screen, so every
+  // later startGame() call is a deliberate replay.
+  if (window.TSAnalytics) TSAnalytics.instrumentStart({
+    fn: 'startGame',
+    gameType: 'starting_xi',
+    verify: () => TSAnalytics.visible('step2'),
+    params: () => Object.assign(
+      { mode: selectedObjective, formation: selectedFormation },
+      TSAnalytics.scopeParams(selectedScope)
+    )
+  });
 
   let _xiLogged = false;
   async function tsLogXISession() {

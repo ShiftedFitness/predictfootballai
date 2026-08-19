@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<!-- Analytics: GA4 via the central TeleStats helper (never loaded on /fives*) -->
+<script src="/js/ts-analytics.js"></script>
 <title>TeleStats - Bullseye</title>
 <meta name="description" content="Name players to subtract their stats from 501. Go bust and you lose. A darts-style football trivia game."/>
 <meta property="og:site_name" content="TeleStats"/>
@@ -4062,6 +4064,35 @@ function updateBullseyeSetting(key,val){
     _origRecordGameEnd();
     tsLogBullseyeSession(false);
   };
+
+  // ── Analytics: game_start / game_replay ──────────────────────────
+  // startMatch() is the single point where a player actually enters a
+  // match, for standard, custom, chat-built and community games alike.
+  // "Play Again" routes back through it, so every later call is a replay.
+  // game_complete is emitted centrally from TSData.logGameSession().
+  function tsBullseyeParams() {
+    const cat = (typeof currentCategory !== 'undefined' && currentCategory) ? currentCategory : null;
+    let category = 'unknown';
+    if (cat) {
+      // Never send a category *title* — custom and community games carry
+      // user-authored titles. Only stable ids or a fixed bucket label.
+      if (cat.isCustom) category = 'custom';
+      else if (typeof cat.id === 'string' && cat.id.indexOf('community_') === 0) category = 'community';
+      else if (typeof cat.id === 'string') category = cat.id;
+    }
+    return {
+      category,
+      mode: (window.gameSetup && window.gameSetup.isSinglePlayer) ? 'single' : 'multiplayer'
+    };
+  }
+  if (window.TSAnalytics) TSAnalytics.instrumentStart({
+    fn: 'startMatch',
+    gameType: 'bullseye',
+    verify: () => TSAnalytics.visible('playCard'),
+    params: tsBullseyeParams
+  });
+  // Community games auto-start before the wrapper is installed.
+  if (communityId && window.TSAnalytics) TSAnalytics.gameStart('bullseye', tsBullseyeParams());
 
   async function tsLogBullseyeSession(won) {
     try {

@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<!-- Analytics: GA4 via the central TeleStats helper (never loaded on /fives*) -->
+<script src="/js/ts-analytics.js"></script>
 <title>TeleStats - Pop Quiz</title>
 <meta name="description" content="5 data-powered questions from easy to hard. All generated from real Premier League data. How much do you really know?"/>
 <meta property="og:site_name" content="TeleStats"/>
@@ -755,6 +757,14 @@ init();
     try { _origShowResults(); } catch(e) { console.warn('[TS] showResults error:', e); }
     tsLogQuizSession();
   };
+
+  // ── Analytics: game_start / game_replay ──────────────────────────
+  if (window.TSAnalytics) TSAnalytics.instrumentStart({
+    fn: 'startQuiz',
+    gameType: 'pop_quiz',
+    verify: () => TSAnalytics.visible('step2'),
+    params: () => TSAnalytics.scopeParams(selectedScope)
+  });
 
   async function tsLogQuizSession() {
     try {

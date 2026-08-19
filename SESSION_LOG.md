@@ -844,3 +844,44 @@ Fix: a position is only emitted once somebody has actually scored
 is no lead to protect and nobody to chase. Needs deploying before Friday's
 cron run for the note to read correctly — though the picks would be the same
 either way.
+
+---
+
+# SESSION LOG — 2026-08-19
+
+## Goal
+Add Google Analytics 4 (`G-MPSNPSY3RP`) across TeleStats, with **zero tracking**
+on any `/fives*` route, plus baseline gameplay events.
+
+## Tasks
+- [x] Inspect architecture (framework, build, routing, existing analytics, consent)
+- [x] Create central analytics helper `public/js/ts-analytics.js`
+- [x] Load it on every tracked page (20 HTML files); load it on **no** Fives page
+- [x] Central `game_complete` via `TSData.logGameSession()`
+- [x] Central `result_share` via `TSData.shareResult()`
+- [x] Per-game `game_start` / `game_replay` for the 6 main games
+- [x] Service worker: precache the helper, keep GA hosts out of the SW fetch path
+- [x] QA: exclusion, page views, gameplay events, PII, dev-mode behaviour
+- [ ] Goal Recreator gameplay events — HELD BACK at user's request (not in
+      circulation). Instrumentation was written and verified, then reverted;
+      a TODO block at the top of `public/goals/game.js` records exactly what
+      to add if it ever goes live. The page still emits page views.
+
+## Key findings
+- Pure multi-page static site. **No SPA routing anywhere** — the only
+  `history.replaceState()` calls strip Supabase auth hashes. So GA4's automatic
+  page_view is exactly right: one per document load, nothing to de-duplicate.
+- **No pre-existing analytics, no GTM, no cookie/consent layer.** Nothing to
+  extend, nothing to bypass.
+- `/fives/` is only the marketing shell. The Fives **product** is served from
+  `/predict/*` (its pages are titled "TeleStats Fives – …"). Both prefixes are
+  excluded, otherwise the exclusion would have missed the actual product.
+- Every game funnels its genuine end-of-round through `TSData.logGameSession()`
+  and every share through `TSData.shareResult()` → `game_complete` and
+  `result_share` needed instrumenting in exactly one place each.
+- Supabase puts `access_token`/`refresh_token` in the URL **hash** on any page,
+  and Stripe returns to `/upgrade/` with `session_id`. `page_location` is
+  therefore rebuilt from origin+pathname+filtered query, hash always dropped.
+- Pre-existing (NOT introduced here, NOT fixed here): a perfect Starting XI
+  never calls `logGameSession()`, so it awards no XP. Community XI likewise
+  logs no session. Both now emit `game_complete` for analytics only.

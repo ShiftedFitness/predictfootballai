@@ -42,6 +42,7 @@ predictfootballai/
 │   │   ├── predict-data.js    # Fives data layer (window.PredictData)
 │   │   └── picks-widget.js    # Picks UI component
 │   ├── js/                    # Core shared modules
+│   │   ├── ts-analytics.js    # Analytics layer (window.TSAnalytics) — GA4 loader + trackEvent
 │   │   ├── ts-auth.js         # Auth layer (window.TSAuth) — Supabase client, sessions, anon users
 │   │   ├── ts-data.js         # Data layer (window.TSData) — game sessions, XP, leaderboards
 │   │   └── ts-nav.js          # Nav component — persistent bar, user badge, level display
@@ -118,6 +119,25 @@ ADMIN_SECRET          # Legacy admin key
 - Design system: Dark theme, teletext-inspired, CSS variables, Space Mono + Inter fonts
 - Anonymous users supported: play all games without signup, no leaderboard/streak
 - Admin functions require `x-admin-secret` header
+
+## Analytics (GA4)
+- Measurement ID `G-MPSNPSY3RP`, loaded **only** via `public/js/ts-analytics.js`
+  (`window.TSAnalytics`). Never paste the gtag snippet into a page.
+- Add analytics to a new page with one line in `<head>`:
+  `<script src="/js/ts-analytics.js"></script>` — nothing else is needed.
+- **Fives is excluded.** `EXCLUDED_PREFIXES` in `ts-analytics.js` lists `/fives`
+  and `/predict` (the Fives product lives under `/predict/*`). On those routes
+  gtag.js is never injected and every `trackEvent()` is a no-op. Fives pages
+  also carry no script tag at all. Do not add one.
+- `TSAnalytics.trackEvent(name, params)` drops objects/arrays and anything
+  non-scalar, so game answers and player names cannot be sent. `page_location`
+  is rebuilt without the URL hash (Supabase auth tokens) and without sensitive
+  query params (Stripe `session_id`).
+- Events: `game_start`, `game_replay` (per game page), `game_complete`
+  (central, in `TSData.logGameSession`), `result_share` (central, in
+  `TSData.shareResult`). Deliberately no `game_abandon`.
+- On localhost the library is not fetched and events log to the console as
+  `[TSAnalytics]`; add `?ts_debug=1` to mirror events to the console anywhere.
 
 ## Pricing Model
 - **Free (no account):** Limited game access

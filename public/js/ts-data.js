@@ -39,6 +39,26 @@
      * @returns {Object} XP result from award_xp_for_session
      */
     async logGameSession(sessionData) {
+      // ── Analytics: game_complete ──────────────────────────────────
+      // Every game funnels its genuine end-of-round through this method,
+      // so this is the one place game_complete needs to be emitted.
+      // TSAnalytics de-dupes to one event per round and is a no-op on
+      // excluded (/fives*) routes. Fired before the DB work so a logged-out
+      // player or a failed insert still counts as a completed game.
+      if (window.TSAnalytics && sessionData && sessionData.completed !== false) {
+        const gaParams = {
+          score: typeof sessionData.score === 'number' ? sessionData.score : undefined,
+          rounds: sessionData.total_questions > 0 ? sessionData.total_questions : undefined,
+          perfect: sessionData.is_perfect_round === true ? true : undefined
+        };
+        // game_category is a stable scope id for most games but a
+        // user-authored title for custom/community games — scopeParams()
+        // returns {} for anything that is not a recognised scope id, which
+        // is what keeps free text out of GA4.
+        Object.assign(gaParams, TSAnalytics.scopeParams(sessionData.game_category));
+        TSAnalytics.gameComplete(sessionData.game_type, gaParams);
+      }
+
       const userId = TSAuth.getUserId();
       if (!userId) return { error: 'No user' };
 
@@ -326,9 +346,22 @@
     /** Share result via Web Share API or clipboard */
     async shareResult(result) {
       const text = this.generateShareText(result);
+
+      // Analytics: result_share fires only on a deliberate, successful
+      // share. The shared text itself is never sent.
+      const trackShare = (method) => {
+        if (!window.TSAnalytics) return;
+        TSAnalytics.trackEvent('result_share', {
+          game_type: result && result.game_type,
+          share_method: method,
+          score: typeof (result && result.score) === 'number' ? result.score : undefined
+        });
+      };
+
       if (navigator.share) {
         try {
           await navigator.share({ text });
+          trackShare('web_share');
           return { shared: true };
         } catch (e) {
           if (e.name !== 'AbortError') console.warn('[TSData] Share failed:', e);
@@ -337,6 +370,7 @@
       // Fallback: copy to clipboard
       try {
         await navigator.clipboard.writeText(text);
+        trackShare('clipboard');
         return { copied: true };
       } catch {
         return { error: 'Failed to copy' };

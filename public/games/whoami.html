@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<!-- Analytics: GA4 via the central TeleStats helper (never loaded on /fives*) -->
+<script src="/js/ts-analytics.js"></script>
 <title>TeleStats - Who Am I?</title>
 <meta name="description" content="A mystery player is chosen. Clues are revealed one by one. Can you guess who it is before all clues are shown?"/>
 <meta property="og:site_name" content="TeleStats"/>
@@ -1305,6 +1307,17 @@ setInterval(updateClock, 30000);
     _origShowResult(won, player);
     tsLogWhoAmISession(won);
   };
+
+  // ── Analytics: game_start / game_replay ──────────────────────────
+  if (window.TSAnalytics) TSAnalytics.instrumentStart({
+    fn: 'startGame',
+    gameType: 'who_am_i',
+    verify: () => TSAnalytics.visible('step2'),
+    params: () => Object.assign(
+      { difficulty: selectedDifficulty },
+      TSAnalytics.scopeParams(selectedScope)
+    )
+  });
 
   async function tsLogWhoAmISession(won) {
     try {

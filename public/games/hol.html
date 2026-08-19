@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<!-- Analytics: GA4 via the central TeleStats helper (never loaded on /fives*) -->
+<script src="/js/ts-analytics.js"></script>
 <title>TeleStats - Higher or Lower</title>
 <meta name="description" content="Guess if the next player has more or fewer appearances or goals. Keep your streak going as long as you can!"/>
 <meta property="og:site_name" content="TeleStats"/>
@@ -698,6 +700,18 @@ init();
     try { _origGameOver(); } catch(e) { console.warn('[TS] gameOver error:', e); }
     tsLogHoLSession();
   };
+
+  // ── Analytics: game_start / game_replay ──────────────────────────
+  if (window.TSAnalytics) TSAnalytics.instrumentStart({
+    fn: 'startGame',
+    gameType: 'higher_lower',
+    verify: () => TSAnalytics.visible('step2'),
+    params: () => Object.assign(
+      { mode: communityId ? 'community' : 'standard', stat: selectedStat },
+      TSAnalytics.scopeParams(selectedScope)
+    )
+  });
+  if (communityId && window.TSAnalytics) TSAnalytics.gameStart('higher_lower', { mode: 'community', stat: selectedStat });
 
   async function tsLogHoLSession() {
     try {

@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<!-- Analytics: GA4 via the central TeleStats helper (never loaded on /fives*) -->
+<script src="/js/ts-analytics.js"></script>
 <title>TeleStats - Player Alphabet</title>
 <meta name="description" content="Go A-Z naming players by surname initial. Race the clock or take your time. How many letters can you fill?"/>
 <meta property="og:site_name" content="TeleStats"/>
@@ -948,6 +950,22 @@ init();
     try { _origEndGame(); } catch(e) { console.warn('[TS] endGame error:', e); }
     tsLogAlphaSession();
   };
+
+  // ── Analytics: game_start / game_replay ──────────────────────────
+  // Wrapped last so it sits inside the play-limit guard above and inside
+  // any community-mode override: the event only fires for a real start.
+  // game_complete is emitted centrally from TSData.logGameSession().
+  if (window.TSAnalytics) TSAnalytics.instrumentStart({
+    fn: 'startGame',
+    gameType: 'player_alphabet',
+    verify: () => TSAnalytics.visible('step2'),
+    params: () => Object.assign(
+      { mode: communityId ? 'community' : 'standard' },
+      TSAnalytics.scopeParams(selectedScope)
+    )
+  });
+  // Community games auto-start before the wrapper is installed.
+  if (communityId && window.TSAnalytics) TSAnalytics.gameStart('player_alphabet', { mode: 'community' });
 
   async function tsLogAlphaSession() {
     try {

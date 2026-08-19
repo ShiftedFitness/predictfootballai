@@ -6,10 +6,11 @@
  *   - API calls / Supabase: network-only (no caching)
  */
 
-const CACHE_NAME = 'telestats-v5';
+const CACHE_NAME = 'telestats-v6';
 
 const STATIC_ASSETS = [
   '/telestats-theme.css',
+  '/js/ts-analytics.js',
   '/js/ts-auth.js',
   '/js/ts-data.js',
   '/js/ts-nav.js',
@@ -47,7 +48,9 @@ self.addEventListener('fetch', (event) => {
   // Network-only for API calls and Supabase
   if (url.pathname.startsWith('/.netlify/functions/') ||
       url.hostname.includes('supabase.co') ||
-      url.hostname.includes('googleapis.com')) {
+      url.hostname.includes('googleapis.com') ||
+      url.hostname.includes('googletagmanager.com') ||
+      url.hostname.includes('google-analytics.com')) {
     return;
   }
 
