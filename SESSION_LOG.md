@@ -791,3 +791,56 @@ _format_picks_ai.py extended to render the runs list.
 
 User confirmed: not fixing the manual-trigger gap in auto-score /
 picks-reminder, since their scheduled paths work by design.
+
+## ✅ Picks AI dry run SUCCEEDED on Netlify — 2026-08-19
+User confirms the manual dry run worked end to end. That closes the last
+unverified path: the live Claude API call, the strict submit_picks tool
+schema, the Haiku 4.5 web-search variant, the background-function handoff,
+the run logging and the polling script.
+
+Everything in the build has now been exercised against real infrastructure
+except one thing: the SCHEDULED cron firing on its own (first chance is the
+next 2-hourly tick; the real one is Friday ~22:00 UTC at 13.5h before
+lockout).
+
+## Remaining
+- [ ] LIVE provisional run: bash scripts/picks-ai-run.sh live
+      → expect isFinal false, 5 picks written
+- [ ] Confirm Friday's cron replaces them (is_final true) — nothing to do,
+      but worth checking Saturday morning
+- [ ] Drop bak_predict_* tables once week 1 is scored
+- [ ] Optional/later: manual-trigger split for picks-reminder so a test
+      email can be sent (user has deprioritised; crons work by design)
+
+## ✅ LIVE provisional run succeeded — week 1 picks are in
+  2026-08-19 09:54  week 1 [PROVISIONAL]  5 picks written
+  5 searches | $0.0935 | 37,252 in / 1,242 out | 75.1h before lockout
+Friday's cron will replace these with fresher research.
+
+Research quality looks genuine — rationales cite "Sage's tactical debut with
+the Eagles", De Zerbi at Spurs, per-squad injury tolls. That is current team
+news from the web searches, not model recall.
+
+### COST: re-baselined against reality (my estimate was low)
+  live run  $0.0935  (37,252 in / 1,242 out, 5 searches)
+  dry run   $0.1249  (65,478 in / 1,875 out, 5 searches)
+vs my pre-flight estimate of $0.081. Search results carry more tokens than I
+assumed and the total varies a lot with how much the model reads.
+=> ~$0.09-0.12/week → ~$3.60-4.75 per 38-week season. Inside the $5 budget
+   but with less headroom than I told the user.
+=> A provisional+final week costs BOTH (~$0.20). Fine occasionally; doing it
+   every week would breach the budget. Header comment updated to say so.
+Audit query: SELECT season, SUM(estimated_cost_usd) FROM predict_ai_runs
+GROUP BY season;
+
+### BUG FOUND IN THE OUTPUT AND FIXED: phantom lead at 0-0
+The live run's strategy note read "Leading with 37 weeks to play... no need
+to get clever with a lead." At week 1 every player is on 0, so sorting by
+points made the bot "1st of 24" and gatherStrategicContext reported it as
+LEADING. It reached the right conclusion for the wrong reason, and the same
+flaw would misreport any multi-way tie later in the season.
+Fix: a position is only emitted once somebody has actually scored
+(anyonePlayed check). At 0-0 it now says the season has not started, there
+is no lead to protect and nobody to chase. Needs deploying before Friday's
+cron run for the note to read correctly — though the picks would be the same
+either way.

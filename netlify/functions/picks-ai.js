@@ -18,13 +18,24 @@
  *     page, and nothing more. It never sees anyone else's picks for the
  *     current week — RLS blocks that, and it would be cheating.
  *
- * COST CONTROL — budget is $5 per 38-week season (~13c per week):
- *   Web search is the dominant cost at $0.01 per search, NOT the tokens.
- *   Haiku 4.5 is $1/$5 per Mtok in/out.
- *   Budget per run: 5 searches (5c) + ~30K in / 2K out (4c) ~= 9c,
- *   so ~$3.40 a season with headroom for the odd re-run.
- *   Guards: MAX_SEARCHES, max_tokens, one-run-per-week DB check, and every
- *   run logs its actual usage + estimated cost to predict_ai_runs.
+ * COST CONTROL — budget is $5 per 38-week season (~13c per week).
+ *   MEASURED on the first two real runs (2026-08-19, week 1):
+ *     live run  37,252 in / 1,242 out, 5 searches  = $0.0935
+ *     dry run   65,478 in / 1,875 out, 5 searches  = $0.1249
+ *   So ~$0.09-0.12 a week, i.e. ~$3.60-4.75 across 38 weeks. Inside the
+ *   budget, but tighter than the $0.081 I estimated before running it —
+ *   search results carry more tokens than assumed, and the total varies a
+ *   lot with how much the model reads.
+ *
+ *   Note a provisional + final week costs BOTH runs (~$0.20). Doing that
+ *   every week would breach the budget; it is meant for the occasional week
+ *   when nobody is around at the deadline.
+ *
+ *   Guards: MAX_SEARCHES, max_tokens, the is_final one-run-per-week check,
+ *   and every run logs actual usage + cost to predict_ai_runs so the season
+ *   total is auditable rather than assumed:
+ *     SELECT season, SUM(estimated_cost_usd) FROM predict_ai_runs
+ *     GROUP BY season;
  *
  * Scheduled via netlify.toml (daily). Also callable with x-admin-secret:
  *   POST /picks-ai            → run for the next eligible week
@@ -263,7 +274,14 @@ async function gatherStrategicContext(db, botId, weekNumber, season) {
 
   const rows = table || [];
   const meIdx = rows.findIndex((r) => String(r.id) === String(botId));
-  if (meIdx >= 0) {
+
+  // A position is only meaningful once somebody has actually scored. At the
+  // start of a season every row is on zero, so whoever sorts first looks
+  // like the leader — and telling the model it is "leading" invites it to
+  // protect a lead that does not exist.
+  const anyonePlayed = rows.some((r) => Number(r.points || 0) !== 0);
+
+  if (meIdx >= 0 && anyonePlayed) {
     const me = rows[meIdx];
     const leader = rows[0];
     ctx.standing = {
@@ -405,8 +423,14 @@ function renderStrategicContext(ctx, botName) {
     if (s.gapToPlayerAbove != null && s.gapToLeader > 0) {
       out.push(`The player directly above you is ${s.gapToPlayerAbove} point${s.gapToPlayerAbove === 1 ? '' : 's'} ahead.`);
     }
+  } else if (ctx.weeksPlayed === 0) {
+    out.push(
+      'YOUR LEAGUE POSITION: the season has not started — every player, ' +
+      'including you, is on zero points. There is no lead to protect and ' +
+      'nobody to chase. Play the percentages.'
+    );
   } else {
-    out.push('YOUR LEAGUE POSITION: this is your first scored week — no standings yet.');
+    out.push('YOUR LEAGUE POSITION: no standings recorded for you yet.');
   }
 
   out.push(`Weeks played this season: ${ctx.weeksPlayed}. Roughly ${ctx.weeksRemaining} still to come.`);
