@@ -45,6 +45,12 @@
                 margin-bottom:14px; font-size:13px; color:var(--text-secondary);
                 border-left:3px solid var(--accent-yellow) }
   .vs-strategy b{ color:var(--accent-yellow); font-weight:700 }
+  .season-note{ background:var(--bg-elevated); border-left:3px solid var(--accent-yellow);
+                border-radius:6px; padding:8px 12px; margin-bottom:10px;
+                font-size:13px; color:var(--text-secondary) }
+  .bot-tag{ font-size:10px; letter-spacing:.5px; text-transform:uppercase;
+            color:var(--accent-magenta); border:1px solid var(--accent-magenta);
+            border-radius:3px; padding:1px 4px; margin-left:6px; vertical-align:1px }
 </style>
 </head>
 <body>
@@ -63,7 +69,14 @@
 
     <!-- Overall -->
     <div id="overall" class="ts-card">
-      <div class="ts-muted" id="overallCount"></div>
+      <div class="row" style="margin-bottom:8px">
+        <div>
+          <span class="ts-muted">Season</span>
+          <select id="seasonSel" class="ts-select"></select>
+        </div>
+        <div class="ts-muted" id="overallCount"></div>
+      </div>
+      <div id="seasonNote" class="season-note" style="display:none"></div>
       <div class="ts-scroll">
         <table class="ts-table" id="overallTbl">
           <thead>
@@ -79,7 +92,7 @@
           <tbody></tbody>
         </table>
       </div>
-      <div class="ts-muted" style="margin-top:8px">Sorted by points, then FH, then accuracy.</div>
+      <div class="ts-muted" style="margin-top:8px" id="overallFooter">Sorted by points, then FH, then accuracy.</div>
     </div>
 
     <!-- Weekly -->
@@ -164,7 +177,7 @@ function trOverall(row){
   if (String(row.id) === String(highlightUserId)) tr.classList.add('highlight');
   tr.innerHTML = `
     <td class="pos">${row.position}</td>
-    <td class="user">${escapeHTML(row.name)}</td>
+    <td class="user">${escapeHTML(row.name)}${row.isBot ? '<span class="bot-tag">AI</span>' : ''}</td>
     <td class="acc">${pct(row.accuracy)}%</td>
     <td class="center">${row.fh ?? 0}</td>
     <td class="center">${row.blanks ?? 0}</td>
@@ -173,17 +186,64 @@ function trOverall(row){
   return tr;
 }
 
-async function loadOverall(){
+let currentSeasonLabel = null;
+
+async function loadOverall(season){
   try {
-    const rows = await PredictData.getLeaderboard();
+    const rows = await PredictData.getLeaderboard(season);
     const body = document.querySelector('#overallTbl tbody');
     body.innerHTML = '';
     rows.forEach(r => body.appendChild(trOverall(r)));
     document.getElementById('overallCount').textContent = `${rows.length} players`;
+
+    const past = season && currentSeasonLabel && season !== currentSeasonLabel;
+    const note = document.getElementById('seasonNote');
+    if (past) {
+      const winner = rows[0];
+      note.style.display = '';
+      note.innerHTML = `Final table for <strong>${escapeHTML(season)}</strong>` +
+        (winner ? ` — won by <strong>${escapeHTML(winner.name)}</strong> on ${winner.points} points.` : '.') +
+        ' Includes players who have since left.';
+      document.getElementById('overallFooter').textContent =
+        'A completed season. Final positions as they finished.';
+    } else {
+      note.style.display = 'none';
+      document.getElementById('overallFooter').textContent =
+        'Sorted by points, then FH, then accuracy.';
+    }
   } catch (e) {
     console.error('loadOverall failed', e);
     alert('Failed to load leaderboard');
   }
+}
+
+/* ---------- Season selector ---------- */
+async function initSeasonSelector(){
+  const sel = document.getElementById('seasonSel');
+  let seasons = [];
+  try { seasons = await PredictData.getSeasons(); } catch (e) { debugLog('getSeasons failed', e); }
+
+  // Pre-006 database, or the registry is empty — hide the control entirely
+  // and just show the current table, exactly as before.
+  if (!seasons.length) {
+    sel.parentNode.style.display = 'none';
+    return loadOverall(null);
+  }
+
+  const current = seasons.find(s => s.is_current);
+  currentSeasonLabel = current ? current.season : null;
+
+  sel.innerHTML = '';
+  seasons.forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s.season;
+    opt.textContent = s.season + (s.is_current ? ' (current)' : '');
+    if (s.is_current) opt.selected = true;
+    sel.appendChild(opt);
+  });
+
+  sel.onchange = () => loadOverall(sel.value);
+  await loadOverall(currentSeasonLabel || seasons[0].season);
 }
 
 /* ---------- WEEKLY ---------- */
@@ -462,7 +522,7 @@ async function initWeeklyTab() {
   const userId = await PFAuth.initAuth();
   highlightUserId = highlightUserId || userId;
   PFAuth.renderNav();
-  loadOverall();
+  initSeasonSelector();
 })();
 </script>
 </body>

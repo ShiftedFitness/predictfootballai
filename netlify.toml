@@ -38,3 +38,11 @@
 # the day is a no-op (and costs nothing) once the week is picked.
 [functions."picks-ai"]
   schedule = "0 9,18 * * *"
+
+# Odds refresh: re-reads Polymarket every 12 hours and updates the stored
+# percentages for fixtures that have not locked yet. Scheduled a few hours
+# ahead of each picks-ai run (09:00/18:00) so Picks AI always reasons over
+# the freshest prices players can see. Locked fixtures are never touched —
+# their stored odds are the record of what players saw when they picked.
+[functions."refresh-odds"]
+  schedule = "0 4,16 * * *"

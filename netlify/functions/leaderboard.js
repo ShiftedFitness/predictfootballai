@@ -9,9 +9,12 @@ exports.handler = async (event) => {
     const client = sb();
 
     // Fetch all users
+    // Active players only — someone who has left keeps their archived
+    // seasons but must not appear in the current one.
     const { data: users, error: usersError } = await client
       .from('predict_users')
-      .select('*');
+      .select('*')
+      .eq('is_active', true);
 
     if (usersError) throw new Error(`Failed to fetch users: ${usersError.message}`);
 

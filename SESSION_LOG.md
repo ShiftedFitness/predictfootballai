@@ -564,3 +564,61 @@ keep it honest.
 So it now gets market parity, plus prompt guidance to treat the price as a
 starting point and move off it only for concrete late news or when its league
 position calls for differentiation. Flagged to the user as a reversible call.
+
+## refresh-odds.js — NEW, keeps market percentages current
+seedWeek() snapshots prediction_home/draw/away once at seed time; markets
+move between seeding and kickoff, so players (and Picks AI, which reads the
+same columns) could be looking at days-old prices.
+
+netlify/functions/refresh-odds.js, scheduled "0 4,16 * * *" (every 12h):
+- current season's weeks only
+- ONLY fixtures not locked and whose lockout is still in the future. Locked
+  fixtures are deliberately never rewritten — the stored percentage is the
+  historical record of what players saw when they picked, and changing it
+  would make the You-v-AI rationale and the probability summary
+  retrospectively dishonest.
+- if Polymarket returns nothing, leaves existing values alone rather than
+  blanking them
+- {dryRun:true} reports what would change without writing
+Timing is deliberate: 04:00/16:00 sits a few hours before picks-ai at
+09:00/18:00, so the AI always reasons over the freshest visible prices.
+
+No API key: Polymarket Gamma is public, read-only, unauthenticated.
+Confirmed to the user that the Relayer API key they were offered is for
+submitting wallet transactions and must NOT be created for this.
+
+## Full cron schedule now
+  auto-score      0 7,22 * * *
+  picks-reminder  */30 * * * *
+  picks-ai        0 9,18 * * *
+  refresh-odds    0 4,16 * * *
+
+## BUG: WombleDan still on the league table (fixed) + season toggle BUILT
+Soft-delete worked, but nothing filtered the leaderboard — I added is_active
+to the schema and to picks-reminder but never to the read paths.
+
+Fixed:
+- PredictData.getLeaderboard() now .eq('is_active', true) for the current
+  season, and gained a `season` argument.
+- netlify/functions/leaderboard.js same filter.
+- getHistory()'s compare dropdown also filtered (a departed player has no
+  current-season picks, so listing them was pure confusion).
+
+While in there, built the SEASON TOGGLE — the outstanding item from the
+user's original brief ("keep last season's data ... available as a toggle"):
+- PredictData.getSeasons() reads the predict_seasons registry.
+- getLeaderboard(season): current season → predict_users (live mirror,
+  active only); PAST season → the predict_league_table view, deliberately
+  INCLUDING players who have left, because they played that season and
+  belong in its final table. So WombleDan now lives in 2025/26 rather than
+  vanishing entirely.
+- league.html Overall tab gained a season <select>, a note naming the
+  season's winner, and an "AI" tag on the bot row. If predict_seasons is
+  empty or absent the control hides itself and behaviour is unchanged.
+
+Verified in a browser against stubbed data:
+- current season → 3 rows, no note, AI tag present on Picks AI
+- switch to 2025/26 → note reads "Final table for 2025/26 — won by craigtee
+  on 95 points. Includes players who have since left.", WombleDan present at
+  position 8, footer switches to "A completed season."
+Temp harness config removed from .claude/launch.json (verified clean).

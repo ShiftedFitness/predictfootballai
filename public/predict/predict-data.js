@@ -438,10 +438,45 @@
        Overall season standings.
        Drop-in replacement for GET /leaderboard.
        ──────────────────────────────────────────────────────────── */
-    async getLeaderboard() {
+    async getLeaderboard(season) {
+      var current = await currentSeason();
+
+      // A PAST season is read from predict_user_seasons (via the
+      // predict_league_table view) and deliberately includes players who
+      // have since left — they played that season, so they belong in its
+      // final table.
+      if (season && current && season !== current) {
+        var _hist = await sb()
+          .from('predict_league_table')
+          .select('*')
+          .eq('season', season)
+          .order('position', { ascending: true });
+        if (_hist.error) throw new Error('getLeaderboard(history): ' + _hist.error.message);
+        return (_hist.data || []).map(function (u) {
+          var total = (u.correct_results || 0) + (u.incorrect_results || 0);
+          return {
+            id: u.id,
+            name: u.username || u.full_name || ('User ' + u.id),
+            points: u.points || 0,
+            correct: u.correct_results || 0,
+            incorrect: u.incorrect_results || 0,
+            total: total,
+            accuracy: u.accuracy || 0,
+            fh: u.full_houses || 0,
+            blanks: u.blanks || 0,
+            isBot: !!u.is_bot,
+            position: u.position
+          };
+        });
+      }
+
+      // CURRENT season comes from predict_users, which scoring keeps as the
+      // live mirror. Only active players — someone who left still owns their
+      // archived seasons but must not appear in this one.
       var _ref = await sb()
         .from('predict_users')
-        .select('id, username, full_name, points, correct_results, incorrect_results, full_houses, blanks')
+        .select('id, username, full_name, points, correct_results, incorrect_results, full_houses, blanks, is_bot')
+        .eq('is_active', true)
         .order('points', { ascending: false })
         .order('full_houses', { ascending: false })
         .order('correct_results', { ascending: false });
@@ -461,9 +496,24 @@
           accuracy: accuracy,
           fh: u.full_houses || 0,
           blanks: u.blanks || 0,
+          isBot: !!u.is_bot,
           position: i + 1
         };
       });
+    },
+
+    /* ────────────────────────────────────────────────────────────
+       getSeasons()
+       Every season with a standings record, newest first, flagged
+       with which one is currently being played.
+       ──────────────────────────────────────────────────────────── */
+    async getSeasons() {
+      var _ref = await sb()
+        .from('predict_seasons')
+        .select('season, label, is_current')
+        .order('season', { ascending: false });
+      if (_ref.error) return [];   // pre-006 database
+      return _ref.data || [];
     },
 
     /* ────────────────────────────────────────────────────────────
@@ -751,7 +801,8 @@
       // Get all users for compare dropdown
       var _refUsers = await sb()
         .from('predict_users')
-        .select('id, username, full_name, points, correct_results, incorrect_results');
+        .select('id, username, full_name, points, correct_results, incorrect_results')
+        .eq('is_active', true);
 
       if (_refUsers.error) throw new Error('getHistory users: ' + _refUsers.error.message);
       var allUsers = _refUsers.data || [];
