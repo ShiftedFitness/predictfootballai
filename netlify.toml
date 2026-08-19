@@ -33,11 +33,18 @@
 [functions."picks-reminder"]
   schedule = "*/30 * * * *"
 
-# Picks AI: runs twice daily; only acts when a matchweek's first lockout is
-# 2-60 hours away AND the bot has no picks for it yet, so the second run of
-# the day is a no-op (and costs nothing) once the week is picked.
+# Picks AI: checks every 2 hours, but only ACTS when the week's first lockout
+# is ~12 hours away (10-14h window). Deadlines move week to week, so the
+# trigger is measured from each week's actual lockout rather than a fixed
+# clock time. Twelve hours out means Friday press conferences have happened
+# and team news is public.
+#
+# The 4-hour window is always hit by a 2-hourly cron, and the
+# already-picked guard makes every other run a no-op that costs nothing —
+# two cheap DB queries and an early return. Only the one run that lands
+# inside the window spends anything.
 [functions."picks-ai"]
-  schedule = "0 9,18 * * *"
+  schedule = "0 */2 * * *"
 
 # Odds refresh: re-reads Polymarket every 12 hours and updates the stored
 # percentages for fixtures that have not locked yet. Scheduled a few hours

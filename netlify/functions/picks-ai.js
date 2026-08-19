@@ -34,6 +34,7 @@
 
 const Anthropic = require('@anthropic-ai/sdk');
 const { sb, respond, requireAdmin, handleOptions, currentSeason } = require('./_supabase.js');
+const { fetchEplMatchMarkets, findMarketForFixture } = require('./_polymarket.js');
 
 // ── Cost knobs ──────────────────────────────────────────────────────────────
 // Override MODEL via env to upgrade (e.g. claude-sonnet-5) — costs more.
@@ -50,11 +51,29 @@ const PRICING = {
 };
 const SEARCH_COST = 0.01;       // $10 per 1,000 searches
 
-// Only run when the first lockout is inside this window. Wide enough that a
-// single daily cron always catches a week, tight enough that we never pick
-// before fixtures are meaningful.
-const WINDOW_MIN_HOURS = 2;
-const WINDOW_MAX_HOURS = 60;
+// WHEN IT PICKS
+// Target ~12 hours before the first lockout of the week, measured from that
+// week's actual deadline rather than a fixed clock time — deadlines move
+// (Saturday lunchtime, Sunday afternoon, Monday night), so a fixed hour
+// would sometimes fire two days early.
+//
+// Twelve hours is chosen deliberately: for a Saturday 11:30 lockout that is
+// late Friday evening, by which point Friday press conferences have
+// happened and team news, injuries and rotation hints are public. Picking
+// 40 hours out — which the old 2-60h window did — meant researching before
+// the information existed.
+//
+// The cron runs every 2 hours, so this 4-hour window is always hit at least
+// once. The already-picked guard makes a second hit a no-op.
+const IDEAL_MIN_HOURS = 10;
+const IDEAL_MAX_HOURS = 14;
+
+// Safety net for a late-seeded week. If the admin creates the matchweek
+// inside the ideal window, that window never opens — so anything from here
+// up to the ideal window is treated as "pick now, this is the last sensible
+// chance". Below this we decline entirely rather than pick minutes before
+// kickoff on stale research.
+const LAST_CHANCE_HOURS = 2.5;
 
 const U = (s) => String(s || '').trim().toUpperCase();
 
@@ -539,6 +558,23 @@ function validatePicks(rawPicks, matches) {
 
 // ── Handler ─────────────────────────────────────────────────────────────────
 
+// Exposed for the local dry-run harness (scripts/picks-ai-preview.js) so it
+// exercises the REAL prompt and helpers rather than a drifting copy.
+// Not used by the deployed function.
+exports._internal = {
+  SYSTEM_PROMPT,
+  SUBMIT_PICKS_TOOL,
+  buildFixtureBrief,
+  renderStrategicContext,
+  validatePicks,
+  estimateCost,
+  MODEL,
+  MAX_SEARCHES,
+  IDEAL_MIN_HOURS,
+  IDEAL_MAX_HOURS,
+  LAST_CHANCE_HOURS
+};
+
 exports.handler = async (event) => {
   const corsResponse = handleOptions(event);
   if (corsResponse) return corsResponse;
@@ -629,18 +665,31 @@ exports.handler = async (event) => {
       }
 
       const hoursUntil = (firstLockout - now) / 3.6e6;
-      const inWindow = hoursUntil >= WINDOW_MIN_HOURS && hoursUntil <= WINDOW_MAX_HOURS;
 
-      if (!inWindow && !requestedWeek && !force) {
-        skipped.push(
-          `Week ${week.week_number}: lockout ${hoursUntil.toFixed(1)}h away ` +
-            `(window is ${WINDOW_MIN_HOURS}-${WINDOW_MAX_HOURS}h)`
-        );
-        continue;
-      }
-      if (hoursUntil < WINDOW_MIN_HOURS && !force) {
-        skipped.push(`Week ${week.week_number}: too close to lockout, would be unfair`);
-        continue;
+      if (!requestedWeek && !force) {
+        if (hoursUntil > IDEAL_MAX_HOURS) {
+          skipped.push(
+            `Week ${week.week_number}: ${hoursUntil.toFixed(1)}h until lockout — ` +
+            `too early, waiting for the ${IDEAL_MIN_HOURS}-${IDEAL_MAX_HOURS}h window`
+          );
+          continue;
+        }
+        if (hoursUntil < LAST_CHANCE_HOURS) {
+          skipped.push(
+            `Week ${week.week_number}: only ${hoursUntil.toFixed(1)}h until lockout — ` +
+            `too late to research properly`
+          );
+          continue;
+        }
+        // Anything between LAST_CHANCE_HOURS and IDEAL_MAX_HOURS proceeds.
+        // Below IDEAL_MIN_HOURS means the week was seeded late and this is
+        // the catch-up path, which is worth noting in the run log.
+        if (hoursUntil < IDEAL_MIN_HOURS) {
+          skipped.push(
+            `Week ${week.week_number}: picking at ${hoursUntil.toFixed(1)}h ` +
+            `(later than the ${IDEAL_MIN_HOURS}h target — week seeded late?)`
+          );
+        }
       }
 
       target = { week, matches, firstLockout, hoursUntil };
@@ -653,23 +702,79 @@ exports.handler = async (event) => {
 
     const { week, matches, hoursUntil } = target;
 
-    // 3. One run per week — never let a retry double-spend or re-pick.
-    const { data: existing, error: exErr } = await db
+    // 3. Has this week already been picked FINALLY?
+    //
+    //    An early provisional run (outside the 10-14h window — e.g. days
+    //    ahead, to check everything works while someone is around to fix
+    //    it) may be replaced by the real run on fresher team news. A final
+    //    run may not, so retries and extra cron ticks can never double-spend
+    //    or churn the picks the night before.
+    const isFinalRun = hoursUntil <= IDEAL_MAX_HOURS;
+
+    const { data: priorRuns, error: priorRunErr } = await db
+      .from('predict_ai_runs')
+      .select('id, is_final, created_at')
+      .eq('week_number', week.week_number)
+      .eq('season', season)
+      .eq('is_final', true);
+    if (priorRunErr) console.warn(`picks-ai: run history lookup failed: ${priorRunErr.message}`);
+
+    if (priorRuns?.length && !force) {
+      return respond(200, {
+        ok: true,
+        week: week.week_number,
+        message:
+          `Week ${week.week_number} already has FINAL picks ` +
+          `(made ${priorRuns[0].created_at}). Send force:true to redo.`
+      });
+    }
+
+    // Existing provisional picks are fine — they get overwritten below.
+    const { data: existing } = await db
       .from('predict_predictions')
       .select('id')
       .eq('user_id', bot.id)
       .in('match_id', matches.map((m) => m.id));
-    if (exErr) throw new Error(`Existing-picks check failed: ${exErr.message}`);
+    const replacingProvisional = !!(existing && existing.length);
 
-    if (existing?.length && !force) {
-      return respond(200, {
-        ok: true,
-        week: week.week_number,
-        message: `Picks AI already has ${existing.length} picks for week ${week.week_number}. Send force:true to redo.`
-      });
+    // 4. Refresh this week's odds before researching.
+    //    refresh-odds runs on its own 12-hourly schedule, but the two crons
+    //    are independent — this guarantees Picks AI reasons over the same
+    //    prices a player would see right now, not a stale snapshot. One
+    //    unauthenticated call, and a failure here is non-fatal.
+    let oddsRefreshed = 0;
+    try {
+      const markets = await fetchEplMatchMarkets();
+      if (markets.length) {
+        for (const m of matches) {
+          const mk = findMarketForFixture(markets, m.home_team, m.away_team, m.lockout_time);
+          if (!mk) continue;
+          if (Number(m.prediction_home) === mk.home &&
+              Number(m.prediction_draw) === mk.draw &&
+              Number(m.prediction_away) === mk.away) continue;
+
+          const { error: oErr } = await db
+            .from('predict_matches')
+            .update({
+              prediction_home: mk.home,
+              prediction_draw: mk.draw,
+              prediction_away: mk.away
+            })
+            .eq('id', m.id);
+          if (oErr) { console.warn(`picks-ai: odds update failed for ${m.id}: ${oErr.message}`); continue; }
+
+          // Keep the in-memory copy in step so the brief uses the new numbers.
+          m.prediction_home = mk.home;
+          m.prediction_draw = mk.draw;
+          m.prediction_away = mk.away;
+          oddsRefreshed++;
+        }
+      }
+    } catch (e) {
+      console.warn('picks-ai: odds refresh skipped:', e.message);
     }
 
-    // 4. Research and pick.
+    // 5. Research and pick.
     const strategicCtx = await gatherStrategicContext(db, bot.id, week.week_number, season);
     const brief = buildFixtureBrief(
       matches, week.week_number, renderStrategicContext(strategicCtx, bot.username)
@@ -683,13 +788,13 @@ exports.handler = async (event) => {
 
     if (dryRun) {
       return respond(200, {
-        ok: true, dryRun: true, week: week.week_number, strategy, picks,
+        ok: true, dryRun: true, week: week.week_number, oddsRefreshed, strategy, picks,
         strategicContext: strategicCtx,
         usage, searches, estimatedCostUsd: cost, searchNotes, turns
       });
     }
 
-    // 5. Write the picks.
+    // 6. Write the picks.
     const rows = picks.map((p) => ({
       user_id: bot.id,
       match_id: p.match_id,
@@ -705,7 +810,7 @@ exports.handler = async (event) => {
       .upsert(rows, { onConflict: 'user_id,match_id' });
     if (upsertErr) throw new Error(`Failed to save picks: ${upsertErr.message}`);
 
-    // 6. Audit the spend so the season budget is verifiable, not assumed.
+    // 7. Audit the spend so the season budget is verifiable, not assumed.
     const { error: runErr } = await db.from('predict_ai_runs').insert([{
       season: week.season,
       week_number: week.week_number,
@@ -715,18 +820,20 @@ exports.handler = async (event) => {
       web_searches: searches,
       estimated_cost_usd: cost,
       picks_written: rows.length,
+      is_final: isFinalRun,
       strategy: strategy,
       detail: {
         searchNotes, turns,
         hoursBeforeLockout: Number(hoursUntil.toFixed(1)),
         standing: strategicCtx.standing || null,
-        weeksRemaining: strategicCtx.weeksRemaining
+        weeksRemaining: strategicCtx.weeksRemaining,
+        replacedProvisional: replacingProvisional
       }
     }]);
     if (runErr) console.error('picks-ai: run log failed (picks still saved):', runErr.message);
 
     console.log(
-      `picks-ai: week ${week.week_number} — ${rows.length} picks, ` +
+      `picks-ai: week ${week.week_number} ${isFinalRun ? '(final)' : '(provisional)'} — ${rows.length} picks, ` +
       `${searches} searches, ${usage.input_tokens}in/${usage.output_tokens}out, ~$${cost}`
     );
 
@@ -735,6 +842,14 @@ exports.handler = async (event) => {
       week: week.week_number,
       season: week.season,
       picksWritten: rows.length,
+      isFinal: isFinalRun,
+      replacedProvisional: replacingProvisional,
+      note: isFinalRun
+        ? 'Final picks for this week. Later runs will skip.'
+        : `Provisional picks — made ${hoursUntil.toFixed(1)}h before lockout, ` +
+          `outside the ${IDEAL_MIN_HOURS}-${IDEAL_MAX_HOURS}h window. ` +
+          'The scheduled run will replace these on fresher team news.',
+      oddsRefreshed,
       strategy,
       standing: strategicCtx.standing || null,
       hoursBeforeLockout: Number(hoursUntil.toFixed(1)),

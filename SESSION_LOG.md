@@ -622,3 +622,85 @@ Verified in a browser against stubbed data:
   on 95 points. Includes players who have since left.", WombleDan present at
   position 8, footer switches to "A completed season."
 Temp harness config removed from .claude/launch.json (verified clean).
+
+## Picks AI timing changed — now ~12h before each week's ACTUAL deadline
+User asked for a deadline-relative trigger rather than a fixed clock time,
+since deadlines move (Sat lunchtime / Sun afternoon / Mon night).
+
+Was: cron "0 9,18 * * *" with a 2-60h window. For a Sat 11:30 lockout that
+fired THURSDAY EVENING, ~41h out — before Friday press conferences, i.e.
+researching before the useful information existed.
+
+Now: cron "0 */2 * * *", acts only when the first lockout is 10-14h away.
+- 12h before a Sat 11:30 lockout = late Friday evening, after Friday pressers
+  and confirmed team news.
+- 4-hour window vs 2-hourly cron → always hit at least once.
+- Every other run is a no-op costing two DB queries and an early return; the
+  already-picked guard prevents any double spend.
+- LAST_CHANCE_HOURS = 2.5: if the week is seeded INSIDE the ideal window that
+  window never opens, so anything from 2.5h up to 14h still picks (logged as
+  the late/catch-up path). Under 2.5h it declines rather than picking on
+  stale research minutes before kickoff.
+
+Simulated: normal week fires Fri 22:00 UTC = 13.5h out (ideal window);
+week seeded only 6h before lockout still fires at 6.0h out (catch-up path).
+
+Also: picks-ai now refreshes its own week's odds from Polymarket immediately
+before researching. refresh-odds has its own 12-hourly schedule but the two
+crons are independent, and this guarantees the AI reasons over the same
+prices a player would see at that moment. Non-fatal on failure; reports
+oddsRefreshed in the response.
+
+## scripts/picks-ai-preview.js — local dry run, no key, no cost
+User asked to run the process against the live fixtures. Built a preview
+harness that uses the REAL code, not a copy: picks-ai.js now exports
+_internal { SYSTEM_PROMPT, SUBMIT_PICKS_TOOL, buildFixtureBrief,
+renderStrategicContext, validatePicks, estimateCost, MODEL, MAX_SEARCHES,
+window constants } purely for this. The deployed handler does not use it.
+
+  node scripts/picks-ai-preview.js            # 5 closest fixtures
+  node scripts/picks-ai-preview.js --all      # every priced fixture
+  node scripts/picks-ai-preview.js --prompt   # full system prompt + brief
+  node scripts/picks-ai-preview.js --pos 12 --gap 15   # simulate mid-season
+
+It pulls live Polymarket prices, ranks by Shannon entropy (same measure the
+admin "suggested 5" uses), builds the exact prompt, and estimates cost.
+Makes NO Anthropic call and NO database write.
+
+Live run against the real opening weekend:
+  10 fixtures priced. Closest five: Ipswich v Sunderland 35/30/35,
+  Forest v Leeds 41/28/31, Brentford v Spurs 39/26/35,
+  Brighton v Villa 43/26/31, Everton v Palace 45/28/27.
+  Cost: ~$0.081/week → ~$3.07 per 38-week season (searches $0.05 of it).
+  Confirms the earlier ~$3.40 estimate and sits inside the $5 budget.
+
+Also verified the strategic context renders correctly for a mid-season state
+(12th of 24, 15 behind, 26 weeks left, and the field under-picking draws by
+14 points of share — which is the signal that should push it to contrarian
+draws when trailing).
+
+## Provisional vs final picks (user request) — sql/008 + picks-ai change
+User wants to run Picks AI EARLY this week (they are away Friday) and have
+the scheduled Friday run replace those picks with fresher research.
+
+As built that would NOT have worked: the one-run-per-week guard checked for
+existing predictions, so an early run would have silently blocked the real
+one — the opposite of what they wanted.
+
+Fix:
+- sql/008_provisional_picks.sql adds predict_ai_runs.is_final (default true,
+  so any pre-existing row counts as final).
+- picks-ai.js: isFinalRun = hoursUntil <= IDEAL_MAX_HOURS (14). The guard
+  now looks for a prior run with is_final = true rather than for existing
+  predictions. Provisional picks are simply overwritten by the upsert.
+- Response now reports isFinal, replacedProvisional and a plain-English note.
+- Fixed a variable shadow while doing it: my `runErr` collided with the
+  audit-insert's `runErr` further down (caught by node --check).
+
+Simulated the full week — behaves exactly as intended:
+  Tue 21:00  86.5h  WRITE provisional
+  Fri 22:00  13.5h  WRITE final          <- replaces the provisional picks
+  Sat 00:00  11.5h  SKIP (final exists)
+  Sat 02:00   9.5h  SKIP
+  ... every later tick SKIPs
+Cost of the extra run: one additional ~$0.08, i.e. ~$0.16 for this week.
