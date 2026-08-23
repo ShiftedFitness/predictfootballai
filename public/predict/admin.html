@@ -887,6 +887,25 @@ function initAdminUI() {
       <div><label style="margin-top:8px"><input type="checkbox" id="showDebug"> Show API debug info</label></div>
     </div>
 
+    <!-- ═══ RESULTS EMAIL ═══ -->
+    <div class="ts-card">
+      <h3>Results Email</h3>
+      <p style="margin:0 0 10px;font-size:12px;color:var(--text-secondary)">
+        Emails every player a personalised summary of the week above: who won it,
+        who blanked, how they did against Picks AI, and how many players they
+        finished ahead of. Score the week first — this reads the scores.
+      </p>
+      <div class="row">
+        <button class="btn" id="emailTest">Send test to me</button>
+        <button class="btn danger" id="emailAll">Send to all players</button>
+      </div>
+      <p style="margin-top:8px;font-size:12px;color:var(--text-secondary)">
+        The test goes only to you and does <strong>not</strong> mark the week as
+        sent, so the real send still works afterwards.
+      </p>
+      <div id="emailStatus" style="margin-top:8px;font-size:13px"></div>
+    </div>
+
     <!-- ═══ SEED SECTION ═══ -->
     <div class="ts-card">
       <h3>Seed Next Week</h3>
@@ -959,7 +978,56 @@ function showAccessDenied() {
 }
 
 // ── Event Listeners ─────────────────────────────────────────────────────
+/* ---------- Results email ---------- */
+async function sendResultsEmail({ testOnly }) {
+  const week = Number($('week').value);
+  const statusEl = $('emailStatus');
+
+  if (!week) {
+    statusEl.innerHTML = '<span style="color:var(--danger)">Set a week number first.</span>';
+    return;
+  }
+
+  const body = { force: true, week };
+
+  if (testOnly) {
+    const to = (prompt('Send the test to which address?', 'babacvafaey@gmail.com') || '').trim();
+    if (!to) return;
+    body.test_email = to;
+  } else if (!confirm(
+      `Send the Week ${week} results email to ALL active players?\n\n` +
+      'This cannot be unsent. Send a test to yourself first if you have not already.')) {
+    return;
+  }
+
+  statusEl.innerHTML = '<span class="ts-spinner"></span> Sending\u2026';
+  try {
+    const data = await adminFetch('/week-results-trigger', {
+      method: 'POST',
+      body: JSON.stringify(body)
+    });
+    if (data && data.ok) {
+      statusEl.innerHTML =
+        '<span style="color:var(--accent-green)">Started.</span> <span class="ts-muted">' +
+        (testOnly
+          ? 'Check your inbox shortly \u2014 the week has NOT been marked as sent.'
+          : 'Emails are going out in the background; the week is now marked as sent.') +
+        '</span>';
+    } else {
+      statusEl.innerHTML = '<span style="color:var(--danger)">Failed: ' +
+        ((data && (data.error || data.message)) || 'unknown error') + '</span>';
+    }
+  } catch (e) {
+    statusEl.innerHTML = '<span style="color:var(--danger)">Failed: ' + e.message + '</span>';
+  }
+}
+
 function setupEventListeners() {
+  const emailTestBtn = $('emailTest');
+  const emailAllBtn = $('emailAll');
+  if (emailTestBtn) emailTestBtn.onclick = () => sendResultsEmail({ testOnly: true });
+  if (emailAllBtn) emailAllBtn.onclick = () => sendResultsEmail({ testOnly: false });
+
   const loadBtn = $('load');
   const applyBtn = $('applyResults');
   const scoreBtn = $('scoreWeek');

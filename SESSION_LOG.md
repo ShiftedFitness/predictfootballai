@@ -989,3 +989,24 @@ sequential sends far exceeds the 30s scheduled ceiling.
 
 Verified the copy locally for winner / mid-table / blank, including the
 tie-list grammar ("A, B and C").
+
+## Admin button for the results email (user request)
+Rather than relying only on the auto-detect + 1h delay, added a "Results
+Email" card to admin.html, sitting directly after the scoring card:
+  [Send test to me]      prompts for an address, sends only there, and does
+                         NOT stamp the week, so the real send still works
+  [Send to all players]  confirm dialog first ("This cannot be unsent"),
+                         then sends to everyone and stamps the week
+Both post to week-results-trigger with force + the week from the existing
+Week input, so it always matches whatever week the admin is working on.
+
+Verified in a browser against a stubbed admin session:
+  card present, heading "Results Email", both buttons wired
+  positioned immediately after the scoring card
+  empty week   → "Set a week number first." and no request
+  send-to-all  → confirm dialog shown; declining leaves status untouched
+  theme applied correctly (dark card, themed buttons)
+Temp harness config removed from .claude/launch.json (verified clean).
+
+The automatic path stays as a backstop — if the button is never pressed, the
+scheduled job still sends an hour after the week is scored.
