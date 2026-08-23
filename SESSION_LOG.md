@@ -1010,3 +1010,70 @@ Temp harness config removed from .claude/launch.json (verified clean).
 
 The automatic path stays as a backstop — if the button is never pressed, the
 scheduled job still sends an hour after the week is scored.
+
+## ✅ Picks AI cron fired UNATTENDED — last unverified path now proven
+  2026-08-22 00:01:48  week 1  [FINAL]  5 picks, 13h before lockout
+Replaced the Tuesday provisional exactly as designed. Every path in the
+system has now run for real: manual dry run, manual live run, scheduled
+cron, background handoff, run logging, and the polling script.
+
+Phantom-lead fix CONFIRMED working in production. Tuesday (pre-fix) said
+"Leading with 37 weeks to play... no need to get clever with a lead";
+Friday (post-fix) says "Season just starting at 0-0 with all players, so I'm
+playing the percentages without need to differentiate." Correct reasoning
+rather than the right answer by accident.
+
+### Cost, now measured across three real runs
+  dry run      $0.1249   65,478 in / 1,875 out
+  provisional  $0.0935   37,252 in / 1,242 out
+  final        $0.1006   40,448 in / 2,039 out
+Normal week = ONE run ~= $0.10 → ~$3.80 per 38-week season. Week 1 cost
+$0.32 because all three ran. Inside the $5 budget; thinner headroom than my
+original $3.40 estimate. Lever if needed: PICKS_AI_MAX_SEARCHES 5 → 4 saves
+roughly 20%.
+
+## BUG: results email reported success but sent nothing
+User pressed "Send test to me", got a success message, no email arrived.
+
+Cause, mine: week-results-trigger returns 202 "Started" the instant it hands
+off. The background function then found week 1 incomplete (Brighton v Villa
+and Newcastle v Liverpool still have no result), hit
+`if (!allResults) continue;` and stopped. force did NOT bypass that check, so
+even the explicit admin action no-opped — and the admin saw "Started".
+
+Fixes:
+- week-results.js gains checkReady(client, week): validates the week exists,
+  every fixture has a result (naming the ones that do not), and no pick is
+  left unscored. Exported.
+- week-results-trigger.js runs checkReady BEFORE handing off and returns 400
+  with the actual reason, e.g. "Week 1 is not fully scored — 2 of 5 fixtures
+  have no result yet: Brighton & Hove Albion FC v Aston Villa FC, Newcastle
+  United FC v Liverpool FC. Set the results and score the week first."
+  Also blocks a duplicate send unless test/force.
+- force now bypasses the !allResults skip inside run() too, so the trigger
+  and the worker cannot disagree about what force means.
+- admin.html renders the reason as "Not sent. <reason>" in yellow rather
+  than a red "Failed: unknown error".
+
+Lesson worth keeping: a fire-and-forget 202 must not be reported to a human
+as success. Either pre-check synchronously or report the real outcome.
+
+## Correction: the week IS scored — my second guess was also wrong
+User confirms all five results are set and the week is scored, so the
+"incomplete week" theory does not explain the missing email either. I have
+now guessed twice and been wrong twice; stopped theorising.
+
+Built a preflight instead — GET on week-results-trigger checks, in one call,
+everything that can silently stop an email:
+  1. migration 012 applied (missing columns would make every query in run()
+     error, invisibly, behind the 202)
+  2. GMAIL_USER / GMAIL_APP_PASSWORD present — worth checking independently
+     since the pre-deadline reminders ALSO never arrived, which points at the
+     mail path rather than any one feature
+  3. site URL + ADMIN_SECRET (needed to reach the background function)
+  4. how many active players actually have an email address, and who does not
+  5. whether the requested week is scored and sendable
+plus scripts/email-preflight.sh to run and format it.
+
+The readiness/pre-check work from the previous turn stands and is still
+correct — it just was not the cause here.

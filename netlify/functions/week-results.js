@@ -198,6 +198,75 @@ function buildEmail({ me, week, matches, standings, bot, blanks, topScore, winne
   return { subject, html, text };
 }
 
+// ── Readiness ───────────────────────────────────────────────────────────
+
+/**
+ * Can this week's results email be sent yet?
+ *
+ * Split out so the trigger can answer synchronously. Without it the trigger
+ * returns 202 "started", the background function quietly decides the week
+ * is not ready, and the admin sees a success message for an email that was
+ * never sent — which is exactly what happened the first time.
+ */
+async function checkReady(client, weekNumber) {
+  const season = await currentSeason(client);
+
+  let q = client
+    .from('predict_match_weeks')
+    .select('id, week_number, results_email_sent_at')
+    .eq('week_number', Number(weekNumber));
+  if (season) q = q.eq('season', season);
+
+  const { data: weeks, error } = await q;
+  if (error) return { ready: false, reason: `Week lookup failed: ${error.message}` };
+  if (!weeks?.length) return { ready: false, reason: `No week ${weekNumber} this season.` };
+
+  const week = weeks[0];
+
+  const { data: matches } = await client
+    .from('predict_matches')
+    .select('id, home_team, away_team, correct_result')
+    .eq('match_week_id', week.id);
+
+  if (!matches?.length) return { ready: false, reason: `Week ${weekNumber} has no fixtures.` };
+
+  const missing = matches.filter((m) =>
+    !['HOME', 'AWAY', 'DRAW'].includes(String(m.correct_result || '').toUpperCase()));
+  if (missing.length) {
+    return {
+      ready: false,
+      reason:
+        `Week ${weekNumber} is not fully scored — ${missing.length} of ${matches.length} ` +
+        `${missing.length === 1 ? 'fixture has' : 'fixtures have'} no result yet: ` +
+        missing.map((m) => `${m.home_team} v ${m.away_team}`).join(', ') +
+        '. Set the results and score the week first.'
+    };
+  }
+
+  const { data: preds } = await client
+    .from('predict_predictions')
+    .select('id, points_awarded')
+    .in('match_id', matches.map((m) => m.id));
+
+  const unscored = (preds || []).filter((p) => p.points_awarded == null).length;
+  if (unscored) {
+    return {
+      ready: false,
+      reason:
+        `Week ${weekNumber} has all its results, but ${unscored} ` +
+        `${unscored === 1 ? 'pick has' : 'picks have'} not been scored. ` +
+        'Score the week first.'
+    };
+  }
+
+  return {
+    ready: true,
+    alreadySent: week.results_email_sent_at || null,
+    fixtures: matches.length,
+    picks: (preds || []).length
+  };
+}
+
 // ── Work ────────────────────────────────────────────────────────────────
 
 async function run({ force = false, testEmail = null, week: requestedWeek = null } = {}) {
@@ -234,7 +303,7 @@ async function run({ force = false, testEmail = null, week: requestedWeek = null
 
       const allResults = matches.every((m) =>
         ['HOME', 'AWAY', 'DRAW'].includes(String(m.correct_result || '').toUpperCase()));
-      if (!allResults) {
+      if (!allResults && !force) {
         notes.push(`Week ${week.week_number}: not all results in yet`);
         continue;
       }
@@ -357,6 +426,7 @@ async function run({ force = false, testEmail = null, week: requestedWeek = null
 
 // Exposed for local testing of the copy (scripts/week-results-preview.js).
 exports._internal = { buildEmail, nameList, plural };
+exports.checkReady = checkReady;
 
 exports.run = run;
 

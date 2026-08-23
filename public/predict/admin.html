@@ -1014,8 +1014,11 @@ async function sendResultsEmail({ testOnly }) {
           : 'Emails are going out in the background; the week is now marked as sent.') +
         '</span>';
     } else {
-      statusEl.innerHTML = '<span style="color:var(--danger)">Failed: ' +
-        ((data && (data.error || data.message)) || 'unknown error') + '</span>';
+      // The trigger pre-checks readiness, so this is usually a genuine
+      // "the week isn't scored yet" explanation rather than a crash.
+      statusEl.innerHTML = '<span style="color:var(--accent-yellow)">Not sent.</span> ' +
+        '<span class="ts-muted">' +
+        ((data && (data.error || data.message)) || 'Unknown error.') + '</span>';
     }
   } catch (e) {
     statusEl.innerHTML = '<span style="color:var(--danger)">Failed: ' + e.message + '</span>';
