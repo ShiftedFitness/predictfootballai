@@ -320,12 +320,24 @@ async function run({ force = false, testEmail = null, week: requestedWeek = null
         continue;
       }
 
-      // First sighting of a finished week — start the clock, send next time.
+      // First sighting of a finished week — start the clock.
+      //
+      // This gate used to skip unconditionally, INCLUDING when forced. So
+      // the first press of "Send test to me" stamped scored_at, sent
+      // nothing, and still reported success, because the trigger had
+      // already returned 202. Pressing it a second time would have worked,
+      // which made it look random. When an admin explicitly asks, stamp and
+      // carry on rather than silently deferring an hour.
       if (!week.scored_at) {
+        const now = new Date().toISOString();
         await client.from('predict_match_weeks')
-          .update({ scored_at: new Date().toISOString() }).eq('id', week.id);
-        notes.push(`Week ${week.week_number}: marked scored, email in ~${DELAY_HOURS}h`);
-        continue;
+          .update({ scored_at: now }).eq('id', week.id);
+        week.scored_at = now;
+
+        if (!force) {
+          notes.push(`Week ${week.week_number}: marked scored, email in ~${DELAY_HOURS}h`);
+          continue;
+        }
       }
 
       const hoursSince = (Date.now() - new Date(week.scored_at).getTime()) / 3.6e6;

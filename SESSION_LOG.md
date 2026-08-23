@@ -1097,3 +1097,34 @@ Extended the preflight:
     function's log — which is what has been hiding the cause all along
   - scripts/email-preflight.sh takes an optional second arg for that address
     (timeout raised to 60s)
+
+## FOUND IT: force did not bypass the scored_at gate
+Preflight came back all PASS, including a real synchronous send that the user
+received. Mail path proven healthy — so the bug was mine.
+
+In week-results.js run():
+
+    if (!week.scored_at) {
+      ...stamp scored_at...
+      continue;              // <- unconditional, even when forced
+    }
+
+The FIRST press of "Send test to me" stamped scored_at, sent nothing, and
+still reported success because the trigger had already returned 202. A
+SECOND press would have worked, because scored_at was then set and force
+bypasses the one-hour delay. That intermittency is why it looked like a mail
+or credentials problem.
+
+Fixed: when forced, stamp scored_at and carry on to the send instead of
+deferring. Audited every early exit in run() — seven of them; five are now
+force-aware and two are structural (no fixtures / nobody played), which are
+correct to skip regardless.
+
+Three things this sequence taught, worth keeping:
+ 1. A fire-and-forget 202 must never be reported to a person as success.
+    Every failure in this chain hid behind that.
+ 2. "Config is present" is not "config works" — the smtp verify() check was
+    what let us eliminate credentials with certainty rather than suspicion.
+ 3. I guessed three times (auto-score timeout, incomplete week, Gmail
+    credentials) and was wrong three times. The preflight — which makes the
+    system report its own state — found it in one run.
