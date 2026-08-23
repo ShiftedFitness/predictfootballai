@@ -922,3 +922,70 @@ fixtures, picks, confidence, rationale, the strategy note, cost and whether
 the run was PROVISIONAL or FINAL. Never throws — a failed email must not
 fail a run whose picks are already saved. Needs env PICKS_AI_NOTIFY_EMAIL
 (set it to babacvafaey@gmail.com); silently skipped if unset.
+
+## ROOT CAUSE of the week 1 scoring failure — auto-score hit the 30s ceiling
+Diagnostics showed: 120 predictions (24 players x 5 — glyn's insert worked),
+ALL with points_awarded set, but only 1 marked correct. All 23 humans on
+current_week = 1, so my earlier "guard is blocking it" theory was WRONG.
+
+Real cause: auto-score paces one fixture every 6.5s to respect
+football-data.org's 10 req/min free tier. Five fixtures = ~33s. Netlify kills
+SCHEDULED functions at 30s. So fixtures 341/342/343 resolved and 344/345
+never got checked — exactly what the data shows. Scoring then ran against
+three-fifths of the results and recorded nearly every pick as 0.
+
+Same class of bug as picks-ai's timeout, in a function written long before
+this session. Fixed the same way:
+  auto-score.js             scheduled; hands off, does no work. Exports run().
+  auto-score-background.js  background=true, 15 min. Admin-secret gated.
+  auto-score-trigger.js     unscheduled, so manually callable.
+  netlify.toml              background = true for auto-score-background
+
+Also of note: my own diagnostic query was buggy — the per-player join
+filtered week_number = 1 without the season, so it counted last season's
+week 1 too and reported "10 picks" per player. The totals row (season-scoped)
+was correct at 120. Told the user.
+
+sql/011_rescore_week1.sql written to repair, gated on 344/345 having results:
+  step 1 preview of what each player SHOULD have
+  step 2 recompute points_awarded from actual results
+  step 3 rebuild predict_users totals from scratch (idempotent)
+  step 4 mirror into predict_user_seasons
+  step 5 show the resulting table
+Deliberately NOT using admin-score-week's force path: that recalculates from
+points_awarded, which is precisely the corrupted field.
+
+## NEW: weekly results email (user request)
+"Who won the matchweek, call out blanks, and tell each player how they did
+against Picks AI and against the field."
+
+sql/012_week_results_email.sql adds two timestamps to predict_match_weeks:
+  scored_at              first sighting of a fully-scored week
+  results_email_sent_at  send-once guard
+
+netlify/functions/week-results.js (+ -background, + -trigger), cron */30.
+
+WHEN IT FIRES — no reliable "week scored" event exists (a week can be scored
+from the admin button, auto-score, or by hand in SQL), so it DETECTS the
+condition: all matches have a result AND no prediction is left unscored. On
+first sighting it stamps scored_at and waits; an hour later it sends. That
+makes it independent of how the week got scored.
+Delay configurable via RESULTS_EMAIL_DELAY_HOURS (default 1).
+
+CONTENT, per player:
+  - headline: "You won Week N" / "You shared the Week N win" / "You got X/5"
+  - who won, or "N players tied on X out of 5 — A, B and C"
+  - blanks called out by name
+  - vs Picks AI: beat / lost / drew, colour-coded, its own line
+  - "You finished ahead of N players" — HUMANS ONLY. First cut counted the
+    bot, which both double-mentioned it and inflated the number.
+  - their five picks against the actual results, ticked/crossed
+  - the full week table with them highlighted and the bot tagged AI
+  - subject line differs for a winner
+
+Guards: test_email sends to one address and deliberately does NOT stamp, so
+a test cannot suppress the real send. Background function because ~24
+sequential sends far exceeds the 30s scheduled ceiling.
+
+Verified the copy locally for winner / mid-table / blank, including the
+tie-list grammar ("A, B and C").

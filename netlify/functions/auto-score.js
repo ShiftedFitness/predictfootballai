@@ -162,17 +162,20 @@ async function scoreWeek(client, weekNum, matchWeekId, matches) {
 }
 
 // ── Main handler ──────────────────────────────────────────────────────────────
-exports.handler = async (event) => {
+/**
+ * The work.
+ *
+ * WHY THIS IS NOT THE SCHEDULED HANDLER
+ * football-data.org's free tier allows 10 requests a minute, so this paces
+ * one fixture every 6.5 seconds. Five fixtures therefore needs ~33 seconds,
+ * and Netlify kills a SCHEDULED function at 30. The result in week 1: the
+ * first three fixtures resolved, the last two never got checked, the week
+ * looked incomplete, and scoring recorded almost every pick as wrong.
+ *
+ * So the cron hands off to auto-score-background (15-minute limit) instead.
+ */
+async function run() {
   try {
-    // Netlify scheduled functions: no httpMethod. Allow unauthenticated.
-    const isScheduledInvocation = !event.httpMethod;
-    if (!isScheduledInvocation) {
-      const secret = (event.headers?.['x-admin-secret'] || event.headers?.['X-Admin-Secret'] || '').trim();
-      if (process.env.ADMIN_SECRET && secret !== process.env.ADMIN_SECRET) {
-        return respond(401, 'Unauthorised');
-      }
-    }
-
     const client = sb();
 
     // 1. Load all match weeks + their matches, find the latest week with unscored matches
@@ -343,5 +346,31 @@ exports.handler = async (event) => {
   } catch (e) {
     console.error('auto-score error:', e);
     return respond(500, e.message || 'Unknown error');
+  }
+}
+
+exports.run = run;
+
+/**
+ * Scheduled entry point. Does no work itself — see run() above for why —
+ * it just triggers the background function and returns.
+ */
+exports.handler = async () => {
+  const base = process.env.URL || process.env.DEPLOY_URL;
+  const secret = process.env.ADMIN_SECRET;
+  if (!base) return respond(500, 'Site URL unavailable');
+  if (!secret) return respond(500, 'ADMIN_SECRET not configured');
+
+  try {
+    const res = await fetch(`${base}/.netlify/functions/auto-score-background`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-admin-secret': secret },
+      body: '{}'
+    });
+    console.log(`auto-score: handed off to background function (${res.status})`);
+    return respond(202, { ok: true, handedOff: true, status: res.status });
+  } catch (e) {
+    console.error('auto-score: handoff failed:', e.message);
+    return respond(500, `Handoff failed: ${e.message}`);
   }
 };

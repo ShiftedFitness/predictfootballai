@@ -28,6 +28,15 @@
 [functions."auto-score"]
   schedule = "0 7,22 * * *"
 
+# The result-fetching runs as a BACKGROUND function. It paces one fixture
+# every 6.5s to stay inside football-data.org's 10-requests-per-minute free
+# tier, so a five-match week needs ~33 seconds — more than the 30-second
+# ceiling Netlify applies to scheduled functions. In week 1 that cut off the
+# last two fixtures, left the week half-resolved, and scoring then marked
+# nearly every pick wrong.
+[functions."auto-score-background"]
+  background = true
+
 # Picks reminder: checks every 30 minutes for matchweeks with first lockout ~2hrs away
 # Sends personalised email to each user with their picks (or a warning if none submitted)
 [functions."picks-reminder"]
@@ -62,3 +71,13 @@
 # their stored odds are the record of what players saw when they picked.
 [functions."refresh-odds"]
   schedule = "0 4,16 * * *"
+
+# Weekly results email: checks every 30 minutes for a week that is fully
+# scored, stamps scored_at on first sighting, and emails everyone an hour
+# later. Sends exactly once per week (results_email_sent_at guard).
+[functions."week-results"]
+  schedule = "*/30 * * * *"
+
+# ~24 sequential sends is well past the 30s scheduled-function ceiling.
+[functions."week-results-background"]
+  background = true
