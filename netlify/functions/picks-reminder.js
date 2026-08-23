@@ -7,12 +7,17 @@
  * - Users who have submitted all 5 picks: email shows their picks
  * - Users who haven't submitted: email warns them to get picks in
  *
- * Deduplication: the cron runs every 30 minutes, and the trigger window
- * is 28 minutes wide (1h46m – 2h14m before first lockout), so only one
- * cron run per week will ever fire the emails.
+ * Deduplication: predict_match_weeks.reminder_sent_at is stamped once the
+ * emails go out, and the week is skipped thereafter. This replaced a scheme
+ * that relied on the trigger window (28 min) being narrower than the cron
+ * interval (30 min) — which meant an awkwardly-timed lockout could fall
+ * between two ticks and NOBODY got a reminder. The window is now 90-180
+ * minutes and dedupe is explicit.
  *
- * Schedule: every 30 minutes (see netlify.toml)
- * Also callable manually: POST /.netlify/functions/picks-reminder with x-admin-secret
+ * Schedule: every 30 minutes (see netlify.toml).
+ * Manual/test sends go through picks-reminder-trigger.js — this function
+ * carries a schedule, and Netlify rejects HTTP calls to scheduled functions
+ * with a 403 before they ever run.
  *
  * Env vars required:
  *   SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY  — DB access
@@ -201,23 +206,17 @@ function buildEmail({ user, weekNumber, matches, picks, deadline }) {
 
 // ── Handler ────────────────────────────────────────────────────────────────
 
-exports.handler = async (event) => {
-  const corsResponse = handleOptions(event);
-  if (corsResponse) return corsResponse;
-
-  // Netlify Clockwork invokes scheduled functions as POST — don't require auth for those
-  const isScheduled = (event.headers['user-agent'] || '').includes('Netlify Clockwork');
-  const isManual = event.httpMethod === 'POST' && !isScheduled;
-  if (isManual) {
-    const adminErr = await requireAdmin(event);
-    if (adminErr) return adminErr;
-  }
-
-  const body = isManual ? JSON.parse(event.body || '{}') : {};
-  // force=true bypasses the time window and sends to test_email only (or all if omitted)
-  const forceMode = !!body.force;
-  const testEmail = body.test_email || null; // e.g. "babacvafaey@gmail.com"
-
+/**
+ * The work, callable from the cron handler below or from
+ * picks-reminder-trigger.js (a separate unscheduled function, because
+ * Netlify rejects HTTP calls to scheduled functions with a 403).
+ *
+ * @param force      bypass the timing window
+ * @param testEmail  send only to this address (use with force to test)
+ */
+async function run({ force = false, testEmail = null } = {}) {
+  const forceMode = !!force;
+  {
   try {
     const client = sb();
     const now = new Date();
@@ -230,7 +229,7 @@ exports.handler = async (event) => {
 
     let openWeekQuery = client
       .from('predict_match_weeks')
-      .select('id, week_number, status')
+      .select('id, week_number, status, reminder_sent_at')
       .eq('status', 'open')
       .order('week_number', { ascending: true });
     if (season) openWeekQuery = openWeekQuery.eq('season', season);
@@ -259,9 +258,19 @@ exports.handler = async (event) => {
       const firstLockout = new Date(matches[0].lockout_time);
       const minutesUntil = (firstLockout - now) / (1000 * 60);
 
-      // 28-minute window: 106min to 134min before first lockout
-      // Cron fires every 30min so this window is hit exactly once
-      const inWindow = minutesUntil >= 106 && minutesUntil <= 134;
+      // The window used to be 106-134 minutes — 28 minutes wide against a
+      // 30-minute cron, so a lockout landing awkwardly (e.g. 11:15) could
+      // slip between two ticks and NOBODY got a reminder. Dedupe is now
+      // done properly, with a stamp on the week, so the window can be
+      // comfortably wider than the cron interval.
+      const inWindow = minutesUntil >= 90 && minutesUntil <= 180;
+
+      // Already sent for this week? (the stamp survives redeploys, unlike
+      // any in-memory guard)
+      if (!forceMode && week.reminder_sent_at) {
+        skippedReason = `Week ${week.week_number}: reminders already sent at ${week.reminder_sent_at}`;
+        continue;
+      }
 
       if (!forceMode && !inWindow) {
         skippedReason = `Week ${week.week_number}: ${minutesUntil.toFixed(0)} mins until lockout (window is 106–134 mins)`;
@@ -337,10 +346,25 @@ exports.handler = async (event) => {
 
       console.log(`picks-reminder: Week ${week.week_number} — sent ${emailsSent} emails`);
 
+      // Stamp the week so later cron ticks inside the (now wider) window do
+      // not send twice. Not stamped for a test send — that would silently
+      // suppress the real reminder for everyone.
+      let stamped = false;
+      if (!testEmail && emailsSent > 0) {
+        const { error: stampErr } = await client
+          .from('predict_match_weeks')
+          .update({ reminder_sent_at: new Date().toISOString() })
+          .eq('id', week.id);
+        if (stampErr) console.error(`picks-reminder: stamp failed: ${stampErr.message}`);
+        else stamped = true;
+      }
+
       return respond(200, {
         ok: true,
         week: week.week_number,
         emailsSent,
+        stamped,
+        testMode: !!testEmail,
         minutesUntilLockout: Math.round(minutesUntil),
         results
       });
@@ -358,4 +382,10 @@ exports.handler = async (event) => {
     console.error('picks-reminder error:', e);
     return respond(500, e.message || 'Unknown error');
   }
-};
+  }
+}
+
+exports.run = run;
+
+/** Scheduled entry point — the every-30-minutes cron. */
+exports.handler = async () => run();

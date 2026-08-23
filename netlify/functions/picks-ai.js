@@ -43,6 +43,7 @@
  *   POST /picks-ai {dryRun:true} → research + report, write nothing
  */
 
+const nodemailer = require('nodemailer');
 const Anthropic = require('@anthropic-ai/sdk');
 const { sb, respond, requireAdmin, handleOptions, currentSeason } = require('./_supabase.js');
 const { fetchEplMatchMarkets, findMarketForFixture } = require('./_polymarket.js');
@@ -580,6 +581,86 @@ function validatePicks(rawPicks, matches) {
   return clean;
 }
 
+/**
+ * Tell the admin that Picks AI has picked.
+ *
+ * Uses the same Gmail transport as picks-reminder. Never throws — a failed
+ * notification must not fail a run whose picks are already saved.
+ */
+async function notifyAdmin({ week, season, picks, strategy, matches, isFinal, cost, searches }) {
+  const to = process.env.PICKS_AI_NOTIFY_EMAIL;
+  if (!to) return { sent: false, reason: 'PICKS_AI_NOTIFY_EMAIL not set' };
+  if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
+    return { sent: false, reason: 'Gmail credentials not configured' };
+  }
+
+  try {
+    const byId = Object.fromEntries(matches.map((m) => [String(m.id), m]));
+    const rows = picks.map((p) => {
+      const m = byId[String(p.match_id)] || {};
+      const label = p.pick === 'HOME' ? (m.home_team || 'Home')
+                  : p.pick === 'AWAY' ? (m.away_team || 'Away')
+                  : 'Draw';
+      return `
+        <tr>
+          <td style="padding:8px;border-bottom:1px solid #2a2a2a;color:#aaa">
+            ${m.home_team || '?'} v ${m.away_team || '?'}</td>
+          <td style="padding:8px;border-bottom:1px solid #2a2a2a;color:#00ff88;font-weight:bold;white-space:nowrap">
+            ${label}</td>
+          <td style="padding:8px;border-bottom:1px solid #2a2a2a;color:#666;text-align:right;white-space:nowrap">
+            ${p.confidence}/5</td>
+        </tr>
+        <tr><td colspan="3" style="padding:0 8px 10px;color:#777;font-size:12px;font-style:italic">
+            ${p.rationale || ''}</td></tr>`;
+    }).join('');
+
+    const kind = isFinal ? 'FINAL' : 'PROVISIONAL';
+    const html = `
+<!DOCTYPE html><html><head><meta charset="utf-8"></head>
+<body style="margin:0;background:#0a0a0a;font-family:'Courier New',monospace;color:#e0e0e0">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#0a0a0a;padding:24px 0"><tr><td align="center">
+  <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%">
+    <tr><td style="background:#111;border-top:3px solid #00E5FF;padding:20px 24px">
+      <div style="font-size:20px;font-weight:bold;color:#fff">Picks AI ⚽</div>
+      <div style="color:#888;font-size:12px;margin-top:4px">
+        WEEK ${week} · ${season || ''} · ${kind} PICKS</div>
+    </td></tr>
+    <tr><td style="background:#111;padding:20px 24px">
+      ${strategy ? `<p style="margin:0 0 16px;color:#aaa;font-size:13px;line-height:1.6;
+        border-left:3px solid #FFD60A;padding-left:12px">${strategy}</p>` : ''}
+      <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse">${rows}</table>
+      <p style="color:#555;font-size:11px;margin:18px 0 0">
+        ${searches} web searches · $${cost} · ${kind === 'PROVISIONAL'
+          ? 'the scheduled run will replace these closer to the deadline'
+          : 'these are the picks that count'}
+      </p>
+      <p style="color:#444;font-size:11px;margin:10px 0 0">
+        Hidden from players until the first match kicks off.</p>
+    </td></tr>
+  </table></td></tr></table>
+</body></html>`;
+
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: { user: process.env.GMAIL_USER, pass: process.env.GMAIL_APP_PASSWORD }
+    });
+
+    await transporter.sendMail({
+      from: `TeleStats Fives <${process.env.GMAIL_USER}>`,
+      to,
+      subject: `Picks AI — week ${week} ${kind.toLowerCase()} picks are in`,
+      html,
+      text: `Picks AI week ${week} (${kind}).\n\n${strategy || ''}\n\n` +
+        picks.map((p) => `${p.pick} (${p.confidence}/5) — ${p.rationale}`).join('\n')
+    });
+
+    return { sent: true, to };
+  } catch (e) {
+    console.error('picks-ai: notification email failed:', e.message);
+    return { sent: false, reason: e.message };
+  }
+}
+
 // ── Handler ─────────────────────────────────────────────────────────────────
 
 // Exposed for the local dry-run harness (scripts/picks-ai-preview.js) so it
@@ -868,6 +949,11 @@ async function run({ requestedWeek = null, dryRun = false, force = false } = {})
     }]);
     if (runErr) console.error('picks-ai: run log failed (picks still saved):', runErr.message);
 
+    const notified = await notifyAdmin({
+      week: week.week_number, season, picks, strategy, matches,
+      isFinal: isFinalRun, cost, searches
+    });
+
     console.log(
       `picks-ai: week ${week.week_number} ${isFinalRun ? '(final)' : '(provisional)'} — ${rows.length} picks, ` +
       `${searches} searches, ${usage.input_tokens}in/${usage.output_tokens}out, ~$${cost}`
@@ -878,6 +964,7 @@ async function run({ requestedWeek = null, dryRun = false, force = false } = {})
       week: week.week_number,
       season: week.season,
       picksWritten: rows.length,
+      notified,
       isFinal: isFinalRun,
       replacedProvisional: replacingProvisional,
       note: isFinalRun

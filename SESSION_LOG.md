@@ -885,3 +885,40 @@ on any `/fives*` route, plus baseline gameplay events.
 - Pre-existing (NOT introduced here, NOT fixed here): a perfect Starting XI
   never calls `logGameSession()`, so it awards no XP. Community XI likewise
   logs no session. Both now emit `game_complete` for analytics only.
+
+## Week 1 issues raised by user (2026-08-24ish)
+1. glyn_marshall's picks missing → sql/009_fix_week1.sql PART A inserts them
+   (match ids resolved by team name; preview query first). Flagged that this
+   is a post-lockout write only possible via service role.
+2. Scoring looks broken — only one player has points → sql/009 PART B,
+   four read-only queries. Prime suspect stated in the file: auto-score's
+   guard aborts the WHOLE week if ANY user's current_week > weekNum, so a
+   partially-completed scoring pass permanently blocks every retry, which
+   looks exactly like "one player has points".
+3. NO reminder emails went out → root cause found by inspection, see below.
+4. Picks AI email confirmation → built.
+
+### Reminder emails: real bug found, not just a config problem
+The dedupe scheme relied on the trigger window (28 min: 106-134 before
+lockout) being NARROWER than the cron interval (30 min). That guarantees at
+most one send — but also means a lockout timed so the window falls between
+two ticks gets NO send at all. e.g. lockout 11:15 → window 09:01-09:29 →
+ticks at 09:00 and 09:30 both miss. I flagged this window in the very first
+audit and did not fix it; week 1 is what that looked like in practice.
+
+Fixed:
+- sql/010_reminder_stamp.sql adds predict_match_weeks.reminder_sent_at
+- window widened to 90-180 minutes (now much wider than the cron interval)
+- dedupe is explicit: skip if reminder_sent_at is set; stamp after sending
+- test sends (test_email) deliberately do NOT stamp, so a test cannot
+  suppress the real reminder
+- picks-reminder.js split into run() + scheduled handler, and NEW
+  picks-reminder-trigger.js (unscheduled, so HTTP-reachable) exposes the
+  force/test_email mode that has never been usable in production
+
+### Picks AI confirmation email
+notifyAdmin() in picks-ai.js, same Gmail transport as the reminder. Sends
+fixtures, picks, confidence, rationale, the strategy note, cost and whether
+the run was PROVISIONAL or FINAL. Never throws — a failed email must not
+fail a run whose picks are already saved. Needs env PICKS_AI_NOTIFY_EMAIL
+(set it to babacvafaey@gmail.com); silently skipped if unset.
