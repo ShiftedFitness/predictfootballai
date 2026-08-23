@@ -81,3 +81,10 @@
 # ~24 sequential sends is well past the 30s scheduled-function ceiling.
 [functions."week-results-background"]
   background = true
+
+# "Week is open" announcement. Not scheduled — a seeded week may still need
+# a fixture or deadline corrected before 23 people hear about it, so it goes
+# out when the admin presses the button. ~23 sequential sends needs the
+# background function's longer limit.
+[functions."week-open-background"]
+  background = true

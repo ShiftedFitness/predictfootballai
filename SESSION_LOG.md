@@ -1128,3 +1128,39 @@ Three things this sequence taught, worth keeping:
  3. I guessed three times (auto-score timeout, incomplete week, Gmail
     credentials) and was wrong three times. The preflight — which makes the
     system report its own state — found it in one run.
+
+## NEW: "Week is open" announcement email (user request)
+"Email all players when a new week is added, with the fixtures and the
+deadline, encouraging them to submit."
+
+sql/013_week_open_email.sql adds predict_match_weeks.open_email_sent_at.
+
+netlify/functions/week-open.js (+ -background, + -trigger).
+DELIBERATELY NOT SCHEDULED: a freshly seeded week may still need a fixture
+or lockout corrected before 23 people hear about it, so it goes out only
+when the admin presses the button. The stamp prevents a double send.
+
+Email content (kept simple as asked): the five fixtures in kick-off order
+with UK times, the deadline in a highlighted block, and a "Make your picks"
+button. Verified the render — UK timezone conversion correct (19:00Z shows
+as 20:00 BST), fixtures ordered by kickoff, deadline taken from the first.
+
+Admin card "Announce New Week", placed right after Seed Next Week:
+  [Check]              preflight only — confirms fixture count, deadline,
+                       hours remaining and recipient count, sends nothing
+  [Send test to me]    one address, does NOT stamp
+  [Send to all players] confirm dialog, then sends and stamps
+The week field auto-fills from the seed panel's week, so the natural flow is
+seed → check → announce.
+
+Applied every lesson from the results-email debugging:
+  - trigger pre-checks readiness SYNCHRONOUSLY and returns the real reason
+    rather than a 202 that silently no-ops
+  - force genuinely forces at every gate
+  - test sends never stamp
+  - a Check button so the admin can confirm before committing to 23 emails
+
+Verified in a browser: card present and correctly positioned, all three
+buttons wired, empty week → "Enter the week number to announce", send-to-all
+shows a confirm and declining changes nothing, and the week field defaults
+from the seed panel.

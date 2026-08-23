@@ -961,6 +961,30 @@ function initAdminUI() {
         <div id="simContainer"></div>
       </div>
     </div>
+
+    <!-- ═══ ANNOUNCE NEW WEEK ═══ -->
+    <div class="ts-card">
+      <h3>Announce New Week</h3>
+      <p style="margin:0 0 10px;font-size:12px;color:var(--text-secondary)">
+        Emails every player the new fixtures and the deadline, with a link to
+        submit. Seed the week first, then check it looks right before sending.
+      </p>
+      <div class="row" style="margin-bottom:10px">
+        <div><label>Week to announce</label>
+          <input id="announceWeek" type="number" min="1" step="1" style="width:90px"/></div>
+        <div style="align-self:flex-end">
+          <button class="btn" id="announceCheck">Check</button>
+          <button class="btn" id="announceTest">Send test to me</button>
+          <button class="btn danger" id="announceAll">Send to all players</button>
+        </div>
+      </div>
+      <p style="margin:0;font-size:12px;color:var(--text-secondary)">
+        <strong>Check</strong> confirms the fixtures and deadline without sending
+        anything. The test goes only to you and does <strong>not</strong> mark the
+        week as announced.
+      </p>
+      <div id="announceStatus" style="margin-top:8px;font-size:13px"></div>
+    </div>
   `;
 
   setupEventListeners();
@@ -978,6 +1002,66 @@ function showAccessDenied() {
 }
 
 // ── Event Listeners ─────────────────────────────────────────────────────
+/* ---------- Announce new week ---------- */
+async function announceWeek(mode) {
+  const week = Number($('announceWeek').value);
+  const el = $('announceStatus');
+
+  if (!week) {
+    el.innerHTML = '<span style="color:var(--danger)">Enter the week number to announce.</span>';
+    return;
+  }
+
+  // Check: preflight only, changes nothing.
+  if (mode === 'check') {
+    el.innerHTML = '<span class="ts-spinner"></span> Checking\u2026';
+    try {
+      const d = await adminFetch(`/week-open-trigger?week=${week}`, { method: 'GET' });
+      if (d && d.ok) {
+        const when = d.deadline ? new Date(d.deadline).toLocaleString('en-GB',
+          { weekday:'short', day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' }) : '?';
+        el.innerHTML =
+          '<span style="color:var(--accent-green)">Ready.</span> <span class="ts-muted">' +
+          `${d.fixtures} fixtures, deadline ${when} (${d.hoursUntil}h away), ` +
+          `${d.recipients} players would be emailed.` +
+          (d.alreadySent ? ` <strong>Already announced at ${d.alreadySent}.</strong>` : '') +
+          '</span>';
+      } else {
+        el.innerHTML = '<span style="color:var(--accent-yellow)">Not ready.</span> ' +
+          '<span class="ts-muted">' + ((d && (d.reason || d.error)) || 'Unknown.') + '</span>';
+      }
+    } catch (e) {
+      el.innerHTML = '<span style="color:var(--danger)">Check failed: ' + e.message + '</span>';
+    }
+    return;
+  }
+
+  const body = { week };
+  if (mode === 'test') {
+    const to = (prompt('Send the test to which address?', 'babacvafaey@gmail.com') || '').trim();
+    if (!to) return;
+    body.test_email = to;
+  } else if (!confirm(
+      `Email ALL active players that Week ${week} is open?\n\n` +
+      'This cannot be unsent. Press Check first if you have not already.')) {
+    return;
+  }
+
+  el.innerHTML = '<span class="ts-spinner"></span> Sending\u2026';
+  try {
+    const d = await adminFetch('/week-open-trigger', { method: 'POST', body: JSON.stringify(body) });
+    if (d && d.ok) {
+      el.innerHTML = '<span style="color:var(--accent-green)">Started.</span> ' +
+        '<span class="ts-muted">' + (d.message || '') + '</span>';
+    } else {
+      el.innerHTML = '<span style="color:var(--accent-yellow)">Not sent.</span> ' +
+        '<span class="ts-muted">' + ((d && (d.error || d.message)) || 'Unknown error.') + '</span>';
+    }
+  } catch (e) {
+    el.innerHTML = '<span style="color:var(--danger)">Failed: ' + e.message + '</span>';
+  }
+}
+
 /* ---------- Results email ---------- */
 async function sendResultsEmail({ testOnly }) {
   const week = Number($('week').value);
@@ -1030,6 +1114,23 @@ function setupEventListeners() {
   const emailAllBtn = $('emailAll');
   if (emailTestBtn) emailTestBtn.onclick = () => sendResultsEmail({ testOnly: true });
   if (emailAllBtn) emailAllBtn.onclick = () => sendResultsEmail({ testOnly: false });
+
+  const annCheck = $('announceCheck');
+  const annTest = $('announceTest');
+  const annAll = $('announceAll');
+  if (annCheck) annCheck.onclick = () => announceWeek('check');
+  if (annTest) annTest.onclick = () => announceWeek('test');
+  if (annAll) annAll.onclick = () => announceWeek('all');
+
+  // Default to the week just seeded, so the usual flow is seed then announce.
+  const annWeek = $('announceWeek');
+  const nextWeekInput = $('nextWeek');
+  if (annWeek && nextWeekInput) {
+    if (nextWeekInput.value) annWeek.value = nextWeekInput.value;
+    nextWeekInput.addEventListener('change', () => {
+      if (!annWeek.value) annWeek.value = nextWeekInput.value;
+    });
+  }
 
   const loadBtn = $('load');
   const applyBtn = $('applyResults');
