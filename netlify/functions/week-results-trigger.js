@@ -16,6 +16,7 @@
  *
  * Always test with test_email first: without it, force emails all 23 players.
  */
+const nodemailer = require('nodemailer');
 const { sb, respond, requireAdmin, handleOptions } = require('./_supabase.js');
 const { checkReady } = require('./week-results.js');
 
@@ -72,8 +73,57 @@ exports.handler = async (event) => {
           detail: `${recipients.length} active players with an email address`,
           missingEmail: (users || []).filter((u) => !u.is_bot && !u.email).map((u) => u.username) };
 
-    // 5. Is the requested week actually sendable?
+    // 5. Does Gmail actually ACCEPT those credentials?
+    //    Presence is not validity — an app password can be revoked by a
+    //    password change or a security review and still sit in the env.
+    //    verify() opens the SMTP session and authenticates without sending.
+    if (out.checks.gmail.pass) {
+      try {
+        const t = nodemailer.createTransport({
+          service: 'gmail',
+          auth: { user: process.env.GMAIL_USER, pass: process.env.GMAIL_APP_PASSWORD }
+        });
+        await t.verify();
+        out.checks.smtp = { pass: true, detail: 'Gmail accepted the app password' };
+      } catch (e) {
+        out.checks.smtp = {
+          pass: false,
+          detail: `Gmail REJECTED the credentials: ${e.message}. ` +
+                  'Generate a new app password and update GMAIL_APP_PASSWORD.'
+        };
+      }
+    }
+
     const url = new URL(event.rawUrl);
+
+    // 6. Optionally send ONE email, synchronously, and report the outcome.
+    //    A single send is fast enough to do inline, which means the result
+    //    comes back on this request instead of vanishing into a background
+    //    function's log.
+    const sendTest = url.searchParams.get('send_test');
+    if (sendTest && out.checks.smtp && out.checks.smtp.pass) {
+      try {
+        const t = nodemailer.createTransport({
+          service: 'gmail',
+          auth: { user: process.env.GMAIL_USER, pass: process.env.GMAIL_APP_PASSWORD }
+        });
+        const info = await t.sendMail({
+          from: `TeleStats Fives <${process.env.GMAIL_USER}>`,
+          to: sendTest,
+          subject: 'TeleStats Fives — mail path test',
+          text: 'If you are reading this, the mail path works end to end. ' +
+                'Nothing else about this message matters.'
+        });
+        out.checks.testSend = {
+          pass: true,
+          detail: `Accepted for delivery to ${sendTest} (id ${info.messageId})`
+        };
+      } catch (e) {
+        out.checks.testSend = { pass: false, detail: `Send failed: ${e.message}` };
+      }
+    }
+
+    // 7. Is the requested week actually sendable?
     const wk = url.searchParams.get('week');
     if (wk) out.checks.week = await checkReady(client, wk);
 

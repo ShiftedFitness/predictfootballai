@@ -1077,3 +1077,23 @@ plus scripts/email-preflight.sh to run and format it.
 
 The readiness/pre-check work from the previous turn stands and is still
 correct — it just was not the cause here.
+
+## Preflight passed everything — narrowed to the send itself
+User ran it: migration012 PASS, gmail PASS (configured as
+babacvafaey@gmail.com), siteUrl PASS, adminSecret PASS, recipients PASS (23
+with addresses), week PASS (5 fixtures, 120 picks scored).
+
+So configuration is fine and all three of my theories are dead. What the
+preflight could NOT see:
+  a) whether Gmail ACCEPTS the app password (presence != validity — app
+     passwords are revoked by a password change or a security review and sit
+     in the env looking fine)
+  b) whether the background function ran at all
+Extended the preflight:
+  - smtp check via nodemailer transporter.verify(), which authenticates
+    against Gmail without sending
+  - ?send_test=<addr> sends ONE email SYNCHRONOUSLY and returns the outcome
+    on the same request, so the result cannot vanish into a background
+    function's log — which is what has been hiding the cause all along
+  - scripts/email-preflight.sh takes an optional second arg for that address
+    (timeout raised to 60s)

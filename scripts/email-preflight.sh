@@ -7,13 +7,17 @@
 # available, how many players have an email address, and whether the given
 # week is actually scored and sendable.
 #
-#   bash scripts/email-preflight.sh          # general checks
-#   bash scripts/email-preflight.sh 1        # ...plus week 1 readiness
+#   bash scripts/email-preflight.sh                    # general checks
+#   bash scripts/email-preflight.sh 1                  # ...plus week 1 readiness
+#   bash scripts/email-preflight.sh 1 you@example.com  # ...and send ONE real
+#                                                        email, synchronously,
+#                                                        reporting the outcome
 #
 set -uo pipefail
 
 SITE="${SITE_URL:-https://telestats.net}"
 WEEK="${1:-}"
+TEST_TO="${2:-}"
 
 SECRET="${ADMIN_SECRET:-}"
 if [ -z "$SECRET" ]; then
@@ -25,9 +29,12 @@ fi
 
 Q=""
 [ -n "$WEEK" ] && Q="?week=${WEEK}"
+if [ -n "$TEST_TO" ]; then
+  if [ -n "$Q" ]; then Q="${Q}&send_test=${TEST_TO}"; else Q="?send_test=${TEST_TO}"; fi
+fi
 
 RESPONSE=$(curl -sS -X GET "${SITE}/.netlify/functions/week-results-trigger${Q}" \
-  -H "x-admin-secret: ${SECRET}" --max-time 30)
+  -H "x-admin-secret: ${SECRET}" --max-time 60)
 
 FORMATTER="$(dirname "$0")/_format_preflight.py"
 if command -v python3 >/dev/null 2>&1 && [ -f "$FORMATTER" ]; then
