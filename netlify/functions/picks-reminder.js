@@ -41,14 +41,6 @@ function pickEmoji(pick) {
   return '❓';
 }
 
-function formatTime(isoString) {
-  const d = new Date(isoString);
-  return d.toLocaleTimeString('en-GB', {
-    hour: '2-digit', minute: '2-digit',
-    timeZone: 'Europe/London'
-  }) + ' (UK)';
-}
-
 function formatDeadline(isoString) {
   const d = new Date(isoString);
   return d.toLocaleString('en-GB', {
@@ -74,8 +66,6 @@ function buildEmail({ user, weekNumber, matches, picks, deadline }) {
     const pick = picks.find(p => p.match_id === match.id);
     const home = stripFC(match.home_team);
     const away = stripFC(match.away_team);
-    const kickoff = formatTime(match.lockout_time);
-
     if (pick) {
       const isHome = pick.pick === 'HOME';
       const isAway = pick.pick === 'AWAY';
@@ -87,7 +77,6 @@ function buildEmail({ user, weekNumber, matches, picks, deadline }) {
             <span style="color:#555;padding:0 6px;">vs</span>
             <span style="color:${isAway ? accentColour : '#aaa'};font-weight:${isAway ? 'bold' : 'normal'}">${away}</span>
           </td>
-          <td style="padding:10px 8px;border-bottom:1px solid #2a2a2a;color:#888;font-size:12px;white-space:nowrap">${kickoff}</td>
           <td style="padding:10px 8px;border-bottom:1px solid #2a2a2a;text-align:right;white-space:nowrap">
             <span style="background:${accentColour};color:#000;font-weight:bold;padding:3px 10px;border-radius:4px;font-size:13px;">
               ${pickEmoji(pick.pick)} ${isDraw ? 'DRAW' : pick.pick}
@@ -100,7 +89,6 @@ function buildEmail({ user, weekNumber, matches, picks, deadline }) {
           <td style="padding:10px 8px;border-bottom:1px solid #2a2a2a;color:#aaa;">
             ${home} vs ${away}
           </td>
-          <td style="padding:10px 8px;border-bottom:1px solid #2a2a2a;color:#888;font-size:12px;white-space:nowrap">${kickoff}</td>
           <td style="padding:10px 8px;border-bottom:1px solid #2a2a2a;text-align:right">
             <span style="color:#555;font-style:italic;">no pick</span>
           </td>
@@ -162,7 +150,6 @@ function buildEmail({ user, weekNumber, matches, picks, deadline }) {
               <thead>
                 <tr>
                   <th style="text-align:left;padding:8px;color:#555;font-size:11px;letter-spacing:1px;border-bottom:1px solid #2a2a2a;">FIXTURE</th>
-                  <th style="text-align:left;padding:8px;color:#555;font-size:11px;letter-spacing:1px;border-bottom:1px solid #2a2a2a;">KICKOFF</th>
                   <th style="text-align:right;padding:8px;color:#555;font-size:11px;letter-spacing:1px;border-bottom:1px solid #2a2a2a;">YOUR PICK</th>
                 </tr>
               </thead>

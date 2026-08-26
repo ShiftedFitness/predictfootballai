@@ -31,12 +31,6 @@ function ukTime(iso) {
   });
 }
 
-function ukTimeShort(iso) {
-  return new Date(iso).toLocaleString('en-GB', {
-    weekday: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/London'
-  });
-}
-
 // ── Readiness ───────────────────────────────────────────────────────────
 
 /**
@@ -103,13 +97,14 @@ async function checkReady(client, weekNumber) {
 // ── Email ───────────────────────────────────────────────────────────────
 
 function buildEmail({ name, week, matches, deadline }) {
+  // No per-fixture time is shown, because none exists: seedWeek writes one
+  // shared lockout_time to all five matches, so it is the week's DEADLINE,
+  // not a kick-off. Rendering it per row made five fixtures across Saturday
+  // and Sunday all read "Sat 15:00". The deadline gets its own block below.
   const rows = matches.map((m) => `
       <tr>
         <td style="padding:10px 8px;border-bottom:1px solid #2a2a2a;color:#e0e0e0;font-size:14px">
           ${stripFC(m.home_team)} <span style="color:#555">v</span> ${stripFC(m.away_team)}</td>
-        <td style="padding:10px 8px;border-bottom:1px solid #2a2a2a;color:#888;
-                   font-size:12px;text-align:right;white-space:nowrap">
-          ${ukTimeShort(m.lockout_time)}</td>
       </tr>`).join('');
 
   const html = `
@@ -136,9 +131,7 @@ function buildEmail({ name, week, matches, deadline }) {
     <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin-bottom:20px">
       <tr>
         <th style="text-align:left;padding:6px 8px;color:#555;font-size:11px;letter-spacing:1px;
-                   border-bottom:1px solid #2a2a2a">FIXTURE</th>
-        <th style="text-align:right;padding:6px 8px;color:#555;font-size:11px;letter-spacing:1px;
-                   border-bottom:1px solid #2a2a2a">KICK-OFF</th>
+                   border-bottom:1px solid #2a2a2a">FIXTURES</th>
       </tr>
       ${rows}
     </table>
@@ -170,8 +163,7 @@ function buildEmail({ name, week, matches, deadline }) {
     '',
     `Hey ${name}, five new fixtures are up:`,
     '',
-    ...matches.map((m) =>
-      `  ${stripFC(m.home_team)} v ${stripFC(m.away_team)}  (${ukTimeShort(m.lockout_time)})`),
+    ...matches.map((m) => `  ${stripFC(m.home_team)} v ${stripFC(m.away_team)}`),
     '',
     `DEADLINE: ${ukTime(deadline)}`,
     'Picks lock when the first match kicks off.',
@@ -290,4 +282,4 @@ async function run({ force = false, testEmail = null, week: requestedWeek = null
 
 exports.run = run;
 exports.checkReady = checkReady;
-exports._internal = { buildEmail, stripFC, ukTime, ukTimeShort };
+exports._internal = { buildEmail, stripFC, ukTime };

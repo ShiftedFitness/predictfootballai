@@ -1164,3 +1164,24 @@ Verified in a browser: card present and correctly positioned, all three
 buttons wired, empty week → "Enter the week number to announce", send-to-all
 shows a confirm and declining changes nothing, and the week field defaults
 from the seed panel.
+
+## Kick-off times removed from the emails (user request)
+User: the announce email showed the same kick-off day/time for all five
+fixtures, though some are Saturday and some Sunday. Remove it.
+
+ROOT CAUSE, worth recording: predict_matches.lockout_time is NOT a per-match
+kick-off. seedWeek(week, lockoutTime, fixtures) writes ONE shared value to
+all five rows — it is the week's single DEADLINE. There is no per-fixture
+kick-off stored anywhere in the schema, so the column was never showing what
+its label claimed. Removing it is the correct fix, not a workaround.
+
+Fixed in BOTH emails, since the same mislabelled column existed in each:
+- week-open.js: dropped the KICK-OFF column (HTML + text), header now reads
+  FIXTURES. The deadline keeps its own highlighted block, which is the real
+  information. Removed the now-unused ukTimeShort().
+- picks-reminder.js: dropped the KICKOFF column too. That email goes to all
+  23 players and had the same wrong label. Table is now FIXTURE / YOUR PICK,
+  which reads better anyway, and the deadline line was already there.
+  Removed the now-unused formatTime().
+
+Verified no KICKOFF/KICK-OFF label remains in any function.
