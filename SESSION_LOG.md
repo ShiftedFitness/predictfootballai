@@ -1882,3 +1882,83 @@ collision (our 10 = EFL Cup, FBref 10 = Championship).
 1. Run sql/014_rebuild_schema.sql in Supabase (creates _v2 only, safe).
 2. `node scripts/fbref/load.js --load`
 3. Review, then uncomment section 6 to swap.
+
+## REV 9 — bridge built, a real bug caught, Data Summary page done
+
+### CORRECTION TO MYSELF (important)
+sql/014 section 6 claimed the swap was a rename and "every query keeps working
+untouched". WRONG. Verified: players_v2.player_uid was NULL for all 37,000
+rows; player_season_stats_v2 keys on player_id not player_uid; Liverpool went
+club_id 28 → 17. A straight rename would have broken all 11 game functions.
+Told the user plainly and rebuilt the plan around compatibility VIEWS instead.
+
+### Blast radius, measured
+- 11 Netlify functions select player_uid
+- player_performance_scores: 6,548 rows keyed on old player_uid
+- 4 legacy rollup tables (197k rows) on old uids/club_ids
+- ts_community_games embeds 192 player_uid strings in game_data
+  → BUT: no Netlify function reads ts_community_games; the frontend reads it
+    directly and plays from the stored payload. Saved games are SELF-CONTAINED
+    and will NOT break. Biggest worry, eliminated by checking.
+- is_u19/is_u21/is_35plus are NULL for every row in the old table anyway
+  (match_start.js:211 says so in a comment) → safe to drop.
+
+### scripts/fbref/bridge.js — old player_uid → new player_id
+CAUGHT A REAL BUG IN MY OWN MATCHER before writing anything. v1 fell back to
+name+nationality without checking birth year and mapped `ederson|bra|1993`
+(Man City's keeper) onto player_id 20488 — a different Brazilian Ederson, born
+1986, who played for Nice and Lyon. Same name, same country, different human.
+A wrong merge is worse than no merge because it is invisible afterwards.
+
+Rewrote with a birth-year veto, then found the veto was TOO strict: it rejected
+Ryan Giggs, Rio Ferdinand, Jermain Defoe. Cause: the old uids carry a
+SYSTEMATIC OFF-BY-ONE — birth year was derived from age, so anyone born in the
+second half of the calendar year is a year out (Giggs |1974| vs 1973, Bowen
+|1997| vs 1996, Ferdinand |1979| vs 1978).
+Final rule: ±1 year of slack, which recovers those and still refuses the
+7-year Ederson gap. Matches made on a non-zero gap are counted separately.
+
+Final: **99.2% mapped** (36,075 of 36,373)
+  exact name + birth year   33,156  91.2%
+  same name, year 1 out      2,161   5.9%   ← the off-by-one
+  name subset + birth year      34   0.1%   ← "Ederson" ↔ "Ederson Moraes"
+  name + nationality           449   1.2%
+  unique name                  275   0.8%
+  VETOED birth-year clash        7   0.0%   ← genuinely different humans
+  ambiguous namesakes          108 / no candidate 183
+  unmatched holding stats: 297 uids, 1,138 rows = 0.66% of the old table
+  (residue is Andrew/Andy Robertson-style name forms and irreparable mojibake)
+
+Verified the three Edersons now resolve to THREE different player_ids, and
+Salah's 3 and Bowen's 3 each collapse to one. 31,598 canonical uids stamped
+onto players_v2 (had to key the upsert on fbref_player_id, not player_id —
+player_id is GENERATED ALWAYS and Postgres validates the INSERT tuple before
+taking the ON CONFLICT branch, so player_name must be included too).
+
+### sql/015_compat_views.sql — WRITTEN, NOT YET RUN
+Creates player_uid_aliases + FOUR compat views under _compat names:
+players_compat, clubs_compat, v_all_player_season_stats_compat,
+v_game_player_club_comp_compat. Emits the OLD column names from the NEW
+tables, so all 11 functions work unchanged. Deliberately does NOT rename
+anything — the rename is 016, only after every game is tested.
+v_game_player_club_comp_compat reads agg_player_club_comp (a real table) rather
+than GROUP BYing the whole database per call.
+
+### Data Summary page — DONE (user asked for this)
+- netlify/functions/data-summary.js — coverage + freshness per competition.
+  Schema-tolerant: coverage from v_all_player_season_stats (same name before
+  and after the swap); freshness probes a LIST of sources and takes the latest
+  per competition, because no single table covers everything today (the
+  current-season table only holds 6 competitions; FA Cup and Championship live
+  entirely in the historical one).
+  Two bugs found and fixed by testing: .eq() before .select() (PostgREST needs
+  select first), and single-source freshness leaving 4 competitions with "—".
+- public/tools/data.html — renders it. Verified in the browser with live data:
+  red "Out of date · Last refreshed 7 months ago · 15 Feb 2026", 10
+  competitions, 173,517 player seasons, 1992–2025.
+
+### NEXT
+1. User runs sql/015_compat_views.sql
+2. I populate player_uid_aliases from data/bridge/uid_to_player_id.json
+3. Smoke-test ALL 11 game functions against the _compat views — the gate
+4. Only then write sql/016 to rename

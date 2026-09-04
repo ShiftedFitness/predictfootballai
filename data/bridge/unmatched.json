@@ -1,0 +1,2982 @@
+[
+ {
+  "player_uid": "valentino livramento|eng eng|2002",
+  "player_name": "Valentino Livramento",
+  "nationality_raw": "ENG",
+  "nationality_norm": "ENG",
+  "birth_year": 2002,
+  "created_at": "2026-02-15T11:57:18.627879+00:00",
+  "normalized_player_name": null,
+  "rows": 0
+ },
+ {
+  "player_uid": "beto|bra|1976",
+  "player_name": "Beto",
+  "nationality_raw": "BRA",
+  "nationality_norm": "BRA",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "beto",
+  "rows": 2
+ },
+ {
+  "player_uid": "danny collins||",
+  "player_name": "Danny Collins",
+  "nationality_raw": null,
+  "nationality_norm": null,
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "danny collins",
+  "rows": 1
+ },
+ {
+  "player_uid": "adam morgan|eng|",
+  "player_name": "Adam Morgan",
+  "nationality_raw": "ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "adam morgan",
+  "rows": 1
+ },
+ {
+  "player_uid": "adam smith|eng|1985",
+  "player_name": "Adam Smith",
+  "nationality_raw": "ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "adam smith",
+  "rows": 2
+ },
+ {
+  "player_uid": "adama traore|mli|1995",
+  "player_name": "Adama Traoré",
+  "nationality_raw": "MLI",
+  "nationality_norm": "MLI",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "adama traore",
+  "rows": 13
+ },
+ {
+  "player_uid": "adriano|bra|1982",
+  "player_name": "Adriano",
+  "nationality_raw": "BRA",
+  "nationality_norm": "BRA",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "adriano",
+  "rows": 24
+ },
+ {
+  "player_uid": "alea¡ kria¾an|si svn|1971",
+  "player_name": "AleÅ¡ KriÅ¾an",
+  "nationality_raw": "si SVN",
+  "nationality_norm": "SVN",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "alea¡ kria¾an",
+  "rows": 1
+ },
+ {
+  "player_uid": "aleksandar dragovia|at aut|1991",
+  "player_name": "Aleksandar DragoviÄ",
+  "nationality_raw": "at AUT",
+  "nationality_norm": "AUT",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "aleksandar dragovia",
+  "rows": 1
+ },
+ {
+  "player_uid": "aleksandar mitrovia|rs srb|1995",
+  "player_name": "Aleksandar MitroviÄ",
+  "nationality_raw": "rs SRB",
+  "nationality_norm": "SRB",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "aleksandar mitrovia",
+  "rows": 6
+ },
+ {
+  "player_uid": "aleksandar rodia|si svn|1980",
+  "player_name": "Aleksandar RodiÄ",
+  "nationality_raw": "si SVN",
+  "nationality_norm": "SVN",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "aleksandar rodia",
+  "rows": 1
+ },
+ {
+  "player_uid": "alen boka¡ia|hr cro|1970",
+  "player_name": "Alen BokÅ¡iÄ",
+  "nationality_raw": "hr CRO",
+  "nationality_norm": "CRO",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "alen boka¡ia",
+  "rows": 3
+ },
+ {
+  "player_uid": "alex brown|eng|",
+  "player_name": "Alex Brown",
+  "nationality_raw": "ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "alex brown",
+  "rows": 1
+ },
+ {
+  "player_uid": "alex|br bra|1982",
+  "player_name": "Alex",
+  "nationality_raw": "br BRA",
+  "nationality_norm": "BRA",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "alex",
+  "rows": 5
+ },
+ {
+  "player_uid": "alex|bra|1982",
+  "player_name": "Alex",
+  "nationality_raw": "BRA",
+  "nationality_norm": "BRA",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "alex",
+  "rows": 16
+ },
+ {
+  "player_uid": "alexander kaaaniklia|se swe|1992",
+  "player_name": "Alexander KaÄanikliÄ",
+  "nationality_raw": "se SWE",
+  "nationality_norm": "SWE",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "alexander kaaaniklia",
+  "rows": 3
+ },
+ {
+  "player_uid": "alexander pattison|eng|1997",
+  "player_name": "Alexander Pattison",
+  "nationality_raw": "ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "alexander pattison",
+  "rows": 12
+ },
+ {
+  "player_uid": "alexander robertson|aus|2003",
+  "player_name": "Alexander Robertson",
+  "nationality_raw": "AUS",
+  "nationality_norm": "AUS",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "alexander robertson",
+  "rows": 7
+ },
+ {
+  "player_uid": "ali gabr|eg egy|1989",
+  "player_name": "Ali Gabr",
+  "nationality_raw": "eg EGY",
+  "nationality_norm": "EGY",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "ali gabr",
+  "rows": 1
+ },
+ {
+  "player_uid": "alistair smith|sco|1994",
+  "player_name": "Alistair Smith",
+  "nationality_raw": "SCO",
+  "nationality_norm": "SCO",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "alistair smith",
+  "rows": 11
+ },
+ {
+  "player_uid": "aljoa¡a asanovia|hr cro|1966",
+  "player_name": "AljoÅ¡a AsanoviÄ",
+  "nationality_raw": "hr CRO",
+  "nationality_norm": "CRO",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "aljoa¡a asanovia",
+  "rows": 2
+ },
+ {
+  "player_uid": "altay baya±nda±r|tr tur|1998",
+  "player_name": "Altay BayÄ±ndÄ±r",
+  "nationality_raw": "tr TUR",
+  "nationality_norm": "TUR",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "altay baya±nda±r",
+  "rows": 2
+ },
+ {
+  "player_uid": "andrej kramaria|hr cro|1991",
+  "player_name": "Andrej KramariÄ",
+  "nationality_raw": "hr CRO",
+  "nationality_norm": "CRO",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "andrej kramaria",
+  "rows": 2
+ },
+ {
+  "player_uid": "andrejs a tolcers|lv lva|1974",
+  "player_name": "Andrejs Å tolcers",
+  "nationality_raw": "lv LVA",
+  "nationality_norm": "LVA",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "andrejs a tolcers",
+  "rows": 2
+ },
+ {
+  "player_uid": "andrew robertson|sco|",
+  "player_name": "Andrew Robertson",
+  "nationality_raw": "SCO",
+  "nationality_norm": "SCO",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "andrew robertson",
+  "rows": 3
+ },
+ {
+  "player_uid": "andrew robertson|sco|1994",
+  "player_name": "Andrew Robertson",
+  "nationality_raw": "SCO",
+  "nationality_norm": "SCO",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "andrew robertson",
+  "rows": 26
+ },
+ {
+  "player_uid": "andrew robertson|sct sco|1994",
+  "player_name": "Andrew Robertson",
+  "nationality_raw": "sct SCO",
+  "nationality_norm": "SCO",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "andrew robertson",
+  "rows": 11
+ },
+ {
+  "player_uid": "andy dawson|eng|",
+  "player_name": "Andy Dawson",
+  "nationality_raw": "ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "andy dawson",
+  "rows": 1
+ },
+ {
+  "player_uid": "anel ahmedhoda¾ia|ba bih|1999",
+  "player_name": "Anel AhmedhodÅ¾iÄ",
+  "nationality_raw": "ba BIH",
+  "nationality_norm": "BIH",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "anel ahmedhoda¾ia",
+  "rows": 1
+ },
+ {
+  "player_uid": "anthony greaves|eng|2000",
+  "player_name": "Anthony Greaves",
+  "nationality_raw": "ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "anthony greaves",
+  "rows": 1
+ },
+ {
+  "player_uid": "aorae petrovia|rs srb|2000",
+  "player_name": "ÄorÄe PetroviÄ",
+  "nationality_raw": "rs SRB",
+  "nationality_norm": "SRB",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "aorae petrovia",
+  "rows": 1
+ },
+ {
+  "player_uid": "artim a akiri|mk mkd|1974",
+  "player_name": "Artim Å akiri",
+  "nationality_raw": "mk MKD",
+  "nationality_norm": "MKD",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "artim a akiri",
+  "rows": 1
+ },
+ {
+  "player_uid": "asmir begovia|ba bih|1987",
+  "player_name": "Asmir BegoviÄ",
+  "nationality_raw": "ba BIH",
+  "nationality_norm": "BIH",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "asmir begovia",
+  "rows": 14
+ },
+ {
+  "player_uid": "aukasz fabiaaski|pl pol|1985",
+  "player_name": "Åukasz FabiaÅski",
+  "nationality_raw": "pl POL",
+  "nationality_norm": "POL",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "aukasz fabiaaski",
+  "rows": 17
+ },
+ {
+  "player_uid": "bae junho|kor|2003",
+  "player_name": "Bae Junho",
+  "nationality_raw": "KOR",
+  "nationality_norm": "KOR",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "bae junho",
+  "rows": 8
+ },
+ {
+  "player_uid": "ben watson|eng eng|1985",
+  "player_name": "Ben Watson",
+  "nationality_raw": "eng ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "ben watson",
+  "rows": 9
+ },
+ {
+  "player_uid": "ben watson|eng|1985",
+  "player_name": "Ben Watson",
+  "nationality_raw": "ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "ben watson",
+  "rows": 24
+ },
+ {
+  "player_uid": "bernard mensah|gha|1994",
+  "player_name": "Bernard Mensah",
+  "nationality_raw": "GHA",
+  "nationality_norm": "GHA",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "bernard mensah",
+  "rows": 5
+ },
+ {
+  "player_uid": "boa¡ko balaban|hr cro|1979",
+  "player_name": "BoÅ¡ko Balaban",
+  "nationality_raw": "hr CRO",
+  "nationality_norm": "CRO",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "boa¡ko balaban",
+  "rows": 1
+ },
+ {
+  "player_uid": "bojan krkia|es esp|1991",
+  "player_name": "Bojan KrkiÄ",
+  "nationality_raw": "es ESP",
+  "nationality_norm": "ESP",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "bojan krkia",
+  "rows": 4
+ },
+ {
+  "player_uid": "boris a½ivkovia|hr cro|1976",
+  "player_name": "Boris Å½ivkoviÄ",
+  "nationality_raw": "hr CRO",
+  "nationality_norm": "CRO",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "boris a½ivkovia",
+  "rows": 1
+ },
+ {
+  "player_uid": "borja garcia|esp|1990",
+  "player_name": "Borja García",
+  "nationality_raw": "ESP",
+  "nationality_norm": "ESP",
+  "birth_year": 1990,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "borja garcia",
+  "rows": 6
+ },
+ {
+  "player_uid": "cedric orengo||",
+  "player_name": "Cedric Orengo",
+  "nationality_raw": null,
+  "nationality_norm": null,
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "cedric orengo",
+  "rows": 1
+ },
+ {
+  "player_uid": "branislav ivanovia|rs srb|1984",
+  "player_name": "Branislav IvanoviÄ",
+  "nationality_raw": "rs SRB",
+  "nationality_norm": "SRB",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "branislav ivanovia",
+  "rows": 10
+ },
+ {
+  "player_uid": "brodie gilmore|nir|2004",
+  "player_name": "Brodie Gilmore",
+  "nationality_raw": "NIR",
+  "nationality_norm": "NIR",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "brodie gilmore",
+  "rows": 7
+ },
+ {
+  "player_uid": "bruno costa||",
+  "player_name": "Bruno Costa",
+  "nationality_raw": null,
+  "nationality_norm": null,
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "bruno costa",
+  "rows": 1
+ },
+ {
+  "player_uid": "bruno fernandes|por|",
+  "player_name": "Bruno Fernandes",
+  "nationality_raw": "POR",
+  "nationality_norm": "POR",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "bruno fernandes",
+  "rows": 1
+ },
+ {
+  "player_uid": "bruno xavier almeida costa|por|1997",
+  "player_name": "Bruno Xavier Almeida Costa",
+  "nationality_raw": "POR",
+  "nationality_norm": "POR",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "bruno xavier almeida costa",
+  "rows": 3
+ },
+ {
+  "player_uid": "carlao|bra|1986",
+  "player_name": "Carlão",
+  "nationality_raw": "BRA",
+  "nationality_norm": "BRA",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "carlao",
+  "rows": 10
+ },
+ {
+  "player_uid": "carlos gomez|col|2002",
+  "player_name": "Carlos Gómez",
+  "nationality_raw": "COL",
+  "nationality_norm": "COL",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "carlos gomez",
+  "rows": 1
+ },
+ {
+  "player_uid": "charles miller|sct sco|1976",
+  "player_name": "Charles Miller",
+  "nationality_raw": "sct SCO",
+  "nationality_norm": "SCO",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "charles miller",
+  "rows": 2
+ },
+ {
+  "player_uid": "chen yang|chn|1977",
+  "player_name": "Chen Yang",
+  "nationality_raw": "CHN",
+  "nationality_norm": "CHN",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "chen yang",
+  "rows": 3
+ },
+ {
+  "player_uid": "chris long|eng|1995",
+  "player_name": "Chris Long",
+  "nationality_raw": "ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "chris long",
+  "rows": 10
+ },
+ {
+  "player_uid": "chris rowney|eng|",
+  "player_name": "Chris Rowney",
+  "nationality_raw": "ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "chris rowney",
+  "rows": 1
+ },
+ {
+  "player_uid": "chris smith||",
+  "player_name": "Chris Smith",
+  "nationality_raw": null,
+  "nationality_norm": null,
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "chris smith",
+  "rows": 1
+ },
+ {
+  "player_uid": "ciro ferrara|ita|1967",
+  "player_name": "Ciro Ferrara",
+  "nationality_raw": "ITA",
+  "nationality_norm": "ITA",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "ciro ferrara",
+  "rows": 22
+ },
+ {
+  "player_uid": "constantinos charalambides|cyp|1981",
+  "player_name": "Constantinos Charalambides",
+  "nationality_raw": "CYP",
+  "nationality_norm": "CYP",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "constantinos charalambides",
+  "rows": 1
+ },
+ {
+  "player_uid": "curtis jones|eng|",
+  "player_name": "Curtis Jones",
+  "nationality_raw": "ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "curtis jones",
+  "rows": 3
+ },
+ {
+  "player_uid": "daniel langley|eng eng|2001",
+  "player_name": "Daniel Langley",
+  "nationality_raw": "eng ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "daniel langley",
+  "rows": 1
+ },
+ {
+  "player_uid": "danilo|br bra|2001",
+  "player_name": "Danilo",
+  "nationality_raw": "br BRA",
+  "nationality_norm": "BRA",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "danilo",
+  "rows": 3
+ },
+ {
+  "player_uid": "danilo|bra|2001",
+  "player_name": "Danilo",
+  "nationality_raw": "BRA",
+  "nationality_norm": "BRA",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "danilo",
+  "rows": 3
+ },
+ {
+  "player_uid": "dante cassanova|jm jam|2004",
+  "player_name": "Dante Cassanova",
+  "nationality_raw": "jm JAM",
+  "nationality_norm": "JAM",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "dante cassanova",
+  "rows": 1
+ },
+ {
+  "player_uid": "darko kovaaevia|rs srb|1974",
+  "player_name": "Darko KovaÄeviÄ",
+  "nationality_raw": "rs SRB",
+  "nationality_norm": "SRB",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "darko kovaaevia",
+  "rows": 1
+ },
+ {
+  "player_uid": "david hunt|eng|1982",
+  "player_name": "David Hunt",
+  "nationality_raw": "ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "david hunt",
+  "rows": 3
+ },
+ {
+  "player_uid": "david lee|eng eng|1968",
+  "player_name": "David Lee",
+  "nationality_raw": "eng ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "david lee",
+  "rows": 2
+ },
+ {
+  "player_uid": "davor a uker|hr cro|1968",
+  "player_name": "Davor Å uker",
+  "nationality_raw": "hr CRO",
+  "nationality_norm": "CRO",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "davor a uker",
+  "rows": 2
+ },
+ {
+  "player_uid": "dean wells|eng|1985",
+  "player_name": "Dean Wells",
+  "nationality_raw": "ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "dean wells",
+  "rows": 6
+ },
+ {
+  "player_uid": "dejan stefanovia|rs srb|1975",
+  "player_name": "Dejan StefanoviÄ",
+  "nationality_raw": "rs SRB",
+  "nationality_norm": "SRB",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "dejan stefanovia",
+  "rows": 9
+ },
+ {
+  "player_uid": "deonysus woodman|eng|2002",
+  "player_name": "Deonysus Woodman",
+  "nationality_raw": "ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "deonysus woodman",
+  "rows": 1
+ },
+ {
+  "player_uid": "detsi kruszyaski|pl pol|1961",
+  "player_name": "Detsi KruszyÅski",
+  "nationality_raw": "pl POL",
+  "nationality_norm": "POL",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "detsi kruszyaski",
+  "rows": 1
+ },
+ {
+  "player_uid": "dipo akinyemi|eng|1997",
+  "player_name": "Dipo Akinyemi",
+  "nationality_raw": "ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "dipo akinyemi",
+  "rows": 2
+ },
+ {
+  "player_uid": "djair parfitt-williams|bm ber|1997",
+  "player_name": "Djair Parfitt-Williams",
+  "nationality_raw": "bm BER",
+  "nationality_norm": "BER",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "djair parfitt-williams",
+  "rows": 1
+ },
+ {
+  "player_uid": "dolev haziz|isr|1995",
+  "player_name": "Dolev Haziz",
+  "nationality_raw": "ISR",
+  "nationality_norm": "ISR",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "dolev haziz",
+  "rows": 1
+ },
+ {
+  "player_uid": "domingos andre ribeiro almeida|por|2000",
+  "player_name": "Domingos André Ribeiro Almeida",
+  "nationality_raw": "POR",
+  "nationality_norm": "POR",
+  "birth_year": 2000,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "domingos andre ribeiro almeida",
+  "rows": 4
+ },
+ {
+  "player_uid": "dominic martins|pt por|2006",
+  "player_name": "Dominic Martins",
+  "nationality_raw": "pt POR",
+  "nationality_norm": "POR",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "dominic martins",
+  "rows": 1
+ },
+ {
+  "player_uid": "dua¡an tadia|rs srb|1989",
+  "player_name": "DuÅ¡an TadiÄ",
+  "nationality_raw": "rs SRB",
+  "nationality_norm": "SRB",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "dua¡an tadia",
+  "rows": 4
+ },
+ {
+  "player_uid": "duje aaleta-car|hr cro|1997",
+  "player_name": "Duje Äaleta-Car",
+  "nationality_raw": "hr CRO",
+  "nationality_norm": "CRO",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "duje aaleta-car",
+  "rows": 1
+ },
+ {
+  "player_uid": "e forde|eng|",
+  "player_name": "E. Forde",
+  "nationality_raw": "ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "e forde",
+  "rows": 2
+ },
+ {
+  "player_uid": "edgar mendez|esp|1990",
+  "player_name": "Edgar Mendez",
+  "nationality_raw": "ESP",
+  "nationality_norm": "ESP",
+  "birth_year": 1990,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "edgar mendez",
+  "rows": 6
+ },
+ {
+  "player_uid": "edin da¾eko|ba bih|1986",
+  "player_name": "Edin DÅ¾eko",
+  "nationality_raw": "ba BIH",
+  "nationality_norm": "BIH",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "edin da¾eko",
+  "rows": 5
+ },
+ {
+  "player_uid": "eldin jakupovia|ch sui|1985",
+  "player_name": "Eldin JakupoviÄ",
+  "nationality_raw": "ch SUI",
+  "nationality_norm": "SUI",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "eldin jakupovia",
+  "rows": 6
+ },
+ {
+  "player_uid": "elia bruzzi||",
+  "player_name": "Elia Bruzzi",
+  "nationality_raw": null,
+  "nationality_norm": null,
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "elia bruzzi",
+  "rows": 1
+ },
+ {
+  "player_uid": "elliott bonds|guy|2000",
+  "player_name": "Elliott Bonds",
+  "nationality_raw": "GUY",
+  "nationality_norm": "GUY",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "elliott bonds",
+  "rows": 7
+ },
+ {
+  "player_uid": "elsad zverotia|me mne|1987",
+  "player_name": "Elsad ZverotiÄ",
+  "nationality_raw": "me MNE",
+  "nationality_norm": "MNE",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "elsad zverotia",
+  "rows": 1
+ },
+ {
+  "player_uid": "emanuele torrasi|ita|1999",
+  "player_name": "Emanuele Torrasi",
+  "nationality_raw": "ITA",
+  "nationality_norm": "ITA",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "emanuele torrasi",
+  "rows": 1
+ },
+ {
+  "player_uid": "emerson|bra|1973",
+  "player_name": "Emerson",
+  "nationality_raw": "BRA",
+  "nationality_norm": "BRA",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "emerson",
+  "rows": 2
+ },
+ {
+  "player_uid": "enrico del prato|ita|1999",
+  "player_name": "Enrico Del Prato",
+  "nationality_raw": "ITA",
+  "nationality_norm": "ITA",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "enrico del prato",
+  "rows": 2
+ },
+ {
+  "player_uid": "eom jisung|kor|2002",
+  "player_name": "Eom Jisung",
+  "nationality_raw": "KOR",
+  "nationality_norm": "KOR",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "eom jisung",
+  "rows": 5
+ },
+ {
+  "player_uid": "eulanio angelo chipela gomes|gnb|1994",
+  "player_name": "Eulânio Ângelo Chipela Gomes",
+  "nationality_raw": "GNB",
+  "nationality_norm": "GNB",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "eulanio angelo chipela gomes",
+  "rows": 1
+ },
+ {
+  "player_uid": "evgeni yablonski|blr|1995",
+  "player_name": "Evgeni Yablonski",
+  "nationality_raw": "BLR",
+  "nationality_norm": "BLR",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "evgeni yablonski",
+  "rows": 1
+ },
+ {
+  "player_uid": "fabinho|bra|",
+  "player_name": "Fabinho",
+  "nationality_raw": "BRA",
+  "nationality_norm": "BRA",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "fabinho",
+  "rows": 2
+ },
+ {
+  "player_uid": "fernandinho|br bra|1985",
+  "player_name": "Fernandinho",
+  "nationality_raw": "br BRA",
+  "nationality_norm": "BRA",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "fernandinho",
+  "rows": 9
+ },
+ {
+  "player_uid": "fernandinho|bra|",
+  "player_name": "Fernandinho",
+  "nationality_raw": "BRA",
+  "nationality_norm": "BRA",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "fernandinho",
+  "rows": 1
+ },
+ {
+  "player_uid": "fernandinho|bra|1985",
+  "player_name": "Fernandinho",
+  "nationality_raw": "BRA",
+  "nationality_norm": "BRA",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "fernandinho",
+  "rows": 31
+ },
+ {
+  "player_uid": "filip auriaia|rs srb|1992",
+  "player_name": "Filip ÄuriÄiÄ",
+  "nationality_raw": "rs SRB",
+  "nationality_norm": "SRB",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "filip auriaia",
+  "rows": 1
+ },
+ {
+  "player_uid": "filip krovinovia|hr cro|1996",
+  "player_name": "Filip KrovinoviÄ",
+  "nationality_raw": "hr CRO",
+  "nationality_norm": "CRO",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "filip krovinovia",
+  "rows": 1
+ },
+ {
+  "player_uid": "finlay wood|wal|",
+  "player_name": "Finlay Wood",
+  "nationality_raw": "WAL",
+  "nationality_norm": "WAL",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "finlay wood",
+  "rows": 1
+ },
+ {
+  "player_uid": "florin gardoe|ro rou|1989",
+  "player_name": "Florin GardoÈ",
+  "nationality_raw": "ro ROU",
+  "nationality_norm": "ROU",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "florin gardoe",
+  "rows": 1
+ },
+ {
+  "player_uid": "florin raducioiu|ro rou|1970",
+  "player_name": "Florin RÄducioiu",
+  "nationality_raw": "ro ROU",
+  "nationality_norm": "ROU",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "florin raducioiu",
+  "rows": 1
+ },
+ {
+  "player_uid": "frederick issaka|wal|2006",
+  "player_name": "Frederick Issaka",
+  "nationality_raw": "WAL",
+  "nationality_norm": "WAL",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "frederick issaka",
+  "rows": 7
+ },
+ {
+  "player_uid": "gabriel tamae|ro rou|1984",
+  "player_name": "Gabriel TamaÈ",
+  "nationality_raw": "ro ROU",
+  "nationality_norm": "ROU",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "gabriel tamae",
+  "rows": 3
+ },
+ {
+  "player_uid": "gaizka bergara|esp|1986",
+  "player_name": "Gaizka Bergara",
+  "nationality_raw": "ESP",
+  "nationality_norm": "ESP",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "gaizka bergara",
+  "rows": 2
+ },
+ {
+  "player_uid": "gareth dean|eng|",
+  "player_name": "Gareth Dean",
+  "nationality_raw": "ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "gareth dean",
+  "rows": 1
+ },
+ {
+  "player_uid": "george cantrill|eng|1999",
+  "player_name": "George Cantrill",
+  "nationality_raw": "ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "george cantrill",
+  "rows": 3
+ },
+ {
+  "player_uid": "giovanni mcgregor|eng eng|1999",
+  "player_name": "Giovanni McGregor",
+  "nationality_raw": "eng ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "giovanni mcgregor",
+  "rows": 1
+ },
+ {
+  "player_uid": "goran bunjevaevia|rs srb|1973",
+  "player_name": "Goran BunjevÄeviÄ",
+  "nationality_raw": "rs SRB",
+  "nationality_norm": "SRB",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "goran bunjevaevia",
+  "rows": 4
+ },
+ {
+  "player_uid": "halil derviaoalu|tr tur|2000",
+  "player_name": "Halil DerviÅoÄlu",
+  "nationality_raw": "tr TUR",
+  "nationality_norm": "TUR",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "halil derviaoalu",
+  "rows": 1
+ },
+ {
+  "player_uid": "haris vuakia|si svn|1993",
+  "player_name": "Haris VuÄkiÄ",
+  "nationality_raw": "si SVN",
+  "nationality_norm": "SVN",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "haris vuakia",
+  "rows": 2
+ },
+ {
+  "player_uid": "harry gray||",
+  "player_name": "Harry Gray",
+  "nationality_raw": null,
+  "nationality_norm": null,
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "harry gray",
+  "rows": 1
+ },
+ {
+  "player_uid": "igor a timac|hr cro|1968",
+  "player_name": "Igor Å timac",
+  "nationality_raw": "hr CRO",
+  "nationality_norm": "CRO",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "igor a timac",
+  "rows": 5
+ },
+ {
+  "player_uid": "igor balia¡|sk svk|1970",
+  "player_name": "Igor BaliÅ¡",
+  "nationality_raw": "sk SVK",
+  "nationality_norm": "SVK",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "igor balia¡",
+  "rows": 1
+ },
+ {
+  "player_uid": "igor bia¡aan|hr cro|1978",
+  "player_name": "Igor BiÅ¡Äan",
+  "nationality_raw": "hr CRO",
+  "nationality_norm": "CRO",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "igor bia¡aan",
+  "rows": 5
+ },
+ {
+  "player_uid": "ionue radu|ro rou|1997",
+  "player_name": "IonuÈ Radu",
+  "nationality_raw": "ro ROU",
+  "nationality_norm": "ROU",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "ionue radu",
+  "rows": 1
+ },
+ {
+  "player_uid": "ivan klasnia|hr cro|1980",
+  "player_name": "Ivan KlasniÄ",
+  "nationality_raw": "hr CRO",
+  "nationality_norm": "CRO",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "ivan klasnia",
+  "rows": 3
+ },
+ {
+  "player_uid": "ivan peria¡ia|hr cro|1989",
+  "player_name": "Ivan PeriÅ¡iÄ",
+  "nationality_raw": "hr CRO",
+  "nationality_norm": "CRO",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "ivan peria¡ia",
+  "rows": 2
+ },
+ {
+  "player_uid": "ivo grbia|hr cro|1996",
+  "player_name": "Ivo GrbiÄ",
+  "nationality_raw": "hr CRO",
+  "nationality_norm": "CRO",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "ivo grbia",
+  "rows": 1
+ },
+ {
+  "player_uid": "jack ainsley||",
+  "player_name": "Jack Ainsley",
+  "nationality_raw": null,
+  "nationality_norm": null,
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "jack ainsley",
+  "rows": 1
+ },
+ {
+  "player_uid": "jack cook|eng|1993",
+  "player_name": "Jack Cook",
+  "nationality_raw": "ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "jack cook",
+  "rows": 4
+ },
+ {
+  "player_uid": "jack powell|eng|",
+  "player_name": "Jack Powell",
+  "nationality_raw": "ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "jack powell",
+  "rows": 1
+ },
+ {
+  "player_uid": "jack smith|eng|",
+  "player_name": "Jack Smith",
+  "nationality_raw": "ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "jack smith",
+  "rows": 2
+ },
+ {
+  "player_uid": "jack stevens||",
+  "player_name": "Jack Stevens",
+  "nationality_raw": null,
+  "nationality_norm": null,
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "jack stevens",
+  "rows": 2
+ },
+ {
+  "player_uid": "jack thomas||",
+  "player_name": "Jack Thomas",
+  "nationality_raw": null,
+  "nationality_norm": null,
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "jack thomas",
+  "rows": 1
+ },
+ {
+  "player_uid": "jack walton||",
+  "player_name": "Jack Walton",
+  "nationality_raw": null,
+  "nationality_norm": null,
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "jack walton",
+  "rows": 1
+ },
+ {
+  "player_uid": "jake turner||",
+  "player_name": "Jake Turner",
+  "nationality_raw": null,
+  "nationality_norm": null,
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "jake turner",
+  "rows": 1
+ },
+ {
+  "player_uid": "james clarke||",
+  "player_name": "James Clarke",
+  "nationality_raw": null,
+  "nationality_norm": null,
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "james clarke",
+  "rows": 2
+ },
+ {
+  "player_uid": "james thomas||",
+  "player_name": "James Thomas",
+  "nationality_raw": null,
+  "nationality_norm": null,
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "james thomas",
+  "rows": 1
+ },
+ {
+  "player_uid": "james wilson||",
+  "player_name": "James Wilson",
+  "nationality_raw": null,
+  "nationality_norm": null,
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "james wilson",
+  "rows": 1
+ },
+ {
+  "player_uid": "jan laa¡ta¯vka|cz cze|1982",
+  "player_name": "Jan LaÅ¡tÅ¯vka",
+  "nationality_raw": "cz CZE",
+  "nationality_norm": "CZE",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "jan laa¡ta¯vka",
+  "rows": 1
+ },
+ {
+  "player_uid": "jarosaaw fojut|pl pol|1988",
+  "player_name": "JarosÅaw Fojut",
+  "nationality_raw": "pl POL",
+  "nationality_norm": "POL",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "jarosaaw fojut",
+  "rows": 1
+ },
+ {
+  "player_uid": "jason dai svanorsson|isl|1999",
+  "player_name": "Ja­son Daði Svanþórs­son",
+  "nationality_raw": "ISL",
+  "nationality_norm": "ISL",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "jason dai svanorsson",
+  "rows": 4
+ },
+ {
+  "player_uid": "javier rueda garcia|esp|2002",
+  "player_name": "Javier Rueda Garcia",
+  "nationality_raw": "ESP",
+  "nationality_norm": "ESP",
+  "birth_year": 2002,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "javier rueda garcia",
+  "rows": 2
+ },
+ {
+  "player_uid": "jeff king||",
+  "player_name": "Jeff King",
+  "nationality_raw": null,
+  "nationality_norm": null,
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "jeff king",
+  "rows": 1
+ },
+ {
+  "player_uid": "joa¡ko gvardiol|hr cro|2002",
+  "player_name": "JoÅ¡ko Gvardiol",
+  "nationality_raw": "hr CRO",
+  "nationality_norm": "CRO",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "joa¡ko gvardiol",
+  "rows": 2
+ },
+ {
+  "player_uid": "joe kizzi|eng|1993",
+  "player_name": "Joe Kizzi",
+  "nationality_raw": "ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "joe kizzi",
+  "rows": 8
+ },
+ {
+  "player_uid": "joe white|eng eng|2003",
+  "player_name": "Joe White",
+  "nationality_raw": "eng ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "joe white",
+  "rows": 1
+ },
+ {
+  "player_uid": "joe white|eng|2002",
+  "player_name": "Joe White",
+  "nationality_raw": "ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "joe white",
+  "rows": 3
+ },
+ {
+  "player_uid": "jon gorenc stankovia|si svn|1996",
+  "player_name": "Jon Gorenc StankoviÄ",
+  "nationality_raw": "si SVN",
+  "nationality_norm": "SVN",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "jon gorenc stankovia",
+  "rows": 1
+ },
+ {
+  "player_uid": "jonathan hunt|eng|",
+  "player_name": "Jonathan Hunt",
+  "nationality_raw": "ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "jonathan hunt",
+  "rows": 1
+ },
+ {
+  "player_uid": "jordan smith|eng|",
+  "player_name": "Jordan Smith",
+  "nationality_raw": "ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "jordan smith",
+  "rows": 1
+ },
+ {
+  "player_uid": "jordan thomas|eng eng|2001",
+  "player_name": "Jordan Thomas",
+  "nationality_raw": "eng ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "jordan thomas",
+  "rows": 1
+ },
+ {
+  "player_uid": "jordan thomas|eng|2001",
+  "player_name": "Jordan Thomas",
+  "nationality_raw": "ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "jordan thomas",
+  "rows": 5
+ },
+ {
+  "player_uid": "jorge eduardo sanchez|mex|1997",
+  "player_name": "Jorge Eduardo Sánchez",
+  "nationality_raw": "MEX",
+  "nationality_norm": "MEX",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "jorge eduardo sanchez",
+  "rows": 2
+ },
+ {
+  "player_uid": "joseph hodge|ie irl|2003",
+  "player_name": "Joseph Hodge",
+  "nationality_raw": "ie IRL",
+  "nationality_norm": "IRL",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "joseph hodge",
+  "rows": 1
+ },
+ {
+  "player_uid": "joseph hodge|irl|2002",
+  "player_name": "Joseph Hodge",
+  "nationality_raw": "IRL",
+  "nationality_norm": "IRL",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "joseph hodge",
+  "rows": 5
+ },
+ {
+  "player_uid": "joseph taylor|wal|2002",
+  "player_name": "Joseph Taylor",
+  "nationality_raw": "WAL",
+  "nationality_norm": "WAL",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "joseph taylor",
+  "rows": 9
+ },
+ {
+  "player_uid": "josh kay||1996",
+  "player_name": "Josh Kay",
+  "nationality_raw": null,
+  "nationality_norm": null,
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "josh kay",
+  "rows": 1
+ },
+ {
+  "player_uid": "joshua austerfield|eng|2001",
+  "player_name": "Joshua Austerfield",
+  "nationality_raw": "ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "joshua austerfield",
+  "rows": 10
+ },
+ {
+  "player_uid": "joshua grant|eng|1998",
+  "player_name": "Joshua Grant",
+  "nationality_raw": "ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "joshua grant",
+  "rows": 10
+ },
+ {
+  "player_uid": "josip drmia|ch sui|1993",
+  "player_name": "Josip DrmiÄ",
+  "nationality_raw": "ch SUI",
+  "nationality_norm": "SUI",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "josip drmia",
+  "rows": 1
+ },
+ {
+  "player_uid": "jovo bosanaia|rs srb|1971",
+  "player_name": "Jovo BosanÄiÄ",
+  "nationality_raw": "rs SRB",
+  "nationality_norm": "SRB",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "jovo bosanaia",
+  "rows": 1
+ },
+ {
+  "player_uid": "juan herzog|esp|2003",
+  "player_name": "Juan Herzog",
+  "nationality_raw": "ESP",
+  "nationality_norm": "ESP",
+  "birth_year": 2003,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "juan herzog",
+  "rows": 2
+ },
+ {
+  "player_uid": "kaine sinclair|eng|",
+  "player_name": "Kaine Sinclair",
+  "nationality_raw": "ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "kaine sinclair",
+  "rows": 1
+ },
+ {
+  "player_uid": "kaspars gorka¡s|lv lva|1982",
+  "player_name": "Kaspars GorkÅ¡s",
+  "nationality_raw": "lv LVA",
+  "nationality_norm": "LVA",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "kaspars gorka¡s",
+  "rows": 1
+ },
+ {
+  "player_uid": "kevin keben biakolo|cmr|2004",
+  "player_name": "Kévin Keben Biakolo",
+  "nationality_raw": "CMR",
+  "nationality_norm": "CMR",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "kevin keben biakolo",
+  "rows": 5
+ },
+ {
+  "player_uid": "kieran murphy||",
+  "player_name": "Kieran Murphy",
+  "nationality_raw": null,
+  "nationality_norm": null,
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "kieran murphy",
+  "rows": 1
+ },
+ {
+  "player_uid": "kosta nedeljkovia|rs srb|2006",
+  "player_name": "Kosta NedeljkoviÄ",
+  "nationality_raw": "rs SRB",
+  "nationality_norm": "SRB",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "kosta nedeljkovia",
+  "rows": 1
+ },
+ {
+  "player_uid": "lazar markovia|rs srb|1994",
+  "player_name": "Lazar MarkoviÄ",
+  "nationality_raw": "rs SRB",
+  "nationality_norm": "SRB",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "lazar markovia",
+  "rows": 3
+ },
+ {
+  "player_uid": "lee martin|eng eng|1968",
+  "player_name": "Lee Martin",
+  "nationality_raw": "eng ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "lee martin",
+  "rows": 1
+ },
+ {
+  "player_uid": "lee martin|eng|1968",
+  "player_name": "Lee Martin",
+  "nationality_raw": "ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "lee martin",
+  "rows": 1
+ },
+ {
+  "player_uid": "leonard duru|eng|2005",
+  "player_name": "Leonard Duru",
+  "nationality_raw": "ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "leonard duru",
+  "rows": 2
+ },
+ {
+  "player_uid": "lewis wilson|eng|1993",
+  "player_name": "Lewis Wilson",
+  "nationality_raw": "ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "lewis wilson",
+  "rows": 1
+ },
+ {
+  "player_uid": "liam roberts||",
+  "player_name": "Liam Roberts",
+  "nationality_raw": null,
+  "nationality_norm": null,
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "liam roberts",
+  "rows": 2
+ },
+ {
+  "player_uid": "liam tomsett|eng|",
+  "player_name": "Liam Tomsett",
+  "nationality_raw": "ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "liam tomsett",
+  "rows": 1
+ },
+ {
+  "player_uid": "louis jackson|sct sco|2006",
+  "player_name": "Louis Jackson",
+  "nationality_raw": "sct SCO",
+  "nationality_norm": "SCO",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "louis jackson",
+  "rows": 1
+ },
+ {
+  "player_uid": "luca ceccarelli|ita|1983",
+  "player_name": "Luca Ceccarelli",
+  "nationality_raw": "ITA",
+  "nationality_norm": "ITA",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "luca ceccarelli",
+  "rows": 3
+ },
+ {
+  "player_uid": "lucas sinclair|eng|2000",
+  "player_name": "Lucas Sinclair",
+  "nationality_raw": "ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "lucas sinclair",
+  "rows": 1
+ },
+ {
+  "player_uid": "ludak mikloa¡ko|cz cze|1962",
+  "player_name": "LudÄk MikloÅ¡ko",
+  "nationality_raw": "cz CZE",
+  "nationality_norm": "CZE",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "ludak mikloa¡ko",
+  "rows": 5
+ },
+ {
+  "player_uid": "luka milivojevia|rs srb|1991",
+  "player_name": "Luka MilivojeviÄ",
+  "nationality_raw": "rs SRB",
+  "nationality_norm": "SRB",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "luka milivojevia",
+  "rows": 7
+ },
+ {
+  "player_uid": "luka modria|hr cro|1986",
+  "player_name": "Luka ModriÄ",
+  "nationality_raw": "hr CRO",
+  "nationality_norm": "CRO",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "luka modria",
+  "rows": 4
+ },
+ {
+  "player_uid": "luke shaw|eng eng|1995",
+  "player_name": "Luke Shaw",
+  "nationality_raw": "eng ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "luke shaw",
+  "rows": 14
+ },
+ {
+  "player_uid": "luke shaw|eng|",
+  "player_name": "Luke Shaw",
+  "nationality_raw": "ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "luke shaw",
+  "rows": 1
+ },
+ {
+  "player_uid": "luke shaw|eng|1995",
+  "player_name": "Luke Shaw",
+  "nationality_raw": "ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "luke shaw",
+  "rows": 21
+ },
+ {
+  "player_uid": "luke thomas|eng|",
+  "player_name": "Luke Thomas",
+  "nationality_raw": "ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "luke thomas",
+  "rows": 1
+ },
+ {
+  "player_uid": "marco vittiglio||",
+  "player_name": "Marco Vittiglio",
+  "nationality_raw": null,
+  "nationality_norm": null,
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "marco vittiglio",
+  "rows": 1
+ },
+ {
+  "player_uid": "marek aech|sk svk|1983",
+  "player_name": "Marek Äech",
+  "nationality_raw": "sk SVK",
+  "nationality_norm": "SVK",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "marek aech",
+  "rows": 2
+ },
+ {
+  "player_uid": "mario stania|hr cro|1972",
+  "player_name": "Mario StaniÄ",
+  "nationality_raw": "hr CRO",
+  "nationality_norm": "CRO",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "mario stania",
+  "rows": 4
+ },
+ {
+  "player_uid": "mario vranaia|ba bih|1989",
+  "player_name": "Mario VranÄiÄ",
+  "nationality_raw": "ba BIH",
+  "nationality_norm": "BIH",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "mario vranaia",
+  "rows": 1
+ },
+ {
+  "player_uid": "mark hudson|eng eng|1981",
+  "player_name": "Mark Hudson",
+  "nationality_raw": "eng ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "mark hudson",
+  "rows": 2
+ },
+ {
+  "player_uid": "marko arnautovia|at aut|1989",
+  "player_name": "Marko ArnautoviÄ",
+  "nationality_raw": "at AUT",
+  "nationality_norm": "AUT",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "marko arnautovia",
+  "rows": 6
+ },
+ {
+  "player_uid": "marko grujia|rs srb|1996",
+  "player_name": "Marko GrujiÄ",
+  "nationality_raw": "rs SRB",
+  "nationality_norm": "SRB",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "marko grujia",
+  "rows": 2
+ },
+ {
+  "player_uid": "martin a krtel|sk svk|1985",
+  "player_name": "Martin Å krtel",
+  "nationality_raw": "sk SVK",
+  "nationality_norm": "SVK",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "martin a krtel",
+  "rows": 9
+ },
+ {
+  "player_uid": "mataj vydra|cz cze|1992",
+  "player_name": "MatÄj Vydra",
+  "nationality_raw": "cz CZE",
+  "nationality_norm": "CZE",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "mataj vydra",
+  "rows": 7
+ },
+ {
+  "player_uid": "mateja kea¾man|rs srb|1979",
+  "player_name": "Mateja KeÅ¾man",
+  "nationality_raw": "rs SRB",
+  "nationality_norm": "SRB",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "mateja kea¾man",
+  "rows": 1
+ },
+ {
+  "player_uid": "mateo kovaaia|hr cro|1994",
+  "player_name": "Mateo KovaÄiÄ",
+  "nationality_raw": "hr CRO",
+  "nationality_norm": "CRO",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "mateo kovaaia",
+  "rows": 7
+ },
+ {
+  "player_uid": "mathew stevens|eng|1998",
+  "player_name": "Mathew Stevens",
+  "nationality_raw": "ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "mathew stevens",
+  "rows": 12
+ },
+ {
+  "player_uid": "matija nastasia|rs srb|1993",
+  "player_name": "Matija NastasiÄ",
+  "nationality_raw": "rs SRB",
+  "nationality_norm": "SRB",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "matija nastasia",
+  "rows": 2
+ },
+ {
+  "player_uid": "mauricio|bra|1988",
+  "player_name": "Maurício",
+  "nationality_raw": "BRA",
+  "nationality_norm": "BRA",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "mauricio",
+  "rows": 5
+ },
+ {
+  "player_uid": "maximiliano araujo|uru|2000",
+  "player_name": "Maximiliano Araújo",
+  "nationality_raw": "URU",
+  "nationality_norm": "URU",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "maximiliano araujo",
+  "rows": 2
+ },
+ {
+  "player_uid": "michael cheek|eng|1988",
+  "player_name": "Michael Cheek",
+  "nationality_raw": "ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "michael cheek",
+  "rows": 11
+ },
+ {
+  "player_uid": "michal krmencik|cze|1993",
+  "player_name": "Michal Krmenčík",
+  "nationality_raw": "CZE",
+  "nationality_norm": "CZE",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "michal krmencik",
+  "rows": 2
+ },
+ {
+  "player_uid": "milan baroa¡|cz cze|1982",
+  "player_name": "Milan BaroÅ¡",
+  "nationality_raw": "cz CZE",
+  "nationality_norm": "CZE",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "milan baroa¡",
+  "rows": 7
+ },
+ {
+  "player_uid": "milan jovanovia|rs srb|1981",
+  "player_name": "Milan JovanoviÄ",
+  "nationality_raw": "rs SRB",
+  "nationality_norm": "SRB",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "milan jovanovia",
+  "rows": 1
+ },
+ {
+  "player_uid": "milenko aaimovia|si svn|1977",
+  "player_name": "Milenko AÄimoviÄ",
+  "nationality_raw": "si SVN",
+  "nationality_norm": "SVN",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "milenko aaimovia",
+  "rows": 1
+ },
+ {
+  "player_uid": "miloa¡ veljkovia|rs srb|1996",
+  "player_name": "MiloÅ¡ VeljkoviÄ",
+  "nationality_raw": "rs SRB",
+  "nationality_norm": "SRB",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "miloa¡ veljkovia",
+  "rows": 1
+ },
+ {
+  "player_uid": "mislav ora¡ia|hr cro|1993",
+  "player_name": "Mislav OrÅ¡iÄ",
+  "nationality_raw": "hr CRO",
+  "nationality_norm": "CRO",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "mislav ora¡ia",
+  "rows": 1
+ },
+ {
+  "player_uid": "mladen petria|hr cro|1981",
+  "player_name": "Mladen PetriÄ",
+  "nationality_raw": "hr CRO",
+  "nationality_norm": "CRO",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "mladen petria",
+  "rows": 2
+ },
+ {
+  "player_uid": "mohamed abdelmoneim|egy|1999",
+  "player_name": "Mohamed Abdelmoneim",
+  "nationality_raw": "EGY",
+  "nationality_norm": "EGY",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "mohamed abdelmoneim",
+  "rows": 1
+ },
+ {
+  "player_uid": "mohammed lawal|irl|2003",
+  "player_name": "Mohammed Lawal",
+  "nationality_raw": "IRL",
+  "nationality_norm": "IRL",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "mohammed lawal",
+  "rows": 5
+ },
+ {
+  "player_uid": "mora mateos||",
+  "player_name": "Mora Mateos",
+  "nationality_raw": null,
+  "nationality_norm": null,
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "mora mateos",
+  "rows": 1
+ },
+ {
+  "player_uid": "muamer tankovia|se swe|1995",
+  "player_name": "Muamer TankoviÄ",
+  "nationality_raw": "se SWE",
+  "nationality_norm": "SWE",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "muamer tankovia",
+  "rows": 1
+ },
+ {
+  "player_uid": "muhamed bea¡ia|ba bih|1993",
+  "player_name": "Muhamed BeÅ¡iÄ",
+  "nationality_raw": "ba BIH",
+  "nationality_norm": "BIH",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "muhamed bea¡ia",
+  "rows": 4
+ },
+ {
+  "player_uid": "muhamed konjia|ba bih|1970",
+  "player_name": "Muhamed KonjiÄ",
+  "nationality_raw": "ba BIH",
+  "nationality_norm": "BIH",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "muhamed konjia",
+  "rows": 3
+ },
+ {
+  "player_uid": "nacho|esp|1980",
+  "player_name": "Nacho",
+  "nationality_raw": "ESP",
+  "nationality_norm": "ESP",
+  "birth_year": 1980,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "nacho",
+  "rows": 10
+ },
+ {
+  "player_uid": "nando|esp|1967",
+  "player_name": "Nando",
+  "nationality_raw": "ESP",
+  "nationality_norm": "ESP",
+  "birth_year": 1967,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "nando",
+  "rows": 18
+ },
+ {
+  "player_uid": "nathan wood||",
+  "player_name": "Nathan Wood",
+  "nationality_raw": null,
+  "nationality_norm": null,
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "nathan wood",
+  "rows": 1
+ },
+ {
+  "player_uid": "ned zelia|au aus|1971",
+  "player_name": "Ned ZeliÄ",
+  "nationality_raw": "au AUS",
+  "nationality_norm": "AUS",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "ned zelia",
+  "rows": 1
+ },
+ {
+  "player_uid": "nelson sissoko|fra|1997",
+  "player_name": "Nelson Sissoko",
+  "nationality_raw": "FRA",
+  "nationality_norm": "FRA",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "nelson sissoko",
+  "rows": 2
+ },
+ {
+  "player_uid": "nemanja matia|rs srb|1989",
+  "player_name": "Nemanja MatiÄ",
+  "nationality_raw": "rs SRB",
+  "nationality_norm": "SRB",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "nemanja matia",
+  "rows": 10
+ },
+ {
+  "player_uid": "nemanja vidia|rs srb|1982",
+  "player_name": "Nemanja VidiÄ",
+  "nationality_raw": "rs SRB",
+  "nationality_norm": "SRB",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "nemanja vidia",
+  "rows": 9
+ },
+ {
+  "player_uid": "nenad milijaa¡|rs srb|1983",
+  "player_name": "Nenad MilijaÅ¡",
+  "nationality_raw": "rs SRB",
+  "nationality_norm": "SRB",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "nenad milijaa¡",
+  "rows": 3
+ },
+ {
+  "player_uid": "nene||1975",
+  "player_name": "Nené",
+  "nationality_raw": null,
+  "nationality_norm": null,
+  "birth_year": 1975,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "nene",
+  "rows": 2
+ },
+ {
+  "player_uid": "nicholas akoto|usa|1998",
+  "player_name": "Nicholas Akoto",
+  "nationality_raw": "USA",
+  "nationality_norm": "USA",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "nicholas akoto",
+  "rows": 4
+ },
+ {
+  "player_uid": "nico oareilly|eng eng|2005",
+  "player_name": "Nico OâReilly",
+  "nationality_raw": "eng ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "nico oareilly",
+  "rows": 1
+ },
+ {
+  "player_uid": "nikica jelavia|hr cro|1986",
+  "player_name": "Nikica JelaviÄ",
+  "nationality_raw": "hr CRO",
+  "nationality_norm": "CRO",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "nikica jelavia",
+  "rows": 6
+ },
+ {
+  "player_uid": "niko kranjaar|hr cro|1985",
+  "player_name": "Niko KranjÄar",
+  "nationality_raw": "hr CRO",
+  "nationality_norm": "CRO",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "niko kranjaar",
+  "rows": 8
+ },
+ {
+  "player_uid": "nikola a½igia|rs srb|1981",
+  "player_name": "Nikola Å½igiÄ",
+  "nationality_raw": "rs SRB",
+  "nationality_norm": "SRB",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "nikola a½igia",
+  "rows": 1
+ },
+ {
+  "player_uid": "nikola kalinia|hr cro|1988",
+  "player_name": "Nikola KaliniÄ",
+  "nationality_raw": "hr CRO",
+  "nationality_norm": "CRO",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "nikola kalinia",
+  "rows": 2
+ },
+ {
+  "player_uid": "nikola milenkovia|rs srb|1998",
+  "player_name": "Nikola MilenkoviÄ",
+  "nationality_raw": "rs SRB",
+  "nationality_norm": "SRB",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "nikola milenkovia",
+  "rows": 1
+ },
+ {
+  "player_uid": "nikola vlaa¡ia|hr cro|1998",
+  "player_name": "Nikola VlaÅ¡iÄ",
+  "nationality_raw": "hr CRO",
+  "nationality_norm": "CRO",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "nikola vlaa¡ia",
+  "rows": 2
+ },
+ {
+  "player_uid": "nuri aahin|tr tur|1989",
+  "player_name": "Nuri Åahin",
+  "nationality_raw": "tr TUR",
+  "nationality_norm": "TUR",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "nuri aahin",
+  "rows": 1
+ },
+ {
+  "player_uid": "okay yokualu|tr tur|1994",
+  "player_name": "Okay YokuÅlu",
+  "nationality_raw": "tr TUR",
+  "nationality_norm": "TUR",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "okay yokualu",
+  "rows": 1
+ },
+ {
+  "player_uid": "oladapo afolayan|eng|1998",
+  "player_name": "Oladapo Afolayan",
+  "nationality_raw": "ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "oladapo afolayan",
+  "rows": 8
+ },
+ {
+  "player_uid": "oliver bostock|wal|2007",
+  "player_name": "Oliver Bostock",
+  "nationality_raw": "WAL",
+  "nationality_norm": "WAL",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "oliver bostock",
+  "rows": 1
+ },
+ {
+  "player_uid": "ondaej aela¯stka|cz cze|1989",
+  "player_name": "OndÅej ÄelÅ¯stka",
+  "nationality_raw": "cz CZE",
+  "nationality_norm": "CZE",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "ondaej aela¯stka",
+  "rows": 1
+ },
+ {
+  "player_uid": "paul ennis|eng|",
+  "player_name": "Paul Ennis",
+  "nationality_raw": "ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "paul ennis",
+  "rows": 1
+ },
+ {
+  "player_uid": "paul robinson|eng|1978",
+  "player_name": "Paul Robinson",
+  "nationality_raw": "ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "paul robinson",
+  "rows": 22
+ },
+ {
+  "player_uid": "paul williams|eng eng|1970",
+  "player_name": "Paul Williams",
+  "nationality_raw": "eng ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "paul williams",
+  "rows": 2
+ },
+ {
+  "player_uid": "pedro|esp|",
+  "player_name": "Pedro",
+  "nationality_raw": "ESP",
+  "nationality_norm": "ESP",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "pedro",
+  "rows": 1
+ },
+ {
+  "player_uid": "petr aech|cz cze|1982",
+  "player_name": "Petr Äech",
+  "nationality_raw": "cz CZE",
+  "nationality_norm": "CZE",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "petr aech",
+  "rows": 15
+ },
+ {
+  "player_uid": "piotr awierczewski|pl pol|1972",
+  "player_name": "Piotr Åwierczewski",
+  "nationality_raw": "pl POL",
+  "nationality_norm": "POL",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "piotr awierczewski",
+  "rows": 1
+ },
+ {
+  "player_uid": "przemysaaw paacheta|pl pol|1998",
+  "player_name": "PrzemysÅaw PÅacheta",
+  "nationality_raw": "pl POL",
+  "nationality_norm": "POL",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "przemysaaw paacheta",
+  "rows": 1
+ },
+ {
+  "player_uid": "radosav petrovia|rs srb|1989",
+  "player_name": "Radosav PetroviÄ",
+  "nationality_raw": "rs SRB",
+  "nationality_norm": "SRB",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "radosav petrovia",
+  "rows": 1
+ },
+ {
+  "player_uid": "radu draguein|ro rou|2002",
+  "player_name": "Radu DrÄguÈin",
+  "nationality_raw": "ro ROU",
+  "nationality_norm": "ROU",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "radu draguein",
+  "rows": 2
+ },
+ {
+  "player_uid": "razvan rae|ro rou|1981",
+  "player_name": "RÄzvan RaÈ",
+  "nationality_raw": "ro ROU",
+  "nationality_norm": "ROU",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "razvan rae",
+  "rows": 1
+ },
+ {
+  "player_uid": "reece hall|eng|",
+  "player_name": "Reece Hall",
+  "nationality_raw": "ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "reece hall",
+  "rows": 1
+ },
+ {
+  "player_uid": "richairo a½ivkovia|cw cuw|1997",
+  "player_name": "Richairo Å½ivkoviÄ",
+  "nationality_raw": "cw CUW",
+  "nationality_norm": "CUW",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "richairo a½ivkovia",
+  "rows": 1
+ },
+ {
+  "player_uid": "richard davies|eng|",
+  "player_name": "Richard Davies",
+  "nationality_raw": "ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "richard davies",
+  "rows": 1
+ },
+ {
+  "player_uid": "richard smith|eng|",
+  "player_name": "Richard Smith",
+  "nationality_raw": "ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "richard smith",
+  "rows": 1
+ },
+ {
+  "player_uid": "robert apter|sco|2003",
+  "player_name": "Robert Apter",
+  "nationality_raw": "SCO",
+  "nationality_norm": "SCO",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "robert apter",
+  "rows": 5
+ },
+ {
+  "player_uid": "rodri|esp|",
+  "player_name": "Rodri",
+  "nationality_raw": "ESP",
+  "nationality_norm": "ESP",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "rodri",
+  "rows": 3
+ },
+ {
+  "player_uid": "rodrigo|bra|1980",
+  "player_name": "Rodrigo",
+  "nationality_raw": "BRA",
+  "nationality_norm": "BRA",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "rodrigo",
+  "rows": 5
+ },
+ {
+  "player_uid": "ryan jones||",
+  "player_name": "Ryan Jones",
+  "nationality_raw": null,
+  "nationality_norm": null,
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "ryan jones",
+  "rows": 1
+ },
+ {
+  "player_uid": "saa¡a auraia||1972",
+  "player_name": "SaÅ¡a ÄurÄiÄ",
+  "nationality_raw": null,
+  "nationality_norm": null,
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "saa¡a auraia",
+  "rows": 4
+ },
+ {
+  "player_uid": "saa¡a ilia|scg|1972",
+  "player_name": "SaÅ¡a IliÄ",
+  "nationality_raw": "SCG",
+  "nationality_norm": "SCG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "saa¡a ilia",
+  "rows": 3
+ },
+ {
+  "player_uid": "saa¡a lukia|rs srb|1997",
+  "player_name": "SaÅ¡a LukiÄ",
+  "nationality_raw": "rs SRB",
+  "nationality_norm": "SRB",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "saa¡a lukia",
+  "rows": 3
+ },
+ {
+  "player_uid": "sam collins|eng|",
+  "player_name": "Sam Collins",
+  "nationality_raw": "ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "sam collins",
+  "rows": 1
+ },
+ {
+  "player_uid": "sam smith||",
+  "player_name": "Sam Smith",
+  "nationality_raw": null,
+  "nationality_norm": null,
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "sam smith",
+  "rows": 1
+ },
+ {
+  "player_uid": "samuel dahl|swe|2000",
+  "player_name": "Samuel Dahl",
+  "nationality_raw": "SWE",
+  "nationality_norm": "SWE",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "samuel dahl",
+  "rows": 3
+ },
+ {
+  "player_uid": "sandro ramirez||",
+  "player_name": "Sandro Ramírez",
+  "nationality_raw": null,
+  "nationality_norm": null,
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "sandro ramirez",
+  "rows": 1
+ },
+ {
+  "player_uid": "savio|bra|",
+  "player_name": "Sávio",
+  "nationality_raw": "BRA",
+  "nationality_norm": "BRA",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "savio",
+  "rows": 1
+ },
+ {
+  "player_uid": "savo miloa¡evia|rs srb|1974",
+  "player_name": "Savo MiloÅ¡eviÄ",
+  "nationality_raw": "rs SRB",
+  "nationality_norm": "SRB",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "savo miloa¡evia",
+  "rows": 3
+ },
+ {
+  "player_uid": "scott brown|eng|1985",
+  "player_name": "Scott Brown",
+  "nationality_raw": "ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "scott brown",
+  "rows": 16
+ },
+ {
+  "player_uid": "sead kolaa¡inac|ba bih|1993",
+  "player_name": "Sead KolaÅ¡inac",
+  "nationality_raw": "ba BIH",
+  "nationality_norm": "BIH",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "sead kolaa¡inac",
+  "rows": 5
+ },
+ {
+  "player_uid": "seth owens|eng|",
+  "player_name": "Seth Owens",
+  "nationality_raw": "ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "seth owens",
+  "rows": 1
+ },
+ {
+  "player_uid": "silvio maria|hr cro|1975",
+  "player_name": "Silvio MariÄ",
+  "nationality_raw": "hr CRO",
+  "nationality_norm": "CRO",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "silvio maria",
+  "rows": 2
+ },
+ {
+  "player_uid": "simon vukaevia|me mne|1986",
+  "player_name": "Simon VukÄeviÄ",
+  "nationality_raw": "me MNE",
+  "nationality_norm": "MNE",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "simon vukaevia",
+  "rows": 1
+ },
+ {
+  "player_uid": "slaven bilia|hr cro|1969",
+  "player_name": "Slaven BiliÄ",
+  "nationality_raw": "hr CRO",
+  "nationality_norm": "CRO",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "slaven bilia",
+  "rows": 4
+ },
+ {
+  "player_uid": "slavia¡a jokanovia|rs srb|1969",
+  "player_name": "SlaviÅ¡a JokanoviÄ",
+  "nationality_raw": "rs SRB",
+  "nationality_norm": "SRB",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "slavia¡a jokanovia",
+  "rows": 2
+ },
+ {
+  "player_uid": "stefan savia|me mne|1991",
+  "player_name": "Stefan SaviÄ",
+  "nationality_raw": "me MNE",
+  "nationality_norm": "MNE",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "stefan savia",
+  "rows": 1
+ },
+ {
+  "player_uid": "stefano fiore||",
+  "player_name": "Stefano Fiore",
+  "nationality_raw": null,
+  "nationality_norm": null,
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "stefano fiore",
+  "rows": 1
+ },
+ {
+  "player_uid": "stevan jovetia|me mne|1990",
+  "player_name": "Stevan JovetiÄ",
+  "nationality_raw": "me MNE",
+  "nationality_norm": "MNE",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "stevan jovetia",
+  "rows": 2
+ },
+ {
+  "player_uid": "steve foster|eng|",
+  "player_name": "Steve Foster",
+  "nationality_raw": "ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "steve foster",
+  "rows": 1
+ },
+ {
+  "player_uid": "steve jones|eng eng|1970",
+  "player_name": "Steve Jones",
+  "nationality_raw": "eng ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "steve jones",
+  "rows": 4
+ },
+ {
+  "player_uid": "steve livingstone|eng eng|1971",
+  "player_name": "Steve Livingstone",
+  "nationality_raw": "eng ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "steve livingstone",
+  "rows": 1
+ },
+ {
+  "player_uid": "steven caulker||",
+  "player_name": "Steven Caulker",
+  "nationality_raw": null,
+  "nationality_norm": null,
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "steven caulker",
+  "rows": 1
+ },
+ {
+  "player_uid": "teddy luaia|se swe|1973",
+  "player_name": "Teddy LuÄiÄ",
+  "nationality_raw": "se SWE",
+  "nationality_norm": "SWE",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "teddy luaia",
+  "rows": 1
+ },
+ {
+  "player_uid": "terrell egbri|eng|2001",
+  "player_name": "Terrell Egbri",
+  "nationality_raw": "ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "terrell egbri",
+  "rows": 3
+ },
+ {
+  "player_uid": "thiago|br bra|2001",
+  "player_name": "Thiago",
+  "nationality_raw": "br BRA",
+  "nationality_norm": "BRA",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "thiago",
+  "rows": 2
+ },
+ {
+  "player_uid": "thiago|bra|2001",
+  "player_name": "Thiago",
+  "nationality_raw": "BRA",
+  "nationality_norm": "BRA",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "thiago",
+  "rows": 1
+ },
+ {
+  "player_uid": "thomas cannon|ie irl|2003",
+  "player_name": "Thomas Cannon",
+  "nationality_raw": "ie IRL",
+  "nationality_norm": "IRL",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "thomas cannon",
+  "rows": 2
+ },
+ {
+  "player_uid": "thomas cannon|irl|2002",
+  "player_name": "Thomas Cannon",
+  "nationality_raw": "IRL",
+  "nationality_norm": "IRL",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "thomas cannon",
+  "rows": 10
+ },
+ {
+  "player_uid": "timmy tillman|usa|1999",
+  "player_name": "Timmy Tillman",
+  "nationality_raw": "USA",
+  "nationality_norm": "USA",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "timmy tillman",
+  "rows": 2
+ },
+ {
+  "player_uid": "tom king||",
+  "player_name": "Tom King",
+  "nationality_raw": null,
+  "nationality_norm": null,
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "tom king",
+  "rows": 1
+ },
+ {
+  "player_uid": "tugay kerimoalu|tr tur|1971",
+  "player_name": "Tugay KerimoÄlu",
+  "nationality_raw": "tr TUR",
+  "nationality_norm": "TUR",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "tugay kerimoalu",
+  "rows": 8
+ },
+ {
+  "player_uid": "tuncay aanla±|tr tur|1982",
+  "player_name": "Tuncay ÅanlÄ±",
+  "nationality_raw": "tr TUR",
+  "nationality_norm": "TUR",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "tuncay aanla±",
+  "rows": 5
+ },
+ {
+  "player_uid": "tyler goodhram|eng|2003",
+  "player_name": "Tyler Goodhram",
+  "nationality_raw": "ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "tyler goodhram",
+  "rows": 9
+ },
+ {
+  "player_uid": "valentino livramento|eng eng|2003",
+  "player_name": "Valentino Livramento",
+  "nationality_raw": "eng ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "valentino livramento",
+  "rows": 5
+ },
+ {
+  "player_uid": "valentino livramento|eng|2002",
+  "player_name": "Valentino Livramento",
+  "nationality_raw": "ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "valentino livramento",
+  "rows": 10
+ },
+ {
+  "player_uid": "vedran aorluka|hr cro|1986",
+  "player_name": "Vedran Äorluka",
+  "nationality_raw": "hr CRO",
+  "nationality_norm": "CRO",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "vedran aorluka",
+  "rows": 6
+ },
+ {
+  "player_uid": "vitinha|por|2000",
+  "player_name": "Vitinha",
+  "nationality_raw": "POR",
+  "nationality_norm": "POR",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "vitinha",
+  "rows": 16
+ },
+ {
+  "player_uid": "vitinha|pt por|2000",
+  "player_name": "Vitinha",
+  "nationality_raw": "pt POR",
+  "nationality_norm": "POR",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "vitinha",
+  "rows": 1
+ },
+ {
+  "player_uid": "vitinho|br bra|1999",
+  "player_name": "Vitinho",
+  "nationality_raw": "br BRA",
+  "nationality_norm": "BRA",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "vitinho",
+  "rows": 1
+ },
+ {
+  "player_uid": "vitinho|bra|1999",
+  "player_name": "Vitinho",
+  "nationality_raw": "BRA",
+  "nationality_norm": "BRA",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "vitinho",
+  "rows": 7
+ },
+ {
+  "player_uid": "vlad chirichee|ro rou|1990",
+  "player_name": "Vlad ChiricheÈ",
+  "nationality_raw": "ro ROU",
+  "nationality_norm": "ROU",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "vlad chirichee",
+  "rows": 2
+ },
+ {
+  "player_uid": "vladimir stojkovia|rs srb|1983",
+  "player_name": "Vladimir StojkoviÄ",
+  "nationality_raw": "rs SRB",
+  "nationality_norm": "SRB",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "vladimir stojkovia",
+  "rows": 1
+ },
+ {
+  "player_uid": "vratislav grea¡ko|sk svk|1977",
+  "player_name": "Vratislav GreÅ¡ko",
+  "nationality_raw": "sk SVK",
+  "nationality_norm": "SVK",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "vratislav grea¡ko",
+  "rows": 4
+ },
+ {
+  "player_uid": "wayne brown|eng eng|1978",
+  "player_name": "Wayne Brown",
+  "nationality_raw": "eng ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "wayne brown",
+  "rows": 2
+ },
+ {
+  "player_uid": "wayne brown|eng|1977",
+  "player_name": "Wayne Brown",
+  "nationality_raw": "ENG",
+  "nationality_norm": "ENG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "wayne brown",
+  "rows": 11
+ },
+ {
+  "player_uid": "will wright||",
+  "player_name": "Will Wright",
+  "nationality_raw": null,
+  "nationality_norm": null,
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "will wright",
+  "rows": 1
+ },
+ {
+  "player_uid": "wojciech szczasny|pl pol|1990",
+  "player_name": "Wojciech SzczÄsny",
+  "nationality_raw": "pl POL",
+  "nationality_norm": "POL",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "wojciech szczasny",
+  "rows": 5
+ },
+ {
+  "player_uid": "yeremi pino|esp|2002",
+  "player_name": "Yeremi Pino",
+  "nationality_raw": "ESP",
+  "nationality_norm": "ESP",
+  "birth_year": 2002,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "yeremi pino",
+  "rows": 10
+ },
+ {
+  "player_uid": "yang hyunjun|kor|2002",
+  "player_name": "Yang Hyunjun",
+  "nationality_raw": "KOR",
+  "nationality_norm": "KOR",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "yang hyunjun",
+  "rows": 2
+ },
+ {
+  "player_uid": "yanis zouaoui|alg|1994",
+  "player_name": "Yanis Zouaoui",
+  "nationality_raw": "ALG",
+  "nationality_norm": "ALG",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "yanis zouaoui",
+  "rows": 2
+ },
+ {
+  "player_uid": "yoshinori muta|jp jpn|1992",
+  "player_name": "Yoshinori MutÅ",
+  "nationality_raw": "jp JPN",
+  "nationality_norm": "JPN",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "yoshinori muta",
+  "rows": 2
+ },
+ {
+  "player_uid": "zdenak grygera|cz cze|1980",
+  "player_name": "ZdenÄk Grygera",
+  "nationality_raw": "cz CZE",
+  "nationality_norm": "CZE",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "zdenak grygera",
+  "rows": 1
+ },
+ {
+  "player_uid": "zlatan ibrahimovia|se swe|1982",
+  "player_name": "Zlatan IbrahimoviÄ",
+  "nationality_raw": "se SWE",
+  "nationality_norm": "SWE",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "zlatan ibrahimovia",
+  "rows": 2
+ },
+ {
+  "player_uid": "zoran toa¡ia|rs srb|1987",
+  "player_name": "Zoran ToÅ¡iÄ",
+  "nationality_raw": "rs SRB",
+  "nationality_norm": "SRB",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "zoran toa¡ia",
+  "rows": 1
+ },
+ {
+  "player_uid": "zvonimir vukia|rs srb|1979",
+  "player_name": "Zvonimir VukiÄ",
+  "nationality_raw": "rs SRB",
+  "nationality_norm": "SRB",
+  "birth_year": null,
+  "created_at": "2026-02-07T15:48:09.263119+00:00",
+  "normalized_player_name": "zvonimir vukia",
+  "rows": 1
+ }
+]
