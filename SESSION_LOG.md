@@ -1962,3 +1962,67 @@ than GROUP BYing the whole database per call.
 2. I populate player_uid_aliases from data/bridge/uid_to_player_id.json
 3. Smoke-test ALL 11 game functions against the _compat views — the gate
 4. Only then write sql/016 to rename
+
+## REV 10 — the gate: 015 applied, aliases populated, ALL GAMES TESTED
+
+### scripts/fbref/smoke.js — the gate
+Loads each real Netlify handler and calls it for real, with the Supabase client
+wrapped so .from('players') resolves to players_compat etc. If it works here it
+works after the rename, because the rename makes those names point at exactly
+what the wrapper points at now. --live runs the same cases against the old
+tables as a CONTROL, so a pre-existing failure is distinguishable from a
+regression. Running the control FIRST was what caught that my test params were
+wrong (functions want scopeId, not competition) rather than the code.
+
+Result, 14 cases: **13 passed / 1 failed on BOTH**. The one failure is a test
+query of mine matching nothing in either. No regressions.
+Notable: did-you-know 2160ms -> 858ms and community-builder 407ms -> 153ms,
+because v_game_player_club_comp_compat reads the materialised
+agg_player_club_comp instead of GROUP BYing the whole database per call.
+
+### Fixed a live production bug: featured-player
+Had been returning {"error":"No players found"} in production. It queried
+v_all_player_season_stats for columns named `competition`, `season` and `club`
+— that view has never had them (competition_id, season_label, club_id). Every
+query errored, data came back null, handler reported "no players" instead of
+the failure. Rewritten against v_game_player_club_comp: correct AND one indexed
+read instead of a scan. Also fixed my own bug in the rewrite — I drew
+Math.random() twice for the two ends of .range(), so `from` could exceed `to`
+and PostgREST answers that with a 500, not an empty result.
+
+### THE REAL REGRESSION THE GATE CAUGHT
+xi_start `club_arsenal / appearances`: 11/11 on live, **0/11 on compat**.
+Cause: club_ids are HARDCODED IN THE SOURCE —
+  { id: 'club_arsenal', clubName: 'Arsenal', clubId: 94 }
+41 of them in xi_start.js and 41 in xi_score.js, with a comment saying
+"clubId is the direct database ID (avoids fragile name lookups)". Reasonable
+when written; fatal once club_ids change (Arsenal 94 -> 4).
+My first smoke run MISSED this because I tested objective 'appearances' at
+league scope only — the club-scoped path was never exercised. Found it by
+testing the objective I had skipped.
+FIX: remapped all 41 ids in both files by club name (100% mapped, 0 unmapped)
+rather than building a translation layer — removes the landmine instead of
+papering over it. Verified: club_arsenal/appearances now 11/11 (Seaman, Keown,
+Dixon); club_liverpool/goals 11/11.
+NOTE: the LIVE control now fails club scopes, correctly — the code is aligned
+to the post-swap ids.
+
+### Still outstanding, by design
+club + performance = 0/11, because player_performance_scores.scope_id holds
+OLD club ids and only 41% of its player_uids are the canonical form. The table
+is otherwise self-contained (carries its own names/stats, xi_start reads them
+directly), so it survives the swap. Resolution: run
+`SELECT public.compute_performance_scores();` AFTER the swap — it reads the
+live names, which by then point at the rebuilt data, so scores and scope ids
+regenerate consistently. Pre-rebuild copy is in the backup if needed.
+Added as step 5 of sql/016_swap.sql, commented.
+
+### Also noted, NOT a regression
+xi epl_alltime/appearances returns some players named "Unknown" — identical on
+live and compat, so pre-existing. Worth chasing separately.
+
+### State
+- sql/015_compat_views.sql  APPLIED
+- player_uid_aliases        36,075 rows
+- players_compat            37,000, zero NULL uids
+- sql/016_swap.sql          WRITTEN, NOT RUN — the cutover

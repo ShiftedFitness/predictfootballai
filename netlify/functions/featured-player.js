@@ -1,121 +1,123 @@
 /**
- * featured-player.js — Return a random notable player with career stats
+ * featured-player.js — a random notable player with their Premier League career.
  *
- * GET — returns a random player with 100+ PL appearances, their career stats and clubs.
+ * GET → one player with 100+ Premier League appearances, plus a club-by-club
+ * breakdown of that career.
+ *
+ * REWRITTEN 4 Sep 2026. The previous version had been returning
+ * {"error":"No players found"} in production for an unknown length of time. It
+ * queried v_all_player_season_stats for columns named `competition`, `season`
+ * and `club` — that view has never had them; it carries competition_id,
+ * season_label and club_id. Every query errored, `data` came back null, and
+ * the handler reported no players rather than the failure.
+ *
+ * This version reads v_game_player_club_comp, which is already aggregated one
+ * row per player per club per competition and carries competition_name
+ * outright. That is both correct and a great deal cheaper: picking a notable
+ * player is now one indexed read rather than a scan of every season row in the
+ * database.
  */
 
 const { sb, respond, handleOptions } = require('./_supabase');
 
+const PREMIER_LEAGUE = 'Premier League';
+const NOTABLE_APPEARANCES = 100;
+
+/** Names arrived mojibaked from an old import; repair them on the way out. */
+function fixMojibake(s) {
+  if (!/[ÃÂ][\x80-\xBF -ÿ]/.test(s || '')) return s;
+  try {
+    const fixed = Buffer.from(s, 'latin1').toString('utf8');
+    return fixed.includes('�') ? s : fixed;
+  } catch { return s; }
+}
+
 exports.handler = async (event) => {
   const cors = handleOptions(event);
   if (cors) return cors;
-
   if (event.httpMethod !== 'GET') return respond(405, 'GET only');
 
   const client = sb();
 
   try {
-    // Get count of notable players (100+ EPL appearances)
-    const { count } = await client
-      .from('v_all_player_season_stats')
+    // How many player-club pairs clear the bar? Used only to pick an offset,
+    // so it is a head request with no rows crossing the wire.
+    const { count, error: countErr } = await client
+      .from('v_game_player_club_comp')
       .select('player_uid', { count: 'exact', head: true })
-      .eq('competition', 'Premier League')
-      .gte('appearances', 1);
+      .eq('competition_name', PREMIER_LEAGUE)
+      .gte('appearances', NOTABLE_APPEARANCES);
 
-    // We'll aggregate to find players with significant careers
-    // Use a random offset approach with the players table
-    const { data: allPlayers } = await client
-      .from('players')
-      .select('player_uid, player_name, nationality_norm, position_bucket, birth_year')
-      .not('nationality_norm', 'is', null)
-      .limit(5000);
+    if (countErr) return respond(500, { error: countErr.message });
+    if (!count) return respond(404, { error: 'No notable players found' });
 
-    if (!allPlayers || allPlayers.length === 0) {
-      return respond(404, { error: 'No players found' });
-    }
+    // Random offset into the set, rather than pulling the set and choosing in
+    // JavaScript. One row comes back.
+    //
+    // The offset is drawn ONCE and used for both ends of the range. Drawing it
+    // twice gives a start past the end often enough to matter, and PostgREST
+    // answers that with "Requested range not satisfiable" rather than an empty
+    // result — a 500 on a page that should simply show a different player.
+    const offset = Math.floor(Math.random() * count);
+    const { data: picked, error: pickErr } = await client
+      .from('v_game_player_club_comp')
+      .select('player_uid, player_name, nationality_norm')
+      .eq('competition_name', PREMIER_LEAGUE)
+      .gte('appearances', NOTABLE_APPEARANCES)
+      .order('player_uid')
+      .range(offset, offset);
 
-    // Pick a random player
-    const randomIdx = Math.floor(Math.random() * allPlayers.length);
-    const player = allPlayers[randomIdx];
+    if (pickErr) return respond(500, { error: pickErr.message });
+    if (!picked || !picked.length) return respond(404, { error: 'No notable players found' });
 
-    // Get their career stats from EPL
-    const { data: stats } = await client
-      .from('v_all_player_season_stats')
-      .select('season, club, appearances, goals, assists, competition')
+    const player = picked[0];
+
+    // The whole Premier League career, one row per club.
+    const { data: spells, error: spellErr } = await client
+      .from('v_game_player_club_comp')
+      .select('club_name, appearances, goals, assists, minutes, seasons, first_season_start_year, last_season_start_year')
       .eq('player_uid', player.player_uid)
-      .eq('competition', 'Premier League')
-      .order('season', { ascending: true });
+      .eq('competition_name', PREMIER_LEAGUE)
+      .order('appearances', { ascending: false });
 
-    // Skip players with very few EPL seasons — pick another if < 2 seasons
-    if (!stats || stats.length < 2) {
-      // Fallback: try again with a known good query
-      const { data: fallbackStats } = await client
-        .from('v_all_player_season_stats')
-        .select('player_uid, season, club, appearances, goals, assists')
-        .eq('competition', 'Premier League')
-        .gte('appearances', 20)
-        .limit(1000);
+    if (spellErr) return respond(500, { error: spellErr.message });
+    if (!spells || !spells.length) return respond(404, { error: 'No career found' });
 
-      if (!fallbackStats || fallbackStats.length === 0) {
-        return respond(404, { error: 'No suitable player found' });
-      }
+    const total = spells.reduce(
+      (a, s) => ({
+        appearances: a.appearances + (s.appearances || 0),
+        goals: a.goals + (s.goals || 0),
+        assists: a.assists + (s.assists || 0),
+        minutes: a.minutes + (s.minutes || 0),
+      }),
+      { appearances: 0, goals: 0, assists: 0, minutes: 0 }
+    );
 
-      // Group by player_uid and pick one with decent career
-      const grouped = {};
-      for (const row of fallbackStats) {
-        if (!grouped[row.player_uid]) grouped[row.player_uid] = [];
-        grouped[row.player_uid].push(row);
-      }
-
-      const uids = Object.keys(grouped).filter(uid => grouped[uid].length >= 3);
-      if (uids.length === 0) return respond(404, { error: 'No suitable player found' });
-
-      const fbUid = uids[Math.floor(Math.random() * uids.length)];
-      const fbRows = grouped[fbUid];
-
-      // Look up player name
-      const { data: fbPlayer } = await client
-        .from('players')
-        .select('player_name, nationality_norm, position_bucket')
-        .eq('player_uid', fbUid)
-        .maybeSingle();
-
-      const totalApps = fbRows.reduce((s, r) => s + (r.appearances || 0), 0);
-      const totalGoals = fbRows.reduce((s, r) => s + (r.goals || 0), 0);
-      const totalAssists = fbRows.reduce((s, r) => s + (r.assists || 0), 0);
-      const clubs = [...new Set(fbRows.map(r => r.club))];
-
-      return respond(200, {
-        name: fbPlayer?.player_name || fbUid.split('|')[0],
-        nationality: fbPlayer?.nationality_norm || '',
-        position: fbPlayer?.position_bucket || '',
-        appearances: totalApps,
-        goals: totalGoals,
-        assists: totalAssists,
-        seasons: fbRows.length,
-        clubs
-      });
-    }
-
-    // Aggregate this player's stats
-    const totalApps = stats.reduce((s, r) => s + (r.appearances || 0), 0);
-    const totalGoals = stats.reduce((s, r) => s + (r.goals || 0), 0);
-    const totalAssists = stats.reduce((s, r) => s + (r.assists || 0), 0);
-    const clubs = [...new Set(stats.map(r => r.club))];
+    const years = spells.flatMap((s) => [s.first_season_start_year, s.last_season_start_year]).filter(Boolean);
+    const season = (y) => (y == null ? null : `${y}/${String(y + 1).slice(2)}`);
 
     return respond(200, {
-      name: player.player_name,
-      nationality: player.nationality_norm || '',
-      position: player.position_bucket || '',
-      appearances: totalApps,
-      goals: totalGoals,
-      assists: totalAssists,
-      seasons: stats.length,
-      clubs
+      player: {
+        uid: player.player_uid,
+        name: fixMojibake(player.player_name),
+        nationality: player.nationality_norm || '',
+      },
+      competition: PREMIER_LEAGUE,
+      totals: total,
+      span: years.length
+        ? { from: season(Math.min(...years)), to: season(Math.max(...years)) }
+        : null,
+      clubs: spells.map((s) => ({
+        club: s.club_name,
+        appearances: s.appearances,
+        goals: s.goals,
+        assists: s.assists,
+        seasons: s.seasons,
+        from: season(s.first_season_start_year),
+        to: season(s.last_season_start_year),
+      })),
     });
-
   } catch (err) {
-    console.error('featured-player error:', err);
-    return respond(500, { error: 'Internal error' });
+    return respond(500, { error: err.message });
   }
 };

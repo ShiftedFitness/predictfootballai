@@ -297,5 +297,24 @@ function buildMapping(oldPlayers, newPlayers) {
     if (error) throw new Error(`players_v2: ${error.message}`);
     process.stdout.write(`\r    ${Math.min(i + SIZE, updates.length).toLocaleString()} / ${updates.length.toLocaleString()}`);
   }
-  console.log(`\n  ✓ ${updates.length.toLocaleString()} canonical uids stamped\n`);
+  console.log(`\n  ✓ ${updates.length.toLocaleString()} canonical uids stamped`);
+
+  // The alias table is what lets anything still holding an OLD uid find its
+  // player — performance scores, a saved community game, a bookmarked link.
+  // Every old uid goes in, including the duplicates: that many-to-one shape
+  // is the fix, not a defect.
+  const { error: probe } = await db.from('player_uid_aliases').select('player_uid').limit(1);
+  if (probe) {
+    console.log(`\n  ⚠ player_uid_aliases not found — run sql/015_compat_views.sql first`);
+    return;
+  }
+  console.log(`\n  Populating player_uid_aliases…`);
+  const aliases = [...mapping.entries()].map(([player_uid, player_id]) => ({ player_uid, player_id }));
+  for (let i = 0; i < aliases.length; i += SIZE) {
+    const { error } = await db.from('player_uid_aliases')
+      .upsert(aliases.slice(i, i + SIZE), { onConflict: 'player_uid' });
+    if (error) throw new Error(`player_uid_aliases: ${error.message}`);
+    process.stdout.write(`\r    ${Math.min(i + SIZE, aliases.length).toLocaleString()} / ${aliases.length.toLocaleString()}`);
+  }
+  console.log(`\n  ✓ ${aliases.length.toLocaleString()} aliases written\n`);
 })().catch((e) => { console.error(`\n  ✗ ${e.message}\n`); process.exit(1); });
