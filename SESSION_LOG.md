@@ -1476,3 +1476,409 @@ and correct, since current numbers are wrong).
 
 ## Blocked on
 User to run sql/audit_data_health.sql and return queries A, B3 and C.
+
+## REV 4 — ROOT CAUSE FOUND. One bug, three symptoms. FBref gives us the fix.
+
+User ran query E. The clubs array for Salah's Champions League rows was the
+tell: `["Basel", "eng Chelsea", "eng Liverpool", "Liverpool", "Roma"]`.
+There are club rows in the DB literally named "eng Liverpool".
+
+Went and read the FBref markup directly (real Chrome). Confirmed:
+
+**ONE ROOT CAUSE:** cheerio `.text()` called on cells that contain a flag-icon
+span rendered as text.
+
+  nationality cell:
+    <a href="/en/country/ENG/England-Football">
+      <span><span class="f-i f-gb-eng">eng</span> ENG</span></a>
+    .text() -> "eng ENG"           -> goes into player_uid
+
+  team cell (INTERNATIONAL comps only — domestic pages have no flag):
+    <span title="Italy"><span class="f-i f-it">it</span></span>
+      <a href="/en/squads/dc56fe14/2024-2025/Milan-Stats">Milan</a>
+    .text() -> "it Milan"          -> goes into clubs.club_name
+
+  Community Shield tables have NO birth_year column at all
+    -> split_part(uid,'|',3) = '' -> a third, equally valid, primary key
+
+That is why the split follows COMPETITION lines: the flag prefix only appears
+in multi-country competitions. Domestic PL page = "Liverpool"; UCL page =
+"eng Liverpool". Same for nationality across import paths.
+
+**THE FIX — FBref has stable IDs and the ingest already parses one:**
+  <a href="/en/players/f586779e/Tammy-Abraham">        stable player id
+  <a href="/en/squads/dc56fe14/2024-2025/Milan-Stats"> stable squad id
+  <a href="/en/country/ENG/England-Football">          clean 3-letter code
+`player_href` is captured at ingest_current_season.js:280 and then NEVER USED
+— the code builds generatePlayerUid(name, nationality, birth_year) instead.
+→ Recommendation upgraded from "normalise the nationality string" (another
+patch on the pile) to "anchor identity on fbref_player_id / fbref_squad_id;
+keep player_uid as a display key". This class of bug then cannot recur.
+Add a cellText() helper that strips .f-i spans before reading, used everywhere.
+
+## MEASURED FBref coverage (read off the season indexes, one at a time)
+| Competition       | FBref id | From    | To      | Seasons |
+| Premier League    | 9        | 1992/93 | 2026/27 | 34 |
+| Championship      | 10 (!)   | 2001/02 | 2026/27 | 26 |
+| League One        | 15       | 2002/03 | 2026/27 | 25 |
+| League Two        | 16       | 2002/03 | 2026/27 | 25 |
+| Champions League  | 8        | 1990/91 | 2026/27 | 37 |
+| La Liga           | 12       | 1988/89 | 2026/27 | 39 |
+| Serie A           | 11       | 1988/89 | 2026/27 | 39 |
+| Bundesliga        | 20       | 1988/89 | 2026/27 | 39 |
+| Ligue 1           | 13       | 1995/96 | 2026/27 | 32 |
+| FA Cup            | 514      | 2014/15 | 2026/27 | 13 |
+| EFL Cup           | 690      | 2014/15 | 2026/27 | 13 |
+| Community Shield  | 602      | 2015    | 2026    | 12 |
+TOTAL = 334 season-pages ≈ 1 hour of paced browsing at 1 req/5s.
+
+Verified the depth is real, not results-only: La Liga 1988-89 stats page
+returns a 492-row stats_standard table with header
+ranker,player,nationality,position,team,age,birth_year,GAMES,games_starts,
+minutes,goals,assists,pens_made,pens_att,cards_yellow,cards_red...
+
+EVERY competition the DB currently holds is covered by FBref (comps 4/5/10 in
+their schema = FA Cup / Community Shield / EFL Cup, all present). So this is a
+CLEAN REBUILD — nothing needs rescuing from another source.
+
+⚠ ID COLLISION HAZARD: their competition_id 10 = EFL Cup. FBref comp 10 =
+Championship. Copying FBref numbering when adding the EFL would silently merge
+League Cup rows into the second tier. Need a competition_map table.
+
+⚠ Some pages (incl. Champions League) serve stats_standard inside an HTML
+comment. The existing parser already handles this; the new collector must too.
+
+## User decisions this round
+- sql/003 FIX 2: user asked if they should run it. NO — already run in March,
+  cited only as evidence of a prior patch attempt. Running it now would rewrite
+  uids in place immediately before a rebuild. Told them to leave it.
+- Data Summary page: simplified to a plain last-updated DATE (no gameweek
+  wording, no status chips) + first season / last season / seasons held.
+- "All seasons updated from the off" — confirmed, that IS the rebuild.
+- European comps' true start years must be accurate in the DB — measured above.
+
+## Revised phases (Rev 4)
+1. Collector (1-2d)          real Chrome + CDP, fetch-to-disk, handle commented tables
+2. Identity on FBref IDs (1d) fbref_player_id/fbref_squad_id, cellText(), competition_map
+3. THE BIG SCRAPE (4-6d)      334 season-pages, fresh tables, verify, swap
+4. Data Summary page (1d)     /tools/data — acceptance test for the scrape
+5. Automate (1d)              launchd Tue+Fri, current season only, ~3 min/run
+6. Alerting (½d)              data-health on Netlify + FPL cross-check
+
+## Blocked on
+Queries B3, C and D from sql/audit_data_health.sql.
+
+## REV 5 — read-path audit. User asked: is this optimal for the games?
+
+Good challenge and I had NOT checked. Went through what each game actually
+asks Supabase for. Answer: **no, the current read path is already marginal and
+four tiers would break it.**
+
+1. **Every game pulls a whole division into memory.** xi/quiz/whoami/alpha/hol
+   all do `.from('v_all_player_season_stats').select(...).eq('competition_id',X)`
+   with NO limit and NO aggregate, then `fetchAll()` pages at 1000 rows/request
+   and sums in JavaScript. PL ≈ 19,000 rows ≈ 19 sequential round-trips PER
+   GAME START. (They do paginate correctly — no silent 1000-row truncation —
+   but that's the problem, not the mitigation.)
+2. **Nothing is materialised.** `v_game_player_club_comp` (Bullseye + community
+   builder) is a plain VIEW doing GROUP BY over a UNION ALL of two tables on
+   every call.
+3. **community-builder.js:401 has no filter at all** unless a competition is
+   named — reads the entire aggregate view inside a 10s function. This is the
+   "build your own game" path and it dies first.
+
+Competition-scoped games survive the EFL fine (a PL game still pulls only PL
+rows). But CROSS-TIER IS THE ENTIRE POINT of adding the EFL — "Sunderland
+all-time" spans 4 competitions and the query pattern filters competition-first,
+so it becomes 4 scans + a JS merge.
+
+**Fix — mostly deletion, and the rebuild is the only moment to do it:**
+- ONE season-stats table instead of two. The historical/current split exists
+  only because two pipelines wrote them; one pipeline → the UNION ALL
+  disappears from every query in the codebase for free.
+- Materialise the rollups. FIVE rollup tables already exist in the schema
+  (player_club_totals, player_competition_totals, player_club_competition_totals,
+  player_club_total_competition, player_totals) and at least two are EMPTY —
+  sql/003 FIX 1 abandoned them because they held historical data only. With one
+  pipeline they can be rebuilt after each ingest and trusted.
+- Filter in Postgres not Lambda; delete the fetchAll() loops.
+- Index for club-first / tier-first / season-first lookups (nothing supports
+  club-first today).
+- `tier` on competitions so "all English tiers" is ONE query not four.
+Net: "Sunderland all-time across 4 divisions" becomes a single indexed read of
+a few hundred rows — FASTER than today's PL-only version with 4x the data.
+
+## Revised phases (Rev 5) — 7 phases
+1. Collector (1-2d)
+2. Design the target schema (1-2d) — fbref ids, cellText(), one table, tier,
+   competition_map, AND decide rollups+indexes up front so the scrape writes
+   straight into the right shape
+3. THE BIG SCRAPE (4-6d) — 334 season-pages, fresh tables, verify, swap
+4. Build the read model (1-2d) — rollups + indexes, repoint games
+5. Data Summary page (1d)
+6. Automate (1d) — launchd Tue+Fri
+7. Alerting (½d) — Netlify-side
+
+## User offered to let me crawl + write to Supabase directly
+Answered: yes, strongly preferred. Needs:
+- `.env` in repo root with Supabase URL + service-role key. `.env` IS already
+  in .gitignore (verified). Explicitly told them NOT to paste the key in chat.
+- Chrome relaunched with --remote-debugging-port=9222 and a SEPARATE profile
+  dir so it doesn't disturb normal browsing.
+- A Supabase backup taken first — non-negotiable before a rebuild.
+NOTE: this machine is a MacBook Air M4, NOT the Mac mini. Fine for the one-off
+scrape and for prototyping the collector; the launchd job moves to the mini
+afterwards. Node v24.12.0 present, Chrome present.
+
+Also clarified for the user what "B3 / C / D" meant — they were query labels in
+sql/audit_data_health.sql, which wasn't obvious. Gave the queries inline.
+
+## REV 6 — query C results + target schema design
+
+### Query C output (user ran it)
+| nat_form              | born           | count  |
+| one-part  "egy"       | has birth year | 30,136 |  <- historical import, CORRECT form
+| two-part  "eg egy"    | has birth year |  5,242 |  <- Feb 2026 FBref ingest, BROKEN form
+| one-part              | no birth year  |    442 |
+| nationality missing   | no birth year  |    302 |
+| nationality missing   | has birth year |    251 |
+TOTAL 36,373 players
+
+**Interpretation:** the two-part form is produced by ONE code path only — the
+Feb 2026 ingest. That run covered 6 competitions' CURRENT squads, i.e. players
+who almost all already existed historically under a one-part uid. So 5,242 is
+the size of the phantom population: ~1 in 7 identities in the DB is a duplicate
+of another. A further 995 uids are missing nationality, birth year or both.
+(B3 would split genuine 2025/26 debutants out of the 5,242 — worth running but
+does not change the plan.)
+
+### Community-builder filter surface (audited to prove "no flexibility lost")
+competitions[] (by NAME), clubs[] (by NAME) with clubMode any|all,
+nationalities[], measure (appearances|goals|assists|minutes|performance),
+plus free-text parsing. Games separately use season range, position_bucket,
+age flags.
+NOTABLE: there is a ~150-line HAND-MAINTAINED CLUB ALIAS TABLE in
+community-builder.js ('manchester united' -> 'Manchester Utd', 'athletic club'
+-> 'Athletic Club') that exists ONLY because clubs are matched by name string
+against a table that spells them inconsistently. fbref_squad_id kills it.
+ALSO: clubMode 'all' fetches everyone matching ANY club then intersects
+IN MEMORY. Should be GROUP BY player HAVING COUNT(DISTINCT club)=n.
+
+### TARGET SCHEMA (added to the artifact as a diagram)
+WRITE SIDE — one pipeline, idempotent:
+  players            fbref_player_id UNIQUE; player_uid kept for DISPLAY only
+  clubs              fbref_squad_id UNIQUE
+  competitions       + tier smallint, country, comp_type, fbref_comp_id
+  player_season_stats  PK (player_id, club_id, competition_id, season_start_year)
+                       ~246k rows — ONE table, no historical/current split,
+                       so the UNION ALL disappears from every query in the codebase
+READ SIDE — rebuilt at the end of every ingest, names denormalised in (no joins):
+  agg_player_club_comp   player x club x competition   -> Bullseye, XI, quiz
+  agg_player_club        player x club, comps merged   -> "Sunderland all-time"
+  agg_club_season        club x competition x season   -> "Sunderland, L1, 2018-19"
+Indexes for club-first, tier-first, season-first lookups.
+
+KEY FRAMING FOR THE USER: this is SMALL DATA. ~246k season rows. Postgres does
+not notice that. Nothing is slow because of volume — it is slow because every
+question is asked as "give me everything, I'll work it out in JavaScript".
+The fix is asking properly, not caching or sharding.
+
+DELIBERATE TRADE recorded: rollups are denormalised, therefore stale the moment
+an upstream name changes — which is why they are REBUILT each ingest rather
+than trigger-maintained. Cheap to regenerate, never a source of truth.
+
+Estimated rebuild volume by competition (for sizing):
+PL 34x550, Champ 26x700, L1 25x700, L2 25x700, LaLiga 39x600, SerieA 39x650,
+Bundesliga 39x550, Ligue1 32x600, UCL 37x800, FA Cup 13x1500, EFL Cup 13x1200,
+CS 12x40  =>  ~246k rows.
+
+## REV 6b — setup for direct access (walkthrough requested)
+
+Checked local tooling: **no pg_dump, no psql, no supabase CLI, no Homebrew** on
+this MacBook Air. So my earlier "take a backup, one click in the dashboard" was
+wrong — Supabase's automatic backups are a paid-plan feature and there is no
+one-click full export on Free. Corrected to the user.
+
+Created:
+- `.env` in repo root with PLACEHOLDERS ONLY + inline instructions on where to
+  find each value in the Supabase dashboard (Settings → API / API Keys).
+  Sets both spellings (Supabase_Project_URL / SUPABASE_URL etc) because
+  _supabase.js accepts either. Already covered by .gitignore.
+- `scripts/backup_tables.js` — read-only NDJSON snapshot of the 12 stats
+  tables to data/backups/<timestamp>/ plus a manifest.json. No new deps
+  (uses @supabase/supabase-js, already installed; hand-rolled .env parser).
+  Pages at 1000/request. Missing tables are skipped not fatal (several
+  rollups are known empty/absent). Validates the URL shape before connecting.
+  Tested the failure path with an empty .env — fails clean.
+- Added `data/backups/` to .gitignore so a ~50MB snapshot can't be committed.
+
+Built-in verification: the backup's `players` row count should come out at
+**36,373**, matching the total from the user's query C. If it doesn't, the
+credentials point at the wrong project.
+
+Chrome: currently running (pid 644). The `--user-data-dir` flag starts a
+SECOND independent instance alongside it, so normal browsing is untouched.
+Port 9222 confirmed free. First launch will hit the Cloudflare check once on a
+fresh profile (~20s), after which the clearance cookie persists in that
+profile.
+
+Next: user completes .env + backup + Chrome, then I start the collector.
+Commitment made: nothing writes to production until one league-season is
+scraped and diffed for review. Fresh tables, swap later.
+
+## REV 7 — COLLECTOR BUILT AND VALIDATED (user AFK, worked within agreed bounds)
+
+Boundary held: built the collector, scraped 3 season-pages, produced diffs.
+NOTHING written to Supabase. No production change.
+
+### Backup completed first
+data/backups/2026-09-04T12-00-36/ — 413,713 rows, 168 MB, 12 tables.
+players = 36,373 — EXACT match with the user's query C, so credentials verified.
+Added data/backups/ to .gitignore.
+
+### Facts the backup revealed (answered queries A/B3/D locally, no need to ask)
+- **competition_id 8 = Championship ALREADY EXISTS**, 17,557 rows, 2001–2024.
+  So only League One + League Two are genuinely new. Championship just needs
+  2025 and 2026 adding. Much smaller job than stated in Rev 4/5.
+- competitions has 10 rows: 1 La Liga, 2 UCL, 3 Serie A, 4 FA Cup,
+  5 Community Shield, 6 Ligue 1, 7 Premier League, 8 Championship,
+  9 Bundesliga, 10 EFL Cup.
+- Row counts: FA Cup 26,298 (biggest!), UCL 21,864, EFL Cup 19,719,
+  PL 18,694, La Liga 18,378, Serie A 18,234, Championship 17,557,
+  Ligue 1 16,506, Bundesliga 15,990, Community Shield 277.
+- B3 REFINED: 3,915 name-keys hold >1 uid; 8,465 uids involved.
+  Of those, **1,941 are definitely the same person** (birth years agree or
+  one is blank) — the bug. 1,959 have conflicting birth years (real namesakes
+  or bad data) and need a look, not an automatic merge.
+- D: **11 club names hold 2 ids each**, 2,567 rows sit under the phantom
+  (flag-prefixed) copy. Plus **4 flag-prefixed clubs with NO clean twin** —
+  'sct Celtic' (266 rows), 'sct Rangers' (241), 'nir Linfield FC' (14),
+  'nir Glentoran' (14) — European-only sides that need RENAMING not merging.
+- **511 of 36,373 player names are mojibake** (UTF-8 decoded as Latin-1):
+  'Ä°lkay GÃ¼ndoÄan' should be 'İlkay Gündoğan'. New parser gets these right.
+- Seasons FBref has that the DB lacks: La Liga/Serie A/Bundesliga each have
+  **1988–1991** available (4 extra seasons each, 12 total bonus); UCL has
+  1990–1991; Championship 2025–2026; everything missing 2026.
+
+### Files built (scripts/fbref/)
+- `cdp.js`     minimal CDP client, ZERO deps (Node 22+ global WebSocket).
+               Attaches to running Chrome on :9222 — never launches its own.
+               navigate() POLLS on url+readyState+title+size rather than
+               waiting on Page.loadEventFired, because the Cloudflare
+               challenge page fires its own load event so one event proves
+               nothing. First attempt failed exactly this way (1,053 bytes,
+               empty title); polling fixed it.
+- `competitions.js`  the FBref-id ↔ our-id map + per-competition first season
+               and what we already have. Community Shield flagged `irregular`
+               (single-year labels inside two-year path segments).
+- `parse.js`   cellText() strips .f-i flag spans; ids taken from hrefs.
+               **DISCOVERY: the squad URL slug carries the CANONICAL FULL club
+               name** (/en/squads/b2b47a98/2024-2025/Newcastle-United-Stats →
+               "Newcastle United") while the team CELL carries the short one
+               ("Newcastle"). Use the slug.
+               keepers/defense keyed on fbref_player_id, not name+team —
+               the old ingest used name+team and silently dropped anyone whose
+               club name differed by a flag between the two tables.
+- `collect.js` fetch-to-disk then parse. 5s pacing. --missing, --reparse.
+               Does NOT touch Supabase.
+- `diff.js`    compares parsed output to the local backup. Includes
+               demojibake() so encoding damage is not reported as missing
+               players.
+
+### VALIDATION — the two numbers that matter
+PL 2024-25 (settled season, should already be correct in the DB):
+    players on both sides   546 / 562   97.2%
+    apps AND goals agree    545 / 546   **99.8%**   <- parser is correct
+    appearances differ        1
+PL 2025-26 (the stale season):
+    players on both sides   470 / 537   87.5%
+    apps AND goals agree     71 / 470   **15.1%**   <- the staleness, measured
+    appearances differ      399
+    on FBref, absent from DB 67
+The 17 differences on 2024-25 are 1–20 minute revisions plus a few assist
+corrections — FBref restatements, not parser error.
+
+NOTE on name+club matching being only 80.8%: club names disagree in BOTH
+directions. DB has the LONG form for Newcastle United / Nottingham Forest /
+Tottenham Hotspur / West Ham United, and the SHORT form for Brighton / Wolves
+/ Manchester Utd. That is the club-identity bug itself, which is why the
+club-free per-player rollup is the honest acceptance test.
+
+### Collected so far (raw HTML + parsed.json on disk)
+  premier-league/2024-2025   574 rows
+  premier-league/2025-2026   551 rows
+  league-one/2025-2026       782 rows, 24 clubs — FIRST EVER League One data,
+                             clean fbref ids and nationalities
+
+### Next (needs user go-ahead)
+Full scrape, then schema, then load. Still not written a single row to Supabase.
+
+## REV 8 — FULL SCRAPE DONE, LOADER BUILT, DRY RUN CLEAN
+
+### Scrape complete (one resume needed)
+323 season-pages, ~2GB raw HTML in data/fbref/ (gitignored).
+EFL Cup failed first pass on "Page.navigate timed out" — re-ran, resumed
+cleanly, skipped all 909 existing pages. Resumability works as designed.
+Hardened mid-run: 4 attempts with 20/40/60s backoff in collect.js, and
+rebuild.js now checks Chrome is alive before cascading through the remaining
+competitions.
+
+Result: **208,625 season rows · 36,847 players · 558 clubs · 1988–2026**
+  Premier League 35 / Championship 26 / League One 25 / League Two 25
+  FA Cup 13 / EFL Cup 13 / Champions League 37
+  La Liga 39 / Serie A 39 / Bundesliga 39 / Ligue 1 32
+All four English tiers complete — ~75k rows, half of it never in the DB before.
+Got 4 bonus seasons each for La Liga/Serie A/Bundesliga (1988–1991) and 2 for
+the Champions League (1990–1991).
+
+### scripts/fbref/load.js — DRY RUN BY DEFAULT, --load to write
+Two real bugs found and fixed by the dry run before any write:
+
+1. **81→0 primary-key collisions.** Cause: ~220 rows (mostly League Two
+   2002–2006, some UCL minnows) where FBref lists a player with NO player
+   page, hence no href, hence no id — so two such players at one club in one
+   season collided on (null, squad, comp, season).
+   Fix: deterministic synthetic id `x<sha1(name|nat|birth)[:7]>`. Merges the
+   same person across seasons/clubs on re-run; the `x` prefix can never
+   collide with a real 8-hex FBref id. 0.1% of rows.
+   ALSO found FBref genuinely double-lists some players (Birzhan Kulbekov,
+   FC Astana, UCL 2015 — two rows, 1 app each, 10 and 26 minutes).
+   mergeDuplicates() sums them rather than discarding real appearances.
+
+2. **Club name instability.** 22 clubs appeared under >1 spelling. Cause: the
+   season-specific URL slug gives "West-Ham-United-Stats" but the
+   CURRENT-season URL has no season segment and gives "West-Ham-Stats". Same
+   fbref_squad_id both times — identity was never at risk, only the label.
+   Fix: buildClubs() tallies every spelling per squad id and takes the most
+   frequent (longest wins ties), instead of first-seen.
+
+Also hit "Maximum call stack size exceeded" from `rows.push(...batch)` /
+`push(...deduped)` — spread as arguments dies at ~200k elements. Replaced
+with loops.
+
+### Dry-run verdict — SAFE TO LOAD
+    primary-key collisions               0
+    rows with no FBref squad id          0
+    rows on a synthetic player id      220   0.1%
+    players with no birth year         740   2.0%
+    players with no nationality      1,013   2.7%
+    player-seasons split over 2+ clubs 4,868  (correct — one row each)
+  vs live DB: 173,517 → 208,625 rows; 36,373 → 36,847 players; 540 → 558 clubs
+
+### Spot checks — the two diagnosed cases, now resolved
+Salah: ONE id (e342ad68). 526 career apps — PL 328/193g, UCL 98/50g,
+  Serie A 81/35g, FA Cup 16, EFL Cup 3. Was split three ways by competition.
+Bowen: ONE id (79c84d1c). 377 apps. Championship years intact (121 apps 53g),
+  and **the missing 2024-25 PL season is back**. Was split three ways with the
+  wrong birth year on the uid holding his league career.
+
+### sql/014_rebuild_schema.sql — DRAFT, NOT RUN
+_v2 tables alongside live; swap section commented out. players_v2/clubs_v2
+keyed on fbref ids, single fact table, three agg tables + rebuild_aggregates().
+League One = competition_id 11, League Two = 12. Loud comment on the id
+collision (our 10 = EFL Cup, FBref 10 = Championship).
+
+### NEXT — needs user action
+1. Run sql/014_rebuild_schema.sql in Supabase (creates _v2 only, safe).
+2. `node scripts/fbref/load.js --load`
+3. Review, then uncomment section 6 to swap.

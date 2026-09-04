@@ -2,3 +2,9 @@ node_modules/
 .env
 .env.local
 .DS_Store
+
+# Local DB snapshots from scripts/backup_tables.js
+data/backups/
+
+# Raw FBref pages from scripts/fbref/collect.js
+data/fbref/
