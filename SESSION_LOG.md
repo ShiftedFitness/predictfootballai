@@ -1185,3 +1185,294 @@ Fixed in BOTH emails, since the same mislabelled column existed in each:
   Removed the now-unused formatTime().
 
 Verified no KICKOFF/KICK-OFF label remains in any function.
+
+## Week 2: "no reminder email, no Picks AI email" — 5h before deadline
+(a) REMINDER IS NOT LATE. Window is 90-180 minutes before the deadline
+    (1.5-3 hours). At 5 hours out it is simply not due — first eligible
+    cron tick is ~2 hours away. Working as designed; the expectation was
+    early. Original spec was "~2 hours before", which 90-180 satisfies.
+
+(b) PICKS AI's window (10-14h before deadline) HAS passed, so either it ran
+    and the email did not send, or it did not run. Most likely cause:
+    PICKS_AI_NOTIFY_EMAIL never set in Netlify — notifyAdmin() returns
+    {sent:false, reason:'PICKS_AI_NOTIFY_EMAIL not set'} and skips silently.
+
+Gap fixed while looking: `notified` was returned in the HTTP response but NOT
+recorded in predict_ai_runs.detail, so `picks-ai-run.sh status` could not
+answer "did it email me?" — only Netlify logs could. Now stored.
+
+BUG CAUGHT BY THAT CHANGE: adding `notified` to the audit insert put it in
+the temporal dead zone — notifyAdmin() was called AFTER the insert that
+referenced it, which would have thrown a ReferenceError on every live run,
+after the picks were already saved. Moved notifyAdmin ahead of the insert.
+Verified ordering: notify (932) → audit insert (938) → reference (958).
+Worth noting the dry-run path has its own earlier insert at 888 and returns
+before this code, so it is unaffected.
+
+## Week 2: only 19 of 23 reminders sent — TWO causes, and I mis-diagnosed first
+FIRST READ (WRONG): assumed 23 sequential sends hitting the 30s scheduled
+ceiling. Arithmetic fitted (19 x 1.58s = 30s) but reading the code showed the
+sends were done with Promise.all — i.e. all 23 fired AT ONCE, not serially.
+Corrected before the user deployed anything.
+
+ACTUAL CAUSE: nodemailer opens a new SMTP connection per message unless
+pooled, so Promise.all opened 23 simultaneous connections to Gmail. Gmail
+refuses beyond a handful, and the excess fail quietly — which is exactly the
+"most but not all" pattern. The 30s ceiling was plausibly a second
+contributor (unresolved promises when the function was killed), and both are
+now removed.
+
+Fixes:
+1. Sequential sending instead of Promise.all.
+2. Pooled transporter: pool true, maxConnections 1, rateLimit 5/sec, and
+   transporter.close() afterwards so the function exits promptly.
+3. picks-reminder moved to a BACKGROUND function (15 min), since sequential
+   sending takes ~35s — past the 30s scheduled limit. picks-reminder.js now
+   hands off to picks-reminder-background.js; the trigger hands off too.
+4. Fixed my own broken failure log: I filtered on r.ok === false but the
+   results shape is {user, status, error}. Now logs the failing usernames and
+   Gmail's reason.
+
+NASTY PROPERTY WORTH RECORDING: reminder_sent_at is stamped AFTER the send
+loop. Under the old code a truncated run never reached it, so every later
+cron tick re-sent to the same people and the last few could NEVER receive a
+reminder however many times it ran. Sequential + background removes the
+truncation; the stamp placement is still worth revisiting if partial sends
+ever recur.
+
+NOTE: the same Promise.all pattern does NOT exist in week-results.js or
+week-open.js — both already send sequentially in a background function.
+
+---
+
+# SESSION LOG — 2026-09-04
+
+## Goal
+Revive the **trivia games** side of TeleStats (not Fives). Immediate blocker: the
+player-stats database is stale. Two asks:
+1. Update the data from its last update.
+2. Design automation so the DB — and therefore the games — stay evergreen.
+User asked for the *plan* first, for review, before any implementation.
+
+## Tasks
+- [x] Audit the current ingestion path (weekly_update.sh → ingest_current_season.js)
+- [x] Establish how stale the data actually is (live /meta + /player-lookup probes)
+- [x] Test whether the FBref source still works
+- [x] Evaluate replacement data sources
+- [x] Produce a phased automation plan for review
+- [ ] AWAITING REVIEW — no code changed this session
+
+## Findings
+
+**1. Last ingest was 15 Feb 2026.** From `ingestion_meta` via the live `/meta`
+function: "15 Feb 2026 — All 6 leagues from FBref." That is 201 days ago.
+
+**2. 2025/26 is frozen MID-SEASON, not merely old.** `/player-lookup?action=detail`
+for Mohamed Salah returns PL 2025/26 = 18 apps, 4 goals, 1536 minutes. The
+2025/26 season ran to 24 May 2026. ~13 matchweeks are missing from a season
+that has since completed, so the games serve *wrong* answers, not just old
+ones. 2026/27 (started 22 Aug 2026, now GW3) has zero player rows.
+
+**3. The source is dead.** `https://fbref.com/en/comps/9/stats/Premier-League-Stats`
+returns **403** (Cloudflare, 5792-byte challenge page) to a browser-UA request
+from this residential Mac. The scraper cannot run unattended. The script's
+`--local` mode (hand-save 18 HTML pages from a browser) is the only path that
+still works — which is almost certainly why updates stopped.
+
+**4. It is a laptop cron.** `weekly_update.sh` requires `Supabase_Project_URL`
+and `Supabase_Service_Role` exported in a local shell. Nothing runs unless the
+user personally runs it, and nothing alerts when they don't.
+
+**5. Season label is hardcoded.** `SEASON_LABEL = '2025/26'` at
+scripts/ingest_current_season.js:38. Running the script today would write
+2026/27 numbers under the 2025/26 label.
+
+**6. player_uid is a derived composite string** — `name|nationality|birth_year`
+(generatePlayerUid, ingest_current_season.js:183). Salah exists three times in
+the DB: `mohamed salah|egy|1992`, `mohamed salah|eg egy|1992`,
+`mohamed salah|egy|`. Every ingest that sees a differently-formatted
+nationality or a missing birth year mints a new "player". sql/003 FIX 2 and
+scripts/resolve_multiclub_pl.js are both retroactive patches for this. It
+compounds with every run.
+
+**7. Collateral damage already live:** `/featured-player` returns
+`{"error":"No players found"}`.
+
+**8. No season-completion promotion step.** current_season_player_stats →
+player_season_stats appears to have been done by hand.
+
+**9. Games themselves are season-agnostic** (they aggregate over all
+season_start_year values), so no game code needs changing for rollover. Good news.
+
+## Replacement source — verified this session
+FPL public API, no key, no rate limit:
+- `GET /api/bootstrap-static/` → 200, 1.7 MB, 20 teams, 652 players, full
+  current-season stats (minutes, goals, assists, starts, clean_sheets, saves,
+  cards, xG/xA, birth_date, team, position) + gameweek events with `finished`.
+- `GET /api/element-summary/{id}/` → `history_past` carries **complete 2025/26
+  season totals** per player. Verified. Caveats: only for players still
+  registered in FPL 2026/27, and it gives `starts`, not `appearances`.
+- `element_code` is stable across seasons → a real join key, unlike player_uid.
+- Limitation: Premier League only. The DB covers 6 competitions.
+
+## Plan
+Written up as an artifact (6 phases: prove the pipe → fix player identity →
+backfill → automate daily refresh → automate season rollover → alerting), plus
+one open decision on multi-league scope. See the published plan.
+
+## REV 2 — findings after live testing (same session)
+
+User pushed back on three points. All three warranted it. Tested rather than assumed.
+
+**FBref is NOT dead — the block is on automated clients, not browsers.**
+Three clients, same URL, today:
+- node-fetch / curl (what ingest_current_season.js uses) → 403 instantly
+- automated Chromium (in-app browser) → stuck on "Performing security
+  verification" indefinitely, gave it 24s across two attempts
+- the user's real Chrome via the extension → cleared the challenge in ~16s,
+  then browsed FBref freely at ~2s/page with no further checks
+
+So the automation WAS built and DID run; it just sat on node-fetch, and
+Cloudflare closed that door between Feb and now. **The parser is fine. Only
+the fetch layer is dead.** `--local` was the escape hatch that still worked.
+For the Mac mini this must be a REAL Chrome (GUI session, persistent profile)
+with `--remote-debugging-port`, attached over CDP — NOT a headless browser the
+script launches. That distinction is the whole ballgame.
+
+**Appearances settles the source question against FPL.**
+FPL has no appearances field at all — checked all ~100 fields per element.
+Only `starts` and `minutes`; deriving apps needs 650 element-summary calls per
+refresh. FBref gives `MP` on the same row, every league, every season, and
+splits mid-season transfers into separate club rows (verified: Ade Akinbiyi,
+Championship 2002-03, Stoke 4 apps + Crystal Palace 10 apps as rows 7 and 8).
+→ FBref becomes the source for EVERYTHING including the PL. One source, one
+schema, one identity space, no cross-source matching layer. FPL demoted to a
+free cross-check in the health monitor (it can't be stale in the same way, so
+it's the one validator that doesn't depend on the thing it validates).
+
+**The Salah claim was imprecise — user was right.**
+No duplicate rows. Club/competition FKs work exactly as designed; multi-club
+and multi-country are handled correctly. The real bug: his 43 rows split
+across 3 identity keys *by competition*, which is arbitrary —
+- `mohamed salah|eg egy|1992` → 11 rows, ALL competition_id 7 (PL)
+- `mohamed salah|egy|1992`    → 29 rows, everything else (UCL, Serie A, cups)
+- `mohamed salah|egy|`        → 3 rows, comp 5, birth year lost
+His Roma Serie A rows and Liverpool UCL rows share a key; his Liverpool PL and
+Liverpool UCL rows do not.
+ROOT CAUSE: FBref renders nationality as `eg EGY` (flag code + country code).
+generatePlayerUid() lowercases the whole cell → `eg egy`. Whichever path loaded
+the historical rows kept only `egy`. Same source field, two normalisations,
+two "players". Third key is a Born-column parse failure on one page layout.
+Fix is normalisation + a merge pass, NOT a schema redesign.
+ALSO SPOTTED: Liverpool appears under two club_ids (28 and 206) in his UCL
+rows — same disease on the clubs table. Audit before adding ~100 EFL clubs.
+
+**EFL depth on FBref — read the season indexes directly:**
+- Premier League (comp 9):  1992-93 → 2026-27  = 34 seasons
+- Championship  (comp 10):  2001-02 → 2026-27  = 26 seasons
+- League One    (comp 15):  2002-03 → 2026-27  = 25 seasons
+- League Two    (comp 16):  2002-03 → 2026-27  = 25 seasons
+So NOT back to 1992 for the EFL — nine/ten seasons short. Confirmed player
+tables exist that far back with MP/Starts/Min/Gls/Ast/PK/cards (verified on
+Championship 2002-03); older seasons carry standard stats only, no
+tackles/interceptions.
+Collection cost is small: ~76 season pages at 1 req/3s ≈ under 10 min once.
+The real work is downstream — EFL club records incl. defunct/renamed sides,
+and player identity across 25 noisier seasons.
+
+**fbrapi.com (community FBref API) — dead end.** DNS resolves, TLS handshakes,
+then no HTTP response (http=000 even with -k). Not a dependency to build on.
+
+## Revised plan (Rev 2, published to the same artifact URL)
+P0 replace fetch layer (real Chrome + CDP on Mac mini, fetch-to-disk only)
+P1 fix player + club identity normalisation, merge splits, add mapping table
+P2 close out 2025/26, open 2026/27, derive season from the page not a constant
+P3 weekly refresh Tue+Fri via launchd, ingestion_runs audit row per run
+P4 data-health on NETLIFY (so it fires when the Mac mini is what's broken)
+   + FPL cross-check + publish freshness in the footer
+P5 backfill EFL: competitions.tier/country, EFL clubs, 76 season pages
+
+## Open questions put to the user
+1. Is the Mac mini available and always-on (GUI session, no sleep)?
+2. Is 2001/02 an acceptable floor for the EFL?
+3. Phase order — current-season correctness first, or four-tier content first?
+
+## REV 3 — answering "what am I missing" on the uid bug + user's sequencing
+
+**Q: Is it only an issue when a player isn't in the DB yet?**
+No — that's the trap. ingest_current_season.js:552 decides existence with
+`if (!playerCache[playerUid])` — an exact string match on the DERIVED uid.
+A player very much in the DB is treated as brand new the moment the computed
+string differs by one character. Creation only happens on a miss, but a miss
+happens whenever normalisation differs, so an EXISTING player gets a phantom row.
+
+**Q: Did we not already have this normalisation baked in?**
+Yes — three times, at three layers, none of them on the uid itself:
+1. `players.nationality_norm` column exists and is correct (sample row proves
+   the divergence: uid `brenden aaronson|us usa|2000` but nationality_raw and
+   nationality_norm both `USA`). The uid was built from the raw cell before
+   normalisation, and the uid is the PK — normalising a neighbouring column
+   doesn't move it.
+2. `sql/003` FIX 2 is an explicit attempt at this remap, but its WHERE clause
+   is `NOT EXISTS (historical row with same uid AND same competition_id)`.
+   Salah's uids each HAVE history in their own competitions, so the patch
+   inspected them, judged them fine, moved on. The test is per-competition and
+   the split is per-competition — it structurally cannot catch this case.
+3. `player-lookup.js` handleSearch/handleDetail merge every uid sharing a
+   `player_name` at read time, with a code comment acknowledging the
+   fragmentation ("Historical data can have multiple UIDs for the same
+   player... different nationality formats, birth years, mojibake"). That is
+   why the lookup tool shows 524 career apps while the games cannot. THE GAMES
+   NEVER GOT THIS WORKAROUND.
+
+**Mechanism, precisely:** FBref's nationality cell is
+`<span class="f-i f-eg">eg</span> EGY`. cheerio `.text()` → "eg EGY".
+generatePlayerUid lowercases the whole thing → "eg egy". A different import
+path kept only the 3-letter code → "egy". Same source field, two
+normalisations, two primary keys. Third key (`|egy|`) is a Born-column parse
+failure on one page layout.
+
+**Cannot count affected players from here** — no DB access, db-introspect only
+returns sample rows (rowCount is the sample size, not a real count).
+→ Wrote `sql/audit_data_health.sql` (READ ONLY, not numbered as a migration).
+Sections: A/A2/A3 coverage + freshness per competition (this is also the Data
+Summary page query), B1-B4 fragmentation counts incl. careers actually broken,
+C uid-format breakdown + uid-vs-column disagreement, D club duplicates incl.
+the Liverpool 28/206 case, E Salah worked example.
+
+**User decisions this round:**
+- EFL floor 2001/02 — ACCEPTED
+- Mac mini always on — CONFIRMED
+- Wants a Data Summary tab: data start per competition + last updated — ADDED
+- Proposes: scrape everything now in one go (incl. new leagues), get the DB
+  current, THEN build the automation.
+
+**My assessment: their sequencing is better than mine, and I said so.**
+A full rebuild through ONE parser with ONE normalisation means every row for a
+person carries the same uid by construction — the fragmentation is a symptom of
+having two import paths, and one pass leaves one path. Nothing to merge. A
+retroactive merge instead has to guess correctly 36,000 times and keep guessing
+correctly every time a new import path appears.
+
+TWO GUARD RAILS I attached:
+1. Fix generatePlayerUid BEFORE the scrape (~½ day). Scrape first and the
+   rebuilt DB is permanently built around the broken key.
+2. The scrape must cover everything currently in the DB. Anything FBref can't
+   supply (some cup competitions — comps 4, 5, 10 in their schema are unknown
+   to me, NOT FBref's ids) either gets dropped or stays on the old identity
+   space, recreating today's mixture. Audit query A is the go/no-go.
+Plus: build into FRESH TABLES and swap, never in place. Diff old vs new before
+committing; check for players DISAPPEARING (large numeric movement is expected
+and correct, since current numbers are wrong).
+
+## Revised phase order (Rev 3, same artifact URL)
+1. Audit (1h) — run audit_data_health.sql
+2. Collector (1-2d) — real Chrome + CDP, fetch-to-disk only
+3. Fix the key (½d) — one generatePlayerUid, season derived from the page
+4. THE BIG SCRAPE (3-5d) — everything + EFL, fresh tables, verify, swap
+5. Data Summary page (1d) — /tools/data, acceptance test for the scrape
+6. Automate (1d) — launchd Tue+Fri, ingestion_runs
+7. Alerting (½d) — data-health on NETLIFY + FPL cross-check
+
+## Blocked on
+User to run sql/audit_data_health.sql and return queries A, B3 and C.

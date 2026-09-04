@@ -42,6 +42,13 @@
 [functions."picks-reminder"]
   schedule = "*/30 * * * *"
 
+# 23 sequential Gmail sends take ~35s; a scheduled function dies at 30, which
+# truncated week 2's reminders at 19 recipients. The stamp lives after the
+# loop, so it was never reached either — later ticks re-sent to the same 19
+# and the last 4 could never get one.
+[functions."picks-reminder-background"]
+  background = true
+
 # Picks AI: checks every 2 hours, but only ACTS when the week's first lockout
 # is ~12 hours away (10-14h window). Deadlines move week to week, so the
 # trigger is measured from each week's actual lockout rather than a fixed

@@ -23,7 +23,6 @@
  */
 
 const { respond, requireAdmin, handleOptions } = require('./_supabase.js');
-const { run } = require('./picks-reminder.js');
 
 exports.handler = async (event) => {
   const corsResponse = handleOptions(event);
@@ -41,5 +40,25 @@ exports.handler = async (event) => {
     return respond(400, 'Body must be valid JSON');
   }
 
-  return run({ force: !!body.force, testEmail: body.test_email || null });
+  // Hand off rather than run inline: a full send is ~35 seconds, past the
+  // limit on a normal function.
+  const base = process.env.URL || process.env.DEPLOY_URL;
+  const secret = process.env.ADMIN_SECRET;
+  if (!base || !secret) return respond(500, 'URL or ADMIN_SECRET not configured');
+
+  try {
+    const res = await fetch(`${base}/.netlify/functions/picks-reminder-background`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-admin-secret': secret },
+      body: JSON.stringify(body)
+    });
+    return respond(202, {
+      ok: true, started: true, backgroundStatus: res.status, options: body,
+      message: body.test_email
+        ? 'Test send started — goes only to that address, does not stamp the week.'
+        : 'Reminder send started in the background. Allow ~40 seconds for all players.'
+    });
+  } catch (e) {
+    return respond(500, `Could not start: ${e.message}`);
+  }
 };

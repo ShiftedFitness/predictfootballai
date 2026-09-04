@@ -293,6 +293,13 @@ async function run({ force = false, testEmail = null } = {}) {
       // 4. Set up Gmail transporter
       const transporter = nodemailer.createTransport({
         service: 'gmail',
+        // One reused connection, rate-limited, rather than a new connection
+        // per message. Gmail throttles hard on concurrency.
+        pool: true,
+        maxConnections: 1,
+        maxMessages: 100,
+        rateDelta: 1000,
+        rateLimit: 5,
         auth: {
           user: process.env.GMAIL_USER,
           pass: process.env.GMAIL_APP_PASSWORD,
@@ -301,37 +308,57 @@ async function run({ force = false, testEmail = null } = {}) {
 
       const deadline = formatDeadline(matches[0].lockout_time);
 
-      // 5. Send all emails in parallel
-      const emailJobs = users
-        .filter(u => u.email)
-        .map(async user => {
-          const userPicks = (allPicks || []).filter(p => p.user_id === user.id);
-          const { subject, html, text } = buildEmail({
-            user,
-            weekNumber: week.week_number,
-            matches,
-            picks: userPicks,
-            deadline
-          });
-          try {
-            await transporter.sendMail({
-              from: `TeleStats Fives <${process.env.GMAIL_USER}>`,
-              to: user.email,
-              subject,
-              text,
-              html
-            });
-            return { user: user.username || user.email, status: 'sent', hasPicks: userPicks.length > 0 };
-          } catch (mailErr) {
-            console.error(`Email failed for ${user.email}:`, mailErr.message);
-            return { user: user.username || user.email, status: 'failed', error: mailErr.message };
-          }
-        });
+      // 5. Send SEQUENTIALLY, not with Promise.all.
+      //
+      //    Sending all 23 at once opened 23 simultaneous SMTP connections
+      //    (nodemailer creates one per message unless pooled) and Gmail
+      //    refuses beyond a handful — which is why week 2 delivered 19 of 23
+      //    with no obvious error. One at a time is slower but it is the
+      //    difference between everyone getting a reminder and most people
+      //    getting one. This is why the job now runs as a background
+      //    function: ~35 seconds is fine inside a 15-minute limit.
+      const recipients = users.filter((u) => u.email);
+      const results = [];
 
-      const results = await Promise.all(emailJobs);
+      for (const user of recipients) {
+        const userPicks = (allPicks || []).filter(p => p.user_id === user.id);
+        const { subject, html, text } = buildEmail({
+          user,
+          weekNumber: week.week_number,
+          matches,
+          picks: userPicks,
+          deadline
+        });
+        try {
+          await transporter.sendMail({
+            from: `TeleStats Fives <${process.env.GMAIL_USER}>`,
+            to: user.email,
+            subject,
+            text,
+            html
+          });
+          results.push({ user: user.username || user.email, status: 'sent', hasPicks: userPicks.length > 0 });
+        } catch (mailErr) {
+          console.error(`Email failed for ${user.email}:`, mailErr.message);
+          results.push({ user: user.username || user.email, status: 'failed', error: mailErr.message });
+        }
+      }
+
       emailsSent = results.filter(r => r.status === 'sent').length;
 
-      console.log(`picks-reminder: Week ${week.week_number} — sent ${emailsSent} emails`);
+      // A pooled transporter holds the connection open; close it so the
+      // function can exit promptly instead of idling.
+      try { transporter.close(); } catch (e) { /* nothing useful to do */ }
+
+      const failed = results.filter((r) => r && r.status === 'failed');
+      if (failed.length) {
+        console.error(
+          `picks-reminder: ${failed.length} send(s) FAILED for week ${week.week_number}: ` +
+          failed.map((f) => `${f.user} (${f.error})`).join('; '));
+      }
+      console.log(
+        `picks-reminder: Week ${week.week_number} — sent ${emailsSent} of ` +
+        `${users.length} emails`);
 
       // Stamp the week so later cron ticks inside the (now wider) window do
       // not send twice. Not stamped for a test send — that would silently
@@ -374,5 +401,35 @@ async function run({ force = false, testEmail = null } = {}) {
 
 exports.run = run;
 
-/** Scheduled entry point — the every-30-minutes cron. */
-exports.handler = async () => run();
+/**
+ * Scheduled entry point.
+ *
+ * Does NOT send. 23 sequential Gmail sends take ~35 seconds and Netlify
+ * kills a scheduled function at 30 — which in week 2 delivered 19 reminders
+ * and then died. Worse, the reminder_sent_at stamp lives after the loop, so
+ * it was never reached: every later tick re-sent to the same first 19 and
+ * the last 4 could never receive one at all.
+ *
+ * So the cron hands off to picks-reminder-background (15-minute limit).
+ */
+exports.handler = async () => {
+  const base = process.env.URL || process.env.DEPLOY_URL;
+  const secret = process.env.ADMIN_SECRET;
+  if (!base || !secret) {
+    console.error('picks-reminder: URL or ADMIN_SECRET missing; cannot hand off');
+    return respond(500, 'URL or ADMIN_SECRET not configured');
+  }
+
+  try {
+    const res = await fetch(`${base}/.netlify/functions/picks-reminder-background`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-admin-secret': secret },
+      body: '{}'
+    });
+    console.log(`picks-reminder: handed off to background function (${res.status})`);
+    return respond(202, { ok: true, handedOff: true, status: res.status });
+  } catch (e) {
+    console.error('picks-reminder: handoff failed:', e.message);
+    return respond(500, `Handoff failed: ${e.message}`);
+  }
+};

@@ -927,7 +927,14 @@ async function run({ requestedWeek = null, dryRun = false, force = false } = {})
       .upsert(rows, { onConflict: 'user_id,match_id' });
     if (upsertErr) throw new Error(`Failed to save picks: ${upsertErr.message}`);
 
-    // 7. Audit the spend so the season budget is verifiable, not assumed.
+    // 7. Tell the admin the picks are in. Before the audit insert, because
+    //     that record now includes whether the email went.
+    const notified = await notifyAdmin({
+      week: week.week_number, season, picks, strategy, matches,
+      isFinal: isFinalRun, cost, searches
+    });
+
+    // 8. Audit the spend so the season budget is verifiable, not assumed.
     const { error: runErr } = await db.from('predict_ai_runs').insert([{
       season: week.season,
       week_number: week.week_number,
@@ -944,15 +951,14 @@ async function run({ requestedWeek = null, dryRun = false, force = false } = {})
         hoursBeforeLockout: Number(hoursUntil.toFixed(1)),
         standing: strategicCtx.standing || null,
         weeksRemaining: strategicCtx.weeksRemaining,
-        replacedProvisional: replacingProvisional
+        replacedProvisional: replacingProvisional,
+        // Record whether the confirmation email was attempted and why it
+        // may not have gone. Without this, "did Picks AI email me?" can
+        // only be answered from Netlify logs — the run log should say.
+        notified
       }
     }]);
     if (runErr) console.error('picks-ai: run log failed (picks still saved):', runErr.message);
-
-    const notified = await notifyAdmin({
-      week: week.week_number, season, picks, strategy, matches,
-      isFinal: isFinalRun, cost, searches
-    });
 
     console.log(
       `picks-ai: week ${week.week_number} ${isFinalRun ? '(final)' : '(provisional)'} — ${rows.length} picks, ` +
