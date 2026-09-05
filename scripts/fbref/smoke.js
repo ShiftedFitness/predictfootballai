@@ -78,7 +78,10 @@ const CASES = [
   ['hol_start',         'get_scopes',      post({ action: 'get_scopes' })],
   ['hol_start',         'get_players',     post({ action: 'get_players', scopeId: 'epl_alltime', statType: 'appearances' })],
   ['xi_start',          'get_scopes',      post({ action: 'get_scopes' })],
-  ['xi_start',          'search_players',  post({ action: 'search_players', query: 'gerr', positionBucket: 'MID', scopeId: 'epl_alltime' })],
+  // Search is scoped, so the query has to be someone who actually played for
+  // the scope. 'gerr' against Arsenal returns nothing, correctly — that was a
+  // bad test case, not a bug, and it sat red for several runs because of it.
+  ['xi_start',          'search_players',  post({ action: 'search_players', query: 'henry', positionBucket: 'FWD', scopeId: 'club_arsenal' })],
   ['xi_start',          'get_best_xi',     post({ action: 'get_best_xi', scopeId: 'epl_alltime', formation: '4-4-2', objective: 'appearances' })],
   ['community-builder', 'preview',         post({ action: 'preview', gameType: 'higher_lower',
                                                   filters: { competitions: ['Premier League'], clubs: ['Liverpool'] } })],

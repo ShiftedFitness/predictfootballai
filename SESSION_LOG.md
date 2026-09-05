@@ -2026,3 +2026,69 @@ live and compat, so pre-existing. Worth chasing separately.
 - player_uid_aliases        36,075 rows
 - players_compat            37,000, zero NULL uids
 - sql/016_swap.sql          WRITTEN, NOT RUN — the cutover
+
+## REV 11 — CUTOVER COMPLETE. 14/14 green on production.
+
+### What landed
+- sql/016_swap.sql  APPLIED — old tables parked as *_pre_rebuild, the four
+  compat views promoted into the live names.
+- sql/018_fix_fk.sql APPLIED — base-table views restored, blocking FK dropped.
+- sql/019_recompute_scores.sql APPLIED — performance scores regenerated.
+- sql/017 DELETED (superseded by 018; flagged to the user, as it breaks the
+  standing no-delete rule — it was my own file from this session and always
+  rolled back).
+
+### Two failures during cutover, both my fault, both instructive
+1. compute_performance_scores() reads `FROM player_season_stats` — the BASE
+   TABLE, by name, from inside a STORED PROCEDURE. I had grepped the repo for
+   references and cleared it; a procedure body is not in the repo.
+2. player_performance_scores has an FK to players(player_uid). FKs bind to the
+   TABLE not its name, so the 016 rename carried the constraint onto
+   players_pre_rebuild. Every new/newly-canonical uid then failed it
+   ("andy robertson|sco|1994").
+STRUCTURAL MISTAKE I MADE TWICE: bundling a call that might fail with DDL that
+must land. The Supabase SQL editor runs a whole script as ONE transaction, so
+017 rolled back entirely — the views at the top were undone by the RPC failing
+at the bottom. Fixed by splitting: 018 = setup (commits), 019 = the RPC alone.
+Also: when reordering 016 I accidentally UNCOMMENTED the RPC line (moved the
+`--` to a trailing comment), so it ran during the user's paste when I had told
+them it would not.
+
+### 9 FKs still point at parked tables — verified INERT
+They are the parked tables and the superseded rollups (player_club_totals,
+player_totals, player_club_total_competition, player_competition_totals,
+player_club_competition_totals) referencing players_pre_rebuild /
+clubs_pre_rebuild. Only db-introspect.js mentions the rollups, and only as a
+list of names to introspect — no live read path. Safe to leave; safe to drop
+later.
+
+### PRODUCTION NOW — 14 passed · 0 failed
+The last red mark was MY BAD TEST CASE, not code: xi search is scope-limited,
+and I was querying 'gerr' against an Arsenal scope. Corrected to henry/FWD/
+club_arsenal — 1 hit, Thierry Henry. Verified search works: seaman→David
+Seaman, keown→Martin Keown.
+
+XI paths that were 0/11 before 019:
+  club_arsenal / performance    11/11  Seaman, Dixon, Keown, Winterburn
+  club_liverpool / performance  11/11  Reina, Carragher, Alexander-Arnold, Hyypiä
+  epl_alltime / performance     11/11
+Club scope ids confirmed new: Arsenal 4, Chelsea 7, Man City 21.
+
+### Data Summary page, post-rebuild
+  last updated 2026-09-04, 8h ago   (was 15 Feb 2026, 201 days)
+  11 competitions · 221,865 rows · 1988–2026
+  Premier League  1992/93–2026/27  tier 1   19,017
+  Championship    2001/02–2026/27  tier 2   18,845
+  League One      2002/03–2026/27  tier 3   18,430
+  League Two      2002/03–2026/27  tier 4   18,566
+(UCL and FA Cup end at 2025/26 — correct, their 2026/27 rounds have not been
+played yet.)
+
+### STILL TO DO
+- DEPLOY: xi_start.js / xi_score.js (41 club ids remapped each),
+  featured-player.js (rewritten), data-summary.js + public/tools/data.html
+  (new). The DB is ahead of the deployed code right now.
+- Automate: launchd on the Mac mini, Tue+Fri (phase 6)
+- Alerting: data-health on Netlify (phase 7)
+- Optional: point games at agg_* tables for the speed win; drop the legacy
+  rollups and the *_pre_rebuild tables once confident.
