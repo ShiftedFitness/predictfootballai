@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
 <!-- Analytics: GA4 via the central TeleStats helper (never loaded on /fives*) -->
 <script src="/js/ts-analytics.js"></script>
+<script src="/js/ts-scope.js"></script>
 <title>TeleStats - Player Alphabet</title>
 <meta name="description" content="Go A-Z naming players by surname initial. Race the clock or take your time. How many letters can you fill?"/>
 <meta property="og:site_name" content="TeleStats"/>
@@ -350,7 +351,23 @@ async function init() {
     const data = await res.json();
     leagues = data.leagues || [];
     scopes = data.scopes || [];
+
+    // A team page can link straight into a configured game:
+    //   /games/alpha.html?scope=team_plymouth-argyle_league-one
+    // Setting selectedScope BEFORE rendering means the card comes up already
+    // chosen, so the player sees where they landed rather than an untouched
+    // picker. An unknown or stale scope falls through to the normal flow.
+    const preset = window.TSScope && TSScope.requested(scopes);
+    if (preset) selectedScope = preset.id;
+
     renderScopes();
+
+    if (preset) {
+      const startBtn = $('startBtn');
+      if (startBtn) startBtn.disabled = false;
+      const chosen = $('scopeList') && $('scopeList').querySelector('.scope-card.selected');
+      if (chosen) chosen.scrollIntoView({ block: 'center' });
+    }
   } catch (err) {
     console.error('Init error:', err);
   }

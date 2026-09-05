@@ -10,6 +10,7 @@
  */
 
 const { createClient } = require('@supabase/supabase-js');
+const teams = require('./_teams');
 
 const SUPABASE_URL = process.env.Supabase_Project_URL;
 const SUPABASE_SERVICE_KEY = process.env.Supabase_Service_Role;
@@ -304,6 +305,13 @@ async function getClubId(supabase, clubName) {
   if (data && data.length > 0) return data[0].club_id;
 
   return null;
+}
+
+async function getCompetitionIdByName(supabase, name) {
+  const { data } = await supabase
+    .from('competitions').select('competition_id')
+    .eq('competition_name', name).maybeSingle();
+  return data ? data.competition_id : null;
 }
 
 async function getEplCompId(supabase) {
@@ -881,20 +889,27 @@ async function generateFromPool(pool, needed, stats, nameMap, scopeLabel, scope)
  * Generate 10 quiz questions: 3 easy, 4 medium, 3 hard.
  */
 async function generateQuiz(supabase, scopeId) {
-  const scopeDef = SCOPES.find(s => s.id === scopeId);
+  const scopeDef = SCOPES.find(s => s.id === scopeId) || teams.resolve(scopeId);
   if (!scopeDef) throw new Error(`Unknown scope: ${scopeId}`);
 
-  const competitionId = await getEplCompId(supabase);
-  if (!competitionId) throw new Error('Premier League competition not found');
+  // Was hardcoded to the Premier League. Every scope this game shipped with
+  // was a top-flight club, so it never mattered; asking for Plymouth Argyle
+  // would have looked for Plymouth players in the Premier League.
+  const competitionId = scopeDef.competitionName
+    ? await getCompetitionIdByName(supabase, scopeDef.competitionName)
+    : await getEplCompId(supabase);
+  if (!competitionId) throw new Error(`Competition not found: ${scopeDef.competitionName || 'Premier League'}`);
 
-  // Resolve club_id if needed
+  // Resolve club_id if needed. A generated scope already carries one.
   const scope = { ...scopeDef };
-  if (scope.type === 'club' && scope.clubName) {
+  if (scope.type === 'club' && scope.clubId == null && scope.clubName) {
     scope.clubId = await getClubId(supabase, scope.clubName);
     if (!scope.clubId) throw new Error(`Club not found: ${scope.clubName}`);
   }
 
-  const scopeLabel = scope.type === 'club' ? scope.clubName : 'the Premier League';
+  const scopeLabel = scope.type === 'club'
+    ? (scope.teamName || scope.clubName)
+    : (scopeDef.competitionName ? `the ${scopeDef.competitionName}` : 'the Premier League');
 
   // Fetch all stats for this scope
   const stats = await fetchScopedStats(supabase, competitionId, scope);
@@ -984,6 +999,22 @@ exports.handler = async (event) => {
     // ============================================================
     // GENERATE QUIZ
     // ============================================================
+    // This game had no get_scopes action at all, which is why it was the one
+    // game the scope sweep could never enumerate. Adding it closes that gap and
+    // lets team pages link into a club quiz.
+    if (action === 'get_scopes') {
+      const generated = teams.scopes()
+        .filter(g => !SCOPES.some(e => e.id === g.id))
+        .map(g => ({ id: g.id, label: g.label, type: g.type, league: g.league,
+                     slug: g.slug, competition: g.competitionName }));
+      return respond(200, {
+        scopes: [
+          ...SCOPES.map(s => ({ id: s.id, label: s.label, type: s.type })),
+          ...generated,
+        ],
+      });
+    }
+
     if (action === 'generate_quiz') {
       const { scopeId } = body;
 

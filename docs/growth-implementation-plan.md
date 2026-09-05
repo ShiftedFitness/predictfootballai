@@ -157,6 +157,13 @@ into GA4.
 
 ### Slice 4 — Ask TeleStats
 
+**Surface it on team pages too**, not only at `/ask/`. A Plymouth page with
+"Ask about Plymouth Argyle" and two or three pre-filled example questions is a
+far better entry point than a bare search box on a page of its own — the user
+already has a subject in mind, and the examples teach the feature. The page
+template leaves room for it under the stats tables.
+
+
 Genuinely differentiated, and the rebuilt data is what makes it credible.
 
 The brief's architecture is right and should be followed exactly:

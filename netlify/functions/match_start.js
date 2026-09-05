@@ -4,6 +4,7 @@
 // Also queries player_season_stats for position/age categories
 
 const { createClient } = require('@supabase/supabase-js');
+const teams = require('./_teams');
 
 const SUPABASE_URL = process.env.Supabase_Project_URL;
 const SUPABASE_SERVICE_KEY = process.env.Supabase_Service_Role;
@@ -1160,6 +1161,26 @@ exports.handler = async (event) => {
     }
 
     // ============================================================
+    // SHARED TEAM SCOPES — team_<slug>_<competition>
+    //
+    // The same ids every other game now understands, so a team page links to
+    // Bullseye exactly as it links to Higher or Lower. The branch below still
+    // handles the older laliga_club_X form; this one covers all 313 clubs,
+    // including every English club outside the top flight, which the older
+    // form has no prefix for.
+    else if (categoryId && /^team_[a-z0-9-]+_[a-z0-9-]+$/.test(categoryId)) {
+      const scope = teams.resolve(categoryId);
+      if (!scope) {
+        return respond(400, { error: `Unknown team scope: ${categoryId}` });
+      }
+      competition = scope.competitionName;
+      categoryName = `${scope.teamName} (${scope.competitionName})`;
+      categoryFlag = '\uD83C\uDFDF\uFE0F';
+      // clubName must be the string the database stores, not the display name:
+      // "Sheffield Weds", not "Sheffield Wednesday".
+      players = await fetchFromView(supabase, competition, scope.clubName, null, metric);
+    }
+
     // DYNAMIC LEAGUE CLUB CATEGORIES (La Liga, Serie A, Bundesliga)
     // e.g. laliga_club_Real_Madrid, seriea_club_Juventus, bundesliga_goals_Bayern_Munich
     // ============================================================

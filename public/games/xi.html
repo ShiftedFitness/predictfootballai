@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
 <!-- Analytics: GA4 via the central TeleStats helper (never loaded on /fives*) -->
 <script src="/js/ts-analytics.js"></script>
+<script src="/js/ts-scope.js"></script>
 <title>TeleStats - Starting XI</title>
 <meta name="description" content="Pick the best starting XI by appearances, goals, or performance. Fill every position correctly to win."/>
 <meta property="og:site_name" content="TeleStats"/>
@@ -1137,6 +1138,12 @@ async function init() {
       body: JSON.stringify({ action: 'get_scopes' }),
     });
     gameConfig = await res.json();
+
+    // A team page can link straight in:
+    //   /games/xi.html?scope=team_plymouth-argyle_league-one
+    const preset = window.TSScope && TSScope.requested(gameConfig.scopes || []);
+    if (preset) selectedScope = preset.id;
+
     renderSetup();
   } catch (err) {
     console.error('Failed to load game config:', err);

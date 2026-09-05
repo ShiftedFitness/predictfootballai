@@ -9,6 +9,7 @@
  */
 
 const { createClient } = require('@supabase/supabase-js');
+const teams = require('./_teams');
 
 const SUPABASE_URL = process.env.Supabase_Project_URL;
 const SUPABASE_SERVICE_KEY = process.env.Supabase_Service_Role;
@@ -284,6 +285,27 @@ async function getEplCompId(supabase) {
 }
 
 /**
+ * The competition a scope is played in.
+ *
+ * This game shipped Premier-League-only: every club scope it had was a top
+ * flight club, so the competition id was fetched unconditionally and the
+ * question never came up. Now that scopes are generated for all 313 clubs,
+ * asking for Plymouth Argyle meant looking for Plymouth players in the
+ * Premier League — which correctly returned nobody.
+ */
+async function compIdForScope(supabase, scope) {
+  if (scope && scope.competitionName) {
+    const { data } = await supabase
+      .from('competitions')
+      .select('competition_id')
+      .eq('competition_name', scope.competitionName)
+      .maybeSingle();
+    if (data) return data.competition_id;
+  }
+  return getEplCompId(supabase);
+}
+
+/**
  * Search players by name for a given scope and position bucket.
  * Returns top 10 matches.
  */
@@ -430,7 +452,7 @@ async function computeBestXI(supabase, scope, formation, objective) {
   const formationDef = FORMATIONS[formation];
   if (!formationDef) throw new Error(`Unknown formation: ${formation}`);
 
-  const competitionId = await getEplCompId(supabase);
+  const competitionId = await compIdForScope(supabase, scope);
   if (!competitionId) throw new Error('Premier League not found');
 
   // Count needed per bucket
@@ -692,8 +714,16 @@ exports.handler = async (event) => {
     // GET SCOPES — return available scopes and formations
     // ============================================================
     if (action === 'get_scopes') {
+      // Every club in the database, not just the 41 hardcoded ones.
+      const generated = teams.scopes().filter(g => !SCOPES.some(e => e.id === g.id))
+        .map(g => ({ id: g.id, label: g.label, type: g.type, league: g.league,
+                     slug: g.slug, competition: g.competitionName }));
       return respond(200, {
-        scopes: SCOPES.map(s => ({ id: s.id, label: s.label, type: s.type, category: s.category || 'clubs', visibleObjectives: s.visibleObjectives || null, nationalityCode: s.nationalityCode || null, wonderType: s.wonderType || null })),
+        scopes: [
+          ...SCOPES.map(s => ({ id: s.id, label: s.label, type: s.type, category: s.category || 'clubs', visibleObjectives: s.visibleObjectives || null, nationalityCode: s.nationalityCode || null, wonderType: s.wonderType || null })),
+          // Generated clubs default to the 'clubs' category and all objectives.
+          ...generated.map(g => ({ ...g, category: 'clubs', visibleObjectives: null, nationalityCode: null, wonderType: null })),
+        ],
         formations: Object.entries(FORMATIONS).map(([key, val]) => ({
           id: key,
           label: val.label,
@@ -717,12 +747,12 @@ exports.handler = async (event) => {
         return respond(400, { error: 'Missing query, positionBucket, or scopeId' });
       }
 
-      const scopeDef = SCOPES.find(s => s.id === scopeId);
+      const scopeDef = SCOPES.find(s => s.id === scopeId) || teams.resolve(scopeId);
       if (!scopeDef) {
         return respond(400, { error: `Unknown scope: ${scopeId}` });
       }
 
-      const competitionId = await getEplCompId(supabase);
+      const competitionId = await compIdForScope(supabase, scopeDef);
       if (!competitionId) {
         return respond(500, { error: 'Premier League competition not found' });
       }
@@ -731,7 +761,8 @@ exports.handler = async (event) => {
       const scope = { ...scopeDef };
       if (scope.type === 'club') {
         if (!scope.clubId && scope.clubName) {
-          scope.clubId = await getClubId(supabase, scope.clubName);
+          // A generated scope already carries club_id; only names need resolving.
+        if (scope.clubId == null) scope.clubId = await getClubId(supabase, scope.clubName);
         }
         if (!scope.clubId) {
           return respond(400, { error: `Club not found: ${scope.clubName}` });
@@ -753,7 +784,7 @@ exports.handler = async (event) => {
         return respond(400, { error: 'Missing scopeId, formation, or objective' });
       }
 
-      const scopeDef = SCOPES.find(s => s.id === scopeId);
+      const scopeDef = SCOPES.find(s => s.id === scopeId) || teams.resolve(scopeId);
       if (!scopeDef) {
         return respond(400, { error: `Unknown scope: ${scopeId}` });
       }
@@ -765,7 +796,8 @@ exports.handler = async (event) => {
       // Resolve club_id — use direct clubId if available, else name lookup
       const scope = { ...scopeDef };
       if (scope.type === 'club' && !scope.clubId && scope.clubName) {
-        scope.clubId = await getClubId(supabase, scope.clubName);
+        // A generated scope already carries club_id; only names need resolving.
+        if (scope.clubId == null) scope.clubId = await getClubId(supabase, scope.clubName);
       }
 
       const bestXI = await computeBestXI(supabase, scope, formation, objective);

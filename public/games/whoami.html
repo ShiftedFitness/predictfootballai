@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
 <!-- Analytics: GA4 via the central TeleStats helper (never loaded on /fives*) -->
 <script src="/js/ts-analytics.js"></script>
+<script src="/js/ts-scope.js"></script>
 <title>TeleStats - Who Am I?</title>
 <meta name="description" content="A mystery player is chosen. Clues are revealed one by one. Can you guess who it is before all clues are shown?"/>
 <meta property="og:site_name" content="TeleStats"/>
@@ -676,6 +677,22 @@ function init() {
   });
 
   $('startBtn').onclick = startGame;
+
+  // A team page can link straight in. This page keeps its own SCOPES array,
+  // which covers only the top flight, so the id is taken as given and the
+  // server validates it — see ts-scope.js.
+  const linked = window.TSScope && TSScope.requestedId();
+  if (linked) {
+    selectedScope = linked;
+    const btn = $('startBtn');
+    if (btn) btn.disabled = false;
+    const known = document.querySelector('.scope-card[data-scope-id="' + linked + '"]');
+    if (known) {
+      document.querySelectorAll('.scope-card').forEach(c => c.classList.remove('selected'));
+      known.classList.add('selected');
+      known.scrollIntoView({ block: 'center' });
+    }
+  }
   $('nextClueBtn').onclick = revealNextClue;
   $('guessBtn').onclick = submitGuess;
   $('giveUpBtn').onclick = giveUp;

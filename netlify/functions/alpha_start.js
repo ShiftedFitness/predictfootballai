@@ -7,6 +7,7 @@
  */
 
 const { createClient } = require('@supabase/supabase-js');
+const teams = require('./_teams');
 
 const SUPABASE_URL = process.env.Supabase_Project_URL;
 const SUPABASE_SERVICE_KEY = process.env.Supabase_Service_Role;
@@ -246,9 +247,16 @@ exports.handler = async (event) => {
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
   if (action === 'get_scopes') {
+    // Every club in the database, not just the 41 hardcoded ones.
+    const generated = teams.scopes().filter(g => !SCOPES.some(e => e.id === g.id))
+      .map(g => ({ id: g.id, label: g.label, type: g.type, league: g.league,
+                   slug: g.slug, competition: g.competitionName }));
     return respond(200, {
       leagues: LEAGUES.map(l => ({ key: l.key, name: l.name })),
-      scopes: SCOPES.map(s => ({ id: s.id, label: s.label, type: s.type, league: s.league })),
+      scopes: [
+        ...SCOPES.map(s => ({ id: s.id, label: s.label, type: s.type, league: s.league })),
+        ...generated,
+      ],
     });
   }
 
@@ -256,7 +264,7 @@ exports.handler = async (event) => {
     const { scopeId } = body;
     if (!scopeId) return respond(400, { error: 'Missing scopeId' });
 
-    const scope = SCOPES.find(s => s.id === scopeId);
+    const scope = SCOPES.find(s => s.id === scopeId) || teams.resolve(scopeId);
     if (!scope) return respond(400, { error: 'Unknown scope' });
 
     try {
@@ -265,7 +273,8 @@ exports.handler = async (event) => {
 
       let clubId = null;
       if (scope.type === 'club') {
-        clubId = await getClubId(supabase, scope.clubName);
+        clubId = scope.clubId != null ? scope.clubId
+               : await getClubId(supabase, scope.clubName);
         if (!clubId) return respond(400, { error: `Club not found: ${scope.clubName}` });
       }
 

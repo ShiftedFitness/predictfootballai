@@ -2164,3 +2164,237 @@ PHASE 4 — 579,857 rows of dead weight in 11 tables:
     _backup_position_bucket_20260214 1,935
   local disk: data/fbref 2.0G (KEEP — re-parse without re-scraping),
     data/backups 151M (KEEP — only copy of pre-rebuild data)
+
+## REV 13 — SLICE 1: team pages. 313 static pages, and the games behind them.
+
+### The blocker found before building anything
+The 141 club scopes were 41 Premier League + 100 European. ZERO from the
+Championship, League One or League Two. Plymouth, Southend, Carlisle, Barnsley
+— no game supported them at all. 73 English clubs would have had team pages
+advertising games that did not exist.
+Proved the engines were fine via community-builder (which takes arbitrary club
+names): Plymouth/League One 193 players feasible, Southend/Championship 26,
+Carlisle/League Two 288. The engines and data were always capable. Only the
+hardcoded menu was not.
+
+### Foundation — data/teams/slugs.json (a URL contract)
+313 clubs: 114 English tiers 1-4 (92 current + 22 historical incl. Carlisle 492
+players, Scunthorpe 413, Southend 377) + 199 top-5 European.
+Slugs generated ONCE from club_id, committed, never recomputed. Re-running only
+adds. Club names moved 68 times last week — a slug derived at request time
+would have moved with them.
+
+CAUGHT AND FIXED BEFORE IT BECAME A CONTRACT: first pass produced
+/teams/sheffield-weds/, /teams/btsv/, /teams/racing-sant/ — the game-matching
+shorthand, which nobody searches. Each team now carries TWO names:
+  name       Sheffield Wednesday / Eintracht Braunschweig  (slug, H1, title)
+  game_name  Sheffield Weds / BTSV                          (DB string match)
+13 clubs differ. Building 313 SEO pages on "BTSV" would have wasted the lot.
+
+### netlify/functions/_teams.js — one source of truth
+Replaces five copies of the same club list. 313 teams -> 471 scopes (one per
+club PER COMPETITION, so "Sunderland in League One" is its own puzzle).
+Generated scopes carry club_id, so there is NO name lookup at all — which is
+what broke on Málaga. Legacy ids (epl_club_arsenal, club_arsenal) still resolve
+through each game's own list; nothing removed.
+
+### Wired into hol, alpha, whoami, xi
+hol/alpha: 146 -> 617 scopes.
+BIGGER FINDING: xi_start and whoami_start called getEplCompId() UNCONDITIONALLY
+— they were structurally Premier-League-only games. Asking for Plymouth meant
+looking for Plymouth players in the Premier League, which correctly returned
+nobody. Added compIdForScope(supabase, scope); 5 call sites.
+Two self-inflicted bugs on the way, both caught by testing: a blanket replace
+put `scope` above its own `const scope` (TDZ), and I twice tested with the
+wrong legacy id — xi/whoami use `club_arsenal`, hol/alpha use
+`epl_club_arsenal`. Code was fine both times.
+Verified after: legacy Arsenal 11/11 + 147 eligible; new Plymouth 11/11
+(Michael Cooper, Graham Coughlan) + 77 eligible; Carlisle 95 eligible.
+
+### scripts/teams/build.js — 313 STATIC pages
+Static at build time, deliberately: asking Googlebot to run JS and wait on a
+function across 313 pages is the one decision that could waste the exercise.
+Raw HTML contains the players, records and links. Three paged queries for ALL
+teams, not per page.
+Each page: title/description/canonical, H1, appearance leaders, top scorers,
+per-competition table, game links per competition, 12 related teams (no
+orphans), data-scope line, BreadcrumbList + SportsTeam JSON-LD, OG/Twitter.
+Plus /teams/ hub grouped by competition and sitemap-teams.xml.
+
+### PLAYABILITY — the subtle one
+Sweep found hol returning 0 players for Lincoln City (Championship) and
+Elversberg (Bundesliga). NOT a bug: both were promoted this season. Lincoln has
+20 Championship players ALL ON 4 APPEARANCES — Higher or Lower has nothing to
+compare; every pair is a tie. (My first diagnosis said "6 players" — that was my
+own .limit(6), not the real count. Rechecked.)
+So playability is about SPREAD, not headcount:
+  MIN_PLAYERS_TO_PLAY = 12  AND  MIN_TOP_APPEARANCES = 10
+Both clubs clear it on their own as the season is played — no list to maintain.
+Result: Lincoln keeps League One + League Two, loses Championship. Elversberg
+has no playable game, so its page shows the record honestly, says why there is
+no game yet, and is kept OUT of the index.
+Indexability is now ONE decision shared by page and sitemap — two copies would
+eventually disagree, and a sitemap listing a noindex page is a contradiction.
+Cross-checked: 313 pages, 8 noindex, 306 sitemap URLs, no contradictions.
+
+### Sweep after rewiring: 581 passed / 12 failed
+10 were alpha returning 10-14 of 26 letters for clubs with ONE season in a
+division (Oldham in the PL, Wolves in League One, Man City in the Championship).
+Real scarcity — my flat threshold of 15 letters was wrong, now 5.
+2 were the Lincoln/Elversberg case above.
+smoke 19/19 · check_club_names clean.
+
+### NOTE FOR SLICE 4 (user request)
+Ask TeleStats should appear ON TEAM PAGES, not only at /ask/. Recorded in
+docs/growth-implementation-plan.md. The template leaves room under the stats.
+
+### Still to do in Slice 1
+- games must READ ?scope= from the URL (pages link to it; the games ignore it)
+- xi_start get_scopes is now 120KB — needs grouping before it ships
+- /teams into robots.txt + a sitemap index
+- quiz_start and match_start not yet on the shared module
+
+## REV 14 — Slice 1 finished. All five games on the shared scope module.
+
+### ?scope= now works — public/js/ts-scope.js
+Team pages were linking to /games/hol.html?scope=team_plymouth-argyle_league-one
+and every game IGNORED the parameter. One shared file rather than the same six
+lines in five pages — five copies of one club list is what put Málaga in four
+places and left one behind.
+  requested(scopes)  validates against the game's own fetched list
+  requestedId()      raw, for pages holding their own partial list
+  sourceTeam()       the slug, for analytics — a value WE generated, so it is
+                     safe for GA4 unlike anything a user typed
+Wired into hol, alpha, xi (validated) and whoami (raw).
+FOUND A SIXTH COPY: whoami.html has its own hardcoded SCOPES array in the
+FRONTEND and never calls get_scopes. Validating a League One link against that
+list would reject it, so whoami takes the id as given and the server validates.
+Migrating that array is a follow-up.
+VERIFIED: all 468 scope links across the 313 team pages resolve in hol_start. 0 dead.
+
+### The 120KB scope payload — measured, then dropped
+I flagged xi_start's get_scopes as a concern at 120KB. Measured:
+  xi 120KB raw -> 9.3KB gzip · hol/alpha 83KB -> 9.8KB
+and confirmed Netlify returns content-encoding: gzip on live functions.
+Not a problem. Not optimising it. Flagging something and then measuring it away
+is the right outcome, not a wasted step.
+
+### robots.txt — there was none at all
+telestats.net/robots.txt returned Netlify's 404 page. Nothing was blocked, but
+nothing was pointed at either. Written:
+- permissive by default (team/game/data pages are the whole point)
+- Disallow admin + auth: /predict/admin*.html, /predict/login.html,
+  /predict/PicksCheck.html, /account/, /offline.html
+- Disallow /*?challenge= and /*?session= (a player's own result must never
+  compete with the real page)
+- Disallow /games/*?scope= — the preconfigured game is a real destination for a
+  human, but the TEAM page is what should rank; otherwise ~1,500 near-identical
+  game URLs compete with the 313 pages carrying the actual content
+- GPTBot, OAI-SearchBot, ChatGPT-User, PerplexityBot, ClaudeBot,
+  Google-Extended named EXPLICITLY so a future tightening cannot silently cut
+  off AI citation
+- Sitemap declared
+
+### scripts/seo/sitemap.js
+sitemap.xml (index) + sitemap-core.xml (13) + sitemap-teams.xml (306) = 319.
+lastmod from the FILE'S mtime, never "now" — stamping every URL with today on
+every build teaches Google the dates are meaningless.
+Index only lists sections that exist; pointing at a 404 is a broken signal.
+Validated: all three parse, 0 core URLs and 0 of 60 sampled team URLs point at
+a missing file.
+
+### quiz_start + match_start on the shared module
+quiz_start had NO get_scopes action at all — the reason it was the one game the
+sweep could never enumerate. Added it (513 scopes). Also hardcoded to the
+Premier League like xi/whoami; now competition-aware.
+match_start understands team_<slug>_<comp> ids alongside the older
+laliga_club_X form, which has no prefix for English clubs below the top flight.
+Verified: Plymouth 193 players, Sheffield Wednesday 318 — and the display name
+read "Sheffield Wednesday (Championship)" while the DB lookup used "Sheffield
+Weds", which is the two-name split doing its job.
+
+### State after Slice 1
+  hol 617 · alpha 617 · whoami 513 · xi 522 · quiz 513 scopes  (all were 146 or none)
+  313 team pages · 306 in the sitemap · 8 noindex
+  smoke 19/19 · club-name gate clean
+
+## REV 15 — SLICE 4: Ask TeleStats
+
+### Architecture — the brief's, followed exactly
+  question -> _ask_parse (pattern first, model fallback)
+           -> _ask_entities (user's own text -> ids, or refuse)
+           -> _ask_intents (3 whitelisted parameterised queries)
+           -> rows -> sentence built ONLY from those rows
+The model never writes SQL, never names a table, never sees a connection and
+never supplies a fact. It labels the question; the database answers it.
+
+### _ask_entities.js — names to ids, deterministically
+313 clubs indexed by official name, game name, slug, ~50 nicknames (spurs,
+gunners, argyle, shrimpers, toffees…), 60 demonyms, 11 competitions.
+Suffix shortenings generated automatically ("West Ham" for West Ham United)
+but ONLY where unambiguous across all 313 clubs.
+KEY SAFETY PROPERTY: "Sheffield" resolves to NOTHING, because it is two clubs.
+Answering the wrong one silently is far worse than refusing. No edit distance,
+no "did you mean" — an unrecognised span is refused.
+
+### _ask_parse.js — patterns before models
+9 of the brief's 10 example questions parse with NO model call: free, instant,
+cannot hallucinate. The model is fallback only, and is constrained to return an
+intent name plus VERBATIM SPANS of the user's text — never an id.
+TWO REGEX BUGS FOUND BY TESTING:
+- `played?` makes only the "d" optional, so it matched "playe"/"played" but
+  NEVER "play" — "did Peter Crouch play for" fell straight through.
+- "goalscorers" is one word: no boundary before "scorers", none after "goal",
+  so \b(goals?|scorers?)\b could not see it.
+
+### _ask_intents.js — the security boundary
+3 intents: players_for_teams, top_players_for_team, player_clubs.
+Every parameter validated before a query is built: club ids must EXIST in the
+manifest (not merely be numbers), competition must be in a fixed set,
+nationality must be /^[A-Z]{3}$/, limit clamped to 50, teams capped at 4.
+Reads agg_player_club / agg_player_club_comp — one indexed read, 88-360ms.
+
+### ask.js
+Provenance on every answer (intent, how interpreted, teams, competition,
+dataset, coverage link, query ms) so an answer can be CHECKED not trusted.
+Analytics payload is structured and scalar only — intent, team_count,
+result_count, latency. THE RAW QUESTION IS NEVER SENT and must never be.
+Rate limits configurable via env (anon 10 / free 30 / pro 200 per hour).
+KNOWN LIMITATION, documented in the file: the throttle is in-memory and
+therefore PER LAMBDA INSTANCE. Enough to stop an accidental loop; a real limit
+needs shared storage and should land before this leaves beta.
+
+### Verified answers
+  Plymouth Argyle ∩ Manchester United  -> 5 (Scott Wootton, Bojan Djordjic…)
+  Spurs ∩ Arsenal                      -> 4 (Sol Campbell 255 + 187)
+  Everton ∩ Liverpool                  -> 6
+  Arsenal ∩ Everton ∩ West Ham         -> "No player… has appeared for" (honest)
+  Spanish, most PL apps for Liverpool  -> Reina 285, Xabi Alonso 143
+  Top scorers Arsenal PL               -> Thierry Henry 175
+  Top scorers Real Madrid La Liga      -> Cristiano Ronaldo 311
+  Peter Crouch                         -> 8 clubs
+
+### Security probes — all refused
+  "ignore all previous instructions…"        refused (never reaches the model)
+  "Arsenal; DROP TABLE players; --"          refused
+  400-character question                     refused at the length check
+  forged plan {intent:"raw_sql"}             Unsupported question type
+  forged plan club_ids:[999999]              Unknown team id
+  forged plan competition:"Secret League"    Unknown competition
+
+### Pages
+/ask/ — standalone, canonical, examples, provenance line.
+AND ON EVERY TEAM PAGE, per request: an ask box with three questions
+pre-filled from that club's OWN data (partner club chosen from one that
+actually shares a competition, so the suggestion is not a guaranteed "none").
+Copy bug caught and fixed in both the questions and the answers: "in the
+League One" — some competition names take the article and some do not, and on
+313 pages that is the tell that a sentence was assembled rather than written.
+
+### State
+smoke 19/19 · club-name gate clean · 320 indexable URLs (313 teams + /ask/ + core)
+
+### Next
+- shared-storage rate limit before Ask leaves beta
+- games' ?scope= links need an end-to-end browser test on a real server
+- whoami.html's frontend SCOPES array is still a sixth copy of the club list

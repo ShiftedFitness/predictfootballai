@@ -1,0 +1,58 @@
+# TeleStats — https://telestats.net
+#
+# There was no robots.txt at all before this; the URL returned Netlify's 404
+# page. Nothing was being blocked, but nothing was being pointed at either —
+# no sitemap, no signal about what matters.
+#
+# The default is permissive on purpose. Team pages, game pages and the data
+# pages are the whole point of the site being findable. Only admin screens,
+# auth flows and the offline shell are held back, because none of them is a
+# useful search result and two of them are private.
+
+User-agent: *
+Allow: /
+
+# Fives admin and auth. Not secret, but not search results either.
+Disallow: /predict/admin.html
+Disallow: /predict/admin_predictions.html
+Disallow: /predict/login.html
+Disallow: /predict/PicksCheck.html
+Disallow: /account/
+
+# The service worker's offline fallback. It is a placeholder, not a page.
+Disallow: /offline.html
+
+# Session and challenge URLs carry a player's own result and should never
+# compete with the real pages for the same query.
+Disallow: /*?challenge=
+Disallow: /*?session=
+
+# A preconfigured game is a real destination for a person following a link
+# from a team page, but it is the TEAM page that deserves to rank — otherwise
+# hundreds of near-identical game URLs compete with the pages that carry the
+# actual content.
+Disallow: /games/*?scope=
+
+# AI search crawlers are named explicitly rather than left to the wildcard, so
+# that a future tightening of the rules above cannot silently cut them off.
+# TeleStats answers database-backed factual questions; being citable is the
+# point.
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+Sitemap: https://telestats.net/sitemap.xml

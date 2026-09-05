@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="/js/ts-analytics.js"></script>
+<title>Ask TeleStats — Football Database Questions | TeleStats</title>
+<meta name="description" content="Ask the TeleStats football database a question. Which players turned out for both Liverpool and Chelsea? Answers come from real appearance data, never invented.">
+<link rel="canonical" href="https://telestats.net/ask/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Ask TeleStats — Football Database Questions">
+<meta property="og:description" content="Ask a football question and get an answer from real appearance data.">
+<meta property="og:url" content="https://telestats.net/ask/">
+<meta name="twitter:card" content="summary">
+<link rel="stylesheet" href="/telestats-theme.css">
+<style>
+  body { max-width: 760px; margin: 0 auto; padding: 20px; }
+  nav.crumbs { font-size:.8rem; color:var(--text-secondary); margin-bottom:14px; }
+  nav.crumbs a { color:var(--accent); text-decoration:none; }
+  h1 { font-size:1.7rem; margin:0 0 6px; }
+  .lede { color:var(--text-secondary); margin:0 0 20px; max-width:60ch; }
+  form { display:flex; gap:8px; margin-bottom:14px; }
+  input { flex:1; padding:12px 14px; font-size:1rem; border-radius:8px;
+          border:1px solid var(--rule,#24313A); background:var(--bg-card,#171F25); color:var(--text-primary,#F2F5F7); }
+  button { padding:12px 18px; font-size:.95rem; font-weight:600; border:0; border-radius:8px;
+           background:var(--accent,#00E5FF); color:#0B0F12; cursor:pointer; }
+  button:disabled { opacity:.5; cursor:default; }
+  .examples { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:26px; }
+  .examples button { background:var(--bg-elevated,#1E272E); color:var(--accent,#00E5FF);
+                     font-weight:400; font-size:.8rem; padding:6px 11px; }
+  #answer { margin-top:8px; }
+  .msg { font-size:1.05rem; line-height:1.5; margin-bottom:14px; }
+  table { border-collapse:collapse; width:100%; font-size:.875rem; }
+  th,td { text-align:left; padding:7px 10px; border-bottom:1px solid var(--rule,#24313A); }
+  th { font-size:.7rem; text-transform:uppercase; letter-spacing:.05em; color:var(--text-muted); }
+  td.num { text-align:right; font-variant-numeric:tabular-nums; }
+  .prov { margin-top:14px; font-size:.75rem; color:var(--text-muted); }
+  .prov a { color:var(--accent); }
+  footer { margin-top:40px; font-size:.78rem; color:var(--text-muted); }
+  footer a { color:var(--accent); }
+</style>
+</head>
+<body>
+<nav class="crumbs"><a href="/">TeleStats</a> › Ask</nav>
+<h1>Ask TeleStats</h1>
+<p class="lede">Ask about players, clubs and appearances. Every answer is read from the
+  TeleStats database — if the data does not support an answer, it says so rather than
+  guessing.</p>
+
+<form id="f">
+  <input id="q" autocomplete="off" maxlength="300"
+         placeholder="Who has played for both Everton and Liverpool?" aria-label="Your question">
+  <button id="go" type="submit">Ask</button>
+</form>
+
+<div class="examples" id="ex"></div>
+<div id="answer"></div>
+
+<footer>
+  <a href="/tools/data.html">What data this covers</a> ·
+  <a href="/teams/">Teams</a> ·
+  <a href="/games/">Games</a>
+</footer>
+
+<script>
+(function () {
+  var EXAMPLES = [
+    'Who has played for both Everton and Liverpool?',
+    'Which Spanish players have the most Premier League appearances for Liverpool?',
+    'Who played for both Plymouth Argyle and Manchester United?',
+    'Top scorers for Sheffield Wednesday in the Championship',
+    'Which clubs did Peter Crouch play for?'
+  ];
+  var $ = function (id) { return document.getElementById(id); };
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+    });
+  }
+
+  EXAMPLES.forEach(function (t) {
+    var b = document.createElement('button');
+    b.type = 'button'; b.textContent = t;
+    b.onclick = function () { $('q').value = t; $('f').requestSubmit(); };
+    $('ex').appendChild(b);
+  });
+
+  function renderRows(d) {
+    if (!d.rows || !d.rows.length) return '';
+    var r0 = d.rows[0];
+    // Three intents, three shapes.
+    if (r0.clubs && r0.clubs[0] && r0.clubs[0].team && r0.player) {
+      var teams = r0.clubs.map(function (c) { return esc(c.team); });
+      return '<table><thead><tr><th>Player</th>' +
+        teams.map(function (t) { return '<th class="num">' + t + '</th>'; }).join('') +
+        '</tr></thead><tbody>' + d.rows.map(function (r) {
+          return '<tr><td>' + esc(r.player) + '</td>' + r.clubs.map(function (c) {
+            return '<td class="num">' + c.appearances + '</td>'; }).join('') + '</tr>';
+        }).join('') + '</tbody></table>';
+    }
+    if (r0.name && r0.clubs) {
+      return d.rows.map(function (p) {
+        return '<p class="msg">' + esc(p.name) + '</p><table><thead><tr><th>Club</th>' +
+          '<th class="num">Apps</th><th class="num">Goals</th><th>Seasons</th></tr></thead><tbody>' +
+          p.clubs.map(function (c) {
+            return '<tr><td>' + esc(c.team) + '</td><td class="num">' + c.appearances +
+                   '</td><td class="num">' + c.goals + '</td><td>' + esc(c.from) + '–' + esc(c.to) + '</td></tr>';
+          }).join('') + '</tbody></table>';
+      }).join('');
+    }
+    return '<table><thead><tr><th>Player</th><th class="num">Apps</th>' +
+      '<th class="num">Goals</th><th>Seasons</th></tr></thead><tbody>' +
+      d.rows.map(function (r) {
+        return '<tr><td>' + esc(r.player) + '</td><td class="num">' + r.appearances +
+               '</td><td class="num">' + r.goals + '</td><td>' + esc(r.from) + '–' + esc(r.to) + '</td></tr>';
+      }).join('') + '</tbody></table>';
+  }
+
+  $('f').onsubmit = function (e) {
+    e.preventDefault();
+    var q = $('q').value.trim();
+    if (!q) return;
+    $('go').disabled = true;
+    $('answer').innerHTML = '<p class="msg">Looking…</p>';
+
+    fetch('/.netlify/functions/ask', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question: q, source: 'ask_page' })
+    }).then(function (r) { return r.json(); }).then(function (d) {
+      $('go').disabled = false;
+      if (d.error && !d.message) { $('answer').innerHTML = '<p class="msg">' + esc(d.error) + '</p>'; return; }
+      var html = '<p class="msg">' + esc(d.message) + '</p>' + renderRows(d);
+      if (d.provenance) {
+        html += '<p class="prov">' + esc(d.count) + ' result' + (d.count === 1 ? '' : 's') +
+                ' from the TeleStats database in ' + esc(d.provenance.query_ms) + 'ms · ' +
+                '<a href="/tools/data.html">dataset coverage</a></p>';
+      }
+      $('answer').innerHTML = html;
+
+      // Structured only. The user's question is never sent to analytics.
+      if (d.analytics && window.TSAnalytics) {
+        TSAnalytics.trackEvent('ask_query', d.analytics);
+      }
+    }).catch(function () {
+      $('go').disabled = false;
+      $('answer').innerHTML = '<p class="msg">Could not reach the database. Try again.</p>';
+    });
+  };
+})();
+</script>
+</body>
+</html>
