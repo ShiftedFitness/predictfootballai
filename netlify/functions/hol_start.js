@@ -7,6 +7,7 @@
  */
 
 const { createClient } = require('@supabase/supabase-js');
+const teams = require('./_teams');
 
 const SUPABASE_URL = process.env.Supabase_Project_URL;
 const SUPABASE_SERVICE_KEY = process.env.Supabase_Service_Role;
@@ -276,9 +277,20 @@ exports.handler = async (event) => {
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
   if (action === 'get_scopes') {
+    // The hardcoded SCOPES cover 41 Premier League clubs and 100 European
+    // ones. teams.scopes() adds every club in the database that has data —
+    // including all 73 English clubs below the top flight, which until now had
+    // no playable game at all despite Plymouth alone having 481 players.
+    // Legacy ids keep working; these are additive.
+    const generated = teams.scopes()
+      .filter(s => !SCOPES.some(existing => existing.id === s.id));
     return respond(200, {
       leagues: LEAGUES.map(l => ({ key: l.key, name: l.name })),
-      scopes: SCOPES.map(s => ({ id: s.id, label: s.label, type: s.type, league: s.league })),
+      scopes: [
+        ...SCOPES.map(s => ({ id: s.id, label: s.label, type: s.type, league: s.league })),
+        ...generated.map(s => ({ id: s.id, label: s.label, type: s.type, league: s.league,
+                                 slug: s.slug, competition: s.competitionName })),
+      ],
     });
   }
 
@@ -286,7 +298,7 @@ exports.handler = async (event) => {
     const { scopeId, statType } = body;
     if (!scopeId || !statType) return respond(400, { error: 'Missing scopeId or statType' });
 
-    const scope = SCOPES.find(s => s.id === scopeId);
+    const scope = SCOPES.find(s => s.id === scopeId) || teams.resolve(scopeId);
     if (!scope) return respond(400, { error: 'Unknown scope' });
 
     try {
@@ -296,7 +308,10 @@ exports.handler = async (event) => {
 
       let clubId = null;
       if (scope.type === 'club') {
-        clubId = await getClubId(supabase, scope.clubName);
+        // A generated scope already carries the club_id, so no name lookup is
+        // needed at all — which is the point. Matching clubs by name is what
+        // broke when 68 of them were renamed.
+        clubId = scope.clubId != null ? scope.clubId : await getClubId(supabase, scope.clubName);
         if (!clubId) return respond(400, { error: `Club not found: ${scope.clubName}` });
       }
 

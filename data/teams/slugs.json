@@ -1,0 +1,5017 @@
+{
+ "generated": "2026-09-05T10:42:35.134Z",
+ "teams": {
+  "1": {
+   "club_id": 1,
+   "slug": "everton",
+   "name": "Everton",
+   "game_name": "Everton",
+   "country": "ENG",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Premier League"
+   ],
+   "players": 287,
+   "appearances": 17496
+  },
+  "2": {
+   "club_id": 2,
+   "slug": "southampton",
+   "name": "Southampton",
+   "game_name": "Southampton",
+   "country": "ENG",
+   "tiers": [
+    1,
+    2,
+    3
+   ],
+   "competitions": [
+    "Championship",
+    "League One",
+    "Premier League"
+   ],
+   "players": 483,
+   "appearances": 18777
+  },
+  "3": {
+   "club_id": 3,
+   "slug": "oldham-athletic",
+   "name": "Oldham Athletic",
+   "game_name": "Oldham Athletic",
+   "country": "ENG",
+   "tiers": [
+    1,
+    3,
+    4
+   ],
+   "competitions": [
+    "League One",
+    "League Two",
+    "Premier League"
+   ],
+   "players": 509,
+   "appearances": 14020
+  },
+  "4": {
+   "club_id": 4,
+   "slug": "arsenal",
+   "name": "Arsenal",
+   "game_name": "Arsenal",
+   "country": "ENG",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Premier League"
+   ],
+   "players": 248,
+   "appearances": 17813
+  },
+  "5": {
+   "club_id": 5,
+   "slug": "queens-park-rangers",
+   "name": "Queens Park Rangers",
+   "game_name": "Queens Park Rangers",
+   "country": "ENG",
+   "tiers": [
+    1,
+    2,
+    3
+   ],
+   "competitions": [
+    "Championship",
+    "League One",
+    "Premier League"
+   ],
+   "players": 462,
+   "appearances": 17024
+  },
+  "6": {
+   "club_id": 6,
+   "slug": "tottenham-hotspur",
+   "name": "Tottenham Hotspur",
+   "game_name": "Tottenham Hotspur",
+   "country": "ENG",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Premier League"
+   ],
+   "players": 301,
+   "appearances": 17680
+  },
+  "7": {
+   "club_id": 7,
+   "slug": "chelsea",
+   "name": "Chelsea",
+   "game_name": "Chelsea",
+   "country": "ENG",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Premier League"
+   ],
+   "players": 317,
+   "appearances": 17912
+  },
+  "8": {
+   "club_id": 8,
+   "slug": "sheffield-wednesday",
+   "name": "Sheffield Wednesday",
+   "game_name": "Sheffield Weds",
+   "country": "ENG",
+   "tiers": [
+    1,
+    2,
+    3
+   ],
+   "competitions": [
+    "Championship",
+    "League One",
+    "Premier League"
+   ],
+   "players": 571,
+   "appearances": 20108
+  },
+  "9": {
+   "club_id": 9,
+   "slug": "blackburn-rovers",
+   "name": "Blackburn Rovers",
+   "game_name": "Blackburn Rovers",
+   "country": "ENG",
+   "tiers": [
+    1,
+    2,
+    3
+   ],
+   "competitions": [
+    "Championship",
+    "League One",
+    "Premier League"
+   ],
+   "players": 416,
+   "appearances": 18282
+  },
+  "10": {
+   "club_id": 10,
+   "slug": "wimbledon",
+   "name": "Wimbledon",
+   "game_name": "Wimbledon",
+   "country": "ENG",
+   "tiers": [
+    1,
+    2
+   ],
+   "competitions": [
+    "Championship",
+    "Premier League"
+   ],
+   "players": 123,
+   "appearances": 5823
+  },
+  "11": {
+   "club_id": 11,
+   "slug": "crystal-palace",
+   "name": "Crystal Palace",
+   "game_name": "Crystal Palace",
+   "country": "ENG",
+   "tiers": [
+    1,
+    2
+   ],
+   "competitions": [
+    "Championship",
+    "Premier League"
+   ],
+   "players": 393,
+   "appearances": 15799
+  },
+  "12": {
+   "club_id": 12,
+   "slug": "coventry-city",
+   "name": "Coventry City",
+   "game_name": "Coventry City",
+   "country": "ENG",
+   "tiers": [
+    1,
+    2,
+    3,
+    4
+   ],
+   "competitions": [
+    "Championship",
+    "League One",
+    "League Two",
+    "Premier League"
+   ],
+   "players": 591,
+   "appearances": 19924
+  },
+  "13": {
+   "club_id": 13,
+   "slug": "aston-villa",
+   "name": "Aston Villa",
+   "game_name": "Aston Villa",
+   "country": "ENG",
+   "tiers": [
+    1,
+    2
+   ],
+   "competitions": [
+    "Championship",
+    "Premier League"
+   ],
+   "players": 357,
+   "appearances": 17816
+  },
+  "14": {
+   "club_id": 14,
+   "slug": "ipswich-town",
+   "name": "Ipswich Town",
+   "game_name": "Ipswich Town",
+   "country": "ENG",
+   "tiers": [
+    1,
+    2,
+    3
+   ],
+   "competitions": [
+    "Championship",
+    "League One",
+    "Premier League"
+   ],
+   "players": 499,
+   "appearances": 17803
+  },
+  "15": {
+   "club_id": 15,
+   "slug": "nottingham-forest",
+   "name": "Nottingham Forest",
+   "game_name": "Nottingham Forest",
+   "country": "ENG",
+   "tiers": [
+    1,
+    2,
+    3
+   ],
+   "competitions": [
+    "Championship",
+    "League One",
+    "Premier League"
+   ],
+   "players": 480,
+   "appearances": 17989
+  },
+  "16": {
+   "club_id": 16,
+   "slug": "sheffield-united",
+   "name": "Sheffield United",
+   "game_name": "Sheffield United",
+   "country": "ENG",
+   "tiers": [
+    1,
+    2,
+    3
+   ],
+   "competitions": [
+    "Championship",
+    "League One",
+    "Premier League"
+   ],
+   "players": 524,
+   "appearances": 16682
+  },
+  "17": {
+   "club_id": 17,
+   "slug": "liverpool",
+   "name": "Liverpool",
+   "game_name": "Liverpool",
+   "country": "ENG",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Premier League"
+   ],
+   "players": 271,
+   "appearances": 17703
+  },
+  "18": {
+   "club_id": 18,
+   "slug": "leeds-united",
+   "name": "Leeds United",
+   "game_name": "Leeds United",
+   "country": "ENG",
+   "tiers": [
+    1,
+    2,
+    3
+   ],
+   "competitions": [
+    "Championship",
+    "League One",
+    "Premier League"
+   ],
+   "players": 514,
+   "appearances": 19565
+  },
+  "19": {
+   "club_id": 19,
+   "slug": "norwich-city",
+   "name": "Norwich City",
+   "game_name": "Norwich City",
+   "country": "ENG",
+   "tiers": [
+    1,
+    2,
+    3
+   ],
+   "competitions": [
+    "Championship",
+    "League One",
+    "Premier League"
+   ],
+   "players": 486,
+   "appearances": 16870
+  },
+  "20": {
+   "club_id": 20,
+   "slug": "manchester-united",
+   "name": "Manchester United",
+   "game_name": "Manchester Utd",
+   "country": "ENG",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Premier League"
+   ],
+   "players": 252,
+   "appearances": 17741
+  },
+  "21": {
+   "club_id": 21,
+   "slug": "manchester-city",
+   "name": "Manchester City",
+   "game_name": "Manchester City",
+   "country": "ENG",
+   "tiers": [
+    1,
+    2
+   ],
+   "competitions": [
+    "Championship",
+    "Premier League"
+   ],
+   "players": 326,
+   "appearances": 15660
+  },
+  "22": {
+   "club_id": 22,
+   "slug": "middlesbrough",
+   "name": "Middlesbrough",
+   "game_name": "Middlesbrough",
+   "country": "ENG",
+   "tiers": [
+    1,
+    2
+   ],
+   "competitions": [
+    "Championship",
+    "Premier League"
+   ],
+   "players": 445,
+   "appearances": 17918
+  },
+  "23": {
+   "club_id": 23,
+   "slug": "swindon-town",
+   "name": "Swindon Town",
+   "game_name": "Swindon Town",
+   "country": "ENG",
+   "tiers": [
+    1,
+    3,
+    4
+   ],
+   "competitions": [
+    "League One",
+    "League Two",
+    "Premier League"
+   ],
+   "players": 571,
+   "appearances": 15535
+  },
+  "24": {
+   "club_id": 24,
+   "slug": "west-ham-united",
+   "name": "West Ham United",
+   "game_name": "West Ham United",
+   "country": "ENG",
+   "tiers": [
+    1,
+    2
+   ],
+   "competitions": [
+    "Championship",
+    "Premier League"
+   ],
+   "players": 443,
+   "appearances": 17343
+  },
+  "25": {
+   "club_id": 25,
+   "slug": "newcastle-united",
+   "name": "Newcastle United",
+   "game_name": "Newcastle United",
+   "country": "ENG",
+   "tiers": [
+    1,
+    2
+   ],
+   "competitions": [
+    "Championship",
+    "Premier League"
+   ],
+   "players": 345,
+   "appearances": 17324
+  },
+  "26": {
+   "club_id": 26,
+   "slug": "leicester-city",
+   "name": "Leicester City",
+   "game_name": "Leicester City",
+   "country": "ENG",
+   "tiers": [
+    1,
+    2,
+    3
+   ],
+   "competitions": [
+    "Championship",
+    "League One",
+    "Premier League"
+   ],
+   "players": 480,
+   "appearances": 17668
+  },
+  "27": {
+   "club_id": 27,
+   "slug": "bolton-wanderers",
+   "name": "Bolton Wanderers",
+   "game_name": "Bolton Wanderers",
+   "country": "ENG",
+   "tiers": [
+    1,
+    2,
+    3,
+    4
+   ],
+   "competitions": [
+    "Championship",
+    "League One",
+    "League Two",
+    "Premier League"
+   ],
+   "players": 518,
+   "appearances": 15593
+  },
+  "28": {
+   "club_id": 28,
+   "slug": "sunderland",
+   "name": "Sunderland",
+   "game_name": "Sunderland",
+   "country": "ENG",
+   "tiers": [
+    1,
+    2,
+    3
+   ],
+   "competitions": [
+    "Championship",
+    "League One",
+    "Premier League"
+   ],
+   "players": 498,
+   "appearances": 15680
+  },
+  "29": {
+   "club_id": 29,
+   "slug": "derby-county",
+   "name": "Derby County",
+   "game_name": "Derby County",
+   "country": "ENG",
+   "tiers": [
+    1,
+    2,
+    3
+   ],
+   "competitions": [
+    "Championship",
+    "League One",
+    "Premier League"
+   ],
+   "players": 495,
+   "appearances": 18418
+  },
+  "30": {
+   "club_id": 30,
+   "slug": "barnsley",
+   "name": "Barnsley",
+   "game_name": "Barnsley",
+   "country": "ENG",
+   "tiers": [
+    1,
+    2,
+    3
+   ],
+   "competitions": [
+    "Championship",
+    "League One",
+    "Premier League"
+   ],
+   "players": 578,
+   "appearances": 16432
+  },
+  "31": {
+   "club_id": 31,
+   "slug": "charlton-athletic",
+   "name": "Charlton Athletic",
+   "game_name": "Charlton Athletic",
+   "country": "ENG",
+   "tiers": [
+    1,
+    2,
+    3
+   ],
+   "competitions": [
+    "Championship",
+    "League One",
+    "Premier League"
+   ],
+   "players": 537,
+   "appearances": 16451
+  },
+  "32": {
+   "club_id": 32,
+   "slug": "watford",
+   "name": "Watford",
+   "game_name": "Watford",
+   "country": "ENG",
+   "tiers": [
+    1,
+    2
+   ],
+   "competitions": [
+    "Championship",
+    "Premier League"
+   ],
+   "players": 452,
+   "appearances": 15731
+  },
+  "33": {
+   "club_id": 33,
+   "slug": "bradford-city",
+   "name": "Bradford City",
+   "game_name": "Bradford City",
+   "country": "ENG",
+   "tiers": [
+    1,
+    2,
+    3,
+    4
+   ],
+   "competitions": [
+    "Championship",
+    "League One",
+    "League Two",
+    "Premier League"
+   ],
+   "players": 583,
+   "appearances": 16440
+  },
+  "34": {
+   "club_id": 34,
+   "slug": "fulham",
+   "name": "Fulham",
+   "game_name": "Fulham",
+   "country": "ENG",
+   "tiers": [
+    1,
+    2
+   ],
+   "competitions": [
+    "Championship",
+    "Premier League"
+   ],
+   "players": 358,
+   "appearances": 13807
+  },
+  "35": {
+   "club_id": 35,
+   "slug": "west-bromwich-albion",
+   "name": "West Bromwich Albion",
+   "game_name": "West Bromwich Albion",
+   "country": "ENG",
+   "tiers": [
+    1,
+    2
+   ],
+   "competitions": [
+    "Championship",
+    "Premier League"
+   ],
+   "players": 402,
+   "appearances": 14683
+  },
+  "36": {
+   "club_id": 36,
+   "slug": "birmingham-city",
+   "name": "Birmingham City",
+   "game_name": "Birmingham City",
+   "country": "ENG",
+   "tiers": [
+    1,
+    2,
+    3
+   ],
+   "competitions": [
+    "Championship",
+    "League One",
+    "Premier League"
+   ],
+   "players": 457,
+   "appearances": 15309
+  },
+  "37": {
+   "club_id": 37,
+   "slug": "portsmouth",
+   "name": "Portsmouth",
+   "game_name": "Portsmouth",
+   "country": "ENG",
+   "tiers": [
+    1,
+    2,
+    3,
+    4
+   ],
+   "competitions": [
+    "Championship",
+    "League One",
+    "League Two",
+    "Premier League"
+   ],
+   "players": 541,
+   "appearances": 14954
+  },
+  "38": {
+   "club_id": 38,
+   "slug": "wolverhampton-wanderers",
+   "name": "Wolverhampton Wanderers",
+   "game_name": "Wolves",
+   "country": "ENG",
+   "tiers": [
+    1,
+    2,
+    3
+   ],
+   "competitions": [
+    "Championship",
+    "League One",
+    "Premier League"
+   ],
+   "players": 399,
+   "appearances": 14650
+  },
+  "39": {
+   "club_id": 39,
+   "slug": "wigan-athletic",
+   "name": "Wigan Athletic",
+   "game_name": "Wigan Athletic",
+   "country": "ENG",
+   "tiers": [
+    1,
+    2,
+    3
+   ],
+   "competitions": [
+    "Championship",
+    "League One",
+    "Premier League"
+   ],
+   "players": 486,
+   "appearances": 14496
+  },
+  "40": {
+   "club_id": 40,
+   "slug": "reading",
+   "name": "Reading",
+   "game_name": "Reading",
+   "country": "ENG",
+   "tiers": [
+    1,
+    2,
+    3
+   ],
+   "competitions": [
+    "Championship",
+    "League One",
+    "Premier League"
+   ],
+   "players": 383,
+   "appearances": 14961
+  },
+  "41": {
+   "club_id": 41,
+   "slug": "hull-city",
+   "name": "Hull City",
+   "game_name": "Hull City",
+   "country": "ENG",
+   "tiers": [
+    1,
+    2,
+    3,
+    4
+   ],
+   "competitions": [
+    "Championship",
+    "League One",
+    "League Two",
+    "Premier League"
+   ],
+   "players": 503,
+   "appearances": 14929
+  },
+  "42": {
+   "club_id": 42,
+   "slug": "stoke-city",
+   "name": "Stoke City",
+   "game_name": "Stoke City",
+   "country": "ENG",
+   "tiers": [
+    1,
+    2
+   ],
+   "competitions": [
+    "Championship",
+    "Premier League"
+   ],
+   "players": 343,
+   "appearances": 14242
+  },
+  "43": {
+   "club_id": 43,
+   "slug": "burnley",
+   "name": "Burnley",
+   "game_name": "Burnley",
+   "country": "ENG",
+   "tiers": [
+    1,
+    2
+   ],
+   "competitions": [
+    "Championship",
+    "Premier League"
+   ],
+   "players": 362,
+   "appearances": 14707
+  },
+  "44": {
+   "club_id": 44,
+   "slug": "blackpool",
+   "name": "Blackpool",
+   "game_name": "Blackpool",
+   "country": "ENG",
+   "tiers": [
+    1,
+    2,
+    3,
+    4
+   ],
+   "competitions": [
+    "Championship",
+    "League One",
+    "League Two",
+    "Premier League"
+   ],
+   "players": 561,
+   "appearances": 15055
+  },
+  "45": {
+   "club_id": 45,
+   "slug": "swansea-city",
+   "name": "Swansea City",
+   "game_name": "Swansea City",
+   "country": "ENG",
+   "tiers": [
+    1,
+    2,
+    3,
+    4
+   ],
+   "competitions": [
+    "Championship",
+    "League One",
+    "League Two",
+    "Premier League"
+   ],
+   "players": 372,
+   "appearances": 14659
+  },
+  "46": {
+   "club_id": 46,
+   "slug": "cardiff-city",
+   "name": "Cardiff City",
+   "game_name": "Cardiff City",
+   "country": "ENG",
+   "tiers": [
+    1,
+    2,
+    3
+   ],
+   "competitions": [
+    "Championship",
+    "League One",
+    "Premier League"
+   ],
+   "players": 411,
+   "appearances": 15083
+  },
+  "47": {
+   "club_id": 47,
+   "slug": "bournemouth",
+   "name": "Bournemouth",
+   "game_name": "Bournemouth",
+   "country": "ENG",
+   "tiers": [
+    1,
+    2,
+    3,
+    4
+   ],
+   "competitions": [
+    "Championship",
+    "League One",
+    "League Two",
+    "Premier League"
+   ],
+   "players": 385,
+   "appearances": 14341
+  },
+  "48": {
+   "club_id": 48,
+   "slug": "brighton-and-hove-albion",
+   "name": "Brighton and Hove Albion",
+   "game_name": "Brighton",
+   "country": "ENG",
+   "tiers": [
+    1,
+    2,
+    3
+   ],
+   "competitions": [
+    "Championship",
+    "League One",
+    "Premier League"
+   ],
+   "players": 383,
+   "appearances": 14275
+  },
+  "49": {
+   "club_id": 49,
+   "slug": "huddersfield-town",
+   "name": "Huddersfield Town",
+   "game_name": "Huddersfield Town",
+   "country": "ENG",
+   "tiers": [
+    1,
+    2,
+    3,
+    4
+   ],
+   "competitions": [
+    "Championship",
+    "League One",
+    "League Two",
+    "Premier League"
+   ],
+   "players": 442,
+   "appearances": 15026
+  },
+  "50": {
+   "club_id": 50,
+   "slug": "brentford",
+   "name": "Brentford",
+   "game_name": "Brentford",
+   "country": "ENG",
+   "tiers": [
+    1,
+    2,
+    3,
+    4
+   ],
+   "competitions": [
+    "Championship",
+    "League One",
+    "League Two",
+    "Premier League"
+   ],
+   "players": 412,
+   "appearances": 14753
+  },
+  "51": {
+   "club_id": 51,
+   "slug": "luton-town",
+   "name": "Luton Town",
+   "game_name": "Luton Town",
+   "country": "ENG",
+   "tiers": [
+    1,
+    2,
+    3,
+    4
+   ],
+   "competitions": [
+    "Championship",
+    "League One",
+    "League Two",
+    "Premier League"
+   ],
+   "players": 406,
+   "appearances": 11950
+  },
+  "52": {
+   "club_id": 52,
+   "slug": "preston-north-end",
+   "name": "Preston North End",
+   "game_name": "Preston North End",
+   "country": "ENG",
+   "tiers": [
+    2,
+    3
+   ],
+   "competitions": [
+    "Championship",
+    "League One"
+   ],
+   "players": 366,
+   "appearances": 16058
+  },
+  "53": {
+   "club_id": 53,
+   "slug": "grimsby-town",
+   "name": "Grimsby Town",
+   "game_name": "Grimsby Town",
+   "country": "ENG",
+   "tiers": [
+    2,
+    3,
+    4
+   ],
+   "competitions": [
+    "Championship",
+    "League One",
+    "League Two"
+   ],
+   "players": 399,
+   "appearances": 11325
+  },
+  "54": {
+   "club_id": 54,
+   "slug": "walsall",
+   "name": "Walsall",
+   "game_name": "Walsall",
+   "country": "ENG",
+   "tiers": [
+    2,
+    3,
+    4
+   ],
+   "competitions": [
+    "Championship",
+    "League One",
+    "League Two"
+   ],
+   "players": 467,
+   "appearances": 15650
+  },
+  "55": {
+   "club_id": 55,
+   "slug": "stockport",
+   "name": "Stockport",
+   "game_name": "Stockport",
+   "country": "ENG",
+   "tiers": [
+    2,
+    3,
+    4
+   ],
+   "competitions": [
+    "Championship",
+    "League One",
+    "League Two"
+   ],
+   "players": 368,
+   "appearances": 8915
+  },
+  "56": {
+   "club_id": 56,
+   "slug": "gillingham",
+   "name": "Gillingham",
+   "game_name": "Gillingham",
+   "country": "ENG",
+   "tiers": [
+    2,
+    3,
+    4
+   ],
+   "competitions": [
+    "Championship",
+    "League One",
+    "League Two"
+   ],
+   "players": 486,
+   "appearances": 15627
+  },
+  "57": {
+   "club_id": 57,
+   "slug": "crewe-alexandra",
+   "name": "Crewe Alexandra",
+   "game_name": "Crewe Alexandra",
+   "country": "ENG",
+   "tiers": [
+    2,
+    3,
+    4
+   ],
+   "competitions": [
+    "Championship",
+    "League One",
+    "League Two"
+   ],
+   "players": 435,
+   "appearances": 15496
+  },
+  "58": {
+   "club_id": 58,
+   "slug": "rotherham-united",
+   "name": "Rotherham United",
+   "game_name": "Rotherham United",
+   "country": "ENG",
+   "tiers": [
+    2,
+    3,
+    4
+   ],
+   "competitions": [
+    "Championship",
+    "League One",
+    "League Two"
+   ],
+   "players": 533,
+   "appearances": 15652
+  },
+  "59": {
+   "club_id": 59,
+   "slug": "millwall",
+   "name": "Millwall",
+   "game_name": "Millwall",
+   "country": "ENG",
+   "tiers": [
+    2,
+    3
+   ],
+   "competitions": [
+    "Championship",
+    "League One"
+   ],
+   "players": 388,
+   "appearances": 15872
+  },
+  "60": {
+   "club_id": 60,
+   "slug": "plymouth-argyle",
+   "name": "Plymouth Argyle",
+   "game_name": "Plymouth Argyle",
+   "country": "ENG",
+   "tiers": [
+    2,
+    3,
+    4
+   ],
+   "competitions": [
+    "Championship",
+    "League One",
+    "League Two"
+   ],
+   "players": 481,
+   "appearances": 15220
+  },
+  "61": {
+   "club_id": 61,
+   "slug": "southend-united",
+   "name": "Southend United",
+   "game_name": "Southend United",
+   "country": "ENG",
+   "tiers": [
+    2,
+    3,
+    4
+   ],
+   "competitions": [
+    "Championship",
+    "League One",
+    "League Two"
+   ],
+   "players": 399,
+   "appearances": 11612
+  },
+  "62": {
+   "club_id": 62,
+   "slug": "colchester-united",
+   "name": "Colchester United",
+   "game_name": "Colchester United",
+   "country": "ENG",
+   "tiers": [
+    2,
+    3,
+    4
+   ],
+   "competitions": [
+    "Championship",
+    "League One",
+    "League Two"
+   ],
+   "players": 427,
+   "appearances": 15129
+  },
+  "63": {
+   "club_id": 63,
+   "slug": "bristol-city",
+   "name": "Bristol City",
+   "game_name": "Bristol City",
+   "country": "ENG",
+   "tiers": [
+    2,
+    3
+   ],
+   "competitions": [
+    "Championship",
+    "League One"
+   ],
+   "players": 365,
+   "appearances": 15525
+  },
+  "64": {
+   "club_id": 64,
+   "slug": "scunthorpe-united",
+   "name": "Scunthorpe United",
+   "game_name": "Scunthorpe United",
+   "country": "ENG",
+   "tiers": [
+    2,
+    3,
+    4
+   ],
+   "competitions": [
+    "Championship",
+    "League One",
+    "League Two"
+   ],
+   "players": 416,
+   "appearances": 12316
+  },
+  "65": {
+   "club_id": 65,
+   "slug": "doncaster-rovers",
+   "name": "Doncaster Rovers",
+   "game_name": "Doncaster Rovers",
+   "country": "ENG",
+   "tiers": [
+    2,
+    3,
+    4
+   ],
+   "competitions": [
+    "Championship",
+    "League One",
+    "League Two"
+   ],
+   "players": 495,
+   "appearances": 14519
+  },
+  "66": {
+   "club_id": 66,
+   "slug": "peterborough-united",
+   "name": "Peterborough United",
+   "game_name": "Peterborough United",
+   "country": "ENG",
+   "tiers": [
+    2,
+    3,
+    4
+   ],
+   "competitions": [
+    "Championship",
+    "League One",
+    "League Two"
+   ],
+   "players": 496,
+   "appearances": 15108
+  },
+  "67": {
+   "club_id": 67,
+   "slug": "yeovil-town",
+   "name": "Yeovil Town",
+   "game_name": "Yeovil Town",
+   "country": "ENG",
+   "tiers": [
+    2,
+    3,
+    4
+   ],
+   "competitions": [
+    "Championship",
+    "League One",
+    "League Two"
+   ],
+   "players": 386,
+   "appearances": 9938
+  },
+  "68": {
+   "club_id": 68,
+   "slug": "milton-keynes-dons",
+   "name": "Milton Keynes Dons",
+   "game_name": "Milton Keynes Dons",
+   "country": "ENG",
+   "tiers": [
+    2,
+    3,
+    4
+   ],
+   "competitions": [
+    "Championship",
+    "League One",
+    "League Two"
+   ],
+   "players": 455,
+   "appearances": 13988
+  },
+  "69": {
+   "club_id": 69,
+   "slug": "burton-albion",
+   "name": "Burton Albion",
+   "game_name": "Burton Albion",
+   "country": "ENG",
+   "tiers": [
+    2,
+    3,
+    4
+   ],
+   "competitions": [
+    "Championship",
+    "League One",
+    "League Two"
+   ],
+   "players": 368,
+   "appearances": 10744
+  },
+  "70": {
+   "club_id": 70,
+   "slug": "wycombe-wanderers",
+   "name": "Wycombe Wanderers",
+   "game_name": "Wycombe Wanderers",
+   "country": "ENG",
+   "tiers": [
+    2,
+    3,
+    4
+   ],
+   "competitions": [
+    "Championship",
+    "League One",
+    "League Two"
+   ],
+   "players": 477,
+   "appearances": 15122
+  },
+  "71": {
+   "club_id": 71,
+   "slug": "oxford-united",
+   "name": "Oxford United",
+   "game_name": "Oxford United",
+   "country": "ENG",
+   "tiers": [
+    2,
+    3,
+    4
+   ],
+   "competitions": [
+    "Championship",
+    "League One",
+    "League Two"
+   ],
+   "players": 403,
+   "appearances": 12738
+  },
+  "72": {
+   "club_id": 72,
+   "slug": "wrexham",
+   "name": "Wrexham",
+   "game_name": "Wrexham",
+   "country": "ENG",
+   "tiers": [
+    2,
+    3,
+    4
+   ],
+   "competitions": [
+    "Championship",
+    "League One",
+    "League Two"
+   ],
+   "players": 215,
+   "appearances": 5766
+  },
+  "73": {
+   "club_id": 73,
+   "slug": "lincoln-city",
+   "name": "Lincoln City",
+   "game_name": "Lincoln City",
+   "country": "ENG",
+   "tiers": [
+    2,
+    3,
+    4
+   ],
+   "competitions": [
+    "Championship",
+    "League One",
+    "League Two"
+   ],
+   "players": 349,
+   "appearances": 11341
+  },
+  "74": {
+   "club_id": 74,
+   "slug": "northampton-town",
+   "name": "Northampton Town",
+   "game_name": "Northampton Town",
+   "country": "ENG",
+   "tiers": [
+    3,
+    4
+   ],
+   "competitions": [
+    "League One",
+    "League Two"
+   ],
+   "players": 582,
+   "appearances": 15222
+  },
+  "75": {
+   "club_id": 75,
+   "slug": "tranmere-rovers",
+   "name": "Tranmere Rovers",
+   "game_name": "Tranmere Rovers",
+   "country": "ENG",
+   "tiers": [
+    3,
+    4
+   ],
+   "competitions": [
+    "League One",
+    "League Two"
+   ],
+   "players": 399,
+   "appearances": 12914
+  },
+  "76": {
+   "club_id": 76,
+   "slug": "chesterfield",
+   "name": "Chesterfield",
+   "game_name": "Chesterfield",
+   "country": "ENG",
+   "tiers": [
+    3,
+    4
+   ],
+   "competitions": [
+    "League One",
+    "League Two"
+   ],
+   "players": 395,
+   "appearances": 11326
+  },
+  "77": {
+   "club_id": 77,
+   "slug": "notts-county",
+   "name": "Notts County",
+   "game_name": "Notts County",
+   "country": "ENG",
+   "tiers": [
+    3,
+    4
+   ],
+   "competitions": [
+    "League One",
+    "League Two"
+   ],
+   "players": 470,
+   "appearances": 12610
+  },
+  "78": {
+   "club_id": 78,
+   "slug": "cheltenham-town",
+   "name": "Cheltenham Town",
+   "game_name": "Cheltenham Town",
+   "country": "ENG",
+   "tiers": [
+    3,
+    4
+   ],
+   "competitions": [
+    "League One",
+    "League Two"
+   ],
+   "players": 486,
+   "appearances": 14505
+  },
+  "79": {
+   "club_id": 79,
+   "slug": "port-vale",
+   "name": "Port Vale",
+   "game_name": "Port Vale",
+   "country": "ENG",
+   "tiers": [
+    3,
+    4
+   ],
+   "competitions": [
+    "League One",
+    "League Two"
+   ],
+   "players": 491,
+   "appearances": 15142
+  },
+  "80": {
+   "club_id": 80,
+   "slug": "mansfield-town",
+   "name": "Mansfield Town",
+   "game_name": "Mansfield Town",
+   "country": "ENG",
+   "tiers": [
+    3,
+    4
+   ],
+   "competitions": [
+    "League One",
+    "League Two"
+   ],
+   "players": 387,
+   "appearances": 12117
+  },
+  "81": {
+   "club_id": 81,
+   "slug": "hartlepool-united",
+   "name": "Hartlepool United",
+   "game_name": "Hartlepool United",
+   "country": "ENG",
+   "tiers": [
+    3,
+    4
+   ],
+   "competitions": [
+    "League One",
+    "League Two"
+   ],
+   "players": 313,
+   "appearances": 10522
+  },
+  "82": {
+   "club_id": 82,
+   "slug": "rushden-and-diamonds",
+   "name": "Rushden and Diamonds",
+   "game_name": "Rushden and Diamonds",
+   "country": "ENG",
+   "tiers": [
+    3,
+    4
+   ],
+   "competitions": [
+    "League One",
+    "League Two"
+   ],
+   "players": 101,
+   "appearances": 2386
+  },
+  "83": {
+   "club_id": 83,
+   "slug": "torquay-united",
+   "name": "Torquay United",
+   "game_name": "Torquay",
+   "country": "ENG",
+   "tiers": [
+    3,
+    4
+   ],
+   "competitions": [
+    "League One",
+    "League Two"
+   ],
+   "players": 217,
+   "appearances": 6149
+  },
+  "84": {
+   "club_id": 84,
+   "slug": "leyton-orient",
+   "name": "Leyton Orient",
+   "game_name": "Leyton Orient",
+   "country": "ENG",
+   "tiers": [
+    3,
+    4
+   ],
+   "competitions": [
+    "League One",
+    "League Two"
+   ],
+   "players": 431,
+   "appearances": 13885
+  },
+  "85": {
+   "club_id": 85,
+   "slug": "carlisle-united",
+   "name": "Carlisle United",
+   "game_name": "Carlisle United",
+   "country": "ENG",
+   "tiers": [
+    3,
+    4
+   ],
+   "competitions": [
+    "League One",
+    "League Two"
+   ],
+   "players": 476,
+   "appearances": 13664
+  },
+  "86": {
+   "club_id": 86,
+   "slug": "bristol-rovers",
+   "name": "Bristol Rovers",
+   "game_name": "Bristol Rovers",
+   "country": "ENG",
+   "tiers": [
+    3,
+    4
+   ],
+   "competitions": [
+    "League One",
+    "League Two"
+   ],
+   "players": 457,
+   "appearances": 14495
+  },
+  "87": {
+   "club_id": 87,
+   "slug": "hereford-united",
+   "name": "Hereford United",
+   "game_name": "Hereford United",
+   "country": "ENG",
+   "tiers": [
+    3,
+    4
+   ],
+   "competitions": [
+    "League One",
+    "League Two"
+   ],
+   "players": 160,
+   "appearances": 3594
+  },
+  "88": {
+   "club_id": 88,
+   "slug": "exeter-city",
+   "name": "Exeter City",
+   "game_name": "Exeter City",
+   "country": "ENG",
+   "tiers": [
+    3,
+    4
+   ],
+   "competitions": [
+    "League One",
+    "League Two"
+   ],
+   "players": 344,
+   "appearances": 12105
+  },
+  "89": {
+   "club_id": 89,
+   "slug": "rochdale",
+   "name": "Rochdale",
+   "game_name": "Rochdale",
+   "country": "ENG",
+   "tiers": [
+    3,
+    4
+   ],
+   "competitions": [
+    "League One",
+    "League Two"
+   ],
+   "players": 410,
+   "appearances": 12944
+  },
+  "90": {
+   "club_id": 90,
+   "slug": "dagenham-and-redbridge",
+   "name": "Dagenham and Redbridge",
+   "game_name": "Dagenham and Redbridge",
+   "country": "ENG",
+   "tiers": [
+    3,
+    4
+   ],
+   "competitions": [
+    "League One",
+    "League Two"
+   ],
+   "players": 189,
+   "appearances": 5452
+  },
+  "91": {
+   "club_id": 91,
+   "slug": "stevenage",
+   "name": "Stevenage",
+   "game_name": "Stevenage",
+   "country": "ENG",
+   "tiers": [
+    3,
+    4
+   ],
+   "competitions": [
+    "League One",
+    "League Two"
+   ],
+   "players": 372,
+   "appearances": 10320
+  },
+  "92": {
+   "club_id": 92,
+   "slug": "bury",
+   "name": "Bury",
+   "game_name": "Bury",
+   "country": "ENG",
+   "tiers": [
+    3,
+    4
+   ],
+   "competitions": [
+    "League One",
+    "League Two"
+   ],
+   "players": 375,
+   "appearances": 10519
+  },
+  "93": {
+   "club_id": 93,
+   "slug": "crawley-town",
+   "name": "Crawley Town",
+   "game_name": "Crawley Town",
+   "country": "ENG",
+   "tiers": [
+    3,
+    4
+   ],
+   "competitions": [
+    "League One",
+    "League Two"
+   ],
+   "players": 353,
+   "appearances": 9544
+  },
+  "94": {
+   "club_id": 94,
+   "slug": "shrewsbury-town",
+   "name": "Shrewsbury Town",
+   "game_name": "Shrewsbury Town",
+   "country": "ENG",
+   "tiers": [
+    3,
+    4
+   ],
+   "competitions": [
+    "League One",
+    "League Two"
+   ],
+   "players": 494,
+   "appearances": 14297
+  },
+  "95": {
+   "club_id": 95,
+   "slug": "fleetwood-town",
+   "name": "Fleetwood Town",
+   "game_name": "Fleetwood Town",
+   "country": "ENG",
+   "tiers": [
+    3,
+    4
+   ],
+   "competitions": [
+    "League One",
+    "League Two"
+   ],
+   "players": 302,
+   "appearances": 8990
+  },
+  "96": {
+   "club_id": 96,
+   "slug": "afc-wimbledon",
+   "name": "AFC Wimbledon",
+   "game_name": "AFC Wimbledon",
+   "country": "ENG",
+   "tiers": [
+    3,
+    4
+   ],
+   "competitions": [
+    "League One",
+    "League Two"
+   ],
+   "players": 316,
+   "appearances": 9515
+  },
+  "97": {
+   "club_id": 97,
+   "slug": "accrington-stanley",
+   "name": "Accrington Stanley",
+   "game_name": "Accrington Stanley",
+   "country": "ENG",
+   "tiers": [
+    3,
+    4
+   ],
+   "competitions": [
+    "League One",
+    "League Two"
+   ],
+   "players": 388,
+   "appearances": 12211
+  },
+  "98": {
+   "club_id": 98,
+   "slug": "morecambe",
+   "name": "Morecambe",
+   "game_name": "Morecambe",
+   "country": "ENG",
+   "tiers": [
+    3,
+    4
+   ],
+   "competitions": [
+    "League One",
+    "League Two"
+   ],
+   "players": 291,
+   "appearances": 11342
+  },
+  "99": {
+   "club_id": 99,
+   "slug": "cambridge-united",
+   "name": "Cambridge United",
+   "game_name": "Cambridge United",
+   "country": "ENG",
+   "tiers": [
+    3,
+    4
+   ],
+   "competitions": [
+    "League One",
+    "League Two"
+   ],
+   "players": 314,
+   "appearances": 9513
+  },
+  "100": {
+   "club_id": 100,
+   "slug": "forest-green-rovers",
+   "name": "Forest Green Rovers",
+   "game_name": "Forest Green Rovers",
+   "country": "ENG",
+   "tiers": [
+    3,
+    4
+   ],
+   "competitions": [
+    "League One",
+    "League Two"
+   ],
+   "players": 166,
+   "appearances": 4384
+  },
+  "101": {
+   "club_id": 101,
+   "slug": "bromley",
+   "name": "Bromley",
+   "game_name": "Bromley",
+   "country": "ENG",
+   "tiers": [
+    3,
+    4
+   ],
+   "competitions": [
+    "League One",
+    "League Two"
+   ],
+   "players": 63,
+   "appearances": 1403
+  },
+  "102": {
+   "club_id": 102,
+   "slug": "macclesfield-town",
+   "name": "Macclesfield Town",
+   "game_name": "Macclesfield Town",
+   "country": "ENG",
+   "tiers": [
+    4
+   ],
+   "competitions": [
+    "League Two"
+   ],
+   "players": 224,
+   "appearances": 7108
+  },
+  "103": {
+   "club_id": 103,
+   "slug": "darlington",
+   "name": "Darlington",
+   "game_name": "Darlington",
+   "country": "ENG",
+   "tiers": [
+    4
+   ],
+   "competitions": [
+    "League Two"
+   ],
+   "players": 199,
+   "appearances": 4967
+  },
+  "104": {
+   "club_id": 104,
+   "slug": "boston-united",
+   "name": "Boston United",
+   "game_name": "Boston United",
+   "country": "ENG",
+   "tiers": [
+    4
+   ],
+   "competitions": [
+    "League Two"
+   ],
+   "players": 124,
+   "appearances": 3093
+  },
+  "105": {
+   "club_id": 105,
+   "slug": "kidderminster-harriers",
+   "name": "Kidderminster Harriers",
+   "game_name": "Kidderminster",
+   "country": "ENG",
+   "tiers": [
+    4
+   ],
+   "competitions": [
+    "League Two"
+   ],
+   "players": 81,
+   "appearances": 1808
+  },
+  "106": {
+   "club_id": 106,
+   "slug": "york-city",
+   "name": "York City",
+   "game_name": "York City",
+   "country": "ENG",
+   "tiers": [
+    4
+   ],
+   "competitions": [
+    "League Two"
+   ],
+   "players": 178,
+   "appearances": 3727
+  },
+  "107": {
+   "club_id": 107,
+   "slug": "chester-city",
+   "name": "Chester City",
+   "game_name": "Chester City",
+   "country": "ENG",
+   "tiers": [
+    4
+   ],
+   "competitions": [
+    "League Two"
+   ],
+   "players": 113,
+   "appearances": 3011
+  },
+  "108": {
+   "club_id": 108,
+   "slug": "barnet",
+   "name": "Barnet",
+   "game_name": "Barnet",
+   "country": "ENG",
+   "tiers": [
+    4
+   ],
+   "competitions": [
+    "League Two"
+   ],
+   "players": 281,
+   "appearances": 7533
+  },
+  "109": {
+   "club_id": 109,
+   "slug": "aldershot-town",
+   "name": "Aldershot Town",
+   "game_name": "Aldershot Town",
+   "country": "ENG",
+   "tiers": [
+    4
+   ],
+   "competitions": [
+    "League Two"
+   ],
+   "players": 109,
+   "appearances": 3106
+  },
+  "110": {
+   "club_id": 110,
+   "slug": "newport-county",
+   "name": "Newport County",
+   "game_name": "Newport County",
+   "country": "ENG",
+   "tiers": [
+    4
+   ],
+   "competitions": [
+    "League Two"
+   ],
+   "players": 266,
+   "appearances": 8344
+  },
+  "111": {
+   "club_id": 111,
+   "slug": "salford-city-fc",
+   "name": "Salford City FC",
+   "game_name": "Salford City FC",
+   "country": "ENG",
+   "tiers": [
+    4
+   ],
+   "competitions": [
+    "League Two"
+   ],
+   "players": 149,
+   "appearances": 4502
+  },
+  "112": {
+   "club_id": 112,
+   "slug": "harrogate-town",
+   "name": "Harrogate Town",
+   "game_name": "Harrogate Town",
+   "country": "ENG",
+   "tiers": [
+    4
+   ],
+   "competitions": [
+    "League Two"
+   ],
+   "players": 109,
+   "appearances": 3811
+  },
+  "113": {
+   "club_id": 113,
+   "slug": "barrow",
+   "name": "Barrow",
+   "game_name": "Barrow",
+   "country": "ENG",
+   "tiers": [
+    4
+   ],
+   "competitions": [
+    "League Two"
+   ],
+   "players": 124,
+   "appearances": 4031
+  },
+  "114": {
+   "club_id": 114,
+   "slug": "sutton-united",
+   "name": "Sutton United",
+   "game_name": "Sutton United",
+   "country": "ENG",
+   "tiers": [
+    4
+   ],
+   "competitions": [
+    "League Two"
+   ],
+   "players": 59,
+   "appearances": 1973
+  },
+  "227": {
+   "club_id": 227,
+   "slug": "milan",
+   "name": "Milan",
+   "game_name": "Milan",
+   "country": "ITA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Serie A"
+   ],
+   "players": 371,
+   "appearances": 19207
+  },
+  "230": {
+   "club_id": 230,
+   "slug": "real-madrid",
+   "name": "Real Madrid",
+   "game_name": "Real Madrid",
+   "country": "ESP",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "La Liga"
+   ],
+   "players": 304,
+   "appearances": 20072
+  },
+  "231": {
+   "club_id": 231,
+   "slug": "napoli",
+   "name": "Napoli",
+   "game_name": "Napoli",
+   "country": "ITA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Serie A"
+   ],
+   "players": 320,
+   "appearances": 15279
+  },
+  "232": {
+   "club_id": 232,
+   "slug": "dresden",
+   "name": "Dresden",
+   "game_name": "Dresden",
+   "country": "GER",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Bundesliga"
+   ],
+   "players": 52,
+   "appearances": 1751
+  },
+  "233": {
+   "club_id": 233,
+   "slug": "marseille",
+   "name": "Marseille",
+   "game_name": "Marseille",
+   "country": "FRA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Ligue 1"
+   ],
+   "players": 405,
+   "appearances": 15381
+  },
+  "239": {
+   "club_id": 239,
+   "slug": "bayern-munich",
+   "name": "Bayern Munich",
+   "game_name": "Bayern Munich",
+   "country": "GER",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Bundesliga"
+   ],
+   "players": 278,
+   "appearances": 17928
+  },
+  "261": {
+   "club_id": 261,
+   "slug": "hansa-rostock",
+   "name": "Hansa Rostock",
+   "game_name": "Hansa Rostock",
+   "country": "GER",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Bundesliga"
+   ],
+   "players": 133,
+   "appearances": 5611
+  },
+  "262": {
+   "club_id": 262,
+   "slug": "barcelona",
+   "name": "Barcelona",
+   "game_name": "Barcelona",
+   "country": "ESP",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "La Liga"
+   ],
+   "players": 336,
+   "appearances": 20181
+  },
+  "270": {
+   "club_id": 270,
+   "slug": "sampdoria",
+   "name": "Sampdoria",
+   "game_name": "Sampdoria",
+   "country": "ITA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Serie A"
+   ],
+   "players": 366,
+   "appearances": 14985
+  },
+  "276": {
+   "club_id": 276,
+   "slug": "kaiserslautern",
+   "name": "Kaiserslautern",
+   "game_name": "Kaiserslautern",
+   "country": "GER",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Bundesliga"
+   ],
+   "players": 210,
+   "appearances": 8663
+  },
+  "291": {
+   "club_id": 291,
+   "slug": "stuttgart",
+   "name": "Stuttgart",
+   "game_name": "Stuttgart",
+   "country": "GER",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Bundesliga"
+   ],
+   "players": 358,
+   "appearances": 17025
+  },
+  "302": {
+   "club_id": 302,
+   "slug": "werder-bremen",
+   "name": "Werder Bremen",
+   "game_name": "Werder Bremen",
+   "country": "GER",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Bundesliga"
+   ],
+   "players": 300,
+   "appearances": 17306
+  },
+  "305": {
+   "club_id": 305,
+   "slug": "monaco",
+   "name": "Monaco",
+   "game_name": "Monaco",
+   "country": "FRA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Ligue 1"
+   ],
+   "players": 360,
+   "appearances": 14889
+  },
+  "311": {
+   "club_id": 311,
+   "slug": "paris-saint-germain",
+   "name": "Paris Saint-Germain",
+   "game_name": "Paris Saint-Germain",
+   "country": "FRA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Ligue 1"
+   ],
+   "players": 321,
+   "appearances": 15857
+  },
+  "315": {
+   "club_id": 315,
+   "slug": "dortmund",
+   "name": "Dortmund",
+   "game_name": "Dortmund",
+   "country": "GER",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Bundesliga"
+   ],
+   "players": 314,
+   "appearances": 17944
+  },
+  "317": {
+   "club_id": 317,
+   "slug": "nantes",
+   "name": "Nantes",
+   "game_name": "Nantes",
+   "country": "FRA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Ligue 1"
+   ],
+   "players": 317,
+   "appearances": 13282
+  },
+  "318": {
+   "club_id": 318,
+   "slug": "juventus",
+   "name": "Juventus",
+   "game_name": "Juventus",
+   "country": "ITA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Serie A"
+   ],
+   "players": 346,
+   "appearances": 18691
+  },
+  "319": {
+   "club_id": 319,
+   "slug": "atletico-madrid",
+   "name": "Atlético Madrid",
+   "game_name": "Atlético Madrid",
+   "country": "ESP",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "La Liga"
+   ],
+   "players": 380,
+   "appearances": 19173
+  },
+  "321": {
+   "club_id": 321,
+   "slug": "auxerre",
+   "name": "Auxerre",
+   "game_name": "Auxerre",
+   "country": "FRA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Ligue 1"
+   ],
+   "players": 215,
+   "appearances": 9827
+  },
+  "324": {
+   "club_id": 324,
+   "slug": "parma",
+   "name": "Parma",
+   "game_name": "Parma",
+   "country": "ITA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Serie A"
+   ],
+   "players": 401,
+   "appearances": 14338
+  },
+  "327": {
+   "club_id": 327,
+   "slug": "leverkusen",
+   "name": "Leverkusen",
+   "game_name": "Leverkusen",
+   "country": "GER",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Bundesliga"
+   ],
+   "players": 303,
+   "appearances": 17907
+  },
+  "330": {
+   "club_id": 330,
+   "slug": "athletic-club",
+   "name": "Athletic Club",
+   "game_name": "Athletic Club",
+   "country": "ESP",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "La Liga"
+   ],
+   "players": 226,
+   "appearances": 20397
+  },
+  "332": {
+   "club_id": 332,
+   "slug": "internazionale",
+   "name": "Internazionale",
+   "game_name": "Inter",
+   "country": "ITA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Serie A"
+   ],
+   "players": 400,
+   "appearances": 19241
+  },
+  "333": {
+   "club_id": 333,
+   "slug": "lens",
+   "name": "Lens",
+   "game_name": "Lens",
+   "country": "FRA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Ligue 1"
+   ],
+   "players": 280,
+   "appearances": 11316
+  },
+  "335": {
+   "club_id": 335,
+   "slug": "fiorentina",
+   "name": "Fiorentina",
+   "game_name": "Fiorentina",
+   "country": "ITA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Serie A"
+   ],
+   "players": 446,
+   "appearances": 17843
+  },
+  "336": {
+   "club_id": 336,
+   "slug": "bordeaux",
+   "name": "Bordeaux",
+   "game_name": "Bordeaux",
+   "country": "FRA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Ligue 1"
+   ],
+   "players": 275,
+   "appearances": 13699
+  },
+  "338": {
+   "club_id": 338,
+   "slug": "valencia",
+   "name": "Valencia",
+   "game_name": "Valencia",
+   "country": "ESP",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "La Liga"
+   ],
+   "players": 375,
+   "appearances": 20312
+  },
+  "339": {
+   "club_id": 339,
+   "slug": "lazio",
+   "name": "Lazio",
+   "game_name": "Lazio",
+   "country": "ITA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Serie A"
+   ],
+   "players": 339,
+   "appearances": 19237
+  },
+  "340": {
+   "club_id": 340,
+   "slug": "hertha-bsc",
+   "name": "Hertha BSC",
+   "game_name": "Hertha BSC",
+   "country": "GER",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Bundesliga"
+   ],
+   "players": 271,
+   "appearances": 11812
+  },
+  "344": {
+   "club_id": 344,
+   "slug": "lyon",
+   "name": "Lyon",
+   "game_name": "Lyon",
+   "country": "FRA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Ligue 1"
+   ],
+   "players": 302,
+   "appearances": 15901
+  },
+  "346": {
+   "club_id": 346,
+   "slug": "hamburger-sv",
+   "name": "Hamburger SV",
+   "game_name": "Hamburger SV",
+   "country": "GER",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Bundesliga"
+   ],
+   "players": 341,
+   "appearances": 14359
+  },
+  "347": {
+   "club_id": 347,
+   "slug": "deportivo-la-coruna",
+   "name": "Deportivo La Coruna",
+   "game_name": "Dep La Coruña",
+   "country": "ESP",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "La Liga"
+   ],
+   "players": 271,
+   "appearances": 13174
+  },
+  "349": {
+   "club_id": 349,
+   "slug": "schalke-04",
+   "name": "Schalke 04",
+   "game_name": "Schalke 04",
+   "country": "GER",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Bundesliga"
+   ],
+   "players": 321,
+   "appearances": 14480
+  },
+  "351": {
+   "club_id": 351,
+   "slug": "mallorca",
+   "name": "Mallorca",
+   "game_name": "Mallorca",
+   "country": "ESP",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "La Liga"
+   ],
+   "players": 314,
+   "appearances": 13346
+  },
+  "352": {
+   "club_id": 352,
+   "slug": "roma",
+   "name": "Roma",
+   "game_name": "Roma",
+   "country": "ITA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Serie A"
+   ],
+   "players": 393,
+   "appearances": 19030
+  },
+  "353": {
+   "club_id": 353,
+   "slug": "lille",
+   "name": "Lille",
+   "game_name": "Lille",
+   "country": "FRA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Ligue 1"
+   ],
+   "players": 302,
+   "appearances": 14618
+  },
+  "358": {
+   "club_id": 358,
+   "slug": "real-sociedad",
+   "name": "Real Sociedad",
+   "game_name": "Real Sociedad",
+   "country": "ESP",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "La Liga"
+   ],
+   "players": 276,
+   "appearances": 18735
+  },
+  "360": {
+   "club_id": 360,
+   "slug": "celta-vigo",
+   "name": "Celta Vigo",
+   "game_name": "Celta Vigo",
+   "country": "ESP",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "La Liga"
+   ],
+   "players": 322,
+   "appearances": 16174
+  },
+  "362": {
+   "club_id": 362,
+   "slug": "villarreal",
+   "name": "Villarreal",
+   "game_name": "Villarreal",
+   "country": "ESP",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "La Liga"
+   ],
+   "players": 299,
+   "appearances": 14179
+  },
+  "363": {
+   "club_id": 363,
+   "slug": "real-betis",
+   "name": "Real Betis",
+   "game_name": "Real Betis",
+   "country": "ESP",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "La Liga"
+   ],
+   "players": 357,
+   "appearances": 16154
+  },
+  "364": {
+   "club_id": 364,
+   "slug": "udinese",
+   "name": "Udinese",
+   "game_name": "Udinese",
+   "country": "ITA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Serie A"
+   ],
+   "players": 391,
+   "appearances": 17426
+  },
+  "366": {
+   "club_id": 366,
+   "slug": "sevilla",
+   "name": "Sevilla",
+   "game_name": "Sevilla",
+   "country": "ESP",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "La Liga"
+   ],
+   "players": 416,
+   "appearances": 18776
+  },
+  "377": {
+   "club_id": 377,
+   "slug": "wolfsburg",
+   "name": "Wolfsburg",
+   "game_name": "Wolfsburg",
+   "country": "GER",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Bundesliga"
+   ],
+   "players": 309,
+   "appearances": 13931
+  },
+  "387": {
+   "club_id": 387,
+   "slug": "montpellier",
+   "name": "Montpellier",
+   "game_name": "Montpellier",
+   "country": "FRA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Ligue 1"
+   ],
+   "players": 249,
+   "appearances": 12225
+  },
+  "388": {
+   "club_id": 388,
+   "slug": "malaga",
+   "name": "Málaga",
+   "game_name": "Málaga",
+   "country": "ESP",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "La Liga"
+   ],
+   "players": 236,
+   "appearances": 9033
+  },
+  "393": {
+   "club_id": 393,
+   "slug": "monchengladbach",
+   "name": "Monchengladbach",
+   "game_name": "Gladbach",
+   "country": "GER",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Bundesliga"
+   ],
+   "players": 320,
+   "appearances": 16587
+  },
+  "396": {
+   "club_id": 396,
+   "slug": "rb-leipzig",
+   "name": "RB Leipzig",
+   "game_name": "RB Leipzig",
+   "country": "GER",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Bundesliga"
+   ],
+   "players": 99,
+   "appearances": 5113
+  },
+  "398": {
+   "club_id": 398,
+   "slug": "hoffenheim",
+   "name": "Hoffenheim",
+   "game_name": "Hoffenheim",
+   "country": "GER",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Bundesliga"
+   ],
+   "players": 203,
+   "appearances": 8838
+  },
+  "399": {
+   "club_id": 399,
+   "slug": "atalanta",
+   "name": "Atalanta",
+   "game_name": "Atalanta",
+   "country": "ITA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Serie A"
+   ],
+   "players": 409,
+   "appearances": 16417
+  },
+  "400": {
+   "club_id": 400,
+   "slug": "rennes",
+   "name": "Rennes",
+   "game_name": "Rennes",
+   "country": "FRA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Ligue 1"
+   ],
+   "players": 371,
+   "appearances": 15924
+  },
+  "405": {
+   "club_id": 405,
+   "slug": "eintracht-frankfurt",
+   "name": "Eintracht Frankfurt",
+   "game_name": "Eintracht Frankfurt",
+   "country": "GER",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Bundesliga"
+   ],
+   "players": 362,
+   "appearances": 15114
+  },
+  "406": {
+   "club_id": 406,
+   "slug": "union-berlin",
+   "name": "Union Berlin",
+   "game_name": "Union Berlin",
+   "country": "GER",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Bundesliga"
+   ],
+   "players": 102,
+   "appearances": 3707
+  },
+  "408": {
+   "club_id": 408,
+   "slug": "bologna",
+   "name": "Bologna",
+   "game_name": "Bologna",
+   "country": "ITA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Serie A"
+   ],
+   "players": 396,
+   "appearances": 15023
+  },
+  "409": {
+   "club_id": 409,
+   "slug": "brest",
+   "name": "Brest",
+   "game_name": "Brest",
+   "country": "FRA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Ligue 1"
+   ],
+   "players": 142,
+   "appearances": 5223
+  },
+  "410": {
+   "club_id": 410,
+   "slug": "girona",
+   "name": "Girona",
+   "game_name": "Girona",
+   "country": "ESP",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "La Liga"
+   ],
+   "players": 93,
+   "appearances": 3417
+  },
+  "415": {
+   "club_id": 415,
+   "slug": "logrones",
+   "name": "Logroñés",
+   "game_name": "Logroñés",
+   "country": "ESP",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "La Liga"
+   ],
+   "players": 117,
+   "appearances": 3998
+  },
+  "416": {
+   "club_id": 416,
+   "slug": "valladolid",
+   "name": "Valladolid",
+   "game_name": "Valladolid",
+   "country": "ESP",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "La Liga"
+   ],
+   "players": 355,
+   "appearances": 13152
+  },
+  "417": {
+   "club_id": 417,
+   "slug": "zaragoza",
+   "name": "Zaragoza",
+   "game_name": "Zaragoza",
+   "country": "ESP",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "La Liga"
+   ],
+   "players": 232,
+   "appearances": 11893
+  },
+  "418": {
+   "club_id": 418,
+   "slug": "sporting-gijon",
+   "name": "Sporting Gijón",
+   "game_name": "Sporting Gijón",
+   "country": "ESP",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "La Liga"
+   ],
+   "players": 205,
+   "appearances": 8314
+  },
+  "419": {
+   "club_id": 419,
+   "slug": "espanyol",
+   "name": "Espanyol",
+   "game_name": "Espanyol",
+   "country": "ESP",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "La Liga"
+   ],
+   "players": 415,
+   "appearances": 18175
+  },
+  "420": {
+   "club_id": 420,
+   "slug": "malaga-420",
+   "name": "Málaga",
+   "game_name": "Málaga",
+   "country": "ESP",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "La Liga"
+   ],
+   "players": 34,
+   "appearances": 977
+  },
+  "421": {
+   "club_id": 421,
+   "slug": "osasuna",
+   "name": "Osasuna",
+   "game_name": "Osasuna",
+   "country": "ESP",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "La Liga"
+   ],
+   "players": 286,
+   "appearances": 15029
+  },
+  "422": {
+   "club_id": 422,
+   "slug": "elche",
+   "name": "Elche",
+   "game_name": "Elche",
+   "country": "ESP",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "La Liga"
+   ],
+   "players": 154,
+   "appearances": 3963
+  },
+  "423": {
+   "club_id": 423,
+   "slug": "oviedo",
+   "name": "Oviedo",
+   "game_name": "Oviedo",
+   "country": "ESP",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "La Liga"
+   ],
+   "players": 138,
+   "appearances": 7252
+  },
+  "424": {
+   "club_id": 424,
+   "slug": "cadiz",
+   "name": "Cádiz",
+   "game_name": "Cádiz",
+   "country": "ESP",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "La Liga"
+   ],
+   "players": 157,
+   "appearances": 5362
+  },
+  "425": {
+   "club_id": 425,
+   "slug": "real-murcia",
+   "name": "Real Murcia",
+   "game_name": "Real Murcia",
+   "country": "ESP",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "La Liga"
+   ],
+   "players": 85,
+   "appearances": 1549
+  },
+  "426": {
+   "club_id": 426,
+   "slug": "castellon",
+   "name": "Castellon",
+   "game_name": "Castellon",
+   "country": "ESP",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "La Liga"
+   ],
+   "players": 33,
+   "appearances": 976
+  },
+  "427": {
+   "club_id": 427,
+   "slug": "rayo-vallecano",
+   "name": "Rayo Vallecano",
+   "game_name": "Rayo Vallecano",
+   "country": "ESP",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "La Liga"
+   ],
+   "players": 307,
+   "appearances": 10946
+  },
+  "428": {
+   "club_id": 428,
+   "slug": "tenerife",
+   "name": "Tenerife",
+   "game_name": "Tenerife",
+   "country": "ESP",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "La Liga"
+   ],
+   "players": 135,
+   "appearances": 6186
+  },
+  "429": {
+   "club_id": 429,
+   "slug": "real-burgos",
+   "name": "Real Burgos",
+   "game_name": "Real Burgos",
+   "country": "ESP",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "La Liga"
+   ],
+   "players": 41,
+   "appearances": 1467
+  },
+  "430": {
+   "club_id": 430,
+   "slug": "albacete",
+   "name": "Albacete",
+   "game_name": "Albacete",
+   "country": "ESP",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "La Liga"
+   ],
+   "players": 124,
+   "appearances": 3606
+  },
+  "431": {
+   "club_id": 431,
+   "slug": "lleida",
+   "name": "Lleida",
+   "game_name": "Lleida",
+   "country": "ESP",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "La Liga"
+   ],
+   "players": 23,
+   "appearances": 491
+  },
+  "432": {
+   "club_id": 432,
+   "slug": "racing-santander",
+   "name": "Racing Santander",
+   "game_name": "Racing Sant",
+   "country": "ESP",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "La Liga"
+   ],
+   "players": 234,
+   "appearances": 9556
+  },
+  "433": {
+   "club_id": 433,
+   "slug": "compostela",
+   "name": "Compostela",
+   "game_name": "Compostela",
+   "country": "ESP",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "La Liga"
+   ],
+   "players": 53,
+   "appearances": 2169
+  },
+  "434": {
+   "club_id": 434,
+   "slug": "salamanca",
+   "name": "Salamanca",
+   "game_name": "Salamanca",
+   "country": "ESP",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "La Liga"
+   ],
+   "players": 53,
+   "appearances": 1589
+  },
+  "435": {
+   "club_id": 435,
+   "slug": "merida",
+   "name": "Mérida",
+   "game_name": "Mérida",
+   "country": "ESP",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "La Liga"
+   ],
+   "players": 42,
+   "appearances": 1107
+  },
+  "436": {
+   "club_id": 436,
+   "slug": "hercules",
+   "name": "Hércules",
+   "game_name": "Hércules",
+   "country": "ESP",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "La Liga"
+   ],
+   "players": 54,
+   "appearances": 1108
+  },
+  "437": {
+   "club_id": 437,
+   "slug": "extremadura",
+   "name": "Extremadura",
+   "game_name": "Extremadura",
+   "country": "ESP",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "La Liga"
+   ],
+   "players": 42,
+   "appearances": 1111
+  },
+  "438": {
+   "club_id": 438,
+   "slug": "alaves",
+   "name": "Alavés",
+   "game_name": "Alavés",
+   "country": "ESP",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "La Liga"
+   ],
+   "players": 230,
+   "appearances": 8277
+  },
+  "439": {
+   "club_id": 439,
+   "slug": "numancia",
+   "name": "Numancia",
+   "game_name": "Numancia",
+   "country": "ESP",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "La Liga"
+   ],
+   "players": 87,
+   "appearances": 2106
+  },
+  "440": {
+   "club_id": 440,
+   "slug": "las-palmas",
+   "name": "Las Palmas",
+   "game_name": "Las Palmas",
+   "country": "ESP",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "La Liga"
+   ],
+   "players": 137,
+   "appearances": 3839
+  },
+  "441": {
+   "club_id": 441,
+   "slug": "recreativo",
+   "name": "Recreativo",
+   "game_name": "Recreativo",
+   "country": "ESP",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "La Liga"
+   ],
+   "players": 77,
+   "appearances": 2119
+  },
+  "442": {
+   "club_id": 442,
+   "slug": "getafe",
+   "name": "Getafe",
+   "game_name": "Getafe",
+   "country": "ESP",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "La Liga"
+   ],
+   "players": 288,
+   "appearances": 11456
+  },
+  "443": {
+   "club_id": 443,
+   "slug": "levante",
+   "name": "Levante",
+   "game_name": "Levante",
+   "country": "ESP",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "La Liga"
+   ],
+   "players": 245,
+   "appearances": 8239
+  },
+  "444": {
+   "club_id": 444,
+   "slug": "gimnastic",
+   "name": "Gimnàstic",
+   "game_name": "Gimnàstic",
+   "country": "ESP",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "La Liga"
+   ],
+   "players": 29,
+   "appearances": 529
+  },
+  "445": {
+   "club_id": 445,
+   "slug": "almeria",
+   "name": "Almería",
+   "game_name": "Almería",
+   "country": "ESP",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "La Liga"
+   ],
+   "players": 130,
+   "appearances": 4364
+  },
+  "446": {
+   "club_id": 446,
+   "slug": "xerez",
+   "name": "Xerez",
+   "game_name": "Xerez",
+   "country": "ESP",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "La Liga"
+   ],
+   "players": 24,
+   "appearances": 531
+  },
+  "447": {
+   "club_id": 447,
+   "slug": "granada",
+   "name": "Granada",
+   "game_name": "Granada",
+   "country": "ESP",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "La Liga"
+   ],
+   "players": 201,
+   "appearances": 5508
+  },
+  "448": {
+   "club_id": 448,
+   "slug": "eibar",
+   "name": "Eibar",
+   "game_name": "Eibar",
+   "country": "ESP",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "La Liga"
+   ],
+   "players": 95,
+   "appearances": 3765
+  },
+  "449": {
+   "club_id": 449,
+   "slug": "cordoba",
+   "name": "Córdoba",
+   "game_name": "Córdoba",
+   "country": "ESP",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "La Liga"
+   ],
+   "players": 33,
+   "appearances": 523
+  },
+  "450": {
+   "club_id": 450,
+   "slug": "leganes",
+   "name": "Leganés",
+   "game_name": "Leganés",
+   "country": "ESP",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "La Liga"
+   ],
+   "players": 100,
+   "appearances": 2720
+  },
+  "451": {
+   "club_id": 451,
+   "slug": "huesca",
+   "name": "Huesca",
+   "game_name": "Huesca",
+   "country": "ESP",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "La Liga"
+   ],
+   "players": 52,
+   "appearances": 1118
+  },
+  "452": {
+   "club_id": 452,
+   "slug": "ascoli",
+   "name": "Ascoli",
+   "game_name": "Ascoli",
+   "country": "ITA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Serie A"
+   ],
+   "players": 100,
+   "appearances": 2338
+  },
+  "453": {
+   "club_id": 453,
+   "slug": "cesena",
+   "name": "Cesena",
+   "game_name": "Cesena",
+   "country": "ITA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Serie A"
+   ],
+   "players": 126,
+   "appearances": 2875
+  },
+  "454": {
+   "club_id": 454,
+   "slug": "como",
+   "name": "Como",
+   "game_name": "Como",
+   "country": "ITA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Serie A"
+   ],
+   "players": 103,
+   "appearances": 2121
+  },
+  "455": {
+   "club_id": 455,
+   "slug": "pisa",
+   "name": "Pisa",
+   "game_name": "Pisa",
+   "country": "ITA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Serie A"
+   ],
+   "players": 72,
+   "appearances": 1466
+  },
+  "456": {
+   "club_id": 456,
+   "slug": "lecce",
+   "name": "Lecce",
+   "game_name": "Lecce",
+   "country": "ITA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Serie A"
+   ],
+   "players": 330,
+   "appearances": 9641
+  },
+  "457": {
+   "club_id": 457,
+   "slug": "torino",
+   "name": "Torino",
+   "game_name": "Torino",
+   "country": "ITA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Serie A"
+   ],
+   "players": 399,
+   "appearances": 13832
+  },
+  "458": {
+   "club_id": 458,
+   "slug": "pescara",
+   "name": "Pescara",
+   "game_name": "Pescara",
+   "country": "ITA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Serie A"
+   ],
+   "players": 115,
+   "appearances": 1935
+  },
+  "459": {
+   "club_id": 459,
+   "slug": "hellas-verona",
+   "name": "Hellas Verona",
+   "game_name": "Hellas Verona",
+   "country": "ITA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Serie A"
+   ],
+   "players": 344,
+   "appearances": 9371
+  },
+  "460": {
+   "club_id": 460,
+   "slug": "genoa",
+   "name": "Genoa",
+   "game_name": "Genoa",
+   "country": "ITA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Serie A"
+   ],
+   "players": 394,
+   "appearances": 12420
+  },
+  "461": {
+   "club_id": 461,
+   "slug": "bari",
+   "name": "Bari",
+   "game_name": "Bari",
+   "country": "ITA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Serie A"
+   ],
+   "players": 174,
+   "appearances": 5138
+  },
+  "462": {
+   "club_id": 462,
+   "slug": "cremonese",
+   "name": "Cremonese",
+   "game_name": "Cremonese",
+   "country": "ITA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Serie A"
+   ],
+   "players": 121,
+   "appearances": 3409
+  },
+  "463": {
+   "club_id": 463,
+   "slug": "cagliari",
+   "name": "Cagliari",
+   "game_name": "Cagliari",
+   "country": "ITA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Serie A"
+   ],
+   "players": 369,
+   "appearances": 14905
+  },
+  "464": {
+   "club_id": 464,
+   "slug": "foggia",
+   "name": "Foggia",
+   "game_name": "Foggia",
+   "country": "ITA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Serie A"
+   ],
+   "players": 50,
+   "appearances": 1709
+  },
+  "465": {
+   "club_id": 465,
+   "slug": "ancona",
+   "name": "Ancona",
+   "game_name": "Ancona",
+   "country": "ITA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Serie A"
+   ],
+   "players": 60,
+   "appearances": 878
+  },
+  "466": {
+   "club_id": 466,
+   "slug": "brescia",
+   "name": "Brescia",
+   "game_name": "Brescia",
+   "country": "ITA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Serie A"
+   ],
+   "players": 190,
+   "appearances": 4781
+  },
+  "467": {
+   "club_id": 467,
+   "slug": "reggiana",
+   "name": "Reggiana",
+   "game_name": "Reggiana",
+   "country": "ITA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Serie A"
+   ],
+   "players": 68,
+   "appearances": 1337
+  },
+  "468": {
+   "club_id": 468,
+   "slug": "piacenza",
+   "name": "Piacenza",
+   "game_name": "Piacenza",
+   "country": "ITA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Serie A"
+   ],
+   "players": 109,
+   "appearances": 3698
+  },
+  "469": {
+   "club_id": 469,
+   "slug": "padova",
+   "name": "Padova",
+   "game_name": "Padova",
+   "country": "ITA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Serie A"
+   ],
+   "players": 38,
+   "appearances": 889
+  },
+  "470": {
+   "club_id": 470,
+   "slug": "vicenza",
+   "name": "Vicenza",
+   "game_name": "Vicenza",
+   "country": "ITA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Serie A"
+   ],
+   "players": 75,
+   "appearances": 2348
+  },
+  "471": {
+   "club_id": 471,
+   "slug": "perugia",
+   "name": "Perugia",
+   "game_name": "Perugia",
+   "country": "ITA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Serie A"
+   ],
+   "players": 137,
+   "appearances": 3269
+  },
+  "472": {
+   "club_id": 472,
+   "slug": "empoli",
+   "name": "Empoli",
+   "game_name": "Empoli",
+   "country": "ITA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Serie A"
+   ],
+   "players": 264,
+   "appearances": 7962
+  },
+  "473": {
+   "club_id": 473,
+   "slug": "venezia",
+   "name": "Venezia",
+   "game_name": "Venezia",
+   "country": "ITA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Serie A"
+   ],
+   "players": 149,
+   "appearances": 2619
+  },
+  "474": {
+   "club_id": 474,
+   "slug": "salernitana",
+   "name": "Salernitana",
+   "game_name": "Salernitana",
+   "country": "ITA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Serie A"
+   ],
+   "players": 106,
+   "appearances": 2259
+  },
+  "475": {
+   "club_id": 475,
+   "slug": "reggina",
+   "name": "Reggina",
+   "game_name": "Reggina",
+   "country": "ITA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Serie A"
+   ],
+   "players": 135,
+   "appearances": 4510
+  },
+  "476": {
+   "club_id": 476,
+   "slug": "chievo",
+   "name": "Chievo",
+   "game_name": "Chievo",
+   "country": "ITA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Serie A"
+   ],
+   "players": 223,
+   "appearances": 8849
+  },
+  "477": {
+   "club_id": 477,
+   "slug": "modena",
+   "name": "Modena",
+   "game_name": "Modena",
+   "country": "ITA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Serie A"
+   ],
+   "players": 37,
+   "appearances": 951
+  },
+  "478": {
+   "club_id": 478,
+   "slug": "siena",
+   "name": "Siena",
+   "game_name": "Siena",
+   "country": "ITA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Serie A"
+   ],
+   "players": 149,
+   "appearances": 4699
+  },
+  "479": {
+   "club_id": 479,
+   "slug": "palermo",
+   "name": "Palermo",
+   "game_name": "Palermo",
+   "country": "ITA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Serie A"
+   ],
+   "players": 182,
+   "appearances": 6287
+  },
+  "480": {
+   "club_id": 480,
+   "slug": "livorno",
+   "name": "Livorno",
+   "game_name": "Livorno",
+   "country": "ITA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Serie A"
+   ],
+   "players": 118,
+   "appearances": 3135
+  },
+  "481": {
+   "club_id": 481,
+   "slug": "messina",
+   "name": "Messina",
+   "game_name": "Messina",
+   "country": "ITA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Serie A"
+   ],
+   "players": 64,
+   "appearances": 1584
+  },
+  "482": {
+   "club_id": 482,
+   "slug": "treviso",
+   "name": "Treviso",
+   "game_name": "Treviso",
+   "country": "ITA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Serie A"
+   ],
+   "players": 34,
+   "appearances": 530
+  },
+  "483": {
+   "club_id": 483,
+   "slug": "catania",
+   "name": "Catania",
+   "game_name": "Catania",
+   "country": "ITA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Serie A"
+   ],
+   "players": 104,
+   "appearances": 4200
+  },
+  "484": {
+   "club_id": 484,
+   "slug": "novara",
+   "name": "Novara",
+   "game_name": "Novara",
+   "country": "ITA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Serie A"
+   ],
+   "players": 32,
+   "appearances": 531
+  },
+  "485": {
+   "club_id": 485,
+   "slug": "sassuolo",
+   "name": "Sassuolo",
+   "game_name": "Sassuolo",
+   "country": "ITA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Serie A"
+   ],
+   "players": 165,
+   "appearances": 6743
+  },
+  "486": {
+   "club_id": 486,
+   "slug": "frosinone",
+   "name": "Frosinone",
+   "game_name": "Frosinone",
+   "country": "ITA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Serie A"
+   ],
+   "players": 102,
+   "appearances": 1686
+  },
+  "487": {
+   "club_id": 487,
+   "slug": "carpi",
+   "name": "Carpi",
+   "game_name": "Carpi",
+   "country": "ITA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Serie A"
+   ],
+   "players": 35,
+   "appearances": 531
+  },
+  "488": {
+   "club_id": 488,
+   "slug": "crotone",
+   "name": "Crotone",
+   "game_name": "Crotone",
+   "country": "ITA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Serie A"
+   ],
+   "players": 72,
+   "appearances": 1616
+  },
+  "489": {
+   "club_id": 489,
+   "slug": "benevento",
+   "name": "Benevento",
+   "game_name": "Benevento",
+   "country": "ITA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Serie A"
+   ],
+   "players": 66,
+   "appearances": 1127
+  },
+  "490": {
+   "club_id": 490,
+   "slug": "spal",
+   "name": "SPAL",
+   "game_name": "SPAL",
+   "country": "ITA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Serie A"
+   ],
+   "players": 62,
+   "appearances": 1606
+  },
+  "491": {
+   "club_id": 491,
+   "slug": "spezia",
+   "name": "Spezia",
+   "game_name": "Spezia",
+   "country": "ITA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Serie A"
+   ],
+   "players": 70,
+   "appearances": 1739
+  },
+  "492": {
+   "club_id": 492,
+   "slug": "monza",
+   "name": "Monza",
+   "game_name": "Monza",
+   "country": "ITA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Serie A"
+   ],
+   "players": 75,
+   "appearances": 1835
+  },
+  "493": {
+   "club_id": 493,
+   "slug": "nurnberg",
+   "name": "Nürnberg",
+   "game_name": "Nürnberg",
+   "country": "GER",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Bundesliga"
+   ],
+   "players": 251,
+   "appearances": 8725
+  },
+  "494": {
+   "club_id": 494,
+   "slug": "stuttgarter-kickers",
+   "name": "Stuttgarter Kickers",
+   "game_name": "Stuttgarter Kickers",
+   "country": "GER",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Bundesliga"
+   ],
+   "players": 39,
+   "appearances": 918
+  },
+  "495": {
+   "club_id": 495,
+   "slug": "koln",
+   "name": "Köln",
+   "game_name": "Köln",
+   "country": "GER",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Bundesliga"
+   ],
+   "players": 333,
+   "appearances": 13283
+  },
+  "496": {
+   "club_id": 496,
+   "slug": "st-pauli",
+   "name": "St Pauli",
+   "game_name": "St Pauli",
+   "country": "GER",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Bundesliga"
+   ],
+   "players": 150,
+   "appearances": 4189
+  },
+  "497": {
+   "club_id": 497,
+   "slug": "uerdingen",
+   "name": "Uerdingen",
+   "game_name": "Uerdingen",
+   "country": "GER",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Bundesliga"
+   ],
+   "players": 76,
+   "appearances": 2616
+  },
+  "498": {
+   "club_id": 498,
+   "slug": "bochum",
+   "name": "Bochum",
+   "game_name": "Bochum",
+   "country": "GER",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Bundesliga"
+   ],
+   "players": 251,
+   "appearances": 9934
+  },
+  "499": {
+   "club_id": 499,
+   "slug": "waldhof-mannheim",
+   "name": "Waldhof Mannheim",
+   "game_name": "Waldhof Mannheim",
+   "country": "GER",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Bundesliga"
+   ],
+   "players": 31,
+   "appearances": 870
+  },
+  "500": {
+   "club_id": 500,
+   "slug": "karlsruher",
+   "name": "Karlsruher",
+   "game_name": "Karlsruher",
+   "country": "GER",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Bundesliga"
+   ],
+   "players": 107,
+   "appearances": 5402
+  },
+  "501": {
+   "club_id": 501,
+   "slug": "hannover-96",
+   "name": "Hannover 96",
+   "game_name": "Hannover 96",
+   "country": "GER",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Bundesliga"
+   ],
+   "players": 206,
+   "appearances": 7947
+  },
+  "502": {
+   "club_id": 502,
+   "slug": "dusseldorf",
+   "name": "Düsseldorf",
+   "game_name": "Düsseldorf",
+   "country": "GER",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Bundesliga"
+   ],
+   "players": 136,
+   "appearances": 3732
+  },
+  "503": {
+   "club_id": 503,
+   "slug": "homburg",
+   "name": "Homburg",
+   "game_name": "Homburg",
+   "country": "GER",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Bundesliga"
+   ],
+   "players": 22,
+   "appearances": 434
+  },
+  "504": {
+   "club_id": 504,
+   "slug": "wattenscheid",
+   "name": "Wattenscheid",
+   "game_name": "Wattenscheid",
+   "country": "GER",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Bundesliga"
+   ],
+   "players": 43,
+   "appearances": 1768
+  },
+  "505": {
+   "club_id": 505,
+   "slug": "msv-duisburg",
+   "name": "MSV Duisburg",
+   "game_name": "MSV Duisburg",
+   "country": "GER",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Bundesliga"
+   ],
+   "players": 141,
+   "appearances": 4162
+  },
+  "506": {
+   "club_id": 506,
+   "slug": "saarbrucken",
+   "name": "Saarbrücken",
+   "game_name": "Saarbrücken",
+   "country": "GER",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Bundesliga"
+   ],
+   "players": 21,
+   "appearances": 441
+  },
+  "507": {
+   "club_id": 507,
+   "slug": "vfb-leipzig",
+   "name": "VfB Leipzig",
+   "game_name": "VfB Leipzig",
+   "country": "GER",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Bundesliga"
+   ],
+   "players": 24,
+   "appearances": 434
+  },
+  "508": {
+   "club_id": 508,
+   "slug": "freiburg",
+   "name": "Freiburg",
+   "game_name": "Freiburg",
+   "country": "GER",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Bundesliga"
+   ],
+   "players": 258,
+   "appearances": 12528
+  },
+  "509": {
+   "club_id": 509,
+   "slug": "1860-munich",
+   "name": "1860 Munich",
+   "game_name": "1860 Munich",
+   "country": "GER",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Bundesliga"
+   ],
+   "players": 102,
+   "appearances": 4633
+  },
+  "510": {
+   "club_id": 510,
+   "slug": "arminia-bielefeld",
+   "name": "Arminia Bielefeld",
+   "game_name": "Arminia",
+   "country": "GER",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Bundesliga"
+   ],
+   "players": 166,
+   "appearances": 5234
+  },
+  "511": {
+   "club_id": 511,
+   "slug": "unterhaching",
+   "name": "Unterhaching",
+   "game_name": "Unterhaching",
+   "country": "GER",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Bundesliga"
+   ],
+   "players": 31,
+   "appearances": 943
+  },
+  "512": {
+   "club_id": 512,
+   "slug": "ulm",
+   "name": "Ulm",
+   "game_name": "Ulm",
+   "country": "GER",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Bundesliga"
+   ],
+   "players": 21,
+   "appearances": 468
+  },
+  "513": {
+   "club_id": 513,
+   "slug": "energie-cottbus",
+   "name": "Energie Cottbus",
+   "game_name": "Energie Cottbus",
+   "country": "GER",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Bundesliga"
+   ],
+   "players": 87,
+   "appearances": 2828
+  },
+  "514": {
+   "club_id": 514,
+   "slug": "mainz-05",
+   "name": "Mainz 05",
+   "game_name": "Mainz 05",
+   "country": "GER",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Bundesliga"
+   ],
+   "players": 232,
+   "appearances": 9816
+  },
+  "515": {
+   "club_id": 515,
+   "slug": "alemannia-aachen",
+   "name": "Alemannia Aachen",
+   "game_name": "AA Aachen",
+   "country": "GER",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Bundesliga"
+   ],
+   "players": 27,
+   "appearances": 470
+  },
+  "516": {
+   "club_id": 516,
+   "slug": "augsburg",
+   "name": "Augsburg",
+   "game_name": "Augsburg",
+   "country": "GER",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Bundesliga"
+   ],
+   "players": 170,
+   "appearances": 7464
+  },
+  "517": {
+   "club_id": 517,
+   "slug": "greuther-furth",
+   "name": "Greuther Fürth",
+   "game_name": "Greuther Fürth",
+   "country": "GER",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Bundesliga"
+   ],
+   "players": 61,
+   "appearances": 981
+  },
+  "518": {
+   "club_id": 518,
+   "slug": "eintracht-braunschweig",
+   "name": "Eintracht Braunschweig",
+   "game_name": "BTSV",
+   "country": "GER",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Bundesliga"
+   ],
+   "players": 27,
+   "appearances": 470
+  },
+  "519": {
+   "club_id": 519,
+   "slug": "paderborn-07",
+   "name": "Paderborn 07",
+   "game_name": "Paderborn 07",
+   "country": "GER",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Bundesliga"
+   ],
+   "players": 64,
+   "appearances": 983
+  },
+  "520": {
+   "club_id": 520,
+   "slug": "ingolstadt",
+   "name": "Ingolstadt",
+   "game_name": "Ingolstadt",
+   "country": "GER",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Bundesliga"
+   ],
+   "players": 31,
+   "appearances": 945
+  },
+  "521": {
+   "club_id": 521,
+   "slug": "darmstadt-98",
+   "name": "Darmstadt 98",
+   "game_name": "Darmstadt 98",
+   "country": "GER",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Bundesliga"
+   ],
+   "players": 72,
+   "appearances": 1484
+  },
+  "522": {
+   "club_id": 522,
+   "slug": "heidenheim",
+   "name": "Heidenheim",
+   "game_name": "Heidenheim",
+   "country": "GER",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Bundesliga"
+   ],
+   "players": 43,
+   "appearances": 1607
+  },
+  "523": {
+   "club_id": 523,
+   "slug": "holstein-kiel",
+   "name": "Holstein Kiel",
+   "game_name": "Holstein Kiel",
+   "country": "GER",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Bundesliga"
+   ],
+   "players": 27,
+   "appearances": 536
+  },
+  "524": {
+   "club_id": 524,
+   "slug": "elversberg",
+   "name": "Elversberg",
+   "game_name": "Elversberg",
+   "country": "GER",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Bundesliga"
+   ],
+   "players": 16,
+   "appearances": 16
+  },
+  "525": {
+   "club_id": 525,
+   "slug": "gueugnon",
+   "name": "Gueugnon",
+   "game_name": "Gueugnon",
+   "country": "FRA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Ligue 1"
+   ],
+   "players": 25,
+   "appearances": 502
+  },
+  "526": {
+   "club_id": 526,
+   "slug": "metz",
+   "name": "Metz",
+   "game_name": "Metz",
+   "country": "FRA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Ligue 1"
+   ],
+   "players": 307,
+   "appearances": 9484
+  },
+  "527": {
+   "club_id": 527,
+   "slug": "bastia",
+   "name": "Bastia",
+   "game_name": "Bastia",
+   "country": "FRA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Ligue 1"
+   ],
+   "players": 214,
+   "appearances": 7454
+  },
+  "528": {
+   "club_id": 528,
+   "slug": "nice",
+   "name": "Nice",
+   "game_name": "Nice",
+   "country": "FRA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Ligue 1"
+   ],
+   "players": 335,
+   "appearances": 13584
+  },
+  "529": {
+   "club_id": 529,
+   "slug": "saint-etienne",
+   "name": "Saint-Étienne",
+   "game_name": "Saint-Étienne",
+   "country": "FRA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Ligue 1"
+   ],
+   "players": 300,
+   "appearances": 11354
+  },
+  "530": {
+   "club_id": 530,
+   "slug": "le-havre",
+   "name": "Le Havre",
+   "game_name": "Le Havre",
+   "country": "FRA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Ligue 1"
+   ],
+   "players": 182,
+   "appearances": 5002
+  },
+  "531": {
+   "club_id": 531,
+   "slug": "guingamp",
+   "name": "Guingamp",
+   "game_name": "Guingamp",
+   "country": "FRA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Ligue 1"
+   ],
+   "players": 164,
+   "appearances": 6552
+  },
+  "532": {
+   "club_id": 532,
+   "slug": "strasbourg",
+   "name": "Strasbourg",
+   "game_name": "Strasbourg",
+   "country": "FRA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Ligue 1"
+   ],
+   "players": 267,
+   "appearances": 10107
+  },
+  "533": {
+   "club_id": 533,
+   "slug": "cannes",
+   "name": "Cannes",
+   "game_name": "Cannes",
+   "country": "FRA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Ligue 1"
+   ],
+   "players": 57,
+   "appearances": 1483
+  },
+  "534": {
+   "club_id": 534,
+   "slug": "martigues",
+   "name": "Martigues",
+   "game_name": "Martigues",
+   "country": "FRA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Ligue 1"
+   ],
+   "players": 26,
+   "appearances": 505
+  },
+  "535": {
+   "club_id": 535,
+   "slug": "nancy",
+   "name": "Nancy",
+   "game_name": "Nancy",
+   "country": "FRA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Ligue 1"
+   ],
+   "players": 146,
+   "appearances": 6108
+  },
+  "536": {
+   "club_id": 536,
+   "slug": "caen",
+   "name": "Caen",
+   "game_name": "Caen",
+   "country": "FRA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Ligue 1"
+   ],
+   "players": 172,
+   "appearances": 5740
+  },
+  "537": {
+   "club_id": 537,
+   "slug": "chateauroux",
+   "name": "Châteauroux",
+   "game_name": "Châteauroux",
+   "country": "FRA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Ligue 1"
+   ],
+   "players": 26,
+   "appearances": 464
+  },
+  "538": {
+   "club_id": 538,
+   "slug": "toulouse",
+   "name": "Toulouse",
+   "game_name": "Toulouse",
+   "country": "FRA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Ligue 1"
+   ],
+   "players": 311,
+   "appearances": 12212
+  },
+  "539": {
+   "club_id": 539,
+   "slug": "lorient",
+   "name": "Lorient",
+   "game_name": "Lorient",
+   "country": "FRA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Ligue 1"
+   ],
+   "players": 255,
+   "appearances": 9471
+  },
+  "540": {
+   "club_id": 540,
+   "slug": "sochaux",
+   "name": "Sochaux",
+   "game_name": "Sochaux",
+   "country": "FRA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Ligue 1"
+   ],
+   "players": 160,
+   "appearances": 7159
+  },
+  "541": {
+   "club_id": 541,
+   "slug": "troyes",
+   "name": "Troyes",
+   "game_name": "Troyes",
+   "country": "FRA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Ligue 1"
+   ],
+   "players": 216,
+   "appearances": 5739
+  },
+  "542": {
+   "club_id": 542,
+   "slug": "sedan",
+   "name": "Sedan",
+   "game_name": "Sedan",
+   "country": "FRA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Ligue 1"
+   ],
+   "players": 81,
+   "appearances": 2415
+  },
+  "543": {
+   "club_id": 543,
+   "slug": "ajaccio",
+   "name": "Ajaccio",
+   "game_name": "Ajaccio",
+   "country": "FRA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Ligue 1"
+   ],
+   "players": 162,
+   "appearances": 4219
+  },
+  "544": {
+   "club_id": 544,
+   "slug": "le-mans",
+   "name": "Le Mans",
+   "game_name": "Le Mans",
+   "country": "FRA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Ligue 1"
+   ],
+   "players": 102,
+   "appearances": 3176
+  },
+  "545": {
+   "club_id": 545,
+   "slug": "istres",
+   "name": "Istres",
+   "game_name": "Istres",
+   "country": "FRA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Ligue 1"
+   ],
+   "players": 31,
+   "appearances": 523
+  },
+  "546": {
+   "club_id": 546,
+   "slug": "valenciennes",
+   "name": "Valenciennes",
+   "game_name": "Valenciennes",
+   "country": "FRA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Ligue 1"
+   ],
+   "players": 85,
+   "appearances": 4162
+  },
+  "547": {
+   "club_id": 547,
+   "slug": "grenoble-foot",
+   "name": "Grenoble Foot",
+   "game_name": "Grenoble Foot",
+   "country": "FRA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Ligue 1"
+   ],
+   "players": 45,
+   "appearances": 1052
+  },
+  "548": {
+   "club_id": 548,
+   "slug": "boulogne",
+   "name": "Boulogne",
+   "game_name": "Boulogne",
+   "country": "FRA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Ligue 1"
+   ],
+   "players": 33,
+   "appearances": 530
+  },
+  "549": {
+   "club_id": 549,
+   "slug": "arles-avignon",
+   "name": "Arles-Avignon",
+   "game_name": "Arles-Avignon",
+   "country": "FRA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Ligue 1"
+   ],
+   "players": 34,
+   "appearances": 530
+  },
+  "550": {
+   "club_id": 550,
+   "slug": "dijon",
+   "name": "Dijon",
+   "game_name": "Dijon",
+   "country": "FRA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Ligue 1"
+   ],
+   "players": 105,
+   "appearances": 3064
+  },
+  "551": {
+   "club_id": 551,
+   "slug": "evian",
+   "name": "Evian",
+   "game_name": "Evian",
+   "country": "FRA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Ligue 1"
+   ],
+   "players": 64,
+   "appearances": 2117
+  },
+  "552": {
+   "club_id": 552,
+   "slug": "reims",
+   "name": "Reims",
+   "game_name": "Reims",
+   "country": "FRA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Ligue 1"
+   ],
+   "players": 155,
+   "appearances": 5818
+  },
+  "553": {
+   "club_id": 553,
+   "slug": "angers",
+   "name": "Angers",
+   "game_name": "Angers",
+   "country": "FRA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Ligue 1"
+   ],
+   "players": 140,
+   "appearances": 5335
+  },
+  "554": {
+   "club_id": 554,
+   "slug": "gazelec-ajaccio",
+   "name": "Gazélec Ajaccio",
+   "game_name": "Gazélec Ajaccio",
+   "country": "FRA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Ligue 1"
+   ],
+   "players": 23,
+   "appearances": 527
+  },
+  "555": {
+   "club_id": 555,
+   "slug": "amiens",
+   "name": "Amiens",
+   "game_name": "Amiens",
+   "country": "FRA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Ligue 1"
+   ],
+   "players": 54,
+   "appearances": 1444
+  },
+  "556": {
+   "club_id": 556,
+   "slug": "nimes",
+   "name": "Nîmes",
+   "game_name": "Nîmes",
+   "country": "FRA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Ligue 1"
+   ],
+   "players": 52,
+   "appearances": 1483
+  },
+  "557": {
+   "club_id": 557,
+   "slug": "clermont-foot",
+   "name": "Clermont Foot",
+   "game_name": "Clermont Foot",
+   "country": "FRA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Ligue 1"
+   ],
+   "players": 56,
+   "appearances": 1692
+  },
+  "558": {
+   "club_id": 558,
+   "slug": "paris-fc",
+   "name": "Paris FC",
+   "game_name": "Paris FC",
+   "country": "FRA",
+   "tiers": [
+    1
+   ],
+   "competitions": [
+    "Ligue 1"
+   ],
+   "players": 35,
+   "appearances": 567
+  }
+ },
+ "slug_count": 313
+}

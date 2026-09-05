@@ -42,6 +42,19 @@ const { createClient } = require('@supabase/supabase-js');
 const db = createClient(process.env.Supabase_Project_URL, process.env.Supabase_Service_Role,
                         { auth: { persistSession: false } });
 
+/**
+ * Names the de-accenting matcher cannot bridge on its own, because the two
+ * forms abbreviate differently rather than just losing an accent. Keyed on the
+ * FBref squad id, which is the one thing that does not move.
+ *
+ * "Deportivo La Coruna" (FBref's slug) against "Dep La Coruña" (what six files
+ * and four game pages actually ask for) share no normalised form, so the
+ * automatic pass skipped it and Higher-or-Lower answered "Club not found".
+ */
+const OVERRIDES = {
+  '2a60ed82': 'Dep La Coruña',   // FBref slug "Deportivo La Coruna"
+};
+
 /** Compare names ignoring accents, case and punctuation. */
 const key = (s) => String(s || '')
   .normalize('NFD').replace(/[̀-ͯ]/g, '')
@@ -78,7 +91,9 @@ async function page(table, cols) {
   let unchanged = 0, brandNew = 0;
   for (const c of newClubs) {
     // Match on either form: the slug name or FBref's short display name.
-    const was = oldByKey.get(key(c.club_name)) || oldByKey.get(key(c.club_name_short));
+    const was = OVERRIDES[c.fbref_squad_id]
+             || oldByKey.get(key(c.club_name))
+             || oldByKey.get(key(c.club_name_short));
     if (!was) { brandNew++; continue; }
     if (was === c.club_name) { unchanged++; continue; }
     updates.push({
@@ -110,11 +125,28 @@ async function page(table, cols) {
   }
   console.log(`\n  ✓ ${updates.length} club names restored`);
 
-  // Not optional. agg_player_club_comp and agg_player_club both carry
-  // club_name denormalised; without this they keep serving the slug names and
-  // Bullseye stays broken.
-  console.log(`  rebuilding aggregates…`);
-  const { error } = await db.rpc('rebuild_aggregates');
-  if (error) throw new Error(`rebuild_aggregates: ${error.message}`);
-  console.log(`  ✓ aggregates rebuilt\n`);
+  // The aggregates carry club_name denormalised, so they must be corrected
+  // too or the games keep reading the slug names and stay broken.
+  //
+  // NOT via rebuild_aggregates(): that truncates and reinserts ~200k rows
+  // across three tables and blows the statement timeout when called through
+  // PostgREST. Only the name changed, so patch the name — one update per
+  // affected club per table, which is instant.
+  console.log(`  correcting the denormalised copies…`);
+  const truth = new Map();
+  for (const c of await page('clubs_v2', 'club_id, club_name')) truth.set(c.club_id, c.club_name);
+
+  for (const table of ['agg_player_club_comp', 'agg_player_club', 'agg_club_season']) {
+    const rows = await page(table, 'club_id, club_name');
+    const stale = [...new Map(
+      rows.filter((r) => truth.get(r.club_id) !== r.club_name).map((r) => [r.club_id, r])
+    ).values()];
+    for (const s of stale) {
+      const { error } = await db.from(table)
+        .update({ club_name: truth.get(s.club_id) }).eq('club_id', s.club_id);
+      if (error) throw new Error(`${table}: ${error.message}`);
+    }
+    console.log(`    ${table.padEnd(24)} ${stale.length} clubs corrected`);
+  }
+  console.log(`  ✓ done\n`);
 })().catch((e) => { console.error(`\n  ✗ ${e.message}\n`); process.exit(1); });

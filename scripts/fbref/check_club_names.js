@@ -91,14 +91,23 @@ function candidates(text) {
     if (data.length < 1000) break;
   }
 
-  // Names the database knows about at all, so a club with no rows in the game
-  // view can be reported differently from a typo.
+  // Every name that IS or EVER WAS a club. Both halves matter.
+  //
+  // The pre-rebuild table is not optional here, and leaving it out was a real
+  // blind spot: 'Dep La Coruña' is referenced by two games, is absent from the
+  // new clubs table, and was therefore dismissed as "probably not a club" and
+  // skipped — the exact break the checker exists to find. A name that used to
+  // be a club and no longer resolves is the strongest possible signal, not the
+  // weakest.
   const known = new Set();
-  for (let from = 0; ; from += 1000) {
-    const { data } = await db.from('clubs').select('club_name').range(from, from + 999);
-    if (!data || !data.length) break;
-    for (const r of data) known.add(r.club_name);
-    if (data.length < 1000) break;
+  for (const table of ['clubs', 'clubs_pre_rebuild']) {
+    for (let from = 0; ; from += 1000) {
+      const { data, error } = await db.from(table).select('club_name').range(from, from + 999);
+      if (error) break;                       // pre-rebuild may be gone one day
+      if (!data.length) break;
+      for (const r of data) known.add(r.club_name);
+      if (data.length < 1000) break;
+    }
   }
 
   const de = (s) => String(s).normalize('NFD').replace(/[̀-ͯ]/g, '')
