@@ -2092,3 +2092,75 @@ played yet.)
 - Alerting: data-health on Netlify (phase 7)
 - Optional: point games at agg_* tables for the speed win; drop the legacy
   rollups and the *_pre_rebuild tables once confident.
+
+## REV 12 — USER FOUND A REAL BUG. Málaga Bullseye returned nothing.
+
+### My regression, and my testing gap
+Bullseye = match_start.js, which I NEVER PUT IN THE SMOKE TEST. Nor xi_score,
+whose 41 club ids I edited without ever running it.
+
+Honest gap count when asked: 13 functions touch the rebuilt tables, I had
+tested 9. Untested: match_start, xi_score, db-introspect (+ data-summary,
+which I had tested by hand outside the harness).
+
+### Root cause — a regression I introduced
+parse.js takes club_name from the squad URL SLUG, which is ASCII and always
+the full form:
+    /en/squads/1c896955/Malaga-Stats  ->  "Malaga"
+That fixed four English clubs (Newcastle United, Nottingham Forest) and broke
+**68 others**. Five functions resolve clubs by NAME against hardcoded lists —
+match_start alone carries 144 — so "Málaga" stopped matching "Malaga" and the
+board came back empty. NOTHING ERRORED.
+Two loss patterns: accents (Köln, Nürnberg, Alavés, Atlético Madrid,
+Saint-Étienne, Sporting Gijón) and short forms (Wolves, Brighton, Manchester
+Utd, Inter, Gladbach, Arminia, Racing Sant, Sheffield Weds).
+Only 17 of the 68 were hardcoded in match_start — the other 51 were latent.
+
+PRINCIPLE I GOT WRONG: the rebuild was about the data being CORRECT, not about
+renaming things the application already refers to. Where the old database had
+a name, that name wins.
+
+### Fix — in the data, not in five files
+scripts/fbref/restore_club_names.js — maps new clubs to old names by
+de-accented key and restores them; keeps FBref's slug form in club_name_short.
+558 clubs: 403 already correct, 68 restored, 87 genuinely new.
+GOTCHA: rebuild_aggregates() via PostgREST RPC hits a STATEMENT TIMEOUT
+(truncate + reinsert ~200k rows across 3 tables). Full rebuild was overkill
+anyway — only club_name changed, so patched the denormalised copies directly:
+68 clubs × 3 agg tables = 204 targeted updates, instant.
+Verified: Málaga -> Duda (315), Weligton Oliveira (217), Fernando Sanz (205).
+
+### NEW GATE — scripts/fbref/check_club_names.js
+A smoke test cannot catch this class: it would have had to guess Málaga. This
+scans every .js/.html in netlify/functions and public/ for club-name-shaped
+strings and checks each resolves to rows in v_game_player_club_comp. Exits
+non-zero, so it can gate a deploy.
+First run found 4 more — ALL FALSE POSITIVES, which mattered because a checker
+that cries wolf is useless: alias MAPS ('Atlético Madrid': ['Atletico Madrid',
+...]) and a club name inside a code COMMENT. Sharpened: skip comment lines,
+and skip a candidate when the file also contains the form that does resolve.
+Now: 557 club names with players behind them, 96 files scanned, zero broken.
+
+### Smoke test extended: 19 cases, 19 passing
+Added match_start ×4 (epl age bucket, top clubs, La Liga Málaga, Bundesliga
+Köln — non-English deliberately, since English clubs would never have caught a
+lost accent) and xi_score (builds a real XI first, then scores it).
+Also allows a case to be an async function, for tests needing a live value.
+
+### Measurements for the remaining phases (user asked)
+PHASE 3 — this is NOT optimisation, it is a prerequisite:
+  all four English tiers, today's pattern: 74,858 rows · 75 round-trips · 9.9s
+    (Netlify kills a function at 10s — cross-tier games CANNOT be built on it)
+  same question via agg_player_club_comp: 200 rows · 1 round-trip · 90ms
+  PL alone: 19,017 rows (20 trips) -> 7,836 aggregated (8 trips)
+  Per game: xi_start 3.2s, quiz_start 4.4-5.2s, alpha 3.7-4.3s, whoami 3.0s,
+  hol 1.8s, community-builder already 100ms (reads the aggregate).
+PHASE 4 — 579,857 rows of dead weight in 11 tables:
+  rollback path (keep weeks): *_pre_rebuild = 210,430
+  superseded rollups (drop soonest, CORRECTNESS risk not space — they hold
+    February numbers): player_club_totals 71,563, player_totals 36,133,
+    player_club_total_competition 89,028, + 2 empty
+  debris (confirm first): season_stats_staging 170,768,
+    _backup_position_bucket_20260214 1,935
+  local disk: data/fbref 2.0G (KEEP — re-parse without re-scraping),
+    data/backups 151M (KEEP — only copy of pre-rebuild data)

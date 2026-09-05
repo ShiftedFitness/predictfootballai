@@ -85,6 +85,25 @@ const CASES = [
   ['xi_start',          'get_best_xi',     post({ action: 'get_best_xi', scopeId: 'epl_alltime', formation: '4-4-2', objective: 'appearances' })],
   ['community-builder', 'preview',         post({ action: 'preview', gameType: 'higher_lower',
                                                   filters: { competitions: ['Premier League'], clubs: ['Liverpool'] } })],
+
+  // Bullseye. Absent from the first version of this file, which is how it
+  // reached a user with an empty board for Málaga. A non-English club is
+  // deliberate: the English ones were never going to catch a lost accent.
+  ['match_start',       'epl age bucket',  post({ categoryId: 'epl_age_u21' })],
+  ['match_start',       'top clubs',       post({ categoryId: 'get_top_clubs' })],
+  ['match_start',       'La Liga · Málaga', post({ categoryId: 'laliga_club_Málaga' })],
+  ['match_start',       'Bundesliga · Köln', post({ categoryId: 'bundesliga_club_Köln' })],
+
+  // xi_score. I edited its 41 club ids and never once ran it.
+  ['xi_score',          'score an XI',     async () => {
+    const xi = await require(path.join(FUNCS, 'xi_start.js')).handler(
+      post({ action: 'get_best_xi', scopeId: 'club_arsenal', formation: '4-4-2', objective: 'appearances' }), {});
+    const picks = (JSON.parse(xi.body).bestXI || [])
+      .filter((s) => s.player)
+      .map((s) => ({ slotIdx: s.slotIdx, uid: s.player.playerId }));
+    return post({ scopeId: 'club_arsenal', formation: '4-4-2', objective: 'appearances',
+                  picks, reveal: true });
+  }],
 ];
 
 /** A 200 that contains an `error` key is a failure dressed as a success. */
@@ -103,7 +122,7 @@ function verdict(res) {
   console.log(`\n  Smoke test — ${LIVE ? 'LIVE tables (control)' : 'COMPAT views (rebuilt data)'}\n`);
 
   let pass = 0, fail = 0;
-  for (const [file, label, event] of CASES) {
+  for (const [file, label, eventOrFn] of CASES) {
     const p = path.join(FUNCS, `${file}.js`);
     if (!fs.existsSync(p)) { console.log(`  ?  ${file} — not found`); continue; }
 
@@ -112,6 +131,8 @@ function verdict(res) {
     try {
       delete require.cache[require.resolve(p)];
       delete require.cache[require.resolve(path.join(FUNCS, '_supabase.js'))];
+      // Some cases need a live value first — scoring an XI needs an XI.
+      const event = typeof eventOrFn === 'function' ? await eventOrFn() : eventOrFn;
       res = await require(p).handler(event, {});
     } catch (e) { err = e; }
     const ms = Date.now() - t0;
