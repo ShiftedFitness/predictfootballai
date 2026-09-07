@@ -93,6 +93,13 @@
    */
   function play(getButton, opts) {
     if (!autostart() || !param('scope')) return false;
+    // Cover the setup screen straight away.
+    //
+    // Clicking "Luton Town — Higher or Lower" and landing on a picker showing
+    // every other club, which then flickers away on its own, reads as a
+    // misfire even though the right game starts. The player already chose;
+    // this hides the choosing and says what is loading.
+    curtain();
     var tries = 0;
     (function attempt() {
       var btn = null;
@@ -102,11 +109,48 @@
       if (btn && !btn.disabled) {
         if (!opts || opts.announce !== false) announce();
         btn.click();
+        // The game replaces the setup step itself; the curtain comes down a
+        // beat later so there is no flash of the picker in between.
+        setTimeout(uncurtain, 350);
         return;
       }
-      if (++tries < 40) setTimeout(attempt, 100);   // 4s, then give up quietly
+      if (++tries < 40) { setTimeout(attempt, 100); return; }
+      // Four seconds and no start button. Something is wrong or slow — show
+      // the picker rather than leaving somebody on a curtain forever.
+      uncurtain();
     })();
     return true;
+  }
+
+  /** Hide the page behind a "loading" panel that names what is coming. */
+  function curtain() {
+    if (document.getElementById('ts-curtain')) return;
+    var team = sourceTeam();
+    var pretty = team
+      ? team.replace(/-/g, ' ').replace(/\b\w/g, function (c) { return c.toUpperCase(); })
+      : '';
+    var el = document.createElement('div');
+    el.id = 'ts-curtain';
+    el.setAttribute('style',
+      'position:fixed;inset:0;z-index:9998;display:flex;align-items:center;' +
+      'justify-content:center;flex-direction:column;gap:14px;' +
+      'background:var(--bg,#0B0F12);font-family:inherit;text-align:center;padding:24px');
+    el.innerHTML =
+      '<div style="width:34px;height:34px;border-radius:50%;border:3px solid rgba(255,255,255,.14);' +
+      'border-top-color:var(--accent-cyan,#00E5FF);animation:tsSpin .8s linear infinite"></div>' +
+      '<div style="font-size:1rem;font-weight:700;color:var(--text-primary,#F2F5F7)">' +
+      (pretty ? pretty : 'Setting up your game') + '</div>' +
+      '<div style="font-size:.83rem;color:var(--text-secondary,#9FB0BC)">Loading\u2026</div>' +
+      '<style>@keyframes tsSpin{to{transform:rotate(360deg)}}</style>';
+    (document.body || document.documentElement).appendChild(el);
+  }
+
+  function uncurtain() {
+    var el = document.getElementById('ts-curtain');
+    if (!el) return;
+    el.style.transition = 'opacity .18s';
+    el.style.opacity = '0';
+    setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 200);
   }
 
   /**
@@ -154,5 +198,5 @@
 
   window.TSScope = { requested: requested, requestedId: requestedId,
                      autostart: autostart, play: play, sourceTeam: sourceTeam,
-                     param: param };
+                     param: param, curtain: curtain, uncurtain: uncurtain };
 })();

@@ -47,6 +47,46 @@ const MIN_PLAYERS = 40;
 const MIN_TOP_APPS = 100;
 const MIN_SEASONS = 8;
 
+/**
+ * A scope is MARQUEE when most of this site's visitors could name several of
+ * its players. The daily draws only from these for its opening weeks — see
+ * OPENING_DAYS in netlify/functions/_daily.js.
+ *
+ * "Carlisle United in League One" is a perfectly good puzzle and a terrible
+ * first impression: somebody arriving on day one cannot tell whether they are
+ * bad at the game or simply do not follow League One, and there is only one
+ * first impression. The lower leagues remain most of the pool and most of what
+ * makes this site distinctive — they just should not be the welcome mat.
+ *
+ * TWO RULES, AND THE SECOND IS EDITORIAL ON PURPOSE.
+ *
+ * English clubs qualify on Premier League TENURE, which is derivable: ten or
+ * more seasons in the top flight and a fan has seen you. That is 28 clubs and
+ * it self-maintains — a promoted club earns its way in over a decade, a fallen
+ * one keeps its place on history.
+ *
+ * European clubs qualify by being on a list. There is no honest metric for
+ * "famous to a British audience": St Pauli and Cádiz clear every threshold
+ * that Bayern and Barcelona clear, and the first pass duly opened with St
+ * Pauli. Rather than invent a proxy and pretend it is objective, the judgement
+ * is written down where it can be argued with.
+ */
+const MARQUEE_MIN_PL_SEASONS = 10;
+
+const MARQUEE_EUROPEAN = new Set([
+  'Barcelona', 'Real Madrid', 'Atlético Madrid', 'Valencia', 'Sevilla',
+  'Bayern Munich', 'Dortmund', 'Milan', 'Internazionale', 'Juventus',
+  'Roma', 'Napoli', 'Lazio', 'Paris Saint-Germain', 'Marseille', 'Lyon',
+  'Porto', 'Benfica', 'Ajax', 'PSV Eindhoven', 'Celtic', 'Rangers',
+]);
+
+// The competitions a marquee scope may be about. A giant's League Two record
+// does not exist, but a marquee club's cup runs are still recognisable.
+const MARQUEE_COMPETITIONS = new Set([
+  'Premier League', 'La Liga', 'Serie A', 'Bundesliga', 'Ligue 1',
+  'Champions League', 'Championship',
+]);
+
 async function page(table, cols) {
   const out = [];
   for (let from = 0; ; from += 1000) {
@@ -85,6 +125,17 @@ async function page(table, cols) {
   const good = (c) => c.players >= MIN_PLAYERS && c.topApps >= MIN_TOP_APPS
                    && (c.last - c.first + 1) >= MIN_SEASONS;
 
+  // Seasons in the Premier League, per club — the derivable half of marquee.
+  const plSeasons = new Map();
+  for (const r of rows) {
+    if (r.competition_name !== 'Premier League') continue;
+    if (!plSeasons.has(r.club_id)) plSeasons.set(r.club_id, new Set());
+    plSeasons.get(r.club_id).add(r.first_season);
+  }
+  const isMarqueeClub = (t) =>
+    (plSeasons.get(t.club_id) || new Set()).size >= MARQUEE_MIN_PL_SEASONS ||
+    MARQUEE_EUROPEAN.has(t.name) || MARQUEE_EUROPEAN.has(t.game_name);
+
   const entries = [];
   let rejected = 0;
 
@@ -98,6 +149,7 @@ async function page(table, cols) {
         id: teams.scopeIdFor(t.slug, comp),
         slug: t.slug, team: t.name, competition: comp,
         players: c.players, topApps: c.topApps, seasons: c.last - c.first + 1,
+        marquee: isMarqueeClub(t) && MARQUEE_COMPETITIONS.has(comp),
       });
     }
     // The "all competitions" scope, for clubs that have more than one. It is
@@ -110,6 +162,7 @@ async function page(table, cols) {
           id: `team_${t.slug}_all`,
           slug: t.slug, team: t.name, competition: null,
           players: c.players, topApps: c.topApps, seasons: c.last - c.first + 1,
+          marquee: isMarqueeClub(t),
         });
       } else rejected++;
     }
@@ -126,13 +179,15 @@ async function page(table, cols) {
   fs.writeFileSync(path.join(ROOT, 'data', 'daily', 'pool.json'),
     JSON.stringify({
       generated: new Date().toISOString(),
-      thresholds: { MIN_PLAYERS, MIN_TOP_APPS, MIN_SEASONS },
+      thresholds: { MIN_PLAYERS, MIN_TOP_APPS, MIN_SEASONS, MARQUEE_MIN_PL_SEASONS },
       count: entries.length,
+      marquee: entries.filter((e) => e.marquee).length,
       scopes: entries,
     }, null, 1) + '\n');
 
   console.log(`\n  ✓ ${entries.length} scopes qualify · ${rejected} rejected`);
   console.log(`    ${new Set(entries.map((e) => e.slug)).size} distinct clubs`);
+  console.log(`    ${entries.filter((e) => e.marquee).length} marquee (the daily's opening weeks)`);
   for (const [k, v] of Object.entries(byComp).sort((a, b) => b[1] - a[1])) {
     console.log(`      ${String(v).padStart(4)}  ${k}`);
   }

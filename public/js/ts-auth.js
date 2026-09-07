@@ -317,20 +317,28 @@
     },
 
     /** Determine which scopes a user can access based on tier */
+    /**
+     * Which scopes a player may choose. Now: all of them, for everyone.
+     *
+     * The old model gave anonymous players a random club and free accounts the
+     * Premier League only. That was in direct conflict with what the site
+     * became: 312 team pages exist to pull people in from a search for their
+     * own club, and that visitor is anonymous by definition. They landed on
+     * "Sunderland quizzes", pressed play, and were given a random team.
+     *
+     * The paywall now sits on HOW MUCH you can play, not on WHICH club — see
+     * getRemainingPlays(). Choosing your own team is the product.
+     */
     getAllowedScopes() {
-      const tier = this.getTier();
-      const user = this.getUser();
-      if (tier === 'paid') return { all: true };
-      if (tier === 'free' && user?.referral_unlocked) return { all: true };
-      if (tier === 'free') return { leagues: ['epl'], clubsFor: ['epl'] };
-      // anonymous: random only
-      return { randomOnly: true };
+      return { all: true };
     },
 
     /** Check if a specific scope ID is allowed for the current user */
     isScopeAllowed(scopeId) {
       const allowed = this.getAllowedScopes();
       if (allowed.all) return true;
+      // Kept below for the shape, but unreachable while getAllowedScopes()
+      // returns { all: true }.
       if (allowed.randomOnly) return false;
       // EPL scopes: epl_alltime, epl_club_*, or generic club names under EPL
       if (!scopeId) return false;

@@ -40,10 +40,24 @@ const MANIFEST = require('../../data/teams/slugs.json');
 
 // ─── The teams ──────────────────────────────────────────────────────────────
 
-const TEAMS = Object.values(MANIFEST.teams);
+/**
+ * A club FBref holds as two squads but TeleStats presents as one carries
+ * `merged_into` (see scripts/teams/merge_clubs.js). It is dropped from the
+ * team list so it gets no page, no scope and no hub entry — but the entry
+ * stays in the manifest and byClubId() still resolves it, to the surviving
+ * club, so an old scope id or a played round filed under the losing club_id
+ * still lands somewhere real.
+ */
+const ALL_ENTRIES = Object.values(MANIFEST.teams);
+const TEAMS = ALL_ENTRIES.filter((t) => !t.merged_into);
 
 const BY_SLUG = new Map(TEAMS.map((t) => [t.slug, t]));
+const BY_SLUG_ALL = new Map(ALL_ENTRIES.map((t) => [t.slug, t]));
 const BY_ID = new Map(TEAMS.map((t) => [t.club_id, t]));
+// A merged club's id points at the club it merged into.
+for (const t of ALL_ENTRIES) {
+  if (t.merged_into) BY_ID.set(t.club_id, BY_SLUG_ALL.get(t.merged_into) || null);
+}
 
 /**
  * A club with too little behind it is still reachable and playable, but it
@@ -74,7 +88,15 @@ const competitionSlug = (name) =>
 // ─── Lookups ────────────────────────────────────────────────────────────────
 
 const all = () => TEAMS;
-const bySlug = (slug) => BY_SLUG.get(String(slug || '').toLowerCase()) || null;
+const bySlug = (slug) => {
+  const s = String(slug || '').toLowerCase();
+  const hit = BY_SLUG.get(s);
+  if (hit) return hit;
+  // A merged slug resolves to its survivor rather than to nothing, so an old
+  // bookmark or inbound link reaches the club it is about.
+  const merged = BY_SLUG_ALL.get(s);
+  return merged && merged.merged_into ? BY_SLUG.get(merged.merged_into) || null : null;
+};
 const byClubId = (id) => BY_ID.get(Number(id)) || null;
 
 /** Teams that have earned a place in the sitemap. */

@@ -22,6 +22,16 @@ Disallow: /account/
 # The service worker's offline fallback. It is a placeholder, not a page.
 Disallow: /offline.html
 
+# Superseded copies of the games, kept for reference. They have no canonical
+# and would compete with the live /games/* pages for the same queries.
+Disallow: /archive/
+
+# A player's own profile. Not secret, but not a search result.
+Disallow: /profile/
+
+# Goal Recreator is a game to play, not a page to find.
+Disallow: /goals/
+
 # Session and challenge URLs carry a player's own result and should never
 # compete with the real pages for the same query.
 Disallow: /*?challenge=
@@ -33,26 +43,108 @@ Disallow: /*?session=
 # actual content.
 Disallow: /games/*?scope=
 
-# AI search crawlers are named explicitly rather than left to the wildcard, so
-# that a future tightening of the rules above cannot silently cut them off.
-# TeleStats answers database-backed factual questions; being citable is the
-# point.
+# AI search crawlers, named explicitly because TeleStats answers
+# database-backed factual questions and being citable is the point.
+#
+# EVERY RULE IS REPEATED IN FULL INSIDE EACH BLOCK, AND MUST BE.
+#
+# A crawler obeys only the most specific group that names it and ignores every
+# other group — including `User-agent: *`. So a block containing just
+# "Allow: /" does not mean "welcome, subject to the rules above"; it means
+# "welcome, and none of the rules above apply to you". The first version of
+# this file did exactly that, which made these six crawlers the only ones
+# permitted into /account/, the Fives admin screens and the 1,500 near-
+# duplicate ?scope= game URLs deliberately kept out of the index.
+#
+# If a Disallow is added to the wildcard block, add it here too.
 User-agent: GPTBot
 Allow: /
+Disallow: /predict/admin.html
+Disallow: /predict/admin_predictions.html
+Disallow: /predict/login.html
+Disallow: /predict/PicksCheck.html
+Disallow: /account/
+Disallow: /offline.html
+Disallow: /archive/
+Disallow: /profile/
+Disallow: /goals/
+Disallow: /*?challenge=
+Disallow: /*?session=
+Disallow: /games/*?scope=
 
 User-agent: OAI-SearchBot
 Allow: /
+Disallow: /predict/admin.html
+Disallow: /predict/admin_predictions.html
+Disallow: /predict/login.html
+Disallow: /predict/PicksCheck.html
+Disallow: /account/
+Disallow: /offline.html
+Disallow: /archive/
+Disallow: /profile/
+Disallow: /goals/
+Disallow: /*?challenge=
+Disallow: /*?session=
+Disallow: /games/*?scope=
 
 User-agent: ChatGPT-User
 Allow: /
+Disallow: /predict/admin.html
+Disallow: /predict/admin_predictions.html
+Disallow: /predict/login.html
+Disallow: /predict/PicksCheck.html
+Disallow: /account/
+Disallow: /offline.html
+Disallow: /archive/
+Disallow: /profile/
+Disallow: /goals/
+Disallow: /*?challenge=
+Disallow: /*?session=
+Disallow: /games/*?scope=
 
 User-agent: PerplexityBot
 Allow: /
+Disallow: /predict/admin.html
+Disallow: /predict/admin_predictions.html
+Disallow: /predict/login.html
+Disallow: /predict/PicksCheck.html
+Disallow: /account/
+Disallow: /offline.html
+Disallow: /archive/
+Disallow: /profile/
+Disallow: /goals/
+Disallow: /*?challenge=
+Disallow: /*?session=
+Disallow: /games/*?scope=
 
 User-agent: ClaudeBot
 Allow: /
+Disallow: /predict/admin.html
+Disallow: /predict/admin_predictions.html
+Disallow: /predict/login.html
+Disallow: /predict/PicksCheck.html
+Disallow: /account/
+Disallow: /offline.html
+Disallow: /archive/
+Disallow: /profile/
+Disallow: /goals/
+Disallow: /*?challenge=
+Disallow: /*?session=
+Disallow: /games/*?scope=
 
 User-agent: Google-Extended
 Allow: /
+Disallow: /predict/admin.html
+Disallow: /predict/admin_predictions.html
+Disallow: /predict/login.html
+Disallow: /predict/PicksCheck.html
+Disallow: /account/
+Disallow: /offline.html
+Disallow: /archive/
+Disallow: /profile/
+Disallow: /goals/
+Disallow: /*?challenge=
+Disallow: /*?session=
+Disallow: /games/*?scope=
 
 Sitemap: https://telestats.net/sitemap.xml

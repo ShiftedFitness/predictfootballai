@@ -2639,3 +2639,53 @@ values this codebase generated, never user text.
 
 `npm run check` is 29 + 33 + 30 assertions and takes about a minute. It is the
 gate worth running before any deploy.
+
+---
+
+## Snag list — 7 Sep 2026
+
+Answers to the two questions first, because both premises turned out to be wrong.
+
+**Q: positions missing for La Liga, so Málaga XI won't work?**
+No — `position_bucket` is **100% populated for every competition** (only
+Community Shield is empty, and it has no rows at all). Málaga, Real Madrid and
+Barcelona all return a full 11/11: Casillas, Ramos, Hierro; Valdés, Piqué,
+Puyol. Nothing to backfill. If you saw it fail, it was the page and not the
+data — tell me what you clicked.
+
+**Q: Stripe prices?**
+Lifetime Pro **£4.99**, Day Pass **£0.99** (24 hours, via `pro_expires_at`).
+
+### The list
+
+OVERALL
+- [ ] 1  Trending games — curated + most-played, admin to curate, hidden when empty
+- [ ] 2  Search: find a club's games fast
+- [x] 3  Footer → "Database last updated X (see coverage)", linked
+- [x] 4  Daily: curate the first 50, skew to well-known clubs
+- [x] 5  Desktop install prompt appears more than once
+- [x] 6  NEVER name FBref publicly — "various official league sources"
+- [x] 7  Data coverage page: drop the latest-year tab, fix wonky tier highlighting
+- [x] 8  Entitlements: anon 3/day, free 10/day, no locked categories, daily always free
+
+ASK
+- [ ] 9  Result formatting — centre, clean
+- [ ] 10 Sheffield Wednesday vs Sheffield United must be unambiguous
+- [ ] 11 OR as well as AND: "Argentinians who played for Man Utd or Liverpool"
+- [ ] 12 Country + position + competition combined: "Argentinian strikers in the PL"
+- [ ] 13 Negation: "non-Spanish players who played for Málaga"
+
+TEAM PAGES
+- [x] 14 Explainer closed by default
+- [ ] 15 Data coverage as an overlay, not a navigation; drop "all"
+- [x] 16 /teams/ — drop the player counts, use club colours
+- [x] 17 /teams/ — searchable
+- [x] 18 Audit club colours (Birmingham City is purple)
+- [x] 19 Competition chips are inverted: clicking one should select only it
+- [ ] 20 Player of the day: guessable — position, country, hangman reveal
+- [ ] 21 List each game variant (H/L appearances, H/L goals, XI goals, XI apps)
+- [ ] 22 Skip the game's own setup screen entirely
+
+DATA / GAMEPLAY
+- [x] 23 A goalkeeper on 0 goals should be unselectable, not a wasted guess
+- [x] 24 Málaga merge (approved)

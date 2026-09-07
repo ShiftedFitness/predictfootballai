@@ -39,6 +39,7 @@ const db = createClient(process.env.Supabase_Project_URL, process.env.Supabase_S
                         { auth: { persistSession: false } });
 const teams = require(path.join(ROOT, 'netlify', 'functions', '_teams.js'));
 const { render } = require('./render');
+const colours = require('./colours');
 
 const SITE = 'https://telestats.net';
 
@@ -99,9 +100,14 @@ function renderHub(rows) {
     if (!members.length) return '';
     const links = members.map((m) => {
       seen.add(m.team.slug);
-      return `<a href="/teams/${esc(m.team.slug)}/">${esc(m.team.name)}<span>${num(m.team.players)}</span></a>`;
+      const c = colours.forTeam(m.team);
+      // data-name carries a lowercase, accent-folded copy so the search box can
+      // match "malaga" against "Málaga" without refolding 312 names per keystroke.
+      const key = m.team.name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+      return `<a href="/teams/${esc(m.team.slug)}/" data-name="${esc(key)}" ` +
+             `style="--club:${c.primary}"><i></i>${esc(m.team.name)}</a>`;
     }).join('\n        ');
-    return `<section>
+    return `<section data-comp>
   <h2>${esc(comp)}</h2>
   <p class="count">${members.length} clubs</p>
   <div class="grid">
@@ -158,10 +164,24 @@ function renderHub(rows) {
   h2 { font-size: 1.1rem; margin: 26px 0 2px; }
   .count { font-size: .78rem; color: var(--text-muted); margin: 0 0 10px; }
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 6px; }
-  .grid a { display: flex; justify-content: space-between; gap: 8px; font-size: .85rem;
-            padding: 7px 10px; border: 1px solid var(--rule, #24313A); border-radius: 6px;
-            color: var(--accent); text-decoration: none; }
-  .grid a span { color: var(--text-muted); font-variant-numeric: tabular-nums; }
+  .grid a { display: flex; align-items: center; gap: 9px; font-size: .85rem;
+            padding: 7px 11px; border: 1px solid var(--rule, #24313A); border-radius: 6px;
+            color: var(--text-primary, #F2F5F7); text-decoration: none;
+            transition: border-color .12s, background .12s; }
+  /* A bar of the club's colour rather than a dot: at 4px it reads as the club
+     without pretending to be a badge. */
+  .grid a i { width: 4px; align-self: stretch; min-height: 17px; border-radius: 2px;
+              background: var(--club, #4A5A66); flex: 0 0 auto; }
+  .grid a:hover { border-color: var(--club, var(--accent)); background: rgba(255,255,255,.03); }
+
+  .find { margin: 0 0 22px; }
+  .find input { width: 100%; box-sizing: border-box; padding: 12px 15px; font-size: .95rem;
+                border-radius: 9px; border: 1px solid var(--rule, #24313A);
+                background: var(--bg-card, #131A20); color: var(--text-primary, #F2F5F7);
+                font-family: inherit; }
+  .find input:focus { outline: none; border-color: var(--accent, #00E5FF); }
+  .find .hint { font-size: .76rem; color: var(--text-muted); margin: 7px 2px 0; min-height: 1.1em; }
+  section[hidden] { display: none; }
   footer { margin-top: 40px; font-size: .78rem; color: var(--text-muted); }
   footer a { color: var(--accent); }
 </style>
@@ -185,8 +205,14 @@ function renderHub(rows) {
 <div class="wrap">
 <nav class="crumbs"><a href="/">TeleStats</a> › Teams</nav>
 <h1>Football Games by Team</h1>
-<p class="lede">${esc(description)} The number beside each club is how many of its
-  players are in the database.</p>
+<p class="lede">${esc(description)}</p>
+
+<div class="find">
+  <input id="teamFind" type="search" autocomplete="off" spellcheck="false"
+         placeholder="Find your club — try Malaga, Sheff, Argyle…"
+         aria-label="Search for a club">
+  <p class="hint" id="findHint"></p>
+</div>
 
 ${sections}
 
@@ -197,6 +223,46 @@ ${sections}
   <a href="/tools/data.html">Dataset coverage</a>
 </footer>
 </div><!-- /wrap -->
+<script>
+(function () {
+  'use strict';
+  var input = document.getElementById('teamFind');
+  var hint = document.getElementById('findHint');
+  if (!input) return;
+  var links = [].slice.call(document.querySelectorAll('.grid a'));
+  var sections = [].slice.call(document.querySelectorAll('section[data-comp]'));
+
+  function apply() {
+    // Accent-folded, so "malaga" finds "Málaga" and "koln" finds "Köln". The
+    // clubs most likely to be typed without their accents are exactly the ones
+    // a naive match would hide.
+    var q = input.value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+    var shown = 0;
+    links.forEach(function (a) {
+      var hit = !q || a.dataset.name.indexOf(q) !== -1;
+      a.hidden = !hit;
+      if (hit) shown++;
+    });
+    // A competition with nothing left in it hides its heading too, or the page
+    // becomes a column of empty league names.
+    sections.forEach(function (sec) {
+      sec.hidden = !sec.querySelector('.grid a:not([hidden])');
+    });
+    hint.textContent = !q ? ''
+      : shown === 0 ? 'No club matches \u201C' + input.value.trim() + '\u201D.'
+      : shown === 1 ? '1 club' : shown + ' clubs';
+  }
+
+  input.addEventListener('input', apply);
+  // Enter goes straight to the top match — the point is to reach one club fast.
+  input.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter') return;
+    var visible = links.filter(function (a) { return !a.hidden; });
+    if (visible.length) window.location.href = visible[0].getAttribute('href');
+  });
+  apply();
+})();
+</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/js/ts-auth.js"></script>
 <script src="/js/ts-data.js"></script>

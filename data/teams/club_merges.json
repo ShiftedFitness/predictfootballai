@@ -1,0 +1,14 @@
+{
+  "note": "Clubs FBref holds as two squads that TeleStats presents as one. Applied by scripts/teams/merge_clubs.js, which repoints the stats rows and rebuilds the affected aggregates. from_fbref_squad_id is kept so a merge can always be undone.",
+  "merges": [
+    {
+      "from": 420,
+      "into": 388,
+      "name": "Málaga",
+      "from_fbref_squad_id": "ffbf3fa8",
+      "into_fbref_squad_id": "1c896955",
+      "why": "CD Málaga (1904-1992, seasons 1988-89 here) and Málaga CF (founded 1994, seasons 1999-2026). Legally separate entities; same city, same ground, and universally treated as one club. Two pages under the same name were also competing with each other in search.",
+      "not_merged_for_comparison": "Wimbledon (1992-2003) and AFC Wimbledon (2011-2026) look identical to this rule and must NEVER be merged: Wimbledon FC relocated and became MK Dons, and AFC Wimbledon was founded separately by supporters in 2002."
+    }
+  ]
+}

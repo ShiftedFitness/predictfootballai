@@ -41,23 +41,6 @@
   }
   function num(n) { return Number(n || 0).toLocaleString('en-GB'); }
 
-  // ── The explainer ─────────────────────────────────────────────────────────
-  // Open the first time somebody lands on a team page, shut every time after.
-  // It answers "what is this?", and that question is only asked once — leaving
-  // it open forever would push the games below the fold for the people who
-  // already know.
-  (function explainer() {
-    var el = $('explainer');
-    if (!el) return;
-    var KEY = 'ts_team_explained';
-    var seen = false;
-    try { seen = localStorage.getItem(KEY) === '1'; } catch (_) { seen = false; }
-    if (!seen) {
-      el.open = true;
-      try { localStorage.setItem(KEY, '1'); } catch (_) { /* private window */ }
-    }
-  })();
-
   // ── Competition chips ─────────────────────────────────────────────────────
   (function chips() {
     var box = $('compChips');
@@ -108,9 +91,11 @@
       });
 
       note.textContent = isAll
-        ? 'Playing ' + T.name + ' across all ' + each.length + ' competitions.'
+        ? 'Playing ' + T.name + ' across all ' + each.length +
+          ' competitions — tap one to narrow it down.'
         : 'Playing ' + T.name + ' in ' +
-          picked.map(function (c) { return c.dataset.comp; }).join(' and ') + ' only.';
+          picked.map(function (c) { return c.dataset.comp; }).join(' and ') +
+          ' only — tap another to add it.';
     }
 
     all.addEventListener('click', function () {
@@ -123,7 +108,20 @@
 
     each.forEach(function (c) {
       c.addEventListener('click', function () {
-        c.classList.toggle('on');
+        // From "all", a click means "actually, just this one" — it does NOT
+        // mean "all except this one". Starting every competition switched on
+        // and treating the first click as a de-selection was backwards: nobody
+        // arrives at Sunderland wanting three divisions minus the Championship.
+        // Once a narrower choice exists, further clicks add and remove.
+        var isAll = chosen().length === each.length;
+        if (isAll) {
+          each.forEach(function (o) { o.classList.toggle('on', o === c); });
+        } else {
+          c.classList.toggle('on');
+          // Turning the last one off would leave nothing playable, so that
+          // click returns to all instead of to an empty state.
+          if (!chosen().length) each.forEach(function (o) { o.classList.add('on'); });
+        }
         paint();
       });
     });

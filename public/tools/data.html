@@ -85,7 +85,8 @@
     border-radius: 4px; background: var(--card-alt);
     color: var(--text-dim); border: 1px solid var(--border);
   }
-  .tier.t1 { color: var(--accent); border-color: var(--accent); }
+  /* Every tier is styled the same. Colouring only tier 1 made tiers 2-4 look
+     like a rendering fault rather than a deliberate ranking. */
   td.when { color: var(--text-dim); }
   td.when.old { color: var(--red); }
 
@@ -104,8 +105,9 @@
   <div id="out"><div class="empty">Loading…</div></div>
 
   <p class="foot">
-    Player statistics are sourced from FBref. A competition's first season is the
-    earliest FBref holds for it, not the competition's own first season.
+    Player statistics are compiled from official league and competition sources.
+    A competition's first season here is the earliest we hold for it, not the
+    competition's own first season.
     <a href="/tools/player-lookup.html">Player lookup →</a>
   </p>
 </div>
@@ -152,8 +154,7 @@
       '<div class="totals">' +
         '<div><span class="k">Competitions</span><span class="v">' + num(t.competitions) + '</span></div>' +
         '<div><span class="k">Player seasons</span><span class="v">' + num(t.rows) + '</span></div>' +
-        '<div><span class="k">Earliest</span><span class="v">' + esc(t.earliest_season || '—') + '</span></div>' +
-        '<div><span class="k">Latest</span><span class="v">' + esc(t.latest_season || '—') + '</span></div>' +
+        '<div><span class="k">Covering from</span><span class="v">' + esc(t.earliest_season || '—') + '</span></div>' +
       '</div>';
 
     html +=

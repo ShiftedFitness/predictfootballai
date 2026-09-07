@@ -775,9 +775,12 @@ exports.handler = async (event) => {
           label: val.label,
           slots: val.slots,
         })),
+        // No competition is named here. These descriptions are shown against
+        // every scope, including Plymouth Argyle in League One, and "the most
+        // Premier League appearances" is not true of most of them.
         objectives: [
-          { id: 'appearances', label: 'Appearances', description: 'The players with the most Premier League appearances in that position.' },
-          { id: 'goals', label: 'Goals', description: 'The players with the most Premier League goals in that position.' },
+          { id: 'appearances', label: 'Appearances', description: 'The players with the most appearances in that position.' },
+          { id: 'goals', label: 'Goals', description: 'The players with the most goals in that position. Goalkeepers are not scored.' },
           { id: 'performance', label: 'Performance', description: 'Computed score based on goals, assists, defensive actions and GK stats, weighted by position and adjusted for volume.' },
         ],
       });

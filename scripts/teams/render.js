@@ -556,4 +556,5 @@ window.TS_TEAM = ${JSON.stringify({
 `;
 }
 
-module.exports = { render, GAMES, esc, num, season, listOf, withArticle, initials };
+module.exports = { render, GAMES, esc, num, season, listOf, withArticle, initials,
+                   shield, mysteryShirt };

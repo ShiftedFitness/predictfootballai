@@ -106,8 +106,16 @@
         return { error: insertErr.message };
       }
 
-      // Increment daily play count AFTER successful insert
-      await this.incrementDailyPlay(sessionData.game_type);
+      // Increment daily play count AFTER successful insert.
+      //
+      // The daily challenge does not count against the allowance — it is free
+      // to play for everyone, so counting it would make it free at the till
+      // and charged at the door. Only the COUNTER is skipped: the session is
+      // still recorded and XP is still awarded below, which an early return
+      // here would have silently taken away.
+      if (!this.isTodaysDaily()) {
+        await this.incrementDailyPlay(sessionData.game_type);
+      }
 
       // Award XP via RPC
       const { data: xpResult, error: xpErr } = await sb()
@@ -135,6 +143,16 @@
      * today is ignored — the challenge is answerable for any day, but a streak
      * is only earned on the day.
      */
+    /** Is this page today's daily challenge? Used to make it free to play. */
+    isTodaysDaily() {
+      if (!window.TSStreak) return false;
+      try {
+        return new URLSearchParams(window.location.search).get('daily') === TSStreak.utcDate(0);
+      } catch (_) {
+        return false;
+      }
+    },
+
     recordDaily(sessionData) {
       if (!window.TSStreak || !sessionData) return;
       var date;
@@ -188,6 +206,14 @@
       const tier = TSAuth.getTier();
       if (tier === 'paid') return { remaining: Infinity, limit: Infinity };
 
+      // Today's daily challenge never costs a play, for anybody.
+      //
+      // The daily exists to make people come back tomorrow; charging an
+      // anonymous player a third of their day's allowance for taking part is
+      // the model arguing with the product. Checked against today's date, so
+      // an old ?daily= link cannot be used to play free forever.
+      if (this.isTodaysDaily()) return { remaining: Infinity, limit: Infinity, free: 'daily' };
+
       const today = new Date().toISOString().split('T')[0];
 
       if (tier === 'anonymous') {
@@ -200,9 +226,11 @@
         return { remaining: Math.max(0, 3 - total), limit: 3 };
       }
 
-      // Free tier
+      // Free tier. Ten a day per game, up from five — a signed-in player who
+      // is enjoying themselves should not hit a wall on a Saturday afternoon,
+      // and the conversion we want is to Pro, not away.
       const user = TSAuth.getUser();
-      const limit = user?.referral_unlocked ? 8 : 5;
+      const limit = user?.referral_unlocked ? 15 : 10;
       const { data } = await sb()
         .from('ts_daily_plays')
         .select('play_count')

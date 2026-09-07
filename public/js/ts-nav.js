@@ -161,11 +161,21 @@
       }
 
       // ── PWA: Install prompt ──
-      window.addEventListener('beforeinstallprompt', (e) => {
+      // Registered ONCE, not once per render().
+      //
+      // render() runs on every page and can run more than once on a page — after
+      // auth resolves, after a login. The listener used to be added each time,
+      // so a single beforeinstallprompt event fired every copy of it and stacked
+      // a banner for each. That is the duplicate install prompts on desktop.
+      if (!TSNav._installWired) {
+        TSNav._installWired = true;
+        window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
         const deferredPrompt = e;
         // Only show once per session
         if (sessionStorage.getItem('ts_install_dismissed')) return;
+        // And never twice at once, whichever path put the first one there.
+        if (document.querySelector('.ts-install-banner')) return;
 
         const banner = document.createElement('div');
         banner.className = 'ts-install-banner';
@@ -185,7 +195,8 @@
           banner.remove();
           sessionStorage.setItem('ts_install_dismissed', '1');
         });
-      });
+        });
+      }
 
       // ── Mobile install prompt (iOS + Android) ──
       this.showInstallPrompt();
@@ -773,7 +784,11 @@
       const counter = document.createElement('div');
       counter.id = 'tsPlaysRemaining';
       counter.className = 'ts-plays-counter';
-      if (limit === Infinity) {
+      // The daily also reports an unlimited allowance, but "Unlimited plays"
+      // on it would read as a Pro badge rather than as what it is.
+      if (window.TSData && TSData.isTodaysDaily && TSData.isTodaysDaily()) {
+        counter.textContent = 'Today\u2019s challenge — free for everyone';
+      } else if (limit === Infinity) {
         counter.textContent = 'Unlimited plays';
       } else {
         const isAnon = TSAuth.isAnonymous();
@@ -799,6 +814,10 @@
         const res = await fetch(API_BASE + '/meta');
         if (!res.ok) return;
         const meta = await res.json();
+        // One line, one date, and a way to see what it means. The old version
+        // printed two timestamps to the minute — "Current season stats updated:
+        // 15 Feb 2026 21:34 / Database updated: 15 Feb 2026" — which is more
+        // precision than anybody wants and no explanation of the difference.
         const info = meta.current_season_last_updated;
         if (info && info.value !== 'never') {
           const d = new Date(info.updated_at);
@@ -810,7 +829,8 @@
             el.style.cssText = 'margin-top:4px;opacity:0.5;font-size:0.75em;';
             footer.appendChild(el);
           }
-          el.textContent = 'Database updated: ' + formatted;
+          el.innerHTML = 'Database last updated ' + formatted +
+            ' <a href="/tools/data.html" style="color:inherit;text-decoration:underline;">see coverage</a>';
         }
       } catch { /* silent */ }
     },
@@ -824,6 +844,8 @@
                         || window.navigator.standalone;
       const isGamePage = /\/games\/\w+\.html/.test(window.location.pathname);
       if (!isMobileOrTablet || isStandalone || isGamePage || sessionStorage.getItem('ts_install_dismissed')) return;
+      // showInstallPrompt() is called from render(), which can run twice.
+      if (document.querySelector('.ts-install-banner')) return;
 
       const nav = document.querySelector('.ts-nav');
       if (!nav) return;

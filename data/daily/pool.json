@@ -1,11 +1,13 @@
 {
- "generated": "2026-09-06T13:49:33.247Z",
+ "generated": "2026-09-07T12:03:23.498Z",
  "thresholds": {
   "MIN_PLAYERS": 40,
   "MIN_TOP_APPS": 100,
-  "MIN_SEASONS": 8
+  "MIN_SEASONS": 8,
+  "MARQUEE_MIN_PL_SEASONS": 10
  },
- "count": 399,
+ "count": 478,
+ "marquee": 115,
  "scopes": [
   {
    "id": "team_swindon-town_all",
@@ -14,7 +16,8 @@
    "competition": null,
    "players": 872,
    "topApps": 166,
-   "seasons": 34
+   "seasons": 34,
+   "marquee": false
   },
   {
    "id": "team_bradford-city_all",
@@ -23,7 +26,8 @@
    "competition": null,
    "players": 860,
    "topApps": 169,
-   "seasons": 28
+   "seasons": 28,
+   "marquee": false
   },
   {
    "id": "team_northampton-town_all",
@@ -32,7 +36,8 @@
    "competition": null,
    "players": 859,
    "topApps": 215,
-   "seasons": 25
+   "seasons": 25,
+   "marquee": false
   },
   {
    "id": "team_barnsley_all",
@@ -41,7 +46,8 @@
    "competition": null,
    "players": 858,
    "topApps": 226,
-   "seasons": 30
+   "seasons": 30,
+   "marquee": false
   },
   {
    "id": "team_charlton-athletic_all",
@@ -50,7 +56,8 @@
    "competition": null,
    "players": 846,
    "topApps": 187,
-   "seasons": 29
+   "seasons": 29,
+   "marquee": false
   },
   {
    "id": "team_sheffield-wednesday_all",
@@ -59,7 +66,8 @@
    "competition": null,
    "players": 843,
    "topApps": 349,
-   "seasons": 35
+   "seasons": 35,
+   "marquee": false
   },
   {
    "id": "team_blackpool_all",
@@ -68,7 +76,8 @@
    "competition": null,
    "players": 842,
    "topApps": 184,
-   "seasons": 25
+   "seasons": 25,
+   "marquee": false
   },
   {
    "id": "team_coventry-city_all",
@@ -77,7 +86,8 @@
    "competition": null,
    "players": 826,
    "topApps": 265,
-   "seasons": 35
+   "seasons": 35,
+   "marquee": true
   },
   {
    "id": "team_bolton-wanderers_all",
@@ -86,7 +96,8 @@
    "competition": null,
    "players": 811,
    "topApps": 379,
-   "seasons": 32
+   "seasons": 32,
+   "marquee": true
   },
   {
    "id": "team_leeds-united_all",
@@ -95,7 +106,8 @@
    "competition": null,
    "players": 806,
    "topApps": 325,
-   "seasons": 35
+   "seasons": 35,
+   "marquee": true
   },
   {
    "id": "team_portsmouth_all",
@@ -104,7 +116,8 @@
    "competition": null,
    "players": 805,
    "topApps": 198,
-   "seasons": 26
+   "seasons": 26,
+   "marquee": false
   },
   {
    "id": "team_hull-city_all",
@@ -113,7 +126,8 @@
    "competition": null,
    "players": 796,
    "topApps": 187,
-   "seasons": 25
+   "seasons": 25,
+   "marquee": false
   },
   {
    "id": "team_shrewsbury-town_all",
@@ -122,7 +136,8 @@
    "competition": null,
    "players": 793,
    "topApps": 231,
-   "seasons": 25
+   "seasons": 25,
+   "marquee": false
   },
   {
    "id": "team_sheffield-united_all",
@@ -131,7 +146,8 @@
    "competition": null,
    "players": 792,
    "topApps": 276,
-   "seasons": 35
+   "seasons": 35,
+   "marquee": false
   },
   {
    "id": "team_rotherham-united_all",
@@ -140,7 +156,8 @@
    "competition": null,
    "players": 788,
    "topApps": 202,
-   "seasons": 26
+   "seasons": 26,
+   "marquee": false
   },
   {
    "id": "team_oldham-athletic_all",
@@ -149,7 +166,8 @@
    "competition": null,
    "players": 785,
    "topApps": 270,
-   "seasons": 35
+   "seasons": 35,
+   "marquee": false
   },
   {
    "id": "team_nottingham-forest_all",
@@ -158,7 +176,8 @@
    "competition": null,
    "players": 784,
    "topApps": 249,
-   "seasons": 35
+   "seasons": 35,
+   "marquee": true
   },
   {
    "id": "team_port-vale_all",
@@ -167,7 +186,8 @@
    "competition": null,
    "players": 781,
    "topApps": 236,
-   "seasons": 25
+   "seasons": 25,
+   "marquee": false
   },
   {
    "id": "team_peterborough-united_all",
@@ -176,7 +196,8 @@
    "competition": null,
    "players": 777,
    "topApps": 212,
-   "seasons": 25
+   "seasons": 25,
+   "marquee": false
   },
   {
    "id": "team_doncaster-rovers_all",
@@ -185,7 +206,8 @@
    "competition": null,
    "players": 768,
    "topApps": 385,
-   "seasons": 24
+   "seasons": 24,
+   "marquee": false
   },
   {
    "id": "team_ipswich-town_all",
@@ -194,7 +216,18 @@
    "competition": null,
    "players": 768,
    "topApps": 306,
-   "seasons": 35
+   "seasons": 35,
+   "marquee": false
+  },
+  {
+   "id": "team_chelsea_all",
+   "slug": "chelsea",
+   "team": "Chelsea",
+   "competition": null,
+   "players": 767,
+   "topApps": 492,
+   "seasons": 35,
+   "marquee": true
   },
   {
    "id": "team_cheltenham-town_all",
@@ -203,7 +236,8 @@
    "competition": null,
    "players": 767,
    "topApps": 227,
-   "seasons": 25
+   "seasons": 25,
+   "marquee": false
   },
   {
    "id": "team_sunderland_all",
@@ -212,7 +246,8 @@
    "competition": null,
    "players": 767,
    "topApps": 189,
-   "seasons": 31
+   "seasons": 31,
+   "marquee": true
   },
   {
    "id": "team_wigan-athletic_all",
@@ -221,7 +256,8 @@
    "competition": null,
    "players": 766,
    "topApps": 194,
-   "seasons": 25
+   "seasons": 25,
+   "marquee": false
   },
   {
    "id": "team_gillingham_all",
@@ -230,7 +266,8 @@
    "competition": null,
    "players": 760,
    "topApps": 264,
-   "seasons": 26
+   "seasons": 26,
+   "marquee": false
   },
   {
    "id": "team_norwich-city_all",
@@ -239,7 +276,8 @@
    "competition": null,
    "players": 759,
    "topApps": 240,
-   "seasons": 35
+   "seasons": 35,
+   "marquee": true
   },
   {
    "id": "team_derby-county_all",
@@ -248,7 +286,8 @@
    "competition": null,
    "players": 756,
    "topApps": 316,
-   "seasons": 31
+   "seasons": 31,
+   "marquee": false
   },
   {
    "id": "team_plymouth-argyle_all",
@@ -257,7 +296,8 @@
    "competition": null,
    "players": 751,
    "topApps": 176,
-   "seasons": 25
+   "seasons": 25,
+   "marquee": false
   },
   {
    "id": "team_milton-keynes-dons_all",
@@ -266,7 +306,8 @@
    "competition": null,
    "players": 746,
    "topApps": 583,
-   "seasons": 23
+   "seasons": 23,
+   "marquee": false
   },
   {
    "id": "team_walsall_all",
@@ -275,7 +316,8 @@
    "competition": null,
    "players": 740,
    "topApps": 285,
-   "seasons": 26
+   "seasons": 26,
+   "marquee": false
   },
   {
    "id": "team_southampton_all",
@@ -284,7 +326,8 @@
    "competition": null,
    "players": 735,
    "topApps": 343,
-   "seasons": 35
+   "seasons": 35,
+   "marquee": true
   },
   {
    "id": "team_carlisle-united_all",
@@ -293,7 +336,8 @@
    "competition": null,
    "players": 733,
    "topApps": 227,
-   "seasons": 24
+   "seasons": 24,
+   "marquee": false
   },
   {
    "id": "team_birmingham-city_all",
@@ -302,7 +346,8 @@
    "competition": null,
    "players": 732,
    "topApps": 314,
-   "seasons": 26
+   "seasons": 26,
+   "marquee": false
   },
   {
    "id": "team_wycombe-wanderers_all",
@@ -311,7 +356,8 @@
    "competition": null,
    "players": 723,
    "topApps": 359,
-   "seasons": 25
+   "seasons": 25,
+   "marquee": false
   },
   {
    "id": "team_queens-park-rangers_all",
@@ -320,7 +366,8 @@
    "competition": null,
    "players": 721,
    "topApps": 264,
-   "seasons": 35
+   "seasons": 35,
+   "marquee": false
   },
   {
    "id": "team_watford_all",
@@ -329,7 +376,8 @@
    "competition": null,
    "players": 721,
    "topApps": 374,
-   "seasons": 28
+   "seasons": 28,
+   "marquee": false
   },
   {
    "id": "team_leicester-city_all",
@@ -338,7 +386,8 @@
    "competition": null,
    "players": 717,
    "topApps": 342,
-   "seasons": 33
+   "seasons": 33,
+   "marquee": true
   },
   {
    "id": "team_middlesbrough_all",
@@ -347,7 +396,8 @@
    "competition": null,
    "players": 714,
    "topApps": 332,
-   "seasons": 35
+   "seasons": 35,
+   "marquee": true
   },
   {
    "id": "team_notts-county_all",
@@ -356,7 +406,8 @@
    "competition": null,
    "players": 707,
    "topApps": 226,
-   "seasons": 25
+   "seasons": 25,
+   "marquee": false
   },
   {
    "id": "team_bristol-rovers_all",
@@ -365,7 +416,8 @@
    "competition": null,
    "players": 705,
    "topApps": 261,
-   "seasons": 25
+   "seasons": 25,
+   "marquee": false
   },
   {
    "id": "team_blackburn-rovers_all",
@@ -374,7 +426,8 @@
    "competition": null,
    "players": 704,
    "topApps": 261,
-   "seasons": 35
+   "seasons": 35,
+   "marquee": true
   },
   {
    "id": "team_huddersfield-town_all",
@@ -383,7 +436,8 @@
    "competition": null,
    "players": 697,
    "topApps": 288,
-   "seasons": 25
+   "seasons": 25,
+   "marquee": false
   },
   {
    "id": "team_reading_all",
@@ -392,7 +446,8 @@
    "competition": null,
    "players": 682,
    "topApps": 260,
-   "seasons": 25
+   "seasons": 25,
+   "marquee": false
   },
   {
    "id": "team_oxford-united_all",
@@ -401,7 +456,8 @@
    "competition": null,
    "players": 679,
    "topApps": 245,
-   "seasons": 25
+   "seasons": 25,
+   "marquee": false
   },
   {
    "id": "team_west-ham-united_all",
@@ -410,7 +466,18 @@
    "competition": null,
    "players": 678,
    "topApps": 414,
-   "seasons": 34
+   "seasons": 34,
+   "marquee": true
+  },
+  {
+   "id": "team_liverpool_all",
+   "slug": "liverpool",
+   "team": "Liverpool",
+   "competition": null,
+   "players": 675,
+   "topApps": 508,
+   "seasons": 35,
+   "marquee": true
   },
   {
    "id": "team_colchester-united_all",
@@ -419,7 +486,8 @@
    "competition": null,
    "players": 674,
    "topApps": 292,
-   "seasons": 25
+   "seasons": 25,
+   "marquee": false
   },
   {
    "id": "team_leyton-orient_all",
@@ -428,7 +496,8 @@
    "competition": null,
    "players": 674,
    "topApps": 209,
-   "seasons": 25
+   "seasons": 25,
+   "marquee": false
   },
   {
    "id": "team_crewe-alexandra_all",
@@ -437,7 +506,8 @@
    "competition": null,
    "players": 666,
    "topApps": 179,
-   "seasons": 26
+   "seasons": 26,
+   "marquee": false
   },
   {
    "id": "team_luton-town_all",
@@ -446,7 +516,8 @@
    "competition": null,
    "players": 664,
    "topApps": 162,
-   "seasons": 25
+   "seasons": 25,
+   "marquee": false
   },
   {
    "id": "team_cardiff-city_all",
@@ -455,7 +526,8 @@
    "competition": null,
    "players": 662,
    "topApps": 381,
-   "seasons": 25
+   "seasons": 25,
+   "marquee": false
   },
   {
    "id": "team_west-bromwich-albion_all",
@@ -464,7 +536,18 @@
    "competition": null,
    "players": 655,
    "topApps": 269,
-   "seasons": 26
+   "seasons": 26,
+   "marquee": true
+  },
+  {
+   "id": "team_arsenal_all",
+   "slug": "arsenal",
+   "team": "Arsenal",
+   "competition": null,
+   "players": 654,
+   "topApps": 333,
+   "seasons": 36,
+   "marquee": true
   },
   {
    "id": "team_grimsby-town_all",
@@ -473,7 +556,8 @@
    "competition": null,
    "players": 651,
    "topApps": 195,
-   "seasons": 26
+   "seasons": 26,
+   "marquee": false
   },
   {
    "id": "team_mansfield-town_all",
@@ -482,7 +566,8 @@
    "competition": null,
    "players": 651,
    "topApps": 214,
-   "seasons": 25
+   "seasons": 25,
+   "marquee": false
   },
   {
    "id": "team_accrington-stanley_all",
@@ -491,7 +576,8 @@
    "competition": null,
    "players": 650,
    "topApps": 275,
-   "seasons": 21
+   "seasons": 21,
+   "marquee": false
   },
   {
    "id": "team_burton-albion_all",
@@ -500,7 +586,8 @@
    "competition": null,
    "players": 650,
    "topApps": 221,
-   "seasons": 18
+   "seasons": 18,
+   "marquee": false
   },
   {
    "id": "team_stevenage_all",
@@ -509,7 +596,8 @@
    "competition": null,
    "players": 648,
    "topApps": 198,
-   "seasons": 17
+   "seasons": 17,
+   "marquee": false
   },
   {
    "id": "team_wolverhampton-wanderers_all",
@@ -518,7 +606,8 @@
    "competition": null,
    "players": 648,
    "topApps": 193,
-   "seasons": 26
+   "seasons": 26,
+   "marquee": true
   },
   {
    "id": "team_brentford_all",
@@ -527,7 +616,8 @@
    "competition": null,
    "players": 647,
    "topApps": 313,
-   "seasons": 25
+   "seasons": 25,
+   "marquee": false
   },
   {
    "id": "team_brighton-and-hove-albion_all",
@@ -536,7 +626,8 @@
    "competition": null,
    "players": 644,
    "topApps": 301,
-   "seasons": 25
+   "seasons": 25,
+   "marquee": true
   },
   {
    "id": "team_manchester-city_all",
@@ -545,7 +636,18 @@
    "competition": null,
    "players": 643,
    "topApps": 309,
-   "seasons": 35
+   "seasons": 35,
+   "marquee": true
+  },
+  {
+   "id": "team_manchester-united_all",
+   "slug": "manchester-united",
+   "team": "Manchester United",
+   "competition": null,
+   "players": 634,
+   "topApps": 632,
+   "seasons": 35,
+   "marquee": true
   },
   {
    "id": "team_stoke-city_all",
@@ -554,7 +656,8 @@
    "competition": null,
    "players": 634,
    "topApps": 317,
-   "seasons": 25
+   "seasons": 25,
+   "marquee": true
   },
   {
    "id": "team_aston-villa_all",
@@ -563,7 +666,8 @@
    "competition": null,
    "players": 631,
    "topApps": 365,
-   "seasons": 35
+   "seasons": 35,
+   "marquee": true
   },
   {
    "id": "team_crawley-town_all",
@@ -572,7 +676,8 @@
    "competition": null,
    "players": 631,
    "topApps": 257,
-   "seasons": 16
+   "seasons": 16,
+   "marquee": false
   },
   {
    "id": "team_swansea-city_all",
@@ -581,7 +686,8 @@
    "competition": null,
    "players": 627,
    "topApps": 301,
-   "seasons": 25
+   "seasons": 25,
+   "marquee": false
   },
   {
    "id": "team_newcastle-united_all",
@@ -590,7 +696,8 @@
    "competition": null,
    "players": 623,
    "topApps": 354,
-   "seasons": 34
+   "seasons": 34,
+   "marquee": true
   },
   {
    "id": "team_rochdale_all",
@@ -599,7 +706,8 @@
    "competition": null,
    "players": 623,
    "topApps": 240,
-   "seasons": 25
+   "seasons": 25,
+   "marquee": false
   },
   {
    "id": "team_tranmere-rovers_all",
@@ -608,7 +716,8 @@
    "competition": null,
    "players": 622,
    "topApps": 364,
-   "seasons": 25
+   "seasons": 25,
+   "marquee": false
   },
   {
    "id": "team_millwall_all",
@@ -617,7 +726,8 @@
    "competition": null,
    "players": 614,
    "topApps": 389,
-   "seasons": 26
+   "seasons": 26,
+   "marquee": false
   },
   {
    "id": "team_fulham_all",
@@ -626,7 +736,8 @@
    "competition": null,
    "players": 609,
    "topApps": 217,
-   "seasons": 26
+   "seasons": 26,
+   "marquee": true
   },
   {
    "id": "team_bournemouth_all",
@@ -635,7 +746,8 @@
    "competition": null,
    "players": 608,
    "topApps": 257,
-   "seasons": 25
+   "seasons": 25,
+   "marquee": true
   },
   {
    "id": "team_exeter-city_all",
@@ -644,7 +756,28 @@
    "competition": null,
    "players": 603,
    "topApps": 246,
-   "seasons": 25
+   "seasons": 25,
+   "marquee": false
+  },
+  {
+   "id": "team_marseille_all",
+   "slug": "marseille",
+   "team": "Marseille",
+   "competition": null,
+   "players": 603,
+   "topApps": 469,
+   "seasons": 37,
+   "marquee": true
+  },
+  {
+   "id": "team_tottenham-hotspur_all",
+   "slug": "tottenham-hotspur",
+   "team": "Tottenham Hotspur",
+   "competition": null,
+   "players": 602,
+   "topApps": 361,
+   "seasons": 35,
+   "marquee": true
   },
   {
    "id": "team_bristol-city_all",
@@ -653,7 +786,8 @@
    "competition": null,
    "players": 598,
    "topApps": 235,
-   "seasons": 25
+   "seasons": 25,
+   "marquee": false
   },
   {
    "id": "team_scunthorpe-united_all",
@@ -662,7 +796,8 @@
    "competition": null,
    "players": 597,
    "topApps": 154,
-   "seasons": 24
+   "seasons": 24,
+   "marquee": false
   },
   {
    "id": "team_crystal-palace_all",
@@ -671,7 +806,8 @@
    "competition": null,
    "players": 594,
    "topApps": 306,
-   "seasons": 35
+   "seasons": 35,
+   "marquee": true
   },
   {
    "id": "team_chesterfield_all",
@@ -680,7 +816,18 @@
    "competition": null,
    "players": 592,
    "topApps": 236,
-   "seasons": 25
+   "seasons": 25,
+   "marquee": false
+  },
+  {
+   "id": "team_barcelona_all",
+   "slug": "barcelona",
+   "team": "Barcelona",
+   "competition": null,
+   "players": 590,
+   "topApps": 519,
+   "seasons": 39,
+   "marquee": true
   },
   {
    "id": "team_lincoln-city_all",
@@ -689,7 +836,18 @@
    "competition": null,
    "players": 589,
    "topApps": 260,
-   "seasons": 25
+   "seasons": 25,
+   "marquee": false
+  },
+  {
+   "id": "team_internazionale_all",
+   "slug": "internazionale",
+   "team": "Internazionale",
+   "competition": null,
+   "players": 586,
+   "topApps": 614,
+   "seasons": 39,
+   "marquee": true
   },
   {
    "id": "team_burnley_all",
@@ -698,7 +856,8 @@
    "competition": null,
    "players": 583,
    "topApps": 309,
-   "seasons": 26
+   "seasons": 26,
+   "marquee": true
   },
   {
    "id": "team_preston-north-end_all",
@@ -707,7 +866,18 @@
    "competition": null,
    "players": 583,
    "topApps": 346,
-   "seasons": 26
+   "seasons": 26,
+   "marquee": false
+  },
+  {
+   "id": "team_milan_all",
+   "slug": "milan",
+   "team": "Milan",
+   "competition": null,
+   "players": 571,
+   "topApps": 563,
+   "seasons": 39,
+   "marquee": true
   },
   {
    "id": "team_afc-wimbledon_all",
@@ -716,7 +886,18 @@
    "competition": null,
    "players": 567,
    "topApps": 145,
-   "seasons": 16
+   "seasons": 16,
+   "marquee": false
+  },
+  {
+   "id": "team_juventus_all",
+   "slug": "juventus",
+   "team": "Juventus",
+   "competition": null,
+   "players": 564,
+   "topApps": 489,
+   "seasons": 39,
+   "marquee": true
   },
   {
    "id": "team_fleetwood-town_all",
@@ -725,7 +906,8 @@
    "competition": null,
    "players": 563,
    "topApps": 209,
-   "seasons": 15
+   "seasons": 15,
+   "marquee": false
   },
   {
    "id": "team_yeovil-town_all",
@@ -734,7 +916,8 @@
    "competition": null,
    "players": 561,
    "topApps": 185,
-   "seasons": 21
+   "seasons": 21,
+   "marquee": false
   },
   {
    "id": "team_cambridge-united_all",
@@ -743,7 +926,8 @@
    "competition": null,
    "players": 559,
    "topApps": 253,
-   "seasons": 25
+   "seasons": 25,
+   "marquee": false
   },
   {
    "id": "team_southend-united_all",
@@ -752,7 +936,48 @@
    "competition": null,
    "players": 558,
    "topApps": 225,
-   "seasons": 24
+   "seasons": 24,
+   "marquee": false
+  },
+  {
+   "id": "team_newport-county_all",
+   "slug": "newport-county",
+   "team": "Newport County",
+   "competition": null,
+   "players": 550,
+   "topApps": 300,
+   "seasons": 14,
+   "marquee": false
+  },
+  {
+   "id": "team_sevilla_all",
+   "slug": "sevilla",
+   "team": "Sevilla",
+   "competition": null,
+   "players": 541,
+   "topApps": 518,
+   "seasons": 39,
+   "marquee": true
+  },
+  {
+   "id": "team_monaco_all",
+   "slug": "monaco",
+   "team": "Monaco",
+   "competition": null,
+   "players": 539,
+   "topApps": 208,
+   "seasons": 34,
+   "marquee": false
+  },
+  {
+   "id": "team_real-madrid_all",
+   "slug": "real-madrid",
+   "team": "Real Madrid",
+   "competition": null,
+   "players": 531,
+   "topApps": 550,
+   "seasons": 39,
+   "marquee": true
   },
   {
    "id": "team_morecambe_all",
@@ -761,7 +986,18 @@
    "competition": null,
    "players": 530,
    "topApps": 436,
-   "seasons": 18
+   "seasons": 18,
+   "marquee": false
+  },
+  {
+   "id": "team_atletico-madrid_all",
+   "slug": "atletico-madrid",
+   "team": "Atlético Madrid",
+   "competition": null,
+   "players": 529,
+   "topApps": 522,
+   "seasons": 39,
+   "marquee": true
   },
   {
    "id": "team_stockport_all",
@@ -770,7 +1006,58 @@
    "competition": null,
    "players": 529,
    "topApps": 136,
-   "seasons": 26
+   "seasons": 26,
+   "marquee": false
+  },
+  {
+   "id": "team_valencia_all",
+   "slug": "valencia",
+   "team": "Valencia",
+   "competition": null,
+   "players": 526,
+   "topApps": 352,
+   "seasons": 39,
+   "marquee": true
+  },
+  {
+   "id": "team_roma_all",
+   "slug": "roma",
+   "team": "Roma",
+   "competition": null,
+   "players": 525,
+   "topApps": 619,
+   "seasons": 39,
+   "marquee": true
+  },
+  {
+   "id": "team_everton_all",
+   "slug": "everton",
+   "team": "Everton",
+   "competition": null,
+   "players": 500,
+   "topApps": 374,
+   "seasons": 35,
+   "marquee": true
+  },
+  {
+   "id": "team_paris-saint-germain_all",
+   "slug": "paris-saint-germain",
+   "team": "Paris Saint-Germain",
+   "competition": null,
+   "players": 499,
+   "topApps": 328,
+   "seasons": 33,
+   "marquee": true
+  },
+  {
+   "id": "team_fiorentina_all",
+   "slug": "fiorentina",
+   "team": "Fiorentina",
+   "competition": null,
+   "players": 498,
+   "topApps": 302,
+   "seasons": 39,
+   "marquee": false
   },
   {
    "id": "team_bury_all",
@@ -779,7 +1066,18 @@
    "competition": null,
    "players": 494,
    "topApps": 218,
-   "seasons": 17
+   "seasons": 17,
+   "marquee": false
+  },
+  {
+   "id": "team_dortmund_all",
+   "slug": "dortmund",
+   "team": "Dortmund",
+   "competition": null,
+   "players": 493,
+   "topApps": 367,
+   "seasons": 39,
+   "marquee": true
   },
   {
    "id": "team_hartlepool-united_all",
@@ -788,7 +1086,68 @@
    "competition": null,
    "players": 488,
    "topApps": 351,
-   "seasons": 21
+   "seasons": 21,
+   "marquee": false
+  },
+  {
+   "id": "team_bayern-munich_all",
+   "slug": "bayern-munich",
+   "team": "Bayern Munich",
+   "competition": null,
+   "players": 482,
+   "topApps": 503,
+   "seasons": 39,
+   "marquee": true
+  },
+  {
+   "id": "team_atalanta_all",
+   "slug": "atalanta",
+   "team": "Atalanta",
+   "competition": null,
+   "players": 474,
+   "topApps": 340,
+   "seasons": 39,
+   "marquee": false
+  },
+  {
+   "id": "team_leverkusen_all",
+   "slug": "leverkusen",
+   "team": "Leverkusen",
+   "competition": null,
+   "players": 473,
+   "topApps": 350,
+   "seasons": 39,
+   "marquee": false
+  },
+  {
+   "id": "team_barnet_all",
+   "slug": "barnet",
+   "team": "Barnet",
+   "competition": null,
+   "players": 459,
+   "topApps": 150,
+   "seasons": 22,
+   "marquee": false
+  },
+  {
+   "id": "team_schalke-04_all",
+   "slug": "schalke-04",
+   "team": "Schalke 04",
+   "competition": null,
+   "players": 448,
+   "topApps": 279,
+   "seasons": 36,
+   "marquee": false
+  },
+  {
+   "id": "team_lazio_all",
+   "slug": "lazio",
+   "team": "Lazio",
+   "competition": null,
+   "players": 447,
+   "topApps": 349,
+   "seasons": 39,
+   "marquee": true
   },
   {
    "id": "team_fiorentina_serie-a",
@@ -797,7 +1156,68 @@
    "competition": "Serie A",
    "players": 446,
    "topApps": 302,
-   "seasons": 39
+   "seasons": 39,
+   "marquee": false
+  },
+  {
+   "id": "team_stuttgart_all",
+   "slug": "stuttgart",
+   "team": "Stuttgart",
+   "competition": null,
+   "players": 446,
+   "topApps": 301,
+   "seasons": 39,
+   "marquee": false
+  },
+  {
+   "id": "team_lyon_all",
+   "slug": "lyon",
+   "team": "Lyon",
+   "competition": null,
+   "players": 442,
+   "topApps": 378,
+   "seasons": 32,
+   "marquee": true
+  },
+  {
+   "id": "team_napoli_all",
+   "slug": "napoli",
+   "team": "Napoli",
+   "competition": null,
+   "players": 432,
+   "topApps": 408,
+   "seasons": 39,
+   "marquee": true
+  },
+  {
+   "id": "team_lille_all",
+   "slug": "lille",
+   "team": "Lille",
+   "competition": null,
+   "players": 427,
+   "topApps": 299,
+   "seasons": 32,
+   "marquee": false
+  },
+  {
+   "id": "team_parma_all",
+   "slug": "parma",
+   "team": "Parma",
+   "competition": null,
+   "players": 421,
+   "topApps": 257,
+   "seasons": 37,
+   "marquee": false
+  },
+  {
+   "id": "team_bologna_all",
+   "slug": "bologna",
+   "team": "Bologna",
+   "competition": null,
+   "players": 420,
+   "topApps": 275,
+   "seasons": 39,
+   "marquee": false
   },
   {
    "id": "team_sevilla_la-liga",
@@ -806,7 +1226,8 @@
    "competition": "La Liga",
    "players": 416,
    "topApps": 518,
-   "seasons": 39
+   "seasons": 39,
+   "marquee": true
   },
   {
    "id": "team_espanyol_la-liga",
@@ -815,7 +1236,8 @@
    "competition": "La Liga",
    "players": 415,
    "topApps": 340,
-   "seasons": 39
+   "seasons": 39,
+   "marquee": false
   },
   {
    "id": "team_atalanta_serie-a",
@@ -824,7 +1246,28 @@
    "competition": "Serie A",
    "players": 409,
    "topApps": 340,
-   "seasons": 39
+   "seasons": 39,
+   "marquee": false
+  },
+  {
+   "id": "team_eintracht-frankfurt_all",
+   "slug": "eintracht-frankfurt",
+   "team": "Eintracht Frankfurt",
+   "competition": null,
+   "players": 406,
+   "topApps": 293,
+   "seasons": 39,
+   "marquee": false
+  },
+  {
+   "id": "team_udinese_all",
+   "slug": "udinese",
+   "team": "Udinese",
+   "competition": null,
+   "players": 406,
+   "topApps": 385,
+   "seasons": 38,
+   "marquee": false
   },
   {
    "id": "team_marseille_ligue-1",
@@ -833,7 +1276,8 @@
    "competition": "Ligue 1",
    "players": 405,
    "topApps": 469,
-   "seasons": 31
+   "seasons": 31,
+   "marquee": true
   },
   {
    "id": "team_parma_serie-a",
@@ -842,7 +1286,8 @@
    "competition": "Serie A",
    "players": 401,
    "topApps": 257,
-   "seasons": 37
+   "seasons": 37,
+   "marquee": false
   },
   {
    "id": "team_internazionale_serie-a",
@@ -851,7 +1296,8 @@
    "competition": "Serie A",
    "players": 400,
    "topApps": 614,
-   "seasons": 39
+   "seasons": 39,
+   "marquee": true
   },
   {
    "id": "team_torino_serie-a",
@@ -860,7 +1306,28 @@
    "competition": "Serie A",
    "players": 399,
    "topApps": 232,
-   "seasons": 39
+   "seasons": 39,
+   "marquee": false
+  },
+  {
+   "id": "team_villarreal_all",
+   "slug": "villarreal",
+   "team": "Villarreal",
+   "competition": null,
+   "players": 399,
+   "topApps": 330,
+   "seasons": 29,
+   "marquee": false
+  },
+  {
+   "id": "team_rennes_all",
+   "slug": "rennes",
+   "team": "Rennes",
+   "competition": null,
+   "players": 397,
+   "topApps": 323,
+   "seasons": 32,
+   "marquee": false
   },
   {
    "id": "team_bologna_serie-a",
@@ -869,7 +1336,8 @@
    "competition": "Serie A",
    "players": 396,
    "topApps": 275,
-   "seasons": 39
+   "seasons": 39,
+   "marquee": false
   },
   {
    "id": "team_genoa_serie-a",
@@ -878,7 +1346,8 @@
    "competition": "Serie A",
    "players": 394,
    "topApps": 220,
-   "seasons": 38
+   "seasons": 38,
+   "marquee": false
   },
   {
    "id": "team_roma_serie-a",
@@ -887,7 +1356,8 @@
    "competition": "Serie A",
    "players": 393,
    "topApps": 619,
-   "seasons": 39
+   "seasons": 39,
+   "marquee": true
   },
   {
    "id": "team_udinese_serie-a",
@@ -896,7 +1366,28 @@
    "competition": "Serie A",
    "players": 391,
    "topApps": 385,
-   "seasons": 38
+   "seasons": 38,
+   "marquee": false
+  },
+  {
+   "id": "team_hamburger-sv_all",
+   "slug": "hamburger-sv",
+   "team": "Hamburger SV",
+   "competition": null,
+   "players": 383,
+   "topApps": 304,
+   "seasons": 39,
+   "marquee": false
+  },
+  {
+   "id": "team_sampdoria_all",
+   "slug": "sampdoria",
+   "team": "Sampdoria",
+   "competition": null,
+   "players": 383,
+   "topApps": 357,
+   "seasons": 35,
+   "marquee": false
   },
   {
    "id": "team_atletico-madrid_la-liga",
@@ -905,7 +1396,8 @@
    "competition": "La Liga",
    "players": 380,
    "topApps": 522,
-   "seasons": 39
+   "seasons": 39,
+   "marquee": true
   },
   {
    "id": "team_forest-green-rovers_all",
@@ -914,7 +1406,18 @@
    "competition": null,
    "players": 380,
    "topApps": 124,
-   "seasons": 12
+   "seasons": 12,
+   "marquee": false
+  },
+  {
+   "id": "team_real-betis_all",
+   "slug": "real-betis",
+   "team": "Real Betis",
+   "competition": null,
+   "players": 378,
+   "topApps": 408,
+   "seasons": 39,
+   "marquee": false
   },
   {
    "id": "team_valencia_la-liga",
@@ -923,7 +1426,18 @@
    "competition": "La Liga",
    "players": 375,
    "topApps": 352,
-   "seasons": 39
+   "seasons": 39,
+   "marquee": true
+  },
+  {
+   "id": "team_werder-bremen_all",
+   "slug": "werder-bremen",
+   "team": "Werder Bremen",
+   "competition": null,
+   "players": 374,
+   "topApps": 386,
+   "seasons": 39,
+   "marquee": false
   },
   {
    "id": "team_milan_serie-a",
@@ -932,7 +1446,8 @@
    "competition": "Serie A",
    "players": 371,
    "topApps": 563,
-   "seasons": 39
+   "seasons": 39,
+   "marquee": true
   },
   {
    "id": "team_rennes_ligue-1",
@@ -941,7 +1456,8 @@
    "competition": "Ligue 1",
    "players": 371,
    "topApps": 323,
-   "seasons": 32
+   "seasons": 32,
+   "marquee": false
   },
   {
    "id": "team_cagliari_serie-a",
@@ -950,7 +1466,18 @@
    "competition": "Serie A",
    "players": 369,
    "topApps": 332,
-   "seasons": 37
+   "seasons": 37,
+   "marquee": false
+  },
+  {
+   "id": "team_nantes_all",
+   "slug": "nantes",
+   "team": "Nantes",
+   "competition": null,
+   "players": 366,
+   "topApps": 383,
+   "seasons": 31,
+   "marquee": false
   },
   {
    "id": "team_sampdoria_serie-a",
@@ -959,7 +1486,18 @@
    "competition": "Serie A",
    "players": 366,
    "topApps": 357,
-   "seasons": 35
+   "seasons": 35,
+   "marquee": false
+  },
+  {
+   "id": "team_wolfsburg_all",
+   "slug": "wolfsburg",
+   "team": "Wolfsburg",
+   "competition": null,
+   "players": 364,
+   "topApps": 400,
+   "seasons": 29,
+   "marquee": false
   },
   {
    "id": "team_eintracht-frankfurt_bundesliga",
@@ -968,7 +1506,8 @@
    "competition": "Bundesliga",
    "players": 362,
    "topApps": 293,
-   "seasons": 39
+   "seasons": 39,
+   "marquee": false
   },
   {
    "id": "team_wrexham_all",
@@ -977,7 +1516,8 @@
    "competition": null,
    "players": 362,
    "topApps": 105,
-   "seasons": 25
+   "seasons": 25,
+   "marquee": false
   },
   {
    "id": "team_monaco_ligue-1",
@@ -986,7 +1526,8 @@
    "competition": "Ligue 1",
    "players": 360,
    "topApps": 208,
-   "seasons": 32
+   "seasons": 32,
+   "marquee": false
   },
   {
    "id": "team_stuttgart_bundesliga",
@@ -995,7 +1536,18 @@
    "competition": "Bundesliga",
    "players": 358,
    "topApps": 301,
-   "seasons": 39
+   "seasons": 39,
+   "marquee": false
+  },
+  {
+   "id": "team_monchengladbach_all",
+   "slug": "monchengladbach",
+   "team": "Monchengladbach",
+   "competition": null,
+   "players": 357,
+   "topApps": 351,
+   "seasons": 39,
+   "marquee": false
   },
   {
    "id": "team_real-betis_la-liga",
@@ -1004,7 +1556,8 @@
    "competition": "La Liga",
    "players": 357,
    "topApps": 408,
-   "seasons": 39
+   "seasons": 39,
+   "marquee": false
   },
   {
    "id": "team_valladolid_la-liga",
@@ -1013,7 +1566,18 @@
    "competition": "La Liga",
    "players": 355,
    "topApps": 364,
-   "seasons": 37
+   "seasons": 37,
+   "marquee": false
+  },
+  {
+   "id": "team_salford-city-fc_all",
+   "slug": "salford-city-fc",
+   "team": "Salford City FC",
+   "competition": null,
+   "players": 349,
+   "topApps": 153,
+   "seasons": 12,
+   "marquee": false
   },
   {
    "id": "team_juventus_serie-a",
@@ -1022,7 +1586,18 @@
    "competition": "Serie A",
    "players": 346,
    "topApps": 489,
-   "seasons": 39
+   "seasons": 39,
+   "marquee": true
+  },
+  {
+   "id": "team_real-sociedad_all",
+   "slug": "real-sociedad",
+   "team": "Real Sociedad",
+   "competition": null,
+   "players": 345,
+   "topApps": 415,
+   "seasons": 39,
+   "marquee": false
   },
   {
    "id": "team_hellas-verona_serie-a",
@@ -1031,7 +1606,8 @@
    "competition": "Serie A",
    "players": 344,
    "topApps": 193,
-   "seasons": 38
+   "seasons": 38,
+   "marquee": false
   },
   {
    "id": "team_west-ham-united_premier-league",
@@ -1040,7 +1616,18 @@
    "competition": "Premier League",
    "players": 344,
    "topApps": 414,
-   "seasons": 33
+   "seasons": 33,
+   "marquee": true
+  },
+  {
+   "id": "team_celta-vigo_all",
+   "slug": "celta-vigo",
+   "team": "Celta Vigo",
+   "competition": null,
+   "players": 343,
+   "topApps": 407,
+   "seasons": 39,
+   "marquee": false
   },
   {
    "id": "team_derby-county_championship",
@@ -1049,7 +1636,8 @@
    "competition": "Championship",
    "players": 342,
    "topApps": 316,
-   "seasons": 25
+   "seasons": 25,
+   "marquee": false
   },
   {
    "id": "team_hamburger-sv_bundesliga",
@@ -1058,7 +1646,8 @@
    "competition": "Bundesliga",
    "players": 341,
    "topApps": 304,
-   "seasons": 39
+   "seasons": 39,
+   "marquee": false
   },
   {
    "id": "team_lazio_serie-a",
@@ -1067,7 +1656,8 @@
    "competition": "Serie A",
    "players": 339,
    "topApps": 349,
-   "seasons": 39
+   "seasons": 39,
+   "marquee": true
   },
   {
    "id": "team_oldham-athletic_league-one",
@@ -1076,7 +1666,18 @@
    "competition": "League One",
    "players": 338,
    "topApps": 270,
-   "seasons": 16
+   "seasons": 16,
+   "marquee": false
+  },
+  {
+   "id": "team_mallorca_all",
+   "slug": "mallorca",
+   "team": "Mallorca",
+   "competition": null,
+   "players": 337,
+   "topApps": 228,
+   "seasons": 37,
+   "marquee": false
   },
   {
    "id": "team_barcelona_la-liga",
@@ -1085,7 +1686,8 @@
    "competition": "La Liga",
    "players": 336,
    "topApps": 519,
-   "seasons": 39
+   "seasons": 39,
+   "marquee": true
   },
   {
    "id": "team_nice_ligue-1",
@@ -1094,7 +1696,18 @@
    "competition": "Ligue 1",
    "players": 335,
    "topApps": 272,
-   "seasons": 32
+   "seasons": 32,
+   "marquee": false
+  },
+  {
+   "id": "team_lens_all",
+   "slug": "lens",
+   "team": "Lens",
+   "competition": null,
+   "players": 334,
+   "topApps": 237,
+   "seasons": 32,
+   "marquee": false
   },
   {
    "id": "team_koln_bundesliga",
@@ -1103,7 +1716,18 @@
    "competition": "Bundesliga",
    "players": 333,
    "topApps": 274,
-   "seasons": 39
+   "seasons": 39,
+   "marquee": false
+  },
+  {
+   "id": "team_bordeaux_all",
+   "slug": "bordeaux",
+   "team": "Bordeaux",
+   "competition": null,
+   "players": 332,
+   "topApps": 405,
+   "seasons": 27,
+   "marquee": false
   },
   {
    "id": "team_northampton-town_league-two",
@@ -1112,7 +1736,8 @@
    "competition": "League Two",
    "players": 332,
    "topApps": 201,
-   "seasons": 24
+   "seasons": 24,
+   "marquee": false
   },
   {
    "id": "team_lecce_serie-a",
@@ -1121,7 +1746,8 @@
    "competition": "Serie A",
    "players": 330,
    "topApps": 195,
-   "seasons": 39
+   "seasons": 39,
+   "marquee": false
   },
   {
    "id": "team_cheltenham-town_league-two",
@@ -1130,7 +1756,8 @@
    "competition": "League Two",
    "players": 326,
    "topApps": 227,
-   "seasons": 24
+   "seasons": 24,
+   "marquee": false
   },
   {
    "id": "team_peterborough-united_league-one",
@@ -1139,7 +1766,8 @@
    "competition": "League One",
    "players": 325,
    "topApps": 212,
-   "seasons": 25
+   "seasons": 25,
+   "marquee": false
   },
   {
    "id": "team_celta-vigo_la-liga",
@@ -1148,7 +1776,8 @@
    "competition": "La Liga",
    "players": 322,
    "topApps": 407,
-   "seasons": 39
+   "seasons": 39,
+   "marquee": false
   },
   {
    "id": "team_paris-saint-germain_ligue-1",
@@ -1157,7 +1786,8 @@
    "competition": "Ligue 1",
    "players": 321,
    "topApps": 328,
-   "seasons": 32
+   "seasons": 32,
+   "marquee": true
   },
   {
    "id": "team_schalke-04_bundesliga",
@@ -1166,7 +1796,18 @@
    "competition": "Bundesliga",
    "players": 321,
    "topApps": 279,
-   "seasons": 36
+   "seasons": 36,
+   "marquee": false
+  },
+  {
+   "id": "team_york-city_all",
+   "slug": "york-city",
+   "team": "York City",
+   "competition": null,
+   "players": 321,
+   "topApps": 118,
+   "seasons": 25,
+   "marquee": false
   },
   {
    "id": "team_birmingham-city_championship",
@@ -1175,7 +1816,8 @@
    "competition": "Championship",
    "players": 320,
    "topApps": 314,
-   "seasons": 26
+   "seasons": 26,
+   "marquee": false
   },
   {
    "id": "team_monchengladbach_bundesliga",
@@ -1184,7 +1826,8 @@
    "competition": "Bundesliga",
    "players": 320,
    "topApps": 351,
-   "seasons": 39
+   "seasons": 39,
+   "marquee": false
   },
   {
    "id": "team_napoli_serie-a",
@@ -1193,7 +1836,8 @@
    "competition": "Serie A",
    "players": 320,
    "topApps": 408,
-   "seasons": 39
+   "seasons": 39,
+   "marquee": true
   },
   {
    "id": "team_grimsby-town_league-two",
@@ -1202,7 +1846,8 @@
    "competition": "League Two",
    "players": 319,
    "topApps": 195,
-   "seasons": 23
+   "seasons": 23,
+   "marquee": false
   },
   {
    "id": "team_sheffield-wednesday_championship",
@@ -1211,7 +1856,8 @@
    "competition": "Championship",
    "players": 318,
    "topApps": 349,
-   "seasons": 25
+   "seasons": 25,
+   "marquee": false
   },
   {
    "id": "team_chelsea_premier-league",
@@ -1220,7 +1866,8 @@
    "competition": "Premier League",
    "players": 317,
    "topApps": 492,
-   "seasons": 35
+   "seasons": 35,
+   "marquee": true
   },
   {
    "id": "team_nantes_ligue-1",
@@ -1229,7 +1876,8 @@
    "competition": "Ligue 1",
    "players": 317,
    "topApps": 383,
-   "seasons": 31
+   "seasons": 31,
+   "marquee": false
   },
   {
    "id": "team_dortmund_bundesliga",
@@ -1238,7 +1886,8 @@
    "competition": "Bundesliga",
    "players": 314,
    "topApps": 367,
-   "seasons": 39
+   "seasons": 39,
+   "marquee": true
   },
   {
    "id": "team_mallorca_la-liga",
@@ -1247,7 +1896,8 @@
    "competition": "La Liga",
    "players": 314,
    "topApps": 228,
-   "seasons": 37
+   "seasons": 37,
+   "marquee": false
   },
   {
    "id": "team_toulouse_ligue-1",
@@ -1256,7 +1906,28 @@
    "competition": "Ligue 1",
    "players": 311,
    "topApps": 226,
-   "seasons": 30
+   "seasons": 30,
+   "marquee": false
+  },
+  {
+   "id": "team_deportivo-la-coruna_all",
+   "slug": "deportivo-la-coruna",
+   "team": "Deportivo La Coruna",
+   "competition": null,
+   "players": 310,
+   "topApps": 435,
+   "seasons": 36,
+   "marquee": false
+  },
+  {
+   "id": "team_macclesfield-town_all",
+   "slug": "macclesfield-town",
+   "team": "Macclesfield Town",
+   "competition": null,
+   "players": 309,
+   "topApps": 182,
+   "seasons": 18,
+   "marquee": false
   },
   {
    "id": "team_wolfsburg_bundesliga",
@@ -1265,7 +1936,8 @@
    "competition": "Bundesliga",
    "players": 309,
    "topApps": 400,
-   "seasons": 29
+   "seasons": 29,
+   "marquee": false
   },
   {
    "id": "team_metz_ligue-1",
@@ -1274,7 +1946,8 @@
    "competition": "Ligue 1",
    "players": 307,
    "topApps": 198,
-   "seasons": 31
+   "seasons": 31,
+   "marquee": false
   },
   {
    "id": "team_rayo-vallecano_la-liga",
@@ -1283,7 +1956,8 @@
    "competition": "La Liga",
    "players": 307,
    "topApps": 209,
-   "seasons": 38
+   "seasons": 38,
+   "marquee": false
   },
   {
    "id": "team_real-madrid_la-liga",
@@ -1292,7 +1966,8 @@
    "competition": "La Liga",
    "players": 304,
    "topApps": 550,
-   "seasons": 39
+   "seasons": 39,
+   "marquee": true
   },
   {
    "id": "team_watford_championship",
@@ -1301,7 +1976,8 @@
    "competition": "Championship",
    "players": 304,
    "topApps": 374,
-   "seasons": 26
+   "seasons": 26,
+   "marquee": false
   },
   {
    "id": "team_leverkusen_bundesliga",
@@ -1310,7 +1986,8 @@
    "competition": "Bundesliga",
    "players": 303,
    "topApps": 350,
-   "seasons": 39
+   "seasons": 39,
+   "marquee": false
   },
   {
    "id": "team_queens-park-rangers_championship",
@@ -1319,7 +1996,8 @@
    "competition": "Championship",
    "players": 303,
    "topApps": 264,
-   "seasons": 23
+   "seasons": 23,
+   "marquee": false
   },
   {
    "id": "team_aston-villa_premier-league",
@@ -1328,7 +2006,8 @@
    "competition": "Premier League",
    "players": 302,
    "topApps": 365,
-   "seasons": 35
+   "seasons": 35,
+   "marquee": true
   },
   {
    "id": "team_lille_ligue-1",
@@ -1337,7 +2016,8 @@
    "competition": "Ligue 1",
    "players": 302,
    "topApps": 299,
-   "seasons": 32
+   "seasons": 32,
+   "marquee": false
   },
   {
    "id": "team_lyon_ligue-1",
@@ -1346,7 +2026,8 @@
    "competition": "Ligue 1",
    "players": 302,
    "topApps": 378,
-   "seasons": 32
+   "seasons": 32,
+   "marquee": true
   },
   {
    "id": "team_ipswich-town_championship",
@@ -1355,7 +2036,8 @@
    "competition": "Championship",
    "players": 301,
    "topApps": 306,
-   "seasons": 24
+   "seasons": 24,
+   "marquee": false
   },
   {
    "id": "team_tottenham-hotspur_premier-league",
@@ -1364,7 +2046,8 @@
    "competition": "Premier League",
    "players": 301,
    "topApps": 361,
-   "seasons": 35
+   "seasons": 35,
+   "marquee": true
   },
   {
    "id": "team_cardiff-city_championship",
@@ -1373,7 +2056,8 @@
    "competition": "Championship",
    "players": 300,
    "topApps": 381,
-   "seasons": 24
+   "seasons": 24,
+   "marquee": false
   },
   {
    "id": "team_saint-etienne_ligue-1",
@@ -1382,7 +2066,8 @@
    "competition": "Ligue 1",
    "players": 300,
    "topApps": 381,
-   "seasons": 30
+   "seasons": 30,
+   "marquee": false
   },
   {
    "id": "team_werder-bremen_bundesliga",
@@ -1391,7 +2076,8 @@
    "competition": "Bundesliga",
    "players": 300,
    "topApps": 386,
-   "seasons": 39
+   "seasons": 39,
+   "marquee": false
   },
   {
    "id": "team_dagenham-and-redbridge_all",
@@ -1400,7 +2086,8 @@
    "competition": null,
    "players": 299,
    "topApps": 205,
-   "seasons": 18
+   "seasons": 18,
+   "marquee": false
   },
   {
    "id": "team_villarreal_la-liga",
@@ -1409,7 +2096,28 @@
    "competition": "La Liga",
    "players": 299,
    "topApps": 330,
-   "seasons": 29
+   "seasons": 29,
+   "marquee": false
+  },
+  {
+   "id": "team_hertha-bsc_all",
+   "slug": "hertha-bsc",
+   "team": "Hertha BSC",
+   "competition": null,
+   "players": 297,
+   "topApps": 286,
+   "seasons": 33,
+   "marquee": false
+  },
+  {
+   "id": "team_malaga_all",
+   "slug": "malaga",
+   "team": "Málaga",
+   "competition": null,
+   "players": 294,
+   "topApps": 315,
+   "seasons": 39,
+   "marquee": false
   },
   {
    "id": "team_barnsley_championship",
@@ -1418,7 +2126,18 @@
    "competition": "Championship",
    "players": 293,
    "topApps": 226,
-   "seasons": 21
+   "seasons": 21,
+   "marquee": false
+  },
+  {
+   "id": "team_athletic-club_all",
+   "slug": "athletic-club",
+   "team": "Athletic Club",
+   "competition": null,
+   "players": 292,
+   "topApps": 445,
+   "seasons": 39,
+   "marquee": false
   },
   {
    "id": "team_manchester-city_premier-league",
@@ -1427,7 +2146,8 @@
    "competition": "Premier League",
    "players": 292,
    "topApps": 309,
-   "seasons": 35
+   "seasons": 35,
+   "marquee": true
   },
   {
    "id": "team_mansfield-town_league-two",
@@ -1436,7 +2156,8 @@
    "competition": "League Two",
    "players": 290,
    "topApps": 214,
-   "seasons": 21
+   "seasons": 21,
+   "marquee": false
   },
   {
    "id": "team_carlisle-united_league-two",
@@ -1445,7 +2166,8 @@
    "competition": "League Two",
    "players": 288,
    "topApps": 167,
-   "seasons": 23
+   "seasons": 23,
+   "marquee": false
   },
   {
    "id": "team_getafe_la-liga",
@@ -1454,7 +2176,8 @@
    "competition": "La Liga",
    "players": 288,
    "topApps": 307,
-   "seasons": 23
+   "seasons": 23,
+   "marquee": false
   },
   {
    "id": "team_accrington-stanley_league-two",
@@ -1463,7 +2186,8 @@
    "competition": "League Two",
    "players": 287,
    "topApps": 275,
-   "seasons": 21
+   "seasons": 21,
+   "marquee": false
   },
   {
    "id": "team_everton_premier-league",
@@ -1472,7 +2196,8 @@
    "competition": "Premier League",
    "players": 287,
    "topApps": 374,
-   "seasons": 35
+   "seasons": 35,
+   "marquee": true
   },
   {
    "id": "team_sheffield-united_championship",
@@ -1481,7 +2206,8 @@
    "competition": "Championship",
    "players": 287,
    "topApps": 276,
-   "seasons": 26
+   "seasons": 26,
+   "marquee": false
   },
   {
    "id": "team_osasuna_la-liga",
@@ -1490,7 +2216,8 @@
    "competition": "La Liga",
    "players": 286,
    "topApps": 420,
-   "seasons": 39
+   "seasons": 39,
+   "marquee": false
   },
   {
    "id": "team_norwich-city_championship",
@@ -1499,7 +2226,18 @@
    "competition": "Championship",
    "players": 284,
    "topApps": 240,
-   "seasons": 26
+   "seasons": 26,
+   "marquee": true
+  },
+  {
+   "id": "team_barrow_all",
+   "slug": "barrow",
+   "team": "Barrow",
+   "competition": null,
+   "players": 283,
+   "topApps": 166,
+   "seasons": 10,
+   "marquee": false
   },
   {
    "id": "team_newcastle-united_premier-league",
@@ -1508,7 +2246,8 @@
    "competition": "Premier League",
    "players": 282,
    "topApps": 354,
-   "seasons": 34
+   "seasons": 34,
+   "marquee": true
   },
   {
    "id": "team_nottingham-forest_championship",
@@ -1517,7 +2256,8 @@
    "competition": "Championship",
    "players": 282,
    "topApps": 249,
-   "seasons": 21
+   "seasons": 21,
+   "marquee": true
   },
   {
    "id": "team_barnet_league-two",
@@ -1526,7 +2266,8 @@
    "competition": "League Two",
    "players": 281,
    "topApps": 150,
-   "seasons": 22
+   "seasons": 22,
+   "marquee": false
   },
   {
    "id": "team_blackpool_league-one",
@@ -1535,7 +2276,8 @@
    "competition": "League One",
    "players": 280,
    "topApps": 174,
-   "seasons": 25
+   "seasons": 25,
+   "marquee": false
   },
   {
    "id": "team_lens_ligue-1",
@@ -1544,7 +2286,8 @@
    "competition": "Ligue 1",
    "players": 280,
    "topApps": 237,
-   "seasons": 32
+   "seasons": 32,
+   "marquee": false
   },
   {
    "id": "team_hull-city_championship",
@@ -1553,7 +2296,8 @@
    "competition": "Championship",
    "players": 279,
    "topApps": 187,
-   "seasons": 21
+   "seasons": 21,
+   "marquee": false
   },
   {
    "id": "team_millwall_championship",
@@ -1562,7 +2306,8 @@
    "competition": "Championship",
    "players": 279,
    "topApps": 389,
-   "seasons": 26
+   "seasons": 26,
+   "marquee": false
   },
   {
    "id": "team_bayern-munich_bundesliga",
@@ -1571,7 +2316,8 @@
    "competition": "Bundesliga",
    "players": 278,
    "topApps": 503,
-   "seasons": 39
+   "seasons": 39,
+   "marquee": true
   },
   {
    "id": "team_southampton_premier-league",
@@ -1580,7 +2326,8 @@
    "competition": "Premier League",
    "players": 278,
    "topApps": 343,
-   "seasons": 33
+   "seasons": 33,
+   "marquee": true
   },
   {
    "id": "team_swindon-town_league-one",
@@ -1589,7 +2336,8 @@
    "competition": "League One",
    "players": 278,
    "topApps": 166,
-   "seasons": 19
+   "seasons": 19,
+   "marquee": false
   },
   {
    "id": "team_milton-keynes-dons_league-one",
@@ -1598,7 +2346,8 @@
    "competition": "League One",
    "players": 277,
    "topApps": 583,
-   "seasons": 23
+   "seasons": 23,
+   "marquee": false
   },
   {
    "id": "team_real-sociedad_la-liga",
@@ -1607,7 +2356,8 @@
    "competition": "La Liga",
    "players": 276,
    "topApps": 415,
-   "seasons": 39
+   "seasons": 39,
+   "marquee": false
   },
   {
    "id": "team_bordeaux_ligue-1",
@@ -1616,7 +2366,8 @@
    "competition": "Ligue 1",
    "players": 275,
    "topApps": 405,
-   "seasons": 27
+   "seasons": 27,
+   "marquee": false
   },
   {
    "id": "team_preston-north-end_championship",
@@ -1625,7 +2376,18 @@
    "competition": "Championship",
    "players": 275,
    "topApps": 346,
-   "seasons": 26
+   "seasons": 26,
+   "marquee": false
+  },
+  {
+   "id": "team_montpellier_all",
+   "slug": "montpellier",
+   "team": "Montpellier",
+   "competition": null,
+   "players": 274,
+   "topApps": 320,
+   "seasons": 30,
+   "marquee": false
   },
   {
    "id": "team_port-vale_league-one",
@@ -1634,7 +2396,8 @@
    "competition": "League One",
    "players": 273,
    "topApps": 224,
-   "seasons": 24
+   "seasons": 24,
+   "marquee": false
   },
   {
    "id": "team_sunderland_premier-league",
@@ -1643,7 +2406,18 @@
    "competition": "Premier League",
    "players": 272,
    "topApps": 189,
-   "seasons": 31
+   "seasons": 31,
+   "marquee": true
+  },
+  {
+   "id": "team_auxerre_all",
+   "slug": "auxerre",
+   "team": "Auxerre",
+   "competition": null,
+   "players": 271,
+   "topApps": 343,
+   "seasons": 32,
+   "marquee": false
   },
   {
    "id": "team_deportivo-la-coruna_la-liga",
@@ -1652,7 +2426,8 @@
    "competition": "La Liga",
    "players": 271,
    "topApps": 435,
-   "seasons": 36
+   "seasons": 36,
+   "marquee": false
   },
   {
    "id": "team_doncaster-rovers_league-one",
@@ -1661,7 +2436,8 @@
    "competition": "League One",
    "players": 271,
    "topApps": 385,
-   "seasons": 23
+   "seasons": 23,
+   "marquee": false
   },
   {
    "id": "team_hertha-bsc_bundesliga",
@@ -1670,7 +2446,8 @@
    "competition": "Bundesliga",
    "players": 271,
    "topApps": 286,
-   "seasons": 33
+   "seasons": 33,
+   "marquee": false
   },
   {
    "id": "team_liverpool_premier-league",
@@ -1679,7 +2456,18 @@
    "competition": "Premier League",
    "players": 271,
    "topApps": 508,
-   "seasons": 35
+   "seasons": 35,
+   "marquee": true
+  },
+  {
+   "id": "team_malaga_la-liga",
+   "slug": "malaga",
+   "team": "Málaga",
+   "competition": "La Liga",
+   "players": 270,
+   "topApps": 315,
+   "seasons": 39,
+   "marquee": false
   },
   {
    "id": "team_notts-county_league-two",
@@ -1688,7 +2476,8 @@
    "competition": "League Two",
    "players": 270,
    "topApps": 226,
-   "seasons": 22
+   "seasons": 22,
+   "marquee": false
   },
   {
    "id": "team_leeds-united_championship",
@@ -1697,7 +2486,8 @@
    "competition": "Championship",
    "players": 267,
    "topApps": 199,
-   "seasons": 21
+   "seasons": 21,
+   "marquee": true
   },
   {
    "id": "team_strasbourg_ligue-1",
@@ -1706,7 +2496,8 @@
    "competition": "Ligue 1",
    "players": 267,
    "topApps": 179,
-   "seasons": 32
+   "seasons": 32,
+   "marquee": false
   },
   {
    "id": "team_swindon-town_league-two",
@@ -1715,7 +2506,8 @@
    "competition": "League Two",
    "players": 267,
    "topApps": 107,
-   "seasons": 21
+   "seasons": 21,
+   "marquee": false
   },
   {
    "id": "team_newport-county_league-two",
@@ -1724,7 +2516,8 @@
    "competition": "League Two",
    "players": 266,
    "topApps": 300,
-   "seasons": 14
+   "seasons": 14,
+   "marquee": false
   },
   {
    "id": "team_empoli_serie-a",
@@ -1733,7 +2526,8 @@
    "competition": "Serie A",
    "players": 264,
    "topApps": 164,
-   "seasons": 28
+   "seasons": 28,
+   "marquee": false
   },
   {
    "id": "team_middlesbrough_championship",
@@ -1742,7 +2536,8 @@
    "competition": "Championship",
    "players": 264,
    "topApps": 319,
-   "seasons": 18
+   "seasons": 18,
+   "marquee": true
   },
   {
    "id": "team_coventry-city_championship",
@@ -1751,7 +2546,8 @@
    "competition": "Championship",
    "players": 263,
    "topApps": 265,
-   "seasons": 25
+   "seasons": 25,
+   "marquee": true
   },
   {
    "id": "team_torquay-united_all",
@@ -1760,7 +2556,8 @@
    "competition": null,
    "players": 262,
    "topApps": 259,
-   "seasons": 21
+   "seasons": 21,
+   "marquee": false
   },
   {
    "id": "team_gillingham_league-one",
@@ -1769,7 +2566,8 @@
    "competition": "League One",
    "players": 261,
    "topApps": 264,
-   "seasons": 17
+   "seasons": 17,
+   "marquee": false
   },
   {
    "id": "team_barnsley_league-one",
@@ -1778,7 +2576,8 @@
    "competition": "League One",
    "players": 259,
    "topApps": 156,
-   "seasons": 25
+   "seasons": 25,
+   "marquee": false
   },
   {
    "id": "team_freiburg_bundesliga",
@@ -1787,7 +2586,8 @@
    "competition": "Bundesliga",
    "players": 258,
    "topApps": 370,
-   "seasons": 34
+   "seasons": 34,
+   "marquee": false
   },
   {
    "id": "team_reading_championship",
@@ -1796,7 +2596,8 @@
    "competition": "Championship",
    "players": 256,
    "topApps": 260,
-   "seasons": 21
+   "seasons": 21,
+   "marquee": false
   },
   {
    "id": "team_lorient_ligue-1",
@@ -1805,7 +2606,18 @@
    "competition": "Ligue 1",
    "players": 255,
    "topApps": 229,
-   "seasons": 29
+   "seasons": 29,
+   "marquee": false
+  },
+  {
+   "id": "team_barcelona_champions-league",
+   "slug": "barcelona",
+   "team": "Barcelona",
+   "competition": "Champions League",
+   "players": 254,
+   "topApps": 151,
+   "seasons": 35,
+   "marquee": true
   },
   {
    "id": "team_bradford-city_league-two",
@@ -1814,7 +2626,8 @@
    "competition": "League Two",
    "players": 254,
    "topApps": 169,
-   "seasons": 18
+   "seasons": 18,
+   "marquee": false
   },
   {
    "id": "team_manchester-united_premier-league",
@@ -1823,7 +2636,8 @@
    "competition": "Premier League",
    "players": 252,
    "topApps": 632,
-   "seasons": 35
+   "seasons": 35,
+   "marquee": true
   },
   {
    "id": "team_bochum_bundesliga",
@@ -1832,7 +2646,8 @@
    "competition": "Bundesliga",
    "players": 251,
    "topApps": 239,
-   "seasons": 37
+   "seasons": 37,
+   "marquee": false
   },
   {
    "id": "team_nurnberg_bundesliga",
@@ -1841,7 +2656,8 @@
    "competition": "Bundesliga",
    "players": 251,
    "topApps": 250,
-   "seasons": 31
+   "seasons": 31,
+   "marquee": false
   },
   {
    "id": "team_rochdale_league-two",
@@ -1850,7 +2666,8 @@
    "competition": "League Two",
    "players": 251,
    "topApps": 239,
-   "seasons": 25
+   "seasons": 25,
+   "marquee": false
   },
   {
    "id": "team_northampton-town_league-one",
@@ -1859,7 +2676,18 @@
    "competition": "League One",
    "players": 250,
    "topApps": 215,
-   "seasons": 24
+   "seasons": 24,
+   "marquee": false
+  },
+  {
+   "id": "team_kaiserslautern_all",
+   "slug": "kaiserslautern",
+   "team": "Kaiserslautern",
+   "competition": null,
+   "players": 249,
+   "topApps": 235,
+   "seasons": 24,
+   "marquee": false
   },
   {
    "id": "team_montpellier_ligue-1",
@@ -1868,7 +2696,8 @@
    "competition": "Ligue 1",
    "players": 249,
    "topApps": 320,
-   "seasons": 30
+   "seasons": 30,
+   "marquee": false
   },
   {
    "id": "team_shrewsbury-town_league-one",
@@ -1877,7 +2706,8 @@
    "competition": "League One",
    "players": 249,
    "topApps": 214,
-   "seasons": 13
+   "seasons": 13,
+   "marquee": false
   },
   {
    "id": "team_arsenal_premier-league",
@@ -1886,7 +2716,8 @@
    "competition": "Premier League",
    "players": 248,
    "topApps": 333,
-   "seasons": 35
+   "seasons": 35,
+   "marquee": true
   },
   {
    "id": "team_bristol-city_championship",
@@ -1895,7 +2726,8 @@
    "competition": "Championship",
    "players": 247,
    "topApps": 235,
-   "seasons": 20
+   "seasons": 20,
+   "marquee": false
   },
   {
    "id": "team_fulham_premier-league",
@@ -1904,7 +2736,8 @@
    "competition": "Premier League",
    "players": 247,
    "topApps": 217,
-   "seasons": 26
+   "seasons": 26,
+   "marquee": true
   },
   {
    "id": "team_stoke-city_championship",
@@ -1913,7 +2746,8 @@
    "competition": "Championship",
    "players": 246,
    "topApps": 176,
-   "seasons": 25
+   "seasons": 25,
+   "marquee": true
   },
   {
    "id": "team_levante_la-liga",
@@ -1922,7 +2756,8 @@
    "competition": "La Liga",
    "players": 245,
    "topApps": 274,
-   "seasons": 23
+   "seasons": 23,
+   "marquee": false
   },
   {
    "id": "team_shrewsbury-town_league-two",
@@ -1931,7 +2766,8 @@
    "competition": "League Two",
    "players": 245,
    "topApps": 231,
-   "seasons": 25
+   "seasons": 25,
+   "marquee": false
   },
   {
    "id": "team_crawley-town_league-two",
@@ -1940,7 +2776,8 @@
    "competition": "League Two",
    "players": 243,
    "topApps": 257,
-   "seasons": 16
+   "seasons": 16,
+   "marquee": false
   },
   {
    "id": "team_leyton-orient_league-one",
@@ -1949,7 +2786,8 @@
    "competition": "League One",
    "players": 241,
    "topApps": 209,
-   "seasons": 21
+   "seasons": 21,
+   "marquee": false
   },
   {
    "id": "team_morecambe_league-two",
@@ -1958,7 +2796,8 @@
    "competition": "League Two",
    "players": 241,
    "topApps": 436,
-   "seasons": 18
+   "seasons": 18,
+   "marquee": false
   },
   {
    "id": "team_bristol-rovers_league-two",
@@ -1967,7 +2806,8 @@
    "competition": "League Two",
    "players": 239,
    "topApps": 169,
-   "seasons": 25
+   "seasons": 25,
+   "marquee": false
   },
   {
    "id": "team_bury_league-two",
@@ -1976,7 +2816,8 @@
    "competition": "League Two",
    "players": 239,
    "topApps": 218,
-   "seasons": 17
+   "seasons": 17,
+   "marquee": false
   },
   {
    "id": "team_stevenage_league-two",
@@ -1985,7 +2826,8 @@
    "competition": "League Two",
    "players": 239,
    "topApps": 198,
-   "seasons": 13
+   "seasons": 13,
+   "marquee": false
   },
   {
    "id": "team_wycombe-wanderers_league-one",
@@ -1994,16 +2836,8 @@
    "competition": "League One",
    "players": 239,
    "topApps": 192,
-   "seasons": 25
-  },
-  {
-   "id": "team_malaga_la-liga",
-   "slug": "malaga",
-   "team": "Málaga",
-   "competition": "La Liga",
-   "players": 236,
-   "topApps": 315,
-   "seasons": 28
+   "seasons": 25,
+   "marquee": false
   },
   {
    "id": "team_charlton-athletic_league-one",
@@ -2012,7 +2846,8 @@
    "competition": "League One",
    "players": 235,
    "topApps": 157,
-   "seasons": 16
+   "seasons": 16,
+   "marquee": false
   },
   {
    "id": "team_racing-santander_la-liga",
@@ -2021,7 +2856,8 @@
    "competition": "La Liga",
    "players": 234,
    "topApps": 304,
-   "seasons": 34
+   "seasons": 34,
+   "marquee": false
   },
   {
    "id": "team_mainz-05_bundesliga",
@@ -2030,7 +2866,8 @@
    "competition": "Bundesliga",
    "players": 232,
    "topApps": 302,
-   "seasons": 23
+   "seasons": 23,
+   "marquee": false
   },
   {
    "id": "team_zaragoza_la-liga",
@@ -2039,7 +2876,8 @@
    "competition": "La Liga",
    "players": 232,
    "topApps": 383,
-   "seasons": 25
+   "seasons": 25,
+   "marquee": false
   },
   {
    "id": "team_cambridge-united_league-two",
@@ -2048,7 +2886,8 @@
    "competition": "League Two",
    "players": 231,
    "topApps": 253,
-   "seasons": 24
+   "seasons": 24,
+   "marquee": false
   },
   {
    "id": "team_walsall_league-one",
@@ -2057,7 +2896,8 @@
    "competition": "League One",
    "players": 231,
    "topApps": 285,
-   "seasons": 15
+   "seasons": 15,
+   "marquee": false
   },
   {
    "id": "team_alaves_la-liga",
@@ -2066,7 +2906,8 @@
    "competition": "La Liga",
    "players": 230,
    "topApps": 208,
-   "seasons": 29
+   "seasons": 29,
+   "marquee": false
   },
   {
    "id": "team_bradford-city_league-one",
@@ -2075,7 +2916,28 @@
    "competition": "League One",
    "players": 228,
    "topApps": 159,
-   "seasons": 23
+   "seasons": 23,
+   "marquee": false
+  },
+  {
+   "id": "team_hoffenheim_all",
+   "slug": "hoffenheim",
+   "team": "Hoffenheim",
+   "competition": null,
+   "players": 228,
+   "topApps": 393,
+   "seasons": 19,
+   "marquee": false
+  },
+  {
+   "id": "team_real-madrid_champions-league",
+   "slug": "real-madrid",
+   "team": "Real Madrid",
+   "competition": "Champions League",
+   "players": 227,
+   "topApps": 150,
+   "seasons": 36,
+   "marquee": true
   },
   {
    "id": "team_athletic-club_la-liga",
@@ -2084,7 +2946,8 @@
    "competition": "La Liga",
    "players": 226,
    "topApps": 445,
-   "seasons": 39
+   "seasons": 39,
+   "marquee": false
   },
   {
    "id": "team_crystal-palace_premier-league",
@@ -2093,7 +2956,8 @@
    "competition": "Premier League",
    "players": 226,
    "topApps": 306,
-   "seasons": 35
+   "seasons": 35,
+   "marquee": true
   },
   {
    "id": "team_blackpool_championship",
@@ -2102,7 +2966,8 @@
    "competition": "Championship",
    "players": 224,
    "topApps": 184,
-   "seasons": 16
+   "seasons": 16,
+   "marquee": false
   },
   {
    "id": "team_burnley_championship",
@@ -2111,7 +2976,8 @@
    "competition": "Championship",
    "players": 224,
    "topApps": 309,
-   "seasons": 26
+   "seasons": 26,
+   "marquee": true
   },
   {
    "id": "team_macclesfield-town_league-two",
@@ -2120,7 +2986,8 @@
    "competition": "League Two",
    "players": 224,
    "topApps": 182,
-   "seasons": 18
+   "seasons": 18,
+   "marquee": false
   },
   {
    "id": "team_chesterfield_league-two",
@@ -2129,7 +2996,8 @@
    "competition": "League Two",
    "players": 223,
    "topApps": 201,
-   "seasons": 20
+   "seasons": 20,
+   "marquee": false
   },
   {
    "id": "team_chievo_serie-a",
@@ -2138,7 +3006,18 @@
    "competition": "Serie A",
    "players": 223,
    "topApps": 455,
-   "seasons": 18
+   "seasons": 18,
+   "marquee": false
+  },
+  {
+   "id": "team_darlington_all",
+   "slug": "darlington",
+   "team": "Darlington",
+   "competition": null,
+   "players": 222,
+   "topApps": 210,
+   "seasons": 19,
+   "marquee": false
   },
   {
    "id": "team_leicester-city_championship",
@@ -2147,7 +3026,8 @@
    "competition": "Championship",
    "players": 220,
    "topApps": 201,
-   "seasons": 24
+   "seasons": 24,
+   "marquee": true
   },
   {
    "id": "team_west-bromwich-albion_championship",
@@ -2156,7 +3036,8 @@
    "competition": "Championship",
    "players": 219,
    "topApps": 203,
-   "seasons": 26
+   "seasons": 26,
+   "marquee": true
   },
   {
    "id": "team_bristol-rovers_league-one",
@@ -2165,7 +3046,18 @@
    "competition": "League One",
    "players": 218,
    "topApps": 261,
-   "seasons": 18
+   "seasons": 18,
+   "marquee": false
+  },
+  {
+   "id": "team_juventus_champions-league",
+   "slug": "juventus",
+   "team": "Juventus",
+   "competition": "Champions League",
+   "players": 218,
+   "topApps": 113,
+   "seasons": 31,
+   "marquee": true
   },
   {
    "id": "team_port-vale_league-two",
@@ -2174,7 +3066,8 @@
    "competition": "League Two",
    "players": 218,
    "topApps": 236,
-   "seasons": 19
+   "seasons": 19,
+   "marquee": false
   },
   {
    "id": "team_charlton-athletic_championship",
@@ -2183,7 +3076,8 @@
    "competition": "Championship",
    "players": 216,
    "topApps": 144,
-   "seasons": 20
+   "seasons": 20,
+   "marquee": false
   },
   {
    "id": "team_troyes_ligue-1",
@@ -2192,7 +3086,8 @@
    "competition": "Ligue 1",
    "players": 216,
    "topApps": 194,
-   "seasons": 28
+   "seasons": 28,
+   "marquee": false
   },
   {
    "id": "team_auxerre_ligue-1",
@@ -2201,7 +3096,8 @@
    "competition": "Ligue 1",
    "players": 215,
    "topApps": 343,
-   "seasons": 32
+   "seasons": 32,
+   "marquee": false
   },
   {
    "id": "team_lincoln-city_league-two",
@@ -2210,7 +3106,8 @@
    "competition": "League Two",
    "players": 215,
    "topApps": 260,
-   "seasons": 17
+   "seasons": 17,
+   "marquee": false
   },
   {
    "id": "team_yeovil-town_league-one",
@@ -2219,7 +3116,8 @@
    "competition": "League One",
    "players": 215,
    "topApps": 185,
-   "seasons": 10
+   "seasons": 10,
+   "marquee": false
   },
   {
    "id": "team_bastia_ligue-1",
@@ -2228,7 +3126,8 @@
    "competition": "Ligue 1",
    "players": 214,
    "topApps": 233,
-   "seasons": 22
+   "seasons": 22,
+   "marquee": false
   },
   {
    "id": "team_tranmere-rovers_league-one",
@@ -2237,7 +3136,8 @@
    "competition": "League One",
    "players": 214,
    "topApps": 364,
-   "seasons": 18
+   "seasons": 18,
+   "marquee": false
   },
   {
    "id": "team_wolverhampton-wanderers_championship",
@@ -2246,7 +3146,8 @@
    "competition": "Championship",
    "players": 211,
    "topApps": 193,
-   "seasons": 26
+   "seasons": 26,
+   "marquee": true
   },
   {
    "id": "team_kaiserslautern_bundesliga",
@@ -2255,7 +3156,8 @@
    "competition": "Bundesliga",
    "players": 210,
    "topApps": 235,
-   "seasons": 24
+   "seasons": 24,
+   "marquee": false
   },
   {
    "id": "team_rotherham-united_championship",
@@ -2264,7 +3166,8 @@
    "competition": "Championship",
    "players": 210,
    "topApps": 175,
-   "seasons": 23
+   "seasons": 23,
+   "marquee": false
   },
   {
    "id": "team_wycombe-wanderers_league-two",
@@ -2273,7 +3176,8 @@
    "competition": "League Two",
    "players": 210,
    "topApps": 359,
-   "seasons": 14
+   "seasons": 14,
+   "marquee": false
   },
   {
    "id": "team_leicester-city_premier-league",
@@ -2282,7 +3186,8 @@
    "competition": "Premier League",
    "players": 209,
    "topApps": 342,
-   "seasons": 31
+   "seasons": 31,
+   "marquee": true
   },
   {
    "id": "team_blackburn-rovers_championship",
@@ -2291,7 +3196,8 @@
    "competition": "Championship",
    "players": 208,
    "topApps": 234,
-   "seasons": 15
+   "seasons": 15,
+   "marquee": true
   },
   {
    "id": "team_oxford-united_league-two",
@@ -2300,7 +3206,8 @@
    "competition": "League Two",
    "players": 208,
    "topApps": 222,
-   "seasons": 14
+   "seasons": 14,
+   "marquee": false
   },
   {
    "id": "team_burton-albion_league-one",
@@ -2309,7 +3216,8 @@
    "competition": "League One",
    "players": 206,
    "topApps": 221,
-   "seasons": 12
+   "seasons": 12,
+   "marquee": false
   },
   {
    "id": "team_hannover-96_bundesliga",
@@ -2318,7 +3226,8 @@
    "competition": "Bundesliga",
    "players": 206,
    "topApps": 302,
-   "seasons": 31
+   "seasons": 31,
+   "marquee": false
   },
   {
    "id": "team_sporting-gijon_la-liga",
@@ -2327,7 +3236,18 @@
    "competition": "La Liga",
    "players": 205,
    "topApps": 259,
-   "seasons": 29
+   "seasons": 29,
+   "marquee": false
+  },
+  {
+   "id": "team_bayern-munich_champions-league",
+   "slug": "bayern-munich",
+   "team": "Bayern Munich",
+   "competition": "Champions League",
+   "players": 204,
+   "topApps": 163,
+   "seasons": 36,
+   "marquee": true
   },
   {
    "id": "team_crewe-alexandra_league-one",
@@ -2336,7 +3256,8 @@
    "competition": "League One",
    "players": 204,
    "topApps": 150,
-   "seasons": 20
+   "seasons": 20,
+   "marquee": false
   },
   {
    "id": "team_hoffenheim_bundesliga",
@@ -2345,7 +3266,8 @@
    "competition": "Bundesliga",
    "players": 203,
    "topApps": 393,
-   "seasons": 19
+   "seasons": 19,
+   "marquee": false
   },
   {
    "id": "team_southend-united_league-two",
@@ -2354,7 +3276,8 @@
    "competition": "League Two",
    "players": 203,
    "topApps": 155,
-   "seasons": 19
+   "seasons": 19,
+   "marquee": false
   },
   {
    "id": "team_colchester-united_league-one",
@@ -2363,7 +3286,8 @@
    "competition": "League One",
    "players": 201,
    "topApps": 292,
-   "seasons": 14
+   "seasons": 14,
+   "marquee": false
   },
   {
    "id": "team_granada_la-liga",
@@ -2372,7 +3296,8 @@
    "competition": "La Liga",
    "players": 201,
    "topApps": 143,
-   "seasons": 13
+   "seasons": 13,
+   "marquee": false
   },
   {
    "id": "team_exeter-city_league-two",
@@ -2381,7 +3306,18 @@
    "competition": "League Two",
    "players": 200,
    "topApps": 246,
-   "seasons": 25
+   "seasons": 25,
+   "marquee": false
+  },
+  {
+   "id": "team_milan_champions-league",
+   "slug": "milan",
+   "team": "Milan",
+   "competition": "Champions League",
+   "players": 200,
+   "topApps": 119,
+   "seasons": 35,
+   "marquee": true
   },
   {
    "id": "team_notts-county_league-one",
@@ -2390,7 +3326,18 @@
    "competition": "League One",
    "players": 200,
    "topApps": 125,
-   "seasons": 25
+   "seasons": 25,
+   "marquee": false
+  },
+  {
+   "id": "team_aldershot-town_all",
+   "slug": "aldershot-town",
+   "team": "Aldershot Town",
+   "competition": null,
+   "players": 199,
+   "topApps": 165,
+   "seasons": 18,
+   "marquee": false
   },
   {
    "id": "team_darlington_league-two",
@@ -2399,7 +3346,18 @@
    "competition": "League Two",
    "players": 199,
    "topApps": 210,
-   "seasons": 8
+   "seasons": 8,
+   "marquee": false
+  },
+  {
+   "id": "team_sutton-united_all",
+   "slug": "sutton-united",
+   "team": "Sutton United",
+   "competition": null,
+   "players": 199,
+   "topApps": 124,
+   "seasons": 10,
+   "marquee": false
   },
   {
    "id": "team_huddersfield-town_league-one",
@@ -2408,7 +3366,8 @@
    "competition": "League One",
    "players": 196,
    "topApps": 202,
-   "seasons": 25
+   "seasons": 25,
+   "marquee": false
   },
   {
    "id": "team_brentford_league-one",
@@ -2417,7 +3376,8 @@
    "competition": "League One",
    "players": 195,
    "topApps": 313,
-   "seasons": 12
+   "seasons": 12,
+   "marquee": false
   },
   {
    "id": "team_wigan-athletic_championship",
@@ -2426,7 +3386,8 @@
    "competition": "Championship",
    "players": 194,
    "topApps": 119,
-   "seasons": 20
+   "seasons": 20,
+   "marquee": false
   },
   {
    "id": "team_plymouth-argyle_league-one",
@@ -2435,7 +3396,8 @@
    "competition": "League One",
    "players": 193,
    "topApps": 158,
-   "seasons": 25
+   "seasons": 25,
+   "marquee": false
   },
   {
    "id": "team_wigan-athletic_league-one",
@@ -2444,7 +3406,8 @@
    "competition": "League One",
    "players": 193,
    "topApps": 138,
-   "seasons": 25
+   "seasons": 25,
+   "marquee": false
   },
   {
    "id": "team_fleetwood-town_league-one",
@@ -2453,7 +3416,8 @@
    "competition": "League One",
    "players": 191,
    "topApps": 209,
-   "seasons": 10
+   "seasons": 10,
+   "marquee": false
   },
   {
    "id": "team_brescia_serie-a",
@@ -2462,7 +3426,8 @@
    "competition": "Serie A",
    "players": 190,
    "topApps": 147,
-   "seasons": 28
+   "seasons": 28,
+   "marquee": false
   },
   {
    "id": "team_hartlepool-united_league-two",
@@ -2471,7 +3436,8 @@
    "competition": "League Two",
    "players": 190,
    "topApps": 185,
-   "seasons": 21
+   "seasons": 21,
+   "marquee": false
   },
   {
    "id": "team_leyton-orient_league-two",
@@ -2480,7 +3446,8 @@
    "competition": "League Two",
    "players": 190,
    "topApps": 153,
-   "seasons": 21
+   "seasons": 21,
+   "marquee": false
   },
   {
    "id": "team_scunthorpe-united_league-one",
@@ -2489,7 +3456,18 @@
    "competition": "League One",
    "players": 190,
    "topApps": 154,
-   "seasons": 14
+   "seasons": 14,
+   "marquee": false
+  },
+  {
+   "id": "team_chelsea_champions-league",
+   "slug": "chelsea",
+   "team": "Chelsea",
+   "competition": "Champions League",
+   "players": 189,
+   "topApps": 109,
+   "seasons": 27,
+   "marquee": true
   },
   {
    "id": "team_carlisle-united_league-one",
@@ -2498,7 +3476,8 @@
    "competition": "League One",
    "players": 188,
    "topApps": 227,
-   "seasons": 18
+   "seasons": 18,
+   "marquee": false
   },
   {
    "id": "team_colchester-united_league-two",
@@ -2507,7 +3486,8 @@
    "competition": "League Two",
    "players": 188,
    "topApps": 230,
-   "seasons": 11
+   "seasons": 11,
+   "marquee": false
   },
   {
    "id": "team_rotherham-united_league-one",
@@ -2516,7 +3496,8 @@
    "competition": "League One",
    "players": 185,
    "topApps": 106,
-   "seasons": 21
+   "seasons": 21,
+   "marquee": false
   },
   {
    "id": "team_tranmere-rovers_league-two",
@@ -2525,7 +3506,8 @@
    "competition": "League Two",
    "players": 185,
    "topApps": 197,
-   "seasons": 13
+   "seasons": 13,
+   "marquee": false
   },
   {
    "id": "team_afc-wimbledon_league-two",
@@ -2534,7 +3516,8 @@
    "competition": "League Two",
    "players": 184,
    "topApps": 139,
-   "seasons": 14
+   "seasons": 14,
+   "marquee": false
   },
   {
    "id": "team_leeds-united_premier-league",
@@ -2543,7 +3526,18 @@
    "competition": "Premier League",
    "players": 184,
    "topApps": 325,
-   "seasons": 35
+   "seasons": 35,
+   "marquee": true
+  },
+  {
+   "id": "team_manchester-united_champions-league",
+   "slug": "manchester-united",
+   "team": "Manchester United",
+   "competition": "Champions League",
+   "players": 184,
+   "topApps": 146,
+   "seasons": 31,
+   "marquee": true
   },
   {
    "id": "team_west-bromwich-albion_premier-league",
@@ -2552,7 +3546,8 @@
    "competition": "Premier League",
    "players": 183,
    "topApps": 269,
-   "seasons": 19
+   "seasons": 19,
+   "marquee": true
   },
   {
    "id": "team_le-havre_ligue-1",
@@ -2561,7 +3556,8 @@
    "competition": "Ligue 1",
    "players": 182,
    "topApps": 139,
-   "seasons": 32
+   "seasons": 32,
+   "marquee": false
   },
   {
    "id": "team_palermo_serie-a",
@@ -2570,7 +3566,8 @@
    "competition": "Serie A",
    "players": 182,
    "topApps": 165,
-   "seasons": 13
+   "seasons": 13,
+   "marquee": false
   },
   {
    "id": "team_swansea-city_championship",
@@ -2579,7 +3576,8 @@
    "competition": "Championship",
    "players": 182,
    "topApps": 301,
-   "seasons": 19
+   "seasons": 19,
+   "marquee": false
   },
   {
    "id": "team_middlesbrough_premier-league",
@@ -2588,7 +3586,8 @@
    "competition": "Premier League",
    "players": 181,
    "topApps": 332,
-   "seasons": 25
+   "seasons": 25,
+   "marquee": true
   },
   {
    "id": "team_torquay-united_league-two",
@@ -2597,7 +3596,8 @@
    "competition": "League Two",
    "players": 180,
    "topApps": 259,
-   "seasons": 12
+   "seasons": 12,
+   "marquee": false
   },
   {
    "id": "team_blackburn-rovers_premier-league",
@@ -2606,7 +3606,18 @@
    "competition": "Premier League",
    "players": 179,
    "topApps": 261,
-   "seasons": 20
+   "seasons": 20,
+   "marquee": true
+  },
+  {
+   "id": "team_paris-saint-germain_champions-league",
+   "slug": "paris-saint-germain",
+   "team": "Paris Saint-Germain",
+   "competition": "Champions League",
+   "players": 178,
+   "topApps": 122,
+   "seasons": 32,
+   "marquee": true
   },
   {
    "id": "team_york-city_league-two",
@@ -2615,7 +3626,8 @@
    "competition": "League Two",
    "players": 178,
    "topApps": 118,
-   "seasons": 25
+   "seasons": 25,
+   "marquee": false
   },
   {
    "id": "team_huddersfield-town_championship",
@@ -2624,7 +3636,8 @@
    "competition": "Championship",
    "players": 177,
    "topApps": 288,
-   "seasons": 12
+   "seasons": 12,
+   "marquee": false
   },
   {
    "id": "team_stockport_league-one",
@@ -2633,7 +3646,8 @@
    "competition": "League One",
    "players": 176,
    "topApps": 103,
-   "seasons": 25
+   "seasons": 25,
+   "marquee": false
   },
   {
    "id": "team_bolton-wanderers_premier-league",
@@ -2642,7 +3656,8 @@
    "competition": "Premier League",
    "players": 175,
    "topApps": 379,
-   "seasons": 17
+   "seasons": 17,
+   "marquee": true
   },
   {
    "id": "team_bari_serie-a",
@@ -2651,7 +3666,8 @@
    "competition": "Serie A",
    "players": 174,
    "topApps": 123,
-   "seasons": 22
+   "seasons": 22,
+   "marquee": false
   },
   {
    "id": "team_caen_ligue-1",
@@ -2660,7 +3676,8 @@
    "competition": "Ligue 1",
    "players": 172,
    "topApps": 232,
-   "seasons": 23
+   "seasons": 23,
+   "marquee": false
   },
   {
    "id": "team_chesterfield_league-one",
@@ -2669,7 +3686,8 @@
    "competition": "League One",
    "players": 172,
    "topApps": 236,
-   "seasons": 15
+   "seasons": 15,
+   "marquee": false
   },
   {
    "id": "team_gillingham_league-two",
@@ -2678,7 +3696,8 @@
    "competition": "League Two",
    "players": 172,
    "topApps": 139,
-   "seasons": 19
+   "seasons": 19,
+   "marquee": false
   },
   {
    "id": "team_crewe-alexandra_league-two",
@@ -2687,7 +3706,8 @@
    "competition": "League Two",
    "players": 171,
    "topApps": 173,
-   "seasons": 18
+   "seasons": 18,
+   "marquee": false
   },
   {
    "id": "team_walsall_league-two",
@@ -2696,7 +3716,8 @@
    "competition": "League Two",
    "players": 171,
    "topApps": 143,
-   "seasons": 21
+   "seasons": 21,
+   "marquee": false
   },
   {
    "id": "team_augsburg_bundesliga",
@@ -2705,7 +3726,8 @@
    "competition": "Bundesliga",
    "players": 170,
    "topApps": 274,
-   "seasons": 16
+   "seasons": 16,
+   "marquee": false
   },
   {
    "id": "team_coventry-city_league-one",
@@ -2714,7 +3736,8 @@
    "competition": "League One",
    "players": 170,
    "topApps": 162,
-   "seasons": 8
+   "seasons": 8,
+   "marquee": false
   },
   {
    "id": "team_norwich-city_premier-league",
@@ -2723,7 +3746,8 @@
    "competition": "Premier League",
    "players": 170,
    "topApps": 125,
-   "seasons": 30
+   "seasons": 30,
+   "marquee": true
   },
   {
    "id": "team_sheffield-wednesday_league-one",
@@ -2732,7 +3756,8 @@
    "competition": "League One",
    "players": 170,
    "topApps": 108,
-   "seasons": 24
+   "seasons": 24,
+   "marquee": false
   },
   {
    "id": "team_southend-united_league-one",
@@ -2741,7 +3766,8 @@
    "competition": "League One",
    "players": 170,
    "topApps": 225,
-   "seasons": 15
+   "seasons": 15,
+   "marquee": false
   },
   {
    "id": "team_crystal-palace_championship",
@@ -2750,7 +3776,8 @@
    "competition": "Championship",
    "players": 167,
    "topApps": 278,
-   "seasons": 12
+   "seasons": 12,
+   "marquee": true
   },
   {
    "id": "team_arminia-bielefeld_bundesliga",
@@ -2759,7 +3786,18 @@
    "competition": "Bundesliga",
    "players": 166,
    "topApps": 170,
-   "seasons": 26
+   "seasons": 26,
+   "marquee": false
+  },
+  {
+   "id": "team_brest_all",
+   "slug": "brest",
+   "team": "Brest",
+   "competition": null,
+   "players": 165,
+   "topApps": 197,
+   "seasons": 17,
+   "marquee": false
   },
   {
    "id": "team_sassuolo_serie-a",
@@ -2768,7 +3806,8 @@
    "competition": "Serie A",
    "players": 165,
    "topApps": 357,
-   "seasons": 14
+   "seasons": 14,
+   "marquee": false
   },
   {
    "id": "team_guingamp_ligue-1",
@@ -2777,7 +3816,18 @@
    "competition": "Ligue 1",
    "players": 164,
    "topApps": 229,
-   "seasons": 24
+   "seasons": 24,
+   "marquee": false
+  },
+  {
+   "id": "team_rb-leipzig_all",
+   "slug": "rb-leipzig",
+   "team": "RB Leipzig",
+   "competition": null,
+   "players": 164,
+   "topApps": 269,
+   "seasons": 11,
+   "marquee": false
   },
   {
    "id": "team_portsmouth_league-one",
@@ -2786,7 +3836,8 @@
    "competition": "League One",
    "players": 163,
    "topApps": 198,
-   "seasons": 12
+   "seasons": 12,
+   "marquee": false
   },
   {
    "id": "team_ajaccio_ligue-1",
@@ -2795,7 +3846,8 @@
    "competition": "Ligue 1",
    "players": 162,
    "topApps": 138,
-   "seasons": 21
+   "seasons": 21,
+   "marquee": false
   },
   {
    "id": "team_southampton_championship",
@@ -2804,7 +3856,8 @@
    "competition": "Championship",
    "players": 161,
    "topApps": 164,
-   "seasons": 22
+   "seasons": 22,
+   "marquee": true
   },
   {
    "id": "team_cheltenham-town_league-one",
@@ -2813,7 +3866,8 @@
    "competition": "League One",
    "players": 160,
    "topApps": 129,
-   "seasons": 22
+   "seasons": 22,
+   "marquee": false
   },
   {
    "id": "team_sochaux_ligue-1",
@@ -2822,7 +3876,8 @@
    "competition": "Ligue 1",
    "players": 160,
    "topApps": 323,
-   "seasons": 16
+   "seasons": 16,
+   "marquee": false
   },
   {
    "id": "team_wolverhampton-wanderers_premier-league",
@@ -2831,7 +3886,8 @@
    "competition": "Premier League",
    "players": 160,
    "topApps": 177,
-   "seasons": 23
+   "seasons": 23,
+   "marquee": true
   },
   {
    "id": "team_bolton-wanderers_league-one",
@@ -2840,7 +3896,8 @@
    "competition": "League One",
    "players": 159,
    "topApps": 160,
-   "seasons": 10
+   "seasons": 10,
+   "marquee": false
   },
   {
    "id": "team_rochdale_league-one",
@@ -2849,7 +3906,8 @@
    "competition": "League One",
    "players": 159,
    "topApps": 240,
-   "seasons": 11
+   "seasons": 11,
+   "marquee": false
   },
   {
    "id": "team_scunthorpe-united_league-two",
@@ -2858,7 +3916,8 @@
    "competition": "League Two",
    "players": 159,
    "topApps": 150,
-   "seasons": 20
+   "seasons": 20,
+   "marquee": false
   },
   {
    "id": "team_cadiz_la-liga",
@@ -2867,7 +3926,8 @@
    "competition": "La Liga",
    "players": 157,
    "topApps": 187,
-   "seasons": 36
+   "seasons": 36,
+   "marquee": false
   },
   {
    "id": "team_dagenham-and-redbridge_league-two",
@@ -2876,7 +3936,8 @@
    "competition": "League Two",
    "players": 157,
    "topApps": 205,
-   "seasons": 9
+   "seasons": 9,
+   "marquee": false
   },
   {
    "id": "team_reims_ligue-1",
@@ -2885,7 +3946,8 @@
    "competition": "Ligue 1",
    "players": 155,
    "topApps": 201,
-   "seasons": 13
+   "seasons": 13,
+   "marquee": false
   },
   {
    "id": "team_brighton-and-hove-albion_championship",
@@ -2894,7 +3956,8 @@
    "competition": "Championship",
    "players": 154,
    "topApps": 186,
-   "seasons": 15
+   "seasons": 15,
+   "marquee": true
   },
   {
    "id": "team_elche_la-liga",
@@ -2903,7 +3966,8 @@
    "competition": "La Liga",
    "players": 154,
    "topApps": 125,
-   "seasons": 39
+   "seasons": 39,
+   "marquee": false
   },
   {
    "id": "team_sunderland_championship",
@@ -2912,7 +3976,8 @@
    "competition": "Championship",
    "players": 151,
    "topApps": 133,
-   "seasons": 22
+   "seasons": 22,
+   "marquee": true
   },
   {
    "id": "team_bolton-wanderers_championship",
@@ -2921,7 +3986,8 @@
    "competition": "Championship",
    "players": 150,
    "topApps": 141,
-   "seasons": 15
+   "seasons": 15,
+   "marquee": true
   },
   {
    "id": "team_nottingham-forest_premier-league",
@@ -2930,7 +3996,8 @@
    "competition": "Premier League",
    "players": 150,
    "topApps": 174,
-   "seasons": 35
+   "seasons": 35,
+   "marquee": true
   },
   {
    "id": "team_st-pauli_bundesliga",
@@ -2939,7 +4006,18 @@
    "competition": "Bundesliga",
    "players": 150,
    "topApps": 177,
-   "seasons": 38
+   "seasons": 38,
+   "marquee": false
+  },
+  {
+   "id": "team_atletico-madrid_champions-league",
+   "slug": "atletico-madrid",
+   "team": "Atlético Madrid",
+   "competition": "Champions League",
+   "players": 149,
+   "topApps": 118,
+   "seasons": 30,
+   "marquee": true
   },
   {
    "id": "team_salford-city-fc_league-two",
@@ -2948,7 +4026,8 @@
    "competition": "League Two",
    "players": 149,
    "topApps": 153,
-   "seasons": 8
+   "seasons": 8,
+   "marquee": false
   },
   {
    "id": "team_siena_serie-a",
@@ -2957,7 +4036,8 @@
    "competition": "Serie A",
    "players": 149,
    "topApps": 281,
-   "seasons": 10
+   "seasons": 10,
+   "marquee": false
   },
   {
    "id": "team_stockport_league-two",
@@ -2966,7 +4046,18 @@
    "competition": "League Two",
    "players": 149,
    "topApps": 136,
-   "seasons": 19
+   "seasons": 19,
+   "marquee": false
+  },
+  {
+   "id": "team_hansa-rostock_all",
+   "slug": "hansa-rostock",
+   "team": "Hansa Rostock",
+   "competition": null,
+   "players": 148,
+   "topApps": 165,
+   "seasons": 17,
+   "marquee": false
   },
   {
    "id": "team_watford_premier-league",
@@ -2975,7 +4066,8 @@
    "competition": "Premier League",
    "players": 148,
    "topApps": 165,
-   "seasons": 23
+   "seasons": 23,
+   "marquee": false
   },
   {
    "id": "team_plymouth-argyle_league-two",
@@ -2984,7 +4076,8 @@
    "competition": "League Two",
    "players": 147,
    "topApps": 176,
-   "seasons": 9
+   "seasons": 9,
+   "marquee": false
   },
   {
    "id": "team_nancy_ligue-1",
@@ -2993,7 +4086,8 @@
    "competition": "Ligue 1",
    "players": 146,
    "topApps": 253,
-   "seasons": 21
+   "seasons": 21,
+   "marquee": false
   },
   {
    "id": "team_luton-town_league-one",
@@ -3002,7 +4096,8 @@
    "competition": "League One",
    "players": 145,
    "topApps": 142,
-   "seasons": 25
+   "seasons": 25,
+   "marquee": false
   },
   {
    "id": "team_milton-keynes-dons_league-two",
@@ -3011,7 +4106,8 @@
    "competition": "League Two",
    "players": 145,
    "topApps": 171,
-   "seasons": 20
+   "seasons": 20,
+   "marquee": false
   },
   {
    "id": "team_oxford-united_league-one",
@@ -3020,7 +4116,8 @@
    "competition": "League One",
    "players": 145,
    "topApps": 245,
-   "seasons": 11
+   "seasons": 11,
+   "marquee": false
   },
   {
    "id": "team_exeter-city_league-one",
@@ -3029,7 +4126,18 @@
    "competition": "League One",
    "players": 144,
    "topApps": 143,
-   "seasons": 17
+   "seasons": 17,
+   "marquee": false
+  },
+  {
+   "id": "team_boston-united_all",
+   "slug": "boston-united",
+   "team": "Boston United",
+   "competition": null,
+   "players": 142,
+   "topApps": 174,
+   "seasons": 18,
+   "marquee": false
   },
   {
    "id": "team_brest_ligue-1",
@@ -3038,7 +4146,8 @@
    "competition": "Ligue 1",
    "players": 142,
    "topApps": 197,
-   "seasons": 17
+   "seasons": 17,
+   "marquee": false
   },
   {
    "id": "team_msv-duisburg_bundesliga",
@@ -3047,7 +4156,8 @@
    "competition": "Bundesliga",
    "players": 141,
    "topApps": 166,
-   "seasons": 17
+   "seasons": 17,
+   "marquee": false
   },
   {
    "id": "team_plymouth-argyle_championship",
@@ -3056,7 +4166,8 @@
    "competition": "Championship",
    "players": 141,
    "topApps": 155,
-   "seasons": 21
+   "seasons": 21,
+   "marquee": false
   },
   {
    "id": "team_angers_ligue-1",
@@ -3065,7 +4176,8 @@
    "competition": "Ligue 1",
    "players": 140,
    "topApps": 261,
-   "seasons": 12
+   "seasons": 12,
+   "marquee": false
   },
   {
    "id": "team_bournemouth_league-one",
@@ -3074,7 +4186,8 @@
    "competition": "League One",
    "players": 139,
    "topApps": 214,
-   "seasons": 10
+   "seasons": 10,
+   "marquee": false
   },
   {
    "id": "team_burnley_premier-league",
@@ -3083,7 +4196,8 @@
    "competition": "Premier League",
    "players": 138,
    "topApps": 217,
-   "seasons": 17
+   "seasons": 17,
+   "marquee": true
   },
   {
    "id": "team_oviedo_la-liga",
@@ -3092,7 +4206,8 @@
    "competition": "La Liga",
    "players": 138,
    "topApps": 328,
-   "seasons": 38
+   "seasons": 38,
+   "marquee": false
   },
   {
    "id": "team_rotherham-united_league-two",
@@ -3101,7 +4216,8 @@
    "competition": "League Two",
    "players": 138,
    "topApps": 202,
-   "seasons": 20
+   "seasons": 20,
+   "marquee": false
   },
   {
    "id": "team_perugia_serie-a",
@@ -3110,7 +4226,8 @@
    "competition": "Serie A",
    "players": 137,
    "topApps": 159,
-   "seasons": 8
+   "seasons": 8,
+   "marquee": false
   },
   {
    "id": "team_dusseldorf_bundesliga",
@@ -3119,7 +4236,8 @@
    "competition": "Bundesliga",
    "players": 136,
    "topApps": 145,
-   "seasons": 31
+   "seasons": 31,
+   "marquee": false
   },
   {
    "id": "team_yeovil-town_league-two",
@@ -3128,7 +4246,8 @@
    "competition": "League Two",
    "players": 136,
    "topApps": 122,
-   "seasons": 16
+   "seasons": 16,
+   "marquee": false
   },
   {
    "id": "team_reggina_serie-a",
@@ -3137,7 +4256,8 @@
    "competition": "Serie A",
    "players": 135,
    "topApps": 187,
-   "seasons": 10
+   "seasons": 10,
+   "marquee": false
   },
   {
    "id": "team_tenerife_la-liga",
@@ -3146,7 +4266,8 @@
    "competition": "La Liga",
    "players": 135,
    "topApps": 310,
-   "seasons": 21
+   "seasons": 21,
+   "marquee": false
   },
   {
    "id": "team_hansa-rostock_bundesliga",
@@ -3155,7 +4276,8 @@
    "competition": "Bundesliga",
    "players": 133,
    "topApps": 165,
-   "seasons": 17
+   "seasons": 17,
+   "marquee": false
   },
   {
    "id": "team_stevenage_league-one",
@@ -3164,7 +4286,8 @@
    "competition": "League One",
    "players": 133,
    "topApps": 133,
-   "seasons": 16
+   "seasons": 16,
+   "marquee": false
   },
   {
    "id": "team_afc-wimbledon_league-one",
@@ -3173,7 +4296,8 @@
    "competition": "League One",
    "players": 132,
    "topApps": 145,
-   "seasons": 11
+   "seasons": 11,
+   "marquee": false
   },
   {
    "id": "team_almeria_la-liga",
@@ -3182,7 +4306,8 @@
    "competition": "La Liga",
    "players": 130,
    "topApps": 168,
-   "seasons": 17
+   "seasons": 17,
+   "marquee": false
   },
   {
    "id": "team_coventry-city_premier-league",
@@ -3191,7 +4316,8 @@
    "competition": "Premier League",
    "players": 129,
    "topApps": 191,
-   "seasons": 35
+   "seasons": 35,
+   "marquee": true
   },
   {
    "id": "team_brighton-and-hove-albion_league-one",
@@ -3200,7 +4326,8 @@
    "competition": "League One",
    "players": 125,
    "topApps": 191,
-   "seasons": 8
+   "seasons": 8,
+   "marquee": false
   },
   {
    "id": "team_albacete_la-liga",
@@ -3209,7 +4336,8 @@
    "competition": "La Liga",
    "players": 124,
    "topApps": 180,
-   "seasons": 14
+   "seasons": 14,
+   "marquee": false
   },
   {
    "id": "team_doncaster-rovers_league-two",
@@ -3218,7 +4346,8 @@
    "competition": "League Two",
    "players": 124,
    "topApps": 130,
-   "seasons": 22
+   "seasons": 22,
+   "marquee": false
   },
   {
    "id": "team_hartlepool-united_league-one",
@@ -3227,7 +4356,18 @@
    "competition": "League One",
    "players": 123,
    "topApps": 351,
-   "seasons": 10
+   "seasons": 10,
+   "marquee": false
+  },
+  {
+   "id": "team_union-berlin_all",
+   "slug": "union-berlin",
+   "team": "Union Berlin",
+   "competition": null,
+   "players": 123,
+   "topApps": 194,
+   "seasons": 8,
+   "marquee": false
   },
   {
    "id": "team_wimbledon_all",
@@ -3236,7 +4376,8 @@
    "competition": null,
    "players": 123,
    "topApps": 244,
-   "seasons": 12
+   "seasons": 12,
+   "marquee": false
   },
   {
    "id": "team_cremonese_serie-a",
@@ -3245,7 +4386,8 @@
    "competition": "Serie A",
    "players": 121,
    "topApps": 130,
-   "seasons": 37
+   "seasons": 37,
+   "marquee": false
   },
   {
    "id": "team_luton-town_championship",
@@ -3254,7 +4396,18 @@
    "competition": "Championship",
    "players": 120,
    "topApps": 162,
-   "seasons": 20
+   "seasons": 20,
+   "marquee": false
+  },
+  {
+   "id": "team_girona_all",
+   "slug": "girona",
+   "team": "Girona",
+   "competition": null,
+   "players": 119,
+   "topApps": 181,
+   "seasons": 9,
+   "marquee": false
   },
   {
    "id": "team_bristol-city_league-one",
@@ -3263,7 +4416,8 @@
    "competition": "League One",
    "players": 118,
    "topApps": 158,
-   "seasons": 13
+   "seasons": 13,
+   "marquee": false
   },
   {
    "id": "team_ipswich-town_premier-league",
@@ -3272,7 +4426,8 @@
    "competition": "Premier League",
    "players": 118,
    "topApps": 112,
-   "seasons": 35
+   "seasons": 35,
+   "marquee": false
   },
   {
    "id": "team_livorno_serie-a",
@@ -3281,7 +4436,8 @@
    "competition": "Serie A",
    "players": 118,
    "topApps": 135,
-   "seasons": 10
+   "seasons": 10,
+   "marquee": false
   },
   {
    "id": "team_wrexham_league-two",
@@ -3290,7 +4446,8 @@
    "competition": "League Two",
    "players": 118,
    "topApps": 105,
-   "seasons": 22
+   "seasons": 22,
+   "marquee": false
   },
   {
    "id": "team_logrones_la-liga",
@@ -3299,7 +4456,8 @@
    "competition": "La Liga",
    "players": 117,
    "topApps": 212,
-   "seasons": 9
+   "seasons": 9,
+   "marquee": false
   },
   {
    "id": "team_derby-county_premier-league",
@@ -3308,7 +4466,8 @@
    "competition": "Premier League",
    "players": 115,
    "topApps": 170,
-   "seasons": 12
+   "seasons": 12,
+   "marquee": false
   },
   {
    "id": "team_hull-city_premier-league",
@@ -3317,7 +4476,8 @@
    "competition": "Premier League",
    "players": 113,
    "topApps": 109,
-   "seasons": 19
+   "seasons": 19,
+   "marquee": false
   },
   {
    "id": "team_luton-town_league-two",
@@ -3326,7 +4486,8 @@
    "competition": "League Two",
    "players": 113,
    "topApps": 109,
-   "seasons": 10
+   "seasons": 10,
+   "marquee": false
   },
   {
    "id": "team_queens-park-rangers_premier-league",
@@ -3335,7 +4496,8 @@
    "competition": "Premier League",
    "players": 113,
    "topApps": 142,
-   "seasons": 23
+   "seasons": 23,
+   "marquee": false
   },
   {
    "id": "team_fulham_championship",
@@ -3344,7 +4506,8 @@
    "competition": "Championship",
    "players": 111,
    "topApps": 197,
-   "seasons": 8
+   "seasons": 8,
+   "marquee": true
   },
   {
    "id": "team_crawley-town_league-one",
@@ -3353,7 +4516,8 @@
    "competition": "League One",
    "players": 110,
    "topApps": 102,
-   "seasons": 13
+   "seasons": 13,
+   "marquee": false
   },
   {
    "id": "team_millwall_league-one",
@@ -3362,7 +4526,8 @@
    "competition": "League One",
    "players": 109,
    "topApps": 170,
-   "seasons": 11
+   "seasons": 11,
+   "marquee": false
   },
   {
    "id": "team_piacenza_serie-a",
@@ -3371,7 +4536,8 @@
    "competition": "Serie A",
    "players": 109,
    "topApps": 170,
-   "seasons": 10
+   "seasons": 10,
+   "marquee": false
   },
   {
    "id": "team_birmingham-city_premier-league",
@@ -3380,7 +4546,8 @@
    "competition": "Premier League",
    "players": 107,
    "topApps": 150,
-   "seasons": 9
+   "seasons": 9,
+   "marquee": false
   },
   {
    "id": "team_bournemouth_premier-league",
@@ -3389,7 +4556,8 @@
    "competition": "Premier League",
    "players": 107,
    "topApps": 257,
-   "seasons": 12
+   "seasons": 12,
+   "marquee": true
   },
   {
    "id": "team_karlsruher_bundesliga",
@@ -3398,7 +4566,8 @@
    "competition": "Bundesliga",
    "players": 107,
    "topApps": 247,
-   "seasons": 21
+   "seasons": 21,
+   "marquee": false
   },
   {
    "id": "team_peterborough-united_championship",
@@ -3407,7 +4576,8 @@
    "competition": "Championship",
    "players": 106,
    "topApps": 108,
-   "seasons": 13
+   "seasons": 13,
+   "marquee": false
   },
   {
    "id": "team_dijon_ligue-1",
@@ -3416,7 +4586,8 @@
    "competition": "Ligue 1",
    "players": 105,
    "topApps": 120,
-   "seasons": 10
+   "seasons": 10,
+   "marquee": false
   },
   {
    "id": "team_brighton-and-hove-albion_premier-league",
@@ -3425,7 +4596,8 @@
    "competition": "Premier League",
    "players": 104,
    "topApps": 301,
-   "seasons": 10
+   "seasons": 10,
+   "marquee": true
   },
   {
    "id": "team_catania_serie-a",
@@ -3434,7 +4606,8 @@
    "competition": "Serie A",
    "players": 104,
    "topApps": 218,
-   "seasons": 8
+   "seasons": 8,
+   "marquee": false
   },
   {
    "id": "team_1860-munich_bundesliga",
@@ -3443,7 +4616,8 @@
    "competition": "Bundesliga",
    "players": 102,
    "topApps": 239,
-   "seasons": 10
+   "seasons": 10,
+   "marquee": false
   },
   {
    "id": "team_le-mans_ligue-1",
@@ -3452,7 +4626,8 @@
    "competition": "Ligue 1",
    "players": 102,
    "topApps": 138,
-   "seasons": 24
+   "seasons": 24,
+   "marquee": false
   },
   {
    "id": "team_union-berlin_bundesliga",
@@ -3461,7 +4636,8 @@
    "competition": "Bundesliga",
    "players": 102,
    "topApps": 194,
-   "seasons": 8
+   "seasons": 8,
+   "marquee": false
   },
   {
    "id": "team_leganes_la-liga",
@@ -3470,7 +4646,8 @@
    "competition": "La Liga",
    "players": 100,
    "topApps": 118,
-   "seasons": 9
+   "seasons": 9,
+   "marquee": false
   },
   {
    "id": "team_rb-leipzig_bundesliga",
@@ -3479,7 +4656,8 @@
    "competition": "Bundesliga",
    "players": 99,
    "topApps": 269,
-   "seasons": 11
+   "seasons": 11,
+   "marquee": false
   },
   {
    "id": "team_wigan-athletic_premier-league",
@@ -3488,7 +4666,8 @@
    "competition": "Premier League",
    "players": 99,
    "topApps": 194,
-   "seasons": 8
+   "seasons": 8,
+   "marquee": false
   },
   {
    "id": "team_stoke-city_premier-league",
@@ -3497,7 +4676,8 @@
    "competition": "Premier League",
    "players": 97,
    "topApps": 317,
-   "seasons": 10
+   "seasons": 10,
+   "marquee": true
   },
   {
    "id": "team_girona_la-liga",
@@ -3506,7 +4686,8 @@
    "competition": "La Liga",
    "players": 93,
    "topApps": 181,
-   "seasons": 9
+   "seasons": 9,
+   "marquee": false
   },
   {
    "id": "team_energie-cottbus_bundesliga",
@@ -3515,7 +4696,8 @@
    "competition": "Bundesliga",
    "players": 87,
    "topApps": 129,
-   "seasons": 9
+   "seasons": 9,
+   "marquee": false
   },
   {
    "id": "team_numancia_la-liga",
@@ -3524,7 +4706,8 @@
    "competition": "La Liga",
    "players": 87,
    "topApps": 106,
-   "seasons": 10
+   "seasons": 10,
+   "marquee": false
   },
   {
    "id": "team_charlton-athletic_premier-league",
@@ -3533,7 +4716,8 @@
    "competition": "Premier League",
    "players": 86,
    "topApps": 187,
-   "seasons": 9
+   "seasons": 9,
+   "marquee": false
   },
   {
    "id": "team_valenciennes_ligue-1",
@@ -3542,7 +4726,8 @@
    "competition": "Ligue 1",
    "players": 85,
    "topApps": 266,
-   "seasons": 8
+   "seasons": 8,
+   "marquee": false
   },
   {
    "id": "team_sheffield-wednesday_premier-league",
@@ -3551,7 +4736,8 @@
    "competition": "Premier League",
    "players": 83,
    "topApps": 264,
-   "seasons": 8
+   "seasons": 8,
+   "marquee": false
   },
   {
    "id": "team_sedan_ligue-1",
@@ -3560,7 +4746,8 @@
    "competition": "Ligue 1",
    "players": 81,
    "topApps": 111,
-   "seasons": 8
+   "seasons": 8,
+   "marquee": false
   },
   {
    "id": "team_uerdingen_bundesliga",
@@ -3569,7 +4756,8 @@
    "competition": "Bundesliga",
    "players": 76,
    "topApps": 151,
-   "seasons": 8
+   "seasons": 8,
+   "marquee": false
   },
   {
    "id": "team_bournemouth_championship",
@@ -3578,7 +4766,8 @@
    "competition": "Championship",
    "players": 73,
    "topApps": 129,
-   "seasons": 9
+   "seasons": 9,
+   "marquee": true
   },
   {
    "id": "team_bournemouth_league-two",
@@ -3587,7 +4776,8 @@
    "competition": "League Two",
    "players": 66,
    "topApps": 101,
-   "seasons": 8
+   "seasons": 8,
+   "marquee": false
   },
   {
    "id": "team_wimbledon_premier-league",
@@ -3596,7 +4786,8 @@
    "competition": "Premier League",
    "players": 64,
    "topApps": 244,
-   "seasons": 8
+   "seasons": 8,
+   "marquee": false
   }
  ]
 }

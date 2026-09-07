@@ -329,6 +329,9 @@ body {
   color: #fff;
 }
 .slot.locked { cursor: default; pointer-events: none; }
+.slot.na { cursor: default; pointer-events: none; opacity: .42; }
+.slot.na .slot-circle { background: transparent; border-style: dashed; }
+.slot.na .slot-name { font-style: italic; }
 .slot-name {
   font-size: 9px;
   font-weight: 600;
@@ -1428,8 +1431,16 @@ function renderPitch() {
       const isLocked = lockedSlots.has(slot.idx);
       const sr = slotResults[slot.idx]; // per-slot scored result
 
+      // A goalkeeper has no goals, so on a "most goals" eleven the GK slot has
+      // no answer to find: every candidate scores zero and the pick is a coin
+      // toss the player cannot reason about. Say so up front rather than
+      // letting somebody spend a guess discovering it.
+      const isNA = slot.bucket === 'GK' && selectedObjective === 'goals';
+
       let slotClass = 'slot';
-      if (isLocked) {
+      if (isNA) {
+        slotClass += ' na locked';
+      } else if (isLocked) {
         slotClass += ' filled locked correct';
       } else if (sr && sr.correct === false) {
         // Wrong pick — keep red, but allow tapping to replace
@@ -1444,14 +1455,19 @@ function renderPitch() {
       el.style.top = yPct + '%';
       el.dataset.idx = slot.idx;
 
-      el.innerHTML = `
+      el.innerHTML = isNA ? `
+        <div class="slot-circle">&ndash;</div>
+        <div class="slot-name">Not scored</div>
+        <div class="slot-role">${slot.label}</div>
+      ` : `
         <div class="slot-circle">${slot.player ? slot.player.nationality || '&#10003;' : slot.label}</div>
         <div class="slot-name">${slot.player ? truncName(slot.player.name) : ''}</div>
         <div class="slot-role">${slot.label}</div>
       `;
+      if (isNA) el.title = 'Goalkeepers do not score, so this slot is not part of a goals eleven.';
 
       // Wrong or empty slots can be tapped to pick a new player
-      if (!isLocked) {
+      if (!isLocked && !isNA) {
         el.onclick = () => openSearchModal(slot.idx);
       }
 
@@ -1631,7 +1647,8 @@ function truncName(name) {
 }
 
 function updateSubmitBtn() {
-  const allFilled = slots.every(s => s.player !== null || lockedSlots.has(s.idx));
+  const allFilled = slots.every(s => s.player !== null || lockedSlots.has(s.idx) ||
+                                    (s.bucket === 'GK' && selectedObjective === 'goals'));
   $('submitXIBtn').disabled = !allFilled;
 }
 
@@ -2847,7 +2864,7 @@ document.getElementById('tsClock').textContent = new Date().toTimeString().slice
         if (isAnon) {
           const note = document.createElement('div');
           note.style.cssText = 'text-align:center;font-size:12px;color:var(--accent-yellow);padding:8px 0 4px;';
-          note.innerHTML = '\uD83C\uDFB2 Random play only — <a href="#" style="color:var(--accent-cyan);text-decoration:underline;" onclick="TSNav.showAuthModal(\'signup\',\'post_game\');return false;">sign up free</a> to choose your own';
+          note.innerHTML = '\u26BD Pick any club you like \u2014 <a style="color:var(--accent-cyan);text-decoration:underline;" href="/teams/">browse all teams</a> \u00b7 <a href="#" style="color:var(--accent-cyan);text-decoration:underline;" onclick="TSNav.showAuthModal(\'signup\',\'post_game\');return false;">sign up free</a> to save your scores';
           if (scopeGridEl) scopeGridEl.parentElement.insertBefore(note, scopeGridEl);
         }
         if (scopeGridEl) scopeGridEl.parentElement.insertBefore(roulette, scopeGridEl);

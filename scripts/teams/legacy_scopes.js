@@ -24,6 +24,17 @@ const path = require('path');
 
 const ROOT = path.join(__dirname, '..', '..');
 const FUNCS = path.join(ROOT, 'netlify', 'functions');
+
+// Higher or Lower and Player Alphabet are asked for their scopes by calling
+// their handlers, and those need Supabase credentials. Without this the calls
+// fail, the script still exits 0, and it quietly writes a third of the map —
+// which is how the team leaderboards would have lost their history.
+for (const l of fs.readFileSync(path.join(ROOT, '.env'), 'utf8').split('\n')) {
+  const t = l.trim();
+  if (!t || t.startsWith('#')) continue;
+  const i = t.indexOf('='); if (i < 0) continue;
+  if (!process.env[t.slice(0, i).trim()]) process.env[t.slice(0, i).trim()] = t.slice(i + 1).trim();
+}
 const teams = require(path.join(FUNCS, '_teams.js'));
 
 const SOURCES = ['xi_start.js', 'xi_score.js', 'whoami_start.js', 'quiz_start.js', 'match_start.js'];
@@ -87,8 +98,9 @@ for (const t of teams.all()) {
         { httpMethod: 'POST', headers: {}, body: JSON.stringify(body) }, {});
       scopes = (JSON.parse(res.body || '{}').scopes) || [];
     } catch (e) {
-      console.log(`    ✗ ${file}: ${e.message}`);
-      continue;
+      // Not a warning. A partial map means played rounds stop attributing to
+      // their club, silently, on every team page.
+      throw new Error(`${file} could not be asked for its scopes: ${e.message}`);
     }
     let found = 0;
     for (const s of scopes) {
@@ -122,6 +134,9 @@ for (const t of teams.all()) {
   fs.writeFileSync(path.join(ROOT, 'data', 'teams', 'legacy_scopes.json'),
     JSON.stringify({ generated: new Date().toISOString(), scopes: sorted }, null, 2) + '\n');
 
+  if (scanned < SOURCES.length + ASK.length - 1) {
+    throw new Error(`only ${scanned} of ${SOURCES.length + ASK.length} sources were read — refusing to write a partial map`);
+  }
   console.log(`\n  ✓ ${Object.keys(sorted).length} legacy scope ids from ${scanned} files`);
   console.log(`    ${new Set(Object.values(sorted)).size} distinct clubs`);
   if (unresolved.size) {

@@ -29,6 +29,26 @@ const teams = require('./_teams');
 const DAY_MS = 86_400_000;
 
 /**
+ * The daily's opening window.
+ *
+ * For the first OPENING_DAYS after LAUNCH the challenge is drawn only from the
+ * marquee scopes — clubs most fans could name several players for. After that
+ * the whole pool is in play.
+ *
+ * Day one was "Carlisle United in League One", which is a fine puzzle and a
+ * bad first impression: a new visitor has no way to tell whether they are bad
+ * at the game or simply do not follow League One, and they only get one first
+ * impression. The lower leagues are the site's most distinctive content and
+ * they are still 60% of the pool — they just should not be the welcome mat.
+ *
+ * LAUNCH is fixed rather than relative to "now", because the whole design is
+ * that the challenge is a function of the date. A moving launch date would
+ * change what yesterday's challenge was.
+ */
+const LAUNCH = '2026-09-07';
+const OPENING_DAYS = 50;
+
+/**
  * The five games, in the order a week runs through them.
  *
  * Bullseye is absent: it takes a category id of its own shape rather than a
@@ -82,11 +102,24 @@ function challengeFor(dateStr) {
   const n = dayNumber(date);
   const game = GAMES[((n % GAMES.length) + GAMES.length) % GAMES.length];
 
-  const pool = POOL.scopes;
+  // Which pool this day draws from. Computed from the date alone, so it stays
+  // deterministic and any past or future day is still answerable.
+  const sinceLaunch = n - dayNumber(LAUNCH);
+  const opening = sinceLaunch >= 0 && sinceLaunch < OPENING_DAYS;
+  const marquee = POOL.scopes.filter((x) => x.marquee);
+  // If a regenerated pool ever had no marquee scopes, fall back rather than
+  // divide by zero and serve nothing.
+  const pool = opening && marquee.length ? marquee : POOL.scopes;
+
   let idx = hash(`ts-daily|${date}`) % pool.length;
 
+  // Not the same club two days running — the one random outcome people read as
+  // broken. Compared against yesterday's ACTUAL pool, which may differ from
+  // today's on the day the opening window ends.
   const yesterday = new Date(Date.parse(`${date}T00:00:00Z`) - DAY_MS).toISOString().slice(0, 10);
-  const prev = pool[hash(`ts-daily|${yesterday}`) % pool.length];
+  const ySince = dayNumber(yesterday) - dayNumber(LAUNCH);
+  const yPool = (ySince >= 0 && ySince < OPENING_DAYS && marquee.length) ? marquee : POOL.scopes;
+  const prev = yPool[hash(`ts-daily|${yesterday}`) % yPool.length];
   if (prev && pool[idx].slug === prev.slug) idx = (idx + 1) % pool.length;
 
   const scope = pool[idx];
@@ -115,4 +148,9 @@ function challengeFor(dateStr) {
   };
 }
 
-module.exports = { challengeFor, today, isDate, GAMES, hash, poolSize: POOL.scopes.length };
+module.exports = {
+  challengeFor, today, isDate, GAMES, hash,
+  poolSize: POOL.scopes.length,
+  marqueeSize: POOL.scopes.filter((x) => x.marquee).length,
+  LAUNCH, OPENING_DAYS,
+};

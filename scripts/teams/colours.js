@@ -210,13 +210,59 @@ function shift(hex, amount) {
   return "#" + parts.join("");
 }
 
+
+/**
+ * The English clubs the first pass missed.
+ *
+ * A derived colour is deterministic but arbitrary, and on a club with strong
+ * kit associations it reads as a mistake rather than as a placeholder:
+ * Birmingham City came out magenta, Hull City blue-violet, Luton pink. These
+ * are the 28 English clubs in the dataset that had no researched colour, each
+ * set to the club's primary shirt colour.
+ *
+ * Non-English clubs still derive — 98 of them — which is a deliberate stopping
+ * point rather than an oversight. The English leagues are where the traffic is
+ * being sought, and a wrong colour on Hull City costs more than an arbitrary
+ * one on Kaiserslautern.
+ */
+const CURATED_ENG = {
+  "Aldershot Town": "#E41B17",
+  "Barnsley": "#E4002B",
+  "Birmingham City": "#0000AA",
+  "Blackpool": "#F68712",
+  "Boston United": "#D2AB67",
+  "Bristol City": "#E31B23",
+  "Bromley": "#FFFFFF",
+  "Burton Albion": "#FFC20E",
+  "Cardiff City": "#0070B5",
+  "Chester City": "#0033A0",
+  "Crawley Town": "#E4002B",
+  "Dagenham and Redbridge": "#E4002B",
+  "Darlington": "#FFFFFF",
+  "Fleetwood Town": "#E4002B",
+  "Hereford United": "#FFFFFF",
+  "Huddersfield Town": "#0E63AD",
+  "Hull City": "#F5A12D",
+  "Kidderminster Harriers": "#E4002B",
+  "Luton Town": "#F78F1E",
+  "Millwall": "#00246B",
+  "Oldham Athletic": "#004C97",
+  "Preston North End": "#B2B2B2",
+  "Rochdale": "#004B87",
+  "Rushden and Diamonds": "#005BAC",
+  "Stevenage": "#E4002B",
+  "Sutton United": "#F5A12D",
+  "Wycombe Wanderers": "#003DA5",
+  "York City": "#E4002B",
+};
+
 /**
  * { primary, secondary, derived } for a team record from the manifest.
  * Tries the official name, then the game name, before deriving.
  */
 function forTeam(team) {
-  const hit = KNOWN[team.name] || CURATED[team.name] ||
-              KNOWN[team.game_name] || CURATED[team.game_name] ||
+  const hit = KNOWN[team.name] || CURATED[team.name] || CURATED_ENG[team.name] ||
+              KNOWN[team.game_name] || CURATED[team.game_name] || CURATED_ENG[team.game_name] ||
               KNOWN[String(team.name).replace(/ (FC|AFC)$/, "")];
   if (hit) return { primary: hit, secondary: shift(hit, -40), derived: false };
 
@@ -232,4 +278,4 @@ function forTeam(team) {
   };
 }
 
-module.exports = { forTeam, KNOWN, CURATED, hash };
+module.exports = { forTeam, KNOWN, CURATED, CURATED_ENG, hash };

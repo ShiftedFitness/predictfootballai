@@ -109,3 +109,12 @@
   for = "/js/*"
   [headers.values]
     Cache-Control = "public, max-age=0, must-revalidate"
+
+# A club we now present as one but FBref holds as two. The old URL was indexed
+# and may be linked, so it redirects rather than 404s — 301 so the surviving
+# page inherits whatever the old one had earned.
+[[redirects]]
+  from = "/teams/malaga-420/*"
+  to = "/teams/malaga/"
+  status = 301
+  force = true
