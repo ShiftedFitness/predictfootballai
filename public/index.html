@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
 <!-- Analytics: GA4 via the central TeleStats helper (never loaded on /fives*) -->
 <script src="/js/ts-analytics.js"></script>
+<script src="/js/ts-streak.js"></script>
 <title>TeleStats — Premier League Games &amp; Predictions</title>
 <meta name="description" content="Test your Premier League knowledge with Bullseye, Starting XI, Who Am I?, Pop Quiz and more. Track your stats, climb the leaderboard."/>
 <meta property="og:site_name" content="TeleStats"/>
@@ -284,6 +285,32 @@ body { min-height: 100vh; padding-bottom: 40px; }
 .comm-plays { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--text-muted); flex-shrink: 0; }
 
 /* ── Community teaser (logged-out) ── */
+/* ── Daily challenge card ──
+   Top of the homepage on purpose: it is the one thing that is different every
+   day, and the only reason on this page to come back tomorrow. */
+.daily-card {
+  display: block;
+  border: 1px solid var(--accent-cyan);
+  border-radius: 12px;
+  padding: 16px 18px;
+  margin-bottom: 18px;
+  text-decoration: none;
+  color: inherit;
+  background: linear-gradient(120deg, rgba(0,229,255,.12), transparent 62%), var(--bg-card, #171F25);
+}
+.daily-card:hover { background: linear-gradient(120deg, rgba(0,229,255,.2), transparent 62%), var(--bg-card, #171F25); }
+.daily-card .dc-eyebrow {
+  font-size: 10px; text-transform: uppercase; letter-spacing: .12em;
+  color: var(--accent-cyan); font-weight: 700; margin-bottom: 5px;
+  display: flex; gap: 9px; align-items: center;
+}
+.daily-card .dc-streak { color: var(--text-muted); letter-spacing: .04em; }
+.daily-card .dc-title { font-size: 19px; font-weight: 800; margin-bottom: 2px; }
+.daily-card .dc-sub { font-size: 13px; color: var(--text-secondary); }
+.daily-card .dc-go { font-size: 13px; font-weight: 700; color: var(--accent-cyan); margin-top: 9px; display: inline-block; }
+.daily-card.done { border-color: rgba(255,255,255,.12); }
+.daily-card.done .dc-eyebrow { color: var(--text-muted); }
+
 .community-teaser {
   background: var(--bg-card);
   border-radius: 12px;
@@ -436,6 +463,13 @@ function renderLoggedOut(page) {
       </div>
     </div>
 
+    <a class="daily-card" id="dailyCard" href="/daily/">
+      <div class="dc-eyebrow"><span>Today's challenge</span><span class="dc-streak" id="dcStreak"></span></div>
+      <div class="dc-title" id="dcTitle">The TeleStats Daily</div>
+      <div class="dc-sub" id="dcSub">One puzzle a day, the same for everyone.</div>
+      <span class="dc-go" id="dcGo">Play today &rarr;</span>
+    </a>
+
     ${GAMES_HTML}
 
     <div class="community-teaser">
@@ -444,7 +478,8 @@ function renderLoggedOut(page) {
       <a href="/community/">Explore Community &rarr;</a>
     </div>`;
 
-  document.getElementById('heroSignup')?.addEventListener('click', () => TSNav.showAuthModal('signup'));
+  loadDaily();
+  document.getElementById('heroSignup')?.addEventListener('click', () => TSNav.showAuthModal('signup', 'homepage'));
 }
 
 /* ── LOGGED IN HOMEPAGE ── */
@@ -466,6 +501,13 @@ async function renderLoggedIn(user, page) {
         </div>
       </div>
     </div>
+
+    <a class="daily-card" id="dailyCard" href="/daily/">
+      <div class="dc-eyebrow"><span>Today's challenge</span><span class="dc-streak" id="dcStreak"></span></div>
+      <div class="dc-title" id="dcTitle">The TeleStats Daily</div>
+      <div class="dc-sub" id="dcSub">One puzzle a day, the same for everyone.</div>
+      <span class="dc-go" id="dcGo">Play today &rarr;</span>
+    </a>
 
     <!-- Featured Player -->
     <div id="featuredPlayer"></div>
@@ -490,6 +532,7 @@ async function renderLoggedIn(user, page) {
       <div class="lb-empty">Loading...</div>
     </div>`;
 
+  loadDaily();
   // Load featured player
   loadFeaturedPlayer();
   // Load did-you-know stats
@@ -498,6 +541,41 @@ async function renderLoggedIn(user, page) {
   loadLeaderboard();
   // Load community spotlight
   loadCommunity();
+}
+
+/**
+ * Fill in the daily card.
+ *
+ * The card is a real link to /daily/ before this runs and stays one if the
+ * fetch fails, so a slow or broken function costs the detail rather than the
+ * whole card.
+ */
+async function loadDaily() {
+  const card = document.getElementById('dailyCard');
+  if (!card) return;
+  try {
+    const res = await fetch(API_BASE + '/daily');
+    if (!res.ok) return;
+    const d = await res.json();
+    const c = d.challenge;
+    document.getElementById('dcTitle').textContent = c.game.name;
+    document.getElementById('dcSub').textContent = c.label + ' \u2014 ' + c.game.blurb;
+
+    const s = window.TSStreak ? TSStreak.get() : null;
+    if (s && s.current > 0) {
+      document.getElementById('dcStreak').textContent = '\uD83D\uDD25 ' + s.current + ' day streak';
+    }
+    if (s && s.playedToday) {
+      // Played already: still a link, but it stops shouting.
+      card.classList.add('done');
+      document.getElementById('dcGo').textContent = 'See your result \u2192';
+    } else {
+      // Straight into the game, not to /daily/ — one fewer click for the
+      // people who already know what this is.
+      card.href = c.url;
+      document.getElementById('dcGo').textContent = 'Play today \u2192';
+    }
+  } catch (_) { /* the card is already a working link to /daily/ */ }
 }
 
 async function loadFeaturedPlayer() {

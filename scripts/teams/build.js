@@ -38,6 +38,7 @@ const { createClient } = require('@supabase/supabase-js');
 const db = createClient(process.env.Supabase_Project_URL, process.env.Supabase_Service_Role,
                         { auth: { persistSession: false } });
 const teams = require(path.join(ROOT, 'netlify', 'functions', '_teams.js'));
+const { render } = require('./render');
 
 const SITE = 'https://telestats.net';
 
@@ -58,15 +59,6 @@ const SITE = 'https://telestats.net';
 const MIN_PLAYERS_TO_PLAY = 12;
 const MIN_TOP_APPEARANCES = 10;
 
-// Which official games can be configured for a club, and where they live.
-const GAMES = [
-  { key: 'hol',      name: 'Higher or Lower', path: '/games/hol.html',      blurb: 'Which player has more appearances?' },
-  { key: 'alpha',    name: 'Player Alphabet', path: '/games/alpha.html',    blurb: 'Name a player for every letter.' },
-  { key: 'xi',       name: 'Starting XI',     path: '/games/xi.html',       blurb: 'Build the strongest possible eleven.' },
-  { key: 'whoami',   name: 'Who Am I?',       path: '/games/whoami.html',   blurb: 'Guess the player from five clues.' },
-  { key: 'bullseye', name: 'Bullseye',        path: '/games/bullseye.html', blurb: 'Reach 501 appearances in as few picks as possible.' },
-];
-
 // ─── helpers ────────────────────────────────────────────────────────────────
 
 const esc = (s) => String(s == null ? '' : s)
@@ -74,7 +66,6 @@ const esc = (s) => String(s == null ? '' : s)
   .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 
 const num = (n) => (n == null ? '0' : Number(n).toLocaleString('en-GB'));
-const season = (y) => (y == null ? null : `${y}/${String(y + 1).slice(2)}`);
 
 async function page(table, cols) {
   const out = [];
@@ -87,287 +78,6 @@ async function page(table, cols) {
   }
   return out;
 }
-
-// ─── the page ───────────────────────────────────────────────────────────────
-
-function render(team, d, related) {
-  const { leaders, scorers, comps, span, totals } = d;
-
-  const playable = comps.filter((c) =>
-    c.players >= MIN_PLAYERS_TO_PLAY && c.topApps >= MIN_TOP_APPEARANCES);
-
-  // A page with nothing to play is not a destination worth offering to a search
-  // engine, however much history sits behind it. Elversberg was promoted to the
-  // Bundesliga this season and has sixteen players on one appearance each: the
-  // stats are real and worth showing to anyone who lands there, but there is no
-  // game yet, so it stays out of the index until there is.
-  const indexable = team.players >= teams.INDEXABLE_MIN_PLAYERS && playable.length > 0;
-  const url = `${SITE}/teams/${team.slug}/`;
-  const compList = comps.map((c) => c.competition_name);
-
-  // Written from the data, not generated prose. A sentence that says what a
-  // visitor can actually do beats one that says the club is historic and
-  // passionately supported.
-  const description =
-    `Play ${esc(team.name)} football quizzes and trivia games built from ` +
-    `${num(team.players)} players and ${num(totals.appearances)} appearances across ` +
-    `${compList.join(', ')}. Higher or Lower, Starting XI, Player Alphabet and more.`;
-
-  const title = `${team.name} Football Quiz & Trivia Games | TeleStats`;
-
-  const gameLinks = GAMES.map((g) => {
-    // Link into each competition the club actually played in.
-    const scopes = playable
-      .map((c) => ({ comp: c.competition_name, id: teams.scopeIdFor(team.slug, c.competition_name) }))
-      .filter((s) => s.id);
-    if (!scopes.length) return '';
-    const links = scopes.map((s) =>
-      `<a class="scope" href="${esc(g.path)}?scope=${encodeURIComponent(s.id)}">${esc(s.comp)}</a>`
-    ).join('');
-    return `<li class="game">
-        <h3>${esc(team.name)} ${esc(g.name)}</h3>
-        <p>${esc(g.blurb)}</p>
-        <div class="scopes">${links}</div>
-      </li>`;
-  }).filter(Boolean).join('\n      ');
-
-  const leaderRows = leaders.map((p, i) => `<tr>
-          <td class="rank">${i + 1}</td>
-          <td>${esc(p.player_name)}</td>
-          <td class="num">${num(p.appearances)}</td>
-          <td class="num">${num(p.goals)}</td>
-          <td class="yr">${season(p.first_season)}–${season(p.last_season)}</td>
-        </tr>`).join('\n        ');
-
-  const scorerRows = scorers.map((p, i) => `<tr>
-          <td class="rank">${i + 1}</td>
-          <td>${esc(p.player_name)}</td>
-          <td class="num">${num(p.goals)}</td>
-          <td class="num">${num(p.appearances)}</td>
-        </tr>`).join('\n        ');
-
-  const compRows = comps.map((c) => `<tr>
-          <td>${esc(c.competition_name)}</td>
-          <td class="num">${num(c.players)}</td>
-          <td class="yr">${season(c.first_season)}–${season(c.last_season)}</td>
-          <td class="num">${c.seasons}</td>
-        </tr>`).join('\n        ');
-
-  // Questions phrased around THIS club, so the feature explains itself. The
-  // partner is a club that actually shares a competition, otherwise the
-  // suggested question has an obvious answer of "none".
-  const askPartner = (related[0] && related[0].name) || 'Manchester United';
-  // "in the Premier League" but "in League One" — some competition names take
-  // the article and some do not, and getting it wrong reads as machine-written
-  // on all 313 pages.
-  const TAKES_THE = new Set(['Premier League', 'Championship', 'Champions League',
-                             'FA Cup', 'EFL Cup', 'Community Shield']);
-  const rawComp = (comps[0] && comps[0].competition_name) || 'Premier League';
-  const topComp = (TAKES_THE.has(rawComp) ? 'the ' : '') + rawComp;
-  const askExamples = [
-    `Who has played for both ${team.name} and ${askPartner}?`,
-    `Top scorers for ${team.name} in ${topComp}`,
-    `Which English players have the most appearances for ${team.name}?`,
-  ].map((q) => `<button type="button" data-q="${esc(q)}">${esc(q)}</button>`).join('\n        ');
-
-  const relatedLinks = related.map((r) =>
-    `<a href="/teams/${esc(r.slug)}/">${esc(r.name)}</a>`).join('\n        ');
-
-  // Structured data. Only what is honestly true: this is a page about a team,
-  // and it sits in a breadcrumb trail. No invented ratings, no fake reviews.
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@graph': [
-      {
-        '@type': 'BreadcrumbList',
-        itemListElement: [
-          { '@type': 'ListItem', position: 1, name: 'TeleStats', item: SITE },
-          { '@type': 'ListItem', position: 2, name: 'Teams', item: `${SITE}/teams/` },
-          { '@type': 'ListItem', position: 3, name: team.name, item: url },
-        ],
-      },
-      {
-        '@type': 'SportsTeam',
-        name: team.name,
-        sport: 'Association football',
-        url,
-      },
-    ],
-  };
-
-  return `<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<script src="/js/ts-analytics.js"></script>
-<title>${esc(title)}</title>
-<meta name="description" content="${esc(description)}">
-<link rel="canonical" href="${url}">
-${indexable ? '' : '<meta name="robots" content="noindex,follow">\n'}<meta property="og:type" content="website">
-<meta property="og:title" content="${esc(title)}">
-<meta property="og:description" content="${esc(description)}">
-<meta property="og:url" content="${url}">
-<meta property="og:site_name" content="TeleStats">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="${esc(title)}">
-<meta name="twitter:description" content="${esc(description)}">
-<link rel="stylesheet" href="/telestats-theme.css">
-<style>
-  body { max-width: 900px; margin: 0 auto; padding: 20px; }
-  nav.crumbs { font-size: .8rem; color: var(--text-secondary); margin-bottom: 14px; }
-  nav.crumbs a { color: var(--accent); text-decoration: none; }
-  h1 { font-size: 1.7rem; margin: 0 0 6px; }
-  .sub { color: var(--text-secondary); margin: 0 0 6px; }
-  .scope-note { color: var(--text-muted); font-size: .78rem; margin: 0 0 26px; }
-  h2 { font-size: 1.15rem; margin: 30px 0 10px; }
-  ul.games { list-style: none; padding: 0; display: grid;
-             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px; }
-  li.game { background: var(--bg-card); border: 1px solid var(--rule, #24313A); border-radius: 8px; padding: 14px; }
-  li.game h3 { font-size: .95rem; margin: 0 0 4px; }
-  li.game p { font-size: .82rem; color: var(--text-secondary); margin: 0 0 10px; }
-  .scopes { display: flex; flex-wrap: wrap; gap: 6px; }
-  a.scope { font-size: .78rem; padding: 4px 9px; border-radius: 5px;
-            background: var(--bg-elevated, #1E272E); color: var(--accent); text-decoration: none; }
-  table { border-collapse: collapse; width: 100%; font-size: .875rem; margin-bottom: 8px; }
-  th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--rule, #24313A); }
-  th { font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; color: var(--text-muted); }
-  td.num { text-align: right; font-variant-numeric: tabular-nums; }
-  td.rank { color: var(--text-muted); width: 2em; }
-  td.yr { color: var(--text-secondary); white-space: nowrap; }
-  .related { display: flex; flex-wrap: wrap; gap: 8px; }
-  .related a { font-size: .82rem; color: var(--accent); text-decoration: none;
-               padding: 4px 9px; border: 1px solid var(--rule, #24313A); border-radius: 5px; }
-  form.ask { display: flex; gap: 8px; margin: 10px 0 10px; }
-  form.ask input { flex: 1; padding: 10px 13px; font-size: .95rem; border-radius: 7px;
-                   border: 1px solid var(--rule, #24313A); background: var(--bg-card, #171F25);
-                   color: var(--text-primary, #F2F5F7); }
-  form.ask button { padding: 10px 16px; font-weight: 600; border: 0; border-radius: 7px;
-                    background: var(--accent, #00E5FF); color: #0B0F12; cursor: pointer; }
-  .ask-examples { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
-  .ask-examples button { font-size: .78rem; padding: 5px 10px; border-radius: 5px; border: 0;
-                         background: var(--bg-elevated, #1E272E); color: var(--accent); cursor: pointer; }
-  #askAnswer .msg { font-size: .98rem; line-height: 1.5; margin: 10px 0; }
-  #askAnswer .prov { font-size: .74rem; color: var(--text-muted); }
-  footer { margin-top: 40px; font-size: .78rem; color: var(--text-muted); }
-  footer a { color: var(--accent); }
-</style>
-</head>
-<body>
-
-<nav class="crumbs"><a href="/">TeleStats</a> › <a href="/teams/">Teams</a> › ${esc(team.name)}</nav>
-
-<h1>${esc(team.name)} Football Games &amp; Trivia</h1>
-<p class="sub">${num(team.players)} players · ${num(totals.appearances)} appearances · ${esc(compList.join(', '))}</p>
-<p class="scope-note">Data covers ${esc(season(span.first))} to ${esc(season(span.last))}.
-  <a href="/tools/data.html">Full dataset scope</a>.</p>
-
-${gameLinks ? `<h2>Play ${esc(team.name)}</h2>
-<ul class="games">
-      ${gameLinks}
-</ul>` : `<h2>Games</h2>
-<p class="sub">${esc(team.name)} does not have enough data in a single competition
-  to build a game yet — this season is only a few matches old. The record below
-  is complete, and games will appear here as the season is played.</p>`}
-
-<h2>${esc(team.name)} appearance leaders</h2>
-<table>
-  <thead><tr><th></th><th>Player</th><th class="num">Apps</th><th class="num">Goals</th><th>Seasons</th></tr></thead>
-  <tbody>
-        ${leaderRows}
-  </tbody>
-</table>
-
-<h2>${esc(team.name)} top scorers</h2>
-<table>
-  <thead><tr><th></th><th>Player</th><th class="num">Goals</th><th class="num">Apps</th></tr></thead>
-  <tbody>
-        ${scorerRows}
-  </tbody>
-</table>
-
-<h2>Competitions</h2>
-<table>
-  <thead><tr><th>Competition</th><th class="num">Players</th><th>Seasons</th><th class="num">Count</th></tr></thead>
-  <tbody>
-        ${compRows}
-  </tbody>
-</table>
-
-<h2>Ask about ${esc(team.name)}</h2>
-<p class="sub">Ask the database a question. Answers come from ${num(team.players)} ${esc(team.name)}
-  players and are never invented — if the data does not support an answer, it says so.</p>
-<form class="ask" id="askForm">
-  <input id="askQ" autocomplete="off" maxlength="300"
-         placeholder="Who has played for both ${esc(team.name)} and ${esc(askPartner)}?"
-         aria-label="Ask a question about ${esc(team.name)}">
-  <button type="submit">Ask</button>
-</form>
-<div class="ask-examples">
-      ${askExamples}
-</div>
-<div id="askAnswer"></div>
-
-${related.length ? `<h2>More teams</h2>\n<div class="related">\n        ${relatedLinks}\n</div>` : ''}
-
-<footer>
-  Player statistics from the TeleStats football database.
-  <a href="/tools/data.html">Coverage and last update</a> ·
-  <a href="/games/">All games</a> ·
-  <a href="/teams/">All teams</a>
-</footer>
-
-<script>
-(function () {
-  var f = document.getElementById('askForm');
-  if (!f) return;
-  var out = document.getElementById('askAnswer');
-  var input = document.getElementById('askQ');
-  function esc(s) {
-    return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
-      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
-    });
-  }
-  document.querySelectorAll('.ask-examples button').forEach(function (b) {
-    b.onclick = function () { input.value = b.dataset.q; f.requestSubmit(); };
-  });
-  f.onsubmit = function (e) {
-    e.preventDefault();
-    var q = input.value.trim();
-    if (!q) return;
-    out.innerHTML = '<p class="msg">Looking\u2026</p>';
-    fetch('/.netlify/functions/ask', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ question: q, source: 'team_page' })
-    }).then(function (r) { return r.json(); }).then(function (d) {
-      var html = '<p class="msg">' + esc(d.message || d.error) + '</p>';
-      if (d.rows && d.rows.length) {
-        html += '<table><tbody>' + d.rows.slice(0, 10).map(function (r) {
-          var right = r.clubs && r.clubs[0] && r.clubs[0].team
-            ? r.clubs.map(function (c) { return esc(c.team) + ' ' + c.appearances; }).join(' \u00b7 ')
-            : (r.appearances != null ? r.appearances + ' apps, ' + r.goals + 'g' : '');
-          return '<tr><td>' + esc(r.player || r.name) + '</td><td>' + right + '</td></tr>';
-        }).join('') + '</tbody></table>';
-      }
-      if (d.provenance) {
-        html += '<p class="prov">From the TeleStats database in ' +
-                esc(d.provenance.query_ms) + 'ms \u00b7 <a href="/tools/data.html">coverage</a></p>';
-      }
-      out.innerHTML = html;
-      // Structured only \u2014 the question text never goes to analytics.
-      if (d.analytics && window.TSAnalytics) TSAnalytics.trackEvent('ask_query', d.analytics);
-    }).catch(function () {
-      out.innerHTML = '<p class="msg">Could not reach the database. Try again.</p>';
-    });
-  };
-})();
-</script>
-<script type="application/ld+json">${JSON.stringify(jsonLd)}</script>
-</body>
-</html>
-`;
-}
-
 
 // ─── the hub ────────────────────────────────────────────────────────────────
 
@@ -431,7 +141,16 @@ function renderHub(rows) {
 <meta name="twitter:card" content="summary">
 <link rel="stylesheet" href="/telestats-theme.css">
 <style>
-  body { max-width: 1000px; margin: 0 auto; padding: 20px; }
+  body { margin: 0; }
+  .wrap { max-width: 1000px; margin: 0 auto; padding: 0 18px 50px; }
+  .ts-header { border-bottom: 1px solid var(--rule, #24313A); background: var(--bg-card, #131A20); }
+  .ts-header .inner { max-width: 1000px; margin: 0 auto; padding: 11px 18px;
+                      display: flex; align-items: center; gap: 18px; }
+  .ts-header .brand { font-weight: 700; letter-spacing: .04em; color: var(--text-primary, #F2F5F7);
+                      text-decoration: none; font-family: 'Space Mono', ui-monospace, monospace; }
+  .ts-header nav { display: flex; gap: 15px; flex-wrap: wrap; }
+  .ts-header nav a { font-size: .82rem; color: var(--text-secondary, #9FB0BC); text-decoration: none; }
+  nav.crumbs { margin-top: 16px; }
   nav.crumbs { font-size: .8rem; color: var(--text-secondary); margin-bottom: 14px; }
   nav.crumbs a { color: var(--accent); text-decoration: none; }
   h1 { font-size: 1.7rem; margin: 0 0 6px; }
@@ -443,22 +162,27 @@ function renderHub(rows) {
             padding: 7px 10px; border: 1px solid var(--rule, #24313A); border-radius: 6px;
             color: var(--accent); text-decoration: none; }
   .grid a span { color: var(--text-muted); font-variant-numeric: tabular-nums; }
-  form.ask { display: flex; gap: 8px; margin: 10px 0 10px; }
-  form.ask input { flex: 1; padding: 10px 13px; font-size: .95rem; border-radius: 7px;
-                   border: 1px solid var(--rule, #24313A); background: var(--bg-card, #171F25);
-                   color: var(--text-primary, #F2F5F7); }
-  form.ask button { padding: 10px 16px; font-weight: 600; border: 0; border-radius: 7px;
-                    background: var(--accent, #00E5FF); color: #0B0F12; cursor: pointer; }
-  .ask-examples { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
-  .ask-examples button { font-size: .78rem; padding: 5px 10px; border-radius: 5px; border: 0;
-                         background: var(--bg-elevated, #1E272E); color: var(--accent); cursor: pointer; }
-  #askAnswer .msg { font-size: .98rem; line-height: 1.5; margin: 10px 0; }
-  #askAnswer .prov { font-size: .74rem; color: var(--text-muted); }
   footer { margin-top: 40px; font-size: .78rem; color: var(--text-muted); }
   footer a { color: var(--accent); }
 </style>
 </head>
 <body>
+
+<header class="ts-header">
+  <div class="inner">
+    <a class="brand" href="/">TELESTATS</a>
+    <nav>
+      <a href="/daily/">Daily</a>
+      <a href="/games/">Games</a>
+      <a href="/teams/">Teams</a>
+      <a href="/ask/">Ask</a>
+      <a href="/leaderboard/">Leaderboard</a>
+      <a href="/community/">Community</a>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap">
 <nav class="crumbs"><a href="/">TeleStats</a> › Teams</nav>
 <h1>Football Games by Team</h1>
 <p class="lede">${esc(description)} The number beside each club is how many of its
@@ -467,53 +191,21 @@ function renderHub(rows) {
 ${sections}
 
 <footer>
+  <a href="/daily/">Today's challenge</a> ·
   <a href="/games/">All games</a> ·
+  <a href="/ask/">Ask TeleStats a question</a> ·
   <a href="/tools/data.html">Dataset coverage</a>
 </footer>
+</div><!-- /wrap -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/js/ts-auth.js"></script>
+<script src="/js/ts-data.js"></script>
+<script src="/js/ts-nav.js"></script>
 <script>
-(function () {
-  var f = document.getElementById('askForm');
-  if (!f) return;
-  var out = document.getElementById('askAnswer');
-  var input = document.getElementById('askQ');
-  function esc(s) {
-    return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
-      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
-    });
-  }
-  document.querySelectorAll('.ask-examples button').forEach(function (b) {
-    b.onclick = function () { input.value = b.dataset.q; f.requestSubmit(); };
-  });
-  f.onsubmit = function (e) {
-    e.preventDefault();
-    var q = input.value.trim();
-    if (!q) return;
-    out.innerHTML = '<p class="msg">Looking\u2026</p>';
-    fetch('/.netlify/functions/ask', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ question: q, source: 'team_page' })
-    }).then(function (r) { return r.json(); }).then(function (d) {
-      var html = '<p class="msg">' + esc(d.message || d.error) + '</p>';
-      if (d.rows && d.rows.length) {
-        html += '<table><tbody>' + d.rows.slice(0, 10).map(function (r) {
-          var right = r.clubs && r.clubs[0] && r.clubs[0].team
-            ? r.clubs.map(function (c) { return esc(c.team) + ' ' + c.appearances; }).join(' \u00b7 ')
-            : (r.appearances != null ? r.appearances + ' apps, ' + r.goals + 'g' : '');
-          return '<tr><td>' + esc(r.player || r.name) + '</td><td>' + right + '</td></tr>';
-        }).join('') + '</tbody></table>';
-      }
-      if (d.provenance) {
-        html += '<p class="prov">From the TeleStats database in ' +
-                esc(d.provenance.query_ms) + 'ms \u00b7 <a href="/tools/data.html">coverage</a></p>';
-      }
-      out.innerHTML = html;
-      // Structured only \u2014 the question text never goes to analytics.
-      if (d.analytics && window.TSAnalytics) TSAnalytics.trackEvent('ask_query', d.analytics);
-    }).catch(function () {
-      out.innerHTML = '<p class="msg">Could not reach the database. Try again.</p>';
-    });
-  };
-})();
+  (async function () {
+    try { await TSAuth.init(); } catch (e) { console.error('[TeleStats] Auth init failed:', e); }
+    try { TSNav.render(); } catch (e) { console.error('[TeleStats] Nav render failed:', e); }
+  })();
 </script>
 <script type="application/ld+json">${JSON.stringify(jsonLd)}</script>
 </body>
@@ -598,7 +290,8 @@ ${sections}
     const isIndexable = team.players >= teams.INDEXABLE_MIN_PLAYERS && playableComps.length > 0;
     indexDecision.set(team.slug, isIndexable);
 
-    const html = render(team, { leaders, scorers, comps, span, totals }, related);
+    const html = render(team, { leaders, scorers, comps, span, totals, playable: playableComps },
+                        related, { teams, site: SITE });
     const dir = path.join(OUT, team.slug);
     fs.mkdirSync(dir, { recursive: true });
     fs.writeFileSync(path.join(dir, 'index.html'), html);

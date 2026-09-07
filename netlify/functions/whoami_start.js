@@ -8,6 +8,7 @@
 
 const { createClient } = require('@supabase/supabase-js');
 const teams = require('./_teams');
+const comps = require('./_competitions');
 const crypto = require('crypto');
 
 const SUPABASE_URL = process.env.Supabase_Project_URL;
@@ -35,6 +36,27 @@ function respond(status, body) {
 /**
  * Fetch all rows from a Supabase query, paginating past the 1000-row default.
  */
+
+/**
+ * Which competition ids a scope covers.
+ *
+ * A normal scope is one competition. An "all competitions" scope has
+ * competitionName === null and covers every one — so rather than try to make a
+ * mid-chain `.eq()` conditional, it becomes `.in()` over the full list, which
+ * is semantically identical to no filter and a one-word change at each site.
+ */
+let ALL_COMP_IDS = null;
+/**
+ * A scope may name one competition, a chosen subset of them, or none at all
+ * ("all competitions"). _competitions.js turns all three into a plain list of
+ * ids so every query below filters the same way and never branches.
+ */
+async function competitionFilter(supabase, competitionId) {
+  if (Array.isArray(competitionId)) return competitionId;
+  if (competitionId) return [competitionId];
+  return comps.everyId(supabase);
+}
+
 async function fetchAll(queryFn) {
   const PAGE = 1000;
   let all = [];
@@ -294,6 +316,19 @@ async function getEplCompId(supabase) {
  * Premier League — which correctly returned nobody.
  */
 async function compIdForScope(supabase, scope) {
+  // A subset scope — "Sunderland in the Premier League and Championship",
+  // chosen on a team page — names several competitions at once, so this
+  // returns a LIST. competitionFilter passes an array straight through and
+  // every query already filters with `.in`, so nothing downstream branches.
+  if (scope && Array.isArray(scope.competitionNames) && scope.competitionNames.length) {
+    const { ids, missing } = await comps.idsForScope(supabase, scope);
+    if (missing.length) throw new Error(`Competition not found: ${missing.join(', ')}`);
+    return ids;
+  }
+  // An "all competitions" scope carries competitionName === null on purpose.
+  // Returning null here, rather than falling back to the Premier League, is
+  // what makes "Sunderland across all four divisions" possible.
+  if (scope && scope.competitionName === null && scope.clubId != null) return null;
   if (scope && scope.competitionName) {
     const { data } = await supabase
       .from('competitions')
@@ -339,6 +374,10 @@ function letterCount(name) {
  * and return enriched player objects.
  */
 async function fetchEligiblePlayers(supabase, scope, competitionId) {
+  // Derived here rather than passed in: these helpers are module-level and
+  // only ever receive competitionId. null means "all competitions".
+  const competitionIds = await competitionFilter(supabase, competitionId);
+
   const minApps = scope.type === 'club' ? MIN_APPS_CLUB : MIN_APPS_LEAGUE;
 
   // Fetch season-level stats for all players in scope
@@ -346,7 +385,7 @@ async function fetchEligiblePlayers(supabase, scope, competitionId) {
     let q = supabase
       .from('v_all_player_season_stats')
       .select('player_uid, club_id, season_start_year, appearances, goals, assists, minutes, position_bucket, age')
-      .eq('competition_id', competitionId)
+      .in('competition_id', competitionIds)
       .gt('appearances', 0);
     if (scope.type === 'club' && scope.clubId) {
       q = q.eq('club_id', scope.clubId);
@@ -414,7 +453,7 @@ async function fetchEligiblePlayers(supabase, scope, competitionId) {
       const buildFullQuery = () => supabase
         .from('v_all_player_season_stats')
         .select('player_uid, club_id, season_start_year, appearances, goals, assists, minutes, position_bucket')
-        .eq('competition_id', competitionId)
+        .in('competition_id', competitionIds)
         .gt('appearances', 0)
         .in('player_uid', batch);
 
@@ -573,27 +612,56 @@ async function fetchEligiblePlayers(supabase, scope, competitionId) {
 }
 
 /**
+ * How to name, in a clue, the competitions a scope covers.
+ *
+ * Every clue below used to say "Premier League", because every scope this game
+ * shipped with was a top-flight club. Telling somebody that a Plymouth Argyle
+ * player "made 481 Premier League appearances" is a made-up fact in the one
+ * place this site must not have any — a clue the player is asked to reason from.
+ *
+ *   adj  goes before a noun:  "made 481 League One appearances"
+ *   of   goes after one:      "my career in the Premier League and Championship"
+ *
+ * With no competition filter, adj is empty: "I made 481 appearances" is the
+ * honest reading of an unfiltered total, and shorter besides.
+ */
+function compWords(names) {
+  const TAKES_THE = new Set(['Premier League', 'Championship', 'Champions League',
+                             'FA Cup', 'EFL Cup', 'Community Shield']);
+  const withThe = (n) => (TAKES_THE.has(n) ? 'the ' : '') + n;
+  if (!names || !names.length) return { adj: '', of: '' };
+  if (names.length === 1) return { adj: `${names[0]} `, of: ` in ${withThe(names[0])}` };
+  const listed = names.length === 2
+    ? `${withThe(names[0])} and ${withThe(names[1])}`
+    : `${names.slice(0, -1).map(withThe).join(', ')} and ${withThe(names[names.length - 1])}`;
+  // No adjective for a set — "481 Premier League and Championship appearances"
+  // does not parse. The trailing phrase carries it instead.
+  return { adj: '', of: ` in ${listed}` };
+}
+
+/**
  * Generate 5 clues for a player, from hardest to easiest.
  * Uses full PL career stats so clues are accurate even in club-scoped games.
  * For club scopes, also weaves in club-specific context where helpful.
  */
-function generateClues(player, scopeType, scopeClubName) {
+function generateClues(player, scopeType, scopeClubName, competitionNames) {
   const clues = [];
+  const c = compWords(competitionNames);
 
   // Clue 1 (hardest): Number of PL clubs and which clubs
   if (scopeType === 'league') {
     if (player.clubCount === 1) {
-      clues.push(`I played for just 1 Premier League club: ${player.clubNames[0]}`);
+      clues.push(`I played for just 1 ${c.adj}club: ${player.clubNames[0]}`);
     } else {
-      clues.push(`I played for ${player.clubCount} Premier League clubs: ${player.clubNames.join(', ')}`);
+      clues.push(`I played for ${player.clubCount} ${c.adj}clubs: ${player.clubNames.join(', ')}`);
     }
   } else {
     // For club scope — show all their PL clubs
     if (player.clubCount === 1) {
-      clues.push(`${player.clubNames[0]} was my only Premier League club`);
+      clues.push(`${player.clubNames[0]} was my only ${c.adj}club`);
     } else {
       const otherClubs = player.clubNames.filter(c => c !== scopeClubName);
-      clues.push(`I played for ${player.clubCount} Premier League clubs — also: ${otherClubs.join(', ')}`);
+      clues.push(`I played for ${player.clubCount} ${c.adj}clubs — also: ${otherClubs.join(', ')}`);
     }
   }
 
@@ -602,14 +670,14 @@ function generateClues(player, scopeType, scopeClubName) {
     const startDisplay = `${player.firstSeason}/${String(player.firstSeason + 1).slice(2)}`;
     const endDisplay = `${player.lastSeason}/${String(player.lastSeason + 1).slice(2)}`;
     if (player.seasonCount === 1) {
-      clues.push(`My Premier League career lasted just 1 season (${startDisplay})`);
+      clues.push(`My ${c.adj}career lasted just 1 season (${startDisplay})`);
     } else if (player.firstSeason === player.lastSeason) {
-      clues.push(`My Premier League career spanned ${player.seasonCount} seasons from ${startDisplay}`);
+      clues.push(`My ${c.adj}career spanned ${player.seasonCount} seasons from ${startDisplay}`);
     } else {
-      clues.push(`My Premier League career spanned ${player.seasonCount} seasons (${startDisplay} to ${endDisplay})`);
+      clues.push(`My ${c.adj}career spanned ${player.seasonCount} seasons (${startDisplay} to ${endDisplay})`);
     }
   } else {
-    clues.push(`I played ${player.seasonCount} Premier League seasons`);
+    clues.push(`I played ${player.seasonCount} ${c.adj}seasons`);
   }
 
   // Clue 3: Position
@@ -617,19 +685,19 @@ function generateClues(player, scopeType, scopeClubName) {
 
   // Clue 4: Stats — use full PL career totals, plus club-specific context for club scopes
   if (player.primaryPosition === 'Goalkeeper') {
-    let clue = `I made ${player.totalAppearances} Premier League appearances`;
+    let clue = `I made ${player.totalAppearances} ${c.adj}appearances${c.adj ? '' : c.of}`;
     if (scopeType === 'club' && player.clubAppearances !== player.totalAppearances) {
       clue += ` (${player.clubAppearances} for ${scopeClubName})`;
     }
     clues.push(clue);
   } else if (player.totalGoals === 0) {
-    let clue = `I made ${player.totalAppearances} Premier League appearances without scoring`;
+    let clue = `I made ${player.totalAppearances} ${c.adj}appearances without scoring`;
     if (scopeType === 'club' && player.clubAppearances !== player.totalAppearances) {
       clue += ` (${player.clubAppearances} for ${scopeClubName})`;
     }
     clues.push(clue);
   } else {
-    let clue = `I scored ${player.totalGoals} Premier League goal${player.totalGoals !== 1 ? 's' : ''}`;
+    let clue = `I scored ${player.totalGoals} ${c.adj}goal${player.totalGoals !== 1 ? 's' : ''}`;
     if (scopeType === 'club' && player.clubGoals !== player.totalGoals) {
       clue += ` (${player.clubGoals} for ${scopeClubName})`;
     }
@@ -700,8 +768,10 @@ exports.handler = async (event) => {
       }
 
       const competitionId = await compIdForScope(supabase, scopeDef);
-      if (!competitionId) {
-        return respond(500, { error: 'Premier League competition not found' });
+
+      const competitionIds = await competitionFilter(supabase, competitionId);
+      if (scopeDef.competitionName && !competitionId) {
+        return respond(500, { error: 'Competition not found' });
       }
 
       // Resolve club_id if needed
@@ -758,7 +828,13 @@ exports.handler = async (event) => {
       const letters = letterCount(player.name);
 
       // Generate clues
-      const clues = generateClues(player, scope.type, scope.clubName);
+      // Which competitions the clues may name. null covers everything the
+      // club has played in, and compWords() then simply does not name one.
+      const clueComps = Array.isArray(scopeDef.competitionNames) && scopeDef.competitionNames.length
+        ? scopeDef.competitionNames
+        : (scopeDef.competitionName ? [scopeDef.competitionName]
+           : (scopeDef.clubId != null ? null : ['Premier League']));
+      const clues = generateClues(player, scope.type, scope.clubName, clueComps);
 
       // Encrypt the player_uid
       const encryptedId = encryptPlayerId(player.player_uid);
@@ -789,6 +865,8 @@ exports.handler = async (event) => {
       }
 
       const competitionId = await compIdForScope(supabase, scopeDef);
+
+      const competitionIds = await competitionFilter(supabase, competitionId);
       if (!competitionId) {
         return respond(500, { error: 'Premier League competition not found' });
       }
@@ -920,6 +998,7 @@ exports.handler = async (event) => {
         // player the user was asked about in League One.
         const revealScope = SCOPES.find(s => s.id === scopeId) || teams.resolve(scopeId);
         const competitionId = await compIdForScope(supabase, revealScope);
+        const competitionIds = await competitionFilter(supabase, competitionId);
         let playerStats = null;
 
         if (competitionId) {
@@ -936,7 +1015,7 @@ exports.handler = async (event) => {
               .from('v_all_player_season_stats')
               .select('club_id, season_start_year, appearances, goals, assists, minutes, position_bucket')
               .eq('player_uid', decryptedUid)
-              .eq('competition_id', competitionId)
+              .in('competition_id', competitionIds)
               .gt('appearances', 0);
             if (scope && scope.type === 'club' && scope.clubId) {
               q = q.eq('club_id', scope.clubId);

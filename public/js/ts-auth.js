@@ -204,6 +204,10 @@
             if (res.ok && result.user) {
               row = result.user;
               if (result.migrated) localStorage.removeItem(ANON_KEY);
+              // A confirmed account has reached the site for the first time.
+              // This — not the form submit — is where an account genuinely
+              // starts existing, and it is the only place that can tell.
+              if (window.TSAnalytics) TSAnalytics.signupComplete?.();
             } else {
               console.error('[TSAuth] register-user fallback failed:', result.error);
             }

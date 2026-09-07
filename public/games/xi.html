@@ -6,6 +6,7 @@
 <!-- Analytics: GA4 via the central TeleStats helper (never loaded on /fives*) -->
 <script src="/js/ts-analytics.js"></script>
 <script src="/js/ts-scope.js"></script>
+<script src="/js/ts-streak.js"></script>
 <title>TeleStats - Starting XI</title>
 <meta name="description" content="Pick the best starting XI by appearances, goals, or performance. Fill every position correctly to win."/>
 <meta property="og:site_name" content="TeleStats"/>
@@ -1185,6 +1186,11 @@ function renderSetup() {
   renderScopeGrid();
 
   $('startGameBtn').onclick = startGame;
+
+  // Arrived from a team page with the club, division and game already chosen.
+  // Starting XI still needs a formation and an objective, both of which have
+  // sensible defaults already selected, so there is nothing left to ask.
+  if (window.TSScope) TSScope.play(function () { return $('startGameBtn'); });
 }
 
 const SCOPE_CATEGORIES = [
@@ -2795,7 +2801,7 @@ document.getElementById('tsClock').textContent = new Date().toTimeString().slice
         hint.id = 'tsUpgradeHint';
         hint.className = 'ts-upgrade-hint';
         hint.textContent = 'Sign up free to choose your own categories';
-        hint.onclick = () => TSNav.showAuthModal('signup');
+        hint.onclick = () => TSNav.showAuthModal('signup', 'post_game');
         scopeGrid.parentElement.insertBefore(hint, scopeGrid.nextSibling);
       }
     } else if (!tierAccess.all) {
@@ -2841,7 +2847,7 @@ document.getElementById('tsClock').textContent = new Date().toTimeString().slice
         if (isAnon) {
           const note = document.createElement('div');
           note.style.cssText = 'text-align:center;font-size:12px;color:var(--accent-yellow);padding:8px 0 4px;';
-          note.innerHTML = '\uD83C\uDFB2 Random play only — <a href="#" style="color:var(--accent-cyan);text-decoration:underline;" onclick="TSNav.showAuthModal(\'signup\');return false;">sign up free</a> to choose your own';
+          note.innerHTML = '\uD83C\uDFB2 Random play only — <a href="#" style="color:var(--accent-cyan);text-decoration:underline;" onclick="TSNav.showAuthModal(\'signup\',\'post_game\');return false;">sign up free</a> to choose your own';
           if (scopeGridEl) scopeGridEl.parentElement.insertBefore(note, scopeGridEl);
         }
         if (scopeGridEl) scopeGridEl.parentElement.insertBefore(roulette, scopeGridEl);

@@ -98,6 +98,23 @@ const indexable = () => TEAMS.filter((t) => t.players >= INDEXABLE_MIN_PLAYERS);
 function scopes() {
   const out = [];
   for (const t of TEAMS) {
+    // "All competitions" — everything the club has ever played, merged.
+    // competitionName is null, and every game treats that as "do not filter by
+    // competition". This is the scope a supporter actually wants first:
+    // Sunderland across all four divisions, not Sunderland in League One.
+    if (t.competitions.length > 1) {
+      out.push({
+        id: `team_${t.slug}_all`,
+        label: `${t.name} (all competitions)`,
+        type: 'club',
+        league: 'all',
+        competitionName: null,
+        clubName: t.game_name,
+        clubId: t.club_id,
+        slug: t.slug,
+        teamName: t.name,
+      });
+    }
     for (const comp of t.competitions) {
       out.push({
         id: `team_${t.slug}_${competitionSlug(comp)}`,
@@ -125,14 +142,135 @@ function scopeIndex() {
  * Resolve one of this module's scope ids. Returns null for anything else —
  * including every legacy id — so a caller can fall through to its own list
  * without this module having to know about them.
+ *
+ * Also understands a SUBSET id built by joining competition slugs with "+":
+ *
+ *   team_sunderland_premier-league+championship
+ *
+ * Those are resolved by parsing rather than by lookup, deliberately. A club in
+ * four divisions has eleven possible two- and three-competition subsets;
+ * pre-enumerating them would put thousands of scopes into every game's picker
+ * to serve a choice that is made on the team page, one club at a time.
  */
-const resolve = (scopeId) => scopeIndex().get(String(scopeId || '')) || null;
+function resolve(scopeId) {
+  const id = String(scopeId || '');
+  const direct = scopeIndex().get(id);
+  if (direct) return direct;
+  return resolveSubset(id);
+}
+
+/** team_<slug>_<comp-slug>+<comp-slug>[+…] → a scope, or null. */
+function resolveSubset(id) {
+  const m = /^team_([a-z0-9-]+)_([a-z0-9-]+(?:\+[a-z0-9-]+)+)$/.exec(id);
+  if (!m) return null;
+  const t = bySlug(m[1]);
+  if (!t) return null;
+
+  // Every part must be a competition this club actually played in. An id
+  // naming a competition the club never entered is a bad id, not an empty
+  // result — returning null sends it back through the caller's own list and
+  // out as a clean "unknown scope" rather than a game with no players.
+  const wanted = m[2].split('+');
+  const names = [];
+  for (const part of wanted) {
+    const comp = t.competitions.find((c) => competitionSlug(c) === part);
+    if (!comp) return null;
+    if (!names.includes(comp)) names.push(comp);
+  }
+  if (names.length === t.competitions.length) return scopeIndex().get(`team_${t.slug}_all`) || null;
+
+  return {
+    id,
+    label: `${t.name} (${names.join(' + ')})`,
+    type: 'club',
+    league: LEAGUE_KEYS[names[0]] || competitionSlug(names[0]),
+    // null so the "is this one competition" guards in the game handlers keep
+    // reading false; competitionNames is what actually narrows the query.
+    competitionName: null,
+    competitionNames: names,
+    clubName: t.game_name,
+    clubId: t.club_id,
+    slug: t.slug,
+    teamName: t.name,
+  };
+}
 
 /** The scope id for a given team and competition, or null if it does not play there. */
 function scopeIdFor(slug, competitionName) {
   const t = bySlug(slug);
-  if (!t || !t.competitions.includes(competitionName)) return null;
+  if (!t) return null;
+  if (competitionName == null) {
+    return t.competitions.length > 1 ? `team_${t.slug}_all` : null;
+  }
+  if (!t.competitions.includes(competitionName)) return null;
   return `team_${t.slug}_${competitionSlug(competitionName)}`;
+}
+
+/** The scope id for a team across an arbitrary set of its competitions. */
+function scopeIdForMany(slug, competitionNames) {
+  const t = bySlug(slug);
+  if (!t) return null;
+  const picked = t.competitions.filter((c) => competitionNames.includes(c));
+  if (!picked.length) return null;
+  if (picked.length === 1) return scopeIdFor(slug, picked[0]);
+  if (picked.length === t.competitions.length) return `team_${t.slug}_all`;
+  return `team_${t.slug}_${picked.map(competitionSlug).join('+')}`;
+}
+
+// ─── Play history ───────────────────────────────────────────────────────────
+
+/**
+ * Every string that has ever meant "this club" in ts_game_sessions.game_category.
+ *
+ * Rounds played before the rebuild were filed under whatever id the game's own
+ * hardcoded list used at the time — 'epl_club_manchesterunited' in Higher or
+ * Lower, 'club_manutd' in Starting XI, 'laliga_club_mlaga' where an accent was
+ * dropped rather than folded. A team leaderboard that only knew the new
+ * 'team_<slug>_*' ids would show an empty board for the clubs with the most
+ * history, which is exactly backwards.
+ *
+ * The map is not derived by pattern-matching club names here — that is what put
+ * "Málaga" in four places and left one behind. It is generated by
+ * scripts/teams/legacy_scopes.js, which reads the ids out of the game handlers
+ * themselves and joins on the exact database string each one matched.
+ *
+ * Exact ids and prefixes are returned separately because the caller matches
+ * them differently: one is `in`, the other is `like`.
+ */
+const LEGACY = (() => {
+  try {
+    return require('../../data/teams/legacy_scopes.json').scopes || {};
+  } catch (_) {
+    return {};                 // regenerate with scripts/teams/legacy_scopes.js
+  }
+})();
+
+let _legacyBySlug = null;
+function legacyBySlug() {
+  if (_legacyBySlug) return _legacyBySlug;
+  _legacyBySlug = new Map();
+  for (const [id, slug] of Object.entries(LEGACY)) {
+    if (!_legacyBySlug.has(slug)) _legacyBySlug.set(slug, []);
+    _legacyBySlug.get(slug).push(id);
+  }
+  return _legacyBySlug;
+}
+
+function playCategories(team) {
+  const t = typeof team === 'string' ? bySlug(team) : team;
+  if (!t) return { exact: [], prefixes: [] };
+  return {
+    exact: legacyBySlug().get(t.slug) || [],
+    prefixes: [`team_${t.slug}_`],
+  };
+}
+
+/** Which team a played round belongs to, or null. Used to fold history in. */
+function teamForCategory(category) {
+  const c = String(category || '');
+  if (LEGACY[c]) return bySlug(LEGACY[c]);
+  const m = /^team_([a-z0-9-]+)_/.exec(c);
+  return m ? bySlug(m[1]) : null;
 }
 
 // ─── Page helpers ───────────────────────────────────────────────────────────
@@ -150,7 +288,7 @@ const isEnglish = (team) => (team.tiers || []).length > 0 && team.country === 'E
 
 module.exports = {
   all, bySlug, byClubId, indexable,
-  scopes, resolve, scopeIdFor,
+  scopes, resolve, scopeIdFor, scopeIdForMany, playCategories, teamForCategory,
   tierLabel, isEnglish, competitionSlug, LEAGUE_KEYS,
   INDEXABLE_MIN_PLAYERS,
   generatedAt: MANIFEST.generated,

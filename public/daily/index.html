@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="/js/ts-analytics.js"></script>
+<title>Daily Football Challenge | TeleStats</title>
+<meta name="description" content="One football puzzle a day, the same for everyone, built from real Premier League, Championship, League One and League Two records. Play free, no sign-up, keep a streak.">
+<link rel="canonical" href="https://telestats.net/daily/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Daily Football Challenge | TeleStats">
+<meta property="og:description" content="One football puzzle a day, the same for everyone, from real appearance records. Free, no sign-up.">
+<meta property="og:url" content="https://telestats.net/daily/">
+<meta property="og:site_name" content="TeleStats">
+<meta name="twitter:card" content="summary">
+<link rel="stylesheet" href="/telestats-theme.css">
+<style>
+  body { margin: 0; }
+  .wrap { max-width: 700px; margin: 0 auto; padding: 0 18px 60px; }
+
+  /* Fallback header, replaced by TSNav once auth has initialised. */
+  .ts-header { border-bottom: 1px solid var(--rule, #24313A); background: var(--bg-card, #131A20); }
+  .ts-header .inner { max-width: 940px; margin: 0 auto; padding: 11px 18px;
+                      display: flex; align-items: center; gap: 18px; }
+  .ts-header .brand { font-weight: 700; letter-spacing: .04em; color: var(--text-primary, #F2F5F7);
+                      text-decoration: none; font-family: 'Space Mono', ui-monospace, monospace; }
+  .ts-header nav { display: flex; gap: 15px; flex-wrap: wrap; }
+  .ts-header nav a { font-size: .82rem; color: var(--text-secondary, #9FB0BC); text-decoration: none; }
+
+  h1 { font-size: 1.6rem; margin: 22px 0 6px; }
+  .lede { color: var(--text-secondary); margin: 0 0 22px; line-height: 1.55; max-width: 58ch; }
+
+  /* Today */
+  .card { border: 1px solid var(--rule, #24313A); border-radius: 12px; padding: 20px;
+          background: var(--bg-card, #131A20); margin-bottom: 16px; }
+  .eyebrow { font-size: .68rem; text-transform: uppercase; letter-spacing: .11em;
+             color: var(--text-muted); margin: 0 0 7px; }
+  .card h2 { font-size: 1.35rem; margin: 0 0 4px; }
+  .card .sub { color: var(--text-secondary); font-size: .9rem; margin: 0 0 3px; }
+  .card .meta { color: var(--text-muted); font-size: .78rem; margin: 0 0 16px; }
+  .card .meta a { color: var(--accent); }
+  .go { display: inline-block; padding: 11px 22px; border-radius: 8px; font-weight: 700;
+        font-size: .95rem; text-decoration: none; background: var(--accent, #00E5FF); color: #0B0F12; }
+  .go.done { background: transparent; color: var(--text-secondary);
+             border: 1px solid var(--rule, #24313A); font-weight: 600; }
+
+  /* Streak */
+  .streak { display: flex; gap: 22px; flex-wrap: wrap; align-items: flex-start; }
+  .stat .n { font-size: 1.9rem; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+  .stat .l { font-size: .7rem; text-transform: uppercase; letter-spacing: .09em;
+             color: var(--text-muted); margin-top: 4px; }
+  .cal { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 14px; }
+  .cal i { width: 15px; height: 15px; border-radius: 3px; display: block;
+           background: var(--bg-elevated, #1E272E); border: 1px solid var(--rule, #24313A); }
+  .cal i.on { background: var(--accent, #00E5FF); border-color: var(--accent, #00E5FF); }
+  .cal i.today { outline: 2px solid var(--text-secondary); outline-offset: 1px; }
+
+  .result pre { font-family: inherit; font-size: 1.15rem; line-height: 1.35; margin: 10px 0 14px;
+                white-space: pre-wrap; }
+  .btn { padding: 9px 16px; border-radius: 7px; font-weight: 600; font-size: .85rem;
+         border: 1px solid var(--rule, #24313A); background: transparent;
+         color: var(--text-primary, #F2F5F7); cursor: pointer; font-family: inherit; }
+  .btn.primary { background: var(--accent, #00E5FF); color: #0B0F12; border-color: transparent; }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  .prompt { border: 1px solid var(--accent, #00E5FF); border-radius: 10px; padding: 14px 16px;
+            font-size: .87rem; line-height: 1.5; color: var(--text-secondary); margin-bottom: 16px; }
+  .prompt a { color: var(--accent); font-weight: 600; }
+
+  h3 { font-size: 1rem; margin: 28px 0 8px; }
+  .how { color: var(--text-secondary); font-size: .88rem; line-height: 1.6; max-width: 62ch; }
+  .how li { margin-bottom: 7px; }
+  .upcoming { list-style: none; padding: 0; margin: 8px 0 0; font-size: .85rem; }
+  .upcoming li { display: flex; justify-content: space-between; gap: 12px; padding: 7px 0;
+                 border-bottom: 1px solid var(--rule, #24313A); color: var(--text-secondary); }
+  .upcoming .d { color: var(--text-muted); font-variant-numeric: tabular-nums; }
+  footer.page { margin-top: 40px; padding-top: 16px; font-size: .77rem; color: var(--text-muted);
+                border-top: 1px solid var(--rule, #24313A); }
+  footer.page a { color: var(--accent); }
+</style>
+</head>
+<body>
+
+<header class="ts-header">
+  <div class="inner">
+    <a class="brand" href="/">TELESTATS</a>
+    <nav>
+      <a href="/daily/">Daily</a>
+      <a href="/games/">Games</a>
+      <a href="/teams/">Teams</a>
+      <a href="/ask/">Ask</a>
+      <a href="/leaderboard/">Leaderboard</a>
+      <a href="/community/">Community</a>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap">
+
+<h1>The TeleStats Daily</h1>
+<p class="lede">One football puzzle a day. The same club, the same game and the
+  same questions for everyone, worked out from the date — so there is nothing to
+  wait for and nothing to miss. Free, no sign-up, and every answer comes from
+  real appearance records rather than anybody's opinion.</p>
+
+<div class="card" id="todayCard">
+  <p class="eyebrow">Today's challenge</p>
+  <h2 id="todayGame">Loading…</h2>
+  <p class="sub" id="todayTeam"></p>
+  <p class="meta" id="todayMeta"></p>
+  <a class="go" id="todayGo" href="/games/">Play</a>
+</div>
+
+<div class="card result" id="resultCard" hidden>
+  <p class="eyebrow">You played today</p>
+  <pre id="resultGrid"></pre>
+  <div class="row">
+    <button class="btn primary" id="shareBtn">Share result</button>
+    <a class="btn" id="teamLink" href="/teams/">More games for this club</a>
+  </div>
+</div>
+
+<div class="prompt" id="savePrompt" hidden>
+  <strong id="promptStreak"></strong> — that is worth keeping.
+  Streaks live in this browser only, so clearing your data or switching device
+  loses it. <a href="/games/">Make a free account</a> and it follows you.
+</div>
+
+<div class="card">
+  <p class="eyebrow">Your streak</p>
+  <div class="streak">
+    <div class="stat"><div class="n" id="curStreak">0</div><div class="l">Current</div></div>
+    <div class="stat"><div class="n" id="bestStreak">0</div><div class="l">Best</div></div>
+    <div class="stat"><div class="n" id="totalDays">0</div><div class="l">Days played</div></div>
+  </div>
+  <div class="cal" id="cal" aria-label="Last 21 days"></div>
+</div>
+
+<h3>How it works</h3>
+<ul class="how">
+  <li>The game rotates: Higher or Lower, Who Am I?, Player Alphabet, Trivia
+    Quiz, Starting XI, then round again.</li>
+  <li>The club is drawn from <span id="poolSize">hundreds of</span> team-and-competition
+    combinations, every one of which has enough history behind it to make a
+    fair round.</li>
+  <li>Your streak is kept in this browser. Nothing is sent anywhere and you do
+    not need an account to start one.</li>
+  <li>Shared results are blocks, never names — whoever you send it to can still
+    play the same day.</li>
+</ul>
+
+<h3>Coming up</h3>
+<ul class="upcoming" id="upcoming"></ul>
+
+<footer class="page">
+  <a href="/games/">All games</a> ·
+  <a href="/teams/">Teams</a> ·
+  <a href="/tools/data.html">Where the data comes from</a>
+</footer>
+
+</div>
+
+<script src="/js/ts-streak.js"></script>
+<script>
+(function () {
+  'use strict';
+  var API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+    ? 'http://localhost:8888/.netlify/functions' : '/.netlify/functions';
+  function $(id) { return document.getElementById(id); }
+
+  var GAME_NAMES = { hol: 'Higher or Lower', alpha: 'Player Alphabet', xi: 'Starting XI',
+                     whoami: 'Who Am I?', quiz: 'Trivia Quiz' };
+
+  function paintStreak() {
+    var s = TSStreak.get();
+    $('curStreak').textContent = s.current;
+    $('bestStreak').textContent = s.longest;
+    $('totalDays').textContent = s.total;
+
+    var today = TSStreak.utcDate(0);
+    $('cal').innerHTML = TSStreak.history(21).map(function (d) {
+      return '<i class="' + (d.played ? 'on' : '') + (d.date === today ? ' today' : '') +
+             '" title="' + d.date + (d.played ? ' — played' : '') + '"></i>';
+    }).join('');
+
+    // Only mention an account when there is something to lose by not having
+    // one, and only while signed out.
+    var signedIn = window.TSAuth && !TSAuth.isAnonymous();
+    if (s.worthSaving && !signedIn) {
+      $('promptStreak').textContent = s.current + ' days in a row';
+      $('savePrompt').hidden = false;
+    }
+    return s;
+  }
+
+  function paintResult(challenge, s) {
+    if (!s.playedToday || !s.today) return;
+    var r = s.today;
+    $('resultGrid').textContent = TSStreak.grid(r.game, r);
+    $('teamLink').href = challenge.teamPage || '/teams/';
+    $('resultCard').hidden = false;
+
+    var go = $('todayGo');
+    go.textContent = 'Play it again (does not change your result)';
+    go.className = 'go done';
+
+    $('shareBtn').onclick = function () {
+      var text = TSStreak.shareText(s.today && challenge.date, GAME_NAMES[r.game] || r.game,
+                                    challenge.label, r.game, r, s.current);
+      var done = function (how) {
+        $('shareBtn').textContent = how === 'clipboard' ? 'Copied' : 'Shared';
+        // Structured only: which game and how it was shared. Never the grid,
+        // never the club, never anything the player typed.
+        if (window.TSAnalytics) {
+          TSAnalytics.trackEvent?.('daily_share', { daily_game: r.game, share_method: how });
+        }
+      };
+      if (navigator.share) {
+        navigator.share({ text: text }).then(function () { done('web_share'); })
+          .catch(function () { /* dismissed */ });
+      } else if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(function () { done('clipboard'); })
+          .catch(function () { $('shareBtn').textContent = 'Could not copy'; });
+      }
+    };
+  }
+
+  fetch(API + '/daily?days=6')
+    .then(function (r) { return r.json(); })
+    .then(function (d) {
+      var c = d.challenge;
+      $('todayGame').textContent = c.game.name;
+      $('todayTeam').textContent = c.label;
+      $('todayMeta').innerHTML = c.game.blurb + ' · ' + c.scope.players + ' players · ' +
+        c.scope.seasons + ' seasons · <a href="' + c.teamPage + '">' + c.scope.team + ' page</a>';
+      $('todayGo').href = c.url;
+      $('poolSize').textContent = d.pool;
+
+      $('upcoming').innerHTML = (d.upcoming || []).slice(1).map(function (u) {
+        // The GAME is announced, the club is not. Knowing tomorrow is Who Am I?
+        // is a reason to come back; knowing it is Perugia is a head start.
+        return '<li><span>' + u.game.name + '</span><span class="d">' + u.date + '</span></li>';
+      }).join('');
+
+      paintResult(c, paintStreak());
+    })
+    .catch(function () {
+      $('todayGame').textContent = 'Could not load today’s challenge';
+      $('todayMeta').textContent = 'Try again in a moment.';
+      paintStreak();
+    });
+})();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/js/ts-auth.js"></script>
+<script src="/js/ts-data.js"></script>
+<script src="/js/ts-nav.js"></script>
+<script>
+  (async function () {
+    try { await TSAuth.init(); } catch (e) { console.error('[TeleStats] Auth init failed:', e); }
+    try { TSNav.render(); } catch (e) { console.error('[TeleStats] Nav render failed:', e); }
+  })();
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Game","name":"TeleStats Daily","url":"https://telestats.net/daily/","gameItem":"Football statistics puzzle","description":"One football puzzle a day, the same for everyone, built from real appearance records across the Premier League, Championship, League One, League Two and Europe's major leagues.","isAccessibleForFree":true}
+</script>
+</body>
+</html>

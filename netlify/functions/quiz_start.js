@@ -11,6 +11,7 @@
 
 const { createClient } = require('@supabase/supabase-js');
 const teams = require('./_teams');
+const comps = require('./_competitions');
 
 const SUPABASE_URL = process.env.Supabase_Project_URL;
 const SUPABASE_SERVICE_KEY = process.env.Supabase_Service_Role;
@@ -34,6 +35,27 @@ function respond(status, body) {
 /**
  * Fetch all rows from a Supabase query, paginating past the 1000-row default.
  */
+
+/**
+ * Which competition ids a scope covers.
+ *
+ * A normal scope is one competition. An "all competitions" scope has
+ * competitionName === null and covers every one — so rather than try to make a
+ * mid-chain `.eq()` conditional, it becomes `.in()` over the full list, which
+ * is semantically identical to no filter and a one-word change at each site.
+ */
+let ALL_COMP_IDS = null;
+/**
+ * A scope may name one competition, a chosen subset of them, or none at all
+ * ("all competitions"). _competitions.js turns all three into a plain list of
+ * ids so every query below filters the same way and never branches.
+ */
+async function competitionFilter(supabase, competitionId) {
+  if (Array.isArray(competitionId)) return competitionId;
+  if (competitionId) return [competitionId];
+  return comps.everyId(supabase);
+}
+
 async function fetchAll(queryFn) {
   const PAGE = 1000;
   let all = [];
@@ -324,6 +346,41 @@ async function getEplCompId(supabase) {
   return data.competition_id;
 }
 
+/**
+ * How to say, in a question, which competitions a scope covers.
+ *
+ * Every generator below used to write "Premier League" into its question text,
+ * because every scope this game shipped with was a top-flight club. It is not
+ * true any more: Plymouth Argyle have never played in the Premier League, and
+ * asking how many goals they have scored in it is a made-up fact in the one
+ * place this site must not have any — the question itself.
+ *
+ *   adj   used before a noun:  "the most League One appearances"
+ *   in    used as a phrase:    "…in the Premier League and Championship?"
+ *
+ * With no competition filter at all — a club across everything it has played —
+ * adj is empty and `in` says so, because "how many appearances" without a
+ * qualifier is the honest reading of an unfiltered total.
+ */
+function compPhrases(names) {
+  const TAKES_THE = new Set(['Premier League', 'Championship', 'Champions League',
+                             'FA Cup', 'EFL Cup', 'Community Shield']);
+  const withThe = (n) => (TAKES_THE.has(n) ? 'the ' : '') + n;
+
+  if (!names || !names.length) {
+    return { adj: '', in: 'in all competitions', has: false };
+  }
+  if (names.length === 1) {
+    return { adj: `${names[0]} `, in: `in ${withThe(names[0])}`, has: true };
+  }
+  const listed = names.length === 2
+    ? `${withThe(names[0])} and ${withThe(names[1])}`
+    : `${names.slice(0, -1).map(withThe).join(', ')} and ${withThe(names[names.length - 1])}`;
+  // No adjective for a set: "the most Premier League and Championship
+  // appearances" does not parse. The phrase form carries it instead.
+  return { adj: '', in: `in ${listed}`, has: true };
+}
+
 // ============================================================
 // DATA FETCHING FOR QUIZ
 // ============================================================
@@ -333,11 +390,15 @@ async function getEplCompId(supabase) {
  * Returns raw rows; callers aggregate as needed.
  */
 async function fetchScopedStats(supabase, competitionId, scope) {
+  // Derived here rather than passed in: these helpers are module-level and
+  // only ever receive competitionId. null means "all competitions".
+  const competitionIds = await competitionFilter(supabase, competitionId);
+
   const buildQuery = () => {
     let q = supabase
       .from('v_all_player_season_stats')
       .select('player_uid, season_start_year, appearances, goals, assists, minutes, position_bucket, club_id')
-      .eq('competition_id', competitionId)
+      .in('competition_id', competitionIds)
       .gt('appearances', 0);
     if (scope.type === 'club' && scope.clubId) {
       q = q.eq('club_id', scope.clubId);
@@ -387,9 +448,11 @@ async function qCountSeasons(stats, nameMap, scopeLabel, scope) {
   if (correct < 2) return null;
 
   const { correctLabel, wrongLabels } = generateRangeOptions(correct);
-  const subject = scope.type === 'club' ? scopeLabel : 'the Premier League';
+  const c = compPhrases(scope.competitionsCovered);
   return buildQuestion(
-    `How many Premier League seasons has ${subject} had?`,
+    scope.type === 'club'
+      ? `How many ${c.adj}seasons has ${scopeLabel} had?`
+      : `How many seasons has ${scopeLabel} had?`,
     correctLabel,
     wrongLabels,
     'easy'
@@ -432,9 +495,10 @@ async function qTopScorer(stats, nameMap, scopeLabel, scope) {
   }
   if (wrongNames.length < 3) return null;
 
+  const c = compPhrases(scope.competitionsCovered);
   const subject = scope.type === 'club'
-    ? `${scopeLabel}'s all-time top Premier League goalscorer`
-    : 'the all-time top Premier League goalscorer';
+    ? `${scopeLabel}'s all-time top ${c.adj}goalscorer`
+    : `the all-time top ${c.adj}goalscorer${c.adj ? '' : ` ${c.in}`}`;
   return buildQuestion(
     `Who is ${subject}?`,
     correctName,
@@ -449,11 +513,12 @@ async function qCountPlayers(stats, nameMap, scopeLabel, scope) {
   if (correct < 10) return null;
 
   const { correctLabel, wrongLabels } = generateRangeOptions(correct);
+  const c = compPhrases(scope.competitionsCovered);
   const subject = scope.type === 'club'
     ? `have represented ${scopeLabel}`
     : 'have played';
   return buildQuestion(
-    `Roughly how many players ${subject} in the Premier League?`,
+    `Roughly how many players ${subject} ${c.in}?`,
     correctLabel,
     wrongLabels,
     'easy'
@@ -493,9 +558,10 @@ async function qMostAppearances(stats, nameMap, scopeLabel, scope) {
   }
   if (wrongNames.length < 3) return null;
 
+  const c = compPhrases(scope.competitionsCovered);
   const subject = scope.type === 'club'
-    ? `the most Premier League appearances for ${scopeLabel}`
-    : 'the most Premier League appearances';
+    ? `the most ${c.adj}appearances for ${scopeLabel}`
+    : `the most ${c.adj}appearances${c.adj ? '' : ` ${c.in}`}`;
   return buildQuestion(
     `Who has ${subject}?`,
     correctName,
@@ -535,11 +601,10 @@ async function qMostCommonPosition(stats, nameMap, scopeLabel, scope) {
   }
   if (wrongs.length < 3) return null;
 
-  const subject = scope.type === 'club'
-    ? scopeLabel
-    : 'the Premier League';
   return buildQuestion(
-    `Which position has had the most players at ${subject}?`,
+    scope.type === 'club'
+      ? `Which position has had the most players at ${scopeLabel}?`
+      : `Which position has had the most players in ${scopeLabel}?`,
     correct,
     wrongs.slice(0, 3),
     'medium'
@@ -580,9 +645,10 @@ async function qLongestCareer(stats, nameMap, scopeLabel, scope) {
   }
   if (wrongNames.length < 3) return null;
 
+  const c = compPhrases(scope.competitionsCovered);
   const subject = scope.type === 'club'
-    ? `the longest EPL career at ${scopeLabel} in seasons`
-    : 'the longest EPL career in seasons';
+    ? `the most ${c.adj}seasons at ${scopeLabel}`
+    : `the most seasons in ${scopeLabel}`;
   return buildQuestion(
     `Which player had ${subject}?`,
     correctName,
@@ -606,11 +672,12 @@ async function qCountNationalities(stats, nameMap, scopeLabel, scope) {
   if (correct < 5) return null;
 
   const { correctLabel, wrongLabels } = generateRangeOptions(correct);
+  const c = compPhrases(scope.competitionsCovered);
   const subject = scope.type === 'club'
     ? `have played for ${scopeLabel}`
     : 'have played';
   return buildQuestion(
-    `Roughly how many different nationalities ${subject} in the Premier League?`,
+    `Roughly how many different nationalities ${subject} ${c.in}?`,
     correctLabel,
     wrongLabels,
     'hard'
@@ -648,9 +715,10 @@ async function qMostCommonNonEnglish(stats, nameMap, scopeLabel, scope) {
   }
   if (wrongs.length < 3) return null;
 
+  const c = compPhrases(scope.competitionsCovered);
   const subject = scope.type === 'club'
     ? `${scopeLabel} players`
-    : 'Premier League players';
+    : `${c.adj || `${scopeLabel} `}players`;
   return buildQuestion(
     `What is the most common nationality (after English) for ${subject}?`,
     correct,
@@ -691,9 +759,8 @@ async function qTopScorerSingleSeason(stats, nameMap, scopeLabel, scope) {
   }
   if (wrongNames.length < 3) return null;
 
-  const subject = scope.type === 'club'
-    ? `for ${scopeLabel}`
-    : 'in the Premier League';
+  const c = compPhrases(scope.competitionsCovered);
+  const subject = scope.type === 'club' ? `for ${scopeLabel}` : c.in;
   return buildQuestion(
     `Which player scored the most goals in a single season ${subject}?`,
     correctName,
@@ -731,9 +798,10 @@ async function qMostAssists(stats, nameMap, scopeLabel, scope) {
   }
   if (wrongNames.length < 3) return null;
 
+  const c = compPhrases(scope.competitionsCovered);
   const subject = scope.type === 'club'
-    ? `${scopeLabel}'s all-time Premier League assist leader`
-    : 'the all-time Premier League assist leader';
+    ? `${scopeLabel}'s all-time ${c.adj}assist leader`
+    : `the all-time ${c.adj}assist leader${c.adj ? '' : ` ${c.in}`}`;
   return buildQuestion(`Who is ${subject}?`, correctName, wrongNames.slice(0, 3), 'medium');
 }
 
@@ -743,9 +811,10 @@ async function qMostGoals(stats, nameMap, scopeLabel, scope) {
   for (const r of stats) totalGoals += r.goals || 0;
   if (totalGoals < 10) return null;
 
+  const c = compPhrases(scope.competitionsCovered);
   const subject = scope.type === 'club'
-    ? `have been scored by ${scopeLabel} in the Premier League`
-    : 'have been scored in Premier League history';
+    ? `have been scored by ${scopeLabel} ${c.in}`
+    : `have been scored ${c.in}`;
   const options = generateRangeOptions(totalGoals);
   if (!options) return null;
   return buildQuestion(`Roughly how many total goals ${subject}?`, options.correctLabel, options.wrongLabels, 'easy');
@@ -779,9 +848,10 @@ async function qFewestAppearancesTopScorer(stats, nameMap, scopeLabel, scope) {
   }
   if (wrongNames.length < 3) return null;
 
+  const c = compPhrases(scope.competitionsCovered);
   const subject = scope.type === 'club'
-    ? `${scopeLabel}'s top 10 Premier League scorers`
-    : 'the top 10 Premier League all-time scorers';
+    ? `${scopeLabel}'s top 10 ${c.adj}scorers`
+    : `the top 10 ${c.adj}all-time scorers`;
   return buildQuestion(
     `Among ${subject}, who had the fewest appearances?`,
     correctPlayer.player_name,
@@ -793,6 +863,10 @@ async function qFewestAppearancesTopScorer(stats, nameMap, scopeLabel, scope) {
 // --- Special generator: needs supabase + competitionId ---
 
 async function qSharedPlayers(stats, nameMap, scopeLabel, scope, supabase, competitionId) {
+  // Derived here rather than passed in: these helpers are module-level and
+  // only ever receive competitionId. null means "all competitions".
+  const competitionIds = await competitionFilter(supabase, competitionId);
+
   // Only works for club scopes
   if (scope.type !== 'club' || !scope.clubId) return null;
 
@@ -808,7 +882,7 @@ async function qSharedPlayers(stats, nameMap, scopeLabel, scope, supabase, compe
     const buildQ = () => supabase
       .from('v_all_player_season_stats')
       .select('player_uid, club_id')
-      .eq('competition_id', competitionId)
+      .in('competition_id', competitionIds)
       .in('player_uid', batch)
       .gt('appearances', 0);
     const rows = await fetchAll(buildQ);
@@ -851,7 +925,7 @@ async function qSharedPlayers(stats, nameMap, scopeLabel, scope, supabase, compe
   if (wrongNames.length < 3) return null;
 
   return buildQuestion(
-    `Which club has ${scopeLabel} shared the most Premier League players with?`,
+    `Which club has ${scopeLabel} shared the most ${compPhrases(scope.competitionsCovered).adj}players with?`,
     correctClubName,
     wrongNames.slice(0, 3),
     'hard'
@@ -895,10 +969,23 @@ async function generateQuiz(supabase, scopeId) {
   // Was hardcoded to the Premier League. Every scope this game shipped with
   // was a top-flight club, so it never mattered; asking for Plymouth Argyle
   // would have looked for Plymouth players in the Premier League.
-  const competitionId = scopeDef.competitionName
-    ? await getCompetitionIdByName(supabase, scopeDef.competitionName)
-    : await getEplCompId(supabase);
-  if (!competitionId) throw new Error(`Competition not found: ${scopeDef.competitionName || 'Premier League'}`);
+  // A subset scope from a team page names several competitions at once, so
+  // this can legitimately be a LIST; competitionFilter passes arrays through
+  // and every query filters with `.in`.
+  const subset = Array.isArray(scopeDef.competitionNames) && scopeDef.competitionNames.length
+    ? await comps.idsForScope(supabase, scopeDef) : null;
+  if (subset && subset.missing.length) {
+    throw new Error(`Competition not found: ${subset.missing.join(', ')}`);
+  }
+  const competitionId = subset ? subset.ids
+    : scopeDef.competitionName
+      ? await getCompetitionIdByName(supabase, scopeDef.competitionName)
+      : (scopeDef.clubId != null ? null : await getEplCompId(supabase));
+  // null is legitimate: an "all competitions" scope has no single one.
+  if (scopeDef.competitionName && !competitionId) {
+    throw new Error(`Competition not found: ${scopeDef.competitionName}`);
+  }
+  const competitionIds = await competitionFilter(supabase, competitionId);
 
   // Resolve club_id if needed. A generated scope already carries one.
   const scope = { ...scopeDef };
@@ -910,6 +997,14 @@ async function generateQuiz(supabase, scopeId) {
   const scopeLabel = scope.type === 'club'
     ? (scope.teamName || scope.clubName)
     : (scopeDef.competitionName ? `the ${scopeDef.competitionName}` : 'the Premier League');
+
+  // Which competitions the questions may name. null means every one, and the
+  // phrasing helper says "in all competitions" rather than picking a division
+  // the club may never have played in.
+  scope.competitionsCovered = Array.isArray(scopeDef.competitionNames) && scopeDef.competitionNames.length
+    ? scopeDef.competitionNames
+    : (scopeDef.competitionName ? [scopeDef.competitionName]
+       : (scopeDef.clubId != null ? null : ['Premier League']));
 
   // Fetch all stats for this scope
   const stats = await fetchScopedStats(supabase, competitionId, scope);

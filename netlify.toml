@@ -95,3 +95,17 @@
 # background function's longer limit.
 [functions."week-open-background"]
   background = true
+
+# Shared modules revalidate like HTML, not like static assets.
+#
+# ts-analytics.js, ts-nav.js and the rest are the contract between every page
+# and the shared code. A browser holding yesterday's ts-analytics.js while
+# loading today's /upgrade/ is a page calling a method that does not exist —
+# which is exactly what happened the first time the commercial events were
+# added. They are a few kilobytes each; correctness is worth more than the
+# bytes. The version-stamped libraries this site uses come from a CDN and are
+# unaffected.
+[[headers]]
+  for = "/js/*"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"

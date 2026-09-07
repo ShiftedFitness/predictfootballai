@@ -10,6 +10,7 @@
 
 const { createClient } = require('@supabase/supabase-js');
 const teams = require('./_teams');
+const comps = require('./_competitions');
 
 const SUPABASE_URL = process.env.Supabase_Project_URL;
 const SUPABASE_SERVICE_KEY = process.env.Supabase_Service_Role;
@@ -34,6 +35,27 @@ function respond(status, body) {
  * Fetch all rows from a Supabase query, paginating past the 1000-row default.
  * queryFn: a function that accepts (offset, limit) and returns a Supabase query builder.
  */
+
+/**
+ * Which competition ids a scope covers.
+ *
+ * A normal scope is one competition. An "all competitions" scope has
+ * competitionName === null and covers every one — so rather than try to make a
+ * mid-chain `.eq()` conditional, it becomes `.in()` over the full list, which
+ * is semantically identical to no filter and a one-word change at each site.
+ */
+let ALL_COMP_IDS = null;
+/**
+ * A scope may name one competition, a chosen subset of them, or none at all
+ * ("all competitions"). _competitions.js turns all three into a plain list of
+ * ids so every query below filters the same way and never branches.
+ */
+async function competitionFilter(supabase, competitionId) {
+  if (Array.isArray(competitionId)) return competitionId;
+  if (competitionId) return [competitionId];
+  return comps.everyId(supabase);
+}
+
 async function fetchAll(queryFn) {
   const PAGE = 1000;
   let all = [];
@@ -294,6 +316,19 @@ async function getEplCompId(supabase) {
  * Premier League — which correctly returned nobody.
  */
 async function compIdForScope(supabase, scope) {
+  // A subset scope — "Sunderland in the Premier League and Championship",
+  // chosen on a team page — names several competitions at once, so this
+  // returns a LIST. competitionFilter passes an array straight through and
+  // every query already filters with `.in`, so nothing downstream branches.
+  if (scope && Array.isArray(scope.competitionNames) && scope.competitionNames.length) {
+    const { ids, missing } = await comps.idsForScope(supabase, scope);
+    if (missing.length) throw new Error(`Competition not found: ${missing.join(', ')}`);
+    return ids;
+  }
+  // An "all competitions" scope carries competitionName === null on purpose.
+  // Returning null here, rather than falling back to the Premier League, is
+  // what makes "Sunderland across all four divisions" possible.
+  if (scope && scope.competitionName === null && scope.clubId != null) return null;
   if (scope && scope.competitionName) {
     const { data } = await supabase
       .from('competitions')
@@ -313,6 +348,14 @@ async function searchPlayers(supabase, query, positionBucket, scope, competition
   const normalizedQuery = normalize(query);
   if (!normalizedQuery || normalizedQuery.length < 2) return [];
 
+  // Derived here rather than passed in: this helper is module-level and only
+  // ever receives competitionId. It was reading a `competitionIds` that does
+  // not exist in its scope, and the ReferenceError was thrown inside
+  // buildQuery — so the catch below turned "search is broken" into "no player
+  // by that name", which is why it looked like a bad test case rather than a
+  // bug. The smoke suite caught it; the game never would have.
+  const competitionIds = await competitionFilter(supabase, competitionId);
+
   // Only show players that match the slot's position bucket
   const bucketsToSearch = [positionBucket];
 
@@ -320,7 +363,7 @@ async function searchPlayers(supabase, query, positionBucket, scope, competition
     let q = supabase
       .from('v_all_player_season_stats')
       .select('player_uid, appearances, goals, assists, minutes')
-      .eq('competition_id', competitionId)
+      .in('competition_id', competitionIds)
       .in('position_bucket', bucketsToSearch)
       .gt('appearances', 0);
     if (scope.type === 'club' && scope.clubId) {
@@ -453,7 +496,10 @@ async function computeBestXI(supabase, scope, formation, objective) {
   if (!formationDef) throw new Error(`Unknown formation: ${formation}`);
 
   const competitionId = await compIdForScope(supabase, scope);
-  if (!competitionId) throw new Error('Premier League not found');
+
+  const competitionIds = await competitionFilter(supabase, competitionId);
+  // null is legitimate: an "all competitions" scope has no single one.
+  if (scope.competitionName && !competitionId) throw new Error('Competition not found');
 
   // Count needed per bucket
   const bucketCounts = {};
@@ -542,7 +588,7 @@ async function computeBestXI(supabase, scope, formation, objective) {
         let q = supabase
           .from('v_all_player_season_stats')
           .select('player_uid, appearances, goals, assists, minutes')
-          .eq('competition_id', competitionId)
+          .in('competition_id', competitionIds)
           .eq('position_bucket', bucket)
           .gt('appearances', 0);
         if (scope.type === 'club' && scope.clubId) {
@@ -753,8 +799,10 @@ exports.handler = async (event) => {
       }
 
       const competitionId = await compIdForScope(supabase, scopeDef);
-      if (!competitionId) {
-        return respond(500, { error: 'Premier League competition not found' });
+
+      const competitionIds = await competitionFilter(supabase, competitionId);
+      if (scopeDef.competitionName && !competitionId) {
+        return respond(500, { error: 'Competition not found' });
       }
 
       // Resolve club_id — use direct clubId if available, else name lookup

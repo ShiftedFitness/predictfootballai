@@ -31,6 +31,7 @@ const SITE = 'https://telestats.net';
  */
 const CORE = [
   { file: 'index.html',                 url: '/',                       priority: '1.0', freq: 'daily' },
+  { file: 'daily/index.html',           url: '/daily/',                 priority: '0.9', freq: 'daily' },
   { file: 'games/index.html',           url: '/games/',                 priority: '0.9', freq: 'weekly' },
   { file: 'games/hol.html',             url: '/games/hol.html',         priority: '0.8', freq: 'weekly' },
   { file: 'games/alpha.html',           url: '/games/alpha.html',       priority: '0.8', freq: 'weekly' },

@@ -294,6 +294,10 @@
       const isLifetime = TSAuth.isLifetimePro();
       const hasActiveDayPass = TSAuth.hasActiveDayPass();
 
+      // Top of the commercial funnel: this page was actually reached. The tier
+      // is the only dimension — never the user, never an email.
+      if (window.TSAnalytics) TSAnalytics.upgradeView?.(effectiveTier);
+
       // Update plan button states
       const freeBtn = document.getElementById('upFreeBtn');
       const buyBtn = document.getElementById('upBuyBtn');
@@ -302,7 +306,7 @@
 
       if (isAnon) {
         freeBtn.textContent = 'Sign Up Free';
-        freeBtn.addEventListener('click', () => TSNav.showAuthModal('signup'));
+        freeBtn.addEventListener('click', () => TSNav.showAuthModal('signup', 'upgrade_page'));
       } else if (isLifetime) {
         freeBtn.textContent = 'Free';
         buyBtn.textContent = 'Current Plan';
@@ -326,6 +330,10 @@
       const params = new URLSearchParams(window.location.search);
       if (params.get('payment') === 'success') {
         const returnPlan = params.get('plan') || 'lifetime';
+        // NOT a purchase event. This is somebody arriving back on a URL that
+        // anybody can load, and a real customer may close the tab and never
+        // load it. Revenue is recorded by stripe-webhook.js in ts_payments.
+        if (window.TSAnalytics) TSAnalytics.checkoutReturn?.(returnPlan, 'returned');
         const hero = document.querySelector('.up-hero');
 
         // Set pending upgrade flag so game pages skip stale cache
@@ -380,6 +388,7 @@
         }
         history.replaceState(null, '', '/upgrade/');
       } else if (params.get('payment') === 'cancelled') {
+        if (window.TSAnalytics) TSAnalytics.checkoutReturn?.(params.get('plan') || 'lifetime', 'cancelled');
         const hero = document.querySelector('.up-hero');
         const banner = document.createElement('div');
         banner.style.cssText = 'background:var(--card);border:1px solid var(--border);color:var(--muted);padding:14px 20px;border-radius:12px;text-align:center;margin-bottom:20px;font-size:.9rem;';
@@ -394,7 +403,11 @@
 
       // Checkout helper
       async function startCheckout(btn, plan, label) {
-        if (isAnon) { TSNav.showAuthModal('signup'); return; }
+        if (isAnon) { TSNav.showAuthModal('signup', 'upgrade_page'); return; }
+        // Fired before the request, not after: the interesting number is how
+        // many people chose to pay, and a create-checkout failure is exactly
+        // the thing that would hide them.
+        if (window.TSAnalytics) TSAnalytics.checkoutStart?.(plan);
         btn.disabled = true;
         btn.textContent = 'Redirecting...';
         try {
@@ -408,6 +421,9 @@
           window.location.href = data.url;
         } catch (err) {
           console.error('Checkout error:', err);
+          // The plan only. The message comes from an exception and could carry
+          // anything, including something somebody typed.
+          if (window.TSAnalytics) TSAnalytics.checkoutError?.(plan);
           btn.disabled = false;
           btn.textContent = label;
           const msg = document.createElement('div');

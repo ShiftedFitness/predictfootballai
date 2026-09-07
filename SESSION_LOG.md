@@ -2398,3 +2398,244 @@ smoke 19/19 · club-name gate clean · 320 indexable URLs (313 teams + /ask/ + c
 - shared-storage rate limit before Ask leaves beta
 - games' ?scope= links need an end-to-end browser test on a real server
 - whoami.html's frontend SCOPES array is still a sixth copy of the club list
+
+
+---
+
+## Team page feedback (9 items) — done
+
+### 1–2. Formatting and the missing site header
+The page had `body { max-width: 900px }`, so anything TSNav prepended was
+squeezed into the column. Restructured: full-width body, a `.wrap` inside it.
+A static `.ts-header` now ships in the HTML — TSNav removes and replaces it,
+so it is what a visitor sees before the script runs and all a crawler ever
+sees. Rendering moved out of build.js into `scripts/teams/render.js`; build.js
+is about fetching and folding data again.
+
+### 3. Minimisable explainer
+`<details>` that opens the first time somebody lands on any team page and is
+shut every visit after (`localStorage`). It answers "what is this?", which is
+asked once. Also emitted as FAQPage structured data, in the same words as the
+visible copy — nothing invented for the markup.
+
+### 4. Badge and scarf
+`scripts/teams/colours.js` drives a shield with the club's initials and a
+two-tone scarf stripe across the hero. 187 clubs have researched colours; 126
+derive one from a hash of the slug, spread on the golden angle so neighbours in
+a list do not blur. It is deliberately not called a crest — a real badge is
+somebody's trademark.
+
+### 5. Choose all competitions, or one, or two
+The bigger piece. Scope ids now come in three shapes:
+
+    team_sunderland_league-one                     one
+    team_sunderland_premier-league+championship    a subset
+    team_sunderland_all                            everything
+
+Subsets are resolved by parsing, not enumeration — a club in four divisions has
+eleven of them, and putting all of those in every game's picker to serve a
+choice made on one page would be absurd. `_competitions.js` is new and is the
+single place a scope becomes a list of competition ids; all five games filter
+with `.in()` in every case and never branch. Chips on the team page rewrite the
+game links; the static href already points at every playable competition, which
+is what the chips start on.
+
+### 6. Player of the day
+A "?" on a shirt in the club's colours. Picked in the browser from a list baked
+into the page, seeded on club + UTC date: same for everyone, different
+tomorrow, no rebuild and no request.
+
+### 7. Straight through to the game
+Links carry `&play=1`, and `TSScope.play()` clicks the game's own start
+control — not its start function, because each game does different work in that
+handler. A line appears at the top saying where the player came from, with a
+link back and a link to the picker. quiz.html had no scope support at all and
+now has it.
+
+### 8. Stats minimised on load
+Three `<details>`, shut. The content is still real HTML, so it is still indexed
+and still readable with JavaScript off.
+
+### 9. Leaderboard and community games
+Neither existed. Both now come from a new `team-extras` function:
+
+  - **Leaderboard.** `ts_game_sessions.game_category` holds the scope, but
+    pre-rebuild rounds were filed under whatever id the game's own list used at
+    the time — `epl_club_manchesterunited` in Higher or Lower, `club_manutd` in
+    Starting XI, `laliga_club_mlaga` where an accent was dropped. Rather than
+    regex over club names again, `scripts/teams/legacy_scopes.js` reads the ids
+    out of the handlers themselves and joins on the exact database string each
+    matched: 1,476 ids, 141 clubs, nothing unresolved. 125 of 211 historical
+    sessions now attribute to a club; the other 86 are league-wide, nationality
+    and Bullseye's free-text boards, which correctly belong to no club.
+  - **Community games.** No club tag exists on `ts_community_games`, so the club
+    is read out of the title and description with the resolver Ask TeleStats
+    already uses. A game naming no club is simply not tagged. The five official
+    games and the community lane are separated by a heading and a sentence, and
+    a "Make your own <Team> game" CTA sits under it.
+
+### Bugs found and fixed on the way
+
+  - `competitionIds is not defined` in quiz (2 sites) and whoami (1) — declared
+    in the handler, read inside module-level helpers.
+  - The same bug in `xi_start.searchPlayers`, where the ReferenceError was
+    thrown inside `buildQuery` and swallowed by the surrounding catch, so
+    "search is broken" read as "no player by that name". The smoke suite caught
+    it; the game never would have.
+  - `TSScope.play()`'s announce guard read `opts && opts.announce !== false`,
+    which is false when opts is undefined — every caller. The note never
+    rendered.
+  - **Quiz and Who Am I were stating things that are not true.** Every question
+    and every clue hardcoded "Premier League", because every scope the games
+    shipped with was a top-flight club. Plymouth Argyle have never played in the
+    Premier League, and the page was asking how many goals they had scored in
+    it. Both now derive the wording from the scope: "in League One", "in the
+    Premier League and the Championship", or no qualifier at all when the scope
+    covers everything.
+
+### State
+smoke **30/30** (11 new cases: all three scope shapes across five games, a
+refused bad subset, team-extras including a 400) · club-name gate clean ·
+313 pages rebuilt · 320 indexable URLs.
+
+`scripts/dev/server.js` is new — serves `public/` and dispatches
+`/.netlify/functions/*` to the handlers, so a team page can be clicked through
+end to end without a Netlify login.
+
+
+---
+
+## Slice 2 — Habit (daily challenge + streaks)
+
+### The challenge is a function of the date
+`netlify/functions/_daily.js`. Nothing is stored and no job runs at midnight:
+given a date it returns the challenge, so yesterday's and tomorrow's are
+equally computable — which is what makes a streak checkable, a share link
+honest and a missed day explicable.
+
+Two decisions made differently on purpose. The **game rotates** through the
+five in order, so a daily player gets variety by construction rather than by
+luck — hashing it gives three Higher or Lowers in a week often enough to
+notice. The **club is hashed** from the date, because rotating through 399
+scopes would march visibly down a list. A re-draw stops two consecutive days
+landing on the same club, which is the one random outcome people read as
+broken.
+
+### The pool is earned, not curated
+`scripts/daily/pool.js` → `data/daily/pool.json`. A scope qualifies on depth
+(40+ players), spread (a top player past 100 appearances) and history (8+
+seasons). Nothing is included by name and nothing excluded by name, so a club
+enters the pool as its season is played. **399 scopes, 231 clubs**, spread
+across all eight competitions.
+
+The thresholds are stricter than the team pages' own "is there a game here"
+bar, deliberately: a team page offering a thin game is a choice the visitor
+made; the daily serving one is the site's choice, on the day it most needs to
+be worth returning to.
+
+### And it is actually played before it ships
+`scripts/daily/verify.js` runs the real handler for each day's real game and
+scope and asserts a real round came back. **120 consecutive days: 120
+playable, 0 not.** This is the one thing on the site nobody looks at before it
+goes out, so something has to.
+
+### Streaks are local first
+`public/js/ts-streak.js`. localStorage, works signed out, works offline, never
+sent anywhere. The account prompt appears at **three days** and never before —
+asking somebody to register to protect a one-day streak is asking them to
+register for nothing. `TSStreak.pending()` hands the local history over for
+merging when they do sign in.
+
+The streak counts back from today, or from yesterday if today is unplayed.
+That distinction is the thing most implementations get wrong: at 9am, having
+played all week, the streak is 7 and not 0.
+
+Recording is wired into `TSData.logGameSession` rather than into five games —
+the same argument that put `game_complete` there. The link carries
+`?daily=<date>` and the logger reads it back.
+
+### The share grid is spoiler-safe
+Blocks, never names. A shared result says how somebody did and which club it
+was about; it can never say who the mystery player was or which letters were
+found. That is the whole reason a share is worth posting — the person who sees
+it can still play.
+
+### Surfaces
+`/daily/`, a card at the top of the homepage (logged in and logged out), and
+`Daily` in the nav. The nav also gained **Teams** and **Ask**, which had 313
+pages and a differentiated feature between them and no nav link at all.
+
+Tomorrow's GAME is announced on /daily/; tomorrow's CLUB is not. One is a
+reason to come back, the other is a head start.
+
+---
+
+## Slice 3 — Commercial analytics
+
+### The events
+`paywall_view`, `paywall_action`, `signup_view`, `signup_submit`,
+`signup_complete`, `login_success`, `login_magic_link_sent`, `upgrade_view`,
+`checkout_start`, `checkout_error`, `checkout_return` — plus `daily_complete`
+and `daily_share` from Slice 2.
+
+They are named methods on `TSAnalytics` rather than bare `trackEvent` calls at
+each site, so the event names read as a list in one file and the once-only
+rules live with the event rather than in whichever page fires it.
+
+### What is deliberately absent
+**There is no `purchase` event.** GA4 reserves that name for revenue, and the
+only thing a browser can observe is somebody arriving back from Stripe — a URL
+anybody can load, and one a paying customer may never load at all if they
+close the tab. Revenue is `stripe-webhook.js` writing `ts_payments`. What is
+recorded is `checkout_return`, which is what actually happened.
+
+### Closed vocabularies
+`source`, `plan`, `tier` and `action` are each checked against a fixed list.
+An unrecognised value becomes `'other'` rather than being sent, so a new button
+cannot quietly introduce a new dimension — or free text. `paywall_action` with
+an unknown action does not fire at all.
+
+### Proof, not assertion
+`scripts/analytics/verify.js` loads ts-analytics.js into a fake browser with
+gtag replaced by a recorder, so every check is about what would have been
+**sent**. **29 checks, all passing**, covering the brief's three
+non-negotiables:
+
+  - `/fives` and `/predict` send nothing and never inject gtag.js — and the
+    match is a prefix, so `/games/predictions.html` is not caught by it.
+  - Objects, arrays and functions are dropped; long strings truncated; auth
+    tokens and Stripe session ids never reach `page_location`; a community game
+    title produces no scope dimension.
+  - `paywall_view`, `upgrade_view`, `signup_submit`, `signup_complete` and
+    `checkout_return` each fire once however many times they are called, and
+    `game_complete` fires once per round.
+
+Also verified live in a browser: three calls to `showPlayLimitOverlay` produced
+exactly one `paywall_view`; an invented signup source recorded as `other`.
+
+### A bug this introduced, and the fix
+The first version broke `/upgrade/` for anybody holding a cached
+`ts-analytics.js`: the page called `TSAnalytics.upgradeView(...)`, the stale
+module did not have it, and the TypeError stopped the buy buttons being wired.
+
+Two fixes, because there are two problems. `netlify.toml` now sends
+`/js/*` with `must-revalidate` like HTML — these are the contract between
+every page and the shared code, and a few kilobytes are worth less than
+correctness. And every call site uses optional invocation
+(`TSAnalytics.upgradeView?.(…)`), so a stale module degrades to no analytics
+rather than a broken page.
+
+### scopeParams understands team scopes
+It returned `{}` for every `team_<slug>_<comp>` id, so all team-page play was
+invisible. It now emits `team`, `competition` and `competition_count` — all
+values this codebase generated, never user text.
+
+---
+
+## Running the checks
+
+    npm run check              analytics · club names · smoke · 30 dailies
+    npm run dev                static files AND the functions, on :8888
+
+`npm run check` is 29 + 33 + 30 assertions and takes about a minute. It is the
+gate worth running before any deploy.

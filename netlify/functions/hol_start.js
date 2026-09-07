@@ -8,6 +8,7 @@
 
 const { createClient } = require('@supabase/supabase-js');
 const teams = require('./_teams');
+const comps = require('./_competitions');
 
 const SUPABASE_URL = process.env.Supabase_Project_URL;
 const SUPABASE_SERVICE_KEY = process.env.Supabase_Service_Role;
@@ -287,7 +288,11 @@ exports.handler = async (event) => {
     return respond(200, {
       leagues: LEAGUES.map(l => ({ key: l.key, name: l.name })),
       scopes: [
-        ...SCOPES.map(s => ({ id: s.id, label: s.label, type: s.type, league: s.league })),
+        ...SCOPES.map(s => ({ id: s.id, label: s.label, type: s.type, league: s.league,
+                       // The exact database string this legacy id matched. The picker
+                       // ignores it; scripts/teams/legacy_scopes.js uses it to map old
+                       // played rounds onto team pages without re-deriving the id rule.
+                       clubName: s.clubName })),
         ...generated.map(s => ({ id: s.id, label: s.label, type: s.type, league: s.league,
                                  slug: s.slug, competition: s.competitionName })),
       ],
@@ -302,9 +307,13 @@ exports.handler = async (event) => {
     if (!scope) return respond(400, { error: 'Unknown scope' });
 
     try {
-      // Look up competition_id
-      const competitionId = await getCompetitionId(supabase, scope.competitionName);
-      if (!competitionId) return respond(400, { error: `Competition not found: ${scope.competitionName}` });
+      // One competition, a chosen subset of them, or all of them: the scope
+      // says which, _competitions.js turns all three into a list of ids, and
+      // every query below filters the same way.
+      const { ids: competitionIds, missing } = await comps.idsForScope(supabase, scope);
+      if (missing.length) {
+        return respond(400, { error: `Competition not found: ${missing.join(', ')}` });
+      }
 
       let clubId = null;
       if (scope.type === 'club') {
@@ -318,8 +327,8 @@ exports.handler = async (event) => {
       const buildQuery = () => {
         let q = supabase
           .from('v_all_player_season_stats')
-          .select('player_uid, appearances, goals')
-          .eq('competition_id', competitionId);
+          .select('player_uid, appearances, goals');
+        q = q.in('competition_id', competitionIds);
         if (clubId) q = q.eq('club_id', clubId);
         return q;
       };

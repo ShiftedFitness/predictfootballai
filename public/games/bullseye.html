@@ -6,6 +6,7 @@
 <!-- Analytics: GA4 via the central TeleStats helper (never loaded on /fives*) -->
 <script src="/js/ts-analytics.js"></script>
 <script src="/js/ts-scope.js"></script>
+<script src="/js/ts-streak.js"></script>
 <title>TeleStats - Bullseye</title>
 <meta name="description" content="Name players to subtract their stats from 501. Go bust and you lose. A darts-style football trivia game."/>
 <meta property="og:site_name" content="TeleStats"/>
@@ -3975,7 +3976,7 @@ function updateBullseyeSetting(key,val){
         hint.id = 'tsUpgradeHint';
         hint.className = 'ts-upgrade-hint';
         hint.innerHTML = '\uD83D\uDD12 Sign up free to choose your own categories &rarr;';
-        hint.onclick = () => TSNav.showAuthModal('signup');
+        hint.onclick = () => TSNav.showAuthModal('signup', 'post_game');
         step3.appendChild(hint);
       }
     } else if (!tierAccess.all) {
@@ -4033,7 +4034,7 @@ function updateBullseyeSetting(key,val){
           if (isAnon) {
             const note = document.createElement('div');
             note.style.cssText = 'text-align:center;font-size:12px;color:var(--accent-yellow);padding:8px 0 4px;';
-            note.innerHTML = '\uD83C\uDFB2 Random play only &mdash; <a href="#" style="color:var(--accent-cyan);text-decoration:underline;" onclick="TSNav.showAuthModal(\'signup\');return false;">sign up free</a> to choose your own';
+            note.innerHTML = '\uD83C\uDFB2 Random play only &mdash; <a href="#" style="color:var(--accent-cyan);text-decoration:underline;" onclick="TSNav.showAuthModal(\'signup\',\'post_game\');return false;">sign up free</a> to choose your own';
             step3.prepend(note);
           }
         }

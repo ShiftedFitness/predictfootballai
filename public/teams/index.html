@@ -14,7 +14,16 @@
 <meta name="twitter:card" content="summary">
 <link rel="stylesheet" href="/telestats-theme.css">
 <style>
-  body { max-width: 1000px; margin: 0 auto; padding: 20px; }
+  body { margin: 0; }
+  .wrap { max-width: 1000px; margin: 0 auto; padding: 0 18px 50px; }
+  .ts-header { border-bottom: 1px solid var(--rule, #24313A); background: var(--bg-card, #131A20); }
+  .ts-header .inner { max-width: 1000px; margin: 0 auto; padding: 11px 18px;
+                      display: flex; align-items: center; gap: 18px; }
+  .ts-header .brand { font-weight: 700; letter-spacing: .04em; color: var(--text-primary, #F2F5F7);
+                      text-decoration: none; font-family: 'Space Mono', ui-monospace, monospace; }
+  .ts-header nav { display: flex; gap: 15px; flex-wrap: wrap; }
+  .ts-header nav a { font-size: .82rem; color: var(--text-secondary, #9FB0BC); text-decoration: none; }
+  nav.crumbs { margin-top: 16px; }
   nav.crumbs { font-size: .8rem; color: var(--text-secondary); margin-bottom: 14px; }
   nav.crumbs a { color: var(--accent); text-decoration: none; }
   h1 { font-size: 1.7rem; margin: 0 0 6px; }
@@ -26,22 +35,27 @@
             padding: 7px 10px; border: 1px solid var(--rule, #24313A); border-radius: 6px;
             color: var(--accent); text-decoration: none; }
   .grid a span { color: var(--text-muted); font-variant-numeric: tabular-nums; }
-  form.ask { display: flex; gap: 8px; margin: 10px 0 10px; }
-  form.ask input { flex: 1; padding: 10px 13px; font-size: .95rem; border-radius: 7px;
-                   border: 1px solid var(--rule, #24313A); background: var(--bg-card, #171F25);
-                   color: var(--text-primary, #F2F5F7); }
-  form.ask button { padding: 10px 16px; font-weight: 600; border: 0; border-radius: 7px;
-                    background: var(--accent, #00E5FF); color: #0B0F12; cursor: pointer; }
-  .ask-examples { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
-  .ask-examples button { font-size: .78rem; padding: 5px 10px; border-radius: 5px; border: 0;
-                         background: var(--bg-elevated, #1E272E); color: var(--accent); cursor: pointer; }
-  #askAnswer .msg { font-size: .98rem; line-height: 1.5; margin: 10px 0; }
-  #askAnswer .prov { font-size: .74rem; color: var(--text-muted); }
   footer { margin-top: 40px; font-size: .78rem; color: var(--text-muted); }
   footer a { color: var(--accent); }
 </style>
 </head>
 <body>
+
+<header class="ts-header">
+  <div class="inner">
+    <a class="brand" href="/">TELESTATS</a>
+    <nav>
+      <a href="/daily/">Daily</a>
+      <a href="/games/">Games</a>
+      <a href="/teams/">Teams</a>
+      <a href="/ask/">Ask</a>
+      <a href="/leaderboard/">Leaderboard</a>
+      <a href="/community/">Community</a>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap">
 <nav class="crumbs"><a href="/">TeleStats</a> › Teams</nav>
 <h1>Football Games by Team</h1>
 <p class="lede">Pick your club and play football quizzes built from real data. 313 teams across the Premier League, Championship, League One, League Two, La Liga, Serie A, Bundesliga and Ligue 1. The number beside each club is how many of its
@@ -575,53 +589,21 @@
 </section>
 
 <footer>
+  <a href="/daily/">Today's challenge</a> ·
   <a href="/games/">All games</a> ·
+  <a href="/ask/">Ask TeleStats a question</a> ·
   <a href="/tools/data.html">Dataset coverage</a>
 </footer>
+</div><!-- /wrap -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/js/ts-auth.js"></script>
+<script src="/js/ts-data.js"></script>
+<script src="/js/ts-nav.js"></script>
 <script>
-(function () {
-  var f = document.getElementById('askForm');
-  if (!f) return;
-  var out = document.getElementById('askAnswer');
-  var input = document.getElementById('askQ');
-  function esc(s) {
-    return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
-      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
-    });
-  }
-  document.querySelectorAll('.ask-examples button').forEach(function (b) {
-    b.onclick = function () { input.value = b.dataset.q; f.requestSubmit(); };
-  });
-  f.onsubmit = function (e) {
-    e.preventDefault();
-    var q = input.value.trim();
-    if (!q) return;
-    out.innerHTML = '<p class="msg">Looking…</p>';
-    fetch('/.netlify/functions/ask', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ question: q, source: 'team_page' })
-    }).then(function (r) { return r.json(); }).then(function (d) {
-      var html = '<p class="msg">' + esc(d.message || d.error) + '</p>';
-      if (d.rows && d.rows.length) {
-        html += '<table><tbody>' + d.rows.slice(0, 10).map(function (r) {
-          var right = r.clubs && r.clubs[0] && r.clubs[0].team
-            ? r.clubs.map(function (c) { return esc(c.team) + ' ' + c.appearances; }).join(' · ')
-            : (r.appearances != null ? r.appearances + ' apps, ' + r.goals + 'g' : '');
-          return '<tr><td>' + esc(r.player || r.name) + '</td><td>' + right + '</td></tr>';
-        }).join('') + '</tbody></table>';
-      }
-      if (d.provenance) {
-        html += '<p class="prov">From the TeleStats database in ' +
-                esc(d.provenance.query_ms) + 'ms · <a href="/tools/data.html">coverage</a></p>';
-      }
-      out.innerHTML = html;
-      // Structured only — the question text never goes to analytics.
-      if (d.analytics && window.TSAnalytics) TSAnalytics.trackEvent('ask_query', d.analytics);
-    }).catch(function () {
-      out.innerHTML = '<p class="msg">Could not reach the database. Try again.</p>';
-    });
-  };
-})();
+  (async function () {
+    try { await TSAuth.init(); } catch (e) { console.error('[TeleStats] Auth init failed:', e); }
+    try { TSNav.render(); } catch (e) { console.error('[TeleStats] Nav render failed:', e); }
+  })();
 </script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TeleStats","item":"https://telestats.net"},{"@type":"ListItem","position":2,"name":"Teams","item":"https://telestats.net/teams/"}]}</script>
 </body>

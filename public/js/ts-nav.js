@@ -12,9 +12,16 @@
 
   const LOGO_URL = 'https://res.cloudinary.com/dbfvogb95/image/upload/v1770835428/Screenshot_2026-02-11_at_19.43.16_m7urul.png';
 
+  // Daily and Teams are the two return surfaces: one is the reason to come back
+  // tomorrow, the other is 313 pages that were reachable only from a search
+  // result or the sitemap. Ask is here because it is the thing on the site
+  // nobody else has, and it was findable from team pages alone.
   const NAV_LINKS = [
     { label: 'Home', href: '/', match: (p) => p === '/' || p === '/index.html' },
+    { label: 'Daily', href: '/daily/', match: (p) => p.startsWith('/daily') },
     { label: 'Games', href: '/games/', match: (p) => p.startsWith('/games') },
+    { label: 'Teams', href: '/teams/', match: (p) => p.startsWith('/teams') },
+    { label: 'Ask', href: '/ask/', match: (p) => p.startsWith('/ask') },
     { label: 'Leaderboard', href: '/leaderboard/', match: (p) => p.startsWith('/leaderboard') },
     { label: 'Community', href: '/community/', match: (p) => p.startsWith('/community') }
   ];
@@ -245,7 +252,7 @@
     },
 
     /** Show login/signup modal — context-aware */
-    showAuthModal(mode = 'login') {
+    showAuthModal(mode = 'login', source = 'nav') {
       const user = TSAuth.getUser();
       const isAnon = TSAuth.isAnonymous();
 
@@ -259,6 +266,12 @@
         window.location.href = '/profile/';
         return;
       }
+
+      // The account dialog genuinely opened — after the two redirects above,
+      // which are not a signup view at all. `source` is validated against a
+      // fixed list inside TSAnalytics, so an unrecognised call site records
+      // 'other' rather than sending a new value.
+      if (mode === 'signup' && window.TSAnalytics) TSAnalytics.signupView?.(source);
 
       // Remove existing
       const existing = document.getElementById('tsAuthModal');
@@ -362,7 +375,12 @@
             msg.textContent = result.error;
             msg.className = 'ts-auth-msg error';
           }
-        } else { modal.remove(); location.reload(); }
+        } else {
+          // Fired before the reload, which would otherwise lose it.
+          if (window.TSAnalytics) TSAnalytics.loginSuccess?.('password');
+          modal.remove();
+          location.reload();
+        }
       });
 
       // Magic link
@@ -373,7 +391,13 @@
         msg.textContent = 'Sending...';
         const result = await TSAuth.signInMagicLink(email);
         if (result.error) { msg.textContent = result.error; msg.className = 'ts-auth-msg error'; }
-        else { msg.textContent = 'Check your email for the magic link!'; msg.className = 'ts-auth-msg success'; }
+        else {
+          // The link was sent, not followed — the sign-in itself is recorded
+          // when they come back with a session.
+          if (window.TSAnalytics) TSAnalytics.trackEvent?.('login_magic_link_sent', {});
+          msg.textContent = 'Check your email for the magic link!';
+          msg.className = 'ts-auth-msg success';
+        }
       });
 
       // Forgot password toggle
@@ -418,6 +442,9 @@
         );
         if (result.error) { msg.textContent = result.error; msg.className = 'ts-auth-msg error'; }
         else {
+          // Accepted by Supabase. Not yet a confirmed account — that is
+          // signup_complete, and it happens after the emailed link.
+          if (window.TSAnalytics) TSAnalytics.signupSubmit?.();
           // Replace signup form with "check your email" message
           const panel = document.getElementById('tsSignupPanel');
           if (panel) {
@@ -512,6 +539,13 @@
       if (existing) existing.remove();
 
       const isAnon = TSAuth.isAnonymous();
+
+      // The commercial event that matters most: somebody wanted to play and
+      // could not. Fires once per page however many times this renders.
+      if (window.TSAnalytics) {
+        TSAnalytics.paywallView?.({ game_type: gameType, tier: TSAuth.getTier() });
+      }
+
       const overlay = document.createElement('div');
       overlay.id = 'tsPlayLimitOverlay';
       overlay.className = 'ts-modal-overlay';
@@ -544,11 +578,23 @@
 
       if (isAnon) {
         document.getElementById('tsLimitSignup').addEventListener('click', () => {
+          if (window.TSAnalytics) TSAnalytics.paywallAction?.('signup', { game_type: gameType });
           overlay.remove();
-          TSNav.showAuthModal('signup');
+          TSNav.showAuthModal('signup', 'paywall');
         });
       }
+      // The paid options are plain links, so the click has to be caught here
+      // rather than in a handler that navigates.
+      overlay.querySelectorAll('a[href^="/upgrade/"]').forEach((a) => {
+        a.addEventListener('click', () => {
+          if (!window.TSAnalytics) return;
+          TSAnalytics.paywallAction?.(
+            a.textContent.indexOf('Day Pass') === 0 ? 'day_pass' : 'upgrade',
+            { game_type: gameType });
+        });
+      });
       document.getElementById('tsLimitClose')?.addEventListener('click', () => {
+        if (window.TSAnalytics) TSAnalytics.paywallAction?.('dismiss', { game_type: gameType });
         overlay.remove();
         window.location.href = '/games/';
       });
@@ -733,7 +779,7 @@
         const isAnon = TSAuth.isAnonymous();
         counter.textContent = `${remaining} play${remaining !== 1 ? 's' : ''} remaining today`;
         if (isAnon && remaining < limit) {
-          counter.innerHTML += ' · <a href="#" style="color:var(--accent-cyan);text-decoration:underline;font-size:inherit;" onclick="TSNav.showAuthModal(\'signup\');return false;">Sign up for more</a>';
+          counter.innerHTML += ' · <a href="#" style="color:var(--accent-cyan);text-decoration:underline;font-size:inherit;" onclick="TSNav.showAuthModal(\'signup\',\'paywall\');return false;">Sign up for more</a>';
         }
         if (remaining <= 1) counter.classList.add('ts-plays-low');
       }

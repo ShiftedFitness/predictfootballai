@@ -6,6 +6,7 @@
 <!-- Analytics: GA4 via the central TeleStats helper (never loaded on /fives*) -->
 <script src="/js/ts-analytics.js"></script>
 <script src="/js/ts-scope.js"></script>
+<script src="/js/ts-streak.js"></script>
 <title>TeleStats - Player Alphabet</title>
 <meta name="description" content="Go A-Z naming players by surname initial. Race the clock or take your time. How many letters can you fill?"/>
 <meta property="og:site_name" content="TeleStats"/>
@@ -367,6 +368,10 @@ async function init() {
       if (startBtn) startBtn.disabled = false;
       const chosen = $('scopeList') && $('scopeList').querySelector('.scope-card.selected');
       if (chosen) chosen.scrollIntoView({ block: 'center' });
+    
+    // Arrived from a team page with the club, division and game already
+    // chosen — so play it, rather than showing a picker of every other club.
+    if (window.TSScope) TSScope.play(function () { return $('startBtn'); });
     }
   } catch (err) {
     console.error('Init error:', err);
@@ -879,7 +884,7 @@ init();
         hint.id = 'tsUpgradeHint';
         hint.className = 'ts-upgrade-hint';
         hint.textContent = 'Sign up free to choose your own categories';
-        hint.onclick = () => TSNav.showAuthModal('signup');
+        hint.onclick = () => TSNav.showAuthModal('signup', 'post_game');
         scopeList.parentElement.insertBefore(hint, scopeList.nextSibling);
       }
     } else if (!tierAccess.all) {
@@ -940,7 +945,7 @@ init();
         if (isAnon) {
           const note = document.createElement('div');
           note.style.cssText = 'text-align:center;font-size:12px;color:var(--accent-yellow);padding:8px 0 4px;';
-          note.innerHTML = '\uD83C\uDFB2 Random play only — <a href="#" style="color:var(--accent-cyan);text-decoration:underline;" onclick="TSNav.showAuthModal(\'signup\');return false;">sign up free</a> to choose your own';
+          note.innerHTML = '\uD83C\uDFB2 Random play only — <a href="#" style="color:var(--accent-cyan);text-decoration:underline;" onclick="TSNav.showAuthModal(\'signup\',\'post_game\');return false;">sign up free</a> to choose your own';
           if (scopeListEl) scopeListEl.parentElement.insertBefore(note, scopeListEl);
         }
         if (scopeListEl) scopeListEl.parentElement.insertBefore(roulette, scopeListEl);

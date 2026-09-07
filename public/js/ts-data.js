@@ -28,6 +28,16 @@
     player_alphabet: '\uD83D\uDD24'
   };
 
+  /**
+   * game_type as written to ts_game_sessions -> the key _daily.js uses.
+   * Two vocabularies exist because the games predate the daily; mapping them
+   * here beats renaming a column that four years of rows already use.
+   */
+  const DAILY_GAME_KEYS = {
+    higher_lower: 'hol', player_alphabet: 'alpha', starting_xi: 'xi',
+    who_am_i: 'whoami', pop_quiz: 'quiz',
+  };
+
   const TSData = {
 
     GAME_TYPE_LABELS,
@@ -55,9 +65,16 @@
         // user-authored title for custom/community games — scopeParams()
         // returns {} for anything that is not a recognised scope id, which
         // is what keeps free text out of GA4.
-        Object.assign(gaParams, TSAnalytics.scopeParams(sessionData.game_category));
-        TSAnalytics.gameComplete(sessionData.game_type, gaParams);
+        Object.assign(gaParams, TSAnalytics.scopeParams?.(sessionData.game_category));
+        TSAnalytics.gameComplete?.(sessionData.game_type, gaParams);
       }
+
+      // ── Daily challenge ───────────────────────────────────────────
+      // Filed here rather than in each game for the same reason game_complete
+      // is: this is the one method every genuine end-of-round passes through.
+      // Doing it before the auth check is deliberate — a streak is local, and
+      // a signed-out player earns one exactly like anybody else.
+      this.recordDaily(sessionData);
 
       const userId = TSAuth.getUserId();
       if (!userId) return { error: 'No user' };
@@ -108,6 +125,37 @@
         session_id: session.id,
         ...xpResult
       };
+    },
+
+    /**
+     * If this round was today's daily challenge, file it against the streak.
+     *
+     * The game does not need to know it was the daily: the link carried
+     * ?daily=<date>, so this reads it back off the URL. A date that is not
+     * today is ignored — the challenge is answerable for any day, but a streak
+     * is only earned on the day.
+     */
+    recordDaily(sessionData) {
+      if (!window.TSStreak || !sessionData) return;
+      var date;
+      try {
+        date = new URLSearchParams(window.location.search).get('daily');
+      } catch (_) { return; }
+      if (!date || date !== TSStreak.utcDate(0)) return;
+      if (sessionData.completed === false) return;
+
+      var key = DAILY_GAME_KEYS[sessionData.game_type];
+      if (!key) return;
+      TSStreak.record(date, key, sessionData);
+
+      // Structured and scalar only: the game, the day and the resulting
+      // streak. No score, no club, nothing a player typed.
+      if (window.TSAnalytics) {
+        TSAnalytics.trackEvent?.('daily_complete', {
+          daily_game: key,
+          streak_days: TSStreak.get().current,
+        });
+      }
     },
 
     /** Increment daily play count for a game type */
@@ -351,7 +399,7 @@
       // share. The shared text itself is never sent.
       const trackShare = (method) => {
         if (!window.TSAnalytics) return;
-        TSAnalytics.trackEvent('result_share', {
+        TSAnalytics.trackEvent?.('result_share', {
           game_type: result && result.game_type,
           share_method: method,
           score: typeof (result && result.score) === 'number' ? result.score : undefined

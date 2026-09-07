@@ -186,6 +186,20 @@
   var roundsStarted = {};   // game_type -> number of rounds begun this page
   var round = null;         // { gameType, params, completed }
 
+  /* Events that must fire at most once per page load. A paywall re-rendering,
+     or two code paths reaching the same overlay, must not read as two people
+     hitting it. */
+  var seen = {};
+
+  /* Closed vocabularies. Every value below is chosen at a call site in this
+     codebase, never taken from a user, and anything not in the list becomes
+     'other' rather than being sent. This is what stops a new button quietly
+     introducing a new dimension — or a free-text value. */
+  var PAYWALL_ACTIONS = ['signup', 'upgrade', 'day_pass', 'dismiss'];
+  var SIGNUP_SOURCES = ['nav', 'paywall', 'upgrade_page', 'post_game', 'homepage', 'daily'];
+  var PLANS = ['lifetime', 'day_pass'];
+  var TIERS = ['anonymous', 'free', 'paid'];
+
   // ------------------------------------------------------------------
   // Public API
   // ------------------------------------------------------------------
@@ -228,7 +242,24 @@
      */
     scopeParams: function (scopeId) {
       if (typeof scopeId !== 'string') return {};
-      var m = /^([a-z0-9]+)_(alltime|club_[a-z0-9_-]+)$/.exec(scopeId.trim().toLowerCase());
+      var id = scopeId.trim().toLowerCase();
+
+      // Team-page scopes: team_<slug>_<competition>, where <competition> may
+      // be 'all' or several joined with '+'. Both halves are values this
+      // codebase generated — a slug from data/teams/slugs.json and a
+      // competition slug from a fixed list — so neither can be user text.
+      var t = /^team_([a-z0-9-]+)_([a-z0-9+-]+)$/.exec(id);
+      if (t) {
+        return {
+          team: t[1],
+          competition: t[2],
+          // How many divisions the round covers, which is the interesting
+          // question about the chip picker and is a number rather than a name.
+          competition_count: t[2] === 'all' ? 0 : t[2].split('+').length,
+        };
+      }
+
+      var m = /^([a-z0-9]+)_(alltime|club_[a-z0-9_-]+)$/.exec(id);
       if (!m) return {};
       var out = { league: m[1] };
       if (m[2].indexOf('club_') === 0) out.club = m[2].slice(5);
@@ -270,6 +301,106 @@
     /** Parameters captured for the round in progress (read-only copy). */
     currentRoundParams: function () {
       return round ? merge({}, round.params) : {};
+    },
+
+    /* ================================================================
+     * COMMERCIAL EVENTS
+     * ================================================================
+     * The paywall, the account and the checkout. Named methods rather than
+     * bare trackEvent() calls at each site, for two reasons: the event names
+     * stay in one file where they can be read as a list, and the once-only
+     * rules live with the event instead of in whichever page happens to fire
+     * it.
+     *
+     * WHAT IS DELIBERATELY NOT HERE
+     *
+     * There is no `purchase` event. GA4 reserves that name for revenue, and
+     * the only thing a browser can observe is somebody arriving back from
+     * Stripe — a URL anybody can load, and one a paying customer may never
+     * load at all if they close the tab. Revenue is recorded by
+     * stripe-webhook.js against ts_payments, which is the truth. What is here
+     * is `checkout_return`, which is what actually happened.
+     *
+     * No event below carries an email address, a name, a promo code, a Stripe
+     * id or an amount. cleanParams would pass a string through, so the
+     * discipline is at the call sites, and scripts/analytics/verify.js asserts
+     * it.
+     */
+
+    /** Fires once per page: a limit stopped somebody playing. */
+    paywallView: function (params) {
+      if (excluded || seen.paywall) return;
+      seen.paywall = true;
+      this.trackEvent('paywall_view', params);
+    },
+
+    /**
+     * What they did about it. `action` must be one of a fixed set, so a new
+     * button cannot quietly start sending a new value.
+     */
+    paywallAction: function (action, params) {
+      if (PAYWALL_ACTIONS.indexOf(action) === -1) return;
+      this.trackEvent('paywall_action', merge({ action: action }, params || {}));
+    },
+
+    /**
+     * The account dialog opened. `source` is where from, and it is checked
+     * against a list for the same reason: these are call sites, not user input.
+     */
+    signupView: function (source) {
+      this.trackEvent('signup_view', { source: SIGNUP_SOURCES.indexOf(source) === -1 ? 'other' : source });
+    },
+
+    /** The form was submitted and the backend accepted it. No email, ever. */
+    signupSubmit: function () {
+      if (seen.signup) return;
+      seen.signup = true;
+      this.trackEvent('signup_submit', {});
+    },
+
+    /** A confirmed account reached the site for the first time. */
+    signupComplete: function () {
+      if (seen.signupDone) return;
+      seen.signupDone = true;
+      this.trackEvent('signup_complete', {});
+    },
+
+    /** A successful sign-in. `method` is password or magic_link. */
+    loginSuccess: function (method) {
+      this.trackEvent('login_success', { method: method === 'magic_link' ? 'magic_link' : 'password' });
+    },
+
+    /** The upgrade page was seen. Fires once per page load. */
+    upgradeView: function (tier) {
+      if (excluded || seen.upgrade) return;
+      seen.upgrade = true;
+      this.trackEvent('upgrade_view', { tier: TIERS.indexOf(tier) === -1 ? 'unknown' : tier });
+    },
+
+    /** About to hand off to Stripe. `plan` is lifetime or day_pass. */
+    checkoutStart: function (plan) {
+      this.trackEvent('checkout_start', { plan: PLANS.indexOf(plan) === -1 ? 'other' : plan });
+    },
+
+    /**
+     * The handoff failed. The reason is NOT sent: it comes from an exception
+     * message and could carry anything, including something a user typed.
+     */
+    checkoutError: function (plan) {
+      this.trackEvent('checkout_error', { plan: PLANS.indexOf(plan) === -1 ? 'other' : plan });
+    },
+
+    /**
+     * Back from Stripe. NOT a purchase — see the note above. `status` says
+     * which of the two return URLs this was.
+     */
+    checkoutReturn: function (plan, status) {
+      if (excluded || seen.checkoutReturn) return;
+      seen.checkoutReturn = true;
+      this.trackEvent('checkout_return', {
+        plan: PLANS.indexOf(plan) === -1 ? 'other' : plan,
+        status: status === 'cancelled' ? 'cancelled' : 'returned',
+      });
     },
 
     /**

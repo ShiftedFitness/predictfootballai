@@ -86,6 +86,36 @@ const CASES = [
   ['community-builder', 'preview',         post({ action: 'preview', gameType: 'higher_lower',
                                                   filters: { competitions: ['Premier League'], clubs: ['Liverpool'] } })],
 
+  // The three scope shapes a team page can hand a game: one competition, a
+  // chosen subset of them, and all of them. Every one of these has been broken
+  // at some point by a variable that existed in the handler but not in the
+  // helper that read it — a failure that shows up as "no players found", which
+  // reads like thin data rather than a bug. Sunderland is the case worth
+  // pinning: four divisions, so all three shapes are genuinely different.
+  ['hol_start',         'team · one comp',  post({ action: 'get_players', scopeId: 'team_sunderland_league-one', statType: 'appearances' })],
+  ['hol_start',         'team · subset',    post({ action: 'get_players', scopeId: 'team_sunderland_premier-league+championship', statType: 'appearances' })],
+  ['hol_start',         'team · all comps', post({ action: 'get_players', scopeId: 'team_sunderland_all', statType: 'appearances' })],
+  ['alpha_start',       'team · subset',    post({ action: 'get_alphabet', scopeId: 'team_sunderland_premier-league+championship' })],
+  ['whoami_start',      'team · all comps', post({ action: 'start_game', scopeId: 'team_plymouth-argyle_all' })],
+  ['xi_start',          'team · subset',    post({ action: 'get_best_xi', scopeId: 'team_sunderland_premier-league+championship',
+                                                   formation: '4-4-2', objective: 'appearances' })],
+  ['quiz_start',        'team · all comps', post({ action: 'generate_quiz', scopeId: 'team_plymouth-argyle_all' })],
+  // A scope naming a competition the club never played in must be refused, not
+  // answered with an empty game.
+  ['hol_start',         'bad subset 400',   post({ action: 'get_players', scopeId: 'team_sunderland_serie-a+championship', statType: 'appearances' }), 400],
+
+  // Team pages: the leaderboard and community list that are fetched after paint.
+  ['team-extras',       'leaderboard',      get('?slug=manchester-united')],
+  ['team-extras',       'quiet club',       get('?slug=plymouth-argyle')],
+  ['team-extras',       'bad slug 400',     get('?slug=not-a-club'), 400],
+
+  // The daily. Whether the CHALLENGE is playable is checked separately and far
+  // more thoroughly by scripts/daily/verify.js, which plays four months of
+  // them. This is only that the endpoint answers and stays deterministic.
+  ['daily',             'today',            get('')],
+  ['daily',             'a week ahead',     get('?days=7')],
+  ['daily',             'a garbage date',   get('?date=not-a-date')],
+
   // Bullseye. Absent from the first version of this file, which is how it
   // reached a user with an empty board for Málaga. A non-English club is
   // deliberate: the English ones were never going to catch a lost accent.
@@ -106,11 +136,23 @@ const CASES = [
   }],
 ];
 
-/** A 200 that contains an `error` key is a failure dressed as a success. */
-function verdict(res) {
+/**
+ * A 200 that contains an `error` key is a failure dressed as a success.
+ *
+ * A case may name the status it EXPECTS. Refusing a bad scope with a 400 is
+ * correct behaviour and has to be asserted, not merely tolerated — a handler
+ * that answers a nonsense scope with an empty 200 is the failure mode these
+ * pages keep producing.
+ */
+function verdict(res, expect) {
   if (!res || typeof res.statusCode !== 'number') return { ok: false, why: 'no response' };
   let body = {};
   try { body = JSON.parse(res.body || '{}'); } catch { /* non-JSON is fine */ }
+  if (expect) {
+    return res.statusCode === expect
+      ? { ok: true, why: `${res.statusCode} as expected · ${body.error || ''}`.trim() }
+      : { ok: false, why: `expected ${expect}, got ${res.statusCode}` };
+  }
   if (res.statusCode >= 400) return { ok: false, why: `${res.statusCode} ${body.error || ''}`.trim() };
   if (body && body.error) return { ok: false, why: `200 but error: ${body.error}` };
   const size = (res.body || '').length;
@@ -122,7 +164,7 @@ function verdict(res) {
   console.log(`\n  Smoke test — ${LIVE ? 'LIVE tables (control)' : 'COMPAT views (rebuilt data)'}\n`);
 
   let pass = 0, fail = 0;
-  for (const [file, label, eventOrFn] of CASES) {
+  for (const [file, label, eventOrFn, expect] of CASES) {
     const p = path.join(FUNCS, `${file}.js`);
     if (!fs.existsSync(p)) { console.log(`  ?  ${file} — not found`); continue; }
 
@@ -137,7 +179,7 @@ function verdict(res) {
     } catch (e) { err = e; }
     const ms = Date.now() - t0;
 
-    const v = err ? { ok: false, why: `threw: ${err.message}` } : verdict(res);
+    const v = err ? { ok: false, why: `threw: ${err.message}` } : verdict(res, expect);
     v.ok ? pass++ : fail++;
     console.log(`  ${v.ok ? '✓' : '✗'}  ${(file + ' · ' + label).padEnd(36)} ${String(ms).padStart(5)}ms  ${v.why}`);
   }

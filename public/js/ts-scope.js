@@ -38,9 +38,21 @@
    */
   function requested(scopes) {
     var wanted = param('scope');
-    if (!wanted || !Array.isArray(scopes)) return null;
-    for (var i = 0; i < scopes.length; i++) {
-      if (scopes[i] && scopes[i].id === wanted) return scopes[i];
+    if (!wanted) return null;
+    if (Array.isArray(scopes)) {
+      for (var i = 0; i < scopes.length; i++) {
+        if (scopes[i] && scopes[i].id === wanted) return scopes[i];
+      }
+    }
+    // Not in the list, but shaped like one of ours. Team pages let a supporter
+    // pick two of a club's four divisions, and the resulting subset id is not
+    // pre-enumerated in any picker — a club in four competitions has eleven
+    // such subsets, and putting all of them in front of every player to serve a
+    // choice made on one page would be absurd. The server resolves it properly
+    // and rejects anything it does not recognise, so an id it has never seen
+    // comes back as a clean error rather than a game about the wrong club.
+    if (/^team_[a-z0-9-]+_[a-z0-9+-]+$/.test(wanted)) {
+      return { id: wanted, label: null, synthetic: true };
     }
     return null;
   }
@@ -64,6 +76,72 @@
   }
 
   /**
+   * Start the game without making the player choose again.
+   *
+   * Arriving from a team page having already picked the club, the division and
+   * the game, and then landing on a picker offering every other club, reads as
+   * if the link went nowhere. So: click through for them.
+   *
+   * Deliberately a click on the game's own start control rather than a call to
+   * its start function. Each game does different work in that handler —
+   * disabling the button, swapping in a spinner, reading the formation — and
+   * calling past it would skip whichever parts happen to live there.
+   *
+   *   TSScope.play(function () { return document.getElementById('startBtn'); })
+   *
+   * Does nothing unless the URL asked for it with &play=1 and a scope resolved.
+   */
+  function play(getButton, opts) {
+    if (!autostart() || !param('scope')) return false;
+    var tries = 0;
+    (function attempt() {
+      var btn = null;
+      try { btn = getButton(); } catch (_) { btn = null; }
+      // A game whose scope list is still loading has a disabled button; wait
+      // for it rather than clicking a control that will refuse.
+      if (btn && !btn.disabled) {
+        if (!opts || opts.announce !== false) announce();
+        btn.click();
+        return;
+      }
+      if (++tries < 40) setTimeout(attempt, 100);   // 4s, then give up quietly
+    })();
+    return true;
+  }
+
+  /**
+   * A line saying where the player came from and how to change it. Autostarting
+   * without this would leave someone who followed the wrong link with no way
+   * back to the picker except the browser button.
+   */
+  function announce() {
+    if (document.getElementById('ts-scope-note')) return;
+    var team = sourceTeam();
+    var note = document.createElement('div');
+    note.id = 'ts-scope-note';
+    note.setAttribute('style',
+      'max-width:900px;margin:10px auto 0;padding:8px 12px;border-radius:7px;' +
+      'font-size:.8rem;line-height:1.4;background:rgba(255,255,255,.04);' +
+      'color:var(--text-secondary,#9FB0BC);text-align:center');
+    var here = window.location.pathname;
+    var link = function (href, text) {
+      return '<a style="color:var(--accent,#00E5FF)" href="' + href + '">' + text + '</a>';
+    };
+    var title = function (slug) {
+      return slug.replace(/-/g, ' ').replace(/\b\w/g, function (c) { return c.toUpperCase(); });
+    };
+    // Where they came from decides what the way back should say. A daily
+    // player wants the daily; somebody who chose a club wants that club.
+    note.innerHTML = param('daily')
+      ? 'Today\u2019s TeleStats Daily. ' + link('/daily/', 'Back to the daily') +
+        (team ? ' \u00b7 ' + link('/teams/' + team + '/', title(team)) : '')
+      : 'Started from your team page.' +
+        (team ? ' ' + link('/teams/' + team + '/', 'Back to ' + title(team)) + ' \u00b7' : '') +
+        ' ' + link(here, 'Pick a different team');
+    if (document.body) document.body.insertBefore(note, document.body.firstChild);
+  }
+
+  /**
    * Where the player came from, for analytics. Scalar and safe: this is a slug
    * we generated, never anything a user typed, so it can go to GA4 — unlike a
    * free-text guess or a player name.
@@ -75,5 +153,6 @@
   }
 
   window.TSScope = { requested: requested, requestedId: requestedId,
-                     autostart: autostart, sourceTeam: sourceTeam, param: param };
+                     autostart: autostart, play: play, sourceTeam: sourceTeam,
+                     param: param };
 })();
