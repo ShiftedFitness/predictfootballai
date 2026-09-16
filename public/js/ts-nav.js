@@ -20,6 +20,7 @@
     { label: 'Home', href: '/', match: (p) => p === '/' || p === '/index.html' },
     { label: 'Daily', href: '/daily/', match: (p) => p.startsWith('/daily') },
     { label: 'Games', href: '/games/', match: (p) => p.startsWith('/games') },
+    { label: 'Competitions', href: '/competitions/', match: (p) => p.startsWith('/competitions') },
     { label: 'Teams', href: '/teams/', match: (p) => p.startsWith('/teams') },
     { label: 'Ask', href: '/ask/', match: (p) => p.startsWith('/ask') },
     { label: 'Leaderboard', href: '/leaderboard/', match: (p) => p.startsWith('/leaderboard') },

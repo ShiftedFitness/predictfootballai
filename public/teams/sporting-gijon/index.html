@@ -5,17 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="/js/ts-analytics.js"></script>
 <title>Sporting Gijón Football Quiz &amp; Trivia Games | TeleStats</title>
-<meta name="description" content="Play Sporting Gijón football quizzes and trivia games built from 205 players and 8,314 appearances in La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta name="description" content="Play Sporting Gijón football quizzes and trivia games built from 406 players and 19,847 appearances in Segunda División and La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
 <link rel="canonical" href="https://telestats.net/teams/sporting-gijon/">
 <meta name="theme-color" content="#CC2229">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Sporting Gijón Football Quiz &amp; Trivia Games | TeleStats">
-<meta property="og:description" content="Play Sporting Gijón football quizzes and trivia games built from 205 players and 8,314 appearances in La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta property="og:description" content="Play Sporting Gijón football quizzes and trivia games built from 406 players and 19,847 appearances in Segunda División and La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
 <meta property="og:url" content="https://telestats.net/teams/sporting-gijon/">
 <meta property="og:site_name" content="TeleStats">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Sporting Gijón Football Quiz &amp; Trivia Games | TeleStats">
-<meta name="twitter:description" content="Play Sporting Gijón football quizzes and trivia games built from 205 players and 8,314 appearances in La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta name="twitter:description" content="Play Sporting Gijón football quizzes and trivia games built from 406 players and 19,847 appearances in Segunda División and La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
 <link rel="stylesheet" href="/telestats-theme.css">
 <style>
   :root { --club: #CC2229; --club-2: #a40001; }
@@ -52,6 +52,9 @@
   .crest { width: 52px; height: 60px; flex: 0 0 auto; filter: drop-shadow(0 2px 6px rgba(0,0,0,.45)); }
   .hero h1 { font-size: 1.65rem; line-height: 1.2; margin: 0 0 5px; }
   .sub { color: var(--text-secondary); margin: 0; font-size: .9rem; }
+  .sub a.complink { color: var(--text-secondary); text-decoration: underline;
+                    text-decoration-color: rgba(255,255,255,.22); }
+  .sub a.complink:hover { color: var(--accent); }
   .scope-note { color: var(--text-muted); font-size: .76rem; margin: 6px 0 0; }
   .scope-note a { color: var(--accent); }
 
@@ -182,9 +185,9 @@
     <nav>
       <a href="/daily/">Daily</a>
       <a href="/games/">Games</a>
+      <a href="/competitions/">Competitions</a>
       <a href="/teams/">Teams</a>
       <a href="/ask/">Ask</a>
-      <a href="/leaderboard/">Leaderboard</a>
       <a href="/community/">Community</a>
     </nav>
   </div>
@@ -205,8 +208,9 @@
     </svg>
     <div>
       <h1>Sporting Gijón Football Quizzes &amp; Trivia</h1>
-      <p class="sub">205 players · 8,314 appearances · La Liga</p>
-      <p class="scope-note">Records cover 1988/89 to 2016/17.
+      <p class="sub">406 players · 19,847 appearances ·
+        <a class="complink" href="/competitions/segunda-division/">Segunda División</a>, <a class="complink" href="/competitions/la-liga/">La Liga</a></p>
+      <p class="scope-note">Records cover 1988/89 to 2026/27.
         <a href="/tools/data.html">Full dataset scope</a>.</p>
     </div>
   </div>
@@ -216,8 +220,8 @@
   <summary>New here? What this page is</summary>
   <div class="body">
     <p>This is a set of free football games about <strong>Sporting Gijón</strong>, generated
-      from real appearance and goal records — 205 players who have turned out
-      for the club in La Liga, going back to 1988/89.</p>
+      from real appearance and goal records — 406 players who have turned out
+      for the club in Segunda División and La Liga, going back to 1988/89.</p>
     <p>Pick a game below and it starts straight away on Sporting Gijón. No sign-up, no app.
       Make an account only if you want your scores kept and your name on the club's board.</p>
     <p>Everything you see here comes from the TeleStats database. Nothing is written by an AI
@@ -243,11 +247,23 @@
 
 <h2 id="play">Play Sporting Gijón</h2>
 <p class="sub">The five TeleStats games, set up for Sporting Gijón. Click one and it starts.</p>
-      
+      <div class="chips" id="compChips" role="group"
+       aria-label="Choose which competitions to play">
+        <button type="button" class="chip all on" data-all="1" aria-pressed="true">All competitions</button>
+        <button type="button" class="chip on"
+                data-comp="Segunda División"
+                data-slug="segunda-division"
+                aria-pressed="true">Segunda División</button>
+        <button type="button" class="chip on"
+                data-comp="La Liga"
+                data-slug="la-liga"
+                aria-pressed="true">La Liga</button>
+      </div>
+      <p class="chip-note" id="chipNote"></p>
       <ul class="games">
         <li class="game">
           <a class="game-go" data-path="/games/hol.html"
-             href="/games/hol.html?scope=team_sporting-gijon_la-liga&amp;play=1">
+             href="/games/hol.html?scope=team_sporting-gijon_all&amp;play=1">
             <h3>Sporting Gijón Higher or Lower</h3>
             <p>Which player has more appearances?</p>
             <span class="go">Play now &rarr;</span>
@@ -255,7 +271,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/alpha.html"
-             href="/games/alpha.html?scope=team_sporting-gijon_la-liga&amp;play=1">
+             href="/games/alpha.html?scope=team_sporting-gijon_all&amp;play=1">
             <h3>Sporting Gijón Player Alphabet</h3>
             <p>Name a player for every letter of the alphabet.</p>
             <span class="go">Play now &rarr;</span>
@@ -263,7 +279,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/xi.html"
-             href="/games/xi.html?scope=team_sporting-gijon_la-liga&amp;play=1">
+             href="/games/xi.html?scope=team_sporting-gijon_all&amp;play=1">
             <h3>Sporting Gijón Starting XI</h3>
             <p>Build the strongest eleven you can.</p>
             <span class="go">Play now &rarr;</span>
@@ -271,7 +287,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/whoami.html"
-             href="/games/whoami.html?scope=team_sporting-gijon_la-liga&amp;play=1">
+             href="/games/whoami.html?scope=team_sporting-gijon_all&amp;play=1">
             <h3>Sporting Gijón Who Am I?</h3>
             <p>Guess the player from five clues.</p>
             <span class="go">Play now &rarr;</span>
@@ -279,7 +295,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/quiz.html"
-             href="/games/quiz.html?scope=team_sporting-gijon_la-liga&amp;play=1">
+             href="/games/quiz.html?scope=team_sporting-gijon_all&amp;play=1">
             <h3>Sporting Gijón Trivia Quiz</h3>
             <p>Ten questions from this club’s record.</p>
             <span class="go">Play now &rarr;</span>
@@ -309,108 +325,108 @@
       <tbody>
         <tr>
             <td class="rank">1</td>
+            <td>Rafel Sastre</td>
+            <td class="num">309</td>
+            <td class="num">3</td>
+            <td class="yr">2001/02–2010/11</td>
+          </tr>
+        <tr>
+            <td class="rank">2</td>
+            <td>Roberto Canella</td>
+            <td class="num">305</td>
+            <td class="num">8</td>
+            <td class="yr">2006/07–2018/19</td>
+          </tr>
+        <tr>
+            <td class="rank">3</td>
+            <td>Carlos Carmona</td>
+            <td class="num">279</td>
+            <td class="num">41</td>
+            <td class="yr">2012/13–2020/21</td>
+          </tr>
+        <tr>
+            <td class="rank">4</td>
             <td>Juan Carlos Ablanedo</td>
             <td class="num">259</td>
             <td class="num">0</td>
             <td class="yr">1988/89–1997/98</td>
           </tr>
         <tr>
-            <td class="rank">2</td>
+            <td class="rank">5</td>
+            <td>Alberto Lora</td>
+            <td class="num">255</td>
+            <td class="num">5</td>
+            <td class="yr">2007/08–2017/18</td>
+          </tr>
+        <tr>
+            <td class="rank">6</td>
+            <td>Iván Cuéllar</td>
+            <td class="num">234</td>
+            <td class="num">0</td>
+            <td class="yr">2008/09–2022/23</td>
+          </tr>
+        <tr>
+            <td class="rank">7</td>
+            <td>Uroš Đurđević</td>
+            <td class="num">219</td>
+            <td class="num">62</td>
+            <td class="yr">2018/19–2023/24</td>
+          </tr>
+        <tr>
+            <td class="rank">8</td>
             <td>Pablo Díaz Stalla</td>
             <td class="num">214</td>
             <td class="num">4</td>
             <td class="yr">1990/91–1997/98</td>
           </tr>
         <tr>
-            <td class="rank">3</td>
-            <td>Abelardo Fernández</td>
-            <td class="num">179</td>
-            <td class="num">13</td>
-            <td class="yr">1989/90–1993/94</td>
-          </tr>
-        <tr>
-            <td class="rank">4</td>
-            <td>Tomás Hervás</td>
-            <td class="num">161</td>
-            <td class="num">13</td>
-            <td class="yr">1991/92–1997/98</td>
-          </tr>
-        <tr>
-            <td class="rank">5</td>
-            <td>Juan Muñiz</td>
-            <td class="num">150</td>
-            <td class="num">6</td>
-            <td class="yr">1991/92–1995/96</td>
-          </tr>
-        <tr>
-            <td class="rank">6</td>
-            <td>Alberto Lora</td>
-            <td class="num">141</td>
-            <td class="num">3</td>
-            <td class="yr">2008/09–2016/17</td>
-          </tr>
-        <tr>
-            <td class="rank">7</td>
-            <td>Luis Sierra</td>
-            <td class="num">139</td>
-            <td class="num">1</td>
-            <td class="yr">1988/89–1993/94</td>
-          </tr>
-        <tr>
-            <td class="rank">8</td>
-            <td>David Barral</td>
-            <td class="num">132</td>
-            <td class="num">28</td>
-            <td class="yr">2008/09–2011/12</td>
-          </tr>
-        <tr>
             <td class="rank">9</td>
-            <td>Óscar Luis Celada</td>
-            <td class="num">129</td>
-            <td class="num">10</td>
-            <td class="yr">1988/89–1993/94</td>
+            <td>Diego Mariño</td>
+            <td class="num">210</td>
+            <td class="num">0</td>
+            <td class="yr">2016/17–2022/23</td>
           </tr>
         <tr>
             <td class="rank">10</td>
-            <td>Roberto Canella</td>
-            <td class="num">129</td>
-            <td class="num">4</td>
-            <td class="yr">2008/09–2016/17</td>
+            <td>Nacho Méndez</td>
+            <td class="num">203</td>
+            <td class="num">15</td>
+            <td class="yr">2017/18–2024/25</td>
           </tr>
         <tr>
             <td class="rank">11</td>
-            <td>Joaquín</td>
-            <td class="num">128</td>
-            <td class="num">16</td>
-            <td class="yr">1988/89–1991/92</td>
+            <td>David Barral</td>
+            <td class="num">201</td>
+            <td class="num">48</td>
+            <td class="yr">2006/07–2011/12</td>
           </tr>
         <tr>
             <td class="rank">12</td>
-            <td>Javier Manjarín</td>
-            <td class="num">115</td>
-            <td class="num">16</td>
-            <td class="yr">1989/90–1992/93</td>
+            <td>Mate Bilić</td>
+            <td class="num">200</td>
+            <td class="num">57</td>
+            <td class="yr">2003/04–2012/13</td>
           </tr>
         <tr>
             <td class="rank">13</td>
-            <td>Tati Alcalde</td>
-            <td class="num">114</td>
+            <td>Roberto</td>
+            <td class="num">197</td>
             <td class="num">0</td>
-            <td class="yr">1988/89–1992/93</td>
+            <td class="yr">2002/03–2007/08</td>
           </tr>
         <tr>
             <td class="rank">14</td>
-            <td>Alcázar</td>
-            <td class="num">112</td>
-            <td class="num">2</td>
-            <td class="yr">1989/90–1992/93</td>
+            <td>Guillermo Rosas</td>
+            <td class="num">189</td>
+            <td class="num">6</td>
+            <td class="yr">2020/21–2026/27</td>
           </tr>
         <tr>
             <td class="rank">15</td>
-            <td>Manuel Jiménez Abalo</td>
-            <td class="num">109</td>
+            <td>Javi Fuego</td>
+            <td class="num">185</td>
             <td class="num">4</td>
-            <td class="yr">1988/89–1990/91</td>
+            <td class="yr">2002/03–2020/21</td>
           </tr>
       </tbody>
     </table>
@@ -425,63 +441,63 @@
       <tbody>
         <tr>
             <td class="rank">1</td>
-            <td>David Barral</td>
-            <td class="num">28</td>
-            <td class="num">132</td>
+            <td>Uroš Đurđević</td>
+            <td class="num">62</td>
+            <td class="num">219</td>
           </tr>
         <tr>
             <td class="rank">2</td>
-            <td>Diego Castro</td>
-            <td class="num">26</td>
-            <td class="num">95</td>
+            <td>Mate Bilić</td>
+            <td class="num">57</td>
+            <td class="num">200</td>
           </tr>
         <tr>
             <td class="rank">3</td>
+            <td>David Barral</td>
+            <td class="num">48</td>
+            <td class="num">201</td>
+          </tr>
+        <tr>
+            <td class="rank">4</td>
+            <td>Juan Ferney Otero</td>
+            <td class="num">44</td>
+            <td class="num">154</td>
+          </tr>
+        <tr>
+            <td class="rank">5</td>
+            <td>Carlos Carmona</td>
+            <td class="num">41</td>
+            <td class="num">279</td>
+          </tr>
+        <tr>
+            <td class="rank">6</td>
+            <td>Diego Castro</td>
+            <td class="num">40</td>
+            <td class="num">170</td>
+          </tr>
+        <tr>
+            <td class="rank">7</td>
+            <td>David Villa</td>
+            <td class="num">38</td>
+            <td class="num">79</td>
+          </tr>
+        <tr>
+            <td class="rank">8</td>
+            <td>Stefan Šćepović</td>
+            <td class="num">27</td>
+            <td class="num">54</td>
+          </tr>
+        <tr>
+            <td class="rank">9</td>
             <td>Julio Salinas</td>
             <td class="num">24</td>
             <td class="num">54</td>
           </tr>
         <tr>
-            <td class="rank">4</td>
-            <td>Milan Luhový</td>
-            <td class="num">23</td>
-            <td class="num">56</td>
-          </tr>
-        <tr>
-            <td class="rank">5</td>
-            <td>Mate Bilić</td>
-            <td class="num">20</td>
-            <td class="num">106</td>
-          </tr>
-        <tr>
-            <td class="rank">6</td>
-            <td>Juanele</td>
-            <td class="num">18</td>
-            <td class="num">91</td>
-          </tr>
-        <tr>
-            <td class="rank">7</td>
-            <td>Narciso Rodríguez</td>
-            <td class="num">18</td>
-            <td class="num">76</td>
-          </tr>
-        <tr>
-            <td class="rank">8</td>
-            <td>Igor Lediakhov</td>
-            <td class="num">17</td>
-            <td class="num">106</td>
-          </tr>
-        <tr>
-            <td class="rank">9</td>
-            <td>Miguel de las Cuevas</td>
-            <td class="num">17</td>
-            <td class="num">109</td>
-          </tr>
-        <tr>
             <td class="rank">10</td>
-            <td>Joaquín</td>
-            <td class="num">16</td>
-            <td class="num">128</td>
+            <td>Pablo Álvarez</td>
+            <td class="num">24</td>
+            <td class="num">157</td>
           </tr>
       </tbody>
     </table>
@@ -495,6 +511,13 @@
       <thead><tr><th>Competition</th><th class="num">Players</th><th>Seasons</th><th class="num">Count</th><th>Games</th></tr></thead>
       <tbody>
         <tr>
+            <td>Segunda División</td>
+            <td class="num">264</td>
+            <td class="yr">2001/02–2026/27</td>
+            <td class="num">8</td>
+            <td class="yes">Playable</td>
+          </tr>
+        <tr>
             <td>La Liga</td>
             <td class="num">205</td>
             <td class="yr">1988/89–2016/17</td>
@@ -507,35 +530,35 @@
 </details>
 
 <h2>Ask about Sporting Gijón</h2>
-<p class="sub">Ask the database a question. Answers come from 205 Sporting Gijón
+<p class="sub">Ask the database a question. Answers come from 406 Sporting Gijón
   players and are never invented — if the data does not support an answer, it says so.</p>
 <form class="ask" id="askForm">
   <input id="askQ" autocomplete="off" maxlength="300"
-         placeholder="Who has played for both Sporting Gijón and Sevilla?"
+         placeholder="Who has played for both Sporting Gijón and Valladolid?"
          aria-label="Ask a question about Sporting Gijón">
   <button type="submit">Ask</button>
 </form>
 <div class="ask-examples">
-          <button type="button" data-q="Who has played for both Sporting Gijón and Sevilla?">Who has played for both Sporting Gijón and Sevilla?</button>
-          <button type="button" data-q="Top scorers for Sporting Gijón in La Liga">Top scorers for Sporting Gijón in La Liga</button>
+          <button type="button" data-q="Who has played for both Sporting Gijón and Valladolid?">Who has played for both Sporting Gijón and Valladolid?</button>
+          <button type="button" data-q="Top scorers for Sporting Gijón in Segunda División">Top scorers for Sporting Gijón in Segunda División</button>
           <button type="button" data-q="Which English players have the most appearances for Sporting Gijón?">Which English players have the most appearances for Sporting Gijón?</button>
 </div>
 <div id="askAnswer"></div>
 
 <h2>More teams</h2>
 <div class="related">
-          <a href="/teams/sevilla/">Sevilla</a>
-          <a href="/teams/espanyol/">Espanyol</a>
-          <a href="/teams/atletico-madrid/">Atlético Madrid</a>
-          <a href="/teams/valencia/">Valencia</a>
-          <a href="/teams/real-betis/">Real Betis</a>
-          <a href="/teams/barcelona/">Barcelona</a>
           <a href="/teams/valladolid/">Valladolid</a>
-          <a href="/teams/celta-vigo/">Celta Vigo</a>
+          <a href="/teams/albacete/">Albacete</a>
+          <a href="/teams/zaragoza/">Zaragoza</a>
+          <a href="/teams/tenerife/">Tenerife</a>
+          <a href="/teams/elche/">Elche</a>
+          <a href="/teams/espanyol/">Espanyol</a>
+          <a href="/teams/sevilla/">Sevilla</a>
           <a href="/teams/mallorca/">Mallorca</a>
-          <a href="/teams/real-madrid/">Real Madrid</a>
+          <a href="/teams/malaga/">Málaga</a>
+          <a href="/teams/atletico-madrid/">Atlético Madrid</a>
           <a href="/teams/rayo-vallecano/">Rayo Vallecano</a>
-          <a href="/teams/villarreal/">Villarreal</a>
+          <a href="/teams/celta-vigo/">Celta Vigo</a>
 </div>
 
 <footer class="page">
@@ -549,7 +572,7 @@
 </div><!-- /wrap -->
 
 <script>
-window.TS_TEAM = {"slug":"sporting-gijon","name":"Sporting Gijón","comps":["La Liga"],"defaultScope":"team_sporting-gijon_la-liga","potd":[{"n":"Juan Carlos Ablanedo","a":259,"g":0,"f":"1988/89","t":"1997/98"},{"n":"Pablo Díaz Stalla","a":214,"g":4,"f":"1990/91","t":"1997/98"},{"n":"Abelardo Fernández","a":179,"g":13,"f":"1989/90","t":"1993/94"},{"n":"Tomás Hervás","a":161,"g":13,"f":"1991/92","t":"1997/98"},{"n":"Juan Muñiz","a":150,"g":6,"f":"1991/92","t":"1995/96"},{"n":"Alberto Lora","a":141,"g":3,"f":"2008/09","t":"2016/17"},{"n":"Luis Sierra","a":139,"g":1,"f":"1988/89","t":"1993/94"},{"n":"David Barral","a":132,"g":28,"f":"2008/09","t":"2011/12"},{"n":"Óscar Luis Celada","a":129,"g":10,"f":"1988/89","t":"1993/94"},{"n":"Roberto Canella","a":129,"g":4,"f":"2008/09","t":"2016/17"},{"n":"Joaquín","a":128,"g":16,"f":"1988/89","t":"1991/92"},{"n":"Javier Manjarín","a":115,"g":16,"f":"1989/90","t":"1992/93"},{"n":"Tati Alcalde","a":114,"g":0,"f":"1988/89","t":"1992/93"},{"n":"Alcázar","a":112,"g":2,"f":"1989/90","t":"1992/93"},{"n":"Manuel Jiménez Abalo","a":109,"g":4,"f":"1988/89","t":"1990/91"}]};
+window.TS_TEAM = {"slug":"sporting-gijon","name":"Sporting Gijón","comps":["Segunda División","La Liga"],"defaultScope":"team_sporting-gijon_all","potd":[{"n":"Rafel Sastre","a":309,"g":3,"f":"2001/02","t":"2010/11"},{"n":"Roberto Canella","a":305,"g":8,"f":"2006/07","t":"2018/19"},{"n":"Carlos Carmona","a":279,"g":41,"f":"2012/13","t":"2020/21"},{"n":"Juan Carlos Ablanedo","a":259,"g":0,"f":"1988/89","t":"1997/98"},{"n":"Alberto Lora","a":255,"g":5,"f":"2007/08","t":"2017/18"},{"n":"Iván Cuéllar","a":234,"g":0,"f":"2008/09","t":"2022/23"},{"n":"Uroš Đurđević","a":219,"g":62,"f":"2018/19","t":"2023/24"},{"n":"Pablo Díaz Stalla","a":214,"g":4,"f":"1990/91","t":"1997/98"},{"n":"Diego Mariño","a":210,"g":0,"f":"2016/17","t":"2022/23"},{"n":"Nacho Méndez","a":203,"g":15,"f":"2017/18","t":"2024/25"},{"n":"David Barral","a":201,"g":48,"f":"2006/07","t":"2011/12"},{"n":"Mate Bilić","a":200,"g":57,"f":"2003/04","t":"2012/13"},{"n":"Roberto","a":197,"g":0,"f":"2002/03","t":"2007/08"},{"n":"Guillermo Rosas","a":189,"g":6,"f":"2020/21","t":"2026/27"},{"n":"Javi Fuego","a":185,"g":4,"f":"2002/03","t":"2020/21"}]};
 </script>
 <script src="/js/ts-scope.js"></script>
 <script src="/js/team-page.js"></script>
@@ -566,6 +589,6 @@ window.TS_TEAM = {"slug":"sporting-gijon","name":"Sporting Gijón","comps":["La 
     try { TSNav.render(); } catch (e) { console.error('[TeleStats] Nav render failed:', e); }
   })();
 </script>
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TeleStats","item":"https://telestats.net"},{"@type":"ListItem","position":2,"name":"Teams","item":"https://telestats.net/teams/"},{"@type":"ListItem","position":3,"name":"Sporting Gijón","item":"https://telestats.net/teams/sporting-gijon/"}]},{"@type":"SportsTeam","name":"Sporting Gijón","sport":"Association football","url":"https://telestats.net/teams/sporting-gijon/"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is the Sporting Gijón page on TeleStats?","acceptedAnswer":{"@type":"Answer","text":"Free Sporting Gijón football quizzes and trivia games generated from real appearance and goal records for 205 players across La Liga. No sign-up is needed to play."}}]}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TeleStats","item":"https://telestats.net"},{"@type":"ListItem","position":2,"name":"Teams","item":"https://telestats.net/teams/"},{"@type":"ListItem","position":3,"name":"Sporting Gijón","item":"https://telestats.net/teams/sporting-gijon/"}]},{"@type":"SportsTeam","name":"Sporting Gijón","sport":"Association football","url":"https://telestats.net/teams/sporting-gijon/"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is the Sporting Gijón page on TeleStats?","acceptedAnswer":{"@type":"Answer","text":"Free Sporting Gijón football quizzes and trivia games generated from real appearance and goal records for 406 players across Segunda División and La Liga. No sign-up is needed to play."}}]}]}</script>
 </body>
 </html>

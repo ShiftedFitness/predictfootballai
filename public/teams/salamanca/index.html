@@ -5,17 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="/js/ts-analytics.js"></script>
 <title>Salamanca Football Quiz &amp; Trivia Games | TeleStats</title>
-<meta name="description" content="Play Salamanca football quizzes and trivia games built from 53 players and 1,589 appearances in La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta name="description" content="Play Salamanca football quizzes and trivia games built from 184 players and 6,810 appearances in Segunda División and La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
 <link rel="canonical" href="https://telestats.net/teams/salamanca/">
 <meta name="theme-color" content="hsl(255, 73%, 38%)">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Salamanca Football Quiz &amp; Trivia Games | TeleStats">
-<meta property="og:description" content="Play Salamanca football quizzes and trivia games built from 53 players and 1,589 appearances in La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta property="og:description" content="Play Salamanca football quizzes and trivia games built from 184 players and 6,810 appearances in Segunda División and La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
 <meta property="og:url" content="https://telestats.net/teams/salamanca/">
 <meta property="og:site_name" content="TeleStats">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Salamanca Football Quiz &amp; Trivia Games | TeleStats">
-<meta name="twitter:description" content="Play Salamanca football quizzes and trivia games built from 53 players and 1,589 appearances in La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta name="twitter:description" content="Play Salamanca football quizzes and trivia games built from 184 players and 6,810 appearances in Segunda División and La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
 <link rel="stylesheet" href="/telestats-theme.css">
 <style>
   :root { --club: hsl(255, 73%, 38%); --club-2: hsl(273, 73%, 26%); }
@@ -52,6 +52,9 @@
   .crest { width: 52px; height: 60px; flex: 0 0 auto; filter: drop-shadow(0 2px 6px rgba(0,0,0,.45)); }
   .hero h1 { font-size: 1.65rem; line-height: 1.2; margin: 0 0 5px; }
   .sub { color: var(--text-secondary); margin: 0; font-size: .9rem; }
+  .sub a.complink { color: var(--text-secondary); text-decoration: underline;
+                    text-decoration-color: rgba(255,255,255,.22); }
+  .sub a.complink:hover { color: var(--accent); }
   .scope-note { color: var(--text-muted); font-size: .76rem; margin: 6px 0 0; }
   .scope-note a { color: var(--accent); }
 
@@ -182,9 +185,9 @@
     <nav>
       <a href="/daily/">Daily</a>
       <a href="/games/">Games</a>
+      <a href="/competitions/">Competitions</a>
       <a href="/teams/">Teams</a>
       <a href="/ask/">Ask</a>
-      <a href="/leaderboard/">Leaderboard</a>
       <a href="/community/">Community</a>
     </nav>
   </div>
@@ -205,8 +208,9 @@
     </svg>
     <div>
       <h1>Salamanca Football Quizzes &amp; Trivia</h1>
-      <p class="sub">53 players · 1,589 appearances · La Liga</p>
-      <p class="scope-note">Records cover 1995/96 to 1998/99.
+      <p class="sub">184 players · 6,810 appearances ·
+        <a class="complink" href="/competitions/segunda-division/">Segunda División</a>, <a class="complink" href="/competitions/la-liga/">La Liga</a></p>
+      <p class="scope-note">Records cover 1995/96 to 2010/11.
         <a href="/tools/data.html">Full dataset scope</a>.</p>
     </div>
   </div>
@@ -216,8 +220,8 @@
   <summary>New here? What this page is</summary>
   <div class="body">
     <p>This is a set of free football games about <strong>Salamanca</strong>, generated
-      from real appearance and goal records — 53 players who have turned out
-      for the club in La Liga, going back to 1995/96.</p>
+      from real appearance and goal records — 184 players who have turned out
+      for the club in Segunda División and La Liga, going back to 1995/96.</p>
     <p>Pick a game below and it starts straight away on Salamanca. No sign-up, no app.
       Make an account only if you want your scores kept and your name on the club's board.</p>
     <p>Everything you see here comes from the TeleStats database. Nothing is written by an AI
@@ -243,11 +247,23 @@
 
 <h2 id="play">Play Salamanca</h2>
 <p class="sub">The five TeleStats games, set up for Salamanca. Click one and it starts.</p>
-      
+      <div class="chips" id="compChips" role="group"
+       aria-label="Choose which competitions to play">
+        <button type="button" class="chip all on" data-all="1" aria-pressed="true">All competitions</button>
+        <button type="button" class="chip on"
+                data-comp="Segunda División"
+                data-slug="segunda-division"
+                aria-pressed="true">Segunda División</button>
+        <button type="button" class="chip on"
+                data-comp="La Liga"
+                data-slug="la-liga"
+                aria-pressed="true">La Liga</button>
+      </div>
+      <p class="chip-note" id="chipNote"></p>
       <ul class="games">
         <li class="game">
           <a class="game-go" data-path="/games/hol.html"
-             href="/games/hol.html?scope=team_salamanca_la-liga&amp;play=1">
+             href="/games/hol.html?scope=team_salamanca_all&amp;play=1">
             <h3>Salamanca Higher or Lower</h3>
             <p>Which player has more appearances?</p>
             <span class="go">Play now &rarr;</span>
@@ -255,7 +271,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/alpha.html"
-             href="/games/alpha.html?scope=team_salamanca_la-liga&amp;play=1">
+             href="/games/alpha.html?scope=team_salamanca_all&amp;play=1">
             <h3>Salamanca Player Alphabet</h3>
             <p>Name a player for every letter of the alphabet.</p>
             <span class="go">Play now &rarr;</span>
@@ -263,7 +279,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/xi.html"
-             href="/games/xi.html?scope=team_salamanca_la-liga&amp;play=1">
+             href="/games/xi.html?scope=team_salamanca_all&amp;play=1">
             <h3>Salamanca Starting XI</h3>
             <p>Build the strongest eleven you can.</p>
             <span class="go">Play now &rarr;</span>
@@ -271,7 +287,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/whoami.html"
-             href="/games/whoami.html?scope=team_salamanca_la-liga&amp;play=1">
+             href="/games/whoami.html?scope=team_salamanca_all&amp;play=1">
             <h3>Salamanca Who Am I?</h3>
             <p>Guess the player from five clues.</p>
             <span class="go">Play now &rarr;</span>
@@ -279,7 +295,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/quiz.html"
-             href="/games/quiz.html?scope=team_salamanca_la-liga&amp;play=1">
+             href="/games/quiz.html?scope=team_salamanca_all&amp;play=1">
             <h3>Salamanca Trivia Quiz</h3>
             <p>Ten questions from this club’s record.</p>
             <span class="go">Play now &rarr;</span>
@@ -309,108 +325,108 @@
       <tbody>
         <tr>
             <td class="rank">1</td>
+            <td>Raúl Gañán</td>
+            <td class="num">264</td>
+            <td class="num">4</td>
+            <td class="yr">2001/02–2009/10</td>
+          </tr>
+        <tr>
+            <td class="rank">2</td>
+            <td>Quique Martín</td>
+            <td class="num">189</td>
+            <td class="num">43</td>
+            <td class="yr">2002/03–2010/11</td>
+          </tr>
+        <tr>
+            <td class="rank">3</td>
+            <td>Bogdan Stelea</td>
+            <td class="num">140</td>
+            <td class="num">0</td>
+            <td class="yr">1997/98–2003/04</td>
+          </tr>
+        <tr>
+            <td class="rank">4</td>
+            <td>Zé Tó</td>
+            <td class="num">135</td>
+            <td class="num">14</td>
+            <td class="yr">2001/02–2008/09</td>
+          </tr>
+        <tr>
+            <td class="rank">5</td>
+            <td>Tomás</td>
+            <td class="num">128</td>
+            <td class="num">4</td>
+            <td class="yr">1998/99–2007/08</td>
+          </tr>
+        <tr>
+            <td class="rank">6</td>
             <td>Martín Vellisca</td>
             <td class="num">111</td>
             <td class="num">3</td>
             <td class="yr">1995/96–1998/99</td>
           </tr>
         <tr>
-            <td class="rank">2</td>
-            <td>Everton Giovanella</td>
-            <td class="num">70</td>
-            <td class="num">3</td>
-            <td class="yr">1997/98–1998/99</td>
-          </tr>
-        <tr>
-            <td class="rank">3</td>
-            <td>Sergio Corino</td>
-            <td class="num">67</td>
-            <td class="num">3</td>
-            <td class="yr">1997/98–1998/99</td>
-          </tr>
-        <tr>
-            <td class="rank">4</td>
-            <td>Bogdan Stelea</td>
-            <td class="num">63</td>
-            <td class="num">0</td>
-            <td class="yr">1997/98–1998/99</td>
-          </tr>
-        <tr>
-            <td class="rank">5</td>
-            <td>Edu Alonso</td>
-            <td class="num">63</td>
-            <td class="num">4</td>
-            <td class="yr">1997/98–1998/99</td>
-          </tr>
-        <tr>
-            <td class="rank">6</td>
-            <td>Luciano Iturrino</td>
-            <td class="num">61</td>
-            <td class="num">1</td>
-            <td class="yr">1995/96–1997/98</td>
-          </tr>
-        <tr>
             <td class="rank">7</td>
-            <td>Joan Barbarà</td>
-            <td class="num">61</td>
-            <td class="num">13</td>
-            <td class="yr">1995/96–1998/99</td>
+            <td>Cristian Lupidio</td>
+            <td class="num">108</td>
+            <td class="num">3</td>
+            <td class="yr">1998/99–2004/05</td>
           </tr>
         <tr>
             <td class="rank">8</td>
-            <td>Marco Lanna</td>
-            <td class="num">60</td>
-            <td class="num">2</td>
-            <td class="yr">1997/98–1998/99</td>
+            <td>Juanpa</td>
+            <td class="num">105</td>
+            <td class="num">3</td>
+            <td class="yr">2001/02–2010/11</td>
           </tr>
         <tr>
             <td class="rank">9</td>
-            <td>Walter Silvani</td>
-            <td class="num">60</td>
-            <td class="num">9</td>
-            <td class="yr">1997/98–1998/99</td>
+            <td>Aurelio Santos</td>
+            <td class="num">102</td>
+            <td class="num">13</td>
+            <td class="yr">2002/03–2004/05</td>
           </tr>
         <tr>
             <td class="rank">10</td>
-            <td>José Agustín Cenzual Coca</td>
-            <td class="num">55</td>
-            <td class="num">5</td>
-            <td class="yr">1995/96–1997/98</td>
+            <td>Biel Ribas</td>
+            <td class="num">92</td>
+            <td class="num">0</td>
+            <td class="yr">2007/08–2010/11</td>
           </tr>
         <tr>
             <td class="rank">11</td>
-            <td>José Américo Taira da Costa</td>
-            <td class="num">55</td>
-            <td class="num">2</td>
-            <td class="yr">1997/98–1998/99</td>
+            <td>José Aizpurúa</td>
+            <td class="num">87</td>
+            <td class="num">0</td>
+            <td class="yr">1995/96–2001/02</td>
           </tr>
         <tr>
             <td class="rank">12</td>
-            <td>José Aizpurúa</td>
-            <td class="num">54</td>
-            <td class="num">0</td>
-            <td class="yr">1995/96–1998/99</td>
+            <td>Pablo Zegarra</td>
+            <td class="num">87</td>
+            <td class="num">11</td>
+            <td class="yr">1997/98–2002/03</td>
           </tr>
         <tr>
             <td class="rank">13</td>
-            <td>Rogerio Paulo Brito</td>
-            <td class="num">48</td>
-            <td class="num">1</td>
-            <td class="yr">1997/98–1998/99</td>
+            <td>Pepe Domingo</td>
+            <td class="num">86</td>
+            <td class="num">6</td>
+            <td class="yr">2001/02–2003/04</td>
           </tr>
         <tr>
             <td class="rank">14</td>
-            <td>Loren</td>
-            <td class="num">45</td>
-            <td class="num">3</td>
-            <td class="yr">1997/98–1998/99</td>
+            <td>Roberto Rodríguez</td>
+            <td class="num">83</td>
+            <td class="num">17</td>
+            <td class="yr">2001/02–2004/05</td>
           </tr>
         <tr>
             <td class="rank">15</td>
-            <td>Dubravko Pavličić</td>
-            <td class="num">42</td>
-            <td class="num">1</td>
-            <td class="yr">1997/98–1998/99</td>
+            <td>David Català</td>
+            <td class="num">82</td>
+            <td class="num">3</td>
+            <td class="yr">2007/08–2008/09</td>
           </tr>
       </tbody>
     </table>
@@ -425,63 +441,63 @@
       <tbody>
         <tr>
             <td class="rank">1</td>
+            <td>Quique Martín</td>
+            <td class="num">43</td>
+            <td class="num">189</td>
+          </tr>
+        <tr>
+            <td class="rank">2</td>
+            <td>Raúl Sánchez</td>
+            <td class="num">23</td>
+            <td class="num">75</td>
+          </tr>
+        <tr>
+            <td class="rank">3</td>
+            <td>Ariza Makukula</td>
+            <td class="num">20</td>
+            <td class="num">38</td>
+          </tr>
+        <tr>
+            <td class="rank">4</td>
+            <td>Roberto Rodríguez</td>
+            <td class="num">17</td>
+            <td class="num">83</td>
+          </tr>
+        <tr>
+            <td class="rank">5</td>
+            <td>Salva Sevilla</td>
+            <td class="num">17</td>
+            <td class="num">73</td>
+          </tr>
+        <tr>
+            <td class="rank">6</td>
+            <td>Gorka Brit</td>
+            <td class="num">16</td>
+            <td class="num">39</td>
+          </tr>
+        <tr>
+            <td class="rank">7</td>
             <td>Pauleta</td>
             <td class="num">15</td>
             <td class="num">34</td>
           </tr>
         <tr>
-            <td class="rank">2</td>
-            <td>Joan Barbarà</td>
-            <td class="num">13</td>
-            <td class="num">61</td>
-          </tr>
-        <tr>
-            <td class="rank">3</td>
-            <td>Ovidiu Stîngă</td>
-            <td class="num">11</td>
-            <td class="num">40</td>
-          </tr>
-        <tr>
-            <td class="rank">4</td>
-            <td>Claudio Barragán</td>
-            <td class="num">11</td>
-            <td class="num">38</td>
-          </tr>
-        <tr>
-            <td class="rank">5</td>
-            <td>Walter Silvani</td>
-            <td class="num">9</td>
-            <td class="num">60</td>
-          </tr>
-        <tr>
-            <td class="rank">6</td>
-            <td>César Brito</td>
-            <td class="num">7</td>
-            <td class="num">34</td>
-          </tr>
-        <tr>
-            <td class="rank">7</td>
-            <td>José del Solar</td>
-            <td class="num">6</td>
-            <td class="num">36</td>
-          </tr>
-        <tr>
             <td class="rank">8</td>
-            <td>José Agustín Cenzual Coca</td>
-            <td class="num">5</td>
-            <td class="num">55</td>
+            <td>Miku</td>
+            <td class="num">15</td>
+            <td class="num">37</td>
           </tr>
         <tr>
             <td class="rank">9</td>
-            <td>Gabriel Popescu</td>
-            <td class="num">5</td>
-            <td class="num">15</td>
+            <td>Zé Tó</td>
+            <td class="num">14</td>
+            <td class="num">135</td>
           </tr>
         <tr>
             <td class="rank">10</td>
-            <td>Martín Cardetti</td>
-            <td class="num">5</td>
-            <td class="num">24</td>
+            <td>Braulio Nóbrega</td>
+            <td class="num">14</td>
+            <td class="num">39</td>
           </tr>
       </tbody>
     </table>
@@ -495,6 +511,13 @@
       <thead><tr><th>Competition</th><th class="num">Players</th><th>Seasons</th><th class="num">Count</th><th>Games</th></tr></thead>
       <tbody>
         <tr>
+            <td>Segunda División</td>
+            <td class="num">138</td>
+            <td class="yr">2001/02–2010/11</td>
+            <td class="num">8</td>
+            <td class="yes">Playable</td>
+          </tr>
+        <tr>
             <td>La Liga</td>
             <td class="num">53</td>
             <td class="yr">1995/96–1998/99</td>
@@ -507,35 +530,35 @@
 </details>
 
 <h2>Ask about Salamanca</h2>
-<p class="sub">Ask the database a question. Answers come from 53 Salamanca
+<p class="sub">Ask the database a question. Answers come from 184 Salamanca
   players and are never invented — if the data does not support an answer, it says so.</p>
 <form class="ask" id="askForm">
   <input id="askQ" autocomplete="off" maxlength="300"
-         placeholder="Who has played for both Salamanca and Sevilla?"
+         placeholder="Who has played for both Salamanca and Valladolid?"
          aria-label="Ask a question about Salamanca">
   <button type="submit">Ask</button>
 </form>
 <div class="ask-examples">
-          <button type="button" data-q="Who has played for both Salamanca and Sevilla?">Who has played for both Salamanca and Sevilla?</button>
-          <button type="button" data-q="Top scorers for Salamanca in La Liga">Top scorers for Salamanca in La Liga</button>
+          <button type="button" data-q="Who has played for both Salamanca and Valladolid?">Who has played for both Salamanca and Valladolid?</button>
+          <button type="button" data-q="Top scorers for Salamanca in Segunda División">Top scorers for Salamanca in Segunda División</button>
           <button type="button" data-q="Which English players have the most appearances for Salamanca?">Which English players have the most appearances for Salamanca?</button>
 </div>
 <div id="askAnswer"></div>
 
 <h2>More teams</h2>
 <div class="related">
-          <a href="/teams/sevilla/">Sevilla</a>
-          <a href="/teams/espanyol/">Espanyol</a>
-          <a href="/teams/atletico-madrid/">Atlético Madrid</a>
-          <a href="/teams/valencia/">Valencia</a>
-          <a href="/teams/real-betis/">Real Betis</a>
-          <a href="/teams/barcelona/">Barcelona</a>
           <a href="/teams/valladolid/">Valladolid</a>
-          <a href="/teams/celta-vigo/">Celta Vigo</a>
+          <a href="/teams/albacete/">Albacete</a>
+          <a href="/teams/zaragoza/">Zaragoza</a>
+          <a href="/teams/tenerife/">Tenerife</a>
+          <a href="/teams/elche/">Elche</a>
+          <a href="/teams/espanyol/">Espanyol</a>
+          <a href="/teams/sevilla/">Sevilla</a>
           <a href="/teams/mallorca/">Mallorca</a>
-          <a href="/teams/real-madrid/">Real Madrid</a>
+          <a href="/teams/sporting-gijon/">Sporting Gijón</a>
+          <a href="/teams/malaga/">Málaga</a>
+          <a href="/teams/atletico-madrid/">Atlético Madrid</a>
           <a href="/teams/rayo-vallecano/">Rayo Vallecano</a>
-          <a href="/teams/villarreal/">Villarreal</a>
 </div>
 
 <footer class="page">
@@ -549,7 +572,7 @@
 </div><!-- /wrap -->
 
 <script>
-window.TS_TEAM = {"slug":"salamanca","name":"Salamanca","comps":["La Liga"],"defaultScope":"team_salamanca_la-liga","potd":[{"n":"Martín Vellisca","a":111,"g":3,"f":"1995/96","t":"1998/99"},{"n":"Everton Giovanella","a":70,"g":3,"f":"1997/98","t":"1998/99"},{"n":"Sergio Corino","a":67,"g":3,"f":"1997/98","t":"1998/99"},{"n":"Bogdan Stelea","a":63,"g":0,"f":"1997/98","t":"1998/99"},{"n":"Edu Alonso","a":63,"g":4,"f":"1997/98","t":"1998/99"},{"n":"Luciano Iturrino","a":61,"g":1,"f":"1995/96","t":"1997/98"},{"n":"Joan Barbarà","a":61,"g":13,"f":"1995/96","t":"1998/99"},{"n":"Marco Lanna","a":60,"g":2,"f":"1997/98","t":"1998/99"},{"n":"Walter Silvani","a":60,"g":9,"f":"1997/98","t":"1998/99"},{"n":"José Agustín Cenzual Coca","a":55,"g":5,"f":"1995/96","t":"1997/98"},{"n":"José Américo Taira da Costa","a":55,"g":2,"f":"1997/98","t":"1998/99"},{"n":"José Aizpurúa","a":54,"g":0,"f":"1995/96","t":"1998/99"},{"n":"Rogerio Paulo Brito","a":48,"g":1,"f":"1997/98","t":"1998/99"},{"n":"Loren","a":45,"g":3,"f":"1997/98","t":"1998/99"},{"n":"Dubravko Pavličić","a":42,"g":1,"f":"1997/98","t":"1998/99"}]};
+window.TS_TEAM = {"slug":"salamanca","name":"Salamanca","comps":["Segunda División","La Liga"],"defaultScope":"team_salamanca_all","potd":[{"n":"Raúl Gañán","a":264,"g":4,"f":"2001/02","t":"2009/10"},{"n":"Quique Martín","a":189,"g":43,"f":"2002/03","t":"2010/11"},{"n":"Bogdan Stelea","a":140,"g":0,"f":"1997/98","t":"2003/04"},{"n":"Zé Tó","a":135,"g":14,"f":"2001/02","t":"2008/09"},{"n":"Tomás","a":128,"g":4,"f":"1998/99","t":"2007/08"},{"n":"Martín Vellisca","a":111,"g":3,"f":"1995/96","t":"1998/99"},{"n":"Cristian Lupidio","a":108,"g":3,"f":"1998/99","t":"2004/05"},{"n":"Juanpa","a":105,"g":3,"f":"2001/02","t":"2010/11"},{"n":"Aurelio Santos","a":102,"g":13,"f":"2002/03","t":"2004/05"},{"n":"Biel Ribas","a":92,"g":0,"f":"2007/08","t":"2010/11"},{"n":"José Aizpurúa","a":87,"g":0,"f":"1995/96","t":"2001/02"},{"n":"Pablo Zegarra","a":87,"g":11,"f":"1997/98","t":"2002/03"},{"n":"Pepe Domingo","a":86,"g":6,"f":"2001/02","t":"2003/04"},{"n":"Roberto Rodríguez","a":83,"g":17,"f":"2001/02","t":"2004/05"},{"n":"David Català","a":82,"g":3,"f":"2007/08","t":"2008/09"}]};
 </script>
 <script src="/js/ts-scope.js"></script>
 <script src="/js/team-page.js"></script>
@@ -566,6 +589,6 @@ window.TS_TEAM = {"slug":"salamanca","name":"Salamanca","comps":["La Liga"],"def
     try { TSNav.render(); } catch (e) { console.error('[TeleStats] Nav render failed:', e); }
   })();
 </script>
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TeleStats","item":"https://telestats.net"},{"@type":"ListItem","position":2,"name":"Teams","item":"https://telestats.net/teams/"},{"@type":"ListItem","position":3,"name":"Salamanca","item":"https://telestats.net/teams/salamanca/"}]},{"@type":"SportsTeam","name":"Salamanca","sport":"Association football","url":"https://telestats.net/teams/salamanca/"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is the Salamanca page on TeleStats?","acceptedAnswer":{"@type":"Answer","text":"Free Salamanca football quizzes and trivia games generated from real appearance and goal records for 53 players across La Liga. No sign-up is needed to play."}}]}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TeleStats","item":"https://telestats.net"},{"@type":"ListItem","position":2,"name":"Teams","item":"https://telestats.net/teams/"},{"@type":"ListItem","position":3,"name":"Salamanca","item":"https://telestats.net/teams/salamanca/"}]},{"@type":"SportsTeam","name":"Salamanca","sport":"Association football","url":"https://telestats.net/teams/salamanca/"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is the Salamanca page on TeleStats?","acceptedAnswer":{"@type":"Answer","text":"Free Salamanca football quizzes and trivia games generated from real appearance and goal records for 184 players across Segunda División and La Liga. No sign-up is needed to play."}}]}]}</script>
 </body>
 </html>

@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="/js/ts-analytics.js"></script>
+<title>Bundesliga Quiz &amp; Trivia Games | TeleStats</title>
+<meta name="description" content="Play Bundesliga football quizzes built from real data — 5,082 players, 324,906 appearances and 49 clubs across 39 seasons, 1988/89 to 2026/27. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<link rel="canonical" href="https://telestats.net/competitions/bundesliga/">
+<meta name="theme-color" content="#E1000F">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Bundesliga Quiz &amp; Trivia Games | TeleStats">
+<meta property="og:description" content="Play Bundesliga football quizzes built from real data — 5,082 players, 324,906 appearances and 49 clubs across 39 seasons, 1988/89 to 2026/27. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta property="og:url" content="https://telestats.net/competitions/bundesliga/">
+<meta property="og:site_name" content="TeleStats">
+<meta name="twitter:card" content="summary">
+<link rel="stylesheet" href="/telestats-theme.css">
+<style>
+  :root { --club: #E1000F; --club-2: #b90000; }
+  body { margin: 0; }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 0 18px 60px; }
+  .ts-header { border-bottom: 1px solid var(--rule, #24313A); background: var(--bg-card, #131A20); }
+  .ts-header .inner { max-width: 980px; margin: 0 auto; padding: 11px 18px;
+                      display: flex; align-items: center; gap: 18px; }
+  .ts-header .brand { font-weight: 700; letter-spacing: .04em; color: var(--text-primary, #F2F5F7);
+                      text-decoration: none; font-family: 'Space Mono', ui-monospace, monospace; }
+  .ts-header nav { display: flex; gap: 15px; flex-wrap: wrap; }
+  .ts-header nav a { font-size: .82rem; color: var(--text-secondary, #9FB0BC); text-decoration: none; }
+  nav.crumbs { font-size: .78rem; color: var(--text-secondary); margin: 16px 0 12px; }
+  nav.crumbs a { color: var(--accent); text-decoration: none; }
+
+  .hero { position: relative; overflow: hidden; border-radius: 12px; padding: 22px;
+          border: 1px solid var(--rule, #24313A); margin-bottom: 8px;
+          background: linear-gradient(160deg, color-mix(in srgb, var(--club) 26%, transparent), transparent 62%),
+                      var(--bg-card, #131A20); }
+  .scarf { position: absolute; inset: 0 0 auto 0; height: 5px;
+           background: repeating-linear-gradient(90deg, var(--club) 0 24px, var(--club-2) 24px 48px); }
+  .hero h1 { font-size: 1.7rem; line-height: 1.2; margin: 0 0 6px; }
+  .hero .sub { color: var(--text-secondary); font-size: .92rem; margin: 0; }
+  .hero .note { color: var(--text-muted); font-size: .76rem; margin: 7px 0 0; }
+  .hero .note a { color: var(--accent); }
+
+  h2 { font-size: 1.14rem; margin: 32px 0 4px; }
+  h2 + .sub { color: var(--text-secondary); font-size: .88rem; margin: 0 0 13px; max-width: 66ch; line-height: 1.5; }
+
+  ul.games { list-style: none; padding: 0; margin: 0; display: grid;
+             grid-template-columns: repeat(auto-fit, minmax(215px, 1fr)); gap: 11px; }
+  li.game { background: var(--bg-card, #131A20); border: 1px solid var(--rule, #24313A);
+            border-radius: 9px; transition: border-color .15s, transform .15s; }
+  li.game:hover { border-color: var(--club); transform: translateY(-1px); }
+  li.game a { display: block; padding: 14px 15px; text-decoration: none; color: inherit; height: 100%; }
+  li.game h3 { font-size: .95rem; margin: 0 0 4px; }
+  li.game .variant { font-size: .74rem; font-weight: 600; color: var(--club);
+                     border: 1px solid var(--club); border-radius: 4px; padding: 1px 6px;
+                     margin-left: 4px; vertical-align: 1px; }
+  li.game p { font-size: .81rem; color: var(--text-secondary); margin: 0 0 10px; line-height: 1.4; }
+  li.game .go { font-size: .8rem; font-weight: 600; color: var(--accent, #00E5FF); }
+
+  table { border-collapse: collapse; width: 100%; font-size: .87rem; }
+  th, td { text-align: left; padding: 6px 9px; border-bottom: 1px solid var(--rule, #24313A); }
+  th { font-size: .7rem; text-transform: uppercase; letter-spacing: .05em; color: var(--text-muted); }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  td.rank { color: var(--text-muted); width: 2em; }
+  td.club a { color: var(--text-secondary); text-decoration: none; }
+  td.club a:hover { color: var(--accent); }
+  .tables { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .table-wrap { overflow-x: auto; }
+
+  .clubs { display: grid; grid-template-columns: repeat(auto-fill, minmax(196px, 1fr)); gap: 6px; }
+  .clubs a { display: flex; align-items: center; gap: 9px; font-size: .85rem; padding: 7px 11px;
+             border: 1px solid var(--rule, #24313A); border-radius: 6px;
+             color: var(--text-primary, #F2F5F7); text-decoration: none; }
+  .clubs a i { width: 4px; align-self: stretch; min-height: 17px; border-radius: 2px;
+               background: var(--club, #4A5A66); flex: 0 0 auto; }
+  .clubs a span { margin-left: auto; color: var(--text-muted); font-variant-numeric: tabular-nums; font-size: .78rem; }
+  .clubs a:hover { border-color: var(--club); }
+
+  .community { list-style: none; padding: 0; margin: 0; display: grid;
+               grid-template-columns: repeat(auto-fit, minmax(232px, 1fr)); gap: 11px; }
+  .community li { background: var(--bg-card, #131A20); border: 1px dashed var(--rule, #3A4A55);
+                  border-radius: 9px; padding: 13px 15px; }
+  .community a { color: inherit; text-decoration: none; }
+  .community h4 { font-size: .9rem; margin: 0 0 4px; }
+  .community p { font-size: .79rem; color: var(--text-secondary); margin: 0 0 7px; line-height: 1.4; }
+  .community .meta { font-size: .72rem; color: var(--text-muted); }
+  .empty { font-size: .84rem; color: var(--text-muted); margin: 6px 0 0; }
+  .cta { display: inline-block; margin-top: 11px; font-size: .84rem; font-weight: 600;
+         padding: 9px 15px; border-radius: 7px; text-decoration: none;
+         border: 1px solid var(--club); color: var(--text-primary, #F2F5F7); }
+  .cta:hover { background: var(--club); color: #fff; }
+
+  .related { display: flex; flex-wrap: wrap; gap: 7px; }
+  .related a { font-size: .81rem; color: var(--accent); text-decoration: none;
+               padding: 4px 10px; border: 1px solid var(--rule, #24313A); border-radius: 6px; }
+  form.ask { display: flex; gap: 8px; margin: 10px 0; }
+  form.ask input { flex: 1; padding: 10px 13px; font-size: .93rem; border-radius: 7px;
+                   border: 1px solid var(--rule, #24313A); background: var(--bg-card, #131A20);
+                   color: var(--text-primary, #F2F5F7); }
+  form.ask button { padding: 10px 17px; font-weight: 600; border: 0; border-radius: 7px;
+                    background: var(--accent, #00E5FF); color: #0B0F12; cursor: pointer; }
+  .ask-examples { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .ask-examples button { font-size: .77rem; padding: 5px 10px; border-radius: 5px; border: 0;
+                         background: var(--bg-elevated, #1E272E); color: var(--accent);
+                         cursor: pointer; font-family: inherit; }
+  #askAnswer .msg { font-size: .95rem; line-height: 1.5; margin: 10px 0; }
+  #askAnswer .prov { font-size: .73rem; color: var(--text-muted); }
+  footer.page { margin-top: 44px; padding-top: 16px; font-size: .77rem; color: var(--text-muted);
+                border-top: 1px solid var(--rule, #24313A); }
+  footer.page a { color: var(--accent); }
+  @media (max-width: 680px) { .tables { grid-template-columns: 1fr; } .hero h1 { font-size: 1.35rem; } }
+</style>
+</head>
+<body>
+
+<header class="ts-header">
+  <div class="inner">
+    <a class="brand" href="/">TELESTATS</a>
+    <nav>
+      <a href="/daily/">Daily</a>
+      <a href="/games/">Games</a>
+      <a href="/competitions/">Competitions</a>
+      <a href="/teams/">Teams</a>
+      <a href="/ask/">Ask</a>
+      <a href="/community/">Community</a>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap">
+
+<nav class="crumbs"><a href="/">TeleStats</a> › <a href="/competitions/">Competitions</a> › Bundesliga</nav>
+
+<div class="hero">
+  <div class="scarf"></div>
+  <h1>Bundesliga Quizzes &amp; Trivia</h1>
+  <p class="sub">5,082 players · 324,906 appearances ·
+    49 clubs · 39 seasons</p>
+  <p class="note">Records cover 1988/89 to 2026/27.
+    <a href="/tools/data.html">What the dataset covers</a>.</p>
+</div>
+
+<h2>Play Bundesliga</h2>
+<p class="sub">Every club in the competition at once. Pick a game and it starts —
+  or scroll down and choose a single club instead.</p>
+<ul class="games">
+        <li class="game">
+          <a href="/games/hol.html?scope=comp_bundesliga&amp;stat=appearances&amp;play=1">
+            <h3>Higher or Lower <span class="variant">Appearances</span></h3>
+            <p>Which player made more appearances?</p>
+            <span class="go">Play &rarr;</span>
+          </a>
+        </li>
+        <li class="game">
+          <a href="/games/hol.html?scope=comp_bundesliga&amp;stat=goals&amp;play=1">
+            <h3>Higher or Lower <span class="variant">Goals</span></h3>
+            <p>Which player scored more?</p>
+            <span class="go">Play &rarr;</span>
+          </a>
+        </li>
+        <li class="game">
+          <a href="/games/xi.html?scope=comp_bundesliga&amp;objective=appearances&amp;play=1">
+            <h3>Starting XI <span class="variant">Appearances</span></h3>
+            <p>Build the most-capped eleven.</p>
+            <span class="go">Play &rarr;</span>
+          </a>
+        </li>
+        <li class="game">
+          <a href="/games/xi.html?scope=comp_bundesliga&amp;objective=goals&amp;play=1">
+            <h3>Starting XI <span class="variant">Goals</span></h3>
+            <p>Build the highest-scoring eleven.</p>
+            <span class="go">Play &rarr;</span>
+          </a>
+        </li>
+        <li class="game">
+          <a href="/games/alpha.html?scope=comp_bundesliga&amp;play=1">
+            <h3>Player Alphabet</h3>
+            <p>Name a player for every letter.</p>
+            <span class="go">Play &rarr;</span>
+          </a>
+        </li>
+        <li class="game">
+          <a href="/games/whoami.html?scope=comp_bundesliga&amp;play=1">
+            <h3>Who Am I?</h3>
+            <p>Guess the player from five clues.</p>
+            <span class="go">Play &rarr;</span>
+          </a>
+        </li>
+        <li class="game">
+          <a href="/games/quiz.html?scope=comp_bundesliga&amp;play=1">
+            <h3>Trivia Quiz</h3>
+            <p>Ten questions from the record books.</p>
+            <span class="go">Play &rarr;</span>
+          </a>
+        </li>
+</ul>
+
+<h2>Bundesliga all-time records</h2>
+<p class="sub">Across every club in the competition, 1988/89 to 2026/27.</p>
+<div class="tables">
+  <div class="table-wrap">
+    <h3 style="font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);margin:0 0 6px">Most appearances</h3>
+    <table>
+      <thead><tr><th></th><th>Player</th><th>Club</th><th class="num">Apps</th><th class="num">Goals</th></tr></thead>
+      <tbody>
+        <tr>
+            <td class="rank">1</td>
+            <td>Oliver Kahn</td>
+            <td class="club"><a href="/teams/bayern-munich/">Bayern Munich</a></td>
+            <td class="num">555</td>
+            <td class="num">0</td>
+          </tr>
+        <tr>
+            <td class="rank">2</td>
+            <td>Manuel Neuer</td>
+            <td class="club"><a href="/teams/bayern-munich/">Bayern Munich</a></td>
+            <td class="num">547</td>
+            <td class="num">0</td>
+          </tr>
+        <tr>
+            <td class="rank">3</td>
+            <td>Oliver Baumann</td>
+            <td class="club"><a href="/teams/hoffenheim/">Hoffenheim</a></td>
+            <td class="num">526</td>
+            <td class="num">0</td>
+          </tr>
+        <tr>
+            <td class="rank">4</td>
+            <td>Thomas Müller</td>
+            <td class="club"><a href="/teams/bayern-munich/">Bayern Munich</a></td>
+            <td class="num">503</td>
+            <td class="num">150</td>
+          </tr>
+        <tr>
+            <td class="rank">5</td>
+            <td>Claudio Pizarro</td>
+            <td class="club"><a href="/teams/werder-bremen/">Werder Bremen</a></td>
+            <td class="num">490</td>
+            <td class="num">197</td>
+          </tr>
+        <tr>
+            <td class="rank">6</td>
+            <td>Christian Wörns</td>
+            <td class="club"><a href="/teams/dortmund/">Dortmund</a></td>
+            <td class="num">469</td>
+            <td class="num">28</td>
+          </tr>
+        <tr>
+            <td class="rank">7</td>
+            <td>Richard Golz</td>
+            <td class="club"><a href="/teams/hamburger-sv/">Hamburger SV</a></td>
+            <td class="num">448</td>
+            <td class="num">0</td>
+          </tr>
+        <tr>
+            <td class="rank">8</td>
+            <td>Mats Hummels</td>
+            <td class="club"><a href="/teams/dortmund/">Dortmund</a></td>
+            <td class="num">442</td>
+            <td class="num">33</td>
+          </tr>
+        <tr>
+            <td class="rank">9</td>
+            <td>Christian Gentner</td>
+            <td class="club"><a href="/teams/stuttgart/">Stuttgart</a></td>
+            <td class="num">430</td>
+            <td class="num">46</td>
+          </tr>
+        <tr>
+            <td class="rank">10</td>
+            <td>Frank Rost</td>
+            <td class="club"><a href="/teams/hamburger-sv/">Hamburger SV</a></td>
+            <td class="num">426</td>
+            <td class="num">1</td>
+          </tr>
+        <tr>
+            <td class="rank">11</td>
+            <td>Oliver Reck</td>
+            <td class="club"><a href="/teams/werder-bremen/">Werder Bremen</a></td>
+            <td class="num">425</td>
+            <td class="num">1</td>
+          </tr>
+        <tr>
+            <td class="rank">12</td>
+            <td>Gonzalo Castro</td>
+            <td class="club"><a href="/teams/leverkusen/">Leverkusen</a></td>
+            <td class="num">420</td>
+            <td class="num">38</td>
+          </tr>
+        <tr>
+            <td class="rank">13</td>
+            <td>Matthias Ginter</td>
+            <td class="club"><a href="/teams/freiburg/">Freiburg</a></td>
+            <td class="num">415</td>
+            <td class="num">25</td>
+          </tr>
+        <tr>
+            <td class="rank">14</td>
+            <td>Stefan Kießling</td>
+            <td class="club"><a href="/teams/leverkusen/">Leverkusen</a></td>
+            <td class="num">403</td>
+            <td class="num">144</td>
+          </tr>
+        <tr>
+            <td class="rank">15</td>
+            <td>Stefan Reuter</td>
+            <td class="club"><a href="/teams/dortmund/">Dortmund</a></td>
+            <td class="num">402</td>
+            <td class="num">15</td>
+          </tr>
+        <tr>
+            <td class="rank">16</td>
+            <td>Torsten Frings</td>
+            <td class="club"><a href="/teams/werder-bremen/">Werder Bremen</a></td>
+            <td class="num">401</td>
+            <td class="num">50</td>
+          </tr>
+        <tr>
+            <td class="rank">17</td>
+            <td>Maximilian Arnold</td>
+            <td class="club"><a href="/teams/wolfsburg/">Wolfsburg</a></td>
+            <td class="num">400</td>
+            <td class="num">45</td>
+          </tr>
+        <tr>
+            <td class="rank">18</td>
+            <td>Martin Max</td>
+            <td class="club"><a href="/teams/monchengladbach/">Monchengladbach</a></td>
+            <td class="num">396</td>
+            <td class="num">126</td>
+          </tr>
+        <tr>
+            <td class="rank">19</td>
+            <td>Jens Lehmann</td>
+            <td class="club"><a href="/teams/schalke-04/">Schalke 04</a></td>
+            <td class="num">394</td>
+            <td class="num">2</td>
+          </tr>
+        <tr>
+            <td class="rank">20</td>
+            <td>Mehmet Scholl</td>
+            <td class="club"><a href="/teams/bayern-munich/">Bayern Munich</a></td>
+            <td class="num">392</td>
+            <td class="num">98</td>
+          </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="table-wrap">
+    <h3 style="font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);margin:0 0 6px">Most goals</h3>
+    <table>
+      <thead><tr><th></th><th>Player</th><th>Club</th><th class="num">Goals</th><th class="num">Apps</th></tr></thead>
+      <tbody>
+        <tr>
+            <td class="rank">1</td>
+            <td>Robert Lewandowski</td>
+            <td class="club"><a href="/teams/bayern-munich/">Bayern Munich</a></td>
+            <td class="num">312</td>
+            <td class="num">384</td>
+          </tr>
+        <tr>
+            <td class="rank">2</td>
+            <td>Claudio Pizarro</td>
+            <td class="club"><a href="/teams/werder-bremen/">Werder Bremen</a></td>
+            <td class="num">197</td>
+            <td class="num">490</td>
+          </tr>
+        <tr>
+            <td class="rank">3</td>
+            <td>Ulf Kirsten</td>
+            <td class="club"><a href="/teams/leverkusen/">Leverkusen</a></td>
+            <td class="num">182</td>
+            <td class="num">350</td>
+          </tr>
+        <tr>
+            <td class="rank">4</td>
+            <td>Mario Gómez</td>
+            <td class="club"><a href="/teams/stuttgart/">Stuttgart</a></td>
+            <td class="num">170</td>
+            <td class="num">328</td>
+          </tr>
+        <tr>
+            <td class="rank">5</td>
+            <td>Marco Reus</td>
+            <td class="club"><a href="/teams/dortmund/">Dortmund</a></td>
+            <td class="num">156</td>
+            <td class="num">391</td>
+          </tr>
+        <tr>
+            <td class="rank">6</td>
+            <td>Thomas Müller</td>
+            <td class="club"><a href="/teams/bayern-munich/">Bayern Munich</a></td>
+            <td class="num">150</td>
+            <td class="num">503</td>
+          </tr>
+        <tr>
+            <td class="rank">7</td>
+            <td>Stefan Kießling</td>
+            <td class="club"><a href="/teams/leverkusen/">Leverkusen</a></td>
+            <td class="num">144</td>
+            <td class="num">403</td>
+          </tr>
+        <tr>
+            <td class="rank">8</td>
+            <td>Andrej Kramarić</td>
+            <td class="club"><a href="/teams/hoffenheim/">Hoffenheim</a></td>
+            <td class="num">140</td>
+            <td class="num">323</td>
+          </tr>
+        <tr>
+            <td class="rank">9</td>
+            <td>Giovane Élber</td>
+            <td class="club"><a href="/teams/bayern-munich/">Bayern Munich</a></td>
+            <td class="num">133</td>
+            <td class="num">260</td>
+          </tr>
+        <tr>
+            <td class="rank">10</td>
+            <td>Vedad Ibišević</td>
+            <td class="club"><a href="/teams/hertha-bsc/">Hertha BSC</a></td>
+            <td class="num">127</td>
+            <td class="num">344</td>
+          </tr>
+        <tr>
+            <td class="rank">11</td>
+            <td>Martin Max</td>
+            <td class="club"><a href="/teams/monchengladbach/">Monchengladbach</a></td>
+            <td class="num">126</td>
+            <td class="num">396</td>
+          </tr>
+        <tr>
+            <td class="rank">12</td>
+            <td>Miroslav Klose</td>
+            <td class="club"><a href="/teams/kaiserslautern/">Kaiserslautern</a></td>
+            <td class="num">120</td>
+            <td class="num">306</td>
+          </tr>
+        <tr>
+            <td class="rank">13</td>
+            <td>Stefan Kuntz</td>
+            <td class="club"><a href="/teams/kaiserslautern/">Kaiserslautern</a></td>
+            <td class="num">119</td>
+            <td class="num">288</td>
+          </tr>
+        <tr>
+            <td class="rank">14</td>
+            <td>Kevin Kurányi</td>
+            <td class="club"><a href="/teams/schalke-04/">Schalke 04</a></td>
+            <td class="num">111</td>
+            <td class="num">273</td>
+          </tr>
+        <tr>
+            <td class="rank">15</td>
+            <td>Fredi Bobic</td>
+            <td class="club"><a href="/teams/stuttgart/">Stuttgart</a></td>
+            <td class="num">108</td>
+            <td class="num">282</td>
+          </tr>
+        <tr>
+            <td class="rank">16</td>
+            <td>Stéphane Chapuisat</td>
+            <td class="club"><a href="/teams/dortmund/">Dortmund</a></td>
+            <td class="num">106</td>
+            <td class="num">228</td>
+          </tr>
+        <tr>
+            <td class="rank">17</td>
+            <td>Aílton Gonçalves</td>
+            <td class="club"><a href="/teams/werder-bremen/">Werder Bremen</a></td>
+            <td class="num">106</td>
+            <td class="num">219</td>
+          </tr>
+        <tr>
+            <td class="rank">18</td>
+            <td>Timo Werner</td>
+            <td class="club"><a href="/teams/rb-leipzig/">RB Leipzig</a></td>
+            <td class="num">102</td>
+            <td class="num">260</td>
+          </tr>
+        <tr>
+            <td class="rank">19</td>
+            <td>Andreas Möller</td>
+            <td class="club"><a href="/teams/dortmund/">Dortmund</a></td>
+            <td class="num">102</td>
+            <td class="num">380</td>
+          </tr>
+        <tr>
+            <td class="rank">20</td>
+            <td>Marco Bode</td>
+            <td class="club"><a href="/teams/werder-bremen/">Werder Bremen</a></td>
+            <td class="num">101</td>
+            <td class="num">379</td>
+          </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<h2>Clubs in Bundesliga</h2>
+<p class="sub">49 clubs have played in Bundesliga in this dataset.
+  Each has its own page, records and games.</p>
+<div class="clubs">
+        <a href="/teams/eintracht-frankfurt/" style="--club:#E1000F"><i></i>Eintracht Frankfurt<span>366</span></a>
+        <a href="/teams/stuttgart/" style="--club:#E32219"><i></i>Stuttgart<span>362</span></a>
+        <a href="/teams/hamburger-sv/" style="--club:#005B9A"><i></i>Hamburger SV<span>344</span></a>
+        <a href="/teams/koln/" style="--club:#ED1C24"><i></i>Köln<span>336</span></a>
+        <a href="/teams/schalke-04/" style="--club:#004D9D"><i></i>Schalke 04<span>326</span></a>
+        <a href="/teams/monchengladbach/" style="--club:#000000"><i></i>Monchengladbach<span>322</span></a>
+        <a href="/teams/dortmund/" style="--club:#FDE100"><i></i>Dortmund<span>315</span></a>
+        <a href="/teams/wolfsburg/" style="--club:#65B32E"><i></i>Wolfsburg<span>309</span></a>
+        <a href="/teams/leverkusen/" style="--club:#E32221"><i></i>Leverkusen<span>308</span></a>
+        <a href="/teams/werder-bremen/" style="--club:#1D9053"><i></i>Werder Bremen<span>303</span></a>
+        <a href="/teams/bayern-munich/" style="--club:#DC052D"><i></i>Bayern Munich<span>283</span></a>
+        <a href="/teams/hertha-bsc/" style="--club:#005BA6"><i></i>Hertha BSC<span>271</span></a>
+        <a href="/teams/freiburg/" style="--club:#000000"><i></i>Freiburg<span>259</span></a>
+        <a href="/teams/nurnberg/" style="--club:#8B0000"><i></i>Nürnberg<span>251</span></a>
+        <a href="/teams/bochum/" style="--club:#005BA6"><i></i>Bochum<span>251</span></a>
+        <a href="/teams/mainz-05/" style="--club:#ED1C24"><i></i>Mainz 05<span>234</span></a>
+        <a href="/teams/kaiserslautern/" style="--club:#E3000B"><i></i>Kaiserslautern<span>210</span></a>
+        <a href="/teams/hannover-96/" style="--club:#1E8C35"><i></i>Hannover 96<span>206</span></a>
+        <a href="/teams/hoffenheim/" style="--club:#1961B5"><i></i>Hoffenheim<span>203</span></a>
+        <a href="/teams/augsburg/" style="--club:#BA3733"><i></i>Augsburg<span>171</span></a>
+        <a href="/teams/arminia-bielefeld/" style="--club:#00447C"><i></i>Arminia Bielefeld<span>166</span></a>
+        <a href="/teams/st-pauli/" style="--club:hsl(25, 57%, 38%)"><i></i>St Pauli<span>150</span></a>
+        <a href="/teams/msv-duisburg/" style="--club:#004B93"><i></i>MSV Duisburg<span>141</span></a>
+        <a href="/teams/dusseldorf/" style="--club:hsl(100, 59%, 38%)"><i></i>Düsseldorf<span>136</span></a>
+        <a href="/teams/hansa-rostock/" style="--club:#003D7E"><i></i>Hansa Rostock<span>133</span></a>
+        <a href="/teams/karlsruher/" style="--club:hsl(270, 71%, 38%)"><i></i>Karlsruher<span>107</span></a>
+        <a href="/teams/union-berlin/" style="--club:hsl(273, 70%, 38%)"><i></i>Union Berlin<span>103</span></a>
+        <a href="/teams/rb-leipzig/" style="--club:#DD0741"><i></i>RB Leipzig<span>102</span></a>
+        <a href="/teams/1860-munich/" style="--club:#00529C"><i></i>1860 Munich<span>102</span></a>
+        <a href="/teams/energie-cottbus/" style="--club:hsl(108, 56%, 38%)"><i></i>Energie Cottbus<span>87</span></a>
+        <a href="/teams/uerdingen/" style="--club:hsl(240, 71%, 38%)"><i></i>Uerdingen<span>76</span></a>
+        <a href="/teams/darmstadt-98/" style="--club:hsl(183, 62%, 38%)"><i></i>Darmstadt 98<span>72</span></a>
+        <a href="/teams/paderborn-07/" style="--club:hsl(310, 55%, 38%)"><i></i>Paderborn 07<span>68</span></a>
+        <a href="/teams/greuther-furth/" style="--club:hsl(148, 56%, 38%)"><i></i>Greuther Fürth<span>61</span></a>
+        <a href="/teams/dresden/" style="--club:hsl(275, 61%, 38%)"><i></i>Dresden<span>56</span></a>
+        <a href="/teams/wattenscheid/" style="--club:hsl(335, 65%, 38%)"><i></i>Wattenscheid<span>43</span></a>
+        <a href="/teams/heidenheim/" style="--club:hsl(118, 56%, 38%)"><i></i>Heidenheim<span>43</span></a>
+        <a href="/teams/stuttgarter-kickers/" style="--club:hsl(43, 70%, 38%)"><i></i>Stuttgarter Kickers<span>39</span></a>
+        <a href="/teams/waldhof-mannheim/" style="--club:hsl(165, 69%, 38%)"><i></i>Waldhof Mannheim<span>31</span></a>
+        <a href="/teams/unterhaching/" style="--club:hsl(23, 66%, 38%)"><i></i>Unterhaching<span>31</span></a>
+        <a href="/teams/ingolstadt/" style="--club:hsl(175, 65%, 38%)"><i></i>Ingolstadt<span>31</span></a>
+        <a href="/teams/alemannia-aachen/" style="--club:hsl(260, 63%, 38%)"><i></i>Alemannia Aachen<span>27</span></a>
+        <a href="/teams/eintracht-braunschweig/" style="--club:hsl(245, 57%, 38%)"><i></i>Eintracht Braunschweig<span>27</span></a>
+        <a href="/teams/holstein-kiel/" style="--club:hsl(18, 56%, 38%)"><i></i>Holstein Kiel<span>27</span></a>
+        <a href="/teams/vfb-leipzig/" style="--club:hsl(230, 59%, 38%)"><i></i>VfB Leipzig<span>24</span></a>
+        <a href="/teams/homburg/" style="--club:hsl(218, 68%, 38%)"><i></i>Homburg<span>22</span></a>
+        <a href="/teams/saarbrucken/" style="--club:hsl(230, 63%, 38%)"><i></i>Saarbrücken<span>21</span></a>
+        <a href="/teams/ulm/" style="--club:hsl(253, 62%, 38%)"><i></i>Ulm<span>21</span></a>
+        <a href="/teams/elversberg/" style="--club:hsl(230, 63%, 38%)"><i></i>Elversberg<span>19</span></a>
+</div>
+
+<h2>Community games</h2>
+<p class="sub">Made by players from the same database — different rules, same real records.</p>
+<div id="communityBox"><p class="empty">Loading…</p></div>
+<a class="cta" href="/community/?build=1">Build a Bundesliga game &rarr;</a>
+
+<h2>Ask about Bundesliga</h2>
+<p class="sub">Answers come from the database and are never invented — if the data does not
+  support an answer, it says so.</p>
+<form class="ask" id="askForm">
+  <input id="askQ" autocomplete="off" maxlength="300"
+         placeholder="Top scorers in Bundesliga"
+         aria-label="Ask a question about Bundesliga">
+  <button type="submit">Ask</button>
+</form>
+<div class="ask-examples">
+          <button type="button" data-q="Top scorers in Bundesliga">Top scorers in Bundesliga</button>
+          <button type="button" data-q="Which English players have the most appearances for Eintracht Frankfurt?">Which English players have the most appearances for Eintracht Frankfurt?</button>
+          <button type="button" data-q="Who has played for both Eintracht Frankfurt and Stuttgart?">Who has played for both Eintracht Frankfurt and Stuttgart?</button>
+</div>
+<div id="askAnswer"></div>
+
+<h2>Other competitions</h2>
+<div class="related">
+          <a href="/competitions/fa-cup/">FA Cup</a>
+          <a href="/competitions/efl-cup/">EFL Cup</a>
+          <a href="/competitions/segunda-division/">Segunda División</a>
+          <a href="/competitions/league-one/">League One</a>
+          <a href="/competitions/league-two/">League Two</a>
+          <a href="/competitions/champions-league/">Champions League</a>
+          <a href="/competitions/championship/">Championship</a>
+          <a href="/competitions/serie-a/">Serie A</a>
+          <a href="/competitions/premier-league/">Premier League</a>
+          <a href="/competitions/la-liga/">La Liga</a>
+          <a href="/competitions/ligue-1/">Ligue 1</a>
+</div>
+
+<footer class="page">
+  Player statistics compiled from official league and competition sources.
+  <a href="/tools/data.html">Coverage and last update</a> ·
+  <a href="/competitions/">All competitions</a> ·
+  <a href="/teams/">All teams</a> ·
+  <a href="/ask/">Ask TeleStats</a>
+</footer>
+
+</div>
+
+<script>
+window.TS_COMPETITION = {"slug":"bundesliga","name":"Bundesliga","scope":"comp_bundesliga"};
+</script>
+<script src="/js/ts-scope.js"></script>
+<script src="/js/competition-page.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/js/ts-auth.js"></script>
+<script src="/js/ts-data.js"></script>
+<script src="/js/ts-nav.js"></script>
+<script>
+  (async function () {
+    try { await TSAuth.init(); } catch (e) { console.error('[TeleStats] Auth init failed:', e); }
+    try { TSNav.render(); } catch (e) { console.error('[TeleStats] Nav render failed:', e); }
+  })();
+</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TeleStats","item":"https://telestats.net"},{"@type":"ListItem","position":2,"name":"Competitions","item":"https://telestats.net/competitions/"},{"@type":"ListItem","position":3,"name":"Bundesliga","item":"https://telestats.net/competitions/bundesliga/"}]},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Who has the most Bundesliga appearances?","acceptedAnswer":{"@type":"Answer","text":"Oliver Kahn has the most Bundesliga appearances in the TeleStats database with 555 for Bayern Munich."}}]}]}</script>
+</body>
+</html>

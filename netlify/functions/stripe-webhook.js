@@ -31,9 +31,18 @@ exports.handler = async (event) => {
   const sig = event.headers['stripe-signature'];
   if (!sig) return respond(400, 'Missing stripe-signature header');
 
+  // Stripe signs the RAW body. Netlify base64-encodes a request body under
+  // some configurations, and passing the encoded string here would fail every
+  // signature — meaning no payment ever upgrades anybody, silently, with a 400
+  // that only shows up in Stripe's dashboard. Decoding when flagged costs
+  // nothing and removes the failure mode.
+  const rawBody = event.isBase64Encoded
+    ? Buffer.from(event.body || '', 'base64')
+    : event.body;
+
   let stripeEvent;
   try {
-    stripeEvent = stripe.webhooks.constructEvent(event.body, sig, webhookSecret);
+    stripeEvent = stripe.webhooks.constructEvent(rawBody, sig, webhookSecret);
   } catch (err) {
     console.error('Webhook signature verification failed:', err.message);
     return respond(400, 'Invalid signature');

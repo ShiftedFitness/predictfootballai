@@ -52,6 +52,9 @@
   .crest { width: 52px; height: 60px; flex: 0 0 auto; filter: drop-shadow(0 2px 6px rgba(0,0,0,.45)); }
   .hero h1 { font-size: 1.65rem; line-height: 1.2; margin: 0 0 5px; }
   .sub { color: var(--text-secondary); margin: 0; font-size: .9rem; }
+  .sub a.complink { color: var(--text-secondary); text-decoration: underline;
+                    text-decoration-color: rgba(255,255,255,.22); }
+  .sub a.complink:hover { color: var(--accent); }
   .scope-note { color: var(--text-muted); font-size: .76rem; margin: 6px 0 0; }
   .scope-note a { color: var(--accent); }
 
@@ -182,9 +185,9 @@
     <nav>
       <a href="/daily/">Daily</a>
       <a href="/games/">Games</a>
+      <a href="/competitions/">Competitions</a>
       <a href="/teams/">Teams</a>
       <a href="/ask/">Ask</a>
-      <a href="/leaderboard/">Leaderboard</a>
       <a href="/community/">Community</a>
     </nav>
   </div>
@@ -205,7 +208,8 @@
     </svg>
     <div>
       <h1>Stuttgarter Kickers Football Quizzes &amp; Trivia</h1>
-      <p class="sub">39 players · 918 appearances · Bundesliga</p>
+      <p class="sub">39 players · 918 appearances ·
+        <a class="complink" href="/competitions/bundesliga/">Bundesliga</a></p>
       <p class="scope-note">Records cover 1988/89 to 1991/92.
         <a href="/tools/data.html">Full dataset scope</a>.</p>
     </div>
@@ -351,17 +355,17 @@
           </tr>
         <tr>
             <td class="rank">7</td>
-            <td>Ari Hjelm</td>
-            <td class="num">32</td>
-            <td class="num">5</td>
-            <td class="yr">1988/89–1988/89</td>
-          </tr>
-        <tr>
-            <td class="rank">8</td>
             <td>Marcus Marin</td>
             <td class="num">32</td>
             <td class="num">13</td>
             <td class="yr">1991/92–1991/92</td>
+          </tr>
+        <tr>
+            <td class="rank">8</td>
+            <td>Ari Hjelm</td>
+            <td class="num">32</td>
+            <td class="num">5</td>
+            <td class="yr">1988/89–1988/89</td>
           </tr>
         <tr>
             <td class="rank">9</td>
@@ -400,9 +404,9 @@
           </tr>
         <tr>
             <td class="rank">14</td>
-            <td>Bernd Grabosch</td>
+            <td>Runald Ossen</td>
             <td class="num">28</td>
-            <td class="num">3</td>
+            <td class="num">1</td>
             <td class="yr">1988/89–1988/89</td>
           </tr>
         <tr>
@@ -461,21 +465,21 @@
           </tr>
         <tr>
             <td class="rank">7</td>
+            <td>Wolfgang Wolf</td>
+            <td class="num">5</td>
+            <td class="num">60</td>
+          </tr>
+        <tr>
+            <td class="rank">8</td>
             <td>Ari Hjelm</td>
             <td class="num">5</td>
             <td class="num">32</td>
           </tr>
         <tr>
-            <td class="rank">8</td>
+            <td class="rank">9</td>
             <td>Andreas Keim</td>
             <td class="num">5</td>
             <td class="num">46</td>
-          </tr>
-        <tr>
-            <td class="rank">9</td>
-            <td>Wolfgang Wolf</td>
-            <td class="num">5</td>
-            <td class="num">60</td>
           </tr>
         <tr>
             <td class="rank">10</td>
@@ -549,7 +553,7 @@
 </div><!-- /wrap -->
 
 <script>
-window.TS_TEAM = {"slug":"stuttgarter-kickers","name":"Stuttgarter Kickers","comps":["Bundesliga"],"defaultScope":"team_stuttgarter-kickers_bundesliga","potd":[{"n":"Ralf Vollmer","a":62,"g":8,"f":"1988/89","t":"1991/92"},{"n":"Wolfgang Wolf","a":60,"g":5,"f":"1988/89","t":"1991/92"},{"n":"Alois Schwartz","a":51,"g":3,"f":"1988/89","t":"1991/92"},{"n":"Andreas Keim","a":46,"g":5,"f":"1988/89","t":"1991/92"},{"n":"Thomas Ritter","a":36,"g":1,"f":"1991/92","t":"1991/92"},{"n":"Jochen Novodomsky","a":34,"g":1,"f":"1991/92","t":"1991/92"},{"n":"Ari Hjelm","a":32,"g":5,"f":"1988/89","t":"1988/89"},{"n":"Marcus Marin","a":32,"g":13,"f":"1991/92","t":"1991/92"},{"n":"Dimitrios Moutas","a":32,"g":12,"f":"1991/92","t":"1991/92"},{"n":"Thomas Richter","a":31,"g":1,"f":"1991/92","t":"1991/92"},{"n":"Claus Reitmaier","a":30,"g":0,"f":"1991/92","t":"1991/92"},{"n":"Bernd Schindler","a":29,"g":2,"f":"1988/89","t":"1988/89"},{"n":"Alfred Schön","a":29,"g":0,"f":"1988/89","t":"1988/89"},{"n":"Bernd Grabosch","a":28,"g":3,"f":"1988/89","t":"1988/89"},{"n":"Kari Laukkanen","a":28,"g":0,"f":"1988/89","t":"1988/89"}]};
+window.TS_TEAM = {"slug":"stuttgarter-kickers","name":"Stuttgarter Kickers","comps":["Bundesliga"],"defaultScope":"team_stuttgarter-kickers_bundesliga","potd":[{"n":"Ralf Vollmer","a":62,"g":8,"f":"1988/89","t":"1991/92"},{"n":"Wolfgang Wolf","a":60,"g":5,"f":"1988/89","t":"1991/92"},{"n":"Alois Schwartz","a":51,"g":3,"f":"1988/89","t":"1991/92"},{"n":"Andreas Keim","a":46,"g":5,"f":"1988/89","t":"1991/92"},{"n":"Thomas Ritter","a":36,"g":1,"f":"1991/92","t":"1991/92"},{"n":"Jochen Novodomsky","a":34,"g":1,"f":"1991/92","t":"1991/92"},{"n":"Marcus Marin","a":32,"g":13,"f":"1991/92","t":"1991/92"},{"n":"Ari Hjelm","a":32,"g":5,"f":"1988/89","t":"1988/89"},{"n":"Dimitrios Moutas","a":32,"g":12,"f":"1991/92","t":"1991/92"},{"n":"Thomas Richter","a":31,"g":1,"f":"1991/92","t":"1991/92"},{"n":"Claus Reitmaier","a":30,"g":0,"f":"1991/92","t":"1991/92"},{"n":"Bernd Schindler","a":29,"g":2,"f":"1988/89","t":"1988/89"},{"n":"Alfred Schön","a":29,"g":0,"f":"1988/89","t":"1988/89"},{"n":"Runald Ossen","a":28,"g":1,"f":"1988/89","t":"1988/89"},{"n":"Kari Laukkanen","a":28,"g":0,"f":"1988/89","t":"1988/89"}]};
 </script>
 <script src="/js/ts-scope.js"></script>
 <script src="/js/team-page.js"></script>

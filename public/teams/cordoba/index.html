@@ -5,17 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="/js/ts-analytics.js"></script>
 <title>Córdoba Football Quiz &amp; Trivia Games | TeleStats</title>
-<meta name="description" content="Play Córdoba football quizzes and trivia games built from 33 players and 523 appearances in La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta name="description" content="Play Córdoba football quizzes and trivia games built from 357 players and 10,663 appearances in Segunda División and La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
 <link rel="canonical" href="https://telestats.net/teams/cordoba/">
 <meta name="theme-color" content="hsl(193, 58%, 38%)">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Córdoba Football Quiz &amp; Trivia Games | TeleStats">
-<meta property="og:description" content="Play Córdoba football quizzes and trivia games built from 33 players and 523 appearances in La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta property="og:description" content="Play Córdoba football quizzes and trivia games built from 357 players and 10,663 appearances in Segunda División and La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
 <meta property="og:url" content="https://telestats.net/teams/cordoba/">
 <meta property="og:site_name" content="TeleStats">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Córdoba Football Quiz &amp; Trivia Games | TeleStats">
-<meta name="twitter:description" content="Play Córdoba football quizzes and trivia games built from 33 players and 523 appearances in La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta name="twitter:description" content="Play Córdoba football quizzes and trivia games built from 357 players and 10,663 appearances in Segunda División and La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
 <link rel="stylesheet" href="/telestats-theme.css">
 <style>
   :root { --club: hsl(193, 58%, 38%); --club-2: hsl(211, 58%, 26%); }
@@ -52,6 +52,9 @@
   .crest { width: 52px; height: 60px; flex: 0 0 auto; filter: drop-shadow(0 2px 6px rgba(0,0,0,.45)); }
   .hero h1 { font-size: 1.65rem; line-height: 1.2; margin: 0 0 5px; }
   .sub { color: var(--text-secondary); margin: 0; font-size: .9rem; }
+  .sub a.complink { color: var(--text-secondary); text-decoration: underline;
+                    text-decoration-color: rgba(255,255,255,.22); }
+  .sub a.complink:hover { color: var(--accent); }
   .scope-note { color: var(--text-muted); font-size: .76rem; margin: 6px 0 0; }
   .scope-note a { color: var(--accent); }
 
@@ -182,9 +185,9 @@
     <nav>
       <a href="/daily/">Daily</a>
       <a href="/games/">Games</a>
+      <a href="/competitions/">Competitions</a>
       <a href="/teams/">Teams</a>
       <a href="/ask/">Ask</a>
-      <a href="/leaderboard/">Leaderboard</a>
       <a href="/community/">Community</a>
     </nav>
   </div>
@@ -205,8 +208,9 @@
     </svg>
     <div>
       <h1>Córdoba Football Quizzes &amp; Trivia</h1>
-      <p class="sub">33 players · 523 appearances · La Liga</p>
-      <p class="scope-note">Records cover 2014/15 to 2014/15.
+      <p class="sub">357 players · 10,663 appearances ·
+        <a class="complink" href="/competitions/segunda-division/">Segunda División</a>, <a class="complink" href="/competitions/la-liga/">La Liga</a></p>
+      <p class="scope-note">Records cover 2001/02 to 2026/27.
         <a href="/tools/data.html">Full dataset scope</a>.</p>
     </div>
   </div>
@@ -216,8 +220,8 @@
   <summary>New here? What this page is</summary>
   <div class="body">
     <p>This is a set of free football games about <strong>Córdoba</strong>, generated
-      from real appearance and goal records — 33 players who have turned out
-      for the club in La Liga, going back to 2014/15.</p>
+      from real appearance and goal records — 357 players who have turned out
+      for the club in Segunda División and La Liga, going back to 2001/02.</p>
     <p>Pick a game below and it starts straight away on Córdoba. No sign-up, no app.
       Make an account only if you want your scores kept and your name on the club's board.</p>
     <p>Everything you see here comes from the TeleStats database. Nothing is written by an AI
@@ -243,11 +247,23 @@
 
 <h2 id="play">Play Córdoba</h2>
 <p class="sub">The five TeleStats games, set up for Córdoba. Click one and it starts.</p>
-      
+      <div class="chips" id="compChips" role="group"
+       aria-label="Choose which competitions to play">
+        <button type="button" class="chip all on" data-all="1" aria-pressed="true">All competitions</button>
+        <button type="button" class="chip on"
+                data-comp="Segunda División"
+                data-slug="segunda-division"
+                aria-pressed="true">Segunda División</button>
+        <button type="button" class="chip on"
+                data-comp="La Liga"
+                data-slug="la-liga"
+                aria-pressed="true">La Liga</button>
+      </div>
+      <p class="chip-note" id="chipNote"></p>
       <ul class="games">
         <li class="game">
           <a class="game-go" data-path="/games/hol.html"
-             href="/games/hol.html?scope=team_cordoba_la-liga&amp;play=1">
+             href="/games/hol.html?scope=team_cordoba_all&amp;play=1">
             <h3>Córdoba Higher or Lower</h3>
             <p>Which player has more appearances?</p>
             <span class="go">Play now &rarr;</span>
@@ -255,7 +271,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/alpha.html"
-             href="/games/alpha.html?scope=team_cordoba_la-liga&amp;play=1">
+             href="/games/alpha.html?scope=team_cordoba_all&amp;play=1">
             <h3>Córdoba Player Alphabet</h3>
             <p>Name a player for every letter of the alphabet.</p>
             <span class="go">Play now &rarr;</span>
@@ -263,7 +279,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/xi.html"
-             href="/games/xi.html?scope=team_cordoba_la-liga&amp;play=1">
+             href="/games/xi.html?scope=team_cordoba_all&amp;play=1">
             <h3>Córdoba Starting XI</h3>
             <p>Build the strongest eleven you can.</p>
             <span class="go">Play now &rarr;</span>
@@ -271,7 +287,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/whoami.html"
-             href="/games/whoami.html?scope=team_cordoba_la-liga&amp;play=1">
+             href="/games/whoami.html?scope=team_cordoba_all&amp;play=1">
             <h3>Córdoba Who Am I?</h3>
             <p>Guess the player from five clues.</p>
             <span class="go">Play now &rarr;</span>
@@ -279,7 +295,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/quiz.html"
-             href="/games/quiz.html?scope=team_cordoba_la-liga&amp;play=1">
+             href="/games/quiz.html?scope=team_cordoba_all&amp;play=1">
             <h3>Córdoba Trivia Quiz</h3>
             <p>Ten questions from this club’s record.</p>
             <span class="go">Play now &rarr;</span>
@@ -309,108 +325,108 @@
       <tbody>
         <tr>
             <td class="rank">1</td>
-            <td>Juan Carlos</td>
-            <td class="num">32</td>
-            <td class="num">0</td>
-            <td class="yr">2014/15–2014/15</td>
+            <td>Carlos Caballero</td>
+            <td class="num">139</td>
+            <td class="num">7</td>
+            <td class="yr">2011/12–2017/18</td>
           </tr>
         <tr>
             <td class="rank">2</td>
-            <td>Federico Cartabia</td>
-            <td class="num">30</td>
-            <td class="num">4</td>
-            <td class="yr">2014/15–2014/15</td>
+            <td>Javier Jauregui</td>
+            <td class="num">136</td>
+            <td class="num">0</td>
+            <td class="yr">2001/02–2004/05</td>
           </tr>
         <tr>
             <td class="rank">3</td>
-            <td>Aleksandar Pantić</td>
-            <td class="num">29</td>
-            <td class="num">0</td>
-            <td class="yr">2014/15–2014/15</td>
+            <td>David Arteaga</td>
+            <td class="num">133</td>
+            <td class="num">17</td>
+            <td class="yr">2007/08–2010/11</td>
           </tr>
         <tr>
             <td class="rank">4</td>
-            <td>Borja García</td>
-            <td class="num">28</td>
-            <td class="num">1</td>
-            <td class="yr">2014/15–2014/15</td>
+            <td>José López Silva</td>
+            <td class="num">130</td>
+            <td class="num">11</td>
+            <td class="yr">2011/12–2015/16</td>
           </tr>
         <tr>
             <td class="rank">5</td>
-            <td>José Ángel Crespo</td>
-            <td class="num">27</td>
-            <td class="num">0</td>
-            <td class="yr">2014/15–2014/15</td>
+            <td>Asen</td>
+            <td class="num">125</td>
+            <td class="num">24</td>
+            <td class="yr">2007/08–2009/10</td>
           </tr>
         <tr>
             <td class="rank">6</td>
-            <td>Nabil Ghilas</td>
-            <td class="num">27</td>
-            <td class="num">7</td>
-            <td class="yr">2014/15–2014/15</td>
+            <td>Daniel López Ramos</td>
+            <td class="num">124</td>
+            <td class="num">1</td>
+            <td class="yr">2001/02–2004/05</td>
           </tr>
         <tr>
             <td class="rank">7</td>
-            <td>Fidel</td>
-            <td class="num">25</td>
-            <td class="num">1</td>
-            <td class="yr">2014/15–2014/15</td>
+            <td>Pepe Díaz</td>
+            <td class="num">123</td>
+            <td class="num">27</td>
+            <td class="yr">2008/09–2012/13</td>
           </tr>
         <tr>
             <td class="rank">8</td>
-            <td>Fausto Rossi</td>
-            <td class="num">24</td>
-            <td class="num">0</td>
-            <td class="yr">2014/15–2014/15</td>
+            <td>Luso</td>
+            <td class="num">116</td>
+            <td class="num">2</td>
+            <td class="yr">2013/14–2016/17</td>
           </tr>
         <tr>
             <td class="rank">9</td>
-            <td>Adrián Gunino</td>
-            <td class="num">23</td>
-            <td class="num">0</td>
-            <td class="yr">2014/15–2014/15</td>
+            <td>Juan Rafael Fuentes</td>
+            <td class="num">113</td>
+            <td class="num">2</td>
+            <td class="yr">2009/10–2012/13</td>
           </tr>
         <tr>
             <td class="rank">10</td>
             <td>Abel Gómez Moreno</td>
-            <td class="num">22</td>
-            <td class="num">0</td>
-            <td class="yr">2014/15–2014/15</td>
+            <td class="num">111</td>
+            <td class="num">7</td>
+            <td class="yr">2012/13–2015/16</td>
           </tr>
         <tr>
             <td class="rank">11</td>
-            <td>Deivid</td>
-            <td class="num">21</td>
-            <td class="num">0</td>
-            <td class="yr">2014/15–2014/15</td>
+            <td>José Manuel Fernández</td>
+            <td class="num">111</td>
+            <td class="num">1</td>
+            <td class="yr">2010/11–2018/19</td>
           </tr>
         <tr>
             <td class="rank">12</td>
-            <td>Íñigo López</td>
-            <td class="num">21</td>
+            <td>Alberto García</td>
+            <td class="num">108</td>
             <td class="num">0</td>
-            <td class="yr">2014/15–2014/15</td>
+            <td class="yr">2009/10–2012/13</td>
           </tr>
         <tr>
             <td class="rank">13</td>
-            <td>Florin Andone</td>
-            <td class="num">20</td>
-            <td class="num">5</td>
-            <td class="yr">2014/15–2014/15</td>
+            <td>Gaspar</td>
+            <td class="num">103</td>
+            <td class="num">2</td>
+            <td class="yr">2008/09–2012/13</td>
           </tr>
         <tr>
             <td class="rank">14</td>
-            <td>Fede Vico</td>
-            <td class="num">20</td>
-            <td class="num">0</td>
-            <td class="yr">2014/15–2014/15</td>
+            <td>Ariel Montenegro</td>
+            <td class="num">94</td>
+            <td class="num">17</td>
+            <td class="yr">2001/02–2004/05</td>
           </tr>
         <tr>
             <td class="rank">15</td>
-            <td>Bebé</td>
-            <td class="num">18</td>
-            <td class="num">0</td>
-            <td class="yr">2014/15–2014/15</td>
+            <td>Aritz López Garai</td>
+            <td class="num">92</td>
+            <td class="num">6</td>
+            <td class="yr">2011/12–2014/15</td>
           </tr>
       </tbody>
     </table>
@@ -425,51 +441,63 @@
       <tbody>
         <tr>
             <td class="rank">1</td>
-            <td>Nabil Ghilas</td>
-            <td class="num">7</td>
+            <td>Xisco</td>
             <td class="num">27</td>
+            <td class="num">90</td>
           </tr>
         <tr>
             <td class="rank">2</td>
-            <td>Florin Andone</td>
-            <td class="num">5</td>
-            <td class="num">20</td>
+            <td>Pepe Díaz</td>
+            <td class="num">27</td>
+            <td class="num">123</td>
           </tr>
         <tr>
             <td class="rank">3</td>
-            <td>Federico Cartabia</td>
-            <td class="num">4</td>
-            <td class="num">30</td>
+            <td>Sergi Guardiola</td>
+            <td class="num">27</td>
+            <td class="num">77</td>
           </tr>
         <tr>
             <td class="rank">4</td>
-            <td>Xisco</td>
-            <td class="num">1</td>
-            <td class="num">9</td>
+            <td>Florin Andone</td>
+            <td class="num">26</td>
+            <td class="num">56</td>
           </tr>
         <tr>
             <td class="rank">5</td>
-            <td>Fidel</td>
-            <td class="num">1</td>
-            <td class="num">25</td>
+            <td>Asen</td>
+            <td class="num">24</td>
+            <td class="num">125</td>
           </tr>
         <tr>
             <td class="rank">6</td>
-            <td>Borja García</td>
-            <td class="num">1</td>
-            <td class="num">28</td>
+            <td>Charles</td>
+            <td class="num">22</td>
+            <td class="num">66</td>
           </tr>
         <tr>
             <td class="rank">7</td>
-            <td>Luso</td>
-            <td class="num">1</td>
+            <td>Borja García</td>
             <td class="num">18</td>
+            <td class="num">66</td>
           </tr>
         <tr>
             <td class="rank">8</td>
-            <td>Patrick Ekeng</td>
-            <td class="num">1</td>
-            <td class="num">14</td>
+            <td>Jacobo</td>
+            <td class="num">18</td>
+            <td class="num">74</td>
+          </tr>
+        <tr>
+            <td class="rank">9</td>
+            <td>Ariel Montenegro</td>
+            <td class="num">17</td>
+            <td class="num">94</td>
+          </tr>
+        <tr>
+            <td class="rank">10</td>
+            <td>David Arteaga</td>
+            <td class="num">17</td>
+            <td class="num">133</td>
           </tr>
       </tbody>
     </table>
@@ -483,6 +511,13 @@
       <thead><tr><th>Competition</th><th class="num">Players</th><th>Seasons</th><th class="num">Count</th><th>Games</th></tr></thead>
       <tbody>
         <tr>
+            <td>Segunda División</td>
+            <td class="num">341</td>
+            <td class="yr">2001/02–2026/27</td>
+            <td class="num">6</td>
+            <td class="yes">Playable</td>
+          </tr>
+        <tr>
             <td>La Liga</td>
             <td class="num">33</td>
             <td class="yr">2014/15–2014/15</td>
@@ -495,35 +530,35 @@
 </details>
 
 <h2>Ask about Córdoba</h2>
-<p class="sub">Ask the database a question. Answers come from 33 Córdoba
+<p class="sub">Ask the database a question. Answers come from 357 Córdoba
   players and are never invented — if the data does not support an answer, it says so.</p>
 <form class="ask" id="askForm">
   <input id="askQ" autocomplete="off" maxlength="300"
-         placeholder="Who has played for both Córdoba and Sevilla?"
+         placeholder="Who has played for both Córdoba and Valladolid?"
          aria-label="Ask a question about Córdoba">
   <button type="submit">Ask</button>
 </form>
 <div class="ask-examples">
-          <button type="button" data-q="Who has played for both Córdoba and Sevilla?">Who has played for both Córdoba and Sevilla?</button>
-          <button type="button" data-q="Top scorers for Córdoba in La Liga">Top scorers for Córdoba in La Liga</button>
+          <button type="button" data-q="Who has played for both Córdoba and Valladolid?">Who has played for both Córdoba and Valladolid?</button>
+          <button type="button" data-q="Top scorers for Córdoba in Segunda División">Top scorers for Córdoba in Segunda División</button>
           <button type="button" data-q="Which English players have the most appearances for Córdoba?">Which English players have the most appearances for Córdoba?</button>
 </div>
 <div id="askAnswer"></div>
 
 <h2>More teams</h2>
 <div class="related">
-          <a href="/teams/sevilla/">Sevilla</a>
-          <a href="/teams/espanyol/">Espanyol</a>
-          <a href="/teams/atletico-madrid/">Atlético Madrid</a>
-          <a href="/teams/valencia/">Valencia</a>
-          <a href="/teams/real-betis/">Real Betis</a>
-          <a href="/teams/barcelona/">Barcelona</a>
           <a href="/teams/valladolid/">Valladolid</a>
-          <a href="/teams/celta-vigo/">Celta Vigo</a>
+          <a href="/teams/albacete/">Albacete</a>
+          <a href="/teams/zaragoza/">Zaragoza</a>
+          <a href="/teams/tenerife/">Tenerife</a>
+          <a href="/teams/elche/">Elche</a>
+          <a href="/teams/espanyol/">Espanyol</a>
+          <a href="/teams/sevilla/">Sevilla</a>
           <a href="/teams/mallorca/">Mallorca</a>
-          <a href="/teams/real-madrid/">Real Madrid</a>
+          <a href="/teams/sporting-gijon/">Sporting Gijón</a>
+          <a href="/teams/malaga/">Málaga</a>
+          <a href="/teams/atletico-madrid/">Atlético Madrid</a>
           <a href="/teams/rayo-vallecano/">Rayo Vallecano</a>
-          <a href="/teams/villarreal/">Villarreal</a>
 </div>
 
 <footer class="page">
@@ -537,7 +572,7 @@
 </div><!-- /wrap -->
 
 <script>
-window.TS_TEAM = {"slug":"cordoba","name":"Córdoba","comps":["La Liga"],"defaultScope":"team_cordoba_la-liga","potd":[{"n":"Juan Carlos","a":32,"g":0,"f":"2014/15","t":"2014/15"},{"n":"Federico Cartabia","a":30,"g":4,"f":"2014/15","t":"2014/15"},{"n":"Aleksandar Pantić","a":29,"g":0,"f":"2014/15","t":"2014/15"},{"n":"Borja García","a":28,"g":1,"f":"2014/15","t":"2014/15"},{"n":"José Ángel Crespo","a":27,"g":0,"f":"2014/15","t":"2014/15"},{"n":"Nabil Ghilas","a":27,"g":7,"f":"2014/15","t":"2014/15"},{"n":"Fidel","a":25,"g":1,"f":"2014/15","t":"2014/15"},{"n":"Fausto Rossi","a":24,"g":0,"f":"2014/15","t":"2014/15"},{"n":"Adrián Gunino","a":23,"g":0,"f":"2014/15","t":"2014/15"},{"n":"Abel Gómez Moreno","a":22,"g":0,"f":"2014/15","t":"2014/15"},{"n":"Deivid","a":21,"g":0,"f":"2014/15","t":"2014/15"},{"n":"Íñigo López","a":21,"g":0,"f":"2014/15","t":"2014/15"},{"n":"Florin Andone","a":20,"g":5,"f":"2014/15","t":"2014/15"},{"n":"Fede Vico","a":20,"g":0,"f":"2014/15","t":"2014/15"},{"n":"Bebé","a":18,"g":0,"f":"2014/15","t":"2014/15"}]};
+window.TS_TEAM = {"slug":"cordoba","name":"Córdoba","comps":["Segunda División","La Liga"],"defaultScope":"team_cordoba_all","potd":[{"n":"Carlos Caballero","a":139,"g":7,"f":"2011/12","t":"2017/18"},{"n":"Javier Jauregui","a":136,"g":0,"f":"2001/02","t":"2004/05"},{"n":"David Arteaga","a":133,"g":17,"f":"2007/08","t":"2010/11"},{"n":"José López Silva","a":130,"g":11,"f":"2011/12","t":"2015/16"},{"n":"Asen","a":125,"g":24,"f":"2007/08","t":"2009/10"},{"n":"Daniel López Ramos","a":124,"g":1,"f":"2001/02","t":"2004/05"},{"n":"Pepe Díaz","a":123,"g":27,"f":"2008/09","t":"2012/13"},{"n":"Luso","a":116,"g":2,"f":"2013/14","t":"2016/17"},{"n":"Juan Rafael Fuentes","a":113,"g":2,"f":"2009/10","t":"2012/13"},{"n":"Abel Gómez Moreno","a":111,"g":7,"f":"2012/13","t":"2015/16"},{"n":"José Manuel Fernández","a":111,"g":1,"f":"2010/11","t":"2018/19"},{"n":"Alberto García","a":108,"g":0,"f":"2009/10","t":"2012/13"},{"n":"Gaspar","a":103,"g":2,"f":"2008/09","t":"2012/13"},{"n":"Ariel Montenegro","a":94,"g":17,"f":"2001/02","t":"2004/05"},{"n":"Aritz López Garai","a":92,"g":6,"f":"2011/12","t":"2014/15"}]};
 </script>
 <script src="/js/ts-scope.js"></script>
 <script src="/js/team-page.js"></script>
@@ -554,6 +589,6 @@ window.TS_TEAM = {"slug":"cordoba","name":"Córdoba","comps":["La Liga"],"defaul
     try { TSNav.render(); } catch (e) { console.error('[TeleStats] Nav render failed:', e); }
   })();
 </script>
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TeleStats","item":"https://telestats.net"},{"@type":"ListItem","position":2,"name":"Teams","item":"https://telestats.net/teams/"},{"@type":"ListItem","position":3,"name":"Córdoba","item":"https://telestats.net/teams/cordoba/"}]},{"@type":"SportsTeam","name":"Córdoba","sport":"Association football","url":"https://telestats.net/teams/cordoba/"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is the Córdoba page on TeleStats?","acceptedAnswer":{"@type":"Answer","text":"Free Córdoba football quizzes and trivia games generated from real appearance and goal records for 33 players across La Liga. No sign-up is needed to play."}}]}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TeleStats","item":"https://telestats.net"},{"@type":"ListItem","position":2,"name":"Teams","item":"https://telestats.net/teams/"},{"@type":"ListItem","position":3,"name":"Córdoba","item":"https://telestats.net/teams/cordoba/"}]},{"@type":"SportsTeam","name":"Córdoba","sport":"Association football","url":"https://telestats.net/teams/cordoba/"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is the Córdoba page on TeleStats?","acceptedAnswer":{"@type":"Answer","text":"Free Córdoba football quizzes and trivia games generated from real appearance and goal records for 357 players across Segunda División and La Liga. No sign-up is needed to play."}}]}]}</script>
 </body>
 </html>

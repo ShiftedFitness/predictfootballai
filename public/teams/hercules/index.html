@@ -5,17 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="/js/ts-analytics.js"></script>
 <title>Hércules Football Quiz &amp; Trivia Games | TeleStats</title>
-<meta name="description" content="Play Hércules football quizzes and trivia games built from 54 players and 1,108 appearances in La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta name="description" content="Play Hércules football quizzes and trivia games built from 190 players and 5,782 appearances in Segunda División and La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
 <link rel="canonical" href="https://telestats.net/teams/hercules/">
 <meta name="theme-color" content="hsl(220, 67%, 38%)">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Hércules Football Quiz &amp; Trivia Games | TeleStats">
-<meta property="og:description" content="Play Hércules football quizzes and trivia games built from 54 players and 1,108 appearances in La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta property="og:description" content="Play Hércules football quizzes and trivia games built from 190 players and 5,782 appearances in Segunda División and La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
 <meta property="og:url" content="https://telestats.net/teams/hercules/">
 <meta property="og:site_name" content="TeleStats">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Hércules Football Quiz &amp; Trivia Games | TeleStats">
-<meta name="twitter:description" content="Play Hércules football quizzes and trivia games built from 54 players and 1,108 appearances in La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta name="twitter:description" content="Play Hércules football quizzes and trivia games built from 190 players and 5,782 appearances in Segunda División and La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
 <link rel="stylesheet" href="/telestats-theme.css">
 <style>
   :root { --club: hsl(220, 67%, 38%); --club-2: hsl(238, 67%, 26%); }
@@ -52,6 +52,9 @@
   .crest { width: 52px; height: 60px; flex: 0 0 auto; filter: drop-shadow(0 2px 6px rgba(0,0,0,.45)); }
   .hero h1 { font-size: 1.65rem; line-height: 1.2; margin: 0 0 5px; }
   .sub { color: var(--text-secondary); margin: 0; font-size: .9rem; }
+  .sub a.complink { color: var(--text-secondary); text-decoration: underline;
+                    text-decoration-color: rgba(255,255,255,.22); }
+  .sub a.complink:hover { color: var(--accent); }
   .scope-note { color: var(--text-muted); font-size: .76rem; margin: 6px 0 0; }
   .scope-note a { color: var(--accent); }
 
@@ -182,9 +185,9 @@
     <nav>
       <a href="/daily/">Daily</a>
       <a href="/games/">Games</a>
+      <a href="/competitions/">Competitions</a>
       <a href="/teams/">Teams</a>
       <a href="/ask/">Ask</a>
-      <a href="/leaderboard/">Leaderboard</a>
       <a href="/community/">Community</a>
     </nav>
   </div>
@@ -205,8 +208,9 @@
     </svg>
     <div>
       <h1>Hércules Football Quizzes &amp; Trivia</h1>
-      <p class="sub">54 players · 1,108 appearances · La Liga</p>
-      <p class="scope-note">Records cover 1996/97 to 2010/11.
+      <p class="sub">190 players · 5,782 appearances ·
+        <a class="complink" href="/competitions/segunda-division/">Segunda División</a>, <a class="complink" href="/competitions/la-liga/">La Liga</a></p>
+      <p class="scope-note">Records cover 1996/97 to 2013/14.
         <a href="/tools/data.html">Full dataset scope</a>.</p>
     </div>
   </div>
@@ -216,8 +220,8 @@
   <summary>New here? What this page is</summary>
   <div class="body">
     <p>This is a set of free football games about <strong>Hércules</strong>, generated
-      from real appearance and goal records — 54 players who have turned out
-      for the club in La Liga, going back to 1996/97.</p>
+      from real appearance and goal records — 190 players who have turned out
+      for the club in Segunda División and La Liga, going back to 1996/97.</p>
     <p>Pick a game below and it starts straight away on Hércules. No sign-up, no app.
       Make an account only if you want your scores kept and your name on the club's board.</p>
     <p>Everything you see here comes from the TeleStats database. Nothing is written by an AI
@@ -243,11 +247,23 @@
 
 <h2 id="play">Play Hércules</h2>
 <p class="sub">The five TeleStats games, set up for Hércules. Click one and it starts.</p>
-      
+      <div class="chips" id="compChips" role="group"
+       aria-label="Choose which competitions to play">
+        <button type="button" class="chip all on" data-all="1" aria-pressed="true">All competitions</button>
+        <button type="button" class="chip on"
+                data-comp="Segunda División"
+                data-slug="segunda-division"
+                aria-pressed="true">Segunda División</button>
+        <button type="button" class="chip on"
+                data-comp="La Liga"
+                data-slug="la-liga"
+                aria-pressed="true">La Liga</button>
+      </div>
+      <p class="chip-note" id="chipNote"></p>
       <ul class="games">
         <li class="game">
           <a class="game-go" data-path="/games/hol.html"
-             href="/games/hol.html?scope=team_hercules_la-liga&amp;play=1">
+             href="/games/hol.html?scope=team_hercules_all&amp;play=1">
             <h3>Hércules Higher or Lower</h3>
             <p>Which player has more appearances?</p>
             <span class="go">Play now &rarr;</span>
@@ -255,7 +271,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/alpha.html"
-             href="/games/alpha.html?scope=team_hercules_la-liga&amp;play=1">
+             href="/games/alpha.html?scope=team_hercules_all&amp;play=1">
             <h3>Hércules Player Alphabet</h3>
             <p>Name a player for every letter of the alphabet.</p>
             <span class="go">Play now &rarr;</span>
@@ -263,7 +279,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/xi.html"
-             href="/games/xi.html?scope=team_hercules_la-liga&amp;play=1">
+             href="/games/xi.html?scope=team_hercules_all&amp;play=1">
             <h3>Hércules Starting XI</h3>
             <p>Build the strongest eleven you can.</p>
             <span class="go">Play now &rarr;</span>
@@ -271,7 +287,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/whoami.html"
-             href="/games/whoami.html?scope=team_hercules_la-liga&amp;play=1">
+             href="/games/whoami.html?scope=team_hercules_all&amp;play=1">
             <h3>Hércules Who Am I?</h3>
             <p>Guess the player from five clues.</p>
             <span class="go">Play now &rarr;</span>
@@ -279,7 +295,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/quiz.html"
-             href="/games/quiz.html?scope=team_hercules_la-liga&amp;play=1">
+             href="/games/quiz.html?scope=team_hercules_all&amp;play=1">
             <h3>Hércules Trivia Quiz</h3>
             <p>Ten questions from this club’s record.</p>
             <span class="go">Play now &rarr;</span>
@@ -309,108 +325,108 @@
       <tbody>
         <tr>
             <td class="rank">1</td>
-            <td>Manuel Alfaro</td>
-            <td class="num">38</td>
-            <td class="num">15</td>
-            <td class="yr">1996/97–1996/97</td>
+            <td>Tote</td>
+            <td class="num">178</td>
+            <td class="num">27</td>
+            <td class="yr">2006/07–2011/12</td>
           </tr>
         <tr>
             <td class="rank">2</td>
-            <td>Dubravko Pavličić</td>
-            <td class="num">38</td>
-            <td class="num">6</td>
-            <td class="yr">1996/97–1996/97</td>
+            <td>Paco Peña</td>
+            <td class="num">166</td>
+            <td class="num">1</td>
+            <td class="yr">2009/10–2013/14</td>
           </tr>
         <tr>
             <td class="rank">3</td>
-            <td>Gabriel Amato</td>
-            <td class="num">36</td>
-            <td class="num">2</td>
-            <td class="yr">1996/97–1996/97</td>
+            <td>Sendoa Agirre</td>
+            <td class="num">166</td>
+            <td class="num">27</td>
+            <td class="yr">2006/07–2010/11</td>
           </tr>
         <tr>
             <td class="rank">4</td>
-            <td>Paquito Escudero</td>
-            <td class="num">36</td>
-            <td class="num">3</td>
-            <td class="yr">1996/97–1996/97</td>
+            <td>Javier Farinós</td>
+            <td class="num">147</td>
+            <td class="num">22</td>
+            <td class="yr">2006/07–2010/11</td>
           </tr>
         <tr>
             <td class="rank">5</td>
-            <td>Kiko Femenía</td>
-            <td class="num">34</td>
-            <td class="num">1</td>
-            <td class="yr">2010/11–2010/11</td>
+            <td>Javier Portillo</td>
+            <td class="num">120</td>
+            <td class="num">32</td>
+            <td class="yr">2009/10–2013/14</td>
           </tr>
         <tr>
             <td class="rank">6</td>
-            <td>David Cortés</td>
-            <td class="num">34</td>
+            <td>Ismael Falcón</td>
+            <td class="num">120</td>
             <td class="num">0</td>
-            <td class="yr">2010/11–2010/11</td>
+            <td class="yr">2006/07–2013/14</td>
           </tr>
         <tr>
             <td class="rank">7</td>
             <td>Juan Calatayud</td>
-            <td class="num">34</td>
+            <td class="num">117</td>
             <td class="num">0</td>
-            <td class="yr">2010/11–2010/11</td>
+            <td class="yr">2008/09–2010/11</td>
           </tr>
         <tr>
             <td class="rank">8</td>
             <td>Abel Aguilar</td>
-            <td class="num">34</td>
-            <td class="num">0</td>
-            <td class="yr">2010/11–2010/11</td>
+            <td class="num">104</td>
+            <td class="num">13</td>
+            <td class="yr">2008/09–2011/12</td>
           </tr>
         <tr>
             <td class="rank">9</td>
-            <td>José Vicente Lledó</td>
-            <td class="num">33</td>
-            <td class="num">0</td>
-            <td class="yr">1996/97–1996/97</td>
+            <td>Sergio Fernández</td>
+            <td class="num">104</td>
+            <td class="num">4</td>
+            <td class="yr">2006/07–2008/09</td>
           </tr>
         <tr>
             <td class="rank">10</td>
-            <td>David Trezeguet</td>
-            <td class="num">31</td>
-            <td class="num">12</td>
-            <td class="yr">2010/11–2010/11</td>
+            <td>Adrián Sardinero</td>
+            <td class="num">100</td>
+            <td class="num">9</td>
+            <td class="yr">2011/12–2013/14</td>
           </tr>
         <tr>
             <td class="rank">11</td>
-            <td>Noé Pamarot</td>
-            <td class="num">29</td>
-            <td class="num">0</td>
-            <td class="yr">2010/11–2010/11</td>
+            <td>Tiago Gomes</td>
+            <td class="num">97</td>
+            <td class="num">8</td>
+            <td class="yr">2009/10–2011/12</td>
           </tr>
         <tr>
             <td class="rank">12</td>
             <td>Abraham Paz</td>
-            <td class="num">29</td>
-            <td class="num">2</td>
-            <td class="yr">2010/11–2010/11</td>
+            <td class="num">91</td>
+            <td class="num">8</td>
+            <td class="yr">2008/09–2010/11</td>
           </tr>
         <tr>
             <td class="rank">13</td>
-            <td>Tiago Gomes</td>
-            <td class="num">28</td>
-            <td class="num">2</td>
-            <td class="yr">2010/11–2010/11</td>
+            <td>Juanra</td>
+            <td class="num">91</td>
+            <td class="num">0</td>
+            <td class="yr">2009/10–2012/13</td>
           </tr>
         <tr>
             <td class="rank">14</td>
-            <td>Paco Peña</td>
-            <td class="num">28</td>
-            <td class="num">0</td>
-            <td class="yr">2010/11–2010/11</td>
+            <td>Noé Pamarot</td>
+            <td class="num">86</td>
+            <td class="num">4</td>
+            <td class="yr">2009/10–2013/14</td>
           </tr>
         <tr>
             <td class="rank">15</td>
-            <td>Eduardo Rodríguez Fernández</td>
-            <td class="num">27</td>
-            <td class="num">1</td>
-            <td class="yr">1996/97–1996/97</td>
+            <td>Rodri</td>
+            <td class="num">77</td>
+            <td class="num">2</td>
+            <td class="yr">2007/08–2009/10</td>
           </tr>
       </tbody>
     </table>
@@ -425,63 +441,63 @@
       <tbody>
         <tr>
             <td class="rank">1</td>
+            <td>Javier Portillo</td>
+            <td class="num">32</td>
+            <td class="num">120</td>
+          </tr>
+        <tr>
+            <td class="rank">2</td>
+            <td>Tote</td>
+            <td class="num">27</td>
+            <td class="num">178</td>
+          </tr>
+        <tr>
+            <td class="rank">3</td>
+            <td>Sendoa Agirre</td>
+            <td class="num">27</td>
+            <td class="num">166</td>
+          </tr>
+        <tr>
+            <td class="rank">4</td>
+            <td>Javier Farinós</td>
+            <td class="num">22</td>
+            <td class="num">147</td>
+          </tr>
+        <tr>
+            <td class="rank">5</td>
+            <td>Rubén Navarro</td>
+            <td class="num">22</td>
+            <td class="num">55</td>
+          </tr>
+        <tr>
+            <td class="rank">6</td>
+            <td>Moisés</td>
+            <td class="num">21</td>
+            <td class="num">70</td>
+          </tr>
+        <tr>
+            <td class="rank">7</td>
+            <td>Andrija Delibašić</td>
+            <td class="num">20</td>
+            <td class="num">65</td>
+          </tr>
+        <tr>
+            <td class="rank">8</td>
             <td>Manuel Alfaro</td>
             <td class="num">15</td>
             <td class="num">38</td>
           </tr>
         <tr>
-            <td class="rank">2</td>
-            <td>David Trezeguet</td>
-            <td class="num">12</td>
-            <td class="num">31</td>
-          </tr>
-        <tr>
-            <td class="rank">3</td>
-            <td>Nelson Valdez</td>
-            <td class="num">8</td>
-            <td class="num">25</td>
-          </tr>
-        <tr>
-            <td class="rank">4</td>
-            <td>Dubravko Pavličić</td>
-            <td class="num">6</td>
-            <td class="num">38</td>
-          </tr>
-        <tr>
-            <td class="rank">5</td>
-            <td>Royston Drenthe</td>
-            <td class="num">4</td>
-            <td class="num">17</td>
-          </tr>
-        <tr>
-            <td class="rank">6</td>
-            <td>Paquito Escudero</td>
-            <td class="num">3</td>
-            <td class="num">36</td>
-          </tr>
-        <tr>
-            <td class="rank">7</td>
-            <td>Sendoa Agirre</td>
-            <td class="num">3</td>
-            <td class="num">23</td>
-          </tr>
-        <tr>
-            <td class="rank">8</td>
-            <td>Tiago Gomes</td>
-            <td class="num">2</td>
-            <td class="num">28</td>
-          </tr>
-        <tr>
             <td class="rank">9</td>
-            <td>Gabriel Amato</td>
-            <td class="num">2</td>
-            <td class="num">36</td>
+            <td>Abel Aguilar</td>
+            <td class="num">13</td>
+            <td class="num">104</td>
           </tr>
         <tr>
             <td class="rank">10</td>
-            <td>Josip Višnjić</td>
-            <td class="num">2</td>
-            <td class="num">22</td>
+            <td>Míchel</td>
+            <td class="num">13</td>
+            <td class="num">38</td>
           </tr>
       </tbody>
     </table>
@@ -495,6 +511,13 @@
       <thead><tr><th>Competition</th><th class="num">Players</th><th>Seasons</th><th class="num">Count</th><th>Games</th></tr></thead>
       <tbody>
         <tr>
+            <td>Segunda División</td>
+            <td class="num">152</td>
+            <td class="yr">2005/06–2013/14</td>
+            <td class="num">5</td>
+            <td class="yes">Playable</td>
+          </tr>
+        <tr>
             <td>La Liga</td>
             <td class="num">54</td>
             <td class="yr">1996/97–2010/11</td>
@@ -507,35 +530,35 @@
 </details>
 
 <h2>Ask about Hércules</h2>
-<p class="sub">Ask the database a question. Answers come from 54 Hércules
+<p class="sub">Ask the database a question. Answers come from 190 Hércules
   players and are never invented — if the data does not support an answer, it says so.</p>
 <form class="ask" id="askForm">
   <input id="askQ" autocomplete="off" maxlength="300"
-         placeholder="Who has played for both Hércules and Sevilla?"
+         placeholder="Who has played for both Hércules and Valladolid?"
          aria-label="Ask a question about Hércules">
   <button type="submit">Ask</button>
 </form>
 <div class="ask-examples">
-          <button type="button" data-q="Who has played for both Hércules and Sevilla?">Who has played for both Hércules and Sevilla?</button>
-          <button type="button" data-q="Top scorers for Hércules in La Liga">Top scorers for Hércules in La Liga</button>
+          <button type="button" data-q="Who has played for both Hércules and Valladolid?">Who has played for both Hércules and Valladolid?</button>
+          <button type="button" data-q="Top scorers for Hércules in Segunda División">Top scorers for Hércules in Segunda División</button>
           <button type="button" data-q="Which English players have the most appearances for Hércules?">Which English players have the most appearances for Hércules?</button>
 </div>
 <div id="askAnswer"></div>
 
 <h2>More teams</h2>
 <div class="related">
-          <a href="/teams/sevilla/">Sevilla</a>
-          <a href="/teams/espanyol/">Espanyol</a>
-          <a href="/teams/atletico-madrid/">Atlético Madrid</a>
-          <a href="/teams/valencia/">Valencia</a>
-          <a href="/teams/real-betis/">Real Betis</a>
-          <a href="/teams/barcelona/">Barcelona</a>
           <a href="/teams/valladolid/">Valladolid</a>
-          <a href="/teams/celta-vigo/">Celta Vigo</a>
+          <a href="/teams/albacete/">Albacete</a>
+          <a href="/teams/zaragoza/">Zaragoza</a>
+          <a href="/teams/tenerife/">Tenerife</a>
+          <a href="/teams/elche/">Elche</a>
+          <a href="/teams/espanyol/">Espanyol</a>
+          <a href="/teams/sevilla/">Sevilla</a>
           <a href="/teams/mallorca/">Mallorca</a>
-          <a href="/teams/real-madrid/">Real Madrid</a>
+          <a href="/teams/sporting-gijon/">Sporting Gijón</a>
+          <a href="/teams/malaga/">Málaga</a>
+          <a href="/teams/atletico-madrid/">Atlético Madrid</a>
           <a href="/teams/rayo-vallecano/">Rayo Vallecano</a>
-          <a href="/teams/villarreal/">Villarreal</a>
 </div>
 
 <footer class="page">
@@ -549,7 +572,7 @@
 </div><!-- /wrap -->
 
 <script>
-window.TS_TEAM = {"slug":"hercules","name":"Hércules","comps":["La Liga"],"defaultScope":"team_hercules_la-liga","potd":[{"n":"Manuel Alfaro","a":38,"g":15,"f":"1996/97","t":"1996/97"},{"n":"Dubravko Pavličić","a":38,"g":6,"f":"1996/97","t":"1996/97"},{"n":"Gabriel Amato","a":36,"g":2,"f":"1996/97","t":"1996/97"},{"n":"Paquito Escudero","a":36,"g":3,"f":"1996/97","t":"1996/97"},{"n":"Kiko Femenía","a":34,"g":1,"f":"2010/11","t":"2010/11"},{"n":"David Cortés","a":34,"g":0,"f":"2010/11","t":"2010/11"},{"n":"Juan Calatayud","a":34,"g":0,"f":"2010/11","t":"2010/11"},{"n":"Abel Aguilar","a":34,"g":0,"f":"2010/11","t":"2010/11"},{"n":"José Vicente Lledó","a":33,"g":0,"f":"1996/97","t":"1996/97"},{"n":"David Trezeguet","a":31,"g":12,"f":"2010/11","t":"2010/11"},{"n":"Noé Pamarot","a":29,"g":0,"f":"2010/11","t":"2010/11"},{"n":"Abraham Paz","a":29,"g":2,"f":"2010/11","t":"2010/11"},{"n":"Tiago Gomes","a":28,"g":2,"f":"2010/11","t":"2010/11"},{"n":"Paco Peña","a":28,"g":0,"f":"2010/11","t":"2010/11"},{"n":"Eduardo Rodríguez Fernández","a":27,"g":1,"f":"1996/97","t":"1996/97"}]};
+window.TS_TEAM = {"slug":"hercules","name":"Hércules","comps":["Segunda División","La Liga"],"defaultScope":"team_hercules_all","potd":[{"n":"Tote","a":178,"g":27,"f":"2006/07","t":"2011/12"},{"n":"Paco Peña","a":166,"g":1,"f":"2009/10","t":"2013/14"},{"n":"Sendoa Agirre","a":166,"g":27,"f":"2006/07","t":"2010/11"},{"n":"Javier Farinós","a":147,"g":22,"f":"2006/07","t":"2010/11"},{"n":"Javier Portillo","a":120,"g":32,"f":"2009/10","t":"2013/14"},{"n":"Ismael Falcón","a":120,"g":0,"f":"2006/07","t":"2013/14"},{"n":"Juan Calatayud","a":117,"g":0,"f":"2008/09","t":"2010/11"},{"n":"Abel Aguilar","a":104,"g":13,"f":"2008/09","t":"2011/12"},{"n":"Sergio Fernández","a":104,"g":4,"f":"2006/07","t":"2008/09"},{"n":"Adrián Sardinero","a":100,"g":9,"f":"2011/12","t":"2013/14"},{"n":"Tiago Gomes","a":97,"g":8,"f":"2009/10","t":"2011/12"},{"n":"Abraham Paz","a":91,"g":8,"f":"2008/09","t":"2010/11"},{"n":"Juanra","a":91,"g":0,"f":"2009/10","t":"2012/13"},{"n":"Noé Pamarot","a":86,"g":4,"f":"2009/10","t":"2013/14"},{"n":"Rodri","a":77,"g":2,"f":"2007/08","t":"2009/10"}]};
 </script>
 <script src="/js/ts-scope.js"></script>
 <script src="/js/team-page.js"></script>
@@ -566,6 +589,6 @@ window.TS_TEAM = {"slug":"hercules","name":"Hércules","comps":["La Liga"],"defa
     try { TSNav.render(); } catch (e) { console.error('[TeleStats] Nav render failed:', e); }
   })();
 </script>
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TeleStats","item":"https://telestats.net"},{"@type":"ListItem","position":2,"name":"Teams","item":"https://telestats.net/teams/"},{"@type":"ListItem","position":3,"name":"Hércules","item":"https://telestats.net/teams/hercules/"}]},{"@type":"SportsTeam","name":"Hércules","sport":"Association football","url":"https://telestats.net/teams/hercules/"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is the Hércules page on TeleStats?","acceptedAnswer":{"@type":"Answer","text":"Free Hércules football quizzes and trivia games generated from real appearance and goal records for 54 players across La Liga. No sign-up is needed to play."}}]}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TeleStats","item":"https://telestats.net"},{"@type":"ListItem","position":2,"name":"Teams","item":"https://telestats.net/teams/"},{"@type":"ListItem","position":3,"name":"Hércules","item":"https://telestats.net/teams/hercules/"}]},{"@type":"SportsTeam","name":"Hércules","sport":"Association football","url":"https://telestats.net/teams/hercules/"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is the Hércules page on TeleStats?","acceptedAnswer":{"@type":"Answer","text":"Free Hércules football quizzes and trivia games generated from real appearance and goal records for 190 players across Segunda División and La Liga. No sign-up is needed to play."}}]}]}</script>
 </body>
 </html>

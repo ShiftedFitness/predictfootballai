@@ -52,6 +52,9 @@
   .crest { width: 52px; height: 60px; flex: 0 0 auto; filter: drop-shadow(0 2px 6px rgba(0,0,0,.45)); }
   .hero h1 { font-size: 1.65rem; line-height: 1.2; margin: 0 0 5px; }
   .sub { color: var(--text-secondary); margin: 0; font-size: .9rem; }
+  .sub a.complink { color: var(--text-secondary); text-decoration: underline;
+                    text-decoration-color: rgba(255,255,255,.22); }
+  .sub a.complink:hover { color: var(--accent); }
   .scope-note { color: var(--text-muted); font-size: .76rem; margin: 6px 0 0; }
   .scope-note a { color: var(--accent); }
 
@@ -182,9 +185,9 @@
     <nav>
       <a href="/daily/">Daily</a>
       <a href="/games/">Games</a>
+      <a href="/competitions/">Competitions</a>
       <a href="/teams/">Teams</a>
       <a href="/ask/">Ask</a>
-      <a href="/leaderboard/">Leaderboard</a>
       <a href="/community/">Community</a>
     </nav>
   </div>
@@ -205,7 +208,8 @@
     </svg>
     <div>
       <h1>Ajaccio Football Quizzes &amp; Trivia</h1>
-      <p class="sub">162 players · 4,219 appearances · Ligue 1</p>
+      <p class="sub">162 players · 4,219 appearances ·
+        <a class="complink" href="/competitions/ligue-1/">Ligue 1</a></p>
       <p class="scope-note">Records cover 2002/03 to 2022/23.
         <a href="/tools/data.html">Full dataset scope</a>.</p>
     </div>
@@ -400,17 +404,17 @@
           </tr>
         <tr>
             <td class="rank">14</td>
-            <td>Yohan Demont</td>
-            <td class="num">70</td>
-            <td class="num">6</td>
-            <td class="yr">2002/03–2004/05</td>
-          </tr>
-        <tr>
-            <td class="rank">15</td>
             <td>Yoann Poulard</td>
             <td class="num">70</td>
             <td class="num">2</td>
             <td class="yr">2011/12–2012/13</td>
+          </tr>
+        <tr>
+            <td class="rank">15</td>
+            <td>Yohan Demont</td>
+            <td class="num">70</td>
+            <td class="num">6</td>
+            <td class="yr">2002/03–2004/05</td>
           </tr>
       </tbody>
     </table>
@@ -549,7 +553,7 @@
 </div><!-- /wrap -->
 
 <script>
-window.TS_TEAM = {"slug":"ajaccio","name":"Ajaccio","comps":["Ligue 1"],"defaultScope":"team_ajaccio_ligue-1","potd":[{"n":"Xavier Collin","a":138,"g":1,"f":"2002/03","t":"2005/06"},{"n":"Guillermo Ochoa","a":112,"g":0,"f":"2011/12","t":"2013/14"},{"n":"Martial Robin","a":103,"g":4,"f":"2002/03","t":"2005/06"},{"n":"Mehdi Mostefa","a":101,"g":8,"f":"2011/12","t":"2013/14"},{"n":"Benjamin André","a":96,"g":8,"f":"2011/12","t":"2013/14"},{"n":"Paul Lasne","a":89,"g":4,"f":"2011/12","t":"2013/14"},{"n":"Johan Cavalli","a":82,"g":7,"f":"2011/12","t":"2013/14"},{"n":"Rodrigo","a":82,"g":0,"f":"2003/04","t":"2005/06"},{"n":"Stéphane Trévisan","a":80,"g":0,"f":"2002/03","t":"2005/06"},{"n":"Abdelnasser Ouadah","a":77,"g":5,"f":"2002/03","t":"2004/05"},{"n":"Fabien Laurenti","a":74,"g":0,"f":"2003/04","t":"2005/06"},{"n":"David Terrier","a":73,"g":0,"f":"2002/03","t":"2004/05"},{"n":"Mamadou Seck","a":73,"g":4,"f":"2002/03","t":"2004/05"},{"n":"Yohan Demont","a":70,"g":6,"f":"2002/03","t":"2004/05"},{"n":"Yoann Poulard","a":70,"g":2,"f":"2011/12","t":"2012/13"}]};
+window.TS_TEAM = {"slug":"ajaccio","name":"Ajaccio","comps":["Ligue 1"],"defaultScope":"team_ajaccio_ligue-1","potd":[{"n":"Xavier Collin","a":138,"g":1,"f":"2002/03","t":"2005/06"},{"n":"Guillermo Ochoa","a":112,"g":0,"f":"2011/12","t":"2013/14"},{"n":"Martial Robin","a":103,"g":4,"f":"2002/03","t":"2005/06"},{"n":"Mehdi Mostefa","a":101,"g":8,"f":"2011/12","t":"2013/14"},{"n":"Benjamin André","a":96,"g":8,"f":"2011/12","t":"2013/14"},{"n":"Paul Lasne","a":89,"g":4,"f":"2011/12","t":"2013/14"},{"n":"Johan Cavalli","a":82,"g":7,"f":"2011/12","t":"2013/14"},{"n":"Rodrigo","a":82,"g":0,"f":"2003/04","t":"2005/06"},{"n":"Stéphane Trévisan","a":80,"g":0,"f":"2002/03","t":"2005/06"},{"n":"Abdelnasser Ouadah","a":77,"g":5,"f":"2002/03","t":"2004/05"},{"n":"Fabien Laurenti","a":74,"g":0,"f":"2003/04","t":"2005/06"},{"n":"David Terrier","a":73,"g":0,"f":"2002/03","t":"2004/05"},{"n":"Mamadou Seck","a":73,"g":4,"f":"2002/03","t":"2004/05"},{"n":"Yoann Poulard","a":70,"g":2,"f":"2011/12","t":"2012/13"},{"n":"Yohan Demont","a":70,"g":6,"f":"2002/03","t":"2004/05"}]};
 </script>
 <script src="/js/ts-scope.js"></script>
 <script src="/js/team-page.js"></script>

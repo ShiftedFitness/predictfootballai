@@ -5,17 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="/js/ts-analytics.js"></script>
 <title>Almería Football Quiz &amp; Trivia Games | TeleStats</title>
-<meta name="description" content="Play Almería football quizzes and trivia games built from 130 players and 4,364 appearances in La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta name="description" content="Play Almería football quizzes and trivia games built from 356 players and 14,079 appearances in Segunda División and La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
 <link rel="canonical" href="https://telestats.net/teams/almeria/">
 <meta name="theme-color" content="hsl(275, 57%, 38%)">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Almería Football Quiz &amp; Trivia Games | TeleStats">
-<meta property="og:description" content="Play Almería football quizzes and trivia games built from 130 players and 4,364 appearances in La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta property="og:description" content="Play Almería football quizzes and trivia games built from 356 players and 14,079 appearances in Segunda División and La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
 <meta property="og:url" content="https://telestats.net/teams/almeria/">
 <meta property="og:site_name" content="TeleStats">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Almería Football Quiz &amp; Trivia Games | TeleStats">
-<meta name="twitter:description" content="Play Almería football quizzes and trivia games built from 130 players and 4,364 appearances in La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta name="twitter:description" content="Play Almería football quizzes and trivia games built from 356 players and 14,079 appearances in Segunda División and La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
 <link rel="stylesheet" href="/telestats-theme.css">
 <style>
   :root { --club: hsl(275, 57%, 38%); --club-2: hsl(293, 57%, 26%); }
@@ -52,6 +52,9 @@
   .crest { width: 52px; height: 60px; flex: 0 0 auto; filter: drop-shadow(0 2px 6px rgba(0,0,0,.45)); }
   .hero h1 { font-size: 1.65rem; line-height: 1.2; margin: 0 0 5px; }
   .sub { color: var(--text-secondary); margin: 0; font-size: .9rem; }
+  .sub a.complink { color: var(--text-secondary); text-decoration: underline;
+                    text-decoration-color: rgba(255,255,255,.22); }
+  .sub a.complink:hover { color: var(--accent); }
   .scope-note { color: var(--text-muted); font-size: .76rem; margin: 6px 0 0; }
   .scope-note a { color: var(--accent); }
 
@@ -182,9 +185,9 @@
     <nav>
       <a href="/daily/">Daily</a>
       <a href="/games/">Games</a>
+      <a href="/competitions/">Competitions</a>
       <a href="/teams/">Teams</a>
       <a href="/ask/">Ask</a>
-      <a href="/leaderboard/">Leaderboard</a>
       <a href="/community/">Community</a>
     </nav>
   </div>
@@ -205,8 +208,9 @@
     </svg>
     <div>
       <h1>Almería Football Quizzes &amp; Trivia</h1>
-      <p class="sub">130 players · 4,364 appearances · La Liga</p>
-      <p class="scope-note">Records cover 2007/08 to 2023/24.
+      <p class="sub">356 players · 14,079 appearances ·
+        <a class="complink" href="/competitions/segunda-division/">Segunda División</a>, <a class="complink" href="/competitions/la-liga/">La Liga</a></p>
+      <p class="scope-note">Records cover 2002/03 to 2026/27.
         <a href="/tools/data.html">Full dataset scope</a>.</p>
     </div>
   </div>
@@ -216,8 +220,8 @@
   <summary>New here? What this page is</summary>
   <div class="body">
     <p>This is a set of free football games about <strong>Almería</strong>, generated
-      from real appearance and goal records — 130 players who have turned out
-      for the club in La Liga, going back to 2007/08.</p>
+      from real appearance and goal records — 356 players who have turned out
+      for the club in Segunda División and La Liga, going back to 2002/03.</p>
     <p>Pick a game below and it starts straight away on Almería. No sign-up, no app.
       Make an account only if you want your scores kept and your name on the club's board.</p>
     <p>Everything you see here comes from the TeleStats database. Nothing is written by an AI
@@ -243,11 +247,23 @@
 
 <h2 id="play">Play Almería</h2>
 <p class="sub">The five TeleStats games, set up for Almería. Click one and it starts.</p>
-      
+      <div class="chips" id="compChips" role="group"
+       aria-label="Choose which competitions to play">
+        <button type="button" class="chip all on" data-all="1" aria-pressed="true">All competitions</button>
+        <button type="button" class="chip on"
+                data-comp="Segunda División"
+                data-slug="segunda-division"
+                aria-pressed="true">Segunda División</button>
+        <button type="button" class="chip on"
+                data-comp="La Liga"
+                data-slug="la-liga"
+                aria-pressed="true">La Liga</button>
+      </div>
+      <p class="chip-note" id="chipNote"></p>
       <ul class="games">
         <li class="game">
           <a class="game-go" data-path="/games/hol.html"
-             href="/games/hol.html?scope=team_almeria_la-liga&amp;play=1">
+             href="/games/hol.html?scope=team_almeria_all&amp;play=1">
             <h3>Almería Higher or Lower</h3>
             <p>Which player has more appearances?</p>
             <span class="go">Play now &rarr;</span>
@@ -255,7 +271,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/alpha.html"
-             href="/games/alpha.html?scope=team_almeria_la-liga&amp;play=1">
+             href="/games/alpha.html?scope=team_almeria_all&amp;play=1">
             <h3>Almería Player Alphabet</h3>
             <p>Name a player for every letter of the alphabet.</p>
             <span class="go">Play now &rarr;</span>
@@ -263,7 +279,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/xi.html"
-             href="/games/xi.html?scope=team_almeria_la-liga&amp;play=1">
+             href="/games/xi.html?scope=team_almeria_all&amp;play=1">
             <h3>Almería Starting XI</h3>
             <p>Build the strongest eleven you can.</p>
             <span class="go">Play now &rarr;</span>
@@ -271,7 +287,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/whoami.html"
-             href="/games/whoami.html?scope=team_almeria_la-liga&amp;play=1">
+             href="/games/whoami.html?scope=team_almeria_all&amp;play=1">
             <h3>Almería Who Am I?</h3>
             <p>Guess the player from five clues.</p>
             <span class="go">Play now &rarr;</span>
@@ -279,7 +295,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/quiz.html"
-             href="/games/quiz.html?scope=team_almeria_la-liga&amp;play=1">
+             href="/games/quiz.html?scope=team_almeria_all&amp;play=1">
             <h3>Almería Trivia Quiz</h3>
             <p>Ten questions from this club’s record.</p>
             <span class="go">Play now &rarr;</span>
@@ -309,108 +325,108 @@
       <tbody>
         <tr>
             <td class="rank">1</td>
-            <td>Corona</td>
-            <td class="num">168</td>
-            <td class="num">6</td>
-            <td class="yr">2007/08–2014/15</td>
+            <td>Fernando Soriano</td>
+            <td class="num">308</td>
+            <td class="num">42</td>
+            <td class="yr">2005/06–2015/16</td>
           </tr>
         <tr>
             <td class="rank">2</td>
-            <td>Fernando Soriano</td>
-            <td class="num">156</td>
-            <td class="num">17</td>
-            <td class="yr">2007/08–2014/15</td>
+            <td>Corona</td>
+            <td class="num">305</td>
+            <td class="num">19</td>
+            <td class="yr">2006/07–2016/17</td>
           </tr>
         <tr>
             <td class="rank">3</td>
-            <td>Albert Crusat</td>
-            <td class="num">131</td>
-            <td class="num">14</td>
-            <td class="yr">2007/08–2010/11</td>
+            <td>José Ortiz Bernal</td>
+            <td class="num">245</td>
+            <td class="num">31</td>
+            <td class="yr">2002/03–2011/12</td>
           </tr>
         <tr>
             <td class="rank">4</td>
-            <td>Juan Manuel Ortiz</td>
-            <td class="num">127</td>
-            <td class="num">10</td>
-            <td class="yr">2007/08–2010/11</td>
+            <td>Kalu Uche</td>
+            <td class="num">200</td>
+            <td class="num">44</td>
+            <td class="yr">2005/06–2016/17</td>
           </tr>
         <tr>
             <td class="rank">5</td>
-            <td>Diego Alves</td>
-            <td class="num">123</td>
-            <td class="num">0</td>
-            <td class="yr">2007/08–2010/11</td>
+            <td>Santiago Acasiete</td>
+            <td class="num">200</td>
+            <td class="num">13</td>
+            <td class="yr">2004/05–2011/12</td>
           </tr>
         <tr>
             <td class="rank">6</td>
-            <td>Kalu Uche</td>
-            <td class="num">117</td>
-            <td class="num">27</td>
-            <td class="yr">2007/08–2010/11</td>
+            <td>Albert Crusat</td>
+            <td class="num">199</td>
+            <td class="num">33</td>
+            <td class="yr">2005/06–2010/11</td>
           </tr>
         <tr>
             <td class="rank">7</td>
-            <td>Pablo Piatti</td>
-            <td class="num">101</td>
-            <td class="num">19</td>
-            <td class="yr">2008/09–2010/11</td>
+            <td>Carlos García</td>
+            <td class="num">195</td>
+            <td class="num">1</td>
+            <td class="yr">2005/06–2011/12</td>
           </tr>
         <tr>
             <td class="rank">8</td>
-            <td>Santiago Acasiete</td>
-            <td class="num">88</td>
-            <td class="num">3</td>
-            <td class="yr">2007/08–2010/11</td>
+            <td>Verza</td>
+            <td class="num">169</td>
+            <td class="num">17</td>
+            <td class="yr">2011/12–2017/18</td>
           </tr>
         <tr>
             <td class="rank">9</td>
-            <td>Carlos García</td>
-            <td class="num">87</td>
-            <td class="num">1</td>
-            <td class="yr">2007/08–2010/11</td>
+            <td>César de la Hoz</td>
+            <td class="num">160</td>
+            <td class="num">4</td>
+            <td class="yr">2018/19–2022/23</td>
           </tr>
         <tr>
             <td class="rank">10</td>
-            <td>Mané</td>
-            <td class="num">82</td>
-            <td class="num">3</td>
-            <td class="yr">2007/08–2014/15</td>
+            <td>Ángel Trujillo</td>
+            <td class="num">146</td>
+            <td class="num">1</td>
+            <td class="yr">2011/12–2018/19</td>
           </tr>
         <tr>
             <td class="rank">11</td>
-            <td>José Ortiz Bernal</td>
-            <td class="num">77</td>
-            <td class="num">1</td>
-            <td class="yr">2007/08–2010/11</td>
+            <td>Arnau Puigmal</td>
+            <td class="num">146</td>
+            <td class="num">12</td>
+            <td class="yr">2021/22–2025/26</td>
           </tr>
         <tr>
             <td class="rank">12</td>
-            <td>Michel</td>
-            <td class="num">75</td>
-            <td class="num">3</td>
-            <td class="yr">2008/09–2014/15</td>
+            <td>Lucas Robertone</td>
+            <td class="num">145</td>
+            <td class="num">9</td>
+            <td class="yr">2020/21–2025/26</td>
           </tr>
         <tr>
             <td class="rank">13</td>
-            <td>Ángel Trujillo</td>
-            <td class="num">72</td>
-            <td class="num">1</td>
-            <td class="yr">2013/14–2014/15</td>
+            <td>Juan Manuel Ortiz</td>
+            <td class="num">143</td>
+            <td class="num">14</td>
+            <td class="yr">2007/08–2011/12</td>
           </tr>
         <tr>
             <td class="rank">14</td>
-            <td>Hernán Pellerano</td>
-            <td class="num">71</td>
-            <td class="num">1</td>
-            <td class="yr">2008/09–2013/14</td>
+            <td>Léo Baptistão</td>
+            <td class="num">138</td>
+            <td class="num">30</td>
+            <td class="yr">2022/23–2026/27</td>
           </tr>
         <tr>
             <td class="rank">15</td>
-            <td>Álvaro Negredo</td>
-            <td class="num">70</td>
-            <td class="num">31</td>
-            <td class="yr">2007/08–2008/09</td>
+            <td>Esteban</td>
+            <td class="num">136</td>
+            <td class="num">0</td>
+            <td class="yr">2008/09–2013/14</td>
           </tr>
       </tbody>
     </table>
@@ -425,63 +441,63 @@
       <tbody>
         <tr>
             <td class="rank">1</td>
+            <td>Kalu Uche</td>
+            <td class="num">44</td>
+            <td class="num">200</td>
+          </tr>
+        <tr>
+            <td class="rank">2</td>
+            <td>Sergio Arribas</td>
+            <td class="num">42</td>
+            <td class="num">119</td>
+          </tr>
+        <tr>
+            <td class="rank">3</td>
+            <td>Fernando Soriano</td>
+            <td class="num">42</td>
+            <td class="num">308</td>
+          </tr>
+        <tr>
+            <td class="rank">4</td>
+            <td>Umar Sadiq</td>
+            <td class="num">40</td>
+            <td class="num">77</td>
+          </tr>
+        <tr>
+            <td class="rank">5</td>
+            <td>Leonardo Ulloa</td>
+            <td class="num">39</td>
+            <td class="num">90</td>
+          </tr>
+        <tr>
+            <td class="rank">6</td>
+            <td>Francisco</td>
+            <td class="num">39</td>
+            <td class="num">128</td>
+          </tr>
+        <tr>
+            <td class="rank">7</td>
+            <td>Luis Suárez</td>
+            <td class="num">37</td>
+            <td class="num">77</td>
+          </tr>
+        <tr>
+            <td class="rank">8</td>
+            <td>Albert Crusat</td>
+            <td class="num">33</td>
+            <td class="num">199</td>
+          </tr>
+        <tr>
+            <td class="rank">9</td>
             <td>Álvaro Negredo</td>
             <td class="num">31</td>
             <td class="num">70</td>
           </tr>
         <tr>
-            <td class="rank">2</td>
-            <td>Kalu Uche</td>
-            <td class="num">27</td>
-            <td class="num">117</td>
-          </tr>
-        <tr>
-            <td class="rank">3</td>
-            <td>Pablo Piatti</td>
-            <td class="num">19</td>
-            <td class="num">101</td>
-          </tr>
-        <tr>
-            <td class="rank">4</td>
-            <td>Fernando Soriano</td>
-            <td class="num">17</td>
-            <td class="num">156</td>
-          </tr>
-        <tr>
-            <td class="rank">5</td>
-            <td>Albert Crusat</td>
-            <td class="num">14</td>
-            <td class="num">131</td>
-          </tr>
-        <tr>
-            <td class="rank">6</td>
-            <td>Verza</td>
-            <td class="num">12</td>
-            <td class="num">67</td>
-          </tr>
-        <tr>
-            <td class="rank">7</td>
-            <td>Léo Baptistão</td>
-            <td class="num">10</td>
-            <td class="num">60</td>
-          </tr>
-        <tr>
-            <td class="rank">8</td>
-            <td>Luis Suárez</td>
-            <td class="num">10</td>
-            <td class="num">36</td>
-          </tr>
-        <tr>
-            <td class="rank">9</td>
-            <td>Juan Manuel Ortiz</td>
-            <td class="num">10</td>
-            <td class="num">127</td>
-          </tr>
-        <tr>
             <td class="rank">10</td>
-            <td>Sergio Arribas</td>
-            <td class="num">9</td>
-            <td class="num">34</td>
+            <td>José Ortiz Bernal</td>
+            <td class="num">31</td>
+            <td class="num">245</td>
           </tr>
       </tbody>
     </table>
@@ -495,6 +511,13 @@
       <thead><tr><th>Competition</th><th class="num">Players</th><th>Seasons</th><th class="num">Count</th><th>Games</th></tr></thead>
       <tbody>
         <tr>
+            <td>Segunda División</td>
+            <td class="num">298</td>
+            <td class="yr">2002/03–2026/27</td>
+            <td class="num">6</td>
+            <td class="yes">Playable</td>
+          </tr>
+        <tr>
             <td>La Liga</td>
             <td class="num">130</td>
             <td class="yr">2007/08–2023/24</td>
@@ -507,35 +530,35 @@
 </details>
 
 <h2>Ask about Almería</h2>
-<p class="sub">Ask the database a question. Answers come from 130 Almería
+<p class="sub">Ask the database a question. Answers come from 356 Almería
   players and are never invented — if the data does not support an answer, it says so.</p>
 <form class="ask" id="askForm">
   <input id="askQ" autocomplete="off" maxlength="300"
-         placeholder="Who has played for both Almería and Sevilla?"
+         placeholder="Who has played for both Almería and Valladolid?"
          aria-label="Ask a question about Almería">
   <button type="submit">Ask</button>
 </form>
 <div class="ask-examples">
-          <button type="button" data-q="Who has played for both Almería and Sevilla?">Who has played for both Almería and Sevilla?</button>
-          <button type="button" data-q="Top scorers for Almería in La Liga">Top scorers for Almería in La Liga</button>
+          <button type="button" data-q="Who has played for both Almería and Valladolid?">Who has played for both Almería and Valladolid?</button>
+          <button type="button" data-q="Top scorers for Almería in Segunda División">Top scorers for Almería in Segunda División</button>
           <button type="button" data-q="Which English players have the most appearances for Almería?">Which English players have the most appearances for Almería?</button>
 </div>
 <div id="askAnswer"></div>
 
 <h2>More teams</h2>
 <div class="related">
-          <a href="/teams/sevilla/">Sevilla</a>
-          <a href="/teams/espanyol/">Espanyol</a>
-          <a href="/teams/atletico-madrid/">Atlético Madrid</a>
-          <a href="/teams/valencia/">Valencia</a>
-          <a href="/teams/real-betis/">Real Betis</a>
-          <a href="/teams/barcelona/">Barcelona</a>
           <a href="/teams/valladolid/">Valladolid</a>
-          <a href="/teams/celta-vigo/">Celta Vigo</a>
+          <a href="/teams/albacete/">Albacete</a>
+          <a href="/teams/zaragoza/">Zaragoza</a>
+          <a href="/teams/tenerife/">Tenerife</a>
+          <a href="/teams/elche/">Elche</a>
+          <a href="/teams/espanyol/">Espanyol</a>
+          <a href="/teams/sevilla/">Sevilla</a>
           <a href="/teams/mallorca/">Mallorca</a>
-          <a href="/teams/real-madrid/">Real Madrid</a>
+          <a href="/teams/sporting-gijon/">Sporting Gijón</a>
+          <a href="/teams/malaga/">Málaga</a>
+          <a href="/teams/atletico-madrid/">Atlético Madrid</a>
           <a href="/teams/rayo-vallecano/">Rayo Vallecano</a>
-          <a href="/teams/villarreal/">Villarreal</a>
 </div>
 
 <footer class="page">
@@ -549,7 +572,7 @@
 </div><!-- /wrap -->
 
 <script>
-window.TS_TEAM = {"slug":"almeria","name":"Almería","comps":["La Liga"],"defaultScope":"team_almeria_la-liga","potd":[{"n":"Corona","a":168,"g":6,"f":"2007/08","t":"2014/15"},{"n":"Fernando Soriano","a":156,"g":17,"f":"2007/08","t":"2014/15"},{"n":"Albert Crusat","a":131,"g":14,"f":"2007/08","t":"2010/11"},{"n":"Juan Manuel Ortiz","a":127,"g":10,"f":"2007/08","t":"2010/11"},{"n":"Diego Alves","a":123,"g":0,"f":"2007/08","t":"2010/11"},{"n":"Kalu Uche","a":117,"g":27,"f":"2007/08","t":"2010/11"},{"n":"Pablo Piatti","a":101,"g":19,"f":"2008/09","t":"2010/11"},{"n":"Santiago Acasiete","a":88,"g":3,"f":"2007/08","t":"2010/11"},{"n":"Carlos García","a":87,"g":1,"f":"2007/08","t":"2010/11"},{"n":"Mané","a":82,"g":3,"f":"2007/08","t":"2014/15"},{"n":"José Ortiz Bernal","a":77,"g":1,"f":"2007/08","t":"2010/11"},{"n":"Michel","a":75,"g":3,"f":"2008/09","t":"2014/15"},{"n":"Ángel Trujillo","a":72,"g":1,"f":"2013/14","t":"2014/15"},{"n":"Hernán Pellerano","a":71,"g":1,"f":"2008/09","t":"2013/14"},{"n":"Álvaro Negredo","a":70,"g":31,"f":"2007/08","t":"2008/09"}]};
+window.TS_TEAM = {"slug":"almeria","name":"Almería","comps":["Segunda División","La Liga"],"defaultScope":"team_almeria_all","potd":[{"n":"Fernando Soriano","a":308,"g":42,"f":"2005/06","t":"2015/16"},{"n":"Corona","a":305,"g":19,"f":"2006/07","t":"2016/17"},{"n":"José Ortiz Bernal","a":245,"g":31,"f":"2002/03","t":"2011/12"},{"n":"Kalu Uche","a":200,"g":44,"f":"2005/06","t":"2016/17"},{"n":"Santiago Acasiete","a":200,"g":13,"f":"2004/05","t":"2011/12"},{"n":"Albert Crusat","a":199,"g":33,"f":"2005/06","t":"2010/11"},{"n":"Carlos García","a":195,"g":1,"f":"2005/06","t":"2011/12"},{"n":"Verza","a":169,"g":17,"f":"2011/12","t":"2017/18"},{"n":"César de la Hoz","a":160,"g":4,"f":"2018/19","t":"2022/23"},{"n":"Ángel Trujillo","a":146,"g":1,"f":"2011/12","t":"2018/19"},{"n":"Arnau Puigmal","a":146,"g":12,"f":"2021/22","t":"2025/26"},{"n":"Lucas Robertone","a":145,"g":9,"f":"2020/21","t":"2025/26"},{"n":"Juan Manuel Ortiz","a":143,"g":14,"f":"2007/08","t":"2011/12"},{"n":"Léo Baptistão","a":138,"g":30,"f":"2022/23","t":"2026/27"},{"n":"Esteban","a":136,"g":0,"f":"2008/09","t":"2013/14"}]};
 </script>
 <script src="/js/ts-scope.js"></script>
 <script src="/js/team-page.js"></script>
@@ -566,6 +589,6 @@ window.TS_TEAM = {"slug":"almeria","name":"Almería","comps":["La Liga"],"defaul
     try { TSNav.render(); } catch (e) { console.error('[TeleStats] Nav render failed:', e); }
   })();
 </script>
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TeleStats","item":"https://telestats.net"},{"@type":"ListItem","position":2,"name":"Teams","item":"https://telestats.net/teams/"},{"@type":"ListItem","position":3,"name":"Almería","item":"https://telestats.net/teams/almeria/"}]},{"@type":"SportsTeam","name":"Almería","sport":"Association football","url":"https://telestats.net/teams/almeria/"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is the Almería page on TeleStats?","acceptedAnswer":{"@type":"Answer","text":"Free Almería football quizzes and trivia games generated from real appearance and goal records for 130 players across La Liga. No sign-up is needed to play."}}]}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TeleStats","item":"https://telestats.net"},{"@type":"ListItem","position":2,"name":"Teams","item":"https://telestats.net/teams/"},{"@type":"ListItem","position":3,"name":"Almería","item":"https://telestats.net/teams/almeria/"}]},{"@type":"SportsTeam","name":"Almería","sport":"Association football","url":"https://telestats.net/teams/almeria/"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is the Almería page on TeleStats?","acceptedAnswer":{"@type":"Answer","text":"Free Almería football quizzes and trivia games generated from real appearance and goal records for 356 players across Segunda División and La Liga. No sign-up is needed to play."}}]}]}</script>
 </body>
 </html>

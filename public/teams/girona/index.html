@@ -5,17 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="/js/ts-analytics.js"></script>
 <title>Girona Football Quiz &amp; Trivia Games | TeleStats</title>
-<meta name="description" content="Play Girona football quizzes and trivia games built from 93 players and 3,541 appearances in La Liga and Champions League. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta name="description" content="Play Girona football quizzes and trivia games built from 256 players and 10,778 appearances in Segunda División, La Liga and Champions League. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
 <link rel="canonical" href="https://telestats.net/teams/girona/">
 <meta name="theme-color" content="hsl(33, 58%, 38%)">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Girona Football Quiz &amp; Trivia Games | TeleStats">
-<meta property="og:description" content="Play Girona football quizzes and trivia games built from 93 players and 3,541 appearances in La Liga and Champions League. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta property="og:description" content="Play Girona football quizzes and trivia games built from 256 players and 10,778 appearances in Segunda División, La Liga and Champions League. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
 <meta property="og:url" content="https://telestats.net/teams/girona/">
 <meta property="og:site_name" content="TeleStats">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Girona Football Quiz &amp; Trivia Games | TeleStats">
-<meta name="twitter:description" content="Play Girona football quizzes and trivia games built from 93 players and 3,541 appearances in La Liga and Champions League. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta name="twitter:description" content="Play Girona football quizzes and trivia games built from 256 players and 10,778 appearances in Segunda División, La Liga and Champions League. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
 <link rel="stylesheet" href="/telestats-theme.css">
 <style>
   :root { --club: hsl(33, 58%, 38%); --club-2: hsl(51, 58%, 26%); }
@@ -52,6 +52,9 @@
   .crest { width: 52px; height: 60px; flex: 0 0 auto; filter: drop-shadow(0 2px 6px rgba(0,0,0,.45)); }
   .hero h1 { font-size: 1.65rem; line-height: 1.2; margin: 0 0 5px; }
   .sub { color: var(--text-secondary); margin: 0; font-size: .9rem; }
+  .sub a.complink { color: var(--text-secondary); text-decoration: underline;
+                    text-decoration-color: rgba(255,255,255,.22); }
+  .sub a.complink:hover { color: var(--accent); }
   .scope-note { color: var(--text-muted); font-size: .76rem; margin: 6px 0 0; }
   .scope-note a { color: var(--accent); }
 
@@ -182,9 +185,9 @@
     <nav>
       <a href="/daily/">Daily</a>
       <a href="/games/">Games</a>
+      <a href="/competitions/">Competitions</a>
       <a href="/teams/">Teams</a>
       <a href="/ask/">Ask</a>
-      <a href="/leaderboard/">Leaderboard</a>
       <a href="/community/">Community</a>
     </nav>
   </div>
@@ -205,8 +208,9 @@
     </svg>
     <div>
       <h1>Girona Football Quizzes &amp; Trivia</h1>
-      <p class="sub">93 players · 3,541 appearances · La Liga and Champions League</p>
-      <p class="scope-note">Records cover 2017/18 to 2025/26.
+      <p class="sub">256 players · 10,778 appearances ·
+        <a class="complink" href="/competitions/segunda-division/">Segunda División</a>, <a class="complink" href="/competitions/la-liga/">La Liga</a>, <a class="complink" href="/competitions/champions-league/">Champions League</a></p>
+      <p class="scope-note">Records cover 2008/09 to 2026/27.
         <a href="/tools/data.html">Full dataset scope</a>.</p>
     </div>
   </div>
@@ -216,8 +220,8 @@
   <summary>New here? What this page is</summary>
   <div class="body">
     <p>This is a set of free football games about <strong>Girona</strong>, generated
-      from real appearance and goal records — 93 players who have turned out
-      for the club in La Liga and Champions League, going back to 2017/18.</p>
+      from real appearance and goal records — 256 players who have turned out
+      for the club in Segunda División, La Liga and Champions League, going back to 2008/09.</p>
     <p>Pick a game below and it starts straight away on Girona. No sign-up, no app.
       Make an account only if you want your scores kept and your name on the club's board.</p>
     <p>Everything you see here comes from the TeleStats database. Nothing is written by an AI
@@ -243,11 +247,23 @@
 
 <h2 id="play">Play Girona</h2>
 <p class="sub">The five TeleStats games, set up for Girona. Click one and it starts.</p>
-      
+      <div class="chips" id="compChips" role="group"
+       aria-label="Choose which competitions to play">
+        <button type="button" class="chip all on" data-all="1" aria-pressed="true">All competitions</button>
+        <button type="button" class="chip on"
+                data-comp="Segunda División"
+                data-slug="segunda-division"
+                aria-pressed="true">Segunda División</button>
+        <button type="button" class="chip on"
+                data-comp="La Liga"
+                data-slug="la-liga"
+                aria-pressed="true">La Liga</button>
+      </div>
+      <p class="chip-note" id="chipNote"></p>
       <ul class="games">
         <li class="game">
           <a class="game-go" data-path="/games/hol.html"
-             href="/games/hol.html?scope=team_girona_la-liga&amp;play=1">
+             href="/games/hol.html?scope=team_girona_la-liga%2Bsegunda-division&amp;play=1">
             <h3>Girona Higher or Lower</h3>
             <p>Which player has more appearances?</p>
             <span class="go">Play now &rarr;</span>
@@ -255,7 +271,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/alpha.html"
-             href="/games/alpha.html?scope=team_girona_la-liga&amp;play=1">
+             href="/games/alpha.html?scope=team_girona_la-liga%2Bsegunda-division&amp;play=1">
             <h3>Girona Player Alphabet</h3>
             <p>Name a player for every letter of the alphabet.</p>
             <span class="go">Play now &rarr;</span>
@@ -263,7 +279,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/xi.html"
-             href="/games/xi.html?scope=team_girona_la-liga&amp;play=1">
+             href="/games/xi.html?scope=team_girona_la-liga%2Bsegunda-division&amp;play=1">
             <h3>Girona Starting XI</h3>
             <p>Build the strongest eleven you can.</p>
             <span class="go">Play now &rarr;</span>
@@ -271,7 +287,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/whoami.html"
-             href="/games/whoami.html?scope=team_girona_la-liga&amp;play=1">
+             href="/games/whoami.html?scope=team_girona_la-liga%2Bsegunda-division&amp;play=1">
             <h3>Girona Who Am I?</h3>
             <p>Guess the player from five clues.</p>
             <span class="go">Play now &rarr;</span>
@@ -279,7 +295,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/quiz.html"
-             href="/games/quiz.html?scope=team_girona_la-liga&amp;play=1">
+             href="/games/quiz.html?scope=team_girona_la-liga%2Bsegunda-division&amp;play=1">
             <h3>Girona Trivia Quiz</h3>
             <p>Ten questions from this club’s record.</p>
             <span class="go">Play now &rarr;</span>
@@ -310,107 +326,107 @@
         <tr>
             <td class="rank">1</td>
             <td>Cristhian Stuani</td>
-            <td class="num">189</td>
-            <td class="num">74</td>
-            <td class="yr">2017/18–2025/26</td>
+            <td class="num">289</td>
+            <td class="num">135</td>
+            <td class="yr">2017/18–2026/27</td>
           </tr>
         <tr>
             <td class="rank">2</td>
-            <td>Portu</td>
-            <td class="num">146</td>
-            <td class="num">28</td>
-            <td class="yr">2017/18–2025/26</td>
+            <td>Juanpe</td>
+            <td class="num">241</td>
+            <td class="num">13</td>
+            <td class="yr">2016/17–2024/25</td>
           </tr>
         <tr>
             <td class="rank">3</td>
-            <td>Paulo Gazzaniga</td>
-            <td class="num">144</td>
-            <td class="num">0</td>
-            <td class="yr">2022/23–2025/26</td>
+            <td>Borja García</td>
+            <td class="num">215</td>
+            <td class="num">19</td>
+            <td class="yr">2015/16–2022/23</td>
           </tr>
         <tr>
             <td class="rank">4</td>
-            <td>Iván Martín</td>
-            <td class="num">134</td>
-            <td class="num">9</td>
-            <td class="yr">2022/23–2025/26</td>
+            <td>Álex Granell</td>
+            <td class="num">215</td>
+            <td class="num">14</td>
+            <td class="yr">2014/15–2020/21</td>
           </tr>
         <tr>
             <td class="rank">5</td>
-            <td>Arnau Martinez</td>
-            <td class="num">126</td>
-            <td class="num">7</td>
-            <td class="yr">2022/23–2025/26</td>
+            <td>Migue</td>
+            <td class="num">215</td>
+            <td class="num">6</td>
+            <td class="yr">2008/09–2013/14</td>
           </tr>
         <tr>
             <td class="rank">6</td>
-            <td>Juanpe</td>
-            <td class="num">121</td>
-            <td class="num">7</td>
-            <td class="yr">2017/18–2024/25</td>
+            <td>Pere Pons</td>
+            <td class="num">197</td>
+            <td class="num">4</td>
+            <td class="yr">2012/13–2018/19</td>
           </tr>
         <tr>
             <td class="rank">7</td>
-            <td>Aleix García</td>
-            <td class="num">118</td>
+            <td>Portu</td>
+            <td class="num">187</td>
+            <td class="num">36</td>
+            <td class="yr">2016/17–2025/26</td>
+          </tr>
+        <tr>
+            <td class="rank">8</td>
+            <td>Aday</td>
+            <td class="num">185</td>
+            <td class="num">7</td>
+            <td class="yr">2014/15–2020/21</td>
+          </tr>
+        <tr>
+            <td class="rank">9</td>
+            <td>Arnau Martinez</td>
+            <td class="num">176</td>
+            <td class="num">9</td>
+            <td class="yr">2020/21–2026/27</td>
+          </tr>
+        <tr>
+            <td class="rank">10</td>
+            <td>Jonás Ramalho</td>
+            <td class="num">168</td>
+            <td class="num">5</td>
+            <td class="yr">2013/14–2020/21</td>
+          </tr>
+        <tr>
+            <td class="rank">11</td>
+            <td>Jandro</td>
+            <td class="num">166</td>
+            <td class="num">36</td>
+            <td class="yr">2010/11–2014/15</td>
+          </tr>
+        <tr>
+            <td class="rank">12</td>
+            <td>Bernardo Espinosa</td>
+            <td class="num">157</td>
             <td class="num">7</td>
             <td class="yr">2017/18–2023/24</td>
           </tr>
         <tr>
-            <td class="rank">8</td>
-            <td>Viktor Tsyhankov</td>
-            <td class="num">113</td>
-            <td class="num">19</td>
-            <td class="yr">2022/23–2025/26</td>
-          </tr>
-        <tr>
-            <td class="rank">9</td>
-            <td>Miguel Gutiérrez</td>
-            <td class="num">104</td>
-            <td class="num">6</td>
-            <td class="yr">2022/23–2024/25</td>
-          </tr>
-        <tr>
-            <td class="rank">10</td>
-            <td>Daley Blind</td>
-            <td class="num">103</td>
-            <td class="num">1</td>
-            <td class="yr">2023/24–2025/26</td>
-          </tr>
-        <tr>
-            <td class="rank">11</td>
-            <td>Bernardo Espinosa</td>
-            <td class="num">87</td>
-            <td class="num">2</td>
-            <td class="yr">2017/18–2023/24</td>
-          </tr>
-        <tr>
-            <td class="rank">12</td>
-            <td>Yangel Herrera</td>
-            <td class="num">85</td>
-            <td class="num">11</td>
-            <td class="yr">2022/23–2025/26</td>
-          </tr>
-        <tr>
             <td class="rank">13</td>
-            <td>David López</td>
-            <td class="num">85</td>
-            <td class="num">8</td>
-            <td class="yr">2022/23–2025/26</td>
+            <td>José</td>
+            <td class="num">157</td>
+            <td class="num">1</td>
+            <td class="yr">2008/09–2012/13</td>
           </tr>
         <tr>
             <td class="rank">14</td>
-            <td>Borja García</td>
-            <td class="num">81</td>
-            <td class="num">4</td>
-            <td class="yr">2017/18–2022/23</td>
+            <td>Aleix García</td>
+            <td class="num">156</td>
+            <td class="num">7</td>
+            <td class="yr">2017/18–2023/24</td>
           </tr>
         <tr>
             <td class="rank">15</td>
-            <td>Valery Fernández</td>
-            <td class="num">69</td>
-            <td class="num">2</td>
-            <td class="yr">2018/19–2023/24</td>
+            <td>Albert Dorca</td>
+            <td class="num">152</td>
+            <td class="num">5</td>
+            <td class="yr">2008/09–2011/12</td>
           </tr>
       </tbody>
     </table>
@@ -426,62 +442,62 @@
         <tr>
             <td class="rank">1</td>
             <td>Cristhian Stuani</td>
-            <td class="num">74</td>
-            <td class="num">189</td>
+            <td class="num">135</td>
+            <td class="num">289</td>
           </tr>
         <tr>
             <td class="rank">2</td>
             <td>Portu</td>
-            <td class="num">28</td>
-            <td class="num">146</td>
+            <td class="num">36</td>
+            <td class="num">187</td>
           </tr>
         <tr>
             <td class="rank">3</td>
+            <td>Jandro</td>
+            <td class="num">36</td>
+            <td class="num">166</td>
+          </tr>
+        <tr>
+            <td class="rank">4</td>
+            <td>Felipe Sanchón</td>
+            <td class="num">33</td>
+            <td class="num">141</td>
+          </tr>
+        <tr>
+            <td class="rank">5</td>
+            <td>Francisco Sandaza</td>
+            <td class="num">25</td>
+            <td class="num">70</td>
+          </tr>
+        <tr>
+            <td class="rank">6</td>
             <td>Artem Dovbyk</td>
             <td class="num">24</td>
             <td class="num">36</td>
           </tr>
         <tr>
-            <td class="rank">4</td>
+            <td class="rank">7</td>
+            <td>Javier Acuña</td>
+            <td class="num">21</td>
+            <td class="num">53</td>
+          </tr>
+        <tr>
+            <td class="rank">8</td>
+            <td>Roberto Peragón</td>
+            <td class="num">20</td>
+            <td class="num">74</td>
+          </tr>
+        <tr>
+            <td class="rank">9</td>
             <td>Viktor Tsyhankov</td>
             <td class="num">19</td>
             <td class="num">113</td>
           </tr>
         <tr>
-            <td class="rank">5</td>
-            <td>Valentín Castellanos</td>
-            <td class="num">13</td>
-            <td class="num">35</td>
-          </tr>
-        <tr>
-            <td class="rank">6</td>
-            <td>Yangel Herrera</td>
-            <td class="num">11</td>
-            <td class="num">85</td>
-          </tr>
-        <tr>
-            <td class="rank">7</td>
-            <td>Sávio</td>
-            <td class="num">9</td>
-            <td class="num">37</td>
-          </tr>
-        <tr>
-            <td class="rank">8</td>
-            <td>Iván Martín</td>
-            <td class="num">9</td>
-            <td class="num">134</td>
-          </tr>
-        <tr>
-            <td class="rank">9</td>
-            <td>Vladyslav Vanat</td>
-            <td class="num">9</td>
-            <td class="num">27</td>
-          </tr>
-        <tr>
             <td class="rank">10</td>
-            <td>David López</td>
-            <td class="num">8</td>
-            <td class="num">85</td>
+            <td>Borja García</td>
+            <td class="num">19</td>
+            <td class="num">215</td>
           </tr>
       </tbody>
     </table>
@@ -494,6 +510,13 @@
     <table>
       <thead><tr><th>Competition</th><th class="num">Players</th><th>Seasons</th><th class="num">Count</th><th>Games</th></tr></thead>
       <tbody>
+        <tr>
+            <td>Segunda División</td>
+            <td class="num">205</td>
+            <td class="yr">2008/09–2026/27</td>
+            <td class="num">6</td>
+            <td class="yes">Playable</td>
+          </tr>
         <tr>
             <td>La Liga</td>
             <td class="num">93</td>
@@ -514,35 +537,35 @@
 </details>
 
 <h2>Ask about Girona</h2>
-<p class="sub">Ask the database a question. Answers come from 93 Girona
+<p class="sub">Ask the database a question. Answers come from 256 Girona
   players and are never invented — if the data does not support an answer, it says so.</p>
 <form class="ask" id="askForm">
   <input id="askQ" autocomplete="off" maxlength="300"
-         placeholder="Who has played for both Girona and Fiorentina?"
+         placeholder="Who has played for both Girona and Valladolid?"
          aria-label="Ask a question about Girona">
   <button type="submit">Ask</button>
 </form>
 <div class="ask-examples">
-          <button type="button" data-q="Who has played for both Girona and Fiorentina?">Who has played for both Girona and Fiorentina?</button>
-          <button type="button" data-q="Top scorers for Girona in La Liga">Top scorers for Girona in La Liga</button>
+          <button type="button" data-q="Who has played for both Girona and Valladolid?">Who has played for both Girona and Valladolid?</button>
+          <button type="button" data-q="Top scorers for Girona in Segunda División">Top scorers for Girona in Segunda División</button>
           <button type="button" data-q="Which English players have the most appearances for Girona?">Which English players have the most appearances for Girona?</button>
 </div>
 <div id="askAnswer"></div>
 
 <h2>More teams</h2>
 <div class="related">
+          <a href="/teams/valladolid/">Valladolid</a>
+          <a href="/teams/albacete/">Albacete</a>
+          <a href="/teams/zaragoza/">Zaragoza</a>
           <a href="/teams/fiorentina/">Fiorentina</a>
           <a href="/teams/leeds-united/">Leeds United</a>
           <a href="/teams/marseille/">Marseille</a>
-          <a href="/teams/sevilla/">Sevilla</a>
+          <a href="/teams/tenerife/">Tenerife</a>
+          <a href="/teams/elche/">Elche</a>
           <a href="/teams/espanyol/">Espanyol</a>
+          <a href="/teams/sevilla/">Sevilla</a>
+          <a href="/teams/mallorca/">Mallorca</a>
           <a href="/teams/atalanta/">Atalanta</a>
-          <a href="/teams/internazionale/">Internazionale</a>
-          <a href="/teams/parma/">Parma</a>
-          <a href="/teams/roma/">Roma</a>
-          <a href="/teams/bologna/">Bologna</a>
-          <a href="/teams/blackburn-rovers/">Blackburn Rovers</a>
-          <a href="/teams/udinese/">Udinese</a>
 </div>
 
 <footer class="page">
@@ -556,7 +579,7 @@
 </div><!-- /wrap -->
 
 <script>
-window.TS_TEAM = {"slug":"girona","name":"Girona","comps":["La Liga"],"defaultScope":"team_girona_la-liga","potd":[{"n":"Cristhian Stuani","a":189,"g":74,"f":"2017/18","t":"2025/26"},{"n":"Portu","a":146,"g":28,"f":"2017/18","t":"2025/26"},{"n":"Paulo Gazzaniga","a":144,"g":0,"f":"2022/23","t":"2025/26"},{"n":"Iván Martín","a":134,"g":9,"f":"2022/23","t":"2025/26"},{"n":"Arnau Martinez","a":126,"g":7,"f":"2022/23","t":"2025/26"},{"n":"Juanpe","a":121,"g":7,"f":"2017/18","t":"2024/25"},{"n":"Aleix García","a":118,"g":7,"f":"2017/18","t":"2023/24"},{"n":"Viktor Tsyhankov","a":113,"g":19,"f":"2022/23","t":"2025/26"},{"n":"Miguel Gutiérrez","a":104,"g":6,"f":"2022/23","t":"2024/25"},{"n":"Daley Blind","a":103,"g":1,"f":"2023/24","t":"2025/26"},{"n":"Bernardo Espinosa","a":87,"g":2,"f":"2017/18","t":"2023/24"},{"n":"Yangel Herrera","a":85,"g":11,"f":"2022/23","t":"2025/26"},{"n":"David López","a":85,"g":8,"f":"2022/23","t":"2025/26"},{"n":"Borja García","a":81,"g":4,"f":"2017/18","t":"2022/23"},{"n":"Valery Fernández","a":69,"g":2,"f":"2018/19","t":"2023/24"}]};
+window.TS_TEAM = {"slug":"girona","name":"Girona","comps":["Segunda División","La Liga"],"defaultScope":"team_girona_la-liga+segunda-division","potd":[{"n":"Cristhian Stuani","a":289,"g":135,"f":"2017/18","t":"2026/27"},{"n":"Juanpe","a":241,"g":13,"f":"2016/17","t":"2024/25"},{"n":"Borja García","a":215,"g":19,"f":"2015/16","t":"2022/23"},{"n":"Álex Granell","a":215,"g":14,"f":"2014/15","t":"2020/21"},{"n":"Migue","a":215,"g":6,"f":"2008/09","t":"2013/14"},{"n":"Pere Pons","a":197,"g":4,"f":"2012/13","t":"2018/19"},{"n":"Portu","a":187,"g":36,"f":"2016/17","t":"2025/26"},{"n":"Aday","a":185,"g":7,"f":"2014/15","t":"2020/21"},{"n":"Arnau Martinez","a":176,"g":9,"f":"2020/21","t":"2026/27"},{"n":"Jonás Ramalho","a":168,"g":5,"f":"2013/14","t":"2020/21"},{"n":"Jandro","a":166,"g":36,"f":"2010/11","t":"2014/15"},{"n":"Bernardo Espinosa","a":157,"g":7,"f":"2017/18","t":"2023/24"},{"n":"José","a":157,"g":1,"f":"2008/09","t":"2012/13"},{"n":"Aleix García","a":156,"g":7,"f":"2017/18","t":"2023/24"},{"n":"Albert Dorca","a":152,"g":5,"f":"2008/09","t":"2011/12"}]};
 </script>
 <script src="/js/ts-scope.js"></script>
 <script src="/js/team-page.js"></script>
@@ -573,6 +596,6 @@ window.TS_TEAM = {"slug":"girona","name":"Girona","comps":["La Liga"],"defaultSc
     try { TSNav.render(); } catch (e) { console.error('[TeleStats] Nav render failed:', e); }
   })();
 </script>
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TeleStats","item":"https://telestats.net"},{"@type":"ListItem","position":2,"name":"Teams","item":"https://telestats.net/teams/"},{"@type":"ListItem","position":3,"name":"Girona","item":"https://telestats.net/teams/girona/"}]},{"@type":"SportsTeam","name":"Girona","sport":"Association football","url":"https://telestats.net/teams/girona/"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is the Girona page on TeleStats?","acceptedAnswer":{"@type":"Answer","text":"Free Girona football quizzes and trivia games generated from real appearance and goal records for 93 players across La Liga and Champions League. No sign-up is needed to play."}}]}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TeleStats","item":"https://telestats.net"},{"@type":"ListItem","position":2,"name":"Teams","item":"https://telestats.net/teams/"},{"@type":"ListItem","position":3,"name":"Girona","item":"https://telestats.net/teams/girona/"}]},{"@type":"SportsTeam","name":"Girona","sport":"Association football","url":"https://telestats.net/teams/girona/"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is the Girona page on TeleStats?","acceptedAnswer":{"@type":"Answer","text":"Free Girona football quizzes and trivia games generated from real appearance and goal records for 256 players across Segunda División, La Liga and Champions League. No sign-up is needed to play."}}]}]}</script>
 </body>
 </html>

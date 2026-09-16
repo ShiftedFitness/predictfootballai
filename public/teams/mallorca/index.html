@@ -5,17 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="/js/ts-analytics.js"></script>
 <title>Mallorca Football Quiz &amp; Trivia Games | TeleStats</title>
-<meta name="description" content="Play Mallorca football quizzes and trivia games built from 315 players and 13,430 appearances in La Liga and Champions League. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta name="description" content="Play Mallorca football quizzes and trivia games built from 410 players and 17,074 appearances in La Liga, Segunda División and Champions League. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
 <link rel="canonical" href="https://telestats.net/teams/mallorca/">
 <meta name="theme-color" content="#E20613">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Mallorca Football Quiz &amp; Trivia Games | TeleStats">
-<meta property="og:description" content="Play Mallorca football quizzes and trivia games built from 315 players and 13,430 appearances in La Liga and Champions League. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta property="og:description" content="Play Mallorca football quizzes and trivia games built from 410 players and 17,074 appearances in La Liga, Segunda División and Champions League. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
 <meta property="og:url" content="https://telestats.net/teams/mallorca/">
 <meta property="og:site_name" content="TeleStats">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Mallorca Football Quiz &amp; Trivia Games | TeleStats">
-<meta name="twitter:description" content="Play Mallorca football quizzes and trivia games built from 315 players and 13,430 appearances in La Liga and Champions League. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta name="twitter:description" content="Play Mallorca football quizzes and trivia games built from 410 players and 17,074 appearances in La Liga, Segunda División and Champions League. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
 <link rel="stylesheet" href="/telestats-theme.css">
 <style>
   :root { --club: #E20613; --club-2: #ba0000; }
@@ -52,6 +52,9 @@
   .crest { width: 52px; height: 60px; flex: 0 0 auto; filter: drop-shadow(0 2px 6px rgba(0,0,0,.45)); }
   .hero h1 { font-size: 1.65rem; line-height: 1.2; margin: 0 0 5px; }
   .sub { color: var(--text-secondary); margin: 0; font-size: .9rem; }
+  .sub a.complink { color: var(--text-secondary); text-decoration: underline;
+                    text-decoration-color: rgba(255,255,255,.22); }
+  .sub a.complink:hover { color: var(--accent); }
   .scope-note { color: var(--text-muted); font-size: .76rem; margin: 6px 0 0; }
   .scope-note a { color: var(--accent); }
 
@@ -182,9 +185,9 @@
     <nav>
       <a href="/daily/">Daily</a>
       <a href="/games/">Games</a>
+      <a href="/competitions/">Competitions</a>
       <a href="/teams/">Teams</a>
       <a href="/ask/">Ask</a>
-      <a href="/leaderboard/">Leaderboard</a>
       <a href="/community/">Community</a>
     </nav>
   </div>
@@ -205,8 +208,9 @@
     </svg>
     <div>
       <h1>Mallorca Football Quizzes &amp; Trivia</h1>
-      <p class="sub">315 players · 13,430 appearances · La Liga and Champions League</p>
-      <p class="scope-note">Records cover 1989/90 to 2025/26.
+      <p class="sub">410 players · 17,074 appearances ·
+        <a class="complink" href="/competitions/la-liga/">La Liga</a>, <a class="complink" href="/competitions/segunda-division/">Segunda División</a>, <a class="complink" href="/competitions/champions-league/">Champions League</a></p>
+      <p class="scope-note">Records cover 1989/90 to 2026/27.
         <a href="/tools/data.html">Full dataset scope</a>.</p>
     </div>
   </div>
@@ -216,8 +220,8 @@
   <summary>New here? What this page is</summary>
   <div class="body">
     <p>This is a set of free football games about <strong>Mallorca</strong>, generated
-      from real appearance and goal records — 315 players who have turned out
-      for the club in La Liga and Champions League, going back to 1989/90.</p>
+      from real appearance and goal records — 410 players who have turned out
+      for the club in La Liga, Segunda División and Champions League, going back to 1989/90.</p>
     <p>Pick a game below and it starts straight away on Mallorca. No sign-up, no app.
       Make an account only if you want your scores kept and your name on the club's board.</p>
     <p>Everything you see here comes from the TeleStats database. Nothing is written by an AI
@@ -243,11 +247,23 @@
 
 <h2 id="play">Play Mallorca</h2>
 <p class="sub">The five TeleStats games, set up for Mallorca. Click one and it starts.</p>
-      
+      <div class="chips" id="compChips" role="group"
+       aria-label="Choose which competitions to play">
+        <button type="button" class="chip all on" data-all="1" aria-pressed="true">All competitions</button>
+        <button type="button" class="chip on"
+                data-comp="La Liga"
+                data-slug="la-liga"
+                aria-pressed="true">La Liga</button>
+        <button type="button" class="chip on"
+                data-comp="Segunda División"
+                data-slug="segunda-division"
+                aria-pressed="true">Segunda División</button>
+      </div>
+      <p class="chip-note" id="chipNote"></p>
       <ul class="games">
         <li class="game">
           <a class="game-go" data-path="/games/hol.html"
-             href="/games/hol.html?scope=team_mallorca_la-liga&amp;play=1">
+             href="/games/hol.html?scope=team_mallorca_la-liga%2Bsegunda-division&amp;play=1">
             <h3>Mallorca Higher or Lower</h3>
             <p>Which player has more appearances?</p>
             <span class="go">Play now &rarr;</span>
@@ -255,7 +271,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/alpha.html"
-             href="/games/alpha.html?scope=team_mallorca_la-liga&amp;play=1">
+             href="/games/alpha.html?scope=team_mallorca_la-liga%2Bsegunda-division&amp;play=1">
             <h3>Mallorca Player Alphabet</h3>
             <p>Name a player for every letter of the alphabet.</p>
             <span class="go">Play now &rarr;</span>
@@ -263,7 +279,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/xi.html"
-             href="/games/xi.html?scope=team_mallorca_la-liga&amp;play=1">
+             href="/games/xi.html?scope=team_mallorca_la-liga%2Bsegunda-division&amp;play=1">
             <h3>Mallorca Starting XI</h3>
             <p>Build the strongest eleven you can.</p>
             <span class="go">Play now &rarr;</span>
@@ -271,7 +287,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/whoami.html"
-             href="/games/whoami.html?scope=team_mallorca_la-liga&amp;play=1">
+             href="/games/whoami.html?scope=team_mallorca_la-liga%2Bsegunda-division&amp;play=1">
             <h3>Mallorca Who Am I?</h3>
             <p>Guess the player from five clues.</p>
             <span class="go">Play now &rarr;</span>
@@ -279,7 +295,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/quiz.html"
-             href="/games/quiz.html?scope=team_mallorca_la-liga&amp;play=1">
+             href="/games/quiz.html?scope=team_mallorca_la-liga%2Bsegunda-division&amp;play=1">
             <h3>Mallorca Trivia Quiz</h3>
             <p>Ten questions from this club’s record.</p>
             <span class="go">Play now &rarr;</span>
@@ -309,108 +325,108 @@
       <tbody>
         <tr>
             <td class="rank">1</td>
+            <td>Antonio Raillo</td>
+            <td class="num">271</td>
+            <td class="num">17</td>
+            <td class="yr">2016/17–2026/27</td>
+          </tr>
+        <tr>
+            <td class="rank">2</td>
+            <td>Martin Valjent</td>
+            <td class="num">265</td>
+            <td class="num">4</td>
+            <td class="yr">2018/19–2026/27</td>
+          </tr>
+        <tr>
+            <td class="rank">3</td>
+            <td>Dani Rodríguez</td>
+            <td class="num">259</td>
+            <td class="num">28</td>
+            <td class="yr">2018/19–2025/26</td>
+          </tr>
+        <tr>
+            <td class="rank">4</td>
+            <td>José Nunes</td>
+            <td class="num">242</td>
+            <td class="num">12</td>
+            <td class="yr">2005/06–2013/14</td>
+          </tr>
+        <tr>
+            <td class="rank">5</td>
             <td>Miguel Ángel Nadal</td>
             <td class="num">234</td>
             <td class="num">18</td>
             <td class="yr">1989/90–2004/05</td>
           </tr>
         <tr>
-            <td class="rank">2</td>
-            <td>José Nunes</td>
+            <td class="rank">6</td>
+            <td>Víctor Casadesús</td>
             <td class="num">221</td>
-            <td class="num">12</td>
-            <td class="yr">2005/06–2012/13</td>
+            <td class="num">42</td>
+            <td class="yr">2004/05–2013/14</td>
           </tr>
         <tr>
-            <td class="rank">3</td>
+            <td class="rank">7</td>
+            <td>Abdón Prats</td>
+            <td class="num">219</td>
+            <td class="num">29</td>
+            <td class="yr">2011/12–2025/26</td>
+          </tr>
+        <tr>
+            <td class="rank">8</td>
             <td>Javier Olaizola</td>
             <td class="num">212</td>
             <td class="num">1</td>
             <td class="yr">1997/98–2003/04</td>
           </tr>
         <tr>
-            <td class="rank">4</td>
+            <td class="rank">9</td>
             <td>Ariel Ibagaza</td>
             <td class="num">205</td>
             <td class="num">25</td>
             <td class="yr">1998/99–2007/08</td>
           </tr>
         <tr>
-            <td class="rank">5</td>
-            <td>Víctor Casadesús</td>
-            <td class="num">198</td>
-            <td class="num">37</td>
-            <td class="yr">2004/05–2012/13</td>
+            <td class="rank">10</td>
+            <td>José Luis Martí</td>
+            <td class="num">192</td>
+            <td class="num">5</td>
+            <td class="yr">1999/00–2014/15</td>
           </tr>
         <tr>
-            <td class="rank">6</td>
-            <td>Martin Valjent</td>
-            <td class="num">198</td>
-            <td class="num">3</td>
-            <td class="yr">2019/20–2025/26</td>
+            <td class="rank">11</td>
+            <td>Antonio Sánchez</td>
+            <td class="num">192</td>
+            <td class="num">7</td>
+            <td class="yr">2020/21–2026/27</td>
           </tr>
         <tr>
-            <td class="rank">7</td>
+            <td class="rank">12</td>
             <td>Juan Arango</td>
             <td class="num">183</td>
             <td class="num">46</td>
             <td class="yr">2004/05–2008/09</td>
           </tr>
         <tr>
-            <td class="rank">8</td>
-            <td>Dani Rodríguez</td>
-            <td class="num">183</td>
-            <td class="num">17</td>
-            <td class="yr">2019/20–2025/26</td>
-          </tr>
-        <tr>
-            <td class="rank">9</td>
+            <td class="rank">13</td>
             <td>Marcos</td>
             <td class="num">175</td>
             <td class="num">9</td>
             <td class="yr">1989/90–2004/05</td>
           </tr>
         <tr>
-            <td class="rank">10</td>
+            <td class="rank">14</td>
             <td>Paco Soler</td>
             <td class="num">171</td>
             <td class="num">3</td>
             <td class="yr">1990/91–2002/03</td>
           </tr>
         <tr>
-            <td class="rank">11</td>
-            <td>Antonio Raillo</td>
-            <td class="num">166</td>
-            <td class="num">10</td>
-            <td class="yr">2019/20–2025/26</td>
-          </tr>
-        <tr>
-            <td class="rank">12</td>
-            <td>Iván Ramis</td>
-            <td class="num">164</td>
-            <td class="num">9</td>
-            <td class="yr">2003/04–2011/12</td>
-          </tr>
-        <tr>
-            <td class="rank">13</td>
-            <td>José Luis Martí</td>
-            <td class="num">161</td>
-            <td class="num">4</td>
-            <td class="yr">1999/00–2012/13</td>
-          </tr>
-        <tr>
-            <td class="rank">14</td>
-            <td>Dudu Aouate</td>
-            <td class="num">159</td>
-            <td class="num">0</td>
-            <td class="yr">2008/09–2012/13</td>
-          </tr>
-        <tr>
             <td class="rank">15</td>
-            <td>Miquel Soler</td>
-            <td class="num">157</td>
-            <td class="num">1</td>
-            <td class="yr">1998/99–2002/03</td>
+            <td>Lago Junior</td>
+            <td class="num">170</td>
+            <td class="num">28</td>
+            <td class="yr">2015/16–2022/23</td>
           </tr>
       </tbody>
     </table>
@@ -444,44 +460,44 @@
         <tr>
             <td class="rank">4</td>
             <td>Víctor Casadesús</td>
-            <td class="num">37</td>
-            <td class="num">198</td>
+            <td class="num">42</td>
+            <td class="num">221</td>
           </tr>
         <tr>
             <td class="rank">5</td>
+            <td>Abdón Prats</td>
+            <td class="num">29</td>
+            <td class="num">219</td>
+          </tr>
+        <tr>
+            <td class="rank">6</td>
             <td>Dani Güiza</td>
             <td class="num">28</td>
             <td class="num">43</td>
           </tr>
         <tr>
-            <td class="rank">6</td>
+            <td class="rank">7</td>
+            <td>Lago Junior</td>
+            <td class="num">28</td>
+            <td class="num">170</td>
+          </tr>
+        <tr>
+            <td class="rank">8</td>
+            <td>Dani Rodríguez</td>
+            <td class="num">28</td>
+            <td class="num">259</td>
+          </tr>
+        <tr>
+            <td class="rank">9</td>
             <td>Pierre Webó</td>
             <td class="num">27</td>
             <td class="num">112</td>
           </tr>
         <tr>
-            <td class="rank">7</td>
+            <td class="rank">10</td>
             <td>Ariel Ibagaza</td>
             <td class="num">25</td>
             <td class="num">205</td>
-          </tr>
-        <tr>
-            <td class="rank">8</td>
-            <td>Albert Luque</td>
-            <td class="num">23</td>
-            <td class="num">78</td>
-          </tr>
-        <tr>
-            <td class="rank">9</td>
-            <td>Aritz Aduriz</td>
-            <td class="num">23</td>
-            <td class="num">69</td>
-          </tr>
-        <tr>
-            <td class="rank">10</td>
-            <td>Chory Castro</td>
-            <td class="num">22</td>
-            <td class="num">131</td>
           </tr>
       </tbody>
     </table>
@@ -502,6 +518,13 @@
             <td class="yes">Playable</td>
           </tr>
         <tr>
+            <td>Segunda División</td>
+            <td class="num">150</td>
+            <td class="yr">2013/14–2026/27</td>
+            <td class="num">4</td>
+            <td class="yes">Playable</td>
+          </tr>
+        <tr>
             <td>Champions League</td>
             <td class="num">23</td>
             <td class="yr">2001/02–2001/02</td>
@@ -514,16 +537,16 @@
 </details>
 
 <h2>Ask about Mallorca</h2>
-<p class="sub">Ask the database a question. Answers come from 315 Mallorca
+<p class="sub">Ask the database a question. Answers come from 410 Mallorca
   players and are never invented — if the data does not support an answer, it says so.</p>
 <form class="ask" id="askForm">
   <input id="askQ" autocomplete="off" maxlength="300"
-         placeholder="Who has played for both Mallorca and Fiorentina?"
+         placeholder="Who has played for both Mallorca and Valladolid?"
          aria-label="Ask a question about Mallorca">
   <button type="submit">Ask</button>
 </form>
 <div class="ask-examples">
-          <button type="button" data-q="Who has played for both Mallorca and Fiorentina?">Who has played for both Mallorca and Fiorentina?</button>
+          <button type="button" data-q="Who has played for both Mallorca and Valladolid?">Who has played for both Mallorca and Valladolid?</button>
           <button type="button" data-q="Top scorers for Mallorca in La Liga">Top scorers for Mallorca in La Liga</button>
           <button type="button" data-q="Which English players have the most appearances for Mallorca?">Which English players have the most appearances for Mallorca?</button>
 </div>
@@ -531,18 +554,18 @@
 
 <h2>More teams</h2>
 <div class="related">
+          <a href="/teams/valladolid/">Valladolid</a>
+          <a href="/teams/albacete/">Albacete</a>
+          <a href="/teams/zaragoza/">Zaragoza</a>
           <a href="/teams/fiorentina/">Fiorentina</a>
           <a href="/teams/leeds-united/">Leeds United</a>
           <a href="/teams/marseille/">Marseille</a>
-          <a href="/teams/sevilla/">Sevilla</a>
+          <a href="/teams/tenerife/">Tenerife</a>
+          <a href="/teams/elche/">Elche</a>
           <a href="/teams/espanyol/">Espanyol</a>
+          <a href="/teams/sevilla/">Sevilla</a>
           <a href="/teams/atalanta/">Atalanta</a>
           <a href="/teams/internazionale/">Internazionale</a>
-          <a href="/teams/parma/">Parma</a>
-          <a href="/teams/roma/">Roma</a>
-          <a href="/teams/bologna/">Bologna</a>
-          <a href="/teams/blackburn-rovers/">Blackburn Rovers</a>
-          <a href="/teams/udinese/">Udinese</a>
 </div>
 
 <footer class="page">
@@ -556,7 +579,7 @@
 </div><!-- /wrap -->
 
 <script>
-window.TS_TEAM = {"slug":"mallorca","name":"Mallorca","comps":["La Liga"],"defaultScope":"team_mallorca_la-liga","potd":[{"n":"Miguel Ángel Nadal","a":234,"g":18,"f":"1989/90","t":"2004/05"},{"n":"José Nunes","a":221,"g":12,"f":"2005/06","t":"2012/13"},{"n":"Javier Olaizola","a":212,"g":1,"f":"1997/98","t":"2003/04"},{"n":"Ariel Ibagaza","a":205,"g":25,"f":"1998/99","t":"2007/08"},{"n":"Víctor Casadesús","a":198,"g":37,"f":"2004/05","t":"2012/13"},{"n":"Martin Valjent","a":198,"g":3,"f":"2019/20","t":"2025/26"},{"n":"Juan Arango","a":183,"g":46,"f":"2004/05","t":"2008/09"},{"n":"Dani Rodríguez","a":183,"g":17,"f":"2019/20","t":"2025/26"},{"n":"Marcos","a":175,"g":9,"f":"1989/90","t":"2004/05"},{"n":"Paco Soler","a":171,"g":3,"f":"1990/91","t":"2002/03"},{"n":"Antonio Raillo","a":166,"g":10,"f":"2019/20","t":"2025/26"},{"n":"Iván Ramis","a":164,"g":9,"f":"2003/04","t":"2011/12"},{"n":"José Luis Martí","a":161,"g":4,"f":"1999/00","t":"2012/13"},{"n":"Dudu Aouate","a":159,"g":0,"f":"2008/09","t":"2012/13"},{"n":"Miquel Soler","a":157,"g":1,"f":"1998/99","t":"2002/03"}]};
+window.TS_TEAM = {"slug":"mallorca","name":"Mallorca","comps":["La Liga","Segunda División"],"defaultScope":"team_mallorca_la-liga+segunda-division","potd":[{"n":"Antonio Raillo","a":271,"g":17,"f":"2016/17","t":"2026/27"},{"n":"Martin Valjent","a":265,"g":4,"f":"2018/19","t":"2026/27"},{"n":"Dani Rodríguez","a":259,"g":28,"f":"2018/19","t":"2025/26"},{"n":"José Nunes","a":242,"g":12,"f":"2005/06","t":"2013/14"},{"n":"Miguel Ángel Nadal","a":234,"g":18,"f":"1989/90","t":"2004/05"},{"n":"Víctor Casadesús","a":221,"g":42,"f":"2004/05","t":"2013/14"},{"n":"Abdón Prats","a":219,"g":29,"f":"2011/12","t":"2025/26"},{"n":"Javier Olaizola","a":212,"g":1,"f":"1997/98","t":"2003/04"},{"n":"Ariel Ibagaza","a":205,"g":25,"f":"1998/99","t":"2007/08"},{"n":"José Luis Martí","a":192,"g":5,"f":"1999/00","t":"2014/15"},{"n":"Antonio Sánchez","a":192,"g":7,"f":"2020/21","t":"2026/27"},{"n":"Juan Arango","a":183,"g":46,"f":"2004/05","t":"2008/09"},{"n":"Marcos","a":175,"g":9,"f":"1989/90","t":"2004/05"},{"n":"Paco Soler","a":171,"g":3,"f":"1990/91","t":"2002/03"},{"n":"Lago Junior","a":170,"g":28,"f":"2015/16","t":"2022/23"}]};
 </script>
 <script src="/js/ts-scope.js"></script>
 <script src="/js/team-page.js"></script>
@@ -573,6 +596,6 @@ window.TS_TEAM = {"slug":"mallorca","name":"Mallorca","comps":["La Liga"],"defau
     try { TSNav.render(); } catch (e) { console.error('[TeleStats] Nav render failed:', e); }
   })();
 </script>
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TeleStats","item":"https://telestats.net"},{"@type":"ListItem","position":2,"name":"Teams","item":"https://telestats.net/teams/"},{"@type":"ListItem","position":3,"name":"Mallorca","item":"https://telestats.net/teams/mallorca/"}]},{"@type":"SportsTeam","name":"Mallorca","sport":"Association football","url":"https://telestats.net/teams/mallorca/"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is the Mallorca page on TeleStats?","acceptedAnswer":{"@type":"Answer","text":"Free Mallorca football quizzes and trivia games generated from real appearance and goal records for 315 players across La Liga and Champions League. No sign-up is needed to play."}}]}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TeleStats","item":"https://telestats.net"},{"@type":"ListItem","position":2,"name":"Teams","item":"https://telestats.net/teams/"},{"@type":"ListItem","position":3,"name":"Mallorca","item":"https://telestats.net/teams/mallorca/"}]},{"@type":"SportsTeam","name":"Mallorca","sport":"Association football","url":"https://telestats.net/teams/mallorca/"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is the Mallorca page on TeleStats?","acceptedAnswer":{"@type":"Answer","text":"Free Mallorca football quizzes and trivia games generated from real appearance and goal records for 410 players across La Liga, Segunda División and Champions League. No sign-up is needed to play."}}]}]}</script>
 </body>
 </html>

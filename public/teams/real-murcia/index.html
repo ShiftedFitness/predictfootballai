@@ -5,17 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="/js/ts-analytics.js"></script>
 <title>Real Murcia Football Quiz &amp; Trivia Games | TeleStats</title>
-<meta name="description" content="Play Real Murcia football quizzes and trivia games built from 85 players and 1,549 appearances in La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta name="description" content="Play Real Murcia football quizzes and trivia games built from 221 players and 7,389 appearances in Segunda División and La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
 <link rel="canonical" href="https://telestats.net/teams/real-murcia/">
 <meta name="theme-color" content="hsl(283, 66%, 38%)">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Real Murcia Football Quiz &amp; Trivia Games | TeleStats">
-<meta property="og:description" content="Play Real Murcia football quizzes and trivia games built from 85 players and 1,549 appearances in La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta property="og:description" content="Play Real Murcia football quizzes and trivia games built from 221 players and 7,389 appearances in Segunda División and La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
 <meta property="og:url" content="https://telestats.net/teams/real-murcia/">
 <meta property="og:site_name" content="TeleStats">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Real Murcia Football Quiz &amp; Trivia Games | TeleStats">
-<meta name="twitter:description" content="Play Real Murcia football quizzes and trivia games built from 85 players and 1,549 appearances in La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta name="twitter:description" content="Play Real Murcia football quizzes and trivia games built from 221 players and 7,389 appearances in Segunda División and La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
 <link rel="stylesheet" href="/telestats-theme.css">
 <style>
   :root { --club: hsl(283, 66%, 38%); --club-2: hsl(301, 66%, 26%); }
@@ -52,6 +52,9 @@
   .crest { width: 52px; height: 60px; flex: 0 0 auto; filter: drop-shadow(0 2px 6px rgba(0,0,0,.45)); }
   .hero h1 { font-size: 1.65rem; line-height: 1.2; margin: 0 0 5px; }
   .sub { color: var(--text-secondary); margin: 0; font-size: .9rem; }
+  .sub a.complink { color: var(--text-secondary); text-decoration: underline;
+                    text-decoration-color: rgba(255,255,255,.22); }
+  .sub a.complink:hover { color: var(--accent); }
   .scope-note { color: var(--text-muted); font-size: .76rem; margin: 6px 0 0; }
   .scope-note a { color: var(--accent); }
 
@@ -182,9 +185,9 @@
     <nav>
       <a href="/daily/">Daily</a>
       <a href="/games/">Games</a>
+      <a href="/competitions/">Competitions</a>
       <a href="/teams/">Teams</a>
       <a href="/ask/">Ask</a>
-      <a href="/leaderboard/">Leaderboard</a>
       <a href="/community/">Community</a>
     </nav>
   </div>
@@ -205,8 +208,9 @@
     </svg>
     <div>
       <h1>Real Murcia Football Quizzes &amp; Trivia</h1>
-      <p class="sub">85 players · 1,549 appearances · La Liga</p>
-      <p class="scope-note">Records cover 1988/89 to 2007/08.
+      <p class="sub">221 players · 7,389 appearances ·
+        <a class="complink" href="/competitions/segunda-division/">Segunda División</a>, <a class="complink" href="/competitions/la-liga/">La Liga</a></p>
+      <p class="scope-note">Records cover 1988/89 to 2013/14.
         <a href="/tools/data.html">Full dataset scope</a>.</p>
     </div>
   </div>
@@ -216,8 +220,8 @@
   <summary>New here? What this page is</summary>
   <div class="body">
     <p>This is a set of free football games about <strong>Real Murcia</strong>, generated
-      from real appearance and goal records — 85 players who have turned out
-      for the club in La Liga, going back to 1988/89.</p>
+      from real appearance and goal records — 221 players who have turned out
+      for the club in Segunda División and La Liga, going back to 1988/89.</p>
     <p>Pick a game below and it starts straight away on Real Murcia. No sign-up, no app.
       Make an account only if you want your scores kept and your name on the club's board.</p>
     <p>Everything you see here comes from the TeleStats database. Nothing is written by an AI
@@ -243,11 +247,23 @@
 
 <h2 id="play">Play Real Murcia</h2>
 <p class="sub">The five TeleStats games, set up for Real Murcia. Click one and it starts.</p>
-      
+      <div class="chips" id="compChips" role="group"
+       aria-label="Choose which competitions to play">
+        <button type="button" class="chip all on" data-all="1" aria-pressed="true">All competitions</button>
+        <button type="button" class="chip on"
+                data-comp="Segunda División"
+                data-slug="segunda-division"
+                aria-pressed="true">Segunda División</button>
+        <button type="button" class="chip on"
+                data-comp="La Liga"
+                data-slug="la-liga"
+                aria-pressed="true">La Liga</button>
+      </div>
+      <p class="chip-note" id="chipNote"></p>
       <ul class="games">
         <li class="game">
           <a class="game-go" data-path="/games/hol.html"
-             href="/games/hol.html?scope=team_real-murcia_la-liga&amp;play=1">
+             href="/games/hol.html?scope=team_real-murcia_all&amp;play=1">
             <h3>Real Murcia Higher or Lower</h3>
             <p>Which player has more appearances?</p>
             <span class="go">Play now &rarr;</span>
@@ -255,7 +271,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/alpha.html"
-             href="/games/alpha.html?scope=team_real-murcia_la-liga&amp;play=1">
+             href="/games/alpha.html?scope=team_real-murcia_all&amp;play=1">
             <h3>Real Murcia Player Alphabet</h3>
             <p>Name a player for every letter of the alphabet.</p>
             <span class="go">Play now &rarr;</span>
@@ -263,7 +279,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/xi.html"
-             href="/games/xi.html?scope=team_real-murcia_la-liga&amp;play=1">
+             href="/games/xi.html?scope=team_real-murcia_all&amp;play=1">
             <h3>Real Murcia Starting XI</h3>
             <p>Build the strongest eleven you can.</p>
             <span class="go">Play now &rarr;</span>
@@ -271,7 +287,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/whoami.html"
-             href="/games/whoami.html?scope=team_real-murcia_la-liga&amp;play=1">
+             href="/games/whoami.html?scope=team_real-murcia_all&amp;play=1">
             <h3>Real Murcia Who Am I?</h3>
             <p>Guess the player from five clues.</p>
             <span class="go">Play now &rarr;</span>
@@ -279,7 +295,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/quiz.html"
-             href="/games/quiz.html?scope=team_real-murcia_la-liga&amp;play=1">
+             href="/games/quiz.html?scope=team_real-murcia_all&amp;play=1">
             <h3>Real Murcia Trivia Quiz</h3>
             <p>Ten questions from this club’s record.</p>
             <span class="go">Play now &rarr;</span>
@@ -310,107 +326,107 @@
         <tr>
             <td class="rank">1</td>
             <td>Richi</td>
-            <td class="num">60</td>
-            <td class="num">4</td>
-            <td class="yr">2003/04–2007/08</td>
+            <td class="num">250</td>
+            <td class="num">29</td>
+            <td class="yr">2002/03–2011/12</td>
           </tr>
         <tr>
             <td class="rank">2</td>
-            <td>Ibán Cuadrado</td>
-            <td class="num">45</td>
-            <td class="num">0</td>
-            <td class="yr">2003/04–2007/08</td>
+            <td>José Acciari</td>
+            <td class="num">221</td>
+            <td class="num">16</td>
+            <td class="yr">2001/02–2013/14</td>
           </tr>
         <tr>
             <td class="rank">3</td>
-            <td>Amador Lorenzo</td>
-            <td class="num">38</td>
-            <td class="num">0</td>
-            <td class="yr">1988/89–1988/89</td>
+            <td>Ibán Cuadrado</td>
+            <td class="num">218</td>
+            <td class="num">4</td>
+            <td class="yr">2001/02–2007/08</td>
           </tr>
         <tr>
             <td class="rank">4</td>
-            <td>Luis García</td>
-            <td class="num">38</td>
-            <td class="num">11</td>
-            <td class="yr">2003/04–2003/04</td>
+            <td>Juanma</td>
+            <td class="num">162</td>
+            <td class="num">5</td>
+            <td class="yr">2001/02–2006/07</td>
           </tr>
         <tr>
             <td class="rank">5</td>
-            <td>Javier Ibeas</td>
-            <td class="num">36</td>
-            <td class="num">3</td>
-            <td class="yr">1988/89–1988/89</td>
+            <td>Iván Alonso</td>
+            <td class="num">158</td>
+            <td class="num">48</td>
+            <td class="yr">2004/05–2008/09</td>
           </tr>
         <tr>
             <td class="rank">6</td>
-            <td>Josep Costa</td>
-            <td class="num">35</td>
-            <td class="num">1</td>
-            <td class="yr">1988/89–1988/89</td>
+            <td>Francisco Molinero</td>
+            <td class="num">114</td>
+            <td class="num">4</td>
+            <td class="yr">2011/12–2013/14</td>
           </tr>
         <tr>
             <td class="rank">7</td>
-            <td>José Acciari</td>
-            <td class="num">35</td>
-            <td class="num">2</td>
-            <td class="yr">2003/04–2003/04</td>
+            <td>Paco Peña</td>
+            <td class="num">108</td>
+            <td class="num">0</td>
+            <td class="yr">2006/07–2008/09</td>
           </tr>
         <tr>
             <td class="rank">8</td>
-            <td>Paco Peña</td>
-            <td class="num">35</td>
-            <td class="num">0</td>
-            <td class="yr">2007/08–2007/08</td>
+            <td>Miguel Albiol</td>
+            <td class="num">102</td>
+            <td class="num">1</td>
+            <td class="yr">2002/03–2013/14</td>
           </tr>
         <tr>
             <td class="rank">9</td>
-            <td>José Manuel Martínez Toral</td>
-            <td class="num">34</td>
-            <td class="num">1</td>
-            <td class="yr">1988/89–1988/89</td>
+            <td>Álvaro Mejía</td>
+            <td class="num">100</td>
+            <td class="num">4</td>
+            <td class="yr">2007/08–2009/10</td>
           </tr>
         <tr>
             <td class="rank">10</td>
-            <td>Salvador Mejías</td>
-            <td class="num">33</td>
-            <td class="num">6</td>
-            <td class="yr">1988/89–1988/89</td>
+            <td>Óscar Sánchez</td>
+            <td class="num">98</td>
+            <td class="num">8</td>
+            <td class="yr">2009/10–2013/14</td>
           </tr>
         <tr>
             <td class="rank">11</td>
-            <td>David Karanka</td>
-            <td class="num">31</td>
-            <td class="num">7</td>
-            <td class="yr">2003/04–2003/04</td>
+            <td>Juanmi</td>
+            <td class="num">94</td>
+            <td class="num">0</td>
+            <td class="yr">2003/04–2006/07</td>
           </tr>
         <tr>
             <td class="rank">12</td>
-            <td>Juanma</td>
-            <td class="num">31</td>
-            <td class="num">0</td>
-            <td class="yr">2003/04–2003/04</td>
+            <td>David Karanka</td>
+            <td class="num">93</td>
+            <td class="num">21</td>
+            <td class="yr">2002/03–2004/05</td>
           </tr>
         <tr>
             <td class="rank">13</td>
-            <td>Henok Goitom</td>
-            <td class="num">31</td>
-            <td class="num">2</td>
-            <td class="yr">2007/08–2007/08</td>
+            <td>Stéphane Pignol</td>
+            <td class="num">88</td>
+            <td class="num">0</td>
+            <td class="yr">2005/06–2007/08</td>
           </tr>
         <tr>
             <td class="rank">14</td>
-            <td>Enrique de Lucas</td>
-            <td class="num">30</td>
-            <td class="num">4</td>
-            <td class="yr">2007/08–2007/08</td>
+            <td>Francisco Maciel</td>
+            <td class="num">88</td>
+            <td class="num">2</td>
+            <td class="yr">2002/03–2004/05</td>
           </tr>
         <tr>
             <td class="rank">15</td>
-            <td>Álvaro Mejía</td>
-            <td class="num">30</td>
-            <td class="num">1</td>
-            <td class="yr">2007/08–2007/08</td>
+            <td>Bruno Herrero Arias</td>
+            <td class="num">85</td>
+            <td class="num">13</td>
+            <td class="yr">2006/07–2009/10</td>
           </tr>
       </tbody>
     </table>
@@ -425,63 +441,63 @@
       <tbody>
         <tr>
             <td class="rank">1</td>
-            <td>Luis García</td>
-            <td class="num">11</td>
-            <td class="num">38</td>
+            <td>Iván Alonso</td>
+            <td class="num">48</td>
+            <td class="num">158</td>
           </tr>
         <tr>
             <td class="rank">2</td>
-            <td>Iván Alonso</td>
-            <td class="num">10</td>
-            <td class="num">29</td>
+            <td>Kiké</td>
+            <td class="num">32</td>
+            <td class="num">79</td>
           </tr>
         <tr>
             <td class="rank">3</td>
-            <td>José Mejías</td>
-            <td class="num">8</td>
-            <td class="num">30</td>
+            <td>Richi</td>
+            <td class="num">29</td>
+            <td class="num">250</td>
           </tr>
         <tr>
             <td class="rank">4</td>
             <td>David Karanka</td>
-            <td class="num">7</td>
-            <td class="num">31</td>
+            <td class="num">21</td>
+            <td class="num">93</td>
           </tr>
         <tr>
             <td class="rank">5</td>
-            <td>Salvador Mejías</td>
-            <td class="num">6</td>
-            <td class="num">33</td>
+            <td>José Luis Loreto</td>
+            <td class="num">17</td>
+            <td class="num">67</td>
           </tr>
         <tr>
             <td class="rank">6</td>
-            <td>Fernando Baiano</td>
-            <td class="num">6</td>
-            <td class="num">27</td>
+            <td>José Acciari</td>
+            <td class="num">16</td>
+            <td class="num">221</td>
           </tr>
         <tr>
             <td class="rank">7</td>
-            <td>Abel Gómez Moreno</td>
-            <td class="num">5</td>
-            <td class="num">30</td>
+            <td>Chando</td>
+            <td class="num">16</td>
+            <td class="num">71</td>
           </tr>
         <tr>
             <td class="rank">8</td>
-            <td>Enrique de Lucas</td>
-            <td class="num">4</td>
-            <td class="num">30</td>
+            <td>Cristian García</td>
+            <td class="num">16</td>
+            <td class="num">63</td>
           </tr>
         <tr>
             <td class="rank">9</td>
-            <td>Míchel</td>
-            <td class="num">4</td>
-            <td class="num">29</td>
+            <td>Bruno Herrero Arias</td>
+            <td class="num">13</td>
+            <td class="num">85</td>
           </tr>
         <tr>
             <td class="rank">10</td>
-            <td>Richi</td>
-            <td class="num">4</td>
-            <td class="num">60</td>
+            <td>Ismael Santiago</td>
+            <td class="num">13</td>
+            <td class="num">69</td>
           </tr>
       </tbody>
     </table>
@@ -495,6 +511,13 @@
       <thead><tr><th>Competition</th><th class="num">Players</th><th>Seasons</th><th class="num">Count</th><th>Games</th></tr></thead>
       <tbody>
         <tr>
+            <td>Segunda División</td>
+            <td class="num">170</td>
+            <td class="yr">2001/02–2013/14</td>
+            <td class="num">7</td>
+            <td class="yes">Playable</td>
+          </tr>
+        <tr>
             <td>La Liga</td>
             <td class="num">85</td>
             <td class="yr">1988/89–2007/08</td>
@@ -507,35 +530,35 @@
 </details>
 
 <h2>Ask about Real Murcia</h2>
-<p class="sub">Ask the database a question. Answers come from 85 Real Murcia
+<p class="sub">Ask the database a question. Answers come from 221 Real Murcia
   players and are never invented — if the data does not support an answer, it says so.</p>
 <form class="ask" id="askForm">
   <input id="askQ" autocomplete="off" maxlength="300"
-         placeholder="Who has played for both Real Murcia and Sevilla?"
+         placeholder="Who has played for both Real Murcia and Valladolid?"
          aria-label="Ask a question about Real Murcia">
   <button type="submit">Ask</button>
 </form>
 <div class="ask-examples">
-          <button type="button" data-q="Who has played for both Real Murcia and Sevilla?">Who has played for both Real Murcia and Sevilla?</button>
-          <button type="button" data-q="Top scorers for Real Murcia in La Liga">Top scorers for Real Murcia in La Liga</button>
+          <button type="button" data-q="Who has played for both Real Murcia and Valladolid?">Who has played for both Real Murcia and Valladolid?</button>
+          <button type="button" data-q="Top scorers for Real Murcia in Segunda División">Top scorers for Real Murcia in Segunda División</button>
           <button type="button" data-q="Which English players have the most appearances for Real Murcia?">Which English players have the most appearances for Real Murcia?</button>
 </div>
 <div id="askAnswer"></div>
 
 <h2>More teams</h2>
 <div class="related">
-          <a href="/teams/sevilla/">Sevilla</a>
-          <a href="/teams/espanyol/">Espanyol</a>
-          <a href="/teams/atletico-madrid/">Atlético Madrid</a>
-          <a href="/teams/valencia/">Valencia</a>
-          <a href="/teams/real-betis/">Real Betis</a>
-          <a href="/teams/barcelona/">Barcelona</a>
           <a href="/teams/valladolid/">Valladolid</a>
-          <a href="/teams/celta-vigo/">Celta Vigo</a>
+          <a href="/teams/albacete/">Albacete</a>
+          <a href="/teams/zaragoza/">Zaragoza</a>
+          <a href="/teams/tenerife/">Tenerife</a>
+          <a href="/teams/elche/">Elche</a>
+          <a href="/teams/espanyol/">Espanyol</a>
+          <a href="/teams/sevilla/">Sevilla</a>
           <a href="/teams/mallorca/">Mallorca</a>
-          <a href="/teams/real-madrid/">Real Madrid</a>
+          <a href="/teams/sporting-gijon/">Sporting Gijón</a>
+          <a href="/teams/malaga/">Málaga</a>
+          <a href="/teams/atletico-madrid/">Atlético Madrid</a>
           <a href="/teams/rayo-vallecano/">Rayo Vallecano</a>
-          <a href="/teams/villarreal/">Villarreal</a>
 </div>
 
 <footer class="page">
@@ -549,7 +572,7 @@
 </div><!-- /wrap -->
 
 <script>
-window.TS_TEAM = {"slug":"real-murcia","name":"Real Murcia","comps":["La Liga"],"defaultScope":"team_real-murcia_la-liga","potd":[{"n":"Richi","a":60,"g":4,"f":"2003/04","t":"2007/08"},{"n":"Ibán Cuadrado","a":45,"g":0,"f":"2003/04","t":"2007/08"},{"n":"Amador Lorenzo","a":38,"g":0,"f":"1988/89","t":"1988/89"},{"n":"Luis García","a":38,"g":11,"f":"2003/04","t":"2003/04"},{"n":"Javier Ibeas","a":36,"g":3,"f":"1988/89","t":"1988/89"},{"n":"Josep Costa","a":35,"g":1,"f":"1988/89","t":"1988/89"},{"n":"José Acciari","a":35,"g":2,"f":"2003/04","t":"2003/04"},{"n":"Paco Peña","a":35,"g":0,"f":"2007/08","t":"2007/08"},{"n":"José Manuel Martínez Toral","a":34,"g":1,"f":"1988/89","t":"1988/89"},{"n":"Salvador Mejías","a":33,"g":6,"f":"1988/89","t":"1988/89"},{"n":"David Karanka","a":31,"g":7,"f":"2003/04","t":"2003/04"},{"n":"Juanma","a":31,"g":0,"f":"2003/04","t":"2003/04"},{"n":"Henok Goitom","a":31,"g":2,"f":"2007/08","t":"2007/08"},{"n":"Enrique de Lucas","a":30,"g":4,"f":"2007/08","t":"2007/08"},{"n":"Álvaro Mejía","a":30,"g":1,"f":"2007/08","t":"2007/08"}]};
+window.TS_TEAM = {"slug":"real-murcia","name":"Real Murcia","comps":["Segunda División","La Liga"],"defaultScope":"team_real-murcia_all","potd":[{"n":"Richi","a":250,"g":29,"f":"2002/03","t":"2011/12"},{"n":"José Acciari","a":221,"g":16,"f":"2001/02","t":"2013/14"},{"n":"Ibán Cuadrado","a":218,"g":4,"f":"2001/02","t":"2007/08"},{"n":"Juanma","a":162,"g":5,"f":"2001/02","t":"2006/07"},{"n":"Iván Alonso","a":158,"g":48,"f":"2004/05","t":"2008/09"},{"n":"Francisco Molinero","a":114,"g":4,"f":"2011/12","t":"2013/14"},{"n":"Paco Peña","a":108,"g":0,"f":"2006/07","t":"2008/09"},{"n":"Miguel Albiol","a":102,"g":1,"f":"2002/03","t":"2013/14"},{"n":"Álvaro Mejía","a":100,"g":4,"f":"2007/08","t":"2009/10"},{"n":"Óscar Sánchez","a":98,"g":8,"f":"2009/10","t":"2013/14"},{"n":"Juanmi","a":94,"g":0,"f":"2003/04","t":"2006/07"},{"n":"David Karanka","a":93,"g":21,"f":"2002/03","t":"2004/05"},{"n":"Stéphane Pignol","a":88,"g":0,"f":"2005/06","t":"2007/08"},{"n":"Francisco Maciel","a":88,"g":2,"f":"2002/03","t":"2004/05"},{"n":"Bruno Herrero Arias","a":85,"g":13,"f":"2006/07","t":"2009/10"}]};
 </script>
 <script src="/js/ts-scope.js"></script>
 <script src="/js/team-page.js"></script>
@@ -566,6 +589,6 @@ window.TS_TEAM = {"slug":"real-murcia","name":"Real Murcia","comps":["La Liga"],
     try { TSNav.render(); } catch (e) { console.error('[TeleStats] Nav render failed:', e); }
   })();
 </script>
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TeleStats","item":"https://telestats.net"},{"@type":"ListItem","position":2,"name":"Teams","item":"https://telestats.net/teams/"},{"@type":"ListItem","position":3,"name":"Real Murcia","item":"https://telestats.net/teams/real-murcia/"}]},{"@type":"SportsTeam","name":"Real Murcia","sport":"Association football","url":"https://telestats.net/teams/real-murcia/"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is the Real Murcia page on TeleStats?","acceptedAnswer":{"@type":"Answer","text":"Free Real Murcia football quizzes and trivia games generated from real appearance and goal records for 85 players across La Liga. No sign-up is needed to play."}}]}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TeleStats","item":"https://telestats.net"},{"@type":"ListItem","position":2,"name":"Teams","item":"https://telestats.net/teams/"},{"@type":"ListItem","position":3,"name":"Real Murcia","item":"https://telestats.net/teams/real-murcia/"}]},{"@type":"SportsTeam","name":"Real Murcia","sport":"Association football","url":"https://telestats.net/teams/real-murcia/"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is the Real Murcia page on TeleStats?","acceptedAnswer":{"@type":"Answer","text":"Free Real Murcia football quizzes and trivia games generated from real appearance and goal records for 221 players across Segunda División and La Liga. No sign-up is needed to play."}}]}]}</script>
 </body>
 </html>

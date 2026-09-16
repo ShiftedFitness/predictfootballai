@@ -5,17 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="/js/ts-analytics.js"></script>
 <title>Osasuna Football Quiz &amp; Trivia Games | TeleStats</title>
-<meta name="description" content="Play Osasuna football quizzes and trivia games built from 286 players and 15,029 appearances in La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta name="description" content="Play Osasuna football quizzes and trivia games built from 313 players and 17,388 appearances in La Liga and Segunda División. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
 <link rel="canonical" href="https://telestats.net/teams/osasuna/">
 <meta name="theme-color" content="#D91A2A">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Osasuna Football Quiz &amp; Trivia Games | TeleStats">
-<meta property="og:description" content="Play Osasuna football quizzes and trivia games built from 286 players and 15,029 appearances in La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta property="og:description" content="Play Osasuna football quizzes and trivia games built from 313 players and 17,388 appearances in La Liga and Segunda División. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
 <meta property="og:url" content="https://telestats.net/teams/osasuna/">
 <meta property="og:site_name" content="TeleStats">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Osasuna Football Quiz &amp; Trivia Games | TeleStats">
-<meta name="twitter:description" content="Play Osasuna football quizzes and trivia games built from 286 players and 15,029 appearances in La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta name="twitter:description" content="Play Osasuna football quizzes and trivia games built from 313 players and 17,388 appearances in La Liga and Segunda División. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
 <link rel="stylesheet" href="/telestats-theme.css">
 <style>
   :root { --club: #D91A2A; --club-2: #b10002; }
@@ -52,6 +52,9 @@
   .crest { width: 52px; height: 60px; flex: 0 0 auto; filter: drop-shadow(0 2px 6px rgba(0,0,0,.45)); }
   .hero h1 { font-size: 1.65rem; line-height: 1.2; margin: 0 0 5px; }
   .sub { color: var(--text-secondary); margin: 0; font-size: .9rem; }
+  .sub a.complink { color: var(--text-secondary); text-decoration: underline;
+                    text-decoration-color: rgba(255,255,255,.22); }
+  .sub a.complink:hover { color: var(--accent); }
   .scope-note { color: var(--text-muted); font-size: .76rem; margin: 6px 0 0; }
   .scope-note a { color: var(--accent); }
 
@@ -182,9 +185,9 @@
     <nav>
       <a href="/daily/">Daily</a>
       <a href="/games/">Games</a>
+      <a href="/competitions/">Competitions</a>
       <a href="/teams/">Teams</a>
       <a href="/ask/">Ask</a>
-      <a href="/leaderboard/">Leaderboard</a>
       <a href="/community/">Community</a>
     </nav>
   </div>
@@ -205,7 +208,8 @@
     </svg>
     <div>
       <h1>Osasuna Football Quizzes &amp; Trivia</h1>
-      <p class="sub">286 players · 15,029 appearances · La Liga</p>
+      <p class="sub">313 players · 17,388 appearances ·
+        <a class="complink" href="/competitions/la-liga/">La Liga</a>, <a class="complink" href="/competitions/segunda-division/">Segunda División</a></p>
       <p class="scope-note">Records cover 1988/89 to 2026/27.
         <a href="/tools/data.html">Full dataset scope</a>.</p>
     </div>
@@ -216,8 +220,8 @@
   <summary>New here? What this page is</summary>
   <div class="body">
     <p>This is a set of free football games about <strong>Osasuna</strong>, generated
-      from real appearance and goal records — 286 players who have turned out
-      for the club in La Liga, going back to 1988/89.</p>
+      from real appearance and goal records — 313 players who have turned out
+      for the club in La Liga and Segunda División, going back to 1988/89.</p>
     <p>Pick a game below and it starts straight away on Osasuna. No sign-up, no app.
       Make an account only if you want your scores kept and your name on the club's board.</p>
     <p>Everything you see here comes from the TeleStats database. Nothing is written by an AI
@@ -243,11 +247,23 @@
 
 <h2 id="play">Play Osasuna</h2>
 <p class="sub">The five TeleStats games, set up for Osasuna. Click one and it starts.</p>
-      
+      <div class="chips" id="compChips" role="group"
+       aria-label="Choose which competitions to play">
+        <button type="button" class="chip all on" data-all="1" aria-pressed="true">All competitions</button>
+        <button type="button" class="chip on"
+                data-comp="La Liga"
+                data-slug="la-liga"
+                aria-pressed="true">La Liga</button>
+        <button type="button" class="chip on"
+                data-comp="Segunda División"
+                data-slug="segunda-division"
+                aria-pressed="true">Segunda División</button>
+      </div>
+      <p class="chip-note" id="chipNote"></p>
       <ul class="games">
         <li class="game">
           <a class="game-go" data-path="/games/hol.html"
-             href="/games/hol.html?scope=team_osasuna_la-liga&amp;play=1">
+             href="/games/hol.html?scope=team_osasuna_all&amp;play=1">
             <h3>Osasuna Higher or Lower</h3>
             <p>Which player has more appearances?</p>
             <span class="go">Play now &rarr;</span>
@@ -255,7 +271,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/alpha.html"
-             href="/games/alpha.html?scope=team_osasuna_la-liga&amp;play=1">
+             href="/games/alpha.html?scope=team_osasuna_all&amp;play=1">
             <h3>Osasuna Player Alphabet</h3>
             <p>Name a player for every letter of the alphabet.</p>
             <span class="go">Play now &rarr;</span>
@@ -263,7 +279,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/xi.html"
-             href="/games/xi.html?scope=team_osasuna_la-liga&amp;play=1">
+             href="/games/xi.html?scope=team_osasuna_all&amp;play=1">
             <h3>Osasuna Starting XI</h3>
             <p>Build the strongest eleven you can.</p>
             <span class="go">Play now &rarr;</span>
@@ -271,7 +287,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/whoami.html"
-             href="/games/whoami.html?scope=team_osasuna_la-liga&amp;play=1">
+             href="/games/whoami.html?scope=team_osasuna_all&amp;play=1">
             <h3>Osasuna Who Am I?</h3>
             <p>Guess the player from five clues.</p>
             <span class="go">Play now &rarr;</span>
@@ -279,7 +295,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/quiz.html"
-             href="/games/quiz.html?scope=team_osasuna_la-liga&amp;play=1">
+             href="/games/quiz.html?scope=team_osasuna_all&amp;play=1">
             <h3>Osasuna Trivia Quiz</h3>
             <p>Ten questions from this club’s record.</p>
             <span class="go">Play now &rarr;</span>
@@ -316,101 +332,101 @@
           </tr>
         <tr>
             <td class="rank">2</td>
+            <td>Oier Sanjurjo</td>
+            <td class="num">331</td>
+            <td class="num">14</td>
+            <td class="yr">2008/09–2021/22</td>
+          </tr>
+        <tr>
+            <td class="rank">3</td>
+            <td>Roberto Torres</td>
+            <td class="num">322</td>
+            <td class="num">57</td>
+            <td class="yr">2011/12–2022/23</td>
+          </tr>
+        <tr>
+            <td class="rank">4</td>
+            <td>Miguel Flaño</td>
+            <td class="num">310</td>
+            <td class="num">12</td>
+            <td class="yr">2004/05–2018/19</td>
+          </tr>
+        <tr>
+            <td class="rank">5</td>
+            <td>David García</td>
+            <td class="num">280</td>
+            <td class="num">13</td>
+            <td class="yr">2014/15–2023/24</td>
+          </tr>
+        <tr>
+            <td class="rank">6</td>
+            <td>Rubén García</td>
+            <td class="num">276</td>
+            <td class="num">31</td>
+            <td class="yr">2018/19–2026/27</td>
+          </tr>
+        <tr>
+            <td class="rank">7</td>
+            <td>Sergio Herrera</td>
+            <td class="num">260</td>
+            <td class="num">0</td>
+            <td class="yr">2017/18–2026/27</td>
+          </tr>
+        <tr>
+            <td class="rank">8</td>
             <td>César Cruchaga</td>
             <td class="num">249</td>
             <td class="num">9</td>
             <td class="yr">2000/01–2008/09</td>
           </tr>
         <tr>
-            <td class="rank">3</td>
+            <td class="rank">9</td>
             <td>Jon Moncayola</td>
-            <td class="num">240</td>
+            <td class="num">242</td>
             <td class="num">7</td>
             <td class="yr">2019/20–2026/27</td>
           </tr>
         <tr>
-            <td class="rank">4</td>
-            <td>Miguel Flaño</td>
-            <td class="num">237</td>
-            <td class="num">10</td>
-            <td class="yr">2004/05–2016/17</td>
+            <td class="rank">10</td>
+            <td>Lucas Torró</td>
+            <td class="num">228</td>
+            <td class="num">7</td>
+            <td class="yr">2017/18–2026/27</td>
           </tr>
         <tr>
-            <td class="rank">5</td>
-            <td>Rubén García</td>
-            <td class="num">237</td>
-            <td class="num">24</td>
-            <td class="yr">2019/20–2026/27</td>
-          </tr>
-        <tr>
-            <td class="rank">6</td>
-            <td>Sergio Herrera</td>
-            <td class="num">214</td>
-            <td class="num">0</td>
-            <td class="yr">2019/20–2026/27</td>
-          </tr>
-        <tr>
-            <td class="rank">7</td>
+            <td class="rank">11</td>
             <td>Pepín</td>
             <td class="num">212</td>
             <td class="num">2</td>
             <td class="yr">1988/89–1993/94</td>
           </tr>
         <tr>
-            <td class="rank">8</td>
+            <td class="rank">12</td>
             <td>Josetxo</td>
             <td class="num">212</td>
             <td class="num">0</td>
             <td class="yr">2001/02–2010/11</td>
           </tr>
         <tr>
-            <td class="rank">9</td>
-            <td>Oier Sanjurjo</td>
-            <td class="num">205</td>
-            <td class="num">5</td>
-            <td class="yr">2008/09–2021/22</td>
-          </tr>
-        <tr>
-            <td class="rank">10</td>
-            <td>Ante Budimir</td>
-            <td class="num">200</td>
-            <td class="num">84</td>
-            <td class="yr">2020/21–2026/27</td>
-          </tr>
-        <tr>
-            <td class="rank">11</td>
-            <td>Ángel Martín González</td>
-            <td class="num">194</td>
-            <td class="num">3</td>
-            <td class="yr">1988/89–1993/94</td>
-          </tr>
-        <tr>
-            <td class="rank">12</td>
-            <td>Roberto Santamaría Calavia</td>
-            <td class="num">191</td>
-            <td class="num">0</td>
-            <td class="yr">1988/89–1993/94</td>
-          </tr>
-        <tr>
             <td class="rank">13</td>
-            <td>Lucas Torró</td>
-            <td class="num">191</td>
-            <td class="num">6</td>
-            <td class="yr">2020/21–2026/27</td>
+            <td>Kike Barja</td>
+            <td class="num">205</td>
+            <td class="num">12</td>
+            <td class="yr">2016/17–2026/27</td>
           </tr>
         <tr>
             <td class="rank">14</td>
-            <td>Ricardo</td>
-            <td class="num">190</td>
-            <td class="num">0</td>
-            <td class="yr">2005/06–2012/13</td>
+            <td>Ante Budimir</td>
+            <td class="num">202</td>
+            <td class="num">86</td>
+            <td class="yr">2020/21–2026/27</td>
           </tr>
         <tr>
             <td class="rank">15</td>
-            <td>Ángel Merino</td>
-            <td class="num">190</td>
-            <td class="num">17</td>
-            <td class="yr">1988/89–1993/94</td>
+            <td>Unai García</td>
+            <td class="num">195</td>
+            <td class="num">11</td>
+            <td class="yr">2012/13–2024/25</td>
           </tr>
       </tbody>
     </table>
@@ -426,62 +442,62 @@
         <tr>
             <td class="rank">1</td>
             <td>Ante Budimir</td>
-            <td class="num">84</td>
-            <td class="num">200</td>
+            <td class="num">86</td>
+            <td class="num">202</td>
           </tr>
         <tr>
             <td class="rank">2</td>
+            <td>Roberto Torres</td>
+            <td class="num">57</td>
+            <td class="num">322</td>
+          </tr>
+        <tr>
+            <td class="rank">3</td>
             <td>Jan Urban</td>
             <td class="num">45</td>
             <td class="num">156</td>
           </tr>
         <tr>
-            <td class="rank">3</td>
+            <td class="rank">4</td>
+            <td>Rubén García</td>
+            <td class="num">31</td>
+            <td class="num">276</td>
+          </tr>
+        <tr>
+            <td class="rank">5</td>
+            <td>Javad Nekounam</td>
+            <td class="num">30</td>
+            <td class="num">171</td>
+          </tr>
+        <tr>
+            <td class="rank">6</td>
             <td>John Aloisi</td>
             <td class="num">29</td>
             <td class="num">120</td>
           </tr>
         <tr>
-            <td class="rank">4</td>
+            <td class="rank">7</td>
             <td>Cuco Ziganda</td>
             <td class="num">29</td>
             <td class="num">101</td>
           </tr>
         <tr>
-            <td class="rank">5</td>
-            <td>Roberto Torres</td>
-            <td class="num">29</td>
-            <td class="num">173</td>
-          </tr>
-        <tr>
-            <td class="rank">6</td>
+            <td class="rank">8</td>
             <td>Walter Pandiani</td>
             <td class="num">27</td>
             <td class="num">92</td>
           </tr>
         <tr>
-            <td class="rank">7</td>
-            <td>Iván Rosado</td>
-            <td class="num">26</td>
-            <td class="num">122</td>
-          </tr>
-        <tr>
-            <td class="rank">8</td>
-            <td>Javad Nekounam</td>
-            <td class="num">25</td>
-            <td class="num">149</td>
-          </tr>
-        <tr>
             <td class="rank">9</td>
-            <td>Rubén García</td>
-            <td class="num">24</td>
-            <td class="num">237</td>
+            <td>Nino</td>
+            <td class="num">27</td>
+            <td class="num">143</td>
           </tr>
         <tr>
             <td class="rank">10</td>
-            <td>Ezequiel Ávila</td>
-            <td class="num">24</td>
-            <td class="num">110</td>
+            <td>Iván Rosado</td>
+            <td class="num">26</td>
+            <td class="num">122</td>
           </tr>
       </tbody>
     </table>
@@ -496,9 +512,16 @@
       <tbody>
         <tr>
             <td>La Liga</td>
-            <td class="num">286</td>
+            <td class="num">289</td>
             <td class="yr">1988/89–2026/27</td>
             <td class="num">13</td>
+            <td class="yes">Playable</td>
+          </tr>
+        <tr>
+            <td>Segunda División</td>
+            <td class="num">70</td>
+            <td class="yr">2014/15–2018/19</td>
+            <td class="num">4</td>
             <td class="yes">Playable</td>
           </tr>
       </tbody>
@@ -507,16 +530,16 @@
 </details>
 
 <h2>Ask about Osasuna</h2>
-<p class="sub">Ask the database a question. Answers come from 286 Osasuna
+<p class="sub">Ask the database a question. Answers come from 313 Osasuna
   players and are never invented — if the data does not support an answer, it says so.</p>
 <form class="ask" id="askForm">
   <input id="askQ" autocomplete="off" maxlength="300"
-         placeholder="Who has played for both Osasuna and Sevilla?"
+         placeholder="Who has played for both Osasuna and Valladolid?"
          aria-label="Ask a question about Osasuna">
   <button type="submit">Ask</button>
 </form>
 <div class="ask-examples">
-          <button type="button" data-q="Who has played for both Osasuna and Sevilla?">Who has played for both Osasuna and Sevilla?</button>
+          <button type="button" data-q="Who has played for both Osasuna and Valladolid?">Who has played for both Osasuna and Valladolid?</button>
           <button type="button" data-q="Top scorers for Osasuna in La Liga">Top scorers for Osasuna in La Liga</button>
           <button type="button" data-q="Which English players have the most appearances for Osasuna?">Which English players have the most appearances for Osasuna?</button>
 </div>
@@ -524,18 +547,18 @@
 
 <h2>More teams</h2>
 <div class="related">
-          <a href="/teams/sevilla/">Sevilla</a>
-          <a href="/teams/espanyol/">Espanyol</a>
-          <a href="/teams/atletico-madrid/">Atlético Madrid</a>
-          <a href="/teams/valencia/">Valencia</a>
-          <a href="/teams/real-betis/">Real Betis</a>
-          <a href="/teams/barcelona/">Barcelona</a>
           <a href="/teams/valladolid/">Valladolid</a>
-          <a href="/teams/celta-vigo/">Celta Vigo</a>
+          <a href="/teams/albacete/">Albacete</a>
+          <a href="/teams/zaragoza/">Zaragoza</a>
+          <a href="/teams/tenerife/">Tenerife</a>
+          <a href="/teams/elche/">Elche</a>
+          <a href="/teams/espanyol/">Espanyol</a>
+          <a href="/teams/sevilla/">Sevilla</a>
           <a href="/teams/mallorca/">Mallorca</a>
-          <a href="/teams/real-madrid/">Real Madrid</a>
+          <a href="/teams/sporting-gijon/">Sporting Gijón</a>
+          <a href="/teams/malaga/">Málaga</a>
+          <a href="/teams/atletico-madrid/">Atlético Madrid</a>
           <a href="/teams/rayo-vallecano/">Rayo Vallecano</a>
-          <a href="/teams/villarreal/">Villarreal</a>
 </div>
 
 <footer class="page">
@@ -549,7 +572,7 @@
 </div><!-- /wrap -->
 
 <script>
-window.TS_TEAM = {"slug":"osasuna","name":"Osasuna","comps":["La Liga"],"defaultScope":"team_osasuna_la-liga","potd":[{"n":"Francisco Puñal","a":420,"g":22,"f":"2001/02","t":"2013/14"},{"n":"César Cruchaga","a":249,"g":9,"f":"2000/01","t":"2008/09"},{"n":"Jon Moncayola","a":240,"g":7,"f":"2019/20","t":"2026/27"},{"n":"Miguel Flaño","a":237,"g":10,"f":"2004/05","t":"2016/17"},{"n":"Rubén García","a":237,"g":24,"f":"2019/20","t":"2026/27"},{"n":"Sergio Herrera","a":214,"g":0,"f":"2019/20","t":"2026/27"},{"n":"Pepín","a":212,"g":2,"f":"1988/89","t":"1993/94"},{"n":"Josetxo","a":212,"g":0,"f":"2001/02","t":"2010/11"},{"n":"Oier Sanjurjo","a":205,"g":5,"f":"2008/09","t":"2021/22"},{"n":"Ante Budimir","a":200,"g":84,"f":"2020/21","t":"2026/27"},{"n":"Ángel Martín González","a":194,"g":3,"f":"1988/89","t":"1993/94"},{"n":"Roberto Santamaría Calavia","a":191,"g":0,"f":"1988/89","t":"1993/94"},{"n":"Lucas Torró","a":191,"g":6,"f":"2020/21","t":"2026/27"},{"n":"Ricardo","a":190,"g":0,"f":"2005/06","t":"2012/13"},{"n":"Ángel Merino","a":190,"g":17,"f":"1988/89","t":"1993/94"}]};
+window.TS_TEAM = {"slug":"osasuna","name":"Osasuna","comps":["La Liga","Segunda División"],"defaultScope":"team_osasuna_all","potd":[{"n":"Francisco Puñal","a":420,"g":22,"f":"2001/02","t":"2013/14"},{"n":"Oier Sanjurjo","a":331,"g":14,"f":"2008/09","t":"2021/22"},{"n":"Roberto Torres","a":322,"g":57,"f":"2011/12","t":"2022/23"},{"n":"Miguel Flaño","a":310,"g":12,"f":"2004/05","t":"2018/19"},{"n":"David García","a":280,"g":13,"f":"2014/15","t":"2023/24"},{"n":"Rubén García","a":276,"g":31,"f":"2018/19","t":"2026/27"},{"n":"Sergio Herrera","a":260,"g":0,"f":"2017/18","t":"2026/27"},{"n":"César Cruchaga","a":249,"g":9,"f":"2000/01","t":"2008/09"},{"n":"Jon Moncayola","a":242,"g":7,"f":"2019/20","t":"2026/27"},{"n":"Lucas Torró","a":228,"g":7,"f":"2017/18","t":"2026/27"},{"n":"Pepín","a":212,"g":2,"f":"1988/89","t":"1993/94"},{"n":"Josetxo","a":212,"g":0,"f":"2001/02","t":"2010/11"},{"n":"Kike Barja","a":205,"g":12,"f":"2016/17","t":"2026/27"},{"n":"Ante Budimir","a":202,"g":86,"f":"2020/21","t":"2026/27"},{"n":"Unai García","a":195,"g":11,"f":"2012/13","t":"2024/25"}]};
 </script>
 <script src="/js/ts-scope.js"></script>
 <script src="/js/team-page.js"></script>
@@ -566,6 +589,6 @@ window.TS_TEAM = {"slug":"osasuna","name":"Osasuna","comps":["La Liga"],"default
     try { TSNav.render(); } catch (e) { console.error('[TeleStats] Nav render failed:', e); }
   })();
 </script>
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TeleStats","item":"https://telestats.net"},{"@type":"ListItem","position":2,"name":"Teams","item":"https://telestats.net/teams/"},{"@type":"ListItem","position":3,"name":"Osasuna","item":"https://telestats.net/teams/osasuna/"}]},{"@type":"SportsTeam","name":"Osasuna","sport":"Association football","url":"https://telestats.net/teams/osasuna/"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is the Osasuna page on TeleStats?","acceptedAnswer":{"@type":"Answer","text":"Free Osasuna football quizzes and trivia games generated from real appearance and goal records for 286 players across La Liga. No sign-up is needed to play."}}]}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TeleStats","item":"https://telestats.net"},{"@type":"ListItem","position":2,"name":"Teams","item":"https://telestats.net/teams/"},{"@type":"ListItem","position":3,"name":"Osasuna","item":"https://telestats.net/teams/osasuna/"}]},{"@type":"SportsTeam","name":"Osasuna","sport":"Association football","url":"https://telestats.net/teams/osasuna/"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is the Osasuna page on TeleStats?","acceptedAnswer":{"@type":"Answer","text":"Free Osasuna football quizzes and trivia games generated from real appearance and goal records for 313 players across La Liga and Segunda División. No sign-up is needed to play."}}]}]}</script>
 </body>
 </html>

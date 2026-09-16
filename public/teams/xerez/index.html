@@ -5,18 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="/js/ts-analytics.js"></script>
 <title>Xerez Football Quiz &amp; Trivia Games | TeleStats</title>
-<meta name="description" content="Play Xerez football quizzes and trivia games built from 24 players and 531 appearances in La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta name="description" content="Play Xerez football quizzes and trivia games built from 167 players and 6,923 appearances in Segunda División and La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
 <link rel="canonical" href="https://telestats.net/teams/xerez/">
-<meta name="robots" content="noindex,follow">
 <meta name="theme-color" content="hsl(53, 62%, 38%)">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Xerez Football Quiz &amp; Trivia Games | TeleStats">
-<meta property="og:description" content="Play Xerez football quizzes and trivia games built from 24 players and 531 appearances in La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta property="og:description" content="Play Xerez football quizzes and trivia games built from 167 players and 6,923 appearances in Segunda División and La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
 <meta property="og:url" content="https://telestats.net/teams/xerez/">
 <meta property="og:site_name" content="TeleStats">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Xerez Football Quiz &amp; Trivia Games | TeleStats">
-<meta name="twitter:description" content="Play Xerez football quizzes and trivia games built from 24 players and 531 appearances in La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta name="twitter:description" content="Play Xerez football quizzes and trivia games built from 167 players and 6,923 appearances in Segunda División and La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
 <link rel="stylesheet" href="/telestats-theme.css">
 <style>
   :root { --club: hsl(53, 62%, 38%); --club-2: hsl(71, 62%, 26%); }
@@ -53,6 +52,9 @@
   .crest { width: 52px; height: 60px; flex: 0 0 auto; filter: drop-shadow(0 2px 6px rgba(0,0,0,.45)); }
   .hero h1 { font-size: 1.65rem; line-height: 1.2; margin: 0 0 5px; }
   .sub { color: var(--text-secondary); margin: 0; font-size: .9rem; }
+  .sub a.complink { color: var(--text-secondary); text-decoration: underline;
+                    text-decoration-color: rgba(255,255,255,.22); }
+  .sub a.complink:hover { color: var(--accent); }
   .scope-note { color: var(--text-muted); font-size: .76rem; margin: 6px 0 0; }
   .scope-note a { color: var(--accent); }
 
@@ -183,9 +185,9 @@
     <nav>
       <a href="/daily/">Daily</a>
       <a href="/games/">Games</a>
+      <a href="/competitions/">Competitions</a>
       <a href="/teams/">Teams</a>
       <a href="/ask/">Ask</a>
-      <a href="/leaderboard/">Leaderboard</a>
       <a href="/community/">Community</a>
     </nav>
   </div>
@@ -206,8 +208,9 @@
     </svg>
     <div>
       <h1>Xerez Football Quizzes &amp; Trivia</h1>
-      <p class="sub">24 players · 531 appearances · La Liga</p>
-      <p class="scope-note">Records cover 2009/10 to 2009/10.
+      <p class="sub">167 players · 6,923 appearances ·
+        <a class="complink" href="/competitions/segunda-division/">Segunda División</a>, <a class="complink" href="/competitions/la-liga/">La Liga</a></p>
+      <p class="scope-note">Records cover 2001/02 to 2012/13.
         <a href="/tools/data.html">Full dataset scope</a>.</p>
     </div>
   </div>
@@ -217,8 +220,8 @@
   <summary>New here? What this page is</summary>
   <div class="body">
     <p>This is a set of free football games about <strong>Xerez</strong>, generated
-      from real appearance and goal records — 24 players who have turned out
-      for the club in La Liga, going back to 2009/10.</p>
+      from real appearance and goal records — 167 players who have turned out
+      for the club in Segunda División and La Liga, going back to 2001/02.</p>
     <p>Pick a game below and it starts straight away on Xerez. No sign-up, no app.
       Make an account only if you want your scores kept and your name on the club's board.</p>
     <p>Everything you see here comes from the TeleStats database. Nothing is written by an AI
@@ -244,11 +247,23 @@
 
 <h2 id="play">Play Xerez</h2>
 <p class="sub">The five TeleStats games, set up for Xerez. Click one and it starts.</p>
-      
+      <div class="chips" id="compChips" role="group"
+       aria-label="Choose which competitions to play">
+        <button type="button" class="chip all on" data-all="1" aria-pressed="true">All competitions</button>
+        <button type="button" class="chip on"
+                data-comp="Segunda División"
+                data-slug="segunda-division"
+                aria-pressed="true">Segunda División</button>
+        <button type="button" class="chip on"
+                data-comp="La Liga"
+                data-slug="la-liga"
+                aria-pressed="true">La Liga</button>
+      </div>
+      <p class="chip-note" id="chipNote"></p>
       <ul class="games">
         <li class="game">
           <a class="game-go" data-path="/games/hol.html"
-             href="/games/hol.html?scope=team_xerez_la-liga&amp;play=1">
+             href="/games/hol.html?scope=team_xerez_all&amp;play=1">
             <h3>Xerez Higher or Lower</h3>
             <p>Which player has more appearances?</p>
             <span class="go">Play now &rarr;</span>
@@ -256,7 +271,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/alpha.html"
-             href="/games/alpha.html?scope=team_xerez_la-liga&amp;play=1">
+             href="/games/alpha.html?scope=team_xerez_all&amp;play=1">
             <h3>Xerez Player Alphabet</h3>
             <p>Name a player for every letter of the alphabet.</p>
             <span class="go">Play now &rarr;</span>
@@ -264,7 +279,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/xi.html"
-             href="/games/xi.html?scope=team_xerez_la-liga&amp;play=1">
+             href="/games/xi.html?scope=team_xerez_all&amp;play=1">
             <h3>Xerez Starting XI</h3>
             <p>Build the strongest eleven you can.</p>
             <span class="go">Play now &rarr;</span>
@@ -272,7 +287,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/whoami.html"
-             href="/games/whoami.html?scope=team_xerez_la-liga&amp;play=1">
+             href="/games/whoami.html?scope=team_xerez_all&amp;play=1">
             <h3>Xerez Who Am I?</h3>
             <p>Guess the player from five clues.</p>
             <span class="go">Play now &rarr;</span>
@@ -280,7 +295,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/quiz.html"
-             href="/games/quiz.html?scope=team_xerez_la-liga&amp;play=1">
+             href="/games/quiz.html?scope=team_xerez_all&amp;play=1">
             <h3>Xerez Trivia Quiz</h3>
             <p>Ten questions from this club’s record.</p>
             <span class="go">Play now &rarr;</span>
@@ -310,108 +325,108 @@
       <tbody>
         <tr>
             <td class="rank">1</td>
-            <td>Renan Brito Soares</td>
-            <td class="num">35</td>
-            <td class="num">0</td>
-            <td class="yr">2009/10–2009/10</td>
+            <td>Jesús Mendoza</td>
+            <td class="num">379</td>
+            <td class="num">11</td>
+            <td class="yr">2001/02–2012/13</td>
           </tr>
         <tr>
             <td class="rank">2</td>
-            <td>Carlos Calvo</td>
-            <td class="num">35</td>
-            <td class="num">4</td>
-            <td class="yr">2009/10–2009/10</td>
+            <td>Vicente Moreno</td>
+            <td class="num">359</td>
+            <td class="num">18</td>
+            <td class="yr">2001/02–2010/11</td>
           </tr>
         <tr>
             <td class="rank">3</td>
-            <td>Mario Bermejo</td>
-            <td class="num">34</td>
-            <td class="num">12</td>
-            <td class="yr">2009/10–2009/10</td>
+            <td>Francis</td>
+            <td class="num">195</td>
+            <td class="num">3</td>
+            <td class="yr">2003/04–2009/10</td>
           </tr>
         <tr>
             <td class="rank">4</td>
-            <td>Aythami Artiles</td>
-            <td class="num">30</td>
-            <td class="num">2</td>
-            <td class="yr">2009/10–2009/10</td>
+            <td>José María Mena</td>
+            <td class="num">157</td>
+            <td class="num">36</td>
+            <td class="yr">2001/02–2004/05</td>
           </tr>
         <tr>
             <td class="rank">5</td>
-            <td>Leandro Gioda</td>
-            <td class="num">29</td>
-            <td class="num">2</td>
-            <td class="yr">2009/10–2009/10</td>
+            <td>Gerard Autet</td>
+            <td class="num">146</td>
+            <td class="num">0</td>
+            <td class="yr">2002/03–2011/12</td>
           </tr>
         <tr>
             <td class="rank">6</td>
-            <td>José Manuel Casado</td>
-            <td class="num">27</td>
-            <td class="num">0</td>
-            <td class="yr">2009/10–2009/10</td>
+            <td>Pedro Ríos</td>
+            <td class="num">146</td>
+            <td class="num">23</td>
+            <td class="yr">2004/05–2008/09</td>
           </tr>
         <tr>
             <td class="rank">7</td>
-            <td>Momo</td>
-            <td class="num">26</td>
-            <td class="num">2</td>
-            <td class="yr">2009/10–2009/10</td>
+            <td>Francisco Javier Cachorro</td>
+            <td class="num">140</td>
+            <td class="num">6</td>
+            <td class="yr">2001/02–2004/05</td>
           </tr>
         <tr>
             <td class="rank">8</td>
-            <td>Álex Bergantiños</td>
-            <td class="num">26</td>
+            <td>Chema</td>
+            <td class="num">128</td>
             <td class="num">0</td>
-            <td class="yr">2009/10–2009/10</td>
+            <td class="yr">2006/07–2012/13</td>
           </tr>
         <tr>
             <td class="rank">9</td>
-            <td>Fabián Orellana</td>
-            <td class="num">26</td>
-            <td class="num">2</td>
-            <td class="yr">2009/10–2009/10</td>
+            <td>Daniel Pendín</td>
+            <td class="num">125</td>
+            <td class="num">22</td>
+            <td class="yr">2002/03–2005/06</td>
           </tr>
         <tr>
             <td class="rank">10</td>
-            <td>Víctor Sánchez</td>
+            <td>Antoñito</td>
+            <td class="num">118</td>
             <td class="num">25</td>
-            <td class="num">2</td>
-            <td class="yr">2009/10–2009/10</td>
+            <td class="yr">2007/08–2010/11</td>
           </tr>
         <tr>
             <td class="rank">11</td>
-            <td>Antoñito</td>
-            <td class="num">25</td>
-            <td class="num">3</td>
-            <td class="yr">2009/10–2009/10</td>
+            <td>Antonio Calle</td>
+            <td class="num">117</td>
+            <td class="num">35</td>
+            <td class="yr">2001/02–2008/09</td>
           </tr>
         <tr>
             <td class="rank">12</td>
-            <td>Emiliano Armenteros</td>
-            <td class="num">25</td>
-            <td class="num">4</td>
-            <td class="yr">2009/10–2009/10</td>
+            <td>Branislav Bajić</td>
+            <td class="num">117</td>
+            <td class="num">5</td>
+            <td class="yr">2003/04–2007/08</td>
           </tr>
         <tr>
             <td class="rank">13</td>
-            <td>Francis</td>
-            <td class="num">25</td>
-            <td class="num">1</td>
-            <td class="yr">2009/10–2009/10</td>
+            <td>Javier Camuñas</td>
+            <td class="num">115</td>
+            <td class="num">21</td>
+            <td class="yr">2004/05–2006/07</td>
           </tr>
         <tr>
             <td class="rank">14</td>
-            <td>Sidi Yaya Keita</td>
-            <td class="num">24</td>
-            <td class="num">0</td>
-            <td class="yr">2009/10–2009/10</td>
+            <td>Carlos Calvo</td>
+            <td class="num">111</td>
+            <td class="num">8</td>
+            <td class="yr">2007/08–2009/10</td>
           </tr>
         <tr>
             <td class="rank">15</td>
-            <td>Vicente Moreno</td>
-            <td class="num">22</td>
-            <td class="num">1</td>
-            <td class="yr">2009/10–2009/10</td>
+            <td>Mario Bermejo</td>
+            <td class="num">101</td>
+            <td class="num">32</td>
+            <td class="yr">2008/09–2010/11</td>
           </tr>
       </tbody>
     </table>
@@ -426,63 +441,63 @@
       <tbody>
         <tr>
             <td class="rank">1</td>
-            <td>Mario Bermejo</td>
-            <td class="num">12</td>
-            <td class="num">34</td>
+            <td>José María Mena</td>
+            <td class="num">36</td>
+            <td class="num">157</td>
           </tr>
         <tr>
             <td class="rank">2</td>
-            <td>Emiliano Armenteros</td>
-            <td class="num">4</td>
-            <td class="num">25</td>
+            <td>Antonio Calle</td>
+            <td class="num">35</td>
+            <td class="num">117</td>
           </tr>
         <tr>
             <td class="rank">3</td>
-            <td>Carlos Calvo</td>
-            <td class="num">4</td>
-            <td class="num">35</td>
+            <td>Mario Bermejo</td>
+            <td class="num">32</td>
+            <td class="num">101</td>
           </tr>
         <tr>
             <td class="rank">4</td>
-            <td>Antoñito</td>
-            <td class="num">3</td>
-            <td class="num">25</td>
+            <td>José Mari</td>
+            <td class="num">27</td>
+            <td class="num">80</td>
           </tr>
         <tr>
             <td class="rank">5</td>
-            <td>Víctor Sánchez</td>
-            <td class="num">2</td>
+            <td>Antoñito</td>
             <td class="num">25</td>
+            <td class="num">118</td>
           </tr>
         <tr>
             <td class="rank">6</td>
-            <td>Míchel</td>
-            <td class="num">2</td>
-            <td class="num">14</td>
+            <td>Pedro Ríos</td>
+            <td class="num">23</td>
+            <td class="num">146</td>
           </tr>
         <tr>
             <td class="rank">7</td>
-            <td>Momo</td>
-            <td class="num">2</td>
-            <td class="num">26</td>
+            <td>Daniel Pendín</td>
+            <td class="num">22</td>
+            <td class="num">125</td>
           </tr>
         <tr>
             <td class="rank">8</td>
-            <td>Aythami Artiles</td>
-            <td class="num">2</td>
-            <td class="num">30</td>
+            <td>Yordi</td>
+            <td class="num">22</td>
+            <td class="num">67</td>
           </tr>
         <tr>
             <td class="rank">9</td>
-            <td>Leandro Gioda</td>
-            <td class="num">2</td>
-            <td class="num">29</td>
+            <td>Javier Camuñas</td>
+            <td class="num">21</td>
+            <td class="num">115</td>
           </tr>
         <tr>
             <td class="rank">10</td>
-            <td>Fabián Orellana</td>
-            <td class="num">2</td>
-            <td class="num">26</td>
+            <td>Alexandre Geijo</td>
+            <td class="num">20</td>
+            <td class="num">71</td>
           </tr>
       </tbody>
     </table>
@@ -496,6 +511,13 @@
       <thead><tr><th>Competition</th><th class="num">Players</th><th>Seasons</th><th class="num">Count</th><th>Games</th></tr></thead>
       <tbody>
         <tr>
+            <td>Segunda División</td>
+            <td class="num">159</td>
+            <td class="yr">2001/02–2012/13</td>
+            <td class="num">11</td>
+            <td class="yes">Playable</td>
+          </tr>
+        <tr>
             <td>La Liga</td>
             <td class="num">24</td>
             <td class="yr">2009/10–2009/10</td>
@@ -508,35 +530,35 @@
 </details>
 
 <h2>Ask about Xerez</h2>
-<p class="sub">Ask the database a question. Answers come from 24 Xerez
+<p class="sub">Ask the database a question. Answers come from 167 Xerez
   players and are never invented — if the data does not support an answer, it says so.</p>
 <form class="ask" id="askForm">
   <input id="askQ" autocomplete="off" maxlength="300"
-         placeholder="Who has played for both Xerez and Sevilla?"
+         placeholder="Who has played for both Xerez and Valladolid?"
          aria-label="Ask a question about Xerez">
   <button type="submit">Ask</button>
 </form>
 <div class="ask-examples">
-          <button type="button" data-q="Who has played for both Xerez and Sevilla?">Who has played for both Xerez and Sevilla?</button>
-          <button type="button" data-q="Top scorers for Xerez in La Liga">Top scorers for Xerez in La Liga</button>
+          <button type="button" data-q="Who has played for both Xerez and Valladolid?">Who has played for both Xerez and Valladolid?</button>
+          <button type="button" data-q="Top scorers for Xerez in Segunda División">Top scorers for Xerez in Segunda División</button>
           <button type="button" data-q="Which English players have the most appearances for Xerez?">Which English players have the most appearances for Xerez?</button>
 </div>
 <div id="askAnswer"></div>
 
 <h2>More teams</h2>
 <div class="related">
-          <a href="/teams/sevilla/">Sevilla</a>
-          <a href="/teams/espanyol/">Espanyol</a>
-          <a href="/teams/atletico-madrid/">Atlético Madrid</a>
-          <a href="/teams/valencia/">Valencia</a>
-          <a href="/teams/real-betis/">Real Betis</a>
-          <a href="/teams/barcelona/">Barcelona</a>
           <a href="/teams/valladolid/">Valladolid</a>
-          <a href="/teams/celta-vigo/">Celta Vigo</a>
+          <a href="/teams/albacete/">Albacete</a>
+          <a href="/teams/zaragoza/">Zaragoza</a>
+          <a href="/teams/tenerife/">Tenerife</a>
+          <a href="/teams/elche/">Elche</a>
+          <a href="/teams/espanyol/">Espanyol</a>
+          <a href="/teams/sevilla/">Sevilla</a>
           <a href="/teams/mallorca/">Mallorca</a>
-          <a href="/teams/real-madrid/">Real Madrid</a>
+          <a href="/teams/sporting-gijon/">Sporting Gijón</a>
+          <a href="/teams/malaga/">Málaga</a>
+          <a href="/teams/atletico-madrid/">Atlético Madrid</a>
           <a href="/teams/rayo-vallecano/">Rayo Vallecano</a>
-          <a href="/teams/villarreal/">Villarreal</a>
 </div>
 
 <footer class="page">
@@ -550,7 +572,7 @@
 </div><!-- /wrap -->
 
 <script>
-window.TS_TEAM = {"slug":"xerez","name":"Xerez","comps":["La Liga"],"defaultScope":"team_xerez_la-liga","potd":[{"n":"Renan Brito Soares","a":35,"g":0,"f":"2009/10","t":"2009/10"},{"n":"Carlos Calvo","a":35,"g":4,"f":"2009/10","t":"2009/10"},{"n":"Mario Bermejo","a":34,"g":12,"f":"2009/10","t":"2009/10"},{"n":"Aythami Artiles","a":30,"g":2,"f":"2009/10","t":"2009/10"},{"n":"Leandro Gioda","a":29,"g":2,"f":"2009/10","t":"2009/10"},{"n":"José Manuel Casado","a":27,"g":0,"f":"2009/10","t":"2009/10"},{"n":"Momo","a":26,"g":2,"f":"2009/10","t":"2009/10"},{"n":"Álex Bergantiños","a":26,"g":0,"f":"2009/10","t":"2009/10"},{"n":"Fabián Orellana","a":26,"g":2,"f":"2009/10","t":"2009/10"},{"n":"Víctor Sánchez","a":25,"g":2,"f":"2009/10","t":"2009/10"},{"n":"Antoñito","a":25,"g":3,"f":"2009/10","t":"2009/10"},{"n":"Emiliano Armenteros","a":25,"g":4,"f":"2009/10","t":"2009/10"},{"n":"Francis","a":25,"g":1,"f":"2009/10","t":"2009/10"},{"n":"Sidi Yaya Keita","a":24,"g":0,"f":"2009/10","t":"2009/10"},{"n":"Vicente Moreno","a":22,"g":1,"f":"2009/10","t":"2009/10"}]};
+window.TS_TEAM = {"slug":"xerez","name":"Xerez","comps":["Segunda División","La Liga"],"defaultScope":"team_xerez_all","potd":[{"n":"Jesús Mendoza","a":379,"g":11,"f":"2001/02","t":"2012/13"},{"n":"Vicente Moreno","a":359,"g":18,"f":"2001/02","t":"2010/11"},{"n":"Francis","a":195,"g":3,"f":"2003/04","t":"2009/10"},{"n":"José María Mena","a":157,"g":36,"f":"2001/02","t":"2004/05"},{"n":"Gerard Autet","a":146,"g":0,"f":"2002/03","t":"2011/12"},{"n":"Pedro Ríos","a":146,"g":23,"f":"2004/05","t":"2008/09"},{"n":"Francisco Javier Cachorro","a":140,"g":6,"f":"2001/02","t":"2004/05"},{"n":"Chema","a":128,"g":0,"f":"2006/07","t":"2012/13"},{"n":"Daniel Pendín","a":125,"g":22,"f":"2002/03","t":"2005/06"},{"n":"Antoñito","a":118,"g":25,"f":"2007/08","t":"2010/11"},{"n":"Antonio Calle","a":117,"g":35,"f":"2001/02","t":"2008/09"},{"n":"Branislav Bajić","a":117,"g":5,"f":"2003/04","t":"2007/08"},{"n":"Javier Camuñas","a":115,"g":21,"f":"2004/05","t":"2006/07"},{"n":"Carlos Calvo","a":111,"g":8,"f":"2007/08","t":"2009/10"},{"n":"Mario Bermejo","a":101,"g":32,"f":"2008/09","t":"2010/11"}]};
 </script>
 <script src="/js/ts-scope.js"></script>
 <script src="/js/team-page.js"></script>
@@ -567,6 +589,6 @@ window.TS_TEAM = {"slug":"xerez","name":"Xerez","comps":["La Liga"],"defaultScop
     try { TSNav.render(); } catch (e) { console.error('[TeleStats] Nav render failed:', e); }
   })();
 </script>
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TeleStats","item":"https://telestats.net"},{"@type":"ListItem","position":2,"name":"Teams","item":"https://telestats.net/teams/"},{"@type":"ListItem","position":3,"name":"Xerez","item":"https://telestats.net/teams/xerez/"}]},{"@type":"SportsTeam","name":"Xerez","sport":"Association football","url":"https://telestats.net/teams/xerez/"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is the Xerez page on TeleStats?","acceptedAnswer":{"@type":"Answer","text":"Free Xerez football quizzes and trivia games generated from real appearance and goal records for 24 players across La Liga. No sign-up is needed to play."}}]}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TeleStats","item":"https://telestats.net"},{"@type":"ListItem","position":2,"name":"Teams","item":"https://telestats.net/teams/"},{"@type":"ListItem","position":3,"name":"Xerez","item":"https://telestats.net/teams/xerez/"}]},{"@type":"SportsTeam","name":"Xerez","sport":"Association football","url":"https://telestats.net/teams/xerez/"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is the Xerez page on TeleStats?","acceptedAnswer":{"@type":"Answer","text":"Free Xerez football quizzes and trivia games generated from real appearance and goal records for 167 players across Segunda División and La Liga. No sign-up is needed to play."}}]}]}</script>
 </body>
 </html>

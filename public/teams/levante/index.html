@@ -5,17 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="/js/ts-analytics.js"></script>
 <title>Levante Football Quiz &amp; Trivia Games | TeleStats</title>
-<meta name="description" content="Play Levante football quizzes and trivia games built from 245 players and 8,239 appearances in La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta name="description" content="Play Levante football quizzes and trivia games built from 363 players and 14,331 appearances in La Liga and Segunda División. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
 <link rel="canonical" href="https://telestats.net/teams/levante/">
 <meta name="theme-color" content="#BD0811">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Levante Football Quiz &amp; Trivia Games | TeleStats">
-<meta property="og:description" content="Play Levante football quizzes and trivia games built from 245 players and 8,239 appearances in La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta property="og:description" content="Play Levante football quizzes and trivia games built from 363 players and 14,331 appearances in La Liga and Segunda División. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
 <meta property="og:url" content="https://telestats.net/teams/levante/">
 <meta property="og:site_name" content="TeleStats">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Levante Football Quiz &amp; Trivia Games | TeleStats">
-<meta name="twitter:description" content="Play Levante football quizzes and trivia games built from 245 players and 8,239 appearances in La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta name="twitter:description" content="Play Levante football quizzes and trivia games built from 363 players and 14,331 appearances in La Liga and Segunda División. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
 <link rel="stylesheet" href="/telestats-theme.css">
 <style>
   :root { --club: #BD0811; --club-2: #950000; }
@@ -52,6 +52,9 @@
   .crest { width: 52px; height: 60px; flex: 0 0 auto; filter: drop-shadow(0 2px 6px rgba(0,0,0,.45)); }
   .hero h1 { font-size: 1.65rem; line-height: 1.2; margin: 0 0 5px; }
   .sub { color: var(--text-secondary); margin: 0; font-size: .9rem; }
+  .sub a.complink { color: var(--text-secondary); text-decoration: underline;
+                    text-decoration-color: rgba(255,255,255,.22); }
+  .sub a.complink:hover { color: var(--accent); }
   .scope-note { color: var(--text-muted); font-size: .76rem; margin: 6px 0 0; }
   .scope-note a { color: var(--accent); }
 
@@ -182,9 +185,9 @@
     <nav>
       <a href="/daily/">Daily</a>
       <a href="/games/">Games</a>
+      <a href="/competitions/">Competitions</a>
       <a href="/teams/">Teams</a>
       <a href="/ask/">Ask</a>
-      <a href="/leaderboard/">Leaderboard</a>
       <a href="/community/">Community</a>
     </nav>
   </div>
@@ -205,8 +208,9 @@
     </svg>
     <div>
       <h1>Levante Football Quizzes &amp; Trivia</h1>
-      <p class="sub">245 players · 8,239 appearances · La Liga</p>
-      <p class="scope-note">Records cover 2004/05 to 2026/27.
+      <p class="sub">363 players · 14,331 appearances ·
+        <a class="complink" href="/competitions/la-liga/">La Liga</a>, <a class="complink" href="/competitions/segunda-division/">Segunda División</a></p>
+      <p class="scope-note">Records cover 2001/02 to 2026/27.
         <a href="/tools/data.html">Full dataset scope</a>.</p>
     </div>
   </div>
@@ -216,8 +220,8 @@
   <summary>New here? What this page is</summary>
   <div class="body">
     <p>This is a set of free football games about <strong>Levante</strong>, generated
-      from real appearance and goal records — 245 players who have turned out
-      for the club in La Liga, going back to 2004/05.</p>
+      from real appearance and goal records — 363 players who have turned out
+      for the club in La Liga and Segunda División, going back to 2001/02.</p>
     <p>Pick a game below and it starts straight away on Levante. No sign-up, no app.
       Make an account only if you want your scores kept and your name on the club's board.</p>
     <p>Everything you see here comes from the TeleStats database. Nothing is written by an AI
@@ -243,11 +247,23 @@
 
 <h2 id="play">Play Levante</h2>
 <p class="sub">The five TeleStats games, set up for Levante. Click one and it starts.</p>
-      
+      <div class="chips" id="compChips" role="group"
+       aria-label="Choose which competitions to play">
+        <button type="button" class="chip all on" data-all="1" aria-pressed="true">All competitions</button>
+        <button type="button" class="chip on"
+                data-comp="La Liga"
+                data-slug="la-liga"
+                aria-pressed="true">La Liga</button>
+        <button type="button" class="chip on"
+                data-comp="Segunda División"
+                data-slug="segunda-division"
+                aria-pressed="true">Segunda División</button>
+      </div>
+      <p class="chip-note" id="chipNote"></p>
       <ul class="games">
         <li class="game">
           <a class="game-go" data-path="/games/hol.html"
-             href="/games/hol.html?scope=team_levante_la-liga&amp;play=1">
+             href="/games/hol.html?scope=team_levante_all&amp;play=1">
             <h3>Levante Higher or Lower</h3>
             <p>Which player has more appearances?</p>
             <span class="go">Play now &rarr;</span>
@@ -255,7 +271,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/alpha.html"
-             href="/games/alpha.html?scope=team_levante_la-liga&amp;play=1">
+             href="/games/alpha.html?scope=team_levante_all&amp;play=1">
             <h3>Levante Player Alphabet</h3>
             <p>Name a player for every letter of the alphabet.</p>
             <span class="go">Play now &rarr;</span>
@@ -263,7 +279,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/xi.html"
-             href="/games/xi.html?scope=team_levante_la-liga&amp;play=1">
+             href="/games/xi.html?scope=team_levante_all&amp;play=1">
             <h3>Levante Starting XI</h3>
             <p>Build the strongest eleven you can.</p>
             <span class="go">Play now &rarr;</span>
@@ -271,7 +287,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/whoami.html"
-             href="/games/whoami.html?scope=team_levante_la-liga&amp;play=1">
+             href="/games/whoami.html?scope=team_levante_all&amp;play=1">
             <h3>Levante Who Am I?</h3>
             <p>Guess the player from five clues.</p>
             <span class="go">Play now &rarr;</span>
@@ -279,7 +295,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/quiz.html"
-             href="/games/quiz.html?scope=team_levante_la-liga&amp;play=1">
+             href="/games/quiz.html?scope=team_levante_all&amp;play=1">
             <h3>Levante Trivia Quiz</h3>
             <p>Ten questions from this club’s record.</p>
             <span class="go">Play now &rarr;</span>
@@ -310,107 +326,107 @@
         <tr>
             <td class="rank">1</td>
             <td>José Luis Morales</td>
-            <td class="num">274</td>
-            <td class="num">63</td>
+            <td class="num">356</td>
+            <td class="num">78</td>
             <td class="yr">2014/15–2025/26</td>
           </tr>
         <tr>
             <td class="rank">2</td>
-            <td>Roger Martí</td>
-            <td class="num">179</td>
-            <td class="num">47</td>
-            <td class="yr">2011/12–2021/22</td>
+            <td>Vicente Iborra</td>
+            <td class="num">227</td>
+            <td class="num">12</td>
+            <td class="yr">2007/08–2024/25</td>
           </tr>
         <tr>
             <td class="rank">3</td>
-            <td>Juanfran</td>
-            <td class="num">153</td>
-            <td class="num">0</td>
-            <td class="yr">2010/11–2015/16</td>
+            <td>Roger Martí</td>
+            <td class="num">216</td>
+            <td class="num">69</td>
+            <td class="yr">2011/12–2021/22</td>
           </tr>
         <tr>
             <td class="rank">4</td>
+            <td>José Campaña</td>
+            <td class="num">197</td>
+            <td class="num">19</td>
+            <td class="yr">2016/17–2022/23</td>
+          </tr>
+        <tr>
+            <td class="rank">5</td>
+            <td>Félix Dja Ettien</td>
+            <td class="num">196</td>
+            <td class="num">15</td>
+            <td class="yr">2001/02–2007/08</td>
+          </tr>
+        <tr>
+            <td class="rank">6</td>
+            <td>Sergio Postigo</td>
+            <td class="num">194</td>
+            <td class="num">5</td>
+            <td class="yr">2016/17–2023/24</td>
+          </tr>
+        <tr>
+            <td class="rank">7</td>
+            <td>Iñaki Descarga</td>
+            <td class="num">191</td>
+            <td class="num">8</td>
+            <td class="yr">2001/02–2007/08</td>
+          </tr>
+        <tr>
+            <td class="rank">8</td>
+            <td>Sergio Ballesteros</td>
+            <td class="num">173</td>
+            <td class="num">3</td>
+            <td class="yr">2008/09–2012/13</td>
+          </tr>
+        <tr>
+            <td class="rank">9</td>
+            <td>Juanfran</td>
+            <td class="num">172</td>
+            <td class="num">0</td>
+            <td class="yr">2009/10–2015/16</td>
+          </tr>
+        <tr>
+            <td class="rank">10</td>
+            <td>Rober</td>
+            <td class="num">168</td>
+            <td class="num">3</td>
+            <td class="yr">2016/17–2022/23</td>
+          </tr>
+        <tr>
+            <td class="rank">11</td>
+            <td>Pedro López Muñoz</td>
+            <td class="num">160</td>
+            <td class="num">2</td>
+            <td class="yr">2011/12–2018/19</td>
+          </tr>
+        <tr>
+            <td class="rank">12</td>
+            <td>Rúben Vezo</td>
+            <td class="num">154</td>
+            <td class="num">3</td>
+            <td class="yr">2018/19–2023/24</td>
+          </tr>
+        <tr>
+            <td class="rank">13</td>
             <td>Enis Bardhi</td>
             <td class="num">148</td>
             <td class="num">23</td>
             <td class="yr">2017/18–2021/22</td>
           </tr>
         <tr>
-            <td class="rank">5</td>
-            <td>José Campaña</td>
-            <td class="num">137</td>
-            <td class="num">10</td>
-            <td class="yr">2017/18–2021/22</td>
-          </tr>
-        <tr>
-            <td class="rank">6</td>
-            <td>Pedro López Muñoz</td>
-            <td class="num">126</td>
-            <td class="num">2</td>
-            <td class="yr">2011/12–2018/19</td>
-          </tr>
-        <tr>
-            <td class="rank">7</td>
-            <td>Toño</td>
-            <td class="num">114</td>
-            <td class="num">2</td>
-            <td class="yr">2014/15–2020/21</td>
-          </tr>
-        <tr>
-            <td class="rank">8</td>
-            <td>Sergio Postigo</td>
-            <td class="num">114</td>
-            <td class="num">3</td>
-            <td class="yr">2017/18–2021/22</td>
-          </tr>
-        <tr>
-            <td class="rank">9</td>
-            <td>Rubén García</td>
-            <td class="num">112</td>
-            <td class="num">8</td>
-            <td class="yr">2012/13–2015/16</td>
-          </tr>
-        <tr>
-            <td class="rank">10</td>
-            <td>David Navarro</td>
-            <td class="num">109</td>
-            <td class="num">2</td>
-            <td class="yr">2011/12–2015/16</td>
-          </tr>
-        <tr>
-            <td class="rank">11</td>
-            <td>Rúben Vezo</td>
-            <td class="num">108</td>
-            <td class="num">3</td>
-            <td class="yr">2018/19–2021/22</td>
-          </tr>
-        <tr>
-            <td class="rank">12</td>
-            <td>Rober</td>
-            <td class="num">108</td>
-            <td class="num">2</td>
-            <td class="yr">2017/18–2021/22</td>
-          </tr>
-        <tr>
-            <td class="rank">13</td>
-            <td>Vicente Iborra</td>
-            <td class="num">98</td>
-            <td class="num">5</td>
-            <td class="yr">2007/08–2012/13</td>
-          </tr>
-        <tr>
             <td class="rank">14</td>
-            <td>Sergio Ballesteros</td>
-            <td class="num">98</td>
-            <td class="num">2</td>
-            <td class="yr">2010/11–2012/13</td>
+            <td>Pablo Martínez</td>
+            <td class="num">144</td>
+            <td class="num">12</td>
+            <td class="yr">2019/20–2025/26</td>
           </tr>
         <tr>
             <td class="rank">15</td>
-            <td>Nabil El Zhar</td>
-            <td class="num">94</td>
-            <td class="num">7</td>
-            <td class="yr">2011/12–2014/15</td>
+            <td>Alexis</td>
+            <td class="num">129</td>
+            <td class="num">8</td>
+            <td class="yr">2003/04–2006/07</td>
           </tr>
       </tbody>
     </table>
@@ -426,62 +442,62 @@
         <tr>
             <td class="rank">1</td>
             <td>José Luis Morales</td>
-            <td class="num">63</td>
-            <td class="num">274</td>
+            <td class="num">78</td>
+            <td class="num">356</td>
           </tr>
         <tr>
             <td class="rank">2</td>
             <td>Roger Martí</td>
-            <td class="num">47</td>
-            <td class="num">179</td>
+            <td class="num">69</td>
+            <td class="num">216</td>
           </tr>
         <tr>
             <td class="rank">3</td>
+            <td>Rubén Suárez</td>
+            <td class="num">38</td>
+            <td class="num">127</td>
+          </tr>
+        <tr>
+            <td class="rank">4</td>
+            <td>Riga Mustapha</td>
+            <td class="num">28</td>
+            <td class="num">104</td>
+          </tr>
+        <tr>
+            <td class="rank">5</td>
             <td>Enis Bardhi</td>
             <td class="num">23</td>
             <td class="num">148</td>
           </tr>
         <tr>
-            <td class="rank">4</td>
-            <td>David Barral</td>
-            <td class="num">18</td>
-            <td class="num">67</td>
-          </tr>
-        <tr>
-            <td class="rank">5</td>
-            <td>Riga Mustapha</td>
-            <td class="num">17</td>
-            <td class="num">66</td>
-          </tr>
-        <tr>
             <td class="rank">6</td>
-            <td>Gonzalo Melero</td>
-            <td class="num">16</td>
-            <td class="num">83</td>
+            <td>Brugui</td>
+            <td class="num">23</td>
+            <td class="num">116</td>
           </tr>
         <tr>
             <td class="rank">7</td>
-            <td>Arouna Koné</td>
-            <td class="num">15</td>
-            <td class="num">34</td>
+            <td>Edwin Congo</td>
+            <td class="num">21</td>
+            <td class="num">112</td>
           </tr>
         <tr>
             <td class="rank">8</td>
-            <td>Felipe Caicedo</td>
-            <td class="num">13</td>
-            <td class="num">27</td>
+            <td>Juanlu</td>
+            <td class="num">21</td>
+            <td class="num">112</td>
           </tr>
         <tr>
             <td class="rank">9</td>
-            <td>Rubén Suárez</td>
-            <td class="num">13</td>
-            <td class="num">60</td>
+            <td>Gustavo Reggi</td>
+            <td class="num">20</td>
+            <td class="num">97</td>
           </tr>
         <tr>
             <td class="rank">10</td>
-            <td>José Barkero</td>
-            <td class="num">12</td>
-            <td class="num">60</td>
+            <td>José Campaña</td>
+            <td class="num">19</td>
+            <td class="num">197</td>
           </tr>
       </tbody>
     </table>
@@ -496,9 +512,16 @@
       <tbody>
         <tr>
             <td>La Liga</td>
-            <td class="num">245</td>
+            <td class="num">249</td>
             <td class="yr">2004/05–2026/27</td>
             <td class="num">8</td>
+            <td class="yes">Playable</td>
+          </tr>
+        <tr>
+            <td>Segunda División</td>
+            <td class="num">199</td>
+            <td class="yr">2001/02–2024/25</td>
+            <td class="num">4</td>
             <td class="yes">Playable</td>
           </tr>
       </tbody>
@@ -507,16 +530,16 @@
 </details>
 
 <h2>Ask about Levante</h2>
-<p class="sub">Ask the database a question. Answers come from 245 Levante
+<p class="sub">Ask the database a question. Answers come from 363 Levante
   players and are never invented — if the data does not support an answer, it says so.</p>
 <form class="ask" id="askForm">
   <input id="askQ" autocomplete="off" maxlength="300"
-         placeholder="Who has played for both Levante and Sevilla?"
+         placeholder="Who has played for both Levante and Valladolid?"
          aria-label="Ask a question about Levante">
   <button type="submit">Ask</button>
 </form>
 <div class="ask-examples">
-          <button type="button" data-q="Who has played for both Levante and Sevilla?">Who has played for both Levante and Sevilla?</button>
+          <button type="button" data-q="Who has played for both Levante and Valladolid?">Who has played for both Levante and Valladolid?</button>
           <button type="button" data-q="Top scorers for Levante in La Liga">Top scorers for Levante in La Liga</button>
           <button type="button" data-q="Which English players have the most appearances for Levante?">Which English players have the most appearances for Levante?</button>
 </div>
@@ -524,18 +547,18 @@
 
 <h2>More teams</h2>
 <div class="related">
-          <a href="/teams/sevilla/">Sevilla</a>
-          <a href="/teams/espanyol/">Espanyol</a>
-          <a href="/teams/atletico-madrid/">Atlético Madrid</a>
-          <a href="/teams/valencia/">Valencia</a>
-          <a href="/teams/real-betis/">Real Betis</a>
-          <a href="/teams/barcelona/">Barcelona</a>
           <a href="/teams/valladolid/">Valladolid</a>
-          <a href="/teams/celta-vigo/">Celta Vigo</a>
+          <a href="/teams/albacete/">Albacete</a>
+          <a href="/teams/zaragoza/">Zaragoza</a>
+          <a href="/teams/tenerife/">Tenerife</a>
+          <a href="/teams/elche/">Elche</a>
+          <a href="/teams/espanyol/">Espanyol</a>
+          <a href="/teams/sevilla/">Sevilla</a>
           <a href="/teams/mallorca/">Mallorca</a>
-          <a href="/teams/real-madrid/">Real Madrid</a>
+          <a href="/teams/sporting-gijon/">Sporting Gijón</a>
+          <a href="/teams/malaga/">Málaga</a>
+          <a href="/teams/atletico-madrid/">Atlético Madrid</a>
           <a href="/teams/rayo-vallecano/">Rayo Vallecano</a>
-          <a href="/teams/villarreal/">Villarreal</a>
 </div>
 
 <footer class="page">
@@ -549,7 +572,7 @@
 </div><!-- /wrap -->
 
 <script>
-window.TS_TEAM = {"slug":"levante","name":"Levante","comps":["La Liga"],"defaultScope":"team_levante_la-liga","potd":[{"n":"José Luis Morales","a":274,"g":63,"f":"2014/15","t":"2025/26"},{"n":"Roger Martí","a":179,"g":47,"f":"2011/12","t":"2021/22"},{"n":"Juanfran","a":153,"g":0,"f":"2010/11","t":"2015/16"},{"n":"Enis Bardhi","a":148,"g":23,"f":"2017/18","t":"2021/22"},{"n":"José Campaña","a":137,"g":10,"f":"2017/18","t":"2021/22"},{"n":"Pedro López Muñoz","a":126,"g":2,"f":"2011/12","t":"2018/19"},{"n":"Toño","a":114,"g":2,"f":"2014/15","t":"2020/21"},{"n":"Sergio Postigo","a":114,"g":3,"f":"2017/18","t":"2021/22"},{"n":"Rubén García","a":112,"g":8,"f":"2012/13","t":"2015/16"},{"n":"David Navarro","a":109,"g":2,"f":"2011/12","t":"2015/16"},{"n":"Rúben Vezo","a":108,"g":3,"f":"2018/19","t":"2021/22"},{"n":"Rober","a":108,"g":2,"f":"2017/18","t":"2021/22"},{"n":"Vicente Iborra","a":98,"g":5,"f":"2007/08","t":"2012/13"},{"n":"Sergio Ballesteros","a":98,"g":2,"f":"2010/11","t":"2012/13"},{"n":"Nabil El Zhar","a":94,"g":7,"f":"2011/12","t":"2014/15"}]};
+window.TS_TEAM = {"slug":"levante","name":"Levante","comps":["La Liga","Segunda División"],"defaultScope":"team_levante_all","potd":[{"n":"José Luis Morales","a":356,"g":78,"f":"2014/15","t":"2025/26"},{"n":"Vicente Iborra","a":227,"g":12,"f":"2007/08","t":"2024/25"},{"n":"Roger Martí","a":216,"g":69,"f":"2011/12","t":"2021/22"},{"n":"José Campaña","a":197,"g":19,"f":"2016/17","t":"2022/23"},{"n":"Félix Dja Ettien","a":196,"g":15,"f":"2001/02","t":"2007/08"},{"n":"Sergio Postigo","a":194,"g":5,"f":"2016/17","t":"2023/24"},{"n":"Iñaki Descarga","a":191,"g":8,"f":"2001/02","t":"2007/08"},{"n":"Sergio Ballesteros","a":173,"g":3,"f":"2008/09","t":"2012/13"},{"n":"Juanfran","a":172,"g":0,"f":"2009/10","t":"2015/16"},{"n":"Rober","a":168,"g":3,"f":"2016/17","t":"2022/23"},{"n":"Pedro López Muñoz","a":160,"g":2,"f":"2011/12","t":"2018/19"},{"n":"Rúben Vezo","a":154,"g":3,"f":"2018/19","t":"2023/24"},{"n":"Enis Bardhi","a":148,"g":23,"f":"2017/18","t":"2021/22"},{"n":"Pablo Martínez","a":144,"g":12,"f":"2019/20","t":"2025/26"},{"n":"Alexis","a":129,"g":8,"f":"2003/04","t":"2006/07"}]};
 </script>
 <script src="/js/ts-scope.js"></script>
 <script src="/js/team-page.js"></script>
@@ -566,6 +589,6 @@ window.TS_TEAM = {"slug":"levante","name":"Levante","comps":["La Liga"],"default
     try { TSNav.render(); } catch (e) { console.error('[TeleStats] Nav render failed:', e); }
   })();
 </script>
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TeleStats","item":"https://telestats.net"},{"@type":"ListItem","position":2,"name":"Teams","item":"https://telestats.net/teams/"},{"@type":"ListItem","position":3,"name":"Levante","item":"https://telestats.net/teams/levante/"}]},{"@type":"SportsTeam","name":"Levante","sport":"Association football","url":"https://telestats.net/teams/levante/"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is the Levante page on TeleStats?","acceptedAnswer":{"@type":"Answer","text":"Free Levante football quizzes and trivia games generated from real appearance and goal records for 245 players across La Liga. No sign-up is needed to play."}}]}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TeleStats","item":"https://telestats.net"},{"@type":"ListItem","position":2,"name":"Teams","item":"https://telestats.net/teams/"},{"@type":"ListItem","position":3,"name":"Levante","item":"https://telestats.net/teams/levante/"}]},{"@type":"SportsTeam","name":"Levante","sport":"Association football","url":"https://telestats.net/teams/levante/"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is the Levante page on TeleStats?","acceptedAnswer":{"@type":"Answer","text":"Free Levante football quizzes and trivia games generated from real appearance and goal records for 363 players across La Liga and Segunda División. No sign-up is needed to play."}}]}]}</script>
 </body>
 </html>

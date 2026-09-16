@@ -2689,3 +2689,180 @@ TEAM PAGES
 DATA / GAMEPLAY
 - [x] 23 A goalkeeper on 0 goals should be unselectable, not a wasted guess
 - [x] 24 Málaga merge (approved)
+
+---
+
+## Pricing — 8 Sep 2026
+
+### Kept the Day Pass at £0.99
+Checked the fee schedule rather than trusting memory: stripe.com/gb/pricing is
+1.5% + 20p for UK standard cards, and there are three more tiers — UK premium
+2.8%, EEA 2.5%, international 3.15% — all with the same 20p fixed fee.
+
+At sub-£1 prices the percentage tier is almost irrelevant; the spread across
+every card type on a 50p sale is **one penny**. The 20p is doing all the work,
+and at 50p it is 40% of the transaction before any percentage.
+
+    99p -> keep 78%     50p -> keep 58%
+    cutting to 50p loses 62% of revenue per sale
+    and needs 2.66x the conversion merely to break even
+    17 day passes to equal one lifetime, against 7 at 99p
+
+The barrier at these prices is not the number, it is having to produce a card.
+
+### So the fix was fewer fees per pound, not a lower price
+
+**Wallets were switched off.** create-checkout.js named
+`payment_method_types: ['card']`, which explicitly DISABLES Apple Pay, Google
+Pay and Link — every buyer had to type a card number, expiry and CVC on a
+phone to spend 99p. Now `automatic_payment_methods: { enabled: true }`.
+
+**The Day Pass is credited against Pro, within its own 24 hours.** Upgrade
+while the pass runs and Pro is £4.00; after it expires, £4.99. The credit is
+taken from a REAL RECORDED PAYMENT in ts_payments, never from the tier flag,
+so a pass granted by hand discounts nothing. It is stated in four places: the
+Day Pass card before you buy, the Pro button while a pass is running (with the
+actual deadline), and both FAQ answers — one of which said the opposite.
+
+### A latent bug found while confirming Stripe
+stripe-webhook.js verified the signature against `event.body` without checking
+`event.isBase64Encoded`. Netlify base64-encodes request bodies under some
+configurations, and if it ever did for this endpoint every payment would fail
+verification and nobody would be upgraded — visible only as 400s in Stripe's
+dashboard. Now decoded when flagged.
+
+Also confirmed: the signature IS verified, `plan_type` DOES exist on
+ts_payments (the .sql file in supabase/ is just out of date), and the webhook
+writes tier and expiry correctly.
+
+### scripts/checks/credit.js — 10 assertions, money logic
+Stripe and Supabase both stubbed, so each one is about the amount that WOULD
+be charged under conditions awkward to reach by hand: a pass nobody paid for,
+a payment from a previous expired pass, a pass past its deadline, a credit
+larger than the price. Added to `npm run check`.
+
+### Still open
+Whether the pass stays 24 hours or becomes a week at the same 99p. Kept as a
+Day Pass because "within the same 24 window" implied it.
+
+---
+
+## Data refresh + Segunda División — 16 Sep 2026
+
+### Result
+    239,360 stat rows (was 221,865)   ·   602 clubs   ·   40,148 players
+    355 team pages (was 313)          ·   1,039 scopes (was 919)
+    Segunda: 85 clubs, 26 seasons 2001-2026, 10,860 player-club-comp rows
+
+Current season refreshed for all eleven existing competitions. FA Cup 2026
+returned 0 rows — FBref does not hold it yet, which is correct for September.
+
+### The question that mattered: what else would a re-ingest destroy?
+
+The merge fix was one instance of a class, and naming the class is the point:
+**the database holds decisions the source does not know about, and any decision
+that exists only in the database is overwritten by the next ingest.** It does
+not error; it just quietly makes the site wrong.
+
+Going looking found a second one already live. restore_club_names.js had put
+back 68 club names by hand — Málaga, Köln, Wolves, Atlético, Saint-Étienne —
+because the rebuild took names from the ASCII URL slug and emptied the
+Bullseye board. That fix lived in the database only, and load.js builds club
+names from the parser and upserts on fbref_squad_id. **This load would have
+reverted all 68 and re-broken the same board.** 44 clubs carry a non-ASCII
+character the slug form destroys.
+
+### So decisions now live in version control
+    data/teams/club_merges.json   which squads are one club
+    data/teams/club_names.json    what each of 602 clubs is called   (new)
+
+load.js applies both on every write. The load reported "kept 69 established
+club names" and "1 merged club remapped" — neither can be undone by a refresh.
+
+### scripts/fbref/preflight.js — the general guard
+Asks what a load WOULD produce, using load.js's own builders so it cannot
+drift out of agreement with the thing it guards, and diffs against the live
+database. Blocks on: club renames, merges that would be undone, competitions
+missing from the table. Warns on: a new club sharing a name with an existing
+one (Málaga *before* it happens), a loaded league that produces no team pages.
+Reports: new clubs, slugs needed, same-name-different-birth-year players.
+
+It earned its place immediately — it blocked the load because competition_id
+13 was not in the competitions table, which would have been a foreign-key
+failure partway through 239,360 rows.
+
+### scripts/fbref/rebuild_aggregates.js
+rebuild_aggregates() has always exceeded the statement timeout through
+PostgREST. Fine to work around by hand once; untenable for a weekly job, since
+the whole site reads the aggregates and a load that cannot rebuild them changes
+nothing anybody can see. The same three tables are now folded in JavaScript and
+upserted in chunks. No statement runs long enough to be cancelled.
+
+### Two more of the same class, found by testing end to end
+  - **slugs.js had its own competition allowlist.** Segunda loaded, aggregated
+    and lived in the database while its 85 clubs got no pages at all, because
+    PAGE_COMPETITIONS had not heard of it and the generator reported "0 to add"
+    rather than an error. preflight.js now checks this.
+  - **competitionSlug dropped accents instead of folding them**, so Segunda
+    División became "segunda-divisi-n" — a scope id nothing resolved, and every
+    Segunda game returned an error. Now folded. Verified that all 85 changed
+    ids were Segunda ones created minutes earlier: no shipped scope moved.
+
+Slug generation is append-only and was proved so: **43 clubs added, 0 existing
+URLs changed.**
+
+### State
+npm run check: 29 analytics · 10 credit · club names clean · 33 smoke · 30
+dailies. All five games verified live on Mirandés, Lugo, Málaga and Arsenal.
+
+---
+
+## Competition pages — 16 Sep 2026
+
+Twelve pages at /competitions/<slug>/, plus a hub. Three reasons were given
+for them and there is a fourth that may matter more right now.
+
+**The stated three.** "Premier League quiz" is a bigger query than any single
+club's. A competition is one URL to hand to somebody — the Segunda podcast is
+the specific case. And the data was already there.
+
+**The fourth.** 355 team pages hung off ONE flat hub of 355 links, and Google
+has indexed none of them. Competition pages turn that into a tree — home →
+competitions → a competition → its clubs — and give every club page a
+topically-relevant parent. Team pages now link UP to each competition they
+played in, so the hierarchy is walkable in both directions.
+
+### Competition-wide scopes had to exist first
+Five did, as legacy ids baked into two games' own arrays: epl_alltime,
+laliga_alltime and three more. So the Championship, League One, League Two,
+Segunda, both domestic cups and the Champions League had **no whole-league game
+at all**. `comp_<slug>` scopes are now generated from the data — twelve of them,
+one per competition, arriving automatically with any future competition.
+Verified across all five games; comp_premier-league returns identical numbers
+to the legacy epl_alltime.
+
+### Game variants are separate entries
+"Higher or Lower: goals" is a different puzzle from "…: appearances", and
+collapsing them into one link then asking which is the same friction the scope
+picker was. The variant travels in the URL — `&stat=goals`, `&objective=goals`
+— read by a new TSScope.variant() that validates against the caller's own
+allowlist, so a value invented in the address bar falls back to the default.
+Seven entries per competition page.
+
+### What a page carries
+Play (7 variants, whole competition) · all-time appearance and goal leaders
+across every club · every club in the competition with its colour, linked ·
+community games (live, via the new competition-extras function) · Ask · the
+other eleven competitions.
+
+Segunda's records read correctly against the real world: Nino 515 appearances
+for Elche, Rubén Castro 196 goals — both genuine Segunda all-time records.
+
+### A wrong-context bug caught by clicking through
+The arrival note said "Started from your team page. Pick a different team" on a
+competition game, because sourceTeam() only matches team_ ids and the copy had
+no other branch. It now says where you actually came from.
+
+### State
+npm run check + 7 new smoke cases = **40 passed · 0 failed**.
+377 indexable URLs (was 364): 15 core + 13 competitions + 349 teams.

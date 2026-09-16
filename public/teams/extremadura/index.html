@@ -5,17 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="/js/ts-analytics.js"></script>
 <title>Extremadura Football Quiz &amp; Trivia Games | TeleStats</title>
-<meta name="description" content="Play Extremadura football quizzes and trivia games built from 42 players and 1,111 appearances in La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta name="description" content="Play Extremadura football quizzes and trivia games built from 123 players and 2,852 appearances in Segunda División and La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
 <link rel="canonical" href="https://telestats.net/teams/extremadura/">
 <meta name="theme-color" content="hsl(348, 68%, 38%)">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Extremadura Football Quiz &amp; Trivia Games | TeleStats">
-<meta property="og:description" content="Play Extremadura football quizzes and trivia games built from 42 players and 1,111 appearances in La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta property="og:description" content="Play Extremadura football quizzes and trivia games built from 123 players and 2,852 appearances in Segunda División and La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
 <meta property="og:url" content="https://telestats.net/teams/extremadura/">
 <meta property="og:site_name" content="TeleStats">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Extremadura Football Quiz &amp; Trivia Games | TeleStats">
-<meta name="twitter:description" content="Play Extremadura football quizzes and trivia games built from 42 players and 1,111 appearances in La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta name="twitter:description" content="Play Extremadura football quizzes and trivia games built from 123 players and 2,852 appearances in Segunda División and La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
 <link rel="stylesheet" href="/telestats-theme.css">
 <style>
   :root { --club: hsl(348, 68%, 38%); --club-2: hsl(6, 68%, 26%); }
@@ -52,6 +52,9 @@
   .crest { width: 52px; height: 60px; flex: 0 0 auto; filter: drop-shadow(0 2px 6px rgba(0,0,0,.45)); }
   .hero h1 { font-size: 1.65rem; line-height: 1.2; margin: 0 0 5px; }
   .sub { color: var(--text-secondary); margin: 0; font-size: .9rem; }
+  .sub a.complink { color: var(--text-secondary); text-decoration: underline;
+                    text-decoration-color: rgba(255,255,255,.22); }
+  .sub a.complink:hover { color: var(--accent); }
   .scope-note { color: var(--text-muted); font-size: .76rem; margin: 6px 0 0; }
   .scope-note a { color: var(--accent); }
 
@@ -182,9 +185,9 @@
     <nav>
       <a href="/daily/">Daily</a>
       <a href="/games/">Games</a>
+      <a href="/competitions/">Competitions</a>
       <a href="/teams/">Teams</a>
       <a href="/ask/">Ask</a>
-      <a href="/leaderboard/">Leaderboard</a>
       <a href="/community/">Community</a>
     </nav>
   </div>
@@ -205,8 +208,9 @@
     </svg>
     <div>
       <h1>Extremadura Football Quizzes &amp; Trivia</h1>
-      <p class="sub">42 players · 1,111 appearances · La Liga</p>
-      <p class="scope-note">Records cover 1996/97 to 1998/99.
+      <p class="sub">123 players · 2,852 appearances ·
+        <a class="complink" href="/competitions/segunda-division/">Segunda División</a>, <a class="complink" href="/competitions/la-liga/">La Liga</a></p>
+      <p class="scope-note">Records cover 1996/97 to 2019/20.
         <a href="/tools/data.html">Full dataset scope</a>.</p>
     </div>
   </div>
@@ -216,8 +220,8 @@
   <summary>New here? What this page is</summary>
   <div class="body">
     <p>This is a set of free football games about <strong>Extremadura</strong>, generated
-      from real appearance and goal records — 42 players who have turned out
-      for the club in La Liga, going back to 1996/97.</p>
+      from real appearance and goal records — 123 players who have turned out
+      for the club in Segunda División and La Liga, going back to 1996/97.</p>
     <p>Pick a game below and it starts straight away on Extremadura. No sign-up, no app.
       Make an account only if you want your scores kept and your name on the club's board.</p>
     <p>Everything you see here comes from the TeleStats database. Nothing is written by an AI
@@ -243,11 +247,23 @@
 
 <h2 id="play">Play Extremadura</h2>
 <p class="sub">The five TeleStats games, set up for Extremadura. Click one and it starts.</p>
-      
+      <div class="chips" id="compChips" role="group"
+       aria-label="Choose which competitions to play">
+        <button type="button" class="chip all on" data-all="1" aria-pressed="true">All competitions</button>
+        <button type="button" class="chip on"
+                data-comp="Segunda División"
+                data-slug="segunda-division"
+                aria-pressed="true">Segunda División</button>
+        <button type="button" class="chip on"
+                data-comp="La Liga"
+                data-slug="la-liga"
+                aria-pressed="true">La Liga</button>
+      </div>
+      <p class="chip-note" id="chipNote"></p>
       <ul class="games">
         <li class="game">
           <a class="game-go" data-path="/games/hol.html"
-             href="/games/hol.html?scope=team_extremadura_la-liga&amp;play=1">
+             href="/games/hol.html?scope=team_extremadura_all&amp;play=1">
             <h3>Extremadura Higher or Lower</h3>
             <p>Which player has more appearances?</p>
             <span class="go">Play now &rarr;</span>
@@ -255,7 +271,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/alpha.html"
-             href="/games/alpha.html?scope=team_extremadura_la-liga&amp;play=1">
+             href="/games/alpha.html?scope=team_extremadura_all&amp;play=1">
             <h3>Extremadura Player Alphabet</h3>
             <p>Name a player for every letter of the alphabet.</p>
             <span class="go">Play now &rarr;</span>
@@ -263,7 +279,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/xi.html"
-             href="/games/xi.html?scope=team_extremadura_la-liga&amp;play=1">
+             href="/games/xi.html?scope=team_extremadura_all&amp;play=1">
             <h3>Extremadura Starting XI</h3>
             <p>Build the strongest eleven you can.</p>
             <span class="go">Play now &rarr;</span>
@@ -271,7 +287,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/whoami.html"
-             href="/games/whoami.html?scope=team_extremadura_la-liga&amp;play=1">
+             href="/games/whoami.html?scope=team_extremadura_all&amp;play=1">
             <h3>Extremadura Who Am I?</h3>
             <p>Guess the player from five clues.</p>
             <span class="go">Play now &rarr;</span>
@@ -279,7 +295,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/quiz.html"
-             href="/games/quiz.html?scope=team_extremadura_la-liga&amp;play=1">
+             href="/games/quiz.html?scope=team_extremadura_all&amp;play=1">
             <h3>Extremadura Trivia Quiz</h3>
             <p>Ten questions from this club’s record.</p>
             <span class="go">Play now &rarr;</span>
@@ -309,108 +325,108 @@
       <tbody>
         <tr>
             <td class="rank">1</td>
+            <td>Pedro José</td>
+            <td class="num">98</td>
+            <td class="num">3</td>
+            <td class="yr">1996/97–2001/02</td>
+          </tr>
+        <tr>
+            <td class="rank">2</td>
             <td>Óscar Montiel</td>
             <td class="num">78</td>
             <td class="num">0</td>
             <td class="yr">1996/97–1998/99</td>
           </tr>
         <tr>
-            <td class="rank">2</td>
+            <td class="rank">3</td>
+            <td>ALex Salomón</td>
+            <td class="num">78</td>
+            <td class="num">1</td>
+            <td class="yr">2018/19–2019/20</td>
+          </tr>
+        <tr>
+            <td class="rank">4</td>
+            <td>Borja Granero</td>
+            <td class="num">71</td>
+            <td class="num">1</td>
+            <td class="yr">2018/19–2019/20</td>
+          </tr>
+        <tr>
+            <td class="rank">5</td>
             <td>Alejandro Duré</td>
             <td class="num">68</td>
             <td class="num">14</td>
             <td class="yr">1996/97–1998/99</td>
           </tr>
         <tr>
-            <td class="rank">3</td>
-            <td>Pedro José</td>
-            <td class="num">68</td>
+            <td class="rank">6</td>
+            <td>Poli</td>
+            <td class="num">67</td>
             <td class="num">2</td>
-            <td class="yr">1996/97–1998/99</td>
+            <td class="yr">1998/99–2001/02</td>
           </tr>
         <tr>
-            <td class="rank">4</td>
+            <td class="rank">7</td>
+            <td>José Pardo</td>
+            <td class="num">66</td>
+            <td class="num">3</td>
+            <td class="yr">2018/19–2019/20</td>
+          </tr>
+        <tr>
+            <td class="rank">8</td>
+            <td>Jorge Zarfino</td>
+            <td class="num">66</td>
+            <td class="num">9</td>
+            <td class="yr">2018/19–2019/20</td>
+          </tr>
+        <tr>
+            <td class="rank">9</td>
+            <td>Kiké</td>
+            <td class="num">61</td>
+            <td class="num">9</td>
+            <td class="yr">2018/19–2019/20</td>
+          </tr>
+        <tr>
+            <td class="rank">10</td>
             <td>Juanito</td>
             <td class="num">58</td>
             <td class="num">3</td>
             <td class="yr">1996/97–1998/99</td>
           </tr>
         <tr>
-            <td class="rank">5</td>
+            <td class="rank">11</td>
+            <td>Raymond Kalla</td>
+            <td class="num">56</td>
+            <td class="num">0</td>
+            <td class="yr">1998/99–2001/02</td>
+          </tr>
+        <tr>
+            <td class="rank">12</td>
+            <td>Casto</td>
+            <td class="num">55</td>
+            <td class="num">0</td>
+            <td class="yr">2018/19–2019/20</td>
+          </tr>
+        <tr>
+            <td class="rank">13</td>
+            <td>Willy</td>
+            <td class="num">48</td>
+            <td class="num">4</td>
+            <td class="yr">2018/19–2019/20</td>
+          </tr>
+        <tr>
+            <td class="rank">14</td>
             <td>Félix Carvallo</td>
             <td class="num">46</td>
             <td class="num">2</td>
             <td class="yr">1996/97–1998/99</td>
           </tr>
         <tr>
-            <td class="rank">6</td>
-            <td>José Ignacio Soler</td>
-            <td class="num">39</td>
-            <td class="num">0</td>
-            <td class="yr">1996/97–1996/97</td>
-          </tr>
-        <tr>
-            <td class="rank">7</td>
-            <td>Ito</td>
-            <td class="num">39</td>
-            <td class="num">1</td>
-            <td class="yr">1996/97–1996/97</td>
-          </tr>
-        <tr>
-            <td class="rank">8</td>
-            <td>Quique Estebaranz</td>
-            <td class="num">37</td>
-            <td class="num">1</td>
-            <td class="yr">1996/97–1996/97</td>
-          </tr>
-        <tr>
-            <td class="rank">9</td>
-            <td>Manuel</td>
-            <td class="num">37</td>
-            <td class="num">1</td>
-            <td class="yr">1998/99–1998/99</td>
-          </tr>
-        <tr>
-            <td class="rank">10</td>
-            <td>David Belenguer</td>
-            <td class="num">36</td>
-            <td class="num">0</td>
-            <td class="yr">1998/99–1998/99</td>
-          </tr>
-        <tr>
-            <td class="rank">11</td>
-            <td>Padilla</td>
-            <td class="num">34</td>
-            <td class="num">1</td>
-            <td class="yr">1996/97–1996/97</td>
-          </tr>
-        <tr>
-            <td class="rank">12</td>
-            <td>Raymond Kalla</td>
-            <td class="num">34</td>
-            <td class="num">0</td>
-            <td class="yr">1998/99–1998/99</td>
-          </tr>
-        <tr>
-            <td class="rank">13</td>
-            <td>Toni Velamazán</td>
-            <td class="num">33</td>
-            <td class="num">6</td>
-            <td class="yr">1998/99–1998/99</td>
-          </tr>
-        <tr>
-            <td class="rank">14</td>
-            <td>Virgilio Ferreira</td>
-            <td class="num">32</td>
-            <td class="num">2</td>
-            <td class="yr">1996/97–1996/97</td>
-          </tr>
-        <tr>
             <td class="rank">15</td>
-            <td>David Castedo</td>
-            <td class="num">32</td>
-            <td class="num">0</td>
-            <td class="yr">1998/99–1998/99</td>
+            <td>Ángel Bastos</td>
+            <td class="num">44</td>
+            <td class="num">1</td>
+            <td class="yr">2018/19–2019/20</td>
           </tr>
       </tbody>
     </table>
@@ -425,63 +441,63 @@
       <tbody>
         <tr>
             <td class="rank">1</td>
+            <td>Enric Gallego</td>
+            <td class="num">15</td>
+            <td class="num">19</td>
+          </tr>
+        <tr>
+            <td class="rank">2</td>
             <td>Alejandro Duré</td>
             <td class="num">14</td>
             <td class="num">68</td>
           </tr>
         <tr>
-            <td class="rank">2</td>
+            <td class="rank">3</td>
+            <td>Kiké</td>
+            <td class="num">9</td>
+            <td class="num">61</td>
+          </tr>
+        <tr>
+            <td class="rank">4</td>
+            <td>Jorge Zarfino</td>
+            <td class="num">9</td>
+            <td class="num">66</td>
+          </tr>
+        <tr>
+            <td class="rank">5</td>
             <td>Walter Silvani</td>
             <td class="num">7</td>
             <td class="num">22</td>
           </tr>
         <tr>
-            <td class="rank">3</td>
+            <td class="rank">6</td>
+            <td>Alfredo Manuel</td>
+            <td class="num">7</td>
+            <td class="num">34</td>
+          </tr>
+        <tr>
+            <td class="rank">7</td>
             <td>Toni Velamazán</td>
             <td class="num">6</td>
             <td class="num">33</td>
           </tr>
         <tr>
-            <td class="rank">4</td>
-            <td>Francisco Javier Carpio Pineda</td>
-            <td class="num">4</td>
-            <td class="num">31</td>
-          </tr>
-        <tr>
-            <td class="rank">5</td>
-            <td>Juanito</td>
-            <td class="num">3</td>
-            <td class="num">58</td>
-          </tr>
-        <tr>
-            <td class="rank">6</td>
-            <td>Antonio Esposito</td>
-            <td class="num">2</td>
-            <td class="num">20</td>
-          </tr>
-        <tr>
-            <td class="rank">7</td>
-            <td>Igor Gluščević</td>
-            <td class="num">2</td>
-            <td class="num">18</td>
-          </tr>
-        <tr>
             <td class="rank">8</td>
-            <td>Antonio López Alfaro</td>
-            <td class="num">2</td>
-            <td class="num">11</td>
+            <td>Juan Carlos Moreno</td>
+            <td class="num">6</td>
+            <td class="num">37</td>
           </tr>
         <tr>
             <td class="rank">9</td>
-            <td>Alberto Toril</td>
-            <td class="num">2</td>
-            <td class="num">16</td>
+            <td>Jesús Vázquez</td>
+            <td class="num">6</td>
+            <td class="num">39</td>
           </tr>
         <tr>
             <td class="rank">10</td>
-            <td>José Luis Soto</td>
-            <td class="num">2</td>
-            <td class="num">27</td>
+            <td>Álex Alegría</td>
+            <td class="num">6</td>
+            <td class="num">17</td>
           </tr>
       </tbody>
     </table>
@@ -495,6 +511,13 @@
       <thead><tr><th>Competition</th><th class="num">Players</th><th>Seasons</th><th class="num">Count</th><th>Games</th></tr></thead>
       <tbody>
         <tr>
+            <td>Segunda División</td>
+            <td class="num">84</td>
+            <td class="yr">2001/02–2019/20</td>
+            <td class="num">2</td>
+            <td class="yes">Playable</td>
+          </tr>
+        <tr>
             <td>La Liga</td>
             <td class="num">42</td>
             <td class="yr">1996/97–1998/99</td>
@@ -507,35 +530,35 @@
 </details>
 
 <h2>Ask about Extremadura</h2>
-<p class="sub">Ask the database a question. Answers come from 42 Extremadura
+<p class="sub">Ask the database a question. Answers come from 123 Extremadura
   players and are never invented — if the data does not support an answer, it says so.</p>
 <form class="ask" id="askForm">
   <input id="askQ" autocomplete="off" maxlength="300"
-         placeholder="Who has played for both Extremadura and Sevilla?"
+         placeholder="Who has played for both Extremadura and Valladolid?"
          aria-label="Ask a question about Extremadura">
   <button type="submit">Ask</button>
 </form>
 <div class="ask-examples">
-          <button type="button" data-q="Who has played for both Extremadura and Sevilla?">Who has played for both Extremadura and Sevilla?</button>
-          <button type="button" data-q="Top scorers for Extremadura in La Liga">Top scorers for Extremadura in La Liga</button>
+          <button type="button" data-q="Who has played for both Extremadura and Valladolid?">Who has played for both Extremadura and Valladolid?</button>
+          <button type="button" data-q="Top scorers for Extremadura in Segunda División">Top scorers for Extremadura in Segunda División</button>
           <button type="button" data-q="Which English players have the most appearances for Extremadura?">Which English players have the most appearances for Extremadura?</button>
 </div>
 <div id="askAnswer"></div>
 
 <h2>More teams</h2>
 <div class="related">
-          <a href="/teams/sevilla/">Sevilla</a>
-          <a href="/teams/espanyol/">Espanyol</a>
-          <a href="/teams/atletico-madrid/">Atlético Madrid</a>
-          <a href="/teams/valencia/">Valencia</a>
-          <a href="/teams/real-betis/">Real Betis</a>
-          <a href="/teams/barcelona/">Barcelona</a>
           <a href="/teams/valladolid/">Valladolid</a>
-          <a href="/teams/celta-vigo/">Celta Vigo</a>
+          <a href="/teams/albacete/">Albacete</a>
+          <a href="/teams/zaragoza/">Zaragoza</a>
+          <a href="/teams/tenerife/">Tenerife</a>
+          <a href="/teams/elche/">Elche</a>
+          <a href="/teams/espanyol/">Espanyol</a>
+          <a href="/teams/sevilla/">Sevilla</a>
           <a href="/teams/mallorca/">Mallorca</a>
-          <a href="/teams/real-madrid/">Real Madrid</a>
+          <a href="/teams/sporting-gijon/">Sporting Gijón</a>
+          <a href="/teams/malaga/">Málaga</a>
+          <a href="/teams/atletico-madrid/">Atlético Madrid</a>
           <a href="/teams/rayo-vallecano/">Rayo Vallecano</a>
-          <a href="/teams/villarreal/">Villarreal</a>
 </div>
 
 <footer class="page">
@@ -549,7 +572,7 @@
 </div><!-- /wrap -->
 
 <script>
-window.TS_TEAM = {"slug":"extremadura","name":"Extremadura","comps":["La Liga"],"defaultScope":"team_extremadura_la-liga","potd":[{"n":"Óscar Montiel","a":78,"g":0,"f":"1996/97","t":"1998/99"},{"n":"Alejandro Duré","a":68,"g":14,"f":"1996/97","t":"1998/99"},{"n":"Pedro José","a":68,"g":2,"f":"1996/97","t":"1998/99"},{"n":"Juanito","a":58,"g":3,"f":"1996/97","t":"1998/99"},{"n":"Félix Carvallo","a":46,"g":2,"f":"1996/97","t":"1998/99"},{"n":"José Ignacio Soler","a":39,"g":0,"f":"1996/97","t":"1996/97"},{"n":"Ito","a":39,"g":1,"f":"1996/97","t":"1996/97"},{"n":"Quique Estebaranz","a":37,"g":1,"f":"1996/97","t":"1996/97"},{"n":"Manuel","a":37,"g":1,"f":"1998/99","t":"1998/99"},{"n":"David Belenguer","a":36,"g":0,"f":"1998/99","t":"1998/99"},{"n":"Padilla","a":34,"g":1,"f":"1996/97","t":"1996/97"},{"n":"Raymond Kalla","a":34,"g":0,"f":"1998/99","t":"1998/99"},{"n":"Toni Velamazán","a":33,"g":6,"f":"1998/99","t":"1998/99"},{"n":"Virgilio Ferreira","a":32,"g":2,"f":"1996/97","t":"1996/97"},{"n":"David Castedo","a":32,"g":0,"f":"1998/99","t":"1998/99"}]};
+window.TS_TEAM = {"slug":"extremadura","name":"Extremadura","comps":["Segunda División","La Liga"],"defaultScope":"team_extremadura_all","potd":[{"n":"Pedro José","a":98,"g":3,"f":"1996/97","t":"2001/02"},{"n":"Óscar Montiel","a":78,"g":0,"f":"1996/97","t":"1998/99"},{"n":"ALex Salomón","a":78,"g":1,"f":"2018/19","t":"2019/20"},{"n":"Borja Granero","a":71,"g":1,"f":"2018/19","t":"2019/20"},{"n":"Alejandro Duré","a":68,"g":14,"f":"1996/97","t":"1998/99"},{"n":"Poli","a":67,"g":2,"f":"1998/99","t":"2001/02"},{"n":"José Pardo","a":66,"g":3,"f":"2018/19","t":"2019/20"},{"n":"Jorge Zarfino","a":66,"g":9,"f":"2018/19","t":"2019/20"},{"n":"Kiké","a":61,"g":9,"f":"2018/19","t":"2019/20"},{"n":"Juanito","a":58,"g":3,"f":"1996/97","t":"1998/99"},{"n":"Raymond Kalla","a":56,"g":0,"f":"1998/99","t":"2001/02"},{"n":"Casto","a":55,"g":0,"f":"2018/19","t":"2019/20"},{"n":"Willy","a":48,"g":4,"f":"2018/19","t":"2019/20"},{"n":"Félix Carvallo","a":46,"g":2,"f":"1996/97","t":"1998/99"},{"n":"Ángel Bastos","a":44,"g":1,"f":"2018/19","t":"2019/20"}]};
 </script>
 <script src="/js/ts-scope.js"></script>
 <script src="/js/team-page.js"></script>
@@ -566,6 +589,6 @@ window.TS_TEAM = {"slug":"extremadura","name":"Extremadura","comps":["La Liga"],
     try { TSNav.render(); } catch (e) { console.error('[TeleStats] Nav render failed:', e); }
   })();
 </script>
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TeleStats","item":"https://telestats.net"},{"@type":"ListItem","position":2,"name":"Teams","item":"https://telestats.net/teams/"},{"@type":"ListItem","position":3,"name":"Extremadura","item":"https://telestats.net/teams/extremadura/"}]},{"@type":"SportsTeam","name":"Extremadura","sport":"Association football","url":"https://telestats.net/teams/extremadura/"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is the Extremadura page on TeleStats?","acceptedAnswer":{"@type":"Answer","text":"Free Extremadura football quizzes and trivia games generated from real appearance and goal records for 42 players across La Liga. No sign-up is needed to play."}}]}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TeleStats","item":"https://telestats.net"},{"@type":"ListItem","position":2,"name":"Teams","item":"https://telestats.net/teams/"},{"@type":"ListItem","position":3,"name":"Extremadura","item":"https://telestats.net/teams/extremadura/"}]},{"@type":"SportsTeam","name":"Extremadura","sport":"Association football","url":"https://telestats.net/teams/extremadura/"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is the Extremadura page on TeleStats?","acceptedAnswer":{"@type":"Answer","text":"Free Extremadura football quizzes and trivia games generated from real appearance and goal records for 123 players across Segunda División and La Liga. No sign-up is needed to play."}}]}]}</script>
 </body>
 </html>

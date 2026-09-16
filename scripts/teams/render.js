@@ -264,6 +264,9 @@ ${indexable ? '' : '<meta name="robots" content="noindex,follow">\n'}<meta name=
   .crest { width: 52px; height: 60px; flex: 0 0 auto; filter: drop-shadow(0 2px 6px rgba(0,0,0,.45)); }
   .hero h1 { font-size: 1.65rem; line-height: 1.2; margin: 0 0 5px; }
   .sub { color: var(--text-secondary); margin: 0; font-size: .9rem; }
+  .sub a.complink { color: var(--text-secondary); text-decoration: underline;
+                    text-decoration-color: rgba(255,255,255,.22); }
+  .sub a.complink:hover { color: var(--accent); }
   .scope-note { color: var(--text-muted); font-size: .76rem; margin: 6px 0 0; }
   .scope-note a { color: var(--accent); }
 
@@ -394,9 +397,9 @@ ${indexable ? '' : '<meta name="robots" content="noindex,follow">\n'}<meta name=
     <nav>
       <a href="/daily/">Daily</a>
       <a href="/games/">Games</a>
+      <a href="/competitions/">Competitions</a>
       <a href="/teams/">Teams</a>
       <a href="/ask/">Ask</a>
-      <a href="/leaderboard/">Leaderboard</a>
       <a href="/community/">Community</a>
     </nav>
   </div>
@@ -412,7 +415,8 @@ ${indexable ? '' : '<meta name="robots" content="noindex,follow">\n'}<meta name=
     ${shield(team, c)}
     <div>
       <h1>${esc(team.name)} Football Quizzes &amp; Trivia</h1>
-      <p class="sub">${num(team.players)} players · ${num(totals.appearances)} appearances · ${esc(listOf(compList))}</p>
+      <p class="sub">${num(team.players)} players · ${num(totals.appearances)} appearances ·
+        ${compList.map((c) => `<a class="complink" href="/competitions/${esc(teams.competitionSlug(c))}/">${esc(c)}</a>`).join(', ')}</p>
       <p class="scope-note">Records cover ${esc(season(span.first))} to ${esc(season(span.last))}.
         <a href="/tools/data.html">Full dataset scope</a>.</p>
     </div>

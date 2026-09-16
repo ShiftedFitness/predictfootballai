@@ -52,6 +52,9 @@
   .crest { width: 52px; height: 60px; flex: 0 0 auto; filter: drop-shadow(0 2px 6px rgba(0,0,0,.45)); }
   .hero h1 { font-size: 1.65rem; line-height: 1.2; margin: 0 0 5px; }
   .sub { color: var(--text-secondary); margin: 0; font-size: .9rem; }
+  .sub a.complink { color: var(--text-secondary); text-decoration: underline;
+                    text-decoration-color: rgba(255,255,255,.22); }
+  .sub a.complink:hover { color: var(--accent); }
   .scope-note { color: var(--text-muted); font-size: .76rem; margin: 6px 0 0; }
   .scope-note a { color: var(--accent); }
 
@@ -182,9 +185,9 @@
     <nav>
       <a href="/daily/">Daily</a>
       <a href="/games/">Games</a>
+      <a href="/competitions/">Competitions</a>
       <a href="/teams/">Teams</a>
       <a href="/ask/">Ask</a>
-      <a href="/leaderboard/">Leaderboard</a>
       <a href="/community/">Community</a>
     </nav>
   </div>
@@ -205,7 +208,8 @@
     </svg>
     <div>
       <h1>Pescara Football Quizzes &amp; Trivia</h1>
-      <p class="sub">115 players · 1,935 appearances · Serie A</p>
+      <p class="sub">115 players · 1,935 appearances ·
+        <a class="complink" href="/competitions/serie-a/">Serie A</a></p>
       <p class="scope-note">Records cover 1988/89 to 2016/17.
         <a href="/tools/data.html">Full dataset scope</a>.</p>
     </div>
@@ -379,23 +383,23 @@
           </tr>
         <tr>
             <td class="rank">11</td>
+            <td>Rocco Pagano</td>
+            <td class="num">31</td>
+            <td class="num">4</td>
+            <td class="yr">1988/89–1988/89</td>
+          </tr>
+        <tr>
+            <td class="rank">12</td>
             <td>Cristiano Bergodi</td>
             <td class="num">31</td>
             <td class="num">0</td>
             <td class="yr">1988/89–1988/89</td>
           </tr>
         <tr>
-            <td class="rank">12</td>
+            <td class="rank">13</td>
             <td>Franco Marchegiani</td>
             <td class="num">31</td>
             <td class="num">0</td>
-            <td class="yr">1988/89–1988/89</td>
-          </tr>
-        <tr>
-            <td class="rank">13</td>
-            <td>Rocco Pagano</td>
-            <td class="num">31</td>
-            <td class="num">4</td>
             <td class="yr">1988/89–1988/89</td>
           </tr>
         <tr>
@@ -479,9 +483,9 @@
           </tr>
         <tr>
             <td class="rank">10</td>
-            <td>Edmar Bernardes</td>
+            <td>Rocco Pagano</td>
             <td class="num">4</td>
-            <td class="num">28</td>
+            <td class="num">31</td>
           </tr>
       </tbody>
     </table>
@@ -529,8 +533,8 @@
           <a href="/teams/internazionale/">Internazionale</a>
           <a href="/teams/parma/">Parma</a>
           <a href="/teams/torino/">Torino</a>
-          <a href="/teams/roma/">Roma</a>
           <a href="/teams/bologna/">Bologna</a>
+          <a href="/teams/roma/">Roma</a>
           <a href="/teams/genoa/">Genoa</a>
           <a href="/teams/udinese/">Udinese</a>
           <a href="/teams/milan/">Milan</a>
@@ -549,7 +553,7 @@
 </div><!-- /wrap -->
 
 <script>
-window.TS_TEAM = {"slug":"pescara","name":"Pescara","comps":["Serie A"],"defaultScope":"team_pescara_serie-a","potd":[{"n":"Gianluca Caprari","a":59,"g":11,"f":"2012/13","t":"2016/17"},{"n":"Stefano Ferretti","a":51,"g":1,"f":"1988/89","t":"1992/93"},{"n":"Giacomo Dicara","a":40,"g":0,"f":"1988/89","t":"1992/93"},{"n":"Ledian Memushaj","a":36,"g":1,"f":"2016/17","t":"2016/17"},{"n":"Cristiano Biraghi","a":35,"g":1,"f":"2016/17","t":"2016/17"},{"n":"Léo Júnior","a":34,"g":3,"f":"1988/89","t":"1988/89"},{"n":"Francesco Zampano","a":34,"g":0,"f":"2016/17","t":"2016/17"},{"n":"Ahmad Benali","a":33,"g":6,"f":"2016/17","t":"2016/17"},{"n":"Gian Piero Gasperini","a":32,"g":3,"f":"1988/89","t":"1988/89"},{"n":"Massimiliano Allegri","a":31,"g":12,"f":"1992/93","t":"1992/93"},{"n":"Cristiano Bergodi","a":31,"g":0,"f":"1988/89","t":"1988/89"},{"n":"Franco Marchegiani","a":31,"g":0,"f":"1988/89","t":"1988/89"},{"n":"Rocco Pagano","a":31,"g":4,"f":"1988/89","t":"1988/89"},{"n":"Emmanuel Cascione","a":30,"g":2,"f":"2012/13","t":"2012/13"},{"n":"Albano Bizzarri","a":29,"g":0,"f":"2016/17","t":"2016/17"}]};
+window.TS_TEAM = {"slug":"pescara","name":"Pescara","comps":["Serie A"],"defaultScope":"team_pescara_serie-a","potd":[{"n":"Gianluca Caprari","a":59,"g":11,"f":"2012/13","t":"2016/17"},{"n":"Stefano Ferretti","a":51,"g":1,"f":"1988/89","t":"1992/93"},{"n":"Giacomo Dicara","a":40,"g":0,"f":"1988/89","t":"1992/93"},{"n":"Ledian Memushaj","a":36,"g":1,"f":"2016/17","t":"2016/17"},{"n":"Cristiano Biraghi","a":35,"g":1,"f":"2016/17","t":"2016/17"},{"n":"Léo Júnior","a":34,"g":3,"f":"1988/89","t":"1988/89"},{"n":"Francesco Zampano","a":34,"g":0,"f":"2016/17","t":"2016/17"},{"n":"Ahmad Benali","a":33,"g":6,"f":"2016/17","t":"2016/17"},{"n":"Gian Piero Gasperini","a":32,"g":3,"f":"1988/89","t":"1988/89"},{"n":"Massimiliano Allegri","a":31,"g":12,"f":"1992/93","t":"1992/93"},{"n":"Rocco Pagano","a":31,"g":4,"f":"1988/89","t":"1988/89"},{"n":"Cristiano Bergodi","a":31,"g":0,"f":"1988/89","t":"1988/89"},{"n":"Franco Marchegiani","a":31,"g":0,"f":"1988/89","t":"1988/89"},{"n":"Emmanuel Cascione","a":30,"g":2,"f":"2012/13","t":"2012/13"},{"n":"Albano Bizzarri","a":29,"g":0,"f":"2016/17","t":"2016/17"}]};
 </script>
 <script src="/js/ts-scope.js"></script>
 <script src="/js/team-page.js"></script>

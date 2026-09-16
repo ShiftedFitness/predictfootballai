@@ -5,17 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="/js/ts-analytics.js"></script>
 <title>Eibar Football Quiz &amp; Trivia Games | TeleStats</title>
-<meta name="description" content="Play Eibar football quizzes and trivia games built from 95 players and 3,765 appearances in La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta name="description" content="Play Eibar football quizzes and trivia games built from 324 players and 11,767 appearances in Segunda División and La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
 <link rel="canonical" href="https://telestats.net/teams/eibar/">
 <meta name="theme-color" content="hsl(10, 55%, 38%)">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Eibar Football Quiz &amp; Trivia Games | TeleStats">
-<meta property="og:description" content="Play Eibar football quizzes and trivia games built from 95 players and 3,765 appearances in La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta property="og:description" content="Play Eibar football quizzes and trivia games built from 324 players and 11,767 appearances in Segunda División and La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
 <meta property="og:url" content="https://telestats.net/teams/eibar/">
 <meta property="og:site_name" content="TeleStats">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Eibar Football Quiz &amp; Trivia Games | TeleStats">
-<meta name="twitter:description" content="Play Eibar football quizzes and trivia games built from 95 players and 3,765 appearances in La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta name="twitter:description" content="Play Eibar football quizzes and trivia games built from 324 players and 11,767 appearances in Segunda División and La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
 <link rel="stylesheet" href="/telestats-theme.css">
 <style>
   :root { --club: hsl(10, 55%, 38%); --club-2: hsl(28, 55%, 26%); }
@@ -52,6 +52,9 @@
   .crest { width: 52px; height: 60px; flex: 0 0 auto; filter: drop-shadow(0 2px 6px rgba(0,0,0,.45)); }
   .hero h1 { font-size: 1.65rem; line-height: 1.2; margin: 0 0 5px; }
   .sub { color: var(--text-secondary); margin: 0; font-size: .9rem; }
+  .sub a.complink { color: var(--text-secondary); text-decoration: underline;
+                    text-decoration-color: rgba(255,255,255,.22); }
+  .sub a.complink:hover { color: var(--accent); }
   .scope-note { color: var(--text-muted); font-size: .76rem; margin: 6px 0 0; }
   .scope-note a { color: var(--accent); }
 
@@ -182,9 +185,9 @@
     <nav>
       <a href="/daily/">Daily</a>
       <a href="/games/">Games</a>
+      <a href="/competitions/">Competitions</a>
       <a href="/teams/">Teams</a>
       <a href="/ask/">Ask</a>
-      <a href="/leaderboard/">Leaderboard</a>
       <a href="/community/">Community</a>
     </nav>
   </div>
@@ -205,8 +208,9 @@
     </svg>
     <div>
       <h1>Eibar Football Quizzes &amp; Trivia</h1>
-      <p class="sub">95 players · 3,765 appearances · La Liga</p>
-      <p class="scope-note">Records cover 2014/15 to 2020/21.
+      <p class="sub">324 players · 11,767 appearances ·
+        <a class="complink" href="/competitions/segunda-division/">Segunda División</a>, <a class="complink" href="/competitions/la-liga/">La Liga</a></p>
+      <p class="scope-note">Records cover 2001/02 to 2026/27.
         <a href="/tools/data.html">Full dataset scope</a>.</p>
     </div>
   </div>
@@ -216,8 +220,8 @@
   <summary>New here? What this page is</summary>
   <div class="body">
     <p>This is a set of free football games about <strong>Eibar</strong>, generated
-      from real appearance and goal records — 95 players who have turned out
-      for the club in La Liga, going back to 2014/15.</p>
+      from real appearance and goal records — 324 players who have turned out
+      for the club in Segunda División and La Liga, going back to 2001/02.</p>
     <p>Pick a game below and it starts straight away on Eibar. No sign-up, no app.
       Make an account only if you want your scores kept and your name on the club's board.</p>
     <p>Everything you see here comes from the TeleStats database. Nothing is written by an AI
@@ -243,11 +247,23 @@
 
 <h2 id="play">Play Eibar</h2>
 <p class="sub">The five TeleStats games, set up for Eibar. Click one and it starts.</p>
-      
+      <div class="chips" id="compChips" role="group"
+       aria-label="Choose which competitions to play">
+        <button type="button" class="chip all on" data-all="1" aria-pressed="true">All competitions</button>
+        <button type="button" class="chip on"
+                data-comp="Segunda División"
+                data-slug="segunda-division"
+                aria-pressed="true">Segunda División</button>
+        <button type="button" class="chip on"
+                data-comp="La Liga"
+                data-slug="la-liga"
+                aria-pressed="true">La Liga</button>
+      </div>
+      <p class="chip-note" id="chipNote"></p>
       <ul class="games">
         <li class="game">
           <a class="game-go" data-path="/games/hol.html"
-             href="/games/hol.html?scope=team_eibar_la-liga&amp;play=1">
+             href="/games/hol.html?scope=team_eibar_all&amp;play=1">
             <h3>Eibar Higher or Lower</h3>
             <p>Which player has more appearances?</p>
             <span class="go">Play now &rarr;</span>
@@ -255,7 +271,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/alpha.html"
-             href="/games/alpha.html?scope=team_eibar_la-liga&amp;play=1">
+             href="/games/alpha.html?scope=team_eibar_all&amp;play=1">
             <h3>Eibar Player Alphabet</h3>
             <p>Name a player for every letter of the alphabet.</p>
             <span class="go">Play now &rarr;</span>
@@ -263,7 +279,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/xi.html"
-             href="/games/xi.html?scope=team_eibar_la-liga&amp;play=1">
+             href="/games/xi.html?scope=team_eibar_all&amp;play=1">
             <h3>Eibar Starting XI</h3>
             <p>Build the strongest eleven you can.</p>
             <span class="go">Play now &rarr;</span>
@@ -271,7 +287,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/whoami.html"
-             href="/games/whoami.html?scope=team_eibar_la-liga&amp;play=1">
+             href="/games/whoami.html?scope=team_eibar_all&amp;play=1">
             <h3>Eibar Who Am I?</h3>
             <p>Guess the player from five clues.</p>
             <span class="go">Play now &rarr;</span>
@@ -279,7 +295,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/quiz.html"
-             href="/games/quiz.html?scope=team_eibar_la-liga&amp;play=1">
+             href="/games/quiz.html?scope=team_eibar_all&amp;play=1">
             <h3>Eibar Trivia Quiz</h3>
             <p>Ten questions from this club’s record.</p>
             <span class="go">Play now &rarr;</span>
@@ -309,108 +325,108 @@
       <tbody>
         <tr>
             <td class="rank">1</td>
+            <td>Anaitz Arbilla</td>
+            <td class="num">297</td>
+            <td class="num">9</td>
+            <td class="yr">2016/17–2026/27</td>
+          </tr>
+        <tr>
+            <td class="rank">2</td>
+            <td>Sergio Álvarez</td>
+            <td class="num">243</td>
+            <td class="num">4</td>
+            <td class="yr">2018/19–2026/27</td>
+          </tr>
+        <tr>
+            <td class="rank">3</td>
+            <td>José Corpas</td>
+            <td class="num">193</td>
+            <td class="num">31</td>
+            <td class="yr">2021/22–2025/26</td>
+          </tr>
+        <tr>
+            <td class="rank">4</td>
             <td>Sergi Enrich</td>
             <td class="num">187</td>
             <td class="num">34</td>
             <td class="yr">2015/16–2020/21</td>
           </tr>
         <tr>
-            <td class="rank">2</td>
+            <td class="rank">5</td>
+            <td>Dani García</td>
+            <td class="num">175</td>
+            <td class="num">2</td>
+            <td class="yr">2013/14–2017/18</td>
+          </tr>
+        <tr>
+            <td class="rank">6</td>
+            <td>Ander Capa</td>
+            <td class="num">165</td>
+            <td class="num">7</td>
+            <td class="yr">2013/14–2017/18</td>
+          </tr>
+        <tr>
+            <td class="rank">7</td>
             <td>Kiké</td>
             <td class="num">153</td>
             <td class="num">35</td>
             <td class="yr">2016/17–2020/21</td>
           </tr>
         <tr>
-            <td class="rank">3</td>
+            <td class="rank">8</td>
+            <td>Jon Bautista</td>
+            <td class="num">151</td>
+            <td class="num">41</td>
+            <td class="yr">2022/23–2026/27</td>
+          </tr>
+        <tr>
+            <td class="rank">9</td>
             <td>Gonzalo Escalante</td>
             <td class="num">147</td>
             <td class="num">10</td>
             <td class="yr">2015/16–2019/20</td>
           </tr>
         <tr>
-            <td class="rank">4</td>
+            <td class="rank">10</td>
             <td>Takashi Inui</td>
             <td class="num">146</td>
             <td class="num">14</td>
             <td class="yr">2015/16–2020/21</td>
           </tr>
         <tr>
-            <td class="rank">5</td>
-            <td>Dani García</td>
-            <td class="num">137</td>
-            <td class="num">2</td>
-            <td class="yr">2014/15–2017/18</td>
+            <td class="rank">11</td>
+            <td>Gaizka Garitano</td>
+            <td class="num">146</td>
+            <td class="num">15</td>
+            <td class="yr">2001/02–2004/05</td>
           </tr>
         <tr>
-            <td class="rank">6</td>
-            <td>Anaitz Arbilla</td>
-            <td class="num">134</td>
-            <td class="num">4</td>
-            <td class="yr">2016/17–2020/21</td>
-          </tr>
-        <tr>
-            <td class="rank">7</td>
-            <td>Ander Capa</td>
-            <td class="num">134</td>
-            <td class="num">5</td>
-            <td class="yr">2014/15–2017/18</td>
-          </tr>
-        <tr>
-            <td class="rank">8</td>
+            <td class="rank">12</td>
             <td>Marko Dmitrović</td>
             <td class="num">130</td>
             <td class="num">1</td>
             <td class="yr">2017/18–2020/21</td>
           </tr>
         <tr>
-            <td class="rank">9</td>
-            <td>Pedro León</td>
-            <td class="num">113</td>
-            <td class="num">13</td>
-            <td class="yr">2016/17–2020/21</td>
-          </tr>
-        <tr>
-            <td class="rank">10</td>
-            <td>Paulo Oliveira</td>
-            <td class="num">111</td>
-            <td class="num">1</td>
-            <td class="yr">2017/18–2020/21</td>
-          </tr>
-        <tr>
-            <td class="rank">11</td>
-            <td>José Ángel</td>
-            <td class="num">107</td>
-            <td class="num">2</td>
-            <td class="yr">2017/18–2020/21</td>
-          </tr>
-        <tr>
-            <td class="rank">12</td>
-            <td>Papakouli Diop</td>
-            <td class="num">106</td>
-            <td class="num">3</td>
-            <td class="yr">2017/18–2020/21</td>
-          </tr>
-        <tr>
             <td class="rank">13</td>
-            <td>Charles</td>
-            <td class="num">94</td>
-            <td class="num">28</td>
-            <td class="yr">2017/18–2019/20</td>
+            <td>Jon Urzelai</td>
+            <td class="num">130</td>
+            <td class="num">2</td>
+            <td class="yr">2002/03–2008/09</td>
           </tr>
         <tr>
             <td class="rank">14</td>
-            <td>Iván Ramis</td>
-            <td class="num">89</td>
-            <td class="num">7</td>
-            <td class="yr">2015/16–2019/20</td>
+            <td>Iban Fagoaga</td>
+            <td class="num">126</td>
+            <td class="num">1</td>
+            <td class="yr">2001/02–2005/06</td>
           </tr>
         <tr>
             <td class="rank">15</td>
-            <td>Rubén Peña</td>
-            <td class="num">87</td>
-            <td class="num">3</td>
-            <td class="yr">2016/17–2018/19</td>
+            <td>Álvaro Tejero</td>
+            <td class="num">125</td>
+            <td class="num">7</td>
+            <td class="yr">2019/20–2023/24</td>
           </tr>
       </tbody>
     </table>
@@ -425,63 +441,63 @@
       <tbody>
         <tr>
             <td class="rank">1</td>
+            <td>Stoichkov</td>
+            <td class="num">45</td>
+            <td class="num">118</td>
+          </tr>
+        <tr>
+            <td class="rank">2</td>
+            <td>Jon Bautista</td>
+            <td class="num">41</td>
+            <td class="num">151</td>
+          </tr>
+        <tr>
+            <td class="rank">3</td>
             <td>Kiké</td>
             <td class="num">35</td>
             <td class="num">153</td>
           </tr>
         <tr>
-            <td class="rank">2</td>
+            <td class="rank">4</td>
             <td>Sergi Enrich</td>
             <td class="num">34</td>
             <td class="num">187</td>
           </tr>
         <tr>
-            <td class="rank">3</td>
+            <td class="rank">5</td>
+            <td>José Corpas</td>
+            <td class="num">31</td>
+            <td class="num">193</td>
+          </tr>
+        <tr>
+            <td class="rank">6</td>
             <td>Charles</td>
             <td class="num">28</td>
             <td class="num">94</td>
           </tr>
         <tr>
-            <td class="rank">4</td>
+            <td class="rank">7</td>
+            <td>Joseba Llorente</td>
+            <td class="num">21</td>
+            <td class="num">71</td>
+          </tr>
+        <tr>
+            <td class="rank">8</td>
             <td>Borja Bastón</td>
             <td class="num">18</td>
             <td class="num">36</td>
           </tr>
         <tr>
-            <td class="rank">5</td>
-            <td>Fabián Orellana</td>
-            <td class="num">14</td>
-            <td class="num">79</td>
-          </tr>
-        <tr>
-            <td class="rank">6</td>
-            <td>Takashi Inui</td>
-            <td class="num">14</td>
-            <td class="num">146</td>
-          </tr>
-        <tr>
-            <td class="rank">7</td>
-            <td>Pedro León</td>
-            <td class="num">13</td>
-            <td class="num">113</td>
-          </tr>
-        <tr>
-            <td class="rank">8</td>
-            <td>Adrián González</td>
-            <td class="num">11</td>
-            <td class="num">60</td>
-          </tr>
-        <tr>
             <td class="rank">9</td>
-            <td>Gonzalo Escalante</td>
-            <td class="num">10</td>
-            <td class="num">147</td>
+            <td>Mikel Arruabarrena</td>
+            <td class="num">18</td>
+            <td class="num">89</td>
           </tr>
         <tr>
             <td class="rank">10</td>
-            <td>Joan Jordán</td>
-            <td class="num">10</td>
-            <td class="num">71</td>
+            <td>Gaizka Garitano</td>
+            <td class="num">15</td>
+            <td class="num">146</td>
           </tr>
       </tbody>
     </table>
@@ -495,6 +511,13 @@
       <thead><tr><th>Competition</th><th class="num">Players</th><th>Seasons</th><th class="num">Count</th><th>Games</th></tr></thead>
       <tbody>
         <tr>
+            <td>Segunda División</td>
+            <td class="num">252</td>
+            <td class="yr">2001/02–2026/27</td>
+            <td class="num">6</td>
+            <td class="yes">Playable</td>
+          </tr>
+        <tr>
             <td>La Liga</td>
             <td class="num">95</td>
             <td class="yr">2014/15–2020/21</td>
@@ -507,35 +530,35 @@
 </details>
 
 <h2>Ask about Eibar</h2>
-<p class="sub">Ask the database a question. Answers come from 95 Eibar
+<p class="sub">Ask the database a question. Answers come from 324 Eibar
   players and are never invented — if the data does not support an answer, it says so.</p>
 <form class="ask" id="askForm">
   <input id="askQ" autocomplete="off" maxlength="300"
-         placeholder="Who has played for both Eibar and Sevilla?"
+         placeholder="Who has played for both Eibar and Valladolid?"
          aria-label="Ask a question about Eibar">
   <button type="submit">Ask</button>
 </form>
 <div class="ask-examples">
-          <button type="button" data-q="Who has played for both Eibar and Sevilla?">Who has played for both Eibar and Sevilla?</button>
-          <button type="button" data-q="Top scorers for Eibar in La Liga">Top scorers for Eibar in La Liga</button>
+          <button type="button" data-q="Who has played for both Eibar and Valladolid?">Who has played for both Eibar and Valladolid?</button>
+          <button type="button" data-q="Top scorers for Eibar in Segunda División">Top scorers for Eibar in Segunda División</button>
           <button type="button" data-q="Which English players have the most appearances for Eibar?">Which English players have the most appearances for Eibar?</button>
 </div>
 <div id="askAnswer"></div>
 
 <h2>More teams</h2>
 <div class="related">
-          <a href="/teams/sevilla/">Sevilla</a>
-          <a href="/teams/espanyol/">Espanyol</a>
-          <a href="/teams/atletico-madrid/">Atlético Madrid</a>
-          <a href="/teams/valencia/">Valencia</a>
-          <a href="/teams/real-betis/">Real Betis</a>
-          <a href="/teams/barcelona/">Barcelona</a>
           <a href="/teams/valladolid/">Valladolid</a>
-          <a href="/teams/celta-vigo/">Celta Vigo</a>
+          <a href="/teams/albacete/">Albacete</a>
+          <a href="/teams/zaragoza/">Zaragoza</a>
+          <a href="/teams/tenerife/">Tenerife</a>
+          <a href="/teams/elche/">Elche</a>
+          <a href="/teams/espanyol/">Espanyol</a>
+          <a href="/teams/sevilla/">Sevilla</a>
           <a href="/teams/mallorca/">Mallorca</a>
-          <a href="/teams/real-madrid/">Real Madrid</a>
+          <a href="/teams/sporting-gijon/">Sporting Gijón</a>
+          <a href="/teams/malaga/">Málaga</a>
+          <a href="/teams/atletico-madrid/">Atlético Madrid</a>
           <a href="/teams/rayo-vallecano/">Rayo Vallecano</a>
-          <a href="/teams/villarreal/">Villarreal</a>
 </div>
 
 <footer class="page">
@@ -549,7 +572,7 @@
 </div><!-- /wrap -->
 
 <script>
-window.TS_TEAM = {"slug":"eibar","name":"Eibar","comps":["La Liga"],"defaultScope":"team_eibar_la-liga","potd":[{"n":"Sergi Enrich","a":187,"g":34,"f":"2015/16","t":"2020/21"},{"n":"Kiké","a":153,"g":35,"f":"2016/17","t":"2020/21"},{"n":"Gonzalo Escalante","a":147,"g":10,"f":"2015/16","t":"2019/20"},{"n":"Takashi Inui","a":146,"g":14,"f":"2015/16","t":"2020/21"},{"n":"Dani García","a":137,"g":2,"f":"2014/15","t":"2017/18"},{"n":"Anaitz Arbilla","a":134,"g":4,"f":"2016/17","t":"2020/21"},{"n":"Ander Capa","a":134,"g":5,"f":"2014/15","t":"2017/18"},{"n":"Marko Dmitrović","a":130,"g":1,"f":"2017/18","t":"2020/21"},{"n":"Pedro León","a":113,"g":13,"f":"2016/17","t":"2020/21"},{"n":"Paulo Oliveira","a":111,"g":1,"f":"2017/18","t":"2020/21"},{"n":"José Ángel","a":107,"g":2,"f":"2017/18","t":"2020/21"},{"n":"Papakouli Diop","a":106,"g":3,"f":"2017/18","t":"2020/21"},{"n":"Charles","a":94,"g":28,"f":"2017/18","t":"2019/20"},{"n":"Iván Ramis","a":89,"g":7,"f":"2015/16","t":"2019/20"},{"n":"Rubén Peña","a":87,"g":3,"f":"2016/17","t":"2018/19"}]};
+window.TS_TEAM = {"slug":"eibar","name":"Eibar","comps":["Segunda División","La Liga"],"defaultScope":"team_eibar_all","potd":[{"n":"Anaitz Arbilla","a":297,"g":9,"f":"2016/17","t":"2026/27"},{"n":"Sergio Álvarez","a":243,"g":4,"f":"2018/19","t":"2026/27"},{"n":"José Corpas","a":193,"g":31,"f":"2021/22","t":"2025/26"},{"n":"Sergi Enrich","a":187,"g":34,"f":"2015/16","t":"2020/21"},{"n":"Dani García","a":175,"g":2,"f":"2013/14","t":"2017/18"},{"n":"Ander Capa","a":165,"g":7,"f":"2013/14","t":"2017/18"},{"n":"Kiké","a":153,"g":35,"f":"2016/17","t":"2020/21"},{"n":"Jon Bautista","a":151,"g":41,"f":"2022/23","t":"2026/27"},{"n":"Gonzalo Escalante","a":147,"g":10,"f":"2015/16","t":"2019/20"},{"n":"Takashi Inui","a":146,"g":14,"f":"2015/16","t":"2020/21"},{"n":"Gaizka Garitano","a":146,"g":15,"f":"2001/02","t":"2004/05"},{"n":"Marko Dmitrović","a":130,"g":1,"f":"2017/18","t":"2020/21"},{"n":"Jon Urzelai","a":130,"g":2,"f":"2002/03","t":"2008/09"},{"n":"Iban Fagoaga","a":126,"g":1,"f":"2001/02","t":"2005/06"},{"n":"Álvaro Tejero","a":125,"g":7,"f":"2019/20","t":"2023/24"}]};
 </script>
 <script src="/js/ts-scope.js"></script>
 <script src="/js/team-page.js"></script>
@@ -566,6 +589,6 @@ window.TS_TEAM = {"slug":"eibar","name":"Eibar","comps":["La Liga"],"defaultScop
     try { TSNav.render(); } catch (e) { console.error('[TeleStats] Nav render failed:', e); }
   })();
 </script>
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TeleStats","item":"https://telestats.net"},{"@type":"ListItem","position":2,"name":"Teams","item":"https://telestats.net/teams/"},{"@type":"ListItem","position":3,"name":"Eibar","item":"https://telestats.net/teams/eibar/"}]},{"@type":"SportsTeam","name":"Eibar","sport":"Association football","url":"https://telestats.net/teams/eibar/"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is the Eibar page on TeleStats?","acceptedAnswer":{"@type":"Answer","text":"Free Eibar football quizzes and trivia games generated from real appearance and goal records for 95 players across La Liga. No sign-up is needed to play."}}]}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TeleStats","item":"https://telestats.net"},{"@type":"ListItem","position":2,"name":"Teams","item":"https://telestats.net/teams/"},{"@type":"ListItem","position":3,"name":"Eibar","item":"https://telestats.net/teams/eibar/"}]},{"@type":"SportsTeam","name":"Eibar","sport":"Association football","url":"https://telestats.net/teams/eibar/"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is the Eibar page on TeleStats?","acceptedAnswer":{"@type":"Answer","text":"Free Eibar football quizzes and trivia games generated from real appearance and goal records for 324 players across Segunda División and La Liga. No sign-up is needed to play."}}]}]}</script>
 </body>
 </html>

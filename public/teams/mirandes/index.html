@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="/js/ts-analytics.js"></script>
+<title>Mirandes Football Quiz &amp; Trivia Games | TeleStats</title>
+<meta name="description" content="Play Mirandes football quizzes and trivia games built from 259 players and 7,333 appearances in Segunda División. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<link rel="canonical" href="https://telestats.net/teams/mirandes/">
+<meta name="theme-color" content="hsl(300, 55%, 38%)">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Mirandes Football Quiz &amp; Trivia Games | TeleStats">
+<meta property="og:description" content="Play Mirandes football quizzes and trivia games built from 259 players and 7,333 appearances in Segunda División. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta property="og:url" content="https://telestats.net/teams/mirandes/">
+<meta property="og:site_name" content="TeleStats">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Mirandes Football Quiz &amp; Trivia Games | TeleStats">
+<meta name="twitter:description" content="Play Mirandes football quizzes and trivia games built from 259 players and 7,333 appearances in Segunda División. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<link rel="stylesheet" href="/telestats-theme.css">
+<style>
+  :root { --club: hsl(300, 55%, 38%); --club-2: hsl(318, 55%, 26%); }
+  body { margin: 0; }
+  .wrap { max-width: 940px; margin: 0 auto; padding: 0 18px 60px; }
+
+  /* Fallback header. TSNav removes .ts-header and prepends the real one, so
+     this is what a visitor sees before the script runs, and all a search
+     engine ever sees. Without it the page opened with no way back to the
+     site and read as if it belonged somewhere else. */
+  .ts-header { border-bottom: 1px solid var(--rule, #24313A); background: var(--bg-card, #131A20); }
+  .ts-header .inner { max-width: 940px; margin: 0 auto; padding: 11px 18px;
+                      display: flex; align-items: center; gap: 18px; }
+  .ts-header .brand { font-weight: 700; letter-spacing: .04em; color: var(--text-primary, #F2F5F7);
+                      text-decoration: none; font-family: 'Space Mono', ui-monospace, monospace; }
+  .ts-header nav { display: flex; gap: 15px; flex-wrap: wrap; }
+  .ts-header nav a { font-size: .82rem; color: var(--text-secondary, #9FB0BC); text-decoration: none; }
+  .ts-header nav a:hover { color: var(--accent, #00E5FF); }
+
+  nav.crumbs { font-size: .78rem; color: var(--text-secondary); margin: 16px 0 12px; }
+  nav.crumbs a { color: var(--accent); text-decoration: none; }
+
+  /* Hero: scarf stripes, shield, name. The point is that landing here feels
+     like arriving somewhere about this club. */
+  .hero { position: relative; overflow: hidden; border-radius: 12px; padding: 22px 22px 20px;
+          border: 1px solid var(--rule, #24313A); margin-bottom: 8px;
+          background:
+            linear-gradient(160deg, color-mix(in srgb, var(--club) 30%, transparent), transparent 62%),
+            var(--bg-card, #131A20); }
+  .scarf { position: absolute; inset: 0 0 auto 0; height: 6px;
+           background: repeating-linear-gradient(90deg,
+             var(--club) 0 26px, var(--club-2) 26px 52px); }
+  .hero-row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .crest { width: 52px; height: 60px; flex: 0 0 auto; filter: drop-shadow(0 2px 6px rgba(0,0,0,.45)); }
+  .hero h1 { font-size: 1.65rem; line-height: 1.2; margin: 0 0 5px; }
+  .sub { color: var(--text-secondary); margin: 0; font-size: .9rem; }
+  .sub a.complink { color: var(--text-secondary); text-decoration: underline;
+                    text-decoration-color: rgba(255,255,255,.22); }
+  .sub a.complink:hover { color: var(--accent); }
+  .scope-note { color: var(--text-muted); font-size: .76rem; margin: 6px 0 0; }
+  .scope-note a { color: var(--accent); }
+
+  /* Explainer: shut by default on a return visit, open the first time. */
+  details.explainer { border: 1px solid var(--rule, #24313A); border-radius: 9px;
+                      background: var(--bg-card, #131A20); margin: 12px 0 26px; }
+  details.explainer > summary { cursor: pointer; padding: 11px 15px; font-size: .87rem;
+                                font-weight: 600; list-style: none; }
+  details.explainer > summary::-webkit-details-marker { display: none; }
+  details.explainer > summary::after { content: ' \25BE'; color: var(--text-muted); }
+  details.explainer[open] > summary::after { content: ' \25B4'; }
+  details.explainer .body { padding: 0 15px 14px; font-size: .87rem; line-height: 1.55;
+                            color: var(--text-secondary); max-width: 68ch; }
+  details.explainer .body p { margin: 0 0 9px; }
+
+  h2 { font-size: 1.12rem; margin: 30px 0 4px; }
+  h2 + .sub { margin-bottom: 12px; }
+  h3.sub-head { font-size: .95rem; margin: 26px 0 3px; }
+
+  /* Player of the day */
+  .potd { display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+          border: 1px solid var(--rule, #24313A); border-radius: 11px; padding: 16px 18px;
+          background: linear-gradient(120deg, color-mix(in srgb, var(--club) 15%, transparent), transparent 55%),
+                      var(--bg-card, #131A20); }
+  .shirt { width: 66px; height: 66px; flex: 0 0 auto; }
+  .potd-body { flex: 1; min-width: 220px; }
+  .potd .eyebrow { font-size: .68rem; text-transform: uppercase; letter-spacing: .1em;
+                   color: var(--text-muted); margin: 0 0 4px; }
+  .potd .name { font-size: 1.22rem; font-weight: 700; margin: 0 0 4px; }
+  .potd .line { font-size: .85rem; color: var(--text-secondary); margin: 0; }
+  .potd button.reveal { margin-top: 9px; padding: 8px 15px; border: 0; border-radius: 7px;
+                        font-weight: 600; font-size: .84rem; cursor: pointer;
+                        background: var(--accent, #00E5FF); color: #0B0F12; }
+
+  /* Competition chips */
+  .chips { display: flex; flex-wrap: wrap; gap: 7px; margin: 4px 0 6px; }
+  .chip { font-size: .79rem; padding: 6px 12px; border-radius: 999px; cursor: pointer;
+          border: 1px solid var(--rule, #24313A); background: transparent;
+          color: var(--text-secondary); font: inherit; font-size: .79rem; }
+  .chip.on { background: var(--club); border-color: var(--club); color: #fff; font-weight: 600; }
+  .chip-note { font-size: .76rem; color: var(--text-muted); margin: 0 0 14px; min-height: 1.1em; }
+
+  ul.games { list-style: none; padding: 0; margin: 0; display: grid;
+             grid-template-columns: repeat(auto-fit, minmax(232px, 1fr)); gap: 11px; }
+  li.game { background: var(--bg-card, #131A20); border: 1px solid var(--rule, #24313A);
+            border-radius: 9px; transition: border-color .15s, transform .15s; }
+  li.game:hover { border-color: var(--club); transform: translateY(-1px); }
+  a.game-go { display: block; padding: 14px 15px; text-decoration: none; color: inherit; height: 100%; }
+  li.game h3 { font-size: .95rem; margin: 0 0 4px; }
+  li.game p { font-size: .81rem; color: var(--text-secondary); margin: 0 0 10px; line-height: 1.4; }
+  li.game .go { font-size: .8rem; font-weight: 600; color: var(--accent, #00E5FF); }
+
+  .lane-note { font-size: .82rem; color: var(--text-secondary); margin: 3px 0 12px; max-width: 66ch; }
+  .cta { display: inline-block; margin-top: 10px; font-size: .84rem; font-weight: 600;
+         padding: 9px 15px; border-radius: 7px; text-decoration: none;
+         border: 1px solid var(--club); color: var(--text-primary, #F2F5F7); }
+  .cta:hover { background: var(--club); color: #fff; }
+
+  /* Community + leaderboard, both filled in after paint */
+  .community { list-style: none; padding: 0; margin: 0; display: grid;
+               grid-template-columns: repeat(auto-fit, minmax(232px, 1fr)); gap: 11px; }
+  .community li { background: var(--bg-card, #131A20); border: 1px dashed var(--rule, #3A4A55);
+                  border-radius: 9px; padding: 13px 15px; }
+  .community a { color: inherit; text-decoration: none; }
+  .community h4 { font-size: .9rem; margin: 0 0 4px; }
+  .community p { font-size: .79rem; color: var(--text-secondary); margin: 0 0 7px; line-height: 1.4; }
+  .community .meta { font-size: .72rem; color: var(--text-muted); }
+  .boards { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 14px; }
+  .board { border: 1px solid var(--rule, #24313A); border-radius: 9px; padding: 12px 14px;
+           background: var(--bg-card, #131A20); }
+  .board h4 { font-size: .82rem; text-transform: uppercase; letter-spacing: .06em;
+              color: var(--text-muted); margin: 0 0 8px; }
+  .board ol { margin: 0; padding-left: 1.3em; font-size: .86rem; }
+  .board li { padding: 2px 0; }
+  .board .pts { color: var(--text-muted); font-variant-numeric: tabular-nums; }
+  .empty { font-size: .84rem; color: var(--text-muted); margin: 6px 0 0; }
+
+  /* Stats: shut on load, per feedback. The content is still in the HTML, so
+     it is still indexed and still readable with JavaScript off. */
+  details.stats { border: 1px solid var(--rule, #24313A); border-radius: 9px;
+                  background: var(--bg-card, #131A20); margin-bottom: 11px; }
+  details.stats > summary { cursor: pointer; padding: 12px 15px; font-weight: 600;
+                            font-size: .95rem; list-style: none; }
+  details.stats > summary::-webkit-details-marker { display: none; }
+  details.stats > summary::after { content: ' \25BE'; color: var(--text-muted); }
+  details.stats[open] > summary::after { content: ' \25B4'; }
+  details.stats .body { padding: 0 15px 12px; overflow-x: auto; }
+
+  table { border-collapse: collapse; width: 100%; font-size: .86rem; }
+  th, td { text-align: left; padding: 6px 9px; border-bottom: 1px solid var(--rule, #24313A); }
+  th { font-size: .7rem; text-transform: uppercase; letter-spacing: .05em; color: var(--text-muted); }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  td.rank { color: var(--text-muted); width: 2em; }
+  td.yr { color: var(--text-secondary); white-space: nowrap; }
+  td.yes { color: var(--accent, #00E5FF); font-size: .78rem; }
+  td.no { color: var(--text-muted); font-size: .78rem; }
+
+  .related { display: flex; flex-wrap: wrap; gap: 7px; }
+  .related a { font-size: .81rem; color: var(--accent); text-decoration: none;
+               padding: 4px 10px; border: 1px solid var(--rule, #24313A); border-radius: 6px; }
+  form.ask { display: flex; gap: 8px; margin: 10px 0; }
+  form.ask input { flex: 1; padding: 10px 13px; font-size: .93rem; border-radius: 7px;
+                   border: 1px solid var(--rule, #24313A); background: var(--bg-card, #131A20);
+                   color: var(--text-primary, #F2F5F7); }
+  form.ask button { padding: 10px 17px; font-weight: 600; border: 0; border-radius: 7px;
+                    background: var(--accent, #00E5FF); color: #0B0F12; cursor: pointer; }
+  .ask-examples { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .ask-examples button { font-size: .77rem; padding: 5px 10px; border-radius: 5px; border: 0;
+                         background: var(--bg-elevated, #1E272E); color: var(--accent);
+                         cursor: pointer; font-family: inherit; }
+  #askAnswer .msg { font-size: .95rem; line-height: 1.5; margin: 10px 0; }
+  #askAnswer .prov { font-size: .73rem; color: var(--text-muted); }
+  footer.page { margin-top: 44px; padding-top: 16px; font-size: .77rem; color: var(--text-muted);
+                border-top: 1px solid var(--rule, #24313A); }
+  footer.page a { color: var(--accent); }
+
+  @media (max-width: 560px) {
+    .hero h1 { font-size: 1.32rem; }
+    .wrap { padding: 0 13px 46px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="ts-header">
+  <div class="inner">
+    <a class="brand" href="/">TELESTATS</a>
+    <nav>
+      <a href="/daily/">Daily</a>
+      <a href="/games/">Games</a>
+      <a href="/competitions/">Competitions</a>
+      <a href="/teams/">Teams</a>
+      <a href="/ask/">Ask</a>
+      <a href="/community/">Community</a>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap">
+
+<nav class="crumbs"><a href="/">TeleStats</a> › <a href="/teams/">Teams</a> › Mirandes</nav>
+
+<div class="hero">
+  <div class="scarf"></div>
+  <div class="hero-row">
+    <svg class="crest" viewBox="0 0 56 64" role="img" aria-label="Mirandes">
+      <path d="M4 4h48v30c0 14-12 23-24 26C16 57 4 48 4 34Z" fill="hsl(300, 55%, 38%)" stroke="hsl(318, 55%, 26%)" stroke-width="3"/>
+      <path d="M4 20h48v8H4Z" fill="hsl(318, 55%, 26%)" opacity=".55"/>
+      <text x="28" y="40" text-anchor="middle" font-size="15" font-weight="700"
+            font-family="Space Mono, ui-monospace, monospace" fill="#fff">MIR</text>
+    </svg>
+    <div>
+      <h1>Mirandes Football Quizzes &amp; Trivia</h1>
+      <p class="sub">259 players · 7,333 appearances ·
+        <a class="complink" href="/competitions/segunda-division/">Segunda División</a></p>
+      <p class="scope-note">Records cover 2012/13 to 2025/26.
+        <a href="/tools/data.html">Full dataset scope</a>.</p>
+    </div>
+  </div>
+</div>
+
+<details class="explainer" id="explainer">
+  <summary>New here? What this page is</summary>
+  <div class="body">
+    <p>This is a set of free football games about <strong>Mirandes</strong>, generated
+      from real appearance and goal records — 259 players who have turned out
+      for the club in Segunda División, going back to 2012/13.</p>
+    <p>Pick a game below and it starts straight away on Mirandes. No sign-up, no app.
+      Make an account only if you want your scores kept and your name on the club's board.</p>
+    <p>Everything you see here comes from the TeleStats database. Nothing is written by an AI
+      and nothing is guessed — if a fact is not in the data, the site says so rather than
+      inventing one.</p>
+  </div>
+</details>
+
+<section class="potd" id="potd" data-team="Mirandes">
+  <svg class="shirt" viewBox="0 0 64 64" aria-hidden="true">
+      <path d="M22 8 32 14 42 8l14 8-6 12-6-3v31H20V25l-6 3-6-12Z"
+            fill="hsl(300, 55%, 38%)" stroke="hsl(318, 55%, 26%)" stroke-width="2.5" stroke-linejoin="round"/>
+      <text x="32" y="46" text-anchor="middle" font-size="24" font-weight="700"
+            font-family="Space Mono, ui-monospace, monospace" fill="#fff">?</text>
+    </svg>
+  <div class="potd-body">
+    <p class="eyebrow">Mirandes · Player of the day</p>
+    <p class="name" id="potdName">Who is it?</p>
+    <p class="line" id="potdLine">One of this club's most-used players. Reveal to find out.</p>
+    <button type="button" class="reveal" id="potdBtn">Reveal</button>
+  </div>
+</section>
+
+<h2 id="play">Play Mirandes</h2>
+<p class="sub">The five TeleStats games, set up for Mirandes. Click one and it starts.</p>
+      
+      <ul class="games">
+        <li class="game">
+          <a class="game-go" data-path="/games/hol.html"
+             href="/games/hol.html?scope=team_mirandes_segunda-division&amp;play=1">
+            <h3>Mirandes Higher or Lower</h3>
+            <p>Which player has more appearances?</p>
+            <span class="go">Play now &rarr;</span>
+          </a>
+        </li>
+        <li class="game">
+          <a class="game-go" data-path="/games/alpha.html"
+             href="/games/alpha.html?scope=team_mirandes_segunda-division&amp;play=1">
+            <h3>Mirandes Player Alphabet</h3>
+            <p>Name a player for every letter of the alphabet.</p>
+            <span class="go">Play now &rarr;</span>
+          </a>
+        </li>
+        <li class="game">
+          <a class="game-go" data-path="/games/xi.html"
+             href="/games/xi.html?scope=team_mirandes_segunda-division&amp;play=1">
+            <h3>Mirandes Starting XI</h3>
+            <p>Build the strongest eleven you can.</p>
+            <span class="go">Play now &rarr;</span>
+          </a>
+        </li>
+        <li class="game">
+          <a class="game-go" data-path="/games/whoami.html"
+             href="/games/whoami.html?scope=team_mirandes_segunda-division&amp;play=1">
+            <h3>Mirandes Who Am I?</h3>
+            <p>Guess the player from five clues.</p>
+            <span class="go">Play now &rarr;</span>
+          </a>
+        </li>
+        <li class="game">
+          <a class="game-go" data-path="/games/quiz.html"
+             href="/games/quiz.html?scope=team_mirandes_segunda-division&amp;play=1">
+            <h3>Mirandes Trivia Quiz</h3>
+            <p>Ten questions from this club’s record.</p>
+            <span class="go">Play now &rarr;</span>
+          </a>
+        </li>
+      </ul>
+
+<h3 class="sub-head">Community games about Mirandes</h3>
+<p class="lane-note">The five above are the official TeleStats games. These are made by players,
+  using the same database — different rules, different lists, same real records.</p>
+<div id="communityBox"><p class="empty">Loading…</p></div>
+<a class="cta" href="/community/?build=1">Make your own Mirandes game &rarr;</a>
+
+<h2>Mirandes leaderboard</h2>
+<p class="sub">Best scores on Mirandes games, by game type. Sign in before you play to
+  get your name on it — or see the <a href="/leaderboard/">site-wide leaderboard</a>.</p>
+<div id="boardBox"><p class="empty">Loading…</p></div>
+
+<h2>Mirandes records</h2>
+<p class="sub">The data these games are built from.</p>
+
+<details class="stats">
+  <summary>Mirandes appearance leaders</summary>
+  <div class="body">
+    <table>
+      <thead><tr><th></th><th>Player</th><th class="num">Apps</th><th class="num">Goals</th><th>Seasons</th></tr></thead>
+      <tbody>
+        <tr>
+            <td class="rank">1</td>
+            <td>Gorka Kijera</td>
+            <td class="num">142</td>
+            <td class="num">4</td>
+            <td class="yr">2014/15–2019/20</td>
+          </tr>
+        <tr>
+            <td class="rank">2</td>
+            <td>Rúper</td>
+            <td class="num">136</td>
+            <td class="num">4</td>
+            <td class="yr">2012/13–2016/17</td>
+          </tr>
+        <tr>
+            <td class="rank">3</td>
+            <td>César Caneda</td>
+            <td class="num">119</td>
+            <td class="num">6</td>
+            <td class="yr">2012/13–2014/15</td>
+          </tr>
+        <tr>
+            <td class="rank">4</td>
+            <td>Álvaro Corral</td>
+            <td class="num">97</td>
+            <td class="num">1</td>
+            <td class="yr">2012/13–2015/16</td>
+          </tr>
+        <tr>
+            <td class="rank">5</td>
+            <td>Álex García</td>
+            <td class="num">96</td>
+            <td class="num">10</td>
+            <td class="yr">2014/15–2016/17</td>
+          </tr>
+        <tr>
+            <td class="rank">6</td>
+            <td>Raúl Lizoain</td>
+            <td class="num">84</td>
+            <td class="num">0</td>
+            <td class="yr">2019/20–2021/22</td>
+          </tr>
+        <tr>
+            <td class="rank">7</td>
+            <td>Raúl Fernández</td>
+            <td class="num">83</td>
+            <td class="num">0</td>
+            <td class="yr">2015/16–2024/25</td>
+          </tr>
+        <tr>
+            <td class="rank">8</td>
+            <td>Alberto Reina</td>
+            <td class="num">81</td>
+            <td class="num">6</td>
+            <td class="yr">2023/24–2024/25</td>
+          </tr>
+        <tr>
+            <td class="rank">9</td>
+            <td>Álex Ortiz</td>
+            <td class="num">80</td>
+            <td class="num">7</td>
+            <td class="yr">2014/15–2016/17</td>
+          </tr>
+        <tr>
+            <td class="rank">10</td>
+            <td>Daniel Provencio</td>
+            <td class="num">80</td>
+            <td class="num">1</td>
+            <td class="yr">2014/15–2016/17</td>
+          </tr>
+        <tr>
+            <td class="rank">11</td>
+            <td>Víctor Meseguer</td>
+            <td class="num">76</td>
+            <td class="num">6</td>
+            <td class="yr">2020/21–2021/22</td>
+          </tr>
+        <tr>
+            <td class="rank">12</td>
+            <td>Juan Gutierrez</td>
+            <td class="num">76</td>
+            <td class="num">0</td>
+            <td class="yr">2024/25–2025/26</td>
+          </tr>
+        <tr>
+            <td class="rank">13</td>
+            <td>Marco Sangalli</td>
+            <td class="num">75</td>
+            <td class="num">8</td>
+            <td class="yr">2015/16–2016/17</td>
+          </tr>
+        <tr>
+            <td class="rank">14</td>
+            <td>Pedro Martín</td>
+            <td class="num">73</td>
+            <td class="num">12</td>
+            <td class="yr">2014/15–2016/17</td>
+          </tr>
+        <tr>
+            <td class="rank">15</td>
+            <td>Oriol Rey</td>
+            <td class="num">72</td>
+            <td class="num">0</td>
+            <td class="yr">2021/22–2022/23</td>
+          </tr>
+      </tbody>
+    </table>
+  </div>
+</details>
+
+<details class="stats">
+  <summary>Mirandes top scorers</summary>
+  <div class="body">
+    <table>
+      <thead><tr><th></th><th>Player</th><th class="num">Goals</th><th class="num">Apps</th></tr></thead>
+      <tbody>
+        <tr>
+            <td class="rank">1</td>
+            <td>Urko Vera</td>
+            <td class="num">22</td>
+            <td class="num">54</td>
+          </tr>
+        <tr>
+            <td class="rank">2</td>
+            <td>Joaquín Panichelli</td>
+            <td class="num">20</td>
+            <td class="num">40</td>
+          </tr>
+        <tr>
+            <td class="rank">3</td>
+            <td>Raúl</td>
+            <td class="num">19</td>
+            <td class="num">39</td>
+          </tr>
+        <tr>
+            <td class="rank">4</td>
+            <td>Carlos Fernández</td>
+            <td class="num">16</td>
+            <td class="num">35</td>
+          </tr>
+        <tr>
+            <td class="rank">5</td>
+            <td>Martín Merquelanz</td>
+            <td class="num">15</td>
+            <td class="num">36</td>
+          </tr>
+        <tr>
+            <td class="rank">6</td>
+            <td>Sergio Camello</td>
+            <td class="num">15</td>
+            <td class="num">36</td>
+          </tr>
+        <tr>
+            <td class="rank">7</td>
+            <td>Carlos Martín</td>
+            <td class="num">15</td>
+            <td class="num">40</td>
+          </tr>
+        <tr>
+            <td class="rank">8</td>
+            <td>Iñigo Díaz de Cerio</td>
+            <td class="num">14</td>
+            <td class="num">68</td>
+          </tr>
+        <tr>
+            <td class="rank">9</td>
+            <td>Pedro Martín</td>
+            <td class="num">12</td>
+            <td class="num">73</td>
+          </tr>
+        <tr>
+            <td class="rank">10</td>
+            <td>Marcos André</td>
+            <td class="num">12</td>
+            <td class="num">38</td>
+          </tr>
+      </tbody>
+    </table>
+  </div>
+</details>
+
+<details class="stats">
+  <summary>Mirandes competitions in the database</summary>
+  <div class="body">
+    <table>
+      <thead><tr><th>Competition</th><th class="num">Players</th><th>Seasons</th><th class="num">Count</th><th>Games</th></tr></thead>
+      <tbody>
+        <tr>
+            <td>Segunda División</td>
+            <td class="num">259</td>
+            <td class="yr">2012/13–2025/26</td>
+            <td class="num">4</td>
+            <td class="yes">Playable</td>
+          </tr>
+      </tbody>
+    </table>
+  </div>
+</details>
+
+<h2>Ask about Mirandes</h2>
+<p class="sub">Ask the database a question. Answers come from 259 Mirandes
+  players and are never invented — if the data does not support an answer, it says so.</p>
+<form class="ask" id="askForm">
+  <input id="askQ" autocomplete="off" maxlength="300"
+         placeholder="Who has played for both Mirandes and Valladolid?"
+         aria-label="Ask a question about Mirandes">
+  <button type="submit">Ask</button>
+</form>
+<div class="ask-examples">
+          <button type="button" data-q="Who has played for both Mirandes and Valladolid?">Who has played for both Mirandes and Valladolid?</button>
+          <button type="button" data-q="Top scorers for Mirandes in Segunda División">Top scorers for Mirandes in Segunda División</button>
+          <button type="button" data-q="Which English players have the most appearances for Mirandes?">Which English players have the most appearances for Mirandes?</button>
+</div>
+<div id="askAnswer"></div>
+
+<h2>More teams</h2>
+<div class="related">
+          <a href="/teams/valladolid/">Valladolid</a>
+          <a href="/teams/albacete/">Albacete</a>
+          <a href="/teams/zaragoza/">Zaragoza</a>
+          <a href="/teams/tenerife/">Tenerife</a>
+          <a href="/teams/elche/">Elche</a>
+          <a href="/teams/espanyol/">Espanyol</a>
+          <a href="/teams/mallorca/">Mallorca</a>
+          <a href="/teams/sporting-gijon/">Sporting Gijón</a>
+          <a href="/teams/malaga/">Málaga</a>
+          <a href="/teams/atletico-madrid/">Atlético Madrid</a>
+          <a href="/teams/rayo-vallecano/">Rayo Vallecano</a>
+          <a href="/teams/celta-vigo/">Celta Vigo</a>
+</div>
+
+<footer class="page">
+  Player statistics from the TeleStats football database.
+  <a href="/tools/data.html">Coverage and last update</a> ·
+  <a href="/games/">All games</a> ·
+  <a href="/teams/">All teams</a> ·
+  <a href="/ask/">Ask TeleStats</a>
+</footer>
+
+</div><!-- /wrap -->
+
+<script>
+window.TS_TEAM = {"slug":"mirandes","name":"Mirandes","comps":["Segunda División"],"defaultScope":"team_mirandes_segunda-division","potd":[{"n":"Gorka Kijera","a":142,"g":4,"f":"2014/15","t":"2019/20"},{"n":"Rúper","a":136,"g":4,"f":"2012/13","t":"2016/17"},{"n":"César Caneda","a":119,"g":6,"f":"2012/13","t":"2014/15"},{"n":"Álvaro Corral","a":97,"g":1,"f":"2012/13","t":"2015/16"},{"n":"Álex García","a":96,"g":10,"f":"2014/15","t":"2016/17"},{"n":"Raúl Lizoain","a":84,"g":0,"f":"2019/20","t":"2021/22"},{"n":"Raúl Fernández","a":83,"g":0,"f":"2015/16","t":"2024/25"},{"n":"Alberto Reina","a":81,"g":6,"f":"2023/24","t":"2024/25"},{"n":"Álex Ortiz","a":80,"g":7,"f":"2014/15","t":"2016/17"},{"n":"Daniel Provencio","a":80,"g":1,"f":"2014/15","t":"2016/17"},{"n":"Víctor Meseguer","a":76,"g":6,"f":"2020/21","t":"2021/22"},{"n":"Juan Gutierrez","a":76,"g":0,"f":"2024/25","t":"2025/26"},{"n":"Marco Sangalli","a":75,"g":8,"f":"2015/16","t":"2016/17"},{"n":"Pedro Martín","a":73,"g":12,"f":"2014/15","t":"2016/17"},{"n":"Oriol Rey","a":72,"g":0,"f":"2021/22","t":"2022/23"}]};
+</script>
+<script src="/js/ts-scope.js"></script>
+<script src="/js/team-page.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/js/ts-auth.js"></script>
+<script src="/js/ts-data.js"></script>
+<script src="/js/ts-nav.js"></script>
+<script>
+  // The real site header, which replaces the static fallback above. Wrapped
+  // because a team page must stay readable if auth is down — the games, the
+  // records and the ask box do not need a signed-in user.
+  (async function () {
+    try { await TSAuth.init(); } catch (e) { console.error('[TeleStats] Auth init failed:', e); }
+    try { TSNav.render(); } catch (e) { console.error('[TeleStats] Nav render failed:', e); }
+  })();
+</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TeleStats","item":"https://telestats.net"},{"@type":"ListItem","position":2,"name":"Teams","item":"https://telestats.net/teams/"},{"@type":"ListItem","position":3,"name":"Mirandes","item":"https://telestats.net/teams/mirandes/"}]},{"@type":"SportsTeam","name":"Mirandes","sport":"Association football","url":"https://telestats.net/teams/mirandes/"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is the Mirandes page on TeleStats?","acceptedAnswer":{"@type":"Answer","text":"Free Mirandes football quizzes and trivia games generated from real appearance and goal records for 259 players across Segunda División. No sign-up is needed to play."}}]}]}</script>
+</body>
+</html>

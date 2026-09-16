@@ -1176,6 +1176,8 @@ function renderSetup() {
   for (const obj of gameConfig.objectives) {
     const btn = document.createElement('button');
     btn.className = 'option-btn wide';
+    // So a link naming an objective can find its button.
+    btn.dataset.obj = obj.id;
     btn.innerHTML = `
       <span class="emoji">${obj.id === 'appearances' ? '&#128202;' : obj.id === 'goals' ? '&#9917;' : '&#127775;'}</span>
       ${obj.label}
@@ -1189,6 +1191,16 @@ function renderSetup() {
   renderScopeGrid();
 
   $('startGameBtn').onclick = startGame;
+
+  // A link may name the objective — "Starting XI: goals" is its own puzzle.
+  const wantObj = window.TSScope &&
+    TSScope.variant('objective', ['appearances', 'goals', 'performance']);
+  if (wantObj) {
+    const btn = document.querySelector(`#objectiveGrid .option-btn[data-obj="${wantObj}"]`)
+             || [...document.querySelectorAll('#objectiveGrid .option-btn')]
+                  .find(b => (b.textContent || '').trim().toLowerCase() === wantObj);
+    if (btn) selectObjective(wantObj, btn);
+  }
 
   // Arrived from a team page with the club, division and game already chosen.
   // Starting XI still needs a formation and an objective, both of which have

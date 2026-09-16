@@ -52,6 +52,9 @@
   .crest { width: 52px; height: 60px; flex: 0 0 auto; filter: drop-shadow(0 2px 6px rgba(0,0,0,.45)); }
   .hero h1 { font-size: 1.65rem; line-height: 1.2; margin: 0 0 5px; }
   .sub { color: var(--text-secondary); margin: 0; font-size: .9rem; }
+  .sub a.complink { color: var(--text-secondary); text-decoration: underline;
+                    text-decoration-color: rgba(255,255,255,.22); }
+  .sub a.complink:hover { color: var(--accent); }
   .scope-note { color: var(--text-muted); font-size: .76rem; margin: 6px 0 0; }
   .scope-note a { color: var(--accent); }
 
@@ -182,9 +185,9 @@
     <nav>
       <a href="/daily/">Daily</a>
       <a href="/games/">Games</a>
+      <a href="/competitions/">Competitions</a>
       <a href="/teams/">Teams</a>
       <a href="/ask/">Ask</a>
-      <a href="/leaderboard/">Leaderboard</a>
       <a href="/community/">Community</a>
     </nav>
   </div>
@@ -205,7 +208,8 @@
     </svg>
     <div>
       <h1>Bari Football Quizzes &amp; Trivia</h1>
-      <p class="sub">174 players · 5,138 appearances · Serie A</p>
+      <p class="sub">174 players · 5,138 appearances ·
+        <a class="complink" href="/competitions/serie-a/">Serie A</a></p>
       <p class="scope-note">Records cover 1989/90 to 2010/11.
         <a href="/tools/data.html">Full dataset scope</a>.</p>
     </div>
@@ -386,17 +390,17 @@
           </tr>
         <tr>
             <td class="rank">12</td>
-            <td>Massimo Brambati</td>
-            <td class="num">79</td>
-            <td class="num">0</td>
-            <td class="yr">1989/90–1991/92</td>
-          </tr>
-        <tr>
-            <td class="rank">13</td>
             <td>Luigi Garzya</td>
             <td class="num">79</td>
             <td class="num">0</td>
             <td class="yr">1997/98–1999/00</td>
+          </tr>
+        <tr>
+            <td class="rank">13</td>
+            <td>Massimo Brambati</td>
+            <td class="num">79</td>
+            <td class="num">0</td>
+            <td class="yr">1989/90–1991/92</td>
           </tr>
         <tr>
             <td class="rank">14</td>
@@ -529,8 +533,8 @@
           <a href="/teams/internazionale/">Internazionale</a>
           <a href="/teams/parma/">Parma</a>
           <a href="/teams/torino/">Torino</a>
-          <a href="/teams/roma/">Roma</a>
           <a href="/teams/bologna/">Bologna</a>
+          <a href="/teams/roma/">Roma</a>
           <a href="/teams/genoa/">Genoa</a>
           <a href="/teams/udinese/">Udinese</a>
           <a href="/teams/milan/">Milan</a>
@@ -549,7 +553,7 @@
 </div><!-- /wrap -->
 
 <script>
-window.TS_TEAM = {"slug":"bari","name":"Bari","comps":["Serie A"],"defaultScope":"team_bari_serie-a","potd":[{"n":"Gérson Caçapa","a":123,"g":3,"f":"1989/90","t":"1995/96"},{"n":"Rachid Neqrouz","a":105,"g":5,"f":"1997/98","t":"2000/01"},{"n":"Gaetano De Rosa","a":102,"g":1,"f":"1997/98","t":"2000/01"},{"n":"Daniel Andersson","a":97,"g":16,"f":"1998/99","t":"2000/01"},{"n":"Francesco Mancini","a":95,"g":0,"f":"1997/98","t":"1999/00"},{"n":"Jean-François Gillet","a":93,"g":0,"f":"2000/01","t":"2010/11"},{"n":"Angelo Terracenere","a":90,"g":3,"f":"1989/90","t":"1991/92"},{"n":"Michele Marcolini","a":86,"g":5,"f":"1997/98","t":"2000/01"},{"n":"Duccio Innocenti","a":86,"g":8,"f":"1998/99","t":"2000/01"},{"n":"Yksel Osmanovski","a":84,"g":14,"f":"1998/99","t":"2000/01"},{"n":"Gian Paolo Manighetti","a":80,"g":0,"f":"1991/92","t":"1997/98"},{"n":"Massimo Brambati","a":79,"g":0,"f":"1989/90","t":"1991/92"},{"n":"Luigi Garzya","a":79,"g":0,"f":"1997/98","t":"1999/00"},{"n":"Phil Masinga","a":75,"g":24,"f":"1997/98","t":"2000/01"},{"n":"Giovanni Loseto","a":75,"g":5,"f":"1989/90","t":"1991/92"}]};
+window.TS_TEAM = {"slug":"bari","name":"Bari","comps":["Serie A"],"defaultScope":"team_bari_serie-a","potd":[{"n":"Gérson Caçapa","a":123,"g":3,"f":"1989/90","t":"1995/96"},{"n":"Rachid Neqrouz","a":105,"g":5,"f":"1997/98","t":"2000/01"},{"n":"Gaetano De Rosa","a":102,"g":1,"f":"1997/98","t":"2000/01"},{"n":"Daniel Andersson","a":97,"g":16,"f":"1998/99","t":"2000/01"},{"n":"Francesco Mancini","a":95,"g":0,"f":"1997/98","t":"1999/00"},{"n":"Jean-François Gillet","a":93,"g":0,"f":"2000/01","t":"2010/11"},{"n":"Angelo Terracenere","a":90,"g":3,"f":"1989/90","t":"1991/92"},{"n":"Michele Marcolini","a":86,"g":5,"f":"1997/98","t":"2000/01"},{"n":"Duccio Innocenti","a":86,"g":8,"f":"1998/99","t":"2000/01"},{"n":"Yksel Osmanovski","a":84,"g":14,"f":"1998/99","t":"2000/01"},{"n":"Gian Paolo Manighetti","a":80,"g":0,"f":"1991/92","t":"1997/98"},{"n":"Luigi Garzya","a":79,"g":0,"f":"1997/98","t":"1999/00"},{"n":"Massimo Brambati","a":79,"g":0,"f":"1989/90","t":"1991/92"},{"n":"Phil Masinga","a":75,"g":24,"f":"1997/98","t":"2000/01"},{"n":"Giovanni Loseto","a":75,"g":5,"f":"1989/90","t":"1991/92"}]};
 </script>
 <script src="/js/ts-scope.js"></script>
 <script src="/js/team-page.js"></script>

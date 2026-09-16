@@ -80,7 +80,7 @@ const xmlHeader = '<?xml version="1.0" encoding="UTF-8"?>\n';
   // ── the index ─────────────────────────────────────────────────────────────
   // Only sections that exist. A sitemap index pointing at a 404 is a broken
   // signal, and Search Console reports it as an error rather than ignoring it.
-  const sections = ['sitemap-core.xml', 'sitemap-teams.xml']
+  const sections = ['sitemap-core.xml', 'sitemap-competitions.xml', 'sitemap-teams.xml']
     .filter((f) => fs.existsSync(path.join(PUB, f)))
     .map((f) => ({ f, lastmod: lastmod(f) }));
 
@@ -92,12 +92,14 @@ const xmlHeader = '<?xml version="1.0" encoding="UTF-8"?>\n';
     ).join('\n') +
     '\n</sitemapindex>\n');
 
-  const teamCount = fs.existsSync(path.join(PUB, 'sitemap-teams.xml'))
-    ? (fs.readFileSync(path.join(PUB, 'sitemap-teams.xml'), 'utf8').match(/<loc>/g) || []).length
-    : 0;
+  const count = (f) => fs.existsSync(path.join(PUB, f))
+    ? (fs.readFileSync(path.join(PUB, f), 'utf8').match(/<loc>/g) || []).length : 0;
+  const teamCount = count('sitemap-teams.xml');
+  const compCount = count('sitemap-competitions.xml');
 
-  console.log(`\n  ✓ sitemap-core.xml   ${entries.length} URLs`);
-  console.log(`  ✓ sitemap-teams.xml  ${teamCount} URLs`);
-  console.log(`  ✓ sitemap.xml        index of ${sections.length} sections`);
-  console.log(`    total indexable: ${entries.length + teamCount}\n`);
+  console.log(`\n  ✓ sitemap-core.xml          ${entries.length} URLs`);
+  console.log(`  ✓ sitemap-competitions.xml  ${compCount} URLs`);
+  console.log(`  ✓ sitemap-teams.xml         ${teamCount} URLs`);
+  console.log(`  ✓ sitemap.xml               index of ${sections.length} sections`);
+  console.log(`    total indexable: ${entries.length + teamCount + compCount}\n`);
 })();

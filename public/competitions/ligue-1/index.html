@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="/js/ts-analytics.js"></script>
+<title>Ligue 1 Quiz &amp; Trivia Games | TeleStats</title>
+<meta name="description" content="Play Ligue 1 football quizzes built from real data — 5,247 players, 310,249 appearances and 46 clubs across 32 seasons, 1995/96 to 2026/27. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<link rel="canonical" href="https://telestats.net/competitions/ligue-1/">
+<meta name="theme-color" content="#009FE3">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Ligue 1 Quiz &amp; Trivia Games | TeleStats">
+<meta property="og:description" content="Play Ligue 1 football quizzes built from real data — 5,247 players, 310,249 appearances and 46 clubs across 32 seasons, 1995/96 to 2026/27. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta property="og:url" content="https://telestats.net/competitions/ligue-1/">
+<meta property="og:site_name" content="TeleStats">
+<meta name="twitter:card" content="summary">
+<link rel="stylesheet" href="/telestats-theme.css">
+<style>
+  :root { --club: #009FE3; --club-2: #0077bb; }
+  body { margin: 0; }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 0 18px 60px; }
+  .ts-header { border-bottom: 1px solid var(--rule, #24313A); background: var(--bg-card, #131A20); }
+  .ts-header .inner { max-width: 980px; margin: 0 auto; padding: 11px 18px;
+                      display: flex; align-items: center; gap: 18px; }
+  .ts-header .brand { font-weight: 700; letter-spacing: .04em; color: var(--text-primary, #F2F5F7);
+                      text-decoration: none; font-family: 'Space Mono', ui-monospace, monospace; }
+  .ts-header nav { display: flex; gap: 15px; flex-wrap: wrap; }
+  .ts-header nav a { font-size: .82rem; color: var(--text-secondary, #9FB0BC); text-decoration: none; }
+  nav.crumbs { font-size: .78rem; color: var(--text-secondary); margin: 16px 0 12px; }
+  nav.crumbs a { color: var(--accent); text-decoration: none; }
+
+  .hero { position: relative; overflow: hidden; border-radius: 12px; padding: 22px;
+          border: 1px solid var(--rule, #24313A); margin-bottom: 8px;
+          background: linear-gradient(160deg, color-mix(in srgb, var(--club) 26%, transparent), transparent 62%),
+                      var(--bg-card, #131A20); }
+  .scarf { position: absolute; inset: 0 0 auto 0; height: 5px;
+           background: repeating-linear-gradient(90deg, var(--club) 0 24px, var(--club-2) 24px 48px); }
+  .hero h1 { font-size: 1.7rem; line-height: 1.2; margin: 0 0 6px; }
+  .hero .sub { color: var(--text-secondary); font-size: .92rem; margin: 0; }
+  .hero .note { color: var(--text-muted); font-size: .76rem; margin: 7px 0 0; }
+  .hero .note a { color: var(--accent); }
+
+  h2 { font-size: 1.14rem; margin: 32px 0 4px; }
+  h2 + .sub { color: var(--text-secondary); font-size: .88rem; margin: 0 0 13px; max-width: 66ch; line-height: 1.5; }
+
+  ul.games { list-style: none; padding: 0; margin: 0; display: grid;
+             grid-template-columns: repeat(auto-fit, minmax(215px, 1fr)); gap: 11px; }
+  li.game { background: var(--bg-card, #131A20); border: 1px solid var(--rule, #24313A);
+            border-radius: 9px; transition: border-color .15s, transform .15s; }
+  li.game:hover { border-color: var(--club); transform: translateY(-1px); }
+  li.game a { display: block; padding: 14px 15px; text-decoration: none; color: inherit; height: 100%; }
+  li.game h3 { font-size: .95rem; margin: 0 0 4px; }
+  li.game .variant { font-size: .74rem; font-weight: 600; color: var(--club);
+                     border: 1px solid var(--club); border-radius: 4px; padding: 1px 6px;
+                     margin-left: 4px; vertical-align: 1px; }
+  li.game p { font-size: .81rem; color: var(--text-secondary); margin: 0 0 10px; line-height: 1.4; }
+  li.game .go { font-size: .8rem; font-weight: 600; color: var(--accent, #00E5FF); }
+
+  table { border-collapse: collapse; width: 100%; font-size: .87rem; }
+  th, td { text-align: left; padding: 6px 9px; border-bottom: 1px solid var(--rule, #24313A); }
+  th { font-size: .7rem; text-transform: uppercase; letter-spacing: .05em; color: var(--text-muted); }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  td.rank { color: var(--text-muted); width: 2em; }
+  td.club a { color: var(--text-secondary); text-decoration: none; }
+  td.club a:hover { color: var(--accent); }
+  .tables { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .table-wrap { overflow-x: auto; }
+
+  .clubs { display: grid; grid-template-columns: repeat(auto-fill, minmax(196px, 1fr)); gap: 6px; }
+  .clubs a { display: flex; align-items: center; gap: 9px; font-size: .85rem; padding: 7px 11px;
+             border: 1px solid var(--rule, #24313A); border-radius: 6px;
+             color: var(--text-primary, #F2F5F7); text-decoration: none; }
+  .clubs a i { width: 4px; align-self: stretch; min-height: 17px; border-radius: 2px;
+               background: var(--club, #4A5A66); flex: 0 0 auto; }
+  .clubs a span { margin-left: auto; color: var(--text-muted); font-variant-numeric: tabular-nums; font-size: .78rem; }
+  .clubs a:hover { border-color: var(--club); }
+
+  .community { list-style: none; padding: 0; margin: 0; display: grid;
+               grid-template-columns: repeat(auto-fit, minmax(232px, 1fr)); gap: 11px; }
+  .community li { background: var(--bg-card, #131A20); border: 1px dashed var(--rule, #3A4A55);
+                  border-radius: 9px; padding: 13px 15px; }
+  .community a { color: inherit; text-decoration: none; }
+  .community h4 { font-size: .9rem; margin: 0 0 4px; }
+  .community p { font-size: .79rem; color: var(--text-secondary); margin: 0 0 7px; line-height: 1.4; }
+  .community .meta { font-size: .72rem; color: var(--text-muted); }
+  .empty { font-size: .84rem; color: var(--text-muted); margin: 6px 0 0; }
+  .cta { display: inline-block; margin-top: 11px; font-size: .84rem; font-weight: 600;
+         padding: 9px 15px; border-radius: 7px; text-decoration: none;
+         border: 1px solid var(--club); color: var(--text-primary, #F2F5F7); }
+  .cta:hover { background: var(--club); color: #fff; }
+
+  .related { display: flex; flex-wrap: wrap; gap: 7px; }
+  .related a { font-size: .81rem; color: var(--accent); text-decoration: none;
+               padding: 4px 10px; border: 1px solid var(--rule, #24313A); border-radius: 6px; }
+  form.ask { display: flex; gap: 8px; margin: 10px 0; }
+  form.ask input { flex: 1; padding: 10px 13px; font-size: .93rem; border-radius: 7px;
+                   border: 1px solid var(--rule, #24313A); background: var(--bg-card, #131A20);
+                   color: var(--text-primary, #F2F5F7); }
+  form.ask button { padding: 10px 17px; font-weight: 600; border: 0; border-radius: 7px;
+                    background: var(--accent, #00E5FF); color: #0B0F12; cursor: pointer; }
+  .ask-examples { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .ask-examples button { font-size: .77rem; padding: 5px 10px; border-radius: 5px; border: 0;
+                         background: var(--bg-elevated, #1E272E); color: var(--accent);
+                         cursor: pointer; font-family: inherit; }
+  #askAnswer .msg { font-size: .95rem; line-height: 1.5; margin: 10px 0; }
+  #askAnswer .prov { font-size: .73rem; color: var(--text-muted); }
+  footer.page { margin-top: 44px; padding-top: 16px; font-size: .77rem; color: var(--text-muted);
+                border-top: 1px solid var(--rule, #24313A); }
+  footer.page a { color: var(--accent); }
+  @media (max-width: 680px) { .tables { grid-template-columns: 1fr; } .hero h1 { font-size: 1.35rem; } }
+</style>
+</head>
+<body>
+
+<header class="ts-header">
+  <div class="inner">
+    <a class="brand" href="/">TELESTATS</a>
+    <nav>
+      <a href="/daily/">Daily</a>
+      <a href="/games/">Games</a>
+      <a href="/competitions/">Competitions</a>
+      <a href="/teams/">Teams</a>
+      <a href="/ask/">Ask</a>
+      <a href="/community/">Community</a>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap">
+
+<nav class="crumbs"><a href="/">TeleStats</a> › <a href="/competitions/">Competitions</a> › Ligue 1</nav>
+
+<div class="hero">
+  <div class="scarf"></div>
+  <h1>Ligue 1 Quizzes &amp; Trivia</h1>
+  <p class="sub">5,247 players · 310,249 appearances ·
+    46 clubs · 32 seasons</p>
+  <p class="note">Records cover 1995/96 to 2026/27.
+    <a href="/tools/data.html">What the dataset covers</a>.</p>
+</div>
+
+<h2>Play Ligue 1</h2>
+<p class="sub">Every club in the competition at once. Pick a game and it starts —
+  or scroll down and choose a single club instead.</p>
+<ul class="games">
+        <li class="game">
+          <a href="/games/hol.html?scope=comp_ligue-1&amp;stat=appearances&amp;play=1">
+            <h3>Higher or Lower <span class="variant">Appearances</span></h3>
+            <p>Which player made more appearances?</p>
+            <span class="go">Play &rarr;</span>
+          </a>
+        </li>
+        <li class="game">
+          <a href="/games/hol.html?scope=comp_ligue-1&amp;stat=goals&amp;play=1">
+            <h3>Higher or Lower <span class="variant">Goals</span></h3>
+            <p>Which player scored more?</p>
+            <span class="go">Play &rarr;</span>
+          </a>
+        </li>
+        <li class="game">
+          <a href="/games/xi.html?scope=comp_ligue-1&amp;objective=appearances&amp;play=1">
+            <h3>Starting XI <span class="variant">Appearances</span></h3>
+            <p>Build the most-capped eleven.</p>
+            <span class="go">Play &rarr;</span>
+          </a>
+        </li>
+        <li class="game">
+          <a href="/games/xi.html?scope=comp_ligue-1&amp;objective=goals&amp;play=1">
+            <h3>Starting XI <span class="variant">Goals</span></h3>
+            <p>Build the highest-scoring eleven.</p>
+            <span class="go">Play &rarr;</span>
+          </a>
+        </li>
+        <li class="game">
+          <a href="/games/alpha.html?scope=comp_ligue-1&amp;play=1">
+            <h3>Player Alphabet</h3>
+            <p>Name a player for every letter.</p>
+            <span class="go">Play &rarr;</span>
+          </a>
+        </li>
+        <li class="game">
+          <a href="/games/whoami.html?scope=comp_ligue-1&amp;play=1">
+            <h3>Who Am I?</h3>
+            <p>Guess the player from five clues.</p>
+            <span class="go">Play &rarr;</span>
+          </a>
+        </li>
+        <li class="game">
+          <a href="/games/quiz.html?scope=comp_ligue-1&amp;play=1">
+            <h3>Trivia Quiz</h3>
+            <p>Ten questions from the record books.</p>
+            <span class="go">Play &rarr;</span>
+          </a>
+        </li>
+</ul>
+
+<h2>Ligue 1 all-time records</h2>
+<p class="sub">Across every club in the competition, 1995/96 to 2026/27.</p>
+<div class="tables">
+  <div class="table-wrap">
+    <h3 style="font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);margin:0 0 6px">Most appearances</h3>
+    <table>
+      <thead><tr><th></th><th>Player</th><th>Club</th><th class="num">Apps</th><th class="num">Goals</th></tr></thead>
+      <tbody>
+        <tr>
+            <td class="rank">1</td>
+            <td>Mickaël Landreau</td>
+            <td class="club"><a href="/teams/nantes/">Nantes</a></td>
+            <td class="num">618</td>
+            <td class="num">0</td>
+          </tr>
+        <tr>
+            <td class="rank">2</td>
+            <td>Steve Mandanda</td>
+            <td class="club"><a href="/teams/marseille/">Marseille</a></td>
+            <td class="num">555</td>
+            <td class="num">0</td>
+          </tr>
+        <tr>
+            <td class="rank">3</td>
+            <td>Vitorino Hilton</td>
+            <td class="club"><a href="/teams/montpellier/">Montpellier</a></td>
+            <td class="num">512</td>
+            <td class="num">20</td>
+          </tr>
+        <tr>
+            <td class="rank">4</td>
+            <td>Florent Balmont</td>
+            <td class="club"><a href="/teams/lille/">Lille</a></td>
+            <td class="num">512</td>
+            <td class="num">13</td>
+          </tr>
+        <tr>
+            <td class="rank">5</td>
+            <td>Sylvain Armand</td>
+            <td class="club"><a href="/teams/paris-saint-germain/">Paris Saint-Germain</a></td>
+            <td class="num">507</td>
+            <td class="num">19</td>
+          </tr>
+        <tr>
+            <td class="rank">6</td>
+            <td>Dimitri Payet</td>
+            <td class="club"><a href="/teams/marseille/">Marseille</a></td>
+            <td class="num">492</td>
+            <td class="num">103</td>
+          </tr>
+        <tr>
+            <td class="rank">7</td>
+            <td>Daniel Congré</td>
+            <td class="club"><a href="/teams/montpellier/">Montpellier</a></td>
+            <td class="num">490</td>
+            <td class="num">14</td>
+          </tr>
+        <tr>
+            <td class="rank">8</td>
+            <td>Jimmy Briand</td>
+            <td class="club"><a href="/teams/rennes/">Rennes</a></td>
+            <td class="num">483</td>
+            <td class="num">102</td>
+          </tr>
+        <tr>
+            <td class="rank">9</td>
+            <td>Benjamin André</td>
+            <td class="club"><a href="/teams/lille/">Lille</a></td>
+            <td class="num">468</td>
+            <td class="num">26</td>
+          </tr>
+        <tr>
+            <td class="rank">10</td>
+            <td>Laurent Batlles</td>
+            <td class="club"><a href="/teams/toulouse/">Toulouse</a></td>
+            <td class="num">465</td>
+            <td class="num">41</td>
+          </tr>
+        <tr>
+            <td class="rank">11</td>
+            <td>Étienne Didot</td>
+            <td class="club"><a href="/teams/toulouse/">Toulouse</a></td>
+            <td class="num">460</td>
+            <td class="num">18</td>
+          </tr>
+        <tr>
+            <td class="rank">12</td>
+            <td>Grégory Coupet</td>
+            <td class="club"><a href="/teams/lyon/">Lyon</a></td>
+            <td class="num">437</td>
+            <td class="num">0</td>
+          </tr>
+        <tr>
+            <td class="rank">13</td>
+            <td>Anthony Lopes</td>
+            <td class="club"><a href="/teams/lyon/">Lyon</a></td>
+            <td class="num">431</td>
+            <td class="num">0</td>
+          </tr>
+        <tr>
+            <td class="rank">14</td>
+            <td>Stéphane Ruffier</td>
+            <td class="club"><a href="/teams/saint-etienne/">Saint-Étienne</a></td>
+            <td class="num">428</td>
+            <td class="num">0</td>
+          </tr>
+        <tr>
+            <td class="rank">15</td>
+            <td>Anthony Réveillère</td>
+            <td class="club"><a href="/teams/lyon/">Lyon</a></td>
+            <td class="num">426</td>
+            <td class="num">5</td>
+          </tr>
+        <tr>
+            <td class="rank">16</td>
+            <td>Rio Mavuba</td>
+            <td class="club"><a href="/teams/lille/">Lille</a></td>
+            <td class="num">426</td>
+            <td class="num">6</td>
+          </tr>
+        <tr>
+            <td class="rank">17</td>
+            <td>Jérémy Morel</td>
+            <td class="club"><a href="/teams/lorient/">Lorient</a></td>
+            <td class="num">425</td>
+            <td class="num">10</td>
+          </tr>
+        <tr>
+            <td class="rank">18</td>
+            <td>Souleymane Camara</td>
+            <td class="club"><a href="/teams/montpellier/">Montpellier</a></td>
+            <td class="num">423</td>
+            <td class="num">62</td>
+          </tr>
+        <tr>
+            <td class="rank">19</td>
+            <td>Jérôme Leroy</td>
+            <td class="club"><a href="/teams/rennes/">Rennes</a></td>
+            <td class="num">419</td>
+            <td class="num">45</td>
+          </tr>
+        <tr>
+            <td class="rank">20</td>
+            <td>Mathieu Bodmer</td>
+            <td class="club"><a href="/teams/lille/">Lille</a></td>
+            <td class="num">418</td>
+            <td class="num">41</td>
+          </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="table-wrap">
+    <h3 style="font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);margin:0 0 6px">Most goals</h3>
+    <table>
+      <thead><tr><th></th><th>Player</th><th>Club</th><th class="num">Goals</th><th class="num">Apps</th></tr></thead>
+      <tbody>
+        <tr>
+            <td class="rank">1</td>
+            <td>Kylian Mbappé</td>
+            <td class="club"><a href="/teams/paris-saint-germain/">Paris Saint-Germain</a></td>
+            <td class="num">191</td>
+            <td class="num">246</td>
+          </tr>
+        <tr>
+            <td class="rank">2</td>
+            <td>Alexandre Lacazette</td>
+            <td class="club"><a href="/teams/lyon/">Lyon</a></td>
+            <td class="num">161</td>
+            <td class="num">297</td>
+          </tr>
+        <tr>
+            <td class="rank">3</td>
+            <td>Wissam Ben Yedder</td>
+            <td class="club"><a href="/teams/monaco/">Monaco</a></td>
+            <td class="num">161</td>
+            <td class="num">320</td>
+          </tr>
+        <tr>
+            <td class="rank">4</td>
+            <td>Pauleta</td>
+            <td class="club"><a href="/teams/paris-saint-germain/">Paris Saint-Germain</a></td>
+            <td class="num">141</td>
+            <td class="num">264</td>
+          </tr>
+        <tr>
+            <td class="rank">5</td>
+            <td>Edinson Cavani</td>
+            <td class="club"><a href="/teams/paris-saint-germain/">Paris Saint-Germain</a></td>
+            <td class="num">138</td>
+            <td class="num">200</td>
+          </tr>
+        <tr>
+            <td class="rank">6</td>
+            <td>Bafétimbi Gomis</td>
+            <td class="club"><a href="/teams/lyon/">Lyon</a></td>
+            <td class="num">121</td>
+            <td class="num">340</td>
+          </tr>
+        <tr>
+            <td class="rank">7</td>
+            <td>Zlatan Ibrahimović</td>
+            <td class="club"><a href="/teams/paris-saint-germain/">Paris Saint-Germain</a></td>
+            <td class="num">113</td>
+            <td class="num">122</td>
+          </tr>
+        <tr>
+            <td class="rank">8</td>
+            <td>Sonny Anderson</td>
+            <td class="club"><a href="/teams/lyon/">Lyon</a></td>
+            <td class="num">111</td>
+            <td class="num">178</td>
+          </tr>
+        <tr>
+            <td class="rank">9</td>
+            <td>Dimitri Payet</td>
+            <td class="club"><a href="/teams/marseille/">Marseille</a></td>
+            <td class="num">103</td>
+            <td class="num">492</td>
+          </tr>
+        <tr>
+            <td class="rank">10</td>
+            <td>André-Pierre Gignac</td>
+            <td class="club"><a href="/teams/marseille/">Marseille</a></td>
+            <td class="num">103</td>
+            <td class="num">290</td>
+          </tr>
+        <tr>
+            <td class="rank">11</td>
+            <td>Lilian Laslandes</td>
+            <td class="club"><a href="/teams/bordeaux/">Bordeaux</a></td>
+            <td class="num">102</td>
+            <td class="num">343</td>
+          </tr>
+        <tr>
+            <td class="rank">12</td>
+            <td>Jimmy Briand</td>
+            <td class="club"><a href="/teams/rennes/">Rennes</a></td>
+            <td class="num">102</td>
+            <td class="num">483</td>
+          </tr>
+        <tr>
+            <td class="rank">13</td>
+            <td>Mamadou Niang</td>
+            <td class="club"><a href="/teams/marseille/">Marseille</a></td>
+            <td class="num">101</td>
+            <td class="num">258</td>
+          </tr>
+        <tr>
+            <td class="rank">14</td>
+            <td>Kévin Gameiro</td>
+            <td class="club"><a href="/teams/strasbourg/">Strasbourg</a></td>
+            <td class="num">101</td>
+            <td class="num">305</td>
+          </tr>
+        <tr>
+            <td class="rank">15</td>
+            <td>Florian Thauvin</td>
+            <td class="club"><a href="/teams/marseille/">Marseille</a></td>
+            <td class="num">100</td>
+            <td class="num">296</td>
+          </tr>
+        <tr>
+            <td class="rank">16</td>
+            <td>Djibril Cissé</td>
+            <td class="club"><a href="/teams/auxerre/">Auxerre</a></td>
+            <td class="num">96</td>
+            <td class="num">209</td>
+          </tr>
+        <tr>
+            <td class="rank">17</td>
+            <td>Mevlüt Erdinç</td>
+            <td class="club"><a href="/teams/sochaux/">Sochaux</a></td>
+            <td class="num">92</td>
+            <td class="num">295</td>
+          </tr>
+        <tr>
+            <td class="rank">18</td>
+            <td>Sylvain Wiltord</td>
+            <td class="club"><a href="/teams/rennes/">Rennes</a></td>
+            <td class="num">90</td>
+            <td class="num">297</td>
+          </tr>
+        <tr>
+            <td class="rank">19</td>
+            <td>Shabani Nonda</td>
+            <td class="club"><a href="/teams/monaco/">Monaco</a></td>
+            <td class="num">88</td>
+            <td class="num">178</td>
+          </tr>
+        <tr>
+            <td class="rank">20</td>
+            <td>Gaëtan Laborde</td>
+            <td class="club"><a href="/teams/montpellier/">Montpellier</a></td>
+            <td class="num">88</td>
+            <td class="num">297</td>
+          </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<h2>Clubs in Ligue 1</h2>
+<p class="sub">46 clubs have played in Ligue 1 in this dataset.
+  Each has its own page, records and games.</p>
+<div class="clubs">
+        <a href="/teams/marseille/" style="--club:#009FE3"><i></i>Marseille<span>440</span></a>
+        <a href="/teams/rennes/" style="--club:#E4002B"><i></i>Rennes<span>372</span></a>
+        <a href="/teams/monaco/" style="--club:#C8102E"><i></i>Monaco<span>371</span></a>
+        <a href="/teams/nice/" style="--club:#000000"><i></i>Nice<span>338</span></a>
+        <a href="/teams/paris-saint-germain/" style="--club:#004170"><i></i>Paris Saint-Germain<span>328</span></a>
+        <a href="/teams/nantes/" style="--club:#FFED00"><i></i>Nantes<span>318</span></a>
+        <a href="/teams/toulouse/" style="--club:#5B2B82"><i></i>Toulouse<span>312</span></a>
+        <a href="/teams/metz/" style="--club:#6D2832"><i></i>Metz<span>307</span></a>
+        <a href="/teams/lyon/" style="--club:#003DA5"><i></i>Lyon<span>306</span></a>
+        <a href="/teams/lille/" style="--club:#D71920"><i></i>Lille<span>303</span></a>
+        <a href="/teams/saint-etienne/" style="--club:#006A3D"><i></i>Saint-Étienne<span>300</span></a>
+        <a href="/teams/lens/" style="--club:#E2001A"><i></i>Lens<span>283</span></a>
+        <a href="/teams/bordeaux/" style="--club:#13244A"><i></i>Bordeaux<span>277</span></a>
+        <a href="/teams/strasbourg/" style="--club:#009FE3"><i></i>Strasbourg<span>270</span></a>
+        <a href="/teams/lorient/" style="--club:#F47920"><i></i>Lorient<span>256</span></a>
+        <a href="/teams/montpellier/" style="--club:#003DA5"><i></i>Montpellier<span>249</span></a>
+        <a href="/teams/auxerre/" style="--club:#FFFFFF"><i></i>Auxerre<span>218</span></a>
+        <a href="/teams/troyes/" style="--club:#004FA3"><i></i>Troyes<span>218</span></a>
+        <a href="/teams/bastia/" style="--club:#009FE3"><i></i>Bastia<span>214</span></a>
+        <a href="/teams/le-havre/" style="--club:hsl(268, 64%, 38%)"><i></i>Le Havre<span>186</span></a>
+        <a href="/teams/caen/" style="--club:#003DA5"><i></i>Caen<span>172</span></a>
+        <a href="/teams/guingamp/" style="--club:#E30613"><i></i>Guingamp<span>164</span></a>
+        <a href="/teams/ajaccio/" style="--club:hsl(343, 62%, 38%)"><i></i>Ajaccio<span>162</span></a>
+        <a href="/teams/sochaux/" style="--club:#FEDD00"><i></i>Sochaux<span>160</span></a>
+        <a href="/teams/reims/" style="--club:#E30613"><i></i>Reims<span>155</span></a>
+        <a href="/teams/nancy/" style="--club:#E4002B"><i></i>Nancy<span>146</span></a>
+        <a href="/teams/brest/" style="--club:hsl(183, 62%, 38%)"><i></i>Brest<span>145</span></a>
+        <a href="/teams/angers/" style="--club:#000000"><i></i>Angers<span>140</span></a>
+        <a href="/teams/le-mans/" style="--club:hsl(250, 71%, 38%)"><i></i>Le Mans<span>106</span></a>
+        <a href="/teams/dijon/" style="--club:hsl(208, 56%, 38%)"><i></i>Dijon<span>105</span></a>
+        <a href="/teams/valenciennes/" style="--club:hsl(295, 73%, 38%)"><i></i>Valenciennes<span>85</span></a>
+        <a href="/teams/sedan/" style="--club:hsl(140, 55%, 38%)"><i></i>Sedan<span>81</span></a>
+        <a href="/teams/evian/" style="--club:hsl(355, 69%, 38%)"><i></i>Evian<span>64</span></a>
+        <a href="/teams/cannes/" style="--club:hsl(108, 64%, 38%)"><i></i>Cannes<span>57</span></a>
+        <a href="/teams/clermont-foot/" style="--club:hsl(345, 61%, 38%)"><i></i>Clermont Foot<span>56</span></a>
+        <a href="/teams/amiens/" style="--club:hsl(275, 57%, 38%)"><i></i>Amiens<span>54</span></a>
+        <a href="/teams/nimes/" style="--club:hsl(243, 70%, 38%)"><i></i>Nîmes<span>52</span></a>
+        <a href="/teams/grenoble-foot/" style="--club:hsl(260, 59%, 38%)"><i></i>Grenoble Foot<span>45</span></a>
+        <a href="/teams/paris-fc/" style="--club:hsl(20, 63%, 38%)"><i></i>Paris FC<span>35</span></a>
+        <a href="/teams/arles-avignon/" style="--club:hsl(58, 72%, 38%)"><i></i>Arles-Avignon<span>34</span></a>
+        <a href="/teams/boulogne/" style="--club:hsl(170, 55%, 38%)"><i></i>Boulogne<span>33</span></a>
+        <a href="/teams/istres/" style="--club:hsl(193, 58%, 38%)"><i></i>Istres<span>31</span></a>
+        <a href="/teams/martigues/" style="--club:hsl(320, 63%, 38%)"><i></i>Martigues<span>26</span></a>
+        <a href="/teams/chateauroux/" style="--club:hsl(275, 61%, 38%)"><i></i>Châteauroux<span>26</span></a>
+        <a href="/teams/gueugnon/" style="--club:hsl(143, 70%, 38%)"><i></i>Gueugnon<span>25</span></a>
+        <a href="/teams/gazelec-ajaccio/" style="--club:hsl(48, 72%, 38%)"><i></i>Gazélec Ajaccio<span>23</span></a>
+</div>
+
+<h2>Community games</h2>
+<p class="sub">Made by players from the same database — different rules, same real records.</p>
+<div id="communityBox"><p class="empty">Loading…</p></div>
+<a class="cta" href="/community/?build=1">Build a Ligue 1 game &rarr;</a>
+
+<h2>Ask about Ligue 1</h2>
+<p class="sub">Answers come from the database and are never invented — if the data does not
+  support an answer, it says so.</p>
+<form class="ask" id="askForm">
+  <input id="askQ" autocomplete="off" maxlength="300"
+         placeholder="Top scorers in Ligue 1"
+         aria-label="Ask a question about Ligue 1">
+  <button type="submit">Ask</button>
+</form>
+<div class="ask-examples">
+          <button type="button" data-q="Top scorers in Ligue 1">Top scorers in Ligue 1</button>
+          <button type="button" data-q="Which English players have the most appearances for Marseille?">Which English players have the most appearances for Marseille?</button>
+          <button type="button" data-q="Who has played for both Marseille and Rennes?">Who has played for both Marseille and Rennes?</button>
+</div>
+<div id="askAnswer"></div>
+
+<h2>Other competitions</h2>
+<div class="related">
+          <a href="/competitions/fa-cup/">FA Cup</a>
+          <a href="/competitions/efl-cup/">EFL Cup</a>
+          <a href="/competitions/segunda-division/">Segunda División</a>
+          <a href="/competitions/league-one/">League One</a>
+          <a href="/competitions/league-two/">League Two</a>
+          <a href="/competitions/champions-league/">Champions League</a>
+          <a href="/competitions/championship/">Championship</a>
+          <a href="/competitions/serie-a/">Serie A</a>
+          <a href="/competitions/premier-league/">Premier League</a>
+          <a href="/competitions/la-liga/">La Liga</a>
+          <a href="/competitions/bundesliga/">Bundesliga</a>
+</div>
+
+<footer class="page">
+  Player statistics compiled from official league and competition sources.
+  <a href="/tools/data.html">Coverage and last update</a> ·
+  <a href="/competitions/">All competitions</a> ·
+  <a href="/teams/">All teams</a> ·
+  <a href="/ask/">Ask TeleStats</a>
+</footer>
+
+</div>
+
+<script>
+window.TS_COMPETITION = {"slug":"ligue-1","name":"Ligue 1","scope":"comp_ligue-1"};
+</script>
+<script src="/js/ts-scope.js"></script>
+<script src="/js/competition-page.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/js/ts-auth.js"></script>
+<script src="/js/ts-data.js"></script>
+<script src="/js/ts-nav.js"></script>
+<script>
+  (async function () {
+    try { await TSAuth.init(); } catch (e) { console.error('[TeleStats] Auth init failed:', e); }
+    try { TSNav.render(); } catch (e) { console.error('[TeleStats] Nav render failed:', e); }
+  })();
+</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TeleStats","item":"https://telestats.net"},{"@type":"ListItem","position":2,"name":"Competitions","item":"https://telestats.net/competitions/"},{"@type":"ListItem","position":3,"name":"Ligue 1","item":"https://telestats.net/competitions/ligue-1/"}]},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Who has the most Ligue 1 appearances?","acceptedAnswer":{"@type":"Answer","text":"Mickaël Landreau has the most Ligue 1 appearances in the TeleStats database with 618 for Nantes."}}]}]}</script>
+</body>
+</html>

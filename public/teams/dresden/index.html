@@ -52,6 +52,9 @@
   .crest { width: 52px; height: 60px; flex: 0 0 auto; filter: drop-shadow(0 2px 6px rgba(0,0,0,.45)); }
   .hero h1 { font-size: 1.65rem; line-height: 1.2; margin: 0 0 5px; }
   .sub { color: var(--text-secondary); margin: 0; font-size: .9rem; }
+  .sub a.complink { color: var(--text-secondary); text-decoration: underline;
+                    text-decoration-color: rgba(255,255,255,.22); }
+  .sub a.complink:hover { color: var(--accent); }
   .scope-note { color: var(--text-muted); font-size: .76rem; margin: 6px 0 0; }
   .scope-note a { color: var(--accent); }
 
@@ -182,9 +185,9 @@
     <nav>
       <a href="/daily/">Daily</a>
       <a href="/games/">Games</a>
+      <a href="/competitions/">Competitions</a>
       <a href="/teams/">Teams</a>
       <a href="/ask/">Ask</a>
-      <a href="/leaderboard/">Leaderboard</a>
       <a href="/community/">Community</a>
     </nav>
   </div>
@@ -205,7 +208,8 @@
     </svg>
     <div>
       <h1>Dresden Football Quizzes &amp; Trivia</h1>
-      <p class="sub">56 players · 1,829 appearances · Bundesliga and Champions League</p>
+      <p class="sub">56 players · 1,829 appearances ·
+        <a class="complink" href="/competitions/bundesliga/">Bundesliga</a>, <a class="complink" href="/competitions/champions-league/">Champions League</a></p>
       <p class="scope-note">Records cover 1990/91 to 1994/95.
         <a href="/tools/data.html">Full dataset scope</a>.</p>
     </div>
@@ -386,17 +390,17 @@
           </tr>
         <tr>
             <td class="rank">12</td>
-            <td>Andreas Wagenhaus</td>
-            <td class="num">55</td>
-            <td class="num">1</td>
-            <td class="yr">1990/91–1993/94</td>
-          </tr>
-        <tr>
-            <td class="rank">13</td>
             <td>Miroslav Stević</td>
             <td class="num">55</td>
             <td class="num">4</td>
             <td class="yr">1992/93–1993/94</td>
+          </tr>
+        <tr>
+            <td class="rank">13</td>
+            <td>Andreas Wagenhaus</td>
+            <td class="num">55</td>
+            <td class="num">1</td>
+            <td class="yr">1990/91–1993/94</td>
           </tr>
         <tr>
             <td class="rank">14</td>
@@ -467,15 +471,15 @@
           </tr>
         <tr>
             <td class="rank">8</td>
-            <td>Henri Fuchs</td>
-            <td class="num">6</td>
-            <td class="num">33</td>
-          </tr>
-        <tr>
-            <td class="rank">9</td>
             <td>Thomas Rath</td>
             <td class="num">6</td>
             <td class="num">75</td>
+          </tr>
+        <tr>
+            <td class="rank">9</td>
+            <td>Henri Fuchs</td>
+            <td class="num">6</td>
+            <td class="num">33</td>
           </tr>
         <tr>
             <td class="rank">10</td>
@@ -535,14 +539,14 @@
           <a href="/teams/leeds-united/">Leeds United</a>
           <a href="/teams/marseille/">Marseille</a>
           <a href="/teams/sevilla/">Sevilla</a>
+          <a href="/teams/mallorca/">Mallorca</a>
           <a href="/teams/atalanta/">Atalanta</a>
           <a href="/teams/internazionale/">Internazionale</a>
           <a href="/teams/parma/">Parma</a>
-          <a href="/teams/roma/">Roma</a>
           <a href="/teams/bologna/">Bologna</a>
+          <a href="/teams/roma/">Roma</a>
+          <a href="/teams/malaga/">Málaga</a>
           <a href="/teams/blackburn-rovers/">Blackburn Rovers</a>
-          <a href="/teams/udinese/">Udinese</a>
-          <a href="/teams/leicester-city/">Leicester City</a>
 </div>
 
 <footer class="page">
@@ -556,7 +560,7 @@
 </div><!-- /wrap -->
 
 <script>
-window.TS_TEAM = {"slug":"dresden","name":"Dresden","comps":["Bundesliga"],"defaultScope":"team_dresden_bundesliga","potd":[{"n":"Detlef Schößler","a":119,"g":3,"f":"1990/91","t":"1994/95"},{"n":"Matthias Maucksch","a":118,"g":4,"f":"1991/92","t":"1994/95"},{"n":"Hans-Uwe Pilz","a":108,"g":4,"f":"1990/91","t":"1994/95"},{"n":"Sven Kmetsch","a":93,"g":6,"f":"1991/92","t":"1994/95"},{"n":"Uwe Jähnig","a":88,"g":12,"f":"1990/91","t":"1994/95"},{"n":"René Müller","a":81,"g":0,"f":"1991/92","t":"1993/94"},{"n":"Thomas Rath","a":75,"g":6,"f":"1992/93","t":"1994/95"},{"n":"Mario Kern","a":73,"g":2,"f":"1990/91","t":"1994/95"},{"n":"Ralf Hauptmann","a":70,"g":0,"f":"1990/91","t":"1992/93"},{"n":"Jens Melzig","a":63,"g":3,"f":"1991/92","t":"1992/93"},{"n":"Stanislav Cherchesov","a":57,"g":0,"f":"1993/94","t":"1994/95"},{"n":"Andreas Wagenhaus","a":55,"g":1,"f":"1990/91","t":"1993/94"},{"n":"Miroslav Stević","a":55,"g":4,"f":"1992/93","t":"1993/94"},{"n":"Sven Ratke","a":52,"g":2,"f":"1990/91","t":"1994/95"},{"n":"René Beuchel","a":49,"g":1,"f":"1992/93","t":"1994/95"}]};
+window.TS_TEAM = {"slug":"dresden","name":"Dresden","comps":["Bundesliga"],"defaultScope":"team_dresden_bundesliga","potd":[{"n":"Detlef Schößler","a":119,"g":3,"f":"1990/91","t":"1994/95"},{"n":"Matthias Maucksch","a":118,"g":4,"f":"1991/92","t":"1994/95"},{"n":"Hans-Uwe Pilz","a":108,"g":4,"f":"1990/91","t":"1994/95"},{"n":"Sven Kmetsch","a":93,"g":6,"f":"1991/92","t":"1994/95"},{"n":"Uwe Jähnig","a":88,"g":12,"f":"1990/91","t":"1994/95"},{"n":"René Müller","a":81,"g":0,"f":"1991/92","t":"1993/94"},{"n":"Thomas Rath","a":75,"g":6,"f":"1992/93","t":"1994/95"},{"n":"Mario Kern","a":73,"g":2,"f":"1990/91","t":"1994/95"},{"n":"Ralf Hauptmann","a":70,"g":0,"f":"1990/91","t":"1992/93"},{"n":"Jens Melzig","a":63,"g":3,"f":"1991/92","t":"1992/93"},{"n":"Stanislav Cherchesov","a":57,"g":0,"f":"1993/94","t":"1994/95"},{"n":"Miroslav Stević","a":55,"g":4,"f":"1992/93","t":"1993/94"},{"n":"Andreas Wagenhaus","a":55,"g":1,"f":"1990/91","t":"1993/94"},{"n":"Sven Ratke","a":52,"g":2,"f":"1990/91","t":"1994/95"},{"n":"René Beuchel","a":49,"g":1,"f":"1992/93","t":"1994/95"}]};
 </script>
 <script src="/js/ts-scope.js"></script>
 <script src="/js/team-page.js"></script>

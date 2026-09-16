@@ -82,8 +82,20 @@ const LEAGUE_KEYS = {
   'Ligue 1': 'ligue1',
 };
 
+/**
+ * A competition name as a URL segment.
+ *
+ * Accents are FOLDED, not stripped. Segunda División is the first competition
+ * with one, and dropping the character rather than folding it produced
+ * "segunda-divisi-n" — a scope id that is ugly in a URL and that nothing
+ * resolves. None of the other twelve competitions has an accent, so this
+ * changes no existing id; it is asserted in scripts/fbref/preflight.js terms
+ * by the fact that every game still answers its old scopes.
+ */
 const competitionSlug = (name) =>
-  String(name).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  String(name)
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 
 // ─── Lookups ────────────────────────────────────────────────────────────────
 
@@ -117,8 +129,51 @@ const indexable = () => TEAMS.filter((t) => t.players >= INDEXABLE_MIN_PLAYERS);
  * left for later. The team PAGE can still show all-time totals, because
  * agg_player_club already merges competitions.
  */
+/**
+ * Every competition a club in the manifest plays in, with how many clubs play
+ * in it. Derived rather than listed, so a new competition needs no edit here.
+ */
+function competitions() {
+  const out = new Map();
+  for (const t of TEAMS) {
+    for (const comp of t.competitions) {
+      const e = out.get(comp) || { name: comp, slug: competitionSlug(comp), clubs: [] };
+      e.clubs.push(t.slug);
+      out.set(comp, e);
+    }
+  }
+  return [...out.values()].sort((a, b) => b.clubs.length - a.clubs.length);
+}
+
+/**
+ * The scope for a WHOLE competition — every club in it at once.
+ *
+ * Five of these existed as legacy ids baked into two games' own arrays
+ * ('epl_alltime', 'laliga_alltime' …), so the Championship, both lower English
+ * tiers, Segunda and the cups had no competition-wide game at all. These are
+ * generated from the data instead, so every competition has one and a new one
+ * arrives with it.
+ *
+ * type is 'league', which every handler already reads as "do not filter by
+ * club" — the same branch the legacy all-time scopes go down.
+ */
+function competitionScopes() {
+  return competitions().map((c) => ({
+    id: `comp_${c.slug}`,
+    label: `${c.name} — all clubs`,
+    type: 'league',
+    league: LEAGUE_KEYS[c.name] || c.slug,
+    competitionName: c.name,
+    clubName: null,
+    clubId: null,
+    slug: null,
+    teamName: null,
+    competitionSlug: c.slug,
+  }));
+}
+
 function scopes() {
-  const out = [];
+  const out = competitionScopes();
   for (const t of TEAMS) {
     // "All competitions" — everything the club has ever played, merged.
     // competitionName is null, and every game treats that as "do not filter by
@@ -311,6 +366,7 @@ const isEnglish = (team) => (team.tiers || []).length > 0 && team.country === 'E
 module.exports = {
   all, bySlug, byClubId, indexable,
   scopes, resolve, scopeIdFor, scopeIdForMany, playCategories, teamForCategory,
+  competitions, competitionScopes,
   tierLabel, isEnglish, competitionSlug, LEAGUE_KEYS,
   INDEXABLE_MIN_PLAYERS,
   generatedAt: MANIFEST.generated,

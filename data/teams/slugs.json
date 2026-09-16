@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-05T10:42:35.134Z",
+ "generated": "2026-09-16T13:30:27.277Z",
  "teams": {
   "1": {
    "club_id": 1,
@@ -15,8 +15,8 @@
     "FA Cup",
     "Premier League"
    ],
-   "players": 294,
-   "appearances": 18369
+   "players": 295,
+   "appearances": 18397
   },
   "2": {
    "club_id": 2,
@@ -37,7 +37,7 @@
     "Premier League"
    ],
    "players": 399,
-   "appearances": 19950
+   "appearances": 19997
   },
   "3": {
    "club_id": 3,
@@ -58,7 +58,7 @@
     "Premier League"
    ],
    "players": 516,
-   "appearances": 14561
+   "appearances": 14590
   },
   "4": {
    "club_id": 4,
@@ -75,8 +75,8 @@
     "FA Cup",
     "Premier League"
    ],
-   "players": 286,
-   "appearances": 21967
+   "players": 287,
+   "appearances": 22031
   },
   "5": {
    "club_id": 5,
@@ -96,8 +96,8 @@
     "League One",
     "Premier League"
    ],
-   "players": 409,
-   "appearances": 17640
+   "players": 410,
+   "appearances": 17688
   },
   "6": {
    "club_id": 6,
@@ -114,8 +114,8 @@
     "FA Cup",
     "Premier League"
    ],
-   "players": 317,
-   "appearances": 19663
+   "players": 320,
+   "appearances": 19711
   },
   "7": {
    "club_id": 7,
@@ -132,8 +132,8 @@
     "FA Cup",
     "Premier League"
    ],
-   "players": 336,
-   "appearances": 22317
+   "players": 337,
+   "appearances": 22364
   },
   "8": {
    "club_id": 8,
@@ -153,8 +153,8 @@
     "League One",
     "Premier League"
    ],
-   "players": 493,
-   "appearances": 21017
+   "players": 494,
+   "appearances": 21049
   },
   "9": {
    "club_id": 9,
@@ -175,8 +175,8 @@
     "League One",
     "Premier League"
    ],
-   "players": 393,
-   "appearances": 19217
+   "players": 395,
+   "appearances": 19259
   },
   "10": {
    "club_id": 10,
@@ -211,8 +211,8 @@
     "FA Cup",
     "Premier League"
    ],
-   "players": 363,
-   "appearances": 16683
+   "players": 366,
+   "appearances": 16731
   },
   "12": {
    "club_id": 12,
@@ -235,7 +235,7 @@
     "Premier League"
    ],
    "players": 500,
-   "appearances": 20651
+   "appearances": 20682
   },
   "13": {
    "club_id": 13,
@@ -254,8 +254,8 @@
     "FA Cup",
     "Premier League"
    ],
-   "players": 350,
-   "appearances": 18771
+   "players": 352,
+   "appearances": 18818
   },
   "14": {
    "club_id": 14,
@@ -275,8 +275,8 @@
     "League One",
     "Premier League"
    ],
-   "players": 422,
-   "appearances": 18521
+   "players": 424,
+   "appearances": 18568
   },
   "15": {
    "club_id": 15,
@@ -296,8 +296,8 @@
     "League One",
     "Premier League"
    ],
-   "players": 446,
-   "appearances": 18804
+   "players": 447,
+   "appearances": 18833
   },
   "16": {
    "club_id": 16,
@@ -317,8 +317,8 @@
     "League One",
     "Premier League"
    ],
-   "players": 431,
-   "appearances": 17543
+   "players": 433,
+   "appearances": 17591
   },
   "17": {
    "club_id": 17,
@@ -335,8 +335,8 @@
     "FA Cup",
     "Premier League"
    ],
-   "players": 312,
-   "appearances": 21475
+   "players": 313,
+   "appearances": 21538
   },
   "18": {
    "club_id": 18,
@@ -357,8 +357,8 @@
     "League One",
     "Premier League"
    ],
-   "players": 443,
-   "appearances": 20599
+   "players": 445,
+   "appearances": 20647
   },
   "19": {
    "club_id": 19,
@@ -379,7 +379,7 @@
     "Premier League"
    ],
    "players": 375,
-   "appearances": 17688
+   "appearances": 17736
   },
   "20": {
    "club_id": 20,
@@ -397,7 +397,7 @@
     "Premier League"
    ],
    "players": 268,
-   "appearances": 22402
+   "appearances": 22447
   },
   "21": {
    "club_id": 21,
@@ -416,8 +416,8 @@
     "FA Cup",
     "Premier League"
    ],
-   "players": 324,
-   "appearances": 19205
+   "players": 326,
+   "appearances": 19248
   },
   "22": {
    "club_id": 22,
@@ -435,8 +435,8 @@
     "FA Cup",
     "Premier League"
    ],
-   "players": 417,
-   "appearances": 18750
+   "players": 420,
+   "appearances": 18814
   },
   "23": {
    "club_id": 23,
@@ -456,8 +456,8 @@
     "League Two",
     "Premier League"
    ],
-   "players": 509,
-   "appearances": 16038
+   "players": 511,
+   "appearances": 16070
   },
   "24": {
    "club_id": 24,
@@ -475,8 +475,8 @@
     "FA Cup",
     "Premier League"
    ],
-   "players": 396,
-   "appearances": 18242
+   "players": 398,
+   "appearances": 18306
   },
   "25": {
    "club_id": 25,
@@ -495,8 +495,8 @@
     "FA Cup",
     "Premier League"
    ],
-   "players": 307,
-   "appearances": 18865
+   "players": 308,
+   "appearances": 18913
   },
   "26": {
    "club_id": 26,
@@ -517,8 +517,8 @@
     "League One",
     "Premier League"
    ],
-   "players": 387,
-   "appearances": 18862
+   "players": 392,
+   "appearances": 18894
   },
   "27": {
    "club_id": 27,
@@ -540,8 +540,8 @@
     "League Two",
     "Premier League"
    ],
-   "players": 444,
-   "appearances": 16274
+   "players": 447,
+   "appearances": 16321
   },
   "28": {
    "club_id": 28,
@@ -561,8 +561,8 @@
     "League One",
     "Premier League"
    ],
-   "players": 406,
-   "appearances": 16347
+   "players": 412,
+   "appearances": 16389
   },
   "29": {
    "club_id": 29,
@@ -582,8 +582,8 @@
     "League One",
     "Premier League"
    ],
-   "players": 437,
-   "appearances": 19259
+   "players": 439,
+   "appearances": 19306
   },
   "30": {
    "club_id": 30,
@@ -603,8 +603,8 @@
     "League One",
     "Premier League"
    ],
-   "players": 489,
-   "appearances": 17192
+   "players": 490,
+   "appearances": 17237
   },
   "31": {
    "club_id": 31,
@@ -624,8 +624,8 @@
     "League One",
     "Premier League"
    ],
-   "players": 450,
-   "appearances": 17175
+   "players": 451,
+   "appearances": 17218
   },
   "32": {
    "club_id": 32,
@@ -643,8 +643,8 @@
     "FA Cup",
     "Premier League"
    ],
-   "players": 399,
-   "appearances": 16428
+   "players": 401,
+   "appearances": 16475
   },
   "33": {
    "club_id": 33,
@@ -666,8 +666,8 @@
     "League Two",
     "Premier League"
    ],
-   "players": 489,
-   "appearances": 17212
+   "players": 493,
+   "appearances": 17258
   },
   "34": {
    "club_id": 34,
@@ -685,8 +685,8 @@
     "FA Cup",
     "Premier League"
    ],
-   "players": 324,
-   "appearances": 14740
+   "players": 327,
+   "appearances": 14788
   },
   "35": {
    "club_id": 35,
@@ -704,8 +704,8 @@
     "FA Cup",
     "Premier League"
    ],
-   "players": 319,
-   "appearances": 15425
+   "players": 320,
+   "appearances": 15470
   },
   "36": {
    "club_id": 36,
@@ -725,8 +725,8 @@
     "League One",
     "Premier League"
    ],
-   "players": 388,
-   "appearances": 16028
+   "players": 389,
+   "appearances": 16075
   },
   "37": {
    "club_id": 37,
@@ -748,8 +748,8 @@
     "League Two",
     "Premier League"
    ],
-   "players": 454,
-   "appearances": 15668
+   "players": 456,
+   "appearances": 15699
   },
   "38": {
    "club_id": 38,
@@ -769,8 +769,8 @@
     "League One",
     "Premier League"
    ],
-   "players": 304,
-   "appearances": 15599
+   "players": 305,
+   "appearances": 15631
   },
   "39": {
    "club_id": 39,
@@ -790,8 +790,8 @@
     "League One",
     "Premier League"
    ],
-   "players": 393,
-   "appearances": 15242
+   "players": 394,
+   "appearances": 15273
   },
   "40": {
    "club_id": 40,
@@ -811,8 +811,8 @@
     "League One",
     "Premier League"
    ],
-   "players": 333,
-   "appearances": 15844
+   "players": 334,
+   "appearances": 15891
   },
   "41": {
    "club_id": 41,
@@ -834,8 +834,8 @@
     "League Two",
     "Premier League"
    ],
-   "players": 388,
-   "appearances": 15615
+   "players": 393,
+   "appearances": 15664
   },
   "42": {
    "club_id": 42,
@@ -853,8 +853,8 @@
     "FA Cup",
     "Premier League"
    ],
-   "players": 321,
-   "appearances": 15129
+   "players": 323,
+   "appearances": 15174
   },
   "43": {
    "club_id": 43,
@@ -872,8 +872,8 @@
     "FA Cup",
     "Premier League"
    ],
-   "players": 285,
-   "appearances": 15470
+   "players": 288,
+   "appearances": 15516
   },
   "44": {
    "club_id": 44,
@@ -896,7 +896,7 @@
     "Premier League"
    ],
    "players": 470,
-   "appearances": 15842
+   "appearances": 15870
   },
   "45": {
    "club_id": 45,
@@ -919,7 +919,7 @@
     "Premier League"
    ],
    "players": 321,
-   "appearances": 15452
+   "appearances": 15500
   },
   "46": {
    "club_id": 46,
@@ -940,7 +940,7 @@
     "Premier League"
    ],
    "players": 348,
-   "appearances": 15784
+   "appearances": 15827
   },
   "47": {
    "club_id": 47,
@@ -962,8 +962,8 @@
     "League Two",
     "Premier League"
    ],
-   "players": 295,
-   "appearances": 15185
+   "players": 297,
+   "appearances": 15233
   },
   "48": {
    "club_id": 48,
@@ -983,8 +983,8 @@
     "League One",
     "Premier League"
    ],
-   "players": 345,
-   "appearances": 15223
+   "players": 347,
+   "appearances": 15253
   },
   "49": {
    "club_id": 49,
@@ -1007,7 +1007,7 @@
     "Premier League"
    ],
    "players": 359,
-   "appearances": 15612
+   "appearances": 15641
   },
   "50": {
    "club_id": 50,
@@ -1029,8 +1029,8 @@
     "League Two",
     "Premier League"
    ],
-   "players": 370,
-   "appearances": 15577
+   "players": 371,
+   "appearances": 15624
   },
   "51": {
    "club_id": 51,
@@ -1052,8 +1052,8 @@
     "League Two",
     "Premier League"
    ],
-   "players": 298,
-   "appearances": 12730
+   "players": 299,
+   "appearances": 12761
   },
   "52": {
    "club_id": 52,
@@ -1071,8 +1071,8 @@
     "FA Cup",
     "League One"
    ],
-   "players": 333,
-   "appearances": 16877
+   "players": 335,
+   "appearances": 16925
   },
   "53": {
    "club_id": 53,
@@ -1092,8 +1092,8 @@
     "League One",
     "League Two"
    ],
-   "players": 402,
-   "appearances": 11984
+   "players": 406,
+   "appearances": 12015
   },
   "54": {
    "club_id": 54,
@@ -1113,8 +1113,8 @@
     "League One",
     "League Two"
    ],
-   "players": 427,
-   "appearances": 16398
+   "players": 428,
+   "appearances": 16428
   },
   "55": {
    "club_id": 55,
@@ -1134,8 +1134,8 @@
     "League One",
     "League Two"
    ],
-   "players": 338,
-   "appearances": 9346
+   "players": 340,
+   "appearances": 9378
   },
   "56": {
    "club_id": 56,
@@ -1155,8 +1155,8 @@
     "League One",
     "League Two"
    ],
-   "players": 418,
-   "appearances": 16397
+   "players": 421,
+   "appearances": 16429
   },
   "57": {
    "club_id": 57,
@@ -1177,7 +1177,7 @@
     "League Two"
    ],
    "players": 342,
-   "appearances": 16086
+   "appearances": 16116
   },
   "58": {
    "club_id": 58,
@@ -1197,8 +1197,8 @@
     "League One",
     "League Two"
    ],
-   "players": 418,
-   "appearances": 16209
+   "players": 420,
+   "appearances": 16241
   },
   "59": {
    "club_id": 59,
@@ -1216,8 +1216,8 @@
     "FA Cup",
     "League One"
    ],
-   "players": 345,
-   "appearances": 16672
+   "players": 349,
+   "appearances": 16735
   },
   "60": {
    "club_id": 60,
@@ -1238,7 +1238,7 @@
     "League Two"
    ],
    "players": 385,
-   "appearances": 15987
+   "appearances": 16019
   },
   "61": {
    "club_id": 61,
@@ -1279,8 +1279,8 @@
     "League One",
     "League Two"
    ],
-   "players": 380,
-   "appearances": 15661
+   "players": 381,
+   "appearances": 15693
   },
   "63": {
    "club_id": 63,
@@ -1298,8 +1298,8 @@
     "FA Cup",
     "League One"
    ],
-   "players": 335,
-   "appearances": 16382
+   "players": 336,
+   "appearances": 16430
   },
   "64": {
    "club_id": 64,
@@ -1341,7 +1341,7 @@
     "League Two"
    ],
    "players": 379,
-   "appearances": 15406
+   "appearances": 15436
   },
   "66": {
    "club_id": 66,
@@ -1361,8 +1361,8 @@
     "League One",
     "League Two"
    ],
-   "players": 396,
-   "appearances": 15979
+   "players": 397,
+   "appearances": 16025
   },
   "67": {
    "club_id": 67,
@@ -1403,8 +1403,8 @@
     "League One",
     "League Two"
    ],
-   "players": 372,
-   "appearances": 14758
+   "players": 373,
+   "appearances": 14787
   },
   "69": {
    "club_id": 69,
@@ -1424,8 +1424,8 @@
     "League One",
     "League Two"
    ],
-   "players": 332,
-   "appearances": 11494
+   "players": 333,
+   "appearances": 11524
   },
   "70": {
    "club_id": 70,
@@ -1445,8 +1445,8 @@
     "League One",
     "League Two"
    ],
-   "players": 389,
-   "appearances": 15894
+   "players": 390,
+   "appearances": 15922
   },
   "71": {
    "club_id": 71,
@@ -1466,8 +1466,8 @@
     "League One",
     "League Two"
    ],
-   "players": 373,
-   "appearances": 13647
+   "players": 374,
+   "appearances": 13679
   },
   "72": {
    "club_id": 72,
@@ -1487,8 +1487,8 @@
     "League One",
     "League Two"
    ],
-   "players": 202,
-   "appearances": 6219
+   "players": 204,
+   "appearances": 6266
   },
   "73": {
    "club_id": 73,
@@ -1508,8 +1508,8 @@
     "League One",
     "League Two"
    ],
-   "players": 359,
-   "appearances": 12016
+   "players": 361,
+   "appearances": 12079
   },
   "74": {
    "club_id": 74,
@@ -1527,8 +1527,8 @@
     "League One",
     "League Two"
    ],
-   "players": 479,
-   "appearances": 15816
+   "players": 481,
+   "appearances": 15846
   },
   "75": {
    "club_id": 75,
@@ -1546,8 +1546,8 @@
     "League One",
     "League Two"
    ],
-   "players": 371,
-   "appearances": 13472
+   "players": 373,
+   "appearances": 13503
   },
   "76": {
    "club_id": 76,
@@ -1565,8 +1565,8 @@
     "League One",
     "League Two"
    ],
-   "players": 379,
-   "appearances": 11848
+   "players": 382,
+   "appearances": 11880
   },
   "77": {
    "club_id": 77,
@@ -1584,8 +1584,8 @@
     "League One",
     "League Two"
    ],
-   "players": 442,
-   "appearances": 13063
+   "players": 443,
+   "appearances": 13094
   },
   "78": {
    "club_id": 78,
@@ -1604,7 +1604,7 @@
     "League Two"
    ],
    "players": 424,
-   "appearances": 15166
+   "appearances": 15197
   },
   "79": {
    "club_id": 79,
@@ -1622,8 +1622,8 @@
     "League One",
     "League Two"
    ],
-   "players": 408,
-   "appearances": 15902
+   "players": 410,
+   "appearances": 15932
   },
   "80": {
    "club_id": 80,
@@ -1642,7 +1642,7 @@
     "League Two"
    ],
    "players": 346,
-   "appearances": 12844
+   "appearances": 12876
   },
   "81": {
    "club_id": 81,
@@ -1714,8 +1714,8 @@
     "League One",
     "League Two"
    ],
-   "players": 390,
-   "appearances": 14423
+   "players": 392,
+   "appearances": 14469
   },
   "85": {
    "club_id": 85,
@@ -1752,8 +1752,8 @@
     "League One",
     "League Two"
    ],
-   "players": 388,
-   "appearances": 15199
+   "players": 389,
+   "appearances": 15230
   },
   "87": {
    "club_id": 87,
@@ -1788,8 +1788,8 @@
     "League One",
     "League Two"
    ],
-   "players": 283,
-   "appearances": 12854
+   "players": 286,
+   "appearances": 12886
   },
   "89": {
    "club_id": 89,
@@ -1807,8 +1807,8 @@
     "League One",
     "League Two"
    ],
-   "players": 378,
-   "appearances": 13697
+   "players": 382,
+   "appearances": 13727
   },
   "90": {
    "club_id": 90,
@@ -1845,8 +1845,8 @@
     "League One",
     "League Two"
    ],
-   "players": 345,
-   "appearances": 11019
+   "players": 347,
+   "appearances": 11051
   },
   "92": {
    "club_id": 92,
@@ -1884,7 +1884,7 @@
     "League Two"
    ],
    "players": 314,
-   "appearances": 10118
+   "appearances": 10150
   },
   "94": {
    "club_id": 94,
@@ -1902,8 +1902,8 @@
     "League One",
     "League Two"
    ],
-   "players": 448,
-   "appearances": 15259
+   "players": 449,
+   "appearances": 15290
   },
   "95": {
    "club_id": 95,
@@ -1921,8 +1921,8 @@
     "League One",
     "League Two"
    ],
-   "players": 273,
-   "appearances": 9756
+   "players": 274,
+   "appearances": 9788
   },
   "96": {
    "club_id": 96,
@@ -1940,8 +1940,8 @@
     "League One",
     "League Two"
    ],
-   "players": 271,
-   "appearances": 10304
+   "players": 273,
+   "appearances": 10333
   },
   "97": {
    "club_id": 97,
@@ -1959,8 +1959,8 @@
     "League One",
     "League Two"
    ],
-   "players": 356,
-   "appearances": 12913
+   "players": 358,
+   "appearances": 12944
   },
   "98": {
    "club_id": 98,
@@ -1997,8 +1997,8 @@
     "League One",
     "League Two"
    ],
-   "players": 282,
-   "appearances": 10308
+   "players": 283,
+   "appearances": 10339
   },
   "100": {
    "club_id": 100,
@@ -2035,8 +2035,8 @@
     "League One",
     "League Two"
    ],
-   "players": 112,
-   "appearances": 1643
+   "players": 115,
+   "appearances": 1674
   },
   "102": {
    "club_id": 102,
@@ -2118,7 +2118,7 @@
     "League Two"
    ],
    "players": 246,
-   "appearances": 3942
+   "appearances": 3974
   },
   "107": {
    "club_id": 107,
@@ -2149,8 +2149,8 @@
     "FA Cup",
     "League Two"
    ],
-   "players": 342,
-   "appearances": 7939
+   "players": 343,
+   "appearances": 7969
   },
   "109": {
    "club_id": 109,
@@ -2182,8 +2182,8 @@
     "FA Cup",
     "League Two"
    ],
-   "players": 273,
-   "appearances": 9246
+   "players": 275,
+   "appearances": 9278
   },
   "111": {
    "club_id": 111,
@@ -2199,8 +2199,8 @@
     "FA Cup",
     "League Two"
    ],
-   "players": 172,
-   "appearances": 4982
+   "players": 174,
+   "appearances": 5014
   },
   "112": {
    "club_id": 112,
@@ -2266,8 +2266,8 @@
     "Champions League",
     "Serie A"
    ],
-   "players": 376,
-   "appearances": 22105
+   "players": 378,
+   "appearances": 22137
   },
   "230": {
    "club_id": 230,
@@ -2283,7 +2283,7 @@
     "La Liga"
    ],
    "players": 311,
-   "appearances": 24941
+   "appearances": 25003
   },
   "231": {
    "club_id": 231,
@@ -2298,8 +2298,8 @@
     "Champions League",
     "Serie A"
    ],
-   "players": 320,
-   "appearances": 16319
+   "players": 322,
+   "appearances": 16366
   },
   "232": {
    "club_id": 232,
@@ -2331,7 +2331,7 @@
     "Ligue 1"
    ],
    "players": 440,
-   "appearances": 16809
+   "appearances": 16841
   },
   "239": {
    "club_id": 239,
@@ -2347,7 +2347,7 @@
     "Champions League"
    ],
    "players": 283,
-   "appearances": 22539
+   "appearances": 22585
   },
   "261": {
    "club_id": 261,
@@ -2378,8 +2378,8 @@
     "Champions League",
     "La Liga"
    ],
-   "players": 355,
-   "appearances": 24800
+   "players": 356,
+   "appearances": 24849
   },
   "270": {
    "club_id": 270,
@@ -2426,8 +2426,8 @@
     "Bundesliga",
     "Champions League"
    ],
-   "players": 360,
-   "appearances": 17479
+   "players": 362,
+   "appearances": 17527
   },
   "302": {
    "club_id": 302,
@@ -2442,8 +2442,8 @@
     "Bundesliga",
     "Champions League"
    ],
-   "players": 300,
-   "appearances": 17983
+   "players": 303,
+   "appearances": 18015
   },
   "305": {
    "club_id": 305,
@@ -2458,8 +2458,8 @@
     "Champions League",
     "Ligue 1"
    ],
-   "players": 370,
-   "appearances": 16316
+   "players": 371,
+   "appearances": 16345
   },
   "311": {
    "club_id": 311,
@@ -2475,7 +2475,7 @@
     "Ligue 1"
    ],
    "players": 328,
-   "appearances": 18434
+   "appearances": 18482
   },
   "315": {
    "club_id": 315,
@@ -2490,8 +2490,8 @@
     "Bundesliga",
     "Champions League"
    ],
-   "players": 314,
-   "appearances": 20554
+   "players": 315,
+   "appearances": 20602
   },
   "317": {
    "club_id": 317,
@@ -2522,8 +2522,8 @@
     "Champions League",
     "Serie A"
    ],
-   "players": 355,
-   "appearances": 22073
+   "players": 358,
+   "appearances": 22105
   },
   "319": {
    "club_id": 319,
@@ -2536,10 +2536,11 @@
    ],
    "competitions": [
     "Champions League",
-    "La Liga"
+    "La Liga",
+    "Segunda División"
    ],
-   "players": 381,
-   "appearances": 21375
+   "players": 388,
+   "appearances": 22017
   },
   "321": {
    "club_id": 321,
@@ -2554,8 +2555,8 @@
     "Champions League",
     "Ligue 1"
    ],
-   "players": 215,
-   "appearances": 10082
+   "players": 218,
+   "appearances": 10113
   },
   "324": {
    "club_id": 324,
@@ -2570,8 +2571,8 @@
     "Champions League",
     "Serie A"
    ],
-   "players": 401,
-   "appearances": 14419
+   "players": 405,
+   "appearances": 14451
   },
   "327": {
    "club_id": 327,
@@ -2586,8 +2587,8 @@
     "Bundesliga",
     "Champions League"
    ],
-   "players": 307,
-   "appearances": 19726
+   "players": 308,
+   "appearances": 19758
   },
   "330": {
    "club_id": 330,
@@ -2603,7 +2604,7 @@
     "La Liga"
    ],
    "players": 227,
-   "appearances": 20693
+   "appearances": 20724
   },
   "332": {
    "club_id": 332,
@@ -2619,7 +2620,7 @@
     "Serie A"
    ],
    "players": 407,
-   "appearances": 21795
+   "appearances": 21843
   },
   "333": {
    "club_id": 333,
@@ -2634,8 +2635,8 @@
     "Champions League",
     "Ligue 1"
    ],
-   "players": 281,
-   "appearances": 11572
+   "players": 283,
+   "appearances": 11620
   },
   "335": {
    "club_id": 335,
@@ -2650,8 +2651,8 @@
     "Champions League",
     "Serie A"
    ],
-   "players": 447,
-   "appearances": 18190
+   "players": 451,
+   "appearances": 18222
   },
   "336": {
    "club_id": 336,
@@ -2682,8 +2683,8 @@
     "Champions League",
     "La Liga"
    ],
-   "players": 380,
-   "appearances": 21855
+   "players": 382,
+   "appearances": 21904
   },
   "339": {
    "club_id": 339,
@@ -2698,8 +2699,8 @@
     "Champions League",
     "Serie A"
    ],
-   "players": 343,
-   "appearances": 20085
+   "players": 346,
+   "appearances": 20116
   },
   "340": {
    "club_id": 340,
@@ -2730,8 +2731,8 @@
     "Champions League",
     "Ligue 1"
    ],
-   "players": 305,
-   "appearances": 17782
+   "players": 306,
+   "appearances": 17812
   },
   "346": {
    "club_id": 346,
@@ -2746,8 +2747,8 @@
     "Bundesliga",
     "Champions League"
    ],
-   "players": 342,
-   "appearances": 14527
+   "players": 344,
+   "appearances": 14559
   },
   "347": {
    "club_id": 347,
@@ -2760,10 +2761,11 @@
    ],
    "competitions": [
     "Champions League",
-    "La Liga"
+    "La Liga",
+    "Segunda División"
    ],
-   "players": 271,
-   "appearances": 13985
+   "players": 360,
+   "appearances": 17688
   },
   "349": {
    "club_id": 349,
@@ -2778,8 +2780,8 @@
     "Bundesliga",
     "Champions League"
    ],
-   "players": 322,
-   "appearances": 15393
+   "players": 326,
+   "appearances": 15425
   },
   "351": {
    "club_id": 351,
@@ -2792,10 +2794,11 @@
    ],
    "competitions": [
     "Champions League",
-    "La Liga"
+    "La Liga",
+    "Segunda División"
    ],
-   "players": 315,
-   "appearances": 13430
+   "players": 410,
+   "appearances": 17074
   },
   "352": {
    "club_id": 352,
@@ -2810,8 +2813,8 @@
     "Champions League",
     "Serie A"
    ],
-   "players": 396,
-   "appearances": 20380
+   "players": 397,
+   "appearances": 20428
   },
   "353": {
    "club_id": 353,
@@ -2826,8 +2829,8 @@
     "Champions League",
     "Ligue 1"
    ],
-   "players": 302,
-   "appearances": 15414
+   "players": 303,
+   "appearances": 15446
   },
   "358": {
    "club_id": 358,
@@ -2840,10 +2843,11 @@
    ],
    "competitions": [
     "Champions League",
-    "La Liga"
+    "La Liga",
+    "Segunda División"
    ],
-   "players": 276,
-   "appearances": 19052
+   "players": 300,
+   "appearances": 20829
   },
   "360": {
    "club_id": 360,
@@ -2856,10 +2860,11 @@
    ],
    "competitions": [
     "Champions League",
-    "La Liga"
+    "La Liga",
+    "Segunda División"
    ],
-   "players": 322,
-   "appearances": 16281
+   "players": 385,
+   "appearances": 19825
   },
   "362": {
    "club_id": 362,
@@ -2872,10 +2877,11 @@
    ],
    "competitions": [
     "Champions League",
-    "La Liga"
+    "La Liga",
+    "Segunda División"
    ],
-   "players": 301,
-   "appearances": 14884
+   "players": 313,
+   "appearances": 15518
   },
   "363": {
    "club_id": 363,
@@ -2888,10 +2894,11 @@
    ],
    "competitions": [
     "Champions League",
-    "La Liga"
+    "La Liga",
+    "Segunda División"
    ],
-   "players": 357,
-   "appearances": 16238
+   "players": 367,
+   "appearances": 18049
   },
   "364": {
    "club_id": 364,
@@ -2906,8 +2913,8 @@
     "Champions League",
     "Serie A"
    ],
-   "players": 391,
-   "appearances": 17501
+   "players": 392,
+   "appearances": 17533
   },
   "366": {
    "club_id": 366,
@@ -2922,8 +2929,8 @@
     "Champions League",
     "La Liga"
    ],
-   "players": 417,
-   "appearances": 19725
+   "players": 420,
+   "appearances": 19757
   },
   "377": {
    "club_id": 377,
@@ -2968,10 +2975,11 @@
    ],
    "competitions": [
     "Champions League",
-    "La Liga"
+    "La Liga",
+    "Segunda División"
    ],
-   "players": 270,
-   "appearances": 10150
+   "players": 397,
+   "appearances": 15805
   },
   "393": {
    "club_id": 393,
@@ -2986,8 +2994,8 @@
     "Bundesliga",
     "Champions League"
    ],
-   "players": 320,
-   "appearances": 16872
+   "players": 322,
+   "appearances": 16903
   },
   "396": {
    "club_id": 396,
@@ -3002,8 +3010,8 @@
     "Bundesliga",
     "Champions League"
    ],
-   "players": 99,
-   "appearances": 5929
+   "players": 102,
+   "appearances": 5976
   },
   "398": {
    "club_id": 398,
@@ -3019,7 +3027,7 @@
     "Champions League"
    ],
    "players": 203,
-   "appearances": 8922
+   "appearances": 8954
   },
   "399": {
    "club_id": 399,
@@ -3034,8 +3042,8 @@
     "Champions League",
     "Serie A"
    ],
-   "players": 409,
-   "appearances": 17106
+   "players": 410,
+   "appearances": 17137
   },
   "400": {
    "club_id": 400,
@@ -3050,8 +3058,8 @@
     "Champions League",
     "Ligue 1"
    ],
-   "players": 371,
-   "appearances": 16017
+   "players": 372,
+   "appearances": 16049
   },
   "405": {
    "club_id": 405,
@@ -3066,8 +3074,8 @@
     "Bundesliga",
     "Champions League"
    ],
-   "players": 364,
-   "appearances": 15363
+   "players": 366,
+   "appearances": 15393
   },
   "406": {
    "club_id": 406,
@@ -3082,8 +3090,8 @@
     "Bundesliga",
     "Champions League"
    ],
-   "players": 102,
-   "appearances": 3801
+   "players": 103,
+   "appearances": 3833
   },
   "408": {
    "club_id": 408,
@@ -3098,8 +3106,8 @@
     "Champions League",
     "Serie A"
    ],
-   "players": 396,
-   "appearances": 15150
+   "players": 399,
+   "appearances": 15182
   },
   "409": {
    "club_id": 409,
@@ -3114,8 +3122,8 @@
     "Champions League",
     "Ligue 1"
    ],
-   "players": 142,
-   "appearances": 5380
+   "players": 145,
+   "appearances": 5411
   },
   "410": {
    "club_id": 410,
@@ -3128,10 +3136,11 @@
    ],
    "competitions": [
     "Champions League",
-    "La Liga"
+    "La Liga",
+    "Segunda División"
    ],
-   "players": 93,
-   "appearances": 3541
+   "players": 256,
+   "appearances": 10778
   },
   "415": {
    "club_id": 415,
@@ -3158,10 +3167,11 @@
     1
    ],
    "competitions": [
-    "La Liga"
+    "La Liga",
+    "Segunda División"
    ],
-   "players": 355,
-   "appearances": 13152
+   "players": 516,
+   "appearances": 20481
   },
   "417": {
    "club_id": 417,
@@ -3173,10 +3183,11 @@
     1
    ],
    "competitions": [
-    "La Liga"
+    "La Liga",
+    "Segunda División"
    ],
-   "players": 232,
-   "appearances": 11893
+   "players": 461,
+   "appearances": 21117
   },
   "418": {
    "club_id": 418,
@@ -3188,10 +3199,11 @@
     1
    ],
    "competitions": [
-    "La Liga"
+    "La Liga",
+    "Segunda División"
    ],
-   "players": 205,
-   "appearances": 8314
+   "players": 406,
+   "appearances": 19847
   },
   "419": {
    "club_id": 419,
@@ -3203,10 +3215,11 @@
     1
    ],
    "competitions": [
-    "La Liga"
+    "La Liga",
+    "Segunda División"
    ],
-   "players": 415,
-   "appearances": 18175
+   "players": 425,
+   "appearances": 19539
   },
   "420": {
    "club_id": 420,
@@ -3232,10 +3245,11 @@
     1
    ],
    "competitions": [
-    "La Liga"
+    "La Liga",
+    "Segunda División"
    ],
-   "players": 286,
-   "appearances": 15029
+   "players": 313,
+   "appearances": 17388
   },
   "422": {
    "club_id": 422,
@@ -3247,10 +3261,11 @@
     1
    ],
    "competitions": [
-    "La Liga"
+    "La Liga",
+    "Segunda División"
    ],
-   "players": 154,
-   "appearances": 3963
+   "players": 429,
+   "appearances": 14681
   },
   "423": {
    "club_id": 423,
@@ -3262,10 +3277,11 @@
     1
    ],
    "competitions": [
-    "La Liga"
+    "La Liga",
+    "Segunda División"
    ],
-   "players": 138,
-   "appearances": 7252
+   "players": 322,
+   "appearances": 14624
   },
   "424": {
    "club_id": 424,
@@ -3277,10 +3293,11 @@
     1
    ],
    "competitions": [
-    "La Liga"
+    "La Liga",
+    "Segunda División"
    ],
-   "players": 157,
-   "appearances": 5362
+   "players": 330,
+   "appearances": 12040
   },
   "425": {
    "club_id": 425,
@@ -3292,10 +3309,11 @@
     1
    ],
    "competitions": [
-    "La Liga"
+    "La Liga",
+    "Segunda División"
    ],
-   "players": 85,
-   "appearances": 1549
+   "players": 221,
+   "appearances": 7389
   },
   "426": {
    "club_id": 426,
@@ -3307,10 +3325,11 @@
     1
    ],
    "competitions": [
-    "La Liga"
+    "La Liga",
+    "Segunda División"
    ],
-   "players": 33,
-   "appearances": 976
+   "players": 198,
+   "appearances": 5958
   },
   "427": {
    "club_id": 427,
@@ -3322,10 +3341,11 @@
     1
    ],
    "competitions": [
-    "La Liga"
+    "La Liga",
+    "Segunda División"
    ],
-   "players": 307,
-   "appearances": 10946
+   "players": 386,
+   "appearances": 15762
   },
   "428": {
    "club_id": 428,
@@ -3337,10 +3357,11 @@
     1
    ],
    "competitions": [
-    "La Liga"
+    "La Liga",
+    "Segunda División"
    ],
-   "players": 135,
-   "appearances": 6186
+   "players": 434,
+   "appearances": 18305
   },
   "429": {
    "club_id": 429,
@@ -3367,10 +3388,11 @@
     1
    ],
    "competitions": [
-    "La Liga"
+    "La Liga",
+    "Segunda División"
    ],
-   "players": 124,
-   "appearances": 3606
+   "players": 468,
+   "appearances": 14565
   },
   "431": {
    "club_id": 431,
@@ -3382,10 +3404,11 @@
     1
    ],
    "competitions": [
-    "La Liga"
+    "La Liga",
+    "Segunda División"
    ],
-   "players": 23,
-   "appearances": 491
+   "players": 60,
+   "appearances": 1657
   },
   "432": {
    "club_id": 432,
@@ -3397,10 +3420,11 @@
     1
    ],
    "competitions": [
-    "La Liga"
+    "La Liga",
+    "Segunda División"
    ],
-   "players": 234,
-   "appearances": 9556
+   "players": 378,
+   "appearances": 14607
   },
   "433": {
    "club_id": 433,
@@ -3412,10 +3436,11 @@
     1
    ],
    "competitions": [
-    "La Liga"
+    "La Liga",
+    "Segunda División"
    ],
-   "players": 53,
-   "appearances": 2169
+   "players": 73,
+   "appearances": 2747
   },
   "434": {
    "club_id": 434,
@@ -3427,10 +3452,11 @@
     1
    ],
    "competitions": [
-    "La Liga"
+    "La Liga",
+    "Segunda División"
    ],
-   "players": 53,
-   "appearances": 1589
+   "players": 184,
+   "appearances": 6810
   },
   "435": {
    "club_id": 435,
@@ -3457,10 +3483,11 @@
     1
    ],
    "competitions": [
-    "La Liga"
+    "La Liga",
+    "Segunda División"
    ],
-   "players": 54,
-   "appearances": 1108
+   "players": 190,
+   "appearances": 5782
   },
   "437": {
    "club_id": 437,
@@ -3472,10 +3499,11 @@
     1
    ],
    "competitions": [
-    "La Liga"
+    "La Liga",
+    "Segunda División"
    ],
-   "players": 42,
-   "appearances": 1111
+   "players": 123,
+   "appearances": 2852
   },
   "438": {
    "club_id": 438,
@@ -3487,10 +3515,11 @@
     1
    ],
    "competitions": [
-    "La Liga"
+    "La Liga",
+    "Segunda División"
    ],
-   "players": 230,
-   "appearances": 8277
+   "players": 354,
+   "appearances": 13669
   },
   "439": {
    "club_id": 439,
@@ -3502,10 +3531,11 @@
     1
    ],
    "competitions": [
-    "La Liga"
+    "La Liga",
+    "Segunda División"
    ],
-   "players": 87,
-   "appearances": 2106
+   "players": 282,
+   "appearances": 12038
   },
   "440": {
    "club_id": 440,
@@ -3517,10 +3547,11 @@
     1
    ],
    "competitions": [
-    "La Liga"
+    "La Liga",
+    "Segunda División"
    ],
-   "players": 137,
-   "appearances": 3839
+   "players": 350,
+   "appearances": 14143
   },
   "441": {
    "club_id": 441,
@@ -3532,10 +3563,11 @@
     1
    ],
    "competitions": [
-    "La Liga"
+    "La Liga",
+    "Segunda División"
    ],
-   "players": 77,
-   "appearances": 2119
+   "players": 220,
+   "appearances": 7964
   },
   "442": {
    "club_id": 442,
@@ -3547,10 +3579,11 @@
     1
    ],
    "competitions": [
-    "La Liga"
+    "La Liga",
+    "Segunda División"
    ],
-   "players": 288,
-   "appearances": 11456
+   "players": 331,
+   "appearances": 13227
   },
   "443": {
    "club_id": 443,
@@ -3562,10 +3595,11 @@
     1
    ],
    "competitions": [
-    "La Liga"
+    "La Liga",
+    "Segunda División"
    ],
-   "players": 245,
-   "appearances": 8239
+   "players": 363,
+   "appearances": 14331
   },
   "444": {
    "club_id": 444,
@@ -3577,10 +3611,11 @@
     1
    ],
    "competitions": [
-    "La Liga"
+    "La Liga",
+    "Segunda División"
    ],
-   "players": 29,
-   "appearances": 529
+   "players": 267,
+   "appearances": 7540
   },
   "445": {
    "club_id": 445,
@@ -3592,10 +3627,11 @@
     1
    ],
    "competitions": [
-    "La Liga"
+    "La Liga",
+    "Segunda División"
    ],
-   "players": 130,
-   "appearances": 4364
+   "players": 356,
+   "appearances": 14079
   },
   "446": {
    "club_id": 446,
@@ -3607,10 +3643,11 @@
     1
    ],
    "competitions": [
-    "La Liga"
+    "La Liga",
+    "Segunda División"
    ],
-   "players": 24,
-   "appearances": 531
+   "players": 167,
+   "appearances": 6923
   },
   "447": {
    "club_id": 447,
@@ -3622,10 +3659,11 @@
     1
    ],
    "competitions": [
-    "La Liga"
+    "La Liga",
+    "Segunda División"
    ],
-   "players": 201,
-   "appearances": 5508
+   "players": 296,
+   "appearances": 9317
   },
   "448": {
    "club_id": 448,
@@ -3637,10 +3675,11 @@
     1
    ],
    "competitions": [
-    "La Liga"
+    "La Liga",
+    "Segunda División"
    ],
-   "players": 95,
-   "appearances": 3765
+   "players": 324,
+   "appearances": 11767
   },
   "449": {
    "club_id": 449,
@@ -3652,10 +3691,11 @@
     1
    ],
    "competitions": [
-    "La Liga"
+    "La Liga",
+    "Segunda División"
    ],
-   "players": 33,
-   "appearances": 523
+   "players": 357,
+   "appearances": 10663
   },
   "450": {
    "club_id": 450,
@@ -3667,10 +3707,11 @@
     1
    ],
    "competitions": [
-    "La Liga"
+    "La Liga",
+    "Segunda División"
    ],
-   "players": 100,
-   "appearances": 2720
+   "players": 257,
+   "appearances": 8979
   },
   "451": {
    "club_id": 451,
@@ -3682,10 +3723,11 @@
     1
    ],
    "competitions": [
-    "La Liga"
+    "La Liga",
+    "Segunda División"
    ],
-   "players": 52,
-   "appearances": 1118
+   "players": 269,
+   "appearances": 9711
   },
   "452": {
    "club_id": 452,
@@ -3727,10 +3769,11 @@
     1
    ],
    "competitions": [
+    "Champions League",
     "Serie A"
    ],
-   "players": 103,
-   "appearances": 2121
+   "players": 106,
+   "appearances": 2169
   },
   "455": {
    "club_id": 455,
@@ -3759,8 +3802,8 @@
    "competitions": [
     "Serie A"
    ],
-   "players": 330,
-   "appearances": 9641
+   "players": 332,
+   "appearances": 9673
   },
   "457": {
    "club_id": 457,
@@ -3774,8 +3817,8 @@
    "competitions": [
     "Serie A"
    ],
-   "players": 399,
-   "appearances": 13832
+   "players": 403,
+   "appearances": 13864
   },
   "458": {
    "club_id": 458,
@@ -3819,8 +3862,8 @@
    "competitions": [
     "Serie A"
    ],
-   "players": 394,
-   "appearances": 12420
+   "players": 395,
+   "appearances": 12452
   },
   "461": {
    "club_id": 461,
@@ -3864,8 +3907,8 @@
    "competitions": [
     "Serie A"
    ],
-   "players": 369,
-   "appearances": 14905
+   "players": 372,
+   "appearances": 14936
   },
   "464": {
    "club_id": 464,
@@ -4014,8 +4057,8 @@
    "competitions": [
     "Serie A"
    ],
-   "players": 149,
-   "appearances": 2619
+   "players": 153,
+   "appearances": 2651
   },
   "474": {
    "club_id": 474,
@@ -4194,8 +4237,8 @@
    "competitions": [
     "Serie A"
    ],
-   "players": 165,
-   "appearances": 6743
+   "players": 168,
+   "appearances": 6775
   },
   "486": {
    "club_id": 486,
@@ -4209,8 +4252,8 @@
    "competitions": [
     "Serie A"
    ],
-   "players": 102,
-   "appearances": 1686
+   "players": 104,
+   "appearances": 1718
   },
   "487": {
    "club_id": 487,
@@ -4299,8 +4342,8 @@
    "competitions": [
     "Serie A"
    ],
-   "players": 75,
-   "appearances": 1835
+   "players": 78,
+   "appearances": 1867
   },
   "493": {
    "club_id": 493,
@@ -4344,8 +4387,8 @@
    "competitions": [
     "Bundesliga"
    ],
-   "players": 333,
-   "appearances": 13283
+   "players": 336,
+   "appearances": 13315
   },
   "496": {
    "club_id": 496,
@@ -4539,8 +4582,8 @@
    "competitions": [
     "Bundesliga"
    ],
-   "players": 258,
-   "appearances": 12528
+   "players": 259,
+   "appearances": 12559
   },
   "509": {
    "club_id": 509,
@@ -4629,8 +4672,8 @@
    "competitions": [
     "Bundesliga"
    ],
-   "players": 232,
-   "appearances": 9816
+   "players": 234,
+   "appearances": 9848
   },
   "515": {
    "club_id": 515,
@@ -4659,8 +4702,8 @@
    "competitions": [
     "Bundesliga"
    ],
-   "players": 170,
-   "appearances": 7464
+   "players": 171,
+   "appearances": 7496
   },
   "517": {
    "club_id": 517,
@@ -4704,8 +4747,8 @@
    "competitions": [
     "Bundesliga"
    ],
-   "players": 64,
-   "appearances": 983
+   "players": 68,
+   "appearances": 1015
   },
   "520": {
    "club_id": 520,
@@ -4779,8 +4822,8 @@
    "competitions": [
     "Bundesliga"
    ],
-   "players": 16,
-   "appearances": 16
+   "players": 19,
+   "appearances": 48
   },
   "525": {
    "club_id": 525,
@@ -4839,8 +4882,8 @@
    "competitions": [
     "Ligue 1"
    ],
-   "players": 335,
-   "appearances": 13584
+   "players": 338,
+   "appearances": 13616
   },
   "529": {
    "club_id": 529,
@@ -4869,8 +4912,8 @@
    "competitions": [
     "Ligue 1"
    ],
-   "players": 182,
-   "appearances": 5002
+   "players": 186,
+   "appearances": 5034
   },
   "531": {
    "club_id": 531,
@@ -4899,8 +4942,8 @@
    "competitions": [
     "Ligue 1"
    ],
-   "players": 267,
-   "appearances": 10107
+   "players": 270,
+   "appearances": 10139
   },
   "533": {
    "club_id": 533,
@@ -4989,8 +5032,8 @@
    "competitions": [
     "Ligue 1"
    ],
-   "players": 311,
-   "appearances": 12212
+   "players": 312,
+   "appearances": 12228
   },
   "539": {
    "club_id": 539,
@@ -5004,8 +5047,8 @@
    "competitions": [
     "Ligue 1"
    ],
-   "players": 255,
-   "appearances": 9471
+   "players": 256,
+   "appearances": 9501
   },
   "540": {
    "club_id": 540,
@@ -5034,8 +5077,8 @@
    "competitions": [
     "Ligue 1"
    ],
-   "players": 216,
-   "appearances": 5739
+   "players": 218,
+   "appearances": 5771
   },
   "542": {
    "club_id": 542,
@@ -5079,8 +5122,8 @@
    "competitions": [
     "Ligue 1"
    ],
-   "players": 102,
-   "appearances": 3176
+   "players": 106,
+   "appearances": 3208
   },
   "545": {
    "club_id": 545,
@@ -5215,7 +5258,7 @@
     "Ligue 1"
    ],
    "players": 140,
-   "appearances": 5335
+   "appearances": 5367
   },
   "554": {
    "club_id": 554,
@@ -5290,8 +5333,653 @@
     "Ligue 1"
    ],
    "players": 35,
-   "appearances": 567
+   "appearances": 597
+  },
+  "1188": {
+   "club_id": 1188,
+   "slug": "racing-ferrol",
+   "name": "Racing Ferrol",
+   "game_name": "Racing Ferrol",
+   "country": "ESP",
+   "tiers": [
+    2
+   ],
+   "competitions": [
+    "Segunda División"
+   ],
+   "players": 160,
+   "appearances": 4228
+  },
+  "1189": {
+   "club_id": 1189,
+   "slug": "badajoz",
+   "name": "Badajoz",
+   "game_name": "Badajoz",
+   "country": "ESP",
+   "tiers": [
+    2
+   ],
+   "competitions": [
+    "Segunda División"
+   ],
+   "players": 43,
+   "appearances": 1119
+  },
+  "1190": {
+   "club_id": 1190,
+   "slug": "poli-ejido",
+   "name": "Poli Ejido",
+   "game_name": "Poli Ejido",
+   "country": "ESP",
+   "tiers": [
+    2
+   ],
+   "competitions": [
+    "Segunda División"
+   ],
+   "players": 117,
+   "appearances": 4090
+  },
+  "1191": {
+   "club_id": 1191,
+   "slug": "burgos",
+   "name": "Burgos",
+   "game_name": "Burgos",
+   "country": "ESP",
+   "tiers": [
+    2
+   ],
+   "competitions": [
+    "Segunda División"
+   ],
+   "players": 115,
+   "appearances": 3967
+  },
+  "1192": {
+   "club_id": 1192,
+   "slug": "jaen",
+   "name": "Jaen",
+   "game_name": "Jaen",
+   "country": "ESP",
+   "tiers": [
+    2
+   ],
+   "competitions": [
+    "Segunda División"
+   ],
+   "players": 55,
+   "appearances": 1153
+  },
+  "1193": {
+   "club_id": 1193,
+   "slug": "terrassa",
+   "name": "Terrassa",
+   "game_name": "Terrassa",
+   "country": "ESP",
+   "tiers": [
+    2
+   ],
+   "competitions": [
+    "Segunda División"
+   ],
+   "players": 43,
+   "appearances": 1727
+  },
+  "1194": {
+   "club_id": 1194,
+   "slug": "malaga-b",
+   "name": "Malaga B",
+   "game_name": "Malaga B",
+   "country": "ESP",
+   "tiers": [
+    2
+   ],
+   "competitions": [
+    "Segunda División"
+   ],
+   "players": 54,
+   "appearances": 1754
+  },
+  "1195": {
+   "club_id": 1195,
+   "slug": "ciudad-murcia",
+   "name": "Ciudad Murcia",
+   "game_name": "Ciudad Murcia",
+   "country": "ESP",
+   "tiers": [
+    2
+   ],
+   "competitions": [
+    "Segunda División"
+   ],
+   "players": 86,
+   "appearances": 2297
+  },
+  "1196": {
+   "club_id": 1196,
+   "slug": "algeciras",
+   "name": "Algeciras",
+   "game_name": "Algeciras",
+   "country": "ESP",
+   "tiers": [
+    2
+   ],
+   "competitions": [
+    "Segunda División"
+   ],
+   "players": 27,
+   "appearances": 584
+  },
+  "1197": {
+   "club_id": 1197,
+   "slug": "pontevedra",
+   "name": "Pontevedra",
+   "game_name": "Pontevedra",
+   "country": "ESP",
+   "tiers": [
+    2
+   ],
+   "competitions": [
+    "Segunda División"
+   ],
+   "players": 27,
+   "appearances": 583
+  },
+  "1198": {
+   "club_id": 1198,
+   "slug": "lorca-deportiva",
+   "name": "Lorca Deportiva",
+   "game_name": "Lorca Deportiva",
+   "country": "ESP",
+   "tiers": [
+    2
+   ],
+   "competitions": [
+    "Segunda División"
+   ],
+   "players": 39,
+   "appearances": 1163
+  },
+  "1199": {
+   "club_id": 1199,
+   "slug": "real-madrid-castilla",
+   "name": "Real Madrid Castilla",
+   "game_name": "Real Madrid Castilla",
+   "country": "ESP",
+   "tiers": [
+    2
+   ],
+   "competitions": [
+    "Segunda División"
+   ],
+   "players": 88,
+   "appearances": 2332
+  },
+  "1200": {
+   "club_id": 1200,
+   "slug": "ponferradina",
+   "name": "Ponferradina",
+   "game_name": "Ponferradina",
+   "country": "ESP",
+   "tiers": [
+    2
+   ],
+   "competitions": [
+    "Segunda División"
+   ],
+   "players": 191,
+   "appearances": 6068
+  },
+  "1201": {
+   "club_id": 1201,
+   "slug": "vecindario",
+   "name": "Vecindario",
+   "game_name": "Vecindario",
+   "country": "ESP",
+   "tiers": [
+    2
+   ],
+   "competitions": [
+    "Segunda División"
+   ],
+   "players": 30,
+   "appearances": 579
+  },
+  "1202": {
+   "club_id": 1202,
+   "slug": "granada-74",
+   "name": "Granada 74",
+   "game_name": "Granada 74",
+   "country": "ESP",
+   "tiers": [
+    2
+   ],
+   "competitions": [
+    "Segunda División"
+   ],
+   "players": 30,
+   "appearances": 584
+  },
+  "1203": {
+   "club_id": 1203,
+   "slug": "sevilla-atletico",
+   "name": "Sevilla Atletico",
+   "game_name": "Sevilla Atletico",
+   "country": "ESP",
+   "tiers": [
+    2
+   ],
+   "competitions": [
+    "Segunda División"
+   ],
+   "players": 94,
+   "appearances": 2339
+  },
+  "1204": {
+   "club_id": 1204,
+   "slug": "alicante",
+   "name": "Alicante",
+   "game_name": "Alicante",
+   "country": "ESP",
+   "tiers": [
+    2
+   ],
+   "competitions": [
+    "Segunda División"
+   ],
+   "players": 30,
+   "appearances": 585
+  },
+  "1205": {
+   "club_id": 1205,
+   "slug": "real-union",
+   "name": "Real Union",
+   "game_name": "Real Union",
+   "country": "ESP",
+   "tiers": [
+    2
+   ],
+   "competitions": [
+    "Segunda División"
+   ],
+   "players": 26,
+   "appearances": 588
+  },
+  "1206": {
+   "club_id": 1206,
+   "slug": "cartagena",
+   "name": "Cartagena",
+   "game_name": "Cartagena",
+   "country": "ESP",
+   "tiers": [
+    2
+   ],
+   "competitions": [
+    "Segunda División"
+   ],
+   "players": 186,
+   "appearances": 5060
+  },
+  "1207": {
+   "club_id": 1207,
+   "slug": "villarreal-b",
+   "name": "Villarreal B",
+   "game_name": "Villarreal B",
+   "country": "ESP",
+   "tiers": [
+    2
+   ],
+   "competitions": [
+    "Segunda División"
+   ],
+   "players": 120,
+   "appearances": 3048
+  },
+  "1208": {
+   "club_id": 1208,
+   "slug": "alcorcon",
+   "name": "Alcorcon",
+   "game_name": "Alcorcon",
+   "country": "ESP",
+   "tiers": [
+    2
+   ],
+   "competitions": [
+    "Segunda División"
+   ],
+   "players": 230,
+   "appearances": 7836
+  },
+  "1209": {
+   "club_id": 1209,
+   "slug": "barcelona-b",
+   "name": "Barcelona B",
+   "game_name": "Barcelona B",
+   "country": "ESP",
+   "tiers": [
+    2
+   ],
+   "competitions": [
+    "Segunda División"
+   ],
+   "players": 109,
+   "appearances": 3510
+  },
+  "1210": {
+   "club_id": 1210,
+   "slug": "sabadell",
+   "name": "Sabadell",
+   "game_name": "Sabadell",
+   "country": "ESP",
+   "tiers": [
+    2
+   ],
+   "competitions": [
+    "Segunda División"
+   ],
+   "players": 115,
+   "appearances": 3084
+  },
+  "1211": {
+   "club_id": 1211,
+   "slug": "alcoyano",
+   "name": "Alcoyano",
+   "game_name": "Alcoyano",
+   "country": "ESP",
+   "tiers": [
+    2
+   ],
+   "competitions": [
+    "Segunda División"
+   ],
+   "players": 28,
+   "appearances": 586
+  },
+  "1212": {
+   "club_id": 1212,
+   "slug": "guadalajara",
+   "name": "Guadalajara",
+   "game_name": "Guadalajara",
+   "country": "ESP",
+   "tiers": [
+    2
+   ],
+   "competitions": [
+    "Segunda División"
+   ],
+   "players": 41,
+   "appearances": 1158
+  },
+  "1213": {
+   "club_id": 1213,
+   "slug": "mirandes",
+   "name": "Mirandes",
+   "game_name": "Mirandes",
+   "country": "ESP",
+   "tiers": [
+    2
+   ],
+   "competitions": [
+    "Segunda División"
+   ],
+   "players": 259,
+   "appearances": 7333
+  },
+  "1214": {
+   "club_id": 1214,
+   "slug": "lugo",
+   "name": "Lugo",
+   "game_name": "Lugo",
+   "country": "ESP",
+   "tiers": [
+    2
+   ],
+   "competitions": [
+    "Segunda División"
+   ],
+   "players": 173,
+   "appearances": 6648
+  },
+  "1215": {
+   "club_id": 1215,
+   "slug": "llagostera",
+   "name": "Llagostera",
+   "game_name": "Llagostera",
+   "country": "ESP",
+   "tiers": [
+    2
+   ],
+   "competitions": [
+    "Segunda División"
+   ],
+   "players": 44,
+   "appearances": 1175
+  },
+  "1216": {
+   "club_id": 1216,
+   "slug": "athletic-bilbao-b",
+   "name": "Athletic Bilbao B",
+   "game_name": "Athletic Bilbao B",
+   "country": "ESP",
+   "tiers": [
+    2
+   ],
+   "competitions": [
+    "Segunda División"
+   ],
+   "players": 27,
+   "appearances": 586
+  },
+  "1217": {
+   "club_id": 1217,
+   "slug": "ucam-murcia",
+   "name": "UCAM Murcia",
+   "game_name": "UCAM Murcia",
+   "country": "ESP",
+   "tiers": [
+    2
+   ],
+   "competitions": [
+    "Segunda División"
+   ],
+   "players": 31,
+   "appearances": 586
+  },
+  "1218": {
+   "club_id": 1218,
+   "slug": "reus",
+   "name": "Reus",
+   "game_name": "Reus",
+   "country": "ESP",
+   "tiers": [
+    2
+   ],
+   "competitions": [
+    "Segunda División"
+   ],
+   "players": 51,
+   "appearances": 1462
+  },
+  "1219": {
+   "club_id": 1219,
+   "slug": "lorca-fc",
+   "name": "Lorca FC",
+   "game_name": "Lorca FC",
+   "country": "ESP",
+   "tiers": [
+    2
+   ],
+   "competitions": [
+    "Segunda División"
+   ],
+   "players": 35,
+   "appearances": 584
+  },
+  "1220": {
+   "club_id": 1220,
+   "slug": "cultural-leonesa",
+   "name": "Cultural Leonesa",
+   "game_name": "Cultural Leonesa",
+   "country": "ESP",
+   "tiers": [
+    2
+   ],
+   "competitions": [
+    "Segunda División"
+   ],
+   "players": 61,
+   "appearances": 1248
+  },
+  "1221": {
+   "club_id": 1221,
+   "slug": "rayo-majadahonda",
+   "name": "Rayo Majadahonda",
+   "game_name": "Rayo Majadahonda",
+   "country": "ESP",
+   "tiers": [
+    2
+   ],
+   "competitions": [
+    "Segunda División"
+   ],
+   "players": 27,
+   "appearances": 564
+  },
+  "1222": {
+   "club_id": 1222,
+   "slug": "cf-fuenlabrada",
+   "name": "CF Fuenlabrada",
+   "game_name": "CF Fuenlabrada",
+   "country": "ESP",
+   "tiers": [
+    2
+   ],
+   "competitions": [
+    "Segunda División"
+   ],
+   "players": 73,
+   "appearances": 1888
+  },
+  "1223": {
+   "club_id": 1223,
+   "slug": "ud-logrones",
+   "name": "UD Logrones",
+   "game_name": "UD Logrones",
+   "country": "ESP",
+   "tiers": [
+    2
+   ],
+   "competitions": [
+    "Segunda División"
+   ],
+   "players": 31,
+   "appearances": 644
+  },
+  "1224": {
+   "club_id": 1224,
+   "slug": "real-sociedad-b",
+   "name": "Real Sociedad B",
+   "game_name": "Real Sociedad B",
+   "country": "ESP",
+   "tiers": [
+    2
+   ],
+   "competitions": [
+    "Segunda División"
+   ],
+   "players": 67,
+   "appearances": 1387
+  },
+  "1225": {
+   "club_id": 1225,
+   "slug": "amorebieta",
+   "name": "Amorebieta",
+   "game_name": "Amorebieta",
+   "country": "ESP",
+   "tiers": [
+    2
+   ],
+   "competitions": [
+    "Segunda División"
+   ],
+   "players": 55,
+   "appearances": 1309
+  },
+  "1226": {
+   "club_id": 1226,
+   "slug": "ibiza",
+   "name": "Ibiza",
+   "game_name": "Ibiza",
+   "country": "ESP",
+   "tiers": [
+    2
+   ],
+   "competitions": [
+    "Segunda División"
+   ],
+   "players": 52,
+   "appearances": 1321
+  },
+  "1227": {
+   "club_id": 1227,
+   "slug": "fc-andorra",
+   "name": "FC Andorra",
+   "game_name": "FC Andorra",
+   "country": "ESP",
+   "tiers": [
+    2
+   ],
+   "competitions": [
+    "Segunda División"
+   ],
+   "players": 79,
+   "appearances": 2071
+  },
+  "1228": {
+   "club_id": 1228,
+   "slug": "eldense",
+   "name": "Eldense",
+   "game_name": "Eldense",
+   "country": "ESP",
+   "tiers": [
+    2
+   ],
+   "competitions": [
+    "Segunda División"
+   ],
+   "players": 75,
+   "appearances": 1412
+  },
+  "1229": {
+   "club_id": 1229,
+   "slug": "ceuta",
+   "name": "Ceuta",
+   "game_name": "Ceuta",
+   "country": "ESP",
+   "tiers": [
+    2
+   ],
+   "competitions": [
+    "Segunda División"
+   ],
+   "players": 51,
+   "appearances": 744
+  },
+  "1230": {
+   "club_id": 1230,
+   "slug": "celta-de-vigo-b",
+   "name": "Celta de Vigo B",
+   "game_name": "Celta de Vigo B",
+   "country": "ESP",
+   "tiers": [
+    2
+   ],
+   "competitions": [
+    "Segunda División"
+   ],
+   "players": 22,
+   "appearances": 80
   }
  },
- "slug_count": 313
+ "slug_count": 356
 }

@@ -52,6 +52,9 @@
   .crest { width: 52px; height: 60px; flex: 0 0 auto; filter: drop-shadow(0 2px 6px rgba(0,0,0,.45)); }
   .hero h1 { font-size: 1.65rem; line-height: 1.2; margin: 0 0 5px; }
   .sub { color: var(--text-secondary); margin: 0; font-size: .9rem; }
+  .sub a.complink { color: var(--text-secondary); text-decoration: underline;
+                    text-decoration-color: rgba(255,255,255,.22); }
+  .sub a.complink:hover { color: var(--accent); }
   .scope-note { color: var(--text-muted); font-size: .76rem; margin: 6px 0 0; }
   .scope-note a { color: var(--accent); }
 
@@ -182,9 +185,9 @@
     <nav>
       <a href="/daily/">Daily</a>
       <a href="/games/">Games</a>
+      <a href="/competitions/">Competitions</a>
       <a href="/teams/">Teams</a>
       <a href="/ask/">Ask</a>
-      <a href="/leaderboard/">Leaderboard</a>
       <a href="/community/">Community</a>
     </nav>
   </div>
@@ -205,7 +208,8 @@
     </svg>
     <div>
       <h1>Ancona Football Quizzes &amp; Trivia</h1>
-      <p class="sub">60 players · 878 appearances · Serie A</p>
+      <p class="sub">60 players · 878 appearances ·
+        <a class="complink" href="/competitions/serie-a/">Serie A</a></p>
       <p class="scope-note">Records cover 1992/93 to 2003/04.
         <a href="/tools/data.html">Full dataset scope</a>.</p>
     </div>
@@ -323,16 +327,16 @@
           </tr>
         <tr>
             <td class="rank">3</td>
-            <td>Lajos Détári</td>
+            <td>Marco Pecoraro Scanio</td>
             <td class="num">32</td>
-            <td class="num">9</td>
+            <td class="num">0</td>
             <td class="yr">1992/93–1992/93</td>
           </tr>
         <tr>
             <td class="rank">4</td>
-            <td>Marco Pecoraro Scanio</td>
+            <td>Lajos Détári</td>
             <td class="num">32</td>
-            <td class="num">0</td>
+            <td class="num">9</td>
             <td class="yr">1992/93–1992/93</td>
           </tr>
         <tr>
@@ -372,24 +376,24 @@
           </tr>
         <tr>
             <td class="rank">10</td>
+            <td>Vincenzo Sommese</td>
+            <td class="num">26</td>
+            <td class="num">1</td>
+            <td class="yr">2003/04–2003/04</td>
+          </tr>
+        <tr>
+            <td class="rank">11</td>
             <td>Nicola Caccia</td>
             <td class="num">26</td>
             <td class="num">0</td>
             <td class="yr">1992/93–1992/93</td>
           </tr>
         <tr>
-            <td class="rank">11</td>
+            <td class="rank">12</td>
             <td>Sebastiano Vecchiola</td>
             <td class="num">26</td>
             <td class="num">4</td>
             <td class="yr">1992/93–1992/93</td>
-          </tr>
-        <tr>
-            <td class="rank">12</td>
-            <td>Vincenzo Sommese</td>
-            <td class="num">26</td>
-            <td class="num">1</td>
-            <td class="yr">2003/04–2003/04</td>
           </tr>
         <tr>
             <td class="rank">13</td>
@@ -467,21 +471,21 @@
           </tr>
         <tr>
             <td class="rank">8</td>
+            <td>William Viali</td>
+            <td class="num">2</td>
+            <td class="num">13</td>
+          </tr>
+        <tr>
+            <td class="rank">9</td>
             <td>Franco Ermini</td>
             <td class="num">2</td>
             <td class="num">14</td>
           </tr>
         <tr>
-            <td class="rank">9</td>
+            <td class="rank">10</td>
             <td>Sean Sogliano</td>
             <td class="num">2</td>
             <td class="num">40</td>
-          </tr>
-        <tr>
-            <td class="rank">10</td>
-            <td>Sergio Zárate</td>
-            <td class="num">2</td>
-            <td class="num">11</td>
           </tr>
       </tbody>
     </table>
@@ -529,8 +533,8 @@
           <a href="/teams/internazionale/">Internazionale</a>
           <a href="/teams/parma/">Parma</a>
           <a href="/teams/torino/">Torino</a>
-          <a href="/teams/roma/">Roma</a>
           <a href="/teams/bologna/">Bologna</a>
+          <a href="/teams/roma/">Roma</a>
           <a href="/teams/genoa/">Genoa</a>
           <a href="/teams/udinese/">Udinese</a>
           <a href="/teams/milan/">Milan</a>
@@ -549,7 +553,7 @@
 </div><!-- /wrap -->
 
 <script>
-window.TS_TEAM = {"slug":"ancona","name":"Ancona","comps":["Serie A"],"defaultScope":"team_ancona_serie-a","potd":[{"n":"Sean Sogliano","a":40,"g":2,"f":"1992/93","t":"2003/04"},{"n":"Massimo Agostini","a":33,"g":12,"f":"1992/93","t":"1992/93"},{"n":"Lajos Détári","a":32,"g":9,"f":"1992/93","t":"1992/93"},{"n":"Marco Pecoraro Scanio","a":32,"g":0,"f":"1992/93","t":"1992/93"},{"n":"Salvatore Mazzarano","a":29,"g":0,"f":"1992/93","t":"1992/93"},{"n":"Mauro Milanese","a":27,"g":1,"f":"2003/04","t":"2003/04"},{"n":"Roberto Lorenzini","a":27,"g":0,"f":"1992/93","t":"1992/93"},{"n":"Andrea Bruniera","a":27,"g":0,"f":"1992/93","t":"1992/93"},{"n":"Alessandro Nista","a":26,"g":0,"f":"1992/93","t":"1992/93"},{"n":"Nicola Caccia","a":26,"g":0,"f":"1992/93","t":"1992/93"},{"n":"Sebastiano Vecchiola","a":26,"g":4,"f":"1992/93","t":"1992/93"},{"n":"Vincenzo Sommese","a":26,"g":1,"f":"2003/04","t":"2003/04"},{"n":"Maurizio Ganz","a":25,"g":3,"f":"2003/04","t":"2003/04"},{"n":"Daniel Andersson","a":25,"g":1,"f":"2003/04","t":"2003/04"},{"n":"Stefano Fontana","a":24,"g":0,"f":"1992/93","t":"1992/93"}]};
+window.TS_TEAM = {"slug":"ancona","name":"Ancona","comps":["Serie A"],"defaultScope":"team_ancona_serie-a","potd":[{"n":"Sean Sogliano","a":40,"g":2,"f":"1992/93","t":"2003/04"},{"n":"Massimo Agostini","a":33,"g":12,"f":"1992/93","t":"1992/93"},{"n":"Marco Pecoraro Scanio","a":32,"g":0,"f":"1992/93","t":"1992/93"},{"n":"Lajos Détári","a":32,"g":9,"f":"1992/93","t":"1992/93"},{"n":"Salvatore Mazzarano","a":29,"g":0,"f":"1992/93","t":"1992/93"},{"n":"Mauro Milanese","a":27,"g":1,"f":"2003/04","t":"2003/04"},{"n":"Roberto Lorenzini","a":27,"g":0,"f":"1992/93","t":"1992/93"},{"n":"Andrea Bruniera","a":27,"g":0,"f":"1992/93","t":"1992/93"},{"n":"Alessandro Nista","a":26,"g":0,"f":"1992/93","t":"1992/93"},{"n":"Vincenzo Sommese","a":26,"g":1,"f":"2003/04","t":"2003/04"},{"n":"Nicola Caccia","a":26,"g":0,"f":"1992/93","t":"1992/93"},{"n":"Sebastiano Vecchiola","a":26,"g":4,"f":"1992/93","t":"1992/93"},{"n":"Maurizio Ganz","a":25,"g":3,"f":"2003/04","t":"2003/04"},{"n":"Daniel Andersson","a":25,"g":1,"f":"2003/04","t":"2003/04"},{"n":"Stefano Fontana","a":24,"g":0,"f":"1992/93","t":"1992/93"}]};
 </script>
 <script src="/js/ts-scope.js"></script>
 <script src="/js/team-page.js"></script>

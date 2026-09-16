@@ -70,6 +70,25 @@
     return param('scope');
   }
 
+  /**
+   * A game's own setting, chosen by the link rather than by the player.
+   *
+   *   /games/hol.html?scope=comp_segunda-division&stat=goals&play=1
+   *
+   * Competition and team pages list each game VARIANT separately — "Higher or
+   * Lower: goals" is a different puzzle from "Higher or Lower: appearances",
+   * and offering them as one link then making somebody choose again is the
+   * same friction as the scope picker was.
+   *
+   * Validated against the caller's own allowlist, so a value invented in the
+   * address bar falls back to the default instead of reaching a handler.
+   */
+  function variant(name, allowed) {
+    var v = param(name);
+    if (!v || !Array.isArray(allowed)) return null;
+    return allowed.indexOf(v) === -1 ? null : v;
+  }
+
   /** Should the game start on its own? Team pages can pass &play=1. */
   function autostart() {
     return param('play') === '1';
@@ -125,9 +144,9 @@
   /** Hide the page behind a "loading" panel that names what is coming. */
   function curtain() {
     if (document.getElementById('ts-curtain')) return;
-    var team = sourceTeam();
-    var pretty = team
-      ? team.replace(/-/g, ' ').replace(/\b\w/g, function (c) { return c.toUpperCase(); })
+    var from = sourceTeam() || sourceCompetition();
+    var pretty = from
+      ? from.replace(/-/g, ' ').replace(/\b\w/g, function (c) { return c.toUpperCase(); })
       : '';
     var el = document.createElement('div');
     el.id = 'ts-curtain';
@@ -176,12 +195,23 @@
     };
     // Where they came from decides what the way back should say. A daily
     // player wants the daily; somebody who chose a club wants that club.
-    note.innerHTML = param('daily')
-      ? 'Today\u2019s TeleStats Daily. ' + link('/daily/', 'Back to the daily') +
-        (team ? ' \u00b7 ' + link('/teams/' + team + '/', title(team)) : '')
-      : 'Started from your team page.' +
-        (team ? ' ' + link('/teams/' + team + '/', 'Back to ' + title(team)) + ' \u00b7' : '') +
-        ' ' + link(here, 'Pick a different team');
+    var comp = sourceCompetition();
+    // Where they came from decides what the way back should say. Sending a
+    // competition player "back to your team page" is worse than saying nothing.
+    if (param('daily')) {
+      note.innerHTML = 'Today\u2019s TeleStats Daily. ' + link('/daily/', 'Back to the daily') +
+        (team ? ' \u00b7 ' + link('/teams/' + team + '/', title(team)) : '');
+    } else if (comp) {
+      note.innerHTML = 'Playing all of ' + title(comp) + '. ' +
+        link('/competitions/' + comp + '/', 'Back to ' + title(comp)) + ' \u00b7 ' +
+        link(here, 'Pick something else');
+    } else if (team) {
+      note.innerHTML = 'Started from your team page. ' +
+        link('/teams/' + team + '/', 'Back to ' + title(team)) + ' \u00b7 ' +
+        link(here, 'Pick a different team');
+    } else {
+      note.innerHTML = link(here, 'Pick a different game');
+    }
     if (document.body) document.body.insertBefore(note, document.body.firstChild);
   }
 
@@ -196,7 +226,15 @@
     return m ? m[1] : null;
   }
 
+  /** The competition slug, when the round is a whole-competition one. */
+  function sourceCompetition() {
+    var m = /^comp_([a-z0-9-]+)$/.exec(param('scope') || '');
+    return m ? m[1] : null;
+  }
+
   window.TSScope = { requested: requested, requestedId: requestedId,
                      autostart: autostart, play: play, sourceTeam: sourceTeam,
-                     param: param, curtain: curtain, uncurtain: uncurtain };
+                     param: param, variant: variant,
+                     sourceCompetition: sourceCompetition,
+                     curtain: curtain, uncurtain: uncurtain };
 })();

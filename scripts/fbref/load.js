@@ -136,16 +136,39 @@ function buildClubs(rows) {
     if (r.club_name_short) shorts.set(r.fbref_squad_id, r.club_name_short);
   }
 
+  // What each club is CALLED is a decision the database holds and FBref does
+  // not. The slug form is ASCII and always long — "Malaga", "Koln",
+  // "Wolverhampton Wanderers" — and five handlers resolve clubs by name
+  // against hardcoded lists, so taking the parser's name would revert the
+  // sixty-eight names restore_club_names.js put back and empty the Bullseye
+  // board again. Silently: a wrong name does not error, it returns nothing.
+  //
+  // data/teams/club_names.json is that decision, in version control, keyed on
+  // the identifier that never changes. See snapshot_club_names.js.
+  let known = {};
+  try {
+    known = require(path.join(ROOT, 'data', 'teams', 'club_names.json')).names || {};
+  } catch (e) {
+    if (e.code !== 'MODULE_NOT_FOUND') throw e;
+  }
+
   const clubs = new Map();
+  let kept = 0;
   for (const [id, tally] of names) {
     const best = [...tally.entries()]
       .sort((a, b) => b[1] - a[1] || b[0].length - a[0].length)[0][0];
+    const fixed = known[id];
+    if (fixed && fixed.name !== best) kept++;
     clubs.set(id, {
       fbref_squad_id: id,
-      club_name: best,
-      club_name_short: shorts.get(id) || best,
+      club_name: fixed ? fixed.name : best,
+      club_name_short: (fixed && fixed.short) || shorts.get(id) || best,
       name_variants: tally.size,
     });
+  }
+  if (kept) {
+    console.log(`\n  kept ${kept} established club name${kept === 1 ? '' : 's'} ` +
+                `over the FBref slug form (data/teams/club_names.json)`);
   }
   return clubs;
 }
@@ -312,6 +335,36 @@ async function write(rows, players, clubs) {
     }
   }
 
+  // ── Merged clubs survive re-ingestion ────────────────────────────────────
+  //
+  // FBref holds a dissolved-and-refounded club as two squads. TeleStats
+  // presents some of those as one — see data/teams/club_merges.json — by
+  // repointing the losing club's rows at the survivor.
+  //
+  // WITHOUT THIS, EVERY REFRESH SILENTLY UNDOES THAT. clubs_v2 upserts on
+  // fbref_squad_id, the losing club's row still exists, so its id comes back
+  // in cMap and its stats are written under it again. The team page then
+  // quietly loses those seasons and the duplicate reappears in search.
+  //
+  // Applied to the MAP rather than to the rows, so the remap happens once and
+  // every stats row that references the losing squad follows automatically.
+  try {
+    const { merges } = require(path.join(ROOT, 'data', 'teams', 'club_merges.json'));
+    let remapped = 0;
+    for (const m of merges || []) {
+      for (const [squadId, clubId] of cMap) {
+        if (clubId === m.from) { cMap.set(squadId, m.into); remapped++; }
+      }
+    }
+    if (remapped) {
+      console.log(`    ${remapped} merged club${remapped === 1 ? '' : 's'} remapped ` +
+                  `(club_merges.json) — the merge survives this load`);
+    }
+  } catch (e) {
+    // No merges file is fine; a broken one is not.
+    if (e.code !== 'MODULE_NOT_FOUND') throw e;
+  }
+
   const stats = rows
     .filter((r) => pMap.has(r.fbref_player_id) && cMap.has(r.fbref_squad_id))
     .map((r) => ({
@@ -342,6 +395,17 @@ async function write(rows, players, clubs) {
 }
 
 // ─── Main ───────────────────────────────────────────────────────────────────
+
+/**
+ * The pure halves of this script, exposed so scripts/fbref/preflight.js can
+ * ask what a load WOULD write without re-implementing any of it. A guard that
+ * carries its own copy of the logic is a guard that drifts out of agreement
+ * with the thing it guards.
+ */
+module.exports = { readAll, mergeDuplicates, buildPlayers, buildClubs, syntheticId };
+
+// Running as a script? Only then does anything happen.
+if (require.main !== module) return;
 
 (async () => {
   const doLoad = process.argv.includes('--load');

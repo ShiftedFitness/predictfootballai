@@ -5,17 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="/js/ts-analytics.js"></script>
 <title>Köln Football Quiz &amp; Trivia Games | TeleStats</title>
-<meta name="description" content="Play Köln football quizzes and trivia games built from 333 players and 13,283 appearances in Bundesliga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta name="description" content="Play Köln football quizzes and trivia games built from 336 players and 13,315 appearances in Bundesliga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
 <link rel="canonical" href="https://telestats.net/teams/koln/">
 <meta name="theme-color" content="#ED1C24">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Köln Football Quiz &amp; Trivia Games | TeleStats">
-<meta property="og:description" content="Play Köln football quizzes and trivia games built from 333 players and 13,283 appearances in Bundesliga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta property="og:description" content="Play Köln football quizzes and trivia games built from 336 players and 13,315 appearances in Bundesliga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
 <meta property="og:url" content="https://telestats.net/teams/koln/">
 <meta property="og:site_name" content="TeleStats">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Köln Football Quiz &amp; Trivia Games | TeleStats">
-<meta name="twitter:description" content="Play Köln football quizzes and trivia games built from 333 players and 13,283 appearances in Bundesliga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta name="twitter:description" content="Play Köln football quizzes and trivia games built from 336 players and 13,315 appearances in Bundesliga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
 <link rel="stylesheet" href="/telestats-theme.css">
 <style>
   :root { --club: #ED1C24; --club-2: #c50000; }
@@ -52,6 +52,9 @@
   .crest { width: 52px; height: 60px; flex: 0 0 auto; filter: drop-shadow(0 2px 6px rgba(0,0,0,.45)); }
   .hero h1 { font-size: 1.65rem; line-height: 1.2; margin: 0 0 5px; }
   .sub { color: var(--text-secondary); margin: 0; font-size: .9rem; }
+  .sub a.complink { color: var(--text-secondary); text-decoration: underline;
+                    text-decoration-color: rgba(255,255,255,.22); }
+  .sub a.complink:hover { color: var(--accent); }
   .scope-note { color: var(--text-muted); font-size: .76rem; margin: 6px 0 0; }
   .scope-note a { color: var(--accent); }
 
@@ -182,9 +185,9 @@
     <nav>
       <a href="/daily/">Daily</a>
       <a href="/games/">Games</a>
+      <a href="/competitions/">Competitions</a>
       <a href="/teams/">Teams</a>
       <a href="/ask/">Ask</a>
-      <a href="/leaderboard/">Leaderboard</a>
       <a href="/community/">Community</a>
     </nav>
   </div>
@@ -205,7 +208,8 @@
     </svg>
     <div>
       <h1>Köln Football Quizzes &amp; Trivia</h1>
-      <p class="sub">333 players · 13,283 appearances · Bundesliga</p>
+      <p class="sub">336 players · 13,315 appearances ·
+        <a class="complink" href="/competitions/bundesliga/">Bundesliga</a></p>
       <p class="scope-note">Records cover 1988/89 to 2026/27.
         <a href="/tools/data.html">Full dataset scope</a>.</p>
     </div>
@@ -216,7 +220,7 @@
   <summary>New here? What this page is</summary>
   <div class="body">
     <p>This is a set of free football games about <strong>Köln</strong>, generated
-      from real appearance and goal records — 333 players who have turned out
+      from real appearance and goal records — 336 players who have turned out
       for the club in Bundesliga, going back to 1988/89.</p>
     <p>Pick a game below and it starts straight away on Köln. No sign-up, no app.
       Make an account only if you want your scores kept and your name on the club's board.</p>
@@ -408,7 +412,7 @@
         <tr>
             <td class="rank">15</td>
             <td>Jan Thielmann</td>
-            <td class="num">137</td>
+            <td class="num">138</td>
             <td class="num">11</td>
             <td class="yr">2019/20–2026/27</td>
           </tr>
@@ -461,15 +465,15 @@
           </tr>
         <tr>
             <td class="rank">7</td>
-            <td>Maurice Banach</td>
-            <td class="num">24</td>
-            <td class="num">49</td>
-          </tr>
-        <tr>
-            <td class="rank">8</td>
             <td>Dirk Lottner</td>
             <td class="num">24</td>
             <td class="num">83</td>
+          </tr>
+        <tr>
+            <td class="rank">8</td>
+            <td>Maurice Banach</td>
+            <td class="num">24</td>
+            <td class="num">49</td>
           </tr>
         <tr>
             <td class="rank">9</td>
@@ -496,7 +500,7 @@
       <tbody>
         <tr>
             <td>Bundesliga</td>
-            <td class="num">333</td>
+            <td class="num">336</td>
             <td class="yr">1988/89–2026/27</td>
             <td class="num">9</td>
             <td class="yes">Playable</td>
@@ -507,7 +511,7 @@
 </details>
 
 <h2>Ask about Köln</h2>
-<p class="sub">Ask the database a question. Answers come from 333 Köln
+<p class="sub">Ask the database a question. Answers come from 336 Köln
   players and are never invented — if the data does not support an answer, it says so.</p>
 <form class="ask" id="askForm">
   <input id="askQ" autocomplete="off" maxlength="300"
@@ -549,7 +553,7 @@
 </div><!-- /wrap -->
 
 <script>
-window.TS_TEAM = {"slug":"koln","name":"Köln","comps":["Bundesliga"],"defaultScope":"team_koln_bundesliga","potd":[{"n":"Bodo Illgner","a":274,"g":0,"f":"1988/89","t":"1996/97"},{"n":"Jonas Hector","a":228,"g":12,"f":"2014/15","t":"2022/23"},{"n":"Karsten Baumann","a":220,"g":9,"f":"1988/89","t":"1997/98"},{"n":"Timo Horn","a":201,"g":0,"f":"2014/15","t":"2021/22"},{"n":"Frank Greiner","a":176,"g":14,"f":"1988/89","t":"1994/95"},{"n":"Alfons Higl","a":172,"g":5,"f":"1989/90","t":"1994/95"},{"n":"Olaf Janßen","a":157,"g":13,"f":"1988/89","t":"1995/96"},{"n":"Toni Polster","a":150,"g":79,"f":"1993/94","t":"1997/98"},{"n":"Florian Kainz","a":148,"g":22,"f":"2019/20","t":"2025/26"},{"n":"Pierre Littbarski","a":141,"g":19,"f":"1988/89","t":"1992/93"},{"n":"Mišo Brečko","a":140,"g":2,"f":"2008/09","t":"2014/15"},{"n":"Lukas Podolski","a":139,"g":55,"f":"2003/04","t":"2011/12"},{"n":"Rico Steinmann","a":139,"g":10,"f":"1991/92","t":"1996/97"},{"n":"Ralf Hauptmann","a":138,"g":5,"f":"1993/94","t":"2000/01"},{"n":"Jan Thielmann","a":137,"g":11,"f":"2019/20","t":"2026/27"}]};
+window.TS_TEAM = {"slug":"koln","name":"Köln","comps":["Bundesliga"],"defaultScope":"team_koln_bundesliga","potd":[{"n":"Bodo Illgner","a":274,"g":0,"f":"1988/89","t":"1996/97"},{"n":"Jonas Hector","a":228,"g":12,"f":"2014/15","t":"2022/23"},{"n":"Karsten Baumann","a":220,"g":9,"f":"1988/89","t":"1997/98"},{"n":"Timo Horn","a":201,"g":0,"f":"2014/15","t":"2021/22"},{"n":"Frank Greiner","a":176,"g":14,"f":"1988/89","t":"1994/95"},{"n":"Alfons Higl","a":172,"g":5,"f":"1989/90","t":"1994/95"},{"n":"Olaf Janßen","a":157,"g":13,"f":"1988/89","t":"1995/96"},{"n":"Toni Polster","a":150,"g":79,"f":"1993/94","t":"1997/98"},{"n":"Florian Kainz","a":148,"g":22,"f":"2019/20","t":"2025/26"},{"n":"Pierre Littbarski","a":141,"g":19,"f":"1988/89","t":"1992/93"},{"n":"Mišo Brečko","a":140,"g":2,"f":"2008/09","t":"2014/15"},{"n":"Lukas Podolski","a":139,"g":55,"f":"2003/04","t":"2011/12"},{"n":"Rico Steinmann","a":139,"g":10,"f":"1991/92","t":"1996/97"},{"n":"Ralf Hauptmann","a":138,"g":5,"f":"1993/94","t":"2000/01"},{"n":"Jan Thielmann","a":138,"g":11,"f":"2019/20","t":"2026/27"}]};
 </script>
 <script src="/js/ts-scope.js"></script>
 <script src="/js/team-page.js"></script>
@@ -566,6 +570,6 @@ window.TS_TEAM = {"slug":"koln","name":"Köln","comps":["Bundesliga"],"defaultSc
     try { TSNav.render(); } catch (e) { console.error('[TeleStats] Nav render failed:', e); }
   })();
 </script>
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TeleStats","item":"https://telestats.net"},{"@type":"ListItem","position":2,"name":"Teams","item":"https://telestats.net/teams/"},{"@type":"ListItem","position":3,"name":"Köln","item":"https://telestats.net/teams/koln/"}]},{"@type":"SportsTeam","name":"Köln","sport":"Association football","url":"https://telestats.net/teams/koln/"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is the Köln page on TeleStats?","acceptedAnswer":{"@type":"Answer","text":"Free Köln football quizzes and trivia games generated from real appearance and goal records for 333 players across Bundesliga. No sign-up is needed to play."}}]}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TeleStats","item":"https://telestats.net"},{"@type":"ListItem","position":2,"name":"Teams","item":"https://telestats.net/teams/"},{"@type":"ListItem","position":3,"name":"Köln","item":"https://telestats.net/teams/koln/"}]},{"@type":"SportsTeam","name":"Köln","sport":"Association football","url":"https://telestats.net/teams/koln/"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is the Köln page on TeleStats?","acceptedAnswer":{"@type":"Answer","text":"Free Köln football quizzes and trivia games generated from real appearance and goal records for 336 players across Bundesliga. No sign-up is needed to play."}}]}]}</script>
 </body>
 </html>

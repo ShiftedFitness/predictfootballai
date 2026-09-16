@@ -5,15 +5,19 @@
   "scripts": {
     "start": "netlify dev",
     "dev": "node scripts/dev/server.js 8888",
-    "check": "node scripts/analytics/verify.js && node scripts/fbref/check_club_names.js && node scripts/fbref/smoke.js --live && node scripts/daily/verify.js 30",
+    "check": "node scripts/analytics/verify.js && node scripts/checks/credit.js && node scripts/fbref/check_club_names.js && node scripts/fbref/smoke.js --live && node scripts/daily/verify.js 30",
     "smoke": "node scripts/fbref/smoke.js --live",
     "check:analytics": "node scripts/analytics/verify.js",
     "check:clubs": "node scripts/fbref/check_club_names.js",
     "check:daily": "node scripts/daily/verify.js 30",
-    "build:teams": "node scripts/teams/build.js && node scripts/seo/sitemap.js",
+    "build:teams": "node scripts/teams/build.js && node scripts/teams/build_competitions.js && node scripts/seo/sitemap.js",
     "build:slugs": "node scripts/teams/slugs.js",
     "build:legacy-scopes": "node scripts/teams/legacy_scopes.js",
-    "build:daily-pool": "node scripts/daily/pool.js"
+    "build:daily-pool": "node scripts/daily/pool.js",
+    "check:credit": "node scripts/checks/credit.js",
+    "build:competitions": "node scripts/teams/build_competitions.js && node scripts/seo/sitemap.js",
+    "preflight": "node scripts/fbref/preflight.js",
+    "aggregates": "node scripts/fbref/rebuild_aggregates.js --write"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.117.1",

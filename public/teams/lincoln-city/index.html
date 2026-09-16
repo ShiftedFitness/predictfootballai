@@ -5,17 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="/js/ts-analytics.js"></script>
 <title>Lincoln City Football Quiz &amp; Trivia Games | TeleStats</title>
-<meta name="description" content="Play Lincoln City football quizzes and trivia games built from 359 players and 12,016 appearances in League Two, FA Cup, EFL Cup, League One and Championship. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta name="description" content="Play Lincoln City football quizzes and trivia games built from 361 players and 12,079 appearances in League Two, FA Cup, EFL Cup, League One and Championship. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
 <link rel="canonical" href="https://telestats.net/teams/lincoln-city/">
 <meta name="theme-color" content="#DA291C">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Lincoln City Football Quiz &amp; Trivia Games | TeleStats">
-<meta property="og:description" content="Play Lincoln City football quizzes and trivia games built from 359 players and 12,016 appearances in League Two, FA Cup, EFL Cup, League One and Championship. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta property="og:description" content="Play Lincoln City football quizzes and trivia games built from 361 players and 12,079 appearances in League Two, FA Cup, EFL Cup, League One and Championship. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
 <meta property="og:url" content="https://telestats.net/teams/lincoln-city/">
 <meta property="og:site_name" content="TeleStats">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Lincoln City Football Quiz &amp; Trivia Games | TeleStats">
-<meta name="twitter:description" content="Play Lincoln City football quizzes and trivia games built from 359 players and 12,016 appearances in League Two, FA Cup, EFL Cup, League One and Championship. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta name="twitter:description" content="Play Lincoln City football quizzes and trivia games built from 361 players and 12,079 appearances in League Two, FA Cup, EFL Cup, League One and Championship. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
 <link rel="stylesheet" href="/telestats-theme.css">
 <style>
   :root { --club: #DA291C; --club-2: #b20100; }
@@ -52,6 +52,9 @@
   .crest { width: 52px; height: 60px; flex: 0 0 auto; filter: drop-shadow(0 2px 6px rgba(0,0,0,.45)); }
   .hero h1 { font-size: 1.65rem; line-height: 1.2; margin: 0 0 5px; }
   .sub { color: var(--text-secondary); margin: 0; font-size: .9rem; }
+  .sub a.complink { color: var(--text-secondary); text-decoration: underline;
+                    text-decoration-color: rgba(255,255,255,.22); }
+  .sub a.complink:hover { color: var(--accent); }
   .scope-note { color: var(--text-muted); font-size: .76rem; margin: 6px 0 0; }
   .scope-note a { color: var(--accent); }
 
@@ -182,9 +185,9 @@
     <nav>
       <a href="/daily/">Daily</a>
       <a href="/games/">Games</a>
+      <a href="/competitions/">Competitions</a>
       <a href="/teams/">Teams</a>
       <a href="/ask/">Ask</a>
-      <a href="/leaderboard/">Leaderboard</a>
       <a href="/community/">Community</a>
     </nav>
   </div>
@@ -205,7 +208,8 @@
     </svg>
     <div>
       <h1>Lincoln City Football Quizzes &amp; Trivia</h1>
-      <p class="sub">359 players · 12,016 appearances · League Two, FA Cup, EFL Cup, League One and Championship</p>
+      <p class="sub">361 players · 12,079 appearances ·
+        <a class="complink" href="/competitions/league-two/">League Two</a>, <a class="complink" href="/competitions/fa-cup/">FA Cup</a>, <a class="complink" href="/competitions/efl-cup/">EFL Cup</a>, <a class="complink" href="/competitions/league-one/">League One</a>, <a class="complink" href="/competitions/championship/">Championship</a></p>
       <p class="scope-note">Records cover 2002/03 to 2026/27.
         <a href="/tools/data.html">Full dataset scope</a>.</p>
     </div>
@@ -216,7 +220,7 @@
   <summary>New here? What this page is</summary>
   <div class="body">
     <p>This is a set of free football games about <strong>Lincoln City</strong>, generated
-      from real appearance and goal records — 359 players who have turned out
+      from real appearance and goal records — 361 players who have turned out
       for the club in League Two, FA Cup, EFL Cup, League One and Championship, going back to 2002/03.</p>
     <p>Pick a game below and it starts straight away on Lincoln City. No sign-up, no app.
       Make an account only if you want your scores kept and your name on the club's board.</p>
@@ -255,6 +259,10 @@
                 data-slug="fa-cup"
                 aria-pressed="true">FA Cup</button>
         <button type="button" class="chip on"
+                data-comp="EFL Cup"
+                data-slug="efl-cup"
+                aria-pressed="true">EFL Cup</button>
+        <button type="button" class="chip on"
                 data-comp="League One"
                 data-slug="league-one"
                 aria-pressed="true">League One</button>
@@ -263,7 +271,7 @@
       <ul class="games">
         <li class="game">
           <a class="game-go" data-path="/games/hol.html"
-             href="/games/hol.html?scope=team_lincoln-city_fa-cup%2Bleague-one%2Bleague-two&amp;play=1">
+             href="/games/hol.html?scope=team_lincoln-city_efl-cup%2Bfa-cup%2Bleague-one%2Bleague-two&amp;play=1">
             <h3>Lincoln City Higher or Lower</h3>
             <p>Which player has more appearances?</p>
             <span class="go">Play now &rarr;</span>
@@ -271,7 +279,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/alpha.html"
-             href="/games/alpha.html?scope=team_lincoln-city_fa-cup%2Bleague-one%2Bleague-two&amp;play=1">
+             href="/games/alpha.html?scope=team_lincoln-city_efl-cup%2Bfa-cup%2Bleague-one%2Bleague-two&amp;play=1">
             <h3>Lincoln City Player Alphabet</h3>
             <p>Name a player for every letter of the alphabet.</p>
             <span class="go">Play now &rarr;</span>
@@ -279,7 +287,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/xi.html"
-             href="/games/xi.html?scope=team_lincoln-city_fa-cup%2Bleague-one%2Bleague-two&amp;play=1">
+             href="/games/xi.html?scope=team_lincoln-city_efl-cup%2Bfa-cup%2Bleague-one%2Bleague-two&amp;play=1">
             <h3>Lincoln City Starting XI</h3>
             <p>Build the strongest eleven you can.</p>
             <span class="go">Play now &rarr;</span>
@@ -287,7 +295,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/whoami.html"
-             href="/games/whoami.html?scope=team_lincoln-city_fa-cup%2Bleague-one%2Bleague-two&amp;play=1">
+             href="/games/whoami.html?scope=team_lincoln-city_efl-cup%2Bfa-cup%2Bleague-one%2Bleague-two&amp;play=1">
             <h3>Lincoln City Who Am I?</h3>
             <p>Guess the player from five clues.</p>
             <span class="go">Play now &rarr;</span>
@@ -295,7 +303,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/quiz.html"
-             href="/games/quiz.html?scope=team_lincoln-city_fa-cup%2Bleague-one%2Bleague-two&amp;play=1">
+             href="/games/quiz.html?scope=team_lincoln-city_efl-cup%2Bfa-cup%2Bleague-one%2Bleague-two&amp;play=1">
             <h3>Lincoln City Trivia Quiz</h3>
             <p>Ten questions from this club’s record.</p>
             <span class="go">Play now &rarr;</span>
@@ -340,7 +348,7 @@
         <tr>
             <td class="rank">3</td>
             <td>Conor McGrandles</td>
-            <td class="num">189</td>
+            <td class="num">192</td>
             <td class="num">9</td>
             <td class="yr">2020/21–2026/27</td>
           </tr>
@@ -382,7 +390,7 @@
         <tr>
             <td class="rank">9</td>
             <td>Ben House</td>
-            <td class="num">152</td>
+            <td class="num">156</td>
             <td class="num">32</td>
             <td class="yr">2021/22–2026/27</td>
           </tr>
@@ -455,7 +463,7 @@
             <td class="rank">3</td>
             <td>Ben House</td>
             <td class="num">32</td>
-            <td class="num">152</td>
+            <td class="num">156</td>
           </tr>
         <tr>
             <td class="rank">4</td>
@@ -479,7 +487,7 @@
             <td class="rank">7</td>
             <td>Reeco Hackett-Fairchild</td>
             <td class="num">23</td>
-            <td class="num">117</td>
+            <td class="num">121</td>
           </tr>
         <tr>
             <td class="rank">8</td>
@@ -526,10 +534,10 @@
           </tr>
         <tr>
             <td>EFL Cup</td>
-            <td class="num">114</td>
+            <td class="num">117</td>
             <td class="yr">2017/18–2026/27</td>
             <td class="num">6</td>
-            <td class="no">Too few games yet</td>
+            <td class="yes">Playable</td>
           </tr>
         <tr>
             <td>League One</td>
@@ -540,7 +548,7 @@
           </tr>
         <tr>
             <td>Championship</td>
-            <td class="num">20</td>
+            <td class="num">24</td>
             <td class="yr">2026/27–2026/27</td>
             <td class="num">1</td>
             <td class="no">Too few games yet</td>
@@ -551,7 +559,7 @@
 </details>
 
 <h2>Ask about Lincoln City</h2>
-<p class="sub">Ask the database a question. Answers come from 359 Lincoln City
+<p class="sub">Ask the database a question. Answers come from 361 Lincoln City
   players and are never invented — if the data does not support an answer, it says so.</p>
 <form class="ask" id="askForm">
   <input id="askQ" autocomplete="off" maxlength="300"
@@ -572,8 +580,8 @@
           <a href="/teams/swindon-town/">Swindon Town</a>
           <a href="/teams/coventry-city/">Coventry City</a>
           <a href="/teams/sheffield-wednesday/">Sheffield Wednesday</a>
-          <a href="/teams/barnsley/">Barnsley</a>
           <a href="/teams/bradford-city/">Bradford City</a>
+          <a href="/teams/barnsley/">Barnsley</a>
           <a href="/teams/northampton-town/">Northampton Town</a>
           <a href="/teams/blackpool/">Blackpool</a>
           <a href="/teams/portsmouth/">Portsmouth</a>
@@ -593,7 +601,7 @@
 </div><!-- /wrap -->
 
 <script>
-window.TS_TEAM = {"slug":"lincoln-city","name":"Lincoln City","comps":["League Two","FA Cup","League One"],"defaultScope":"team_lincoln-city_fa-cup+league-one+league-two","potd":[{"n":"Alan Marriott","a":260,"g":0,"f":"2002/03","t":"2007/08"},{"n":"Scott Kerr","a":221,"g":8,"f":"2005/06","t":"2010/11"},{"n":"Conor McGrandles","a":189,"g":9,"f":"2020/21","t":"2026/27"},{"n":"Paul Morgan","a":178,"g":1,"f":"2002/03","t":"2006/07"},{"n":"Lee Frecklington","a":169,"g":27,"f":"2004/05","t":"2018/19"},{"n":"Adam Jackson","a":167,"g":5,"f":"2020/21","t":"2026/27"},{"n":"Lee Beevers","a":167,"g":9,"f":"2004/05","t":"2015/16"},{"n":"Harry Anderson","a":158,"g":22,"f":"2016/17","t":"2020/21"},{"n":"Ben House","a":152,"g":32,"f":"2021/22","t":"2026/27"},{"n":"Sean Roughan","a":137,"g":4,"f":"2020/21","t":"2024/25"},{"n":"Simon Yeo","a":134,"g":42,"f":"2002/03","t":"2005/06"},{"n":"Paudie O'Connor","a":133,"g":8,"f":"2022/23","t":"2024/25"},{"n":"Neal Eardley","a":131,"g":3,"f":"2017/18","t":"2019/20"},{"n":"Peter Gain","a":125,"g":12,"f":"2002/03","t":"2004/05"},{"n":"Timothy Eyoma","a":125,"g":5,"f":"2020/21","t":"2023/24"}]};
+window.TS_TEAM = {"slug":"lincoln-city","name":"Lincoln City","comps":["League Two","FA Cup","EFL Cup","League One"],"defaultScope":"team_lincoln-city_efl-cup+fa-cup+league-one+league-two","potd":[{"n":"Alan Marriott","a":260,"g":0,"f":"2002/03","t":"2007/08"},{"n":"Scott Kerr","a":221,"g":8,"f":"2005/06","t":"2010/11"},{"n":"Conor McGrandles","a":192,"g":9,"f":"2020/21","t":"2026/27"},{"n":"Paul Morgan","a":178,"g":1,"f":"2002/03","t":"2006/07"},{"n":"Lee Frecklington","a":169,"g":27,"f":"2004/05","t":"2018/19"},{"n":"Adam Jackson","a":167,"g":5,"f":"2020/21","t":"2026/27"},{"n":"Lee Beevers","a":167,"g":9,"f":"2004/05","t":"2015/16"},{"n":"Harry Anderson","a":158,"g":22,"f":"2016/17","t":"2020/21"},{"n":"Ben House","a":156,"g":32,"f":"2021/22","t":"2026/27"},{"n":"Sean Roughan","a":137,"g":4,"f":"2020/21","t":"2024/25"},{"n":"Simon Yeo","a":134,"g":42,"f":"2002/03","t":"2005/06"},{"n":"Paudie O'Connor","a":133,"g":8,"f":"2022/23","t":"2024/25"},{"n":"Neal Eardley","a":131,"g":3,"f":"2017/18","t":"2019/20"},{"n":"Peter Gain","a":125,"g":12,"f":"2002/03","t":"2004/05"},{"n":"Timothy Eyoma","a":125,"g":5,"f":"2020/21","t":"2023/24"}]};
 </script>
 <script src="/js/ts-scope.js"></script>
 <script src="/js/team-page.js"></script>
@@ -610,6 +618,6 @@ window.TS_TEAM = {"slug":"lincoln-city","name":"Lincoln City","comps":["League T
     try { TSNav.render(); } catch (e) { console.error('[TeleStats] Nav render failed:', e); }
   })();
 </script>
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TeleStats","item":"https://telestats.net"},{"@type":"ListItem","position":2,"name":"Teams","item":"https://telestats.net/teams/"},{"@type":"ListItem","position":3,"name":"Lincoln City","item":"https://telestats.net/teams/lincoln-city/"}]},{"@type":"SportsTeam","name":"Lincoln City","sport":"Association football","url":"https://telestats.net/teams/lincoln-city/"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is the Lincoln City page on TeleStats?","acceptedAnswer":{"@type":"Answer","text":"Free Lincoln City football quizzes and trivia games generated from real appearance and goal records for 359 players across League Two, FA Cup, EFL Cup, League One and Championship. No sign-up is needed to play."}}]}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TeleStats","item":"https://telestats.net"},{"@type":"ListItem","position":2,"name":"Teams","item":"https://telestats.net/teams/"},{"@type":"ListItem","position":3,"name":"Lincoln City","item":"https://telestats.net/teams/lincoln-city/"}]},{"@type":"SportsTeam","name":"Lincoln City","sport":"Association football","url":"https://telestats.net/teams/lincoln-city/"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is the Lincoln City page on TeleStats?","acceptedAnswer":{"@type":"Answer","text":"Free Lincoln City football quizzes and trivia games generated from real appearance and goal records for 361 players across League Two, FA Cup, EFL Cup, League One and Championship. No sign-up is needed to play."}}]}]}</script>
 </body>
 </html>

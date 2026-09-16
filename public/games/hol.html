@@ -311,6 +311,11 @@ async function init() {
       if (startBtn) startBtn.disabled = false;
       const chosen = $('scopeList') && $('scopeList').querySelector('.scope-card.selected');
       if (chosen) chosen.scrollIntoView({ block: 'center' });
+
+      // "Higher or Lower: goals" is a different game from "…: appearances",
+      // and a link that names one should not then ask which.
+      const wantStat = TSScope.variant('stat', ['appearances', 'goals']);
+      if (wantStat) selectStat(wantStat);
     
     // Arrived from a team page with the club, division and game already
     // chosen — so play it, rather than showing a picker of every other club.

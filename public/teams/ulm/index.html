@@ -53,6 +53,9 @@
   .crest { width: 52px; height: 60px; flex: 0 0 auto; filter: drop-shadow(0 2px 6px rgba(0,0,0,.45)); }
   .hero h1 { font-size: 1.65rem; line-height: 1.2; margin: 0 0 5px; }
   .sub { color: var(--text-secondary); margin: 0; font-size: .9rem; }
+  .sub a.complink { color: var(--text-secondary); text-decoration: underline;
+                    text-decoration-color: rgba(255,255,255,.22); }
+  .sub a.complink:hover { color: var(--accent); }
   .scope-note { color: var(--text-muted); font-size: .76rem; margin: 6px 0 0; }
   .scope-note a { color: var(--accent); }
 
@@ -183,9 +186,9 @@
     <nav>
       <a href="/daily/">Daily</a>
       <a href="/games/">Games</a>
+      <a href="/competitions/">Competitions</a>
       <a href="/teams/">Teams</a>
       <a href="/ask/">Ask</a>
-      <a href="/leaderboard/">Leaderboard</a>
       <a href="/community/">Community</a>
     </nav>
   </div>
@@ -206,7 +209,8 @@
     </svg>
     <div>
       <h1>Ulm Football Quizzes &amp; Trivia</h1>
-      <p class="sub">21 players · 468 appearances · Bundesliga</p>
+      <p class="sub">21 players · 468 appearances ·
+        <a class="complink" href="/competitions/bundesliga/">Bundesliga</a></p>
       <p class="scope-note">Records cover 1999/00 to 1999/00.
         <a href="/tools/data.html">Full dataset scope</a>.</p>
     </div>
@@ -359,30 +363,30 @@
           </tr>
         <tr>
             <td class="rank">8</td>
+            <td>Janos Radoki</td>
+            <td class="num">25</td>
+            <td class="num">0</td>
+            <td class="yr">1999/00–1999/00</td>
+          </tr>
+        <tr>
+            <td class="rank">9</td>
             <td>Leandro Fonseca</td>
             <td class="num">25</td>
             <td class="num">3</td>
             <td class="yr">1999/00–1999/00</td>
           </tr>
         <tr>
-            <td class="rank">9</td>
+            <td class="rank">10</td>
             <td>Janusz Góra</td>
             <td class="num">25</td>
             <td class="num">3</td>
             <td class="yr">1999/00–1999/00</td>
           </tr>
         <tr>
-            <td class="rank">10</td>
+            <td class="rank">11</td>
             <td>Hans van de Haar</td>
             <td class="num">25</td>
             <td class="num">10</td>
-            <td class="yr">1999/00–1999/00</td>
-          </tr>
-        <tr>
-            <td class="rank">11</td>
-            <td>Janos Radoki</td>
-            <td class="num">25</td>
-            <td class="num">0</td>
             <td class="yr">1999/00–1999/00</td>
           </tr>
         <tr>
@@ -550,7 +554,7 @@
 </div><!-- /wrap -->
 
 <script>
-window.TS_TEAM = {"slug":"ulm","name":"Ulm","comps":["Bundesliga"],"defaultScope":"team_ulm_bundesliga","potd":[{"n":"Philipp Laux","a":34,"g":0,"f":"1999/00","t":"1999/00"},{"n":"Oliver Otto","a":33,"g":2,"f":"1999/00","t":"1999/00"},{"n":"Oliver Unsöld","a":33,"g":1,"f":"1999/00","t":"1999/00"},{"n":"Rui Marques","a":32,"g":0,"f":"1999/00","t":"1999/00"},{"n":"Joachim Stadler","a":31,"g":1,"f":"1999/00","t":"1999/00"},{"n":"Rainer Scharinger","a":29,"g":4,"f":"1999/00","t":"1999/00"},{"n":"Sascha Rösler","a":26,"g":0,"f":"1999/00","t":"1999/00"},{"n":"Leandro Fonseca","a":25,"g":3,"f":"1999/00","t":"1999/00"},{"n":"Janusz Góra","a":25,"g":3,"f":"1999/00","t":"1999/00"},{"n":"Hans van de Haar","a":25,"g":10,"f":"1999/00","t":"1999/00"},{"n":"Janos Radoki","a":25,"g":0,"f":"1999/00","t":"1999/00"},{"n":"Bernd Maier","a":24,"g":1,"f":"1999/00","t":"1999/00"},{"n":"Tamás Bódog","a":23,"g":2,"f":"1999/00","t":"1999/00"},{"n":"David Zdrilic","a":22,"g":6,"f":"1999/00","t":"1999/00"},{"n":"Dragan Trkulja","a":20,"g":1,"f":"1999/00","t":"1999/00"}]};
+window.TS_TEAM = {"slug":"ulm","name":"Ulm","comps":["Bundesliga"],"defaultScope":"team_ulm_bundesliga","potd":[{"n":"Philipp Laux","a":34,"g":0,"f":"1999/00","t":"1999/00"},{"n":"Oliver Otto","a":33,"g":2,"f":"1999/00","t":"1999/00"},{"n":"Oliver Unsöld","a":33,"g":1,"f":"1999/00","t":"1999/00"},{"n":"Rui Marques","a":32,"g":0,"f":"1999/00","t":"1999/00"},{"n":"Joachim Stadler","a":31,"g":1,"f":"1999/00","t":"1999/00"},{"n":"Rainer Scharinger","a":29,"g":4,"f":"1999/00","t":"1999/00"},{"n":"Sascha Rösler","a":26,"g":0,"f":"1999/00","t":"1999/00"},{"n":"Janos Radoki","a":25,"g":0,"f":"1999/00","t":"1999/00"},{"n":"Leandro Fonseca","a":25,"g":3,"f":"1999/00","t":"1999/00"},{"n":"Janusz Góra","a":25,"g":3,"f":"1999/00","t":"1999/00"},{"n":"Hans van de Haar","a":25,"g":10,"f":"1999/00","t":"1999/00"},{"n":"Bernd Maier","a":24,"g":1,"f":"1999/00","t":"1999/00"},{"n":"Tamás Bódog","a":23,"g":2,"f":"1999/00","t":"1999/00"},{"n":"David Zdrilic","a":22,"g":6,"f":"1999/00","t":"1999/00"},{"n":"Dragan Trkulja","a":20,"g":1,"f":"1999/00","t":"1999/00"}]};
 </script>
 <script src="/js/ts-scope.js"></script>
 <script src="/js/team-page.js"></script>

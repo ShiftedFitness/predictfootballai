@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="/js/ts-analytics.js"></script>
+<title>La Liga Quiz &amp; Trivia Games | TeleStats</title>
+<meta name="description" content="Play La Liga football quizzes built from real data — 5,934 players, 408,925 appearances and 50 clubs across 39 seasons, 1988/89 to 2026/27. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<link rel="canonical" href="https://telestats.net/competitions/la-liga/">
+<meta name="theme-color" content="#5A2D82">
+<meta property="og:type" content="website">
+<meta property="og:title" content="La Liga Quiz &amp; Trivia Games | TeleStats">
+<meta property="og:description" content="Play La Liga football quizzes built from real data — 5,934 players, 408,925 appearances and 50 clubs across 39 seasons, 1988/89 to 2026/27. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta property="og:url" content="https://telestats.net/competitions/la-liga/">
+<meta property="og:site_name" content="TeleStats">
+<meta name="twitter:card" content="summary">
+<link rel="stylesheet" href="/telestats-theme.css">
+<style>
+  :root { --club: #5A2D82; --club-2: #32055a; }
+  body { margin: 0; }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 0 18px 60px; }
+  .ts-header { border-bottom: 1px solid var(--rule, #24313A); background: var(--bg-card, #131A20); }
+  .ts-header .inner { max-width: 980px; margin: 0 auto; padding: 11px 18px;
+                      display: flex; align-items: center; gap: 18px; }
+  .ts-header .brand { font-weight: 700; letter-spacing: .04em; color: var(--text-primary, #F2F5F7);
+                      text-decoration: none; font-family: 'Space Mono', ui-monospace, monospace; }
+  .ts-header nav { display: flex; gap: 15px; flex-wrap: wrap; }
+  .ts-header nav a { font-size: .82rem; color: var(--text-secondary, #9FB0BC); text-decoration: none; }
+  nav.crumbs { font-size: .78rem; color: var(--text-secondary); margin: 16px 0 12px; }
+  nav.crumbs a { color: var(--accent); text-decoration: none; }
+
+  .hero { position: relative; overflow: hidden; border-radius: 12px; padding: 22px;
+          border: 1px solid var(--rule, #24313A); margin-bottom: 8px;
+          background: linear-gradient(160deg, color-mix(in srgb, var(--club) 26%, transparent), transparent 62%),
+                      var(--bg-card, #131A20); }
+  .scarf { position: absolute; inset: 0 0 auto 0; height: 5px;
+           background: repeating-linear-gradient(90deg, var(--club) 0 24px, var(--club-2) 24px 48px); }
+  .hero h1 { font-size: 1.7rem; line-height: 1.2; margin: 0 0 6px; }
+  .hero .sub { color: var(--text-secondary); font-size: .92rem; margin: 0; }
+  .hero .note { color: var(--text-muted); font-size: .76rem; margin: 7px 0 0; }
+  .hero .note a { color: var(--accent); }
+
+  h2 { font-size: 1.14rem; margin: 32px 0 4px; }
+  h2 + .sub { color: var(--text-secondary); font-size: .88rem; margin: 0 0 13px; max-width: 66ch; line-height: 1.5; }
+
+  ul.games { list-style: none; padding: 0; margin: 0; display: grid;
+             grid-template-columns: repeat(auto-fit, minmax(215px, 1fr)); gap: 11px; }
+  li.game { background: var(--bg-card, #131A20); border: 1px solid var(--rule, #24313A);
+            border-radius: 9px; transition: border-color .15s, transform .15s; }
+  li.game:hover { border-color: var(--club); transform: translateY(-1px); }
+  li.game a { display: block; padding: 14px 15px; text-decoration: none; color: inherit; height: 100%; }
+  li.game h3 { font-size: .95rem; margin: 0 0 4px; }
+  li.game .variant { font-size: .74rem; font-weight: 600; color: var(--club);
+                     border: 1px solid var(--club); border-radius: 4px; padding: 1px 6px;
+                     margin-left: 4px; vertical-align: 1px; }
+  li.game p { font-size: .81rem; color: var(--text-secondary); margin: 0 0 10px; line-height: 1.4; }
+  li.game .go { font-size: .8rem; font-weight: 600; color: var(--accent, #00E5FF); }
+
+  table { border-collapse: collapse; width: 100%; font-size: .87rem; }
+  th, td { text-align: left; padding: 6px 9px; border-bottom: 1px solid var(--rule, #24313A); }
+  th { font-size: .7rem; text-transform: uppercase; letter-spacing: .05em; color: var(--text-muted); }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  td.rank { color: var(--text-muted); width: 2em; }
+  td.club a { color: var(--text-secondary); text-decoration: none; }
+  td.club a:hover { color: var(--accent); }
+  .tables { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .table-wrap { overflow-x: auto; }
+
+  .clubs { display: grid; grid-template-columns: repeat(auto-fill, minmax(196px, 1fr)); gap: 6px; }
+  .clubs a { display: flex; align-items: center; gap: 9px; font-size: .85rem; padding: 7px 11px;
+             border: 1px solid var(--rule, #24313A); border-radius: 6px;
+             color: var(--text-primary, #F2F5F7); text-decoration: none; }
+  .clubs a i { width: 4px; align-self: stretch; min-height: 17px; border-radius: 2px;
+               background: var(--club, #4A5A66); flex: 0 0 auto; }
+  .clubs a span { margin-left: auto; color: var(--text-muted); font-variant-numeric: tabular-nums; font-size: .78rem; }
+  .clubs a:hover { border-color: var(--club); }
+
+  .community { list-style: none; padding: 0; margin: 0; display: grid;
+               grid-template-columns: repeat(auto-fit, minmax(232px, 1fr)); gap: 11px; }
+  .community li { background: var(--bg-card, #131A20); border: 1px dashed var(--rule, #3A4A55);
+                  border-radius: 9px; padding: 13px 15px; }
+  .community a { color: inherit; text-decoration: none; }
+  .community h4 { font-size: .9rem; margin: 0 0 4px; }
+  .community p { font-size: .79rem; color: var(--text-secondary); margin: 0 0 7px; line-height: 1.4; }
+  .community .meta { font-size: .72rem; color: var(--text-muted); }
+  .empty { font-size: .84rem; color: var(--text-muted); margin: 6px 0 0; }
+  .cta { display: inline-block; margin-top: 11px; font-size: .84rem; font-weight: 600;
+         padding: 9px 15px; border-radius: 7px; text-decoration: none;
+         border: 1px solid var(--club); color: var(--text-primary, #F2F5F7); }
+  .cta:hover { background: var(--club); color: #fff; }
+
+  .related { display: flex; flex-wrap: wrap; gap: 7px; }
+  .related a { font-size: .81rem; color: var(--accent); text-decoration: none;
+               padding: 4px 10px; border: 1px solid var(--rule, #24313A); border-radius: 6px; }
+  form.ask { display: flex; gap: 8px; margin: 10px 0; }
+  form.ask input { flex: 1; padding: 10px 13px; font-size: .93rem; border-radius: 7px;
+                   border: 1px solid var(--rule, #24313A); background: var(--bg-card, #131A20);
+                   color: var(--text-primary, #F2F5F7); }
+  form.ask button { padding: 10px 17px; font-weight: 600; border: 0; border-radius: 7px;
+                    background: var(--accent, #00E5FF); color: #0B0F12; cursor: pointer; }
+  .ask-examples { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .ask-examples button { font-size: .77rem; padding: 5px 10px; border-radius: 5px; border: 0;
+                         background: var(--bg-elevated, #1E272E); color: var(--accent);
+                         cursor: pointer; font-family: inherit; }
+  #askAnswer .msg { font-size: .95rem; line-height: 1.5; margin: 10px 0; }
+  #askAnswer .prov { font-size: .73rem; color: var(--text-muted); }
+  footer.page { margin-top: 44px; padding-top: 16px; font-size: .77rem; color: var(--text-muted);
+                border-top: 1px solid var(--rule, #24313A); }
+  footer.page a { color: var(--accent); }
+  @media (max-width: 680px) { .tables { grid-template-columns: 1fr; } .hero h1 { font-size: 1.35rem; } }
+</style>
+</head>
+<body>
+
+<header class="ts-header">
+  <div class="inner">
+    <a class="brand" href="/">TELESTATS</a>
+    <nav>
+      <a href="/daily/">Daily</a>
+      <a href="/games/">Games</a>
+      <a href="/competitions/">Competitions</a>
+      <a href="/teams/">Teams</a>
+      <a href="/ask/">Ask</a>
+      <a href="/community/">Community</a>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap">
+
+<nav class="crumbs"><a href="/">TeleStats</a> › <a href="/competitions/">Competitions</a> › La Liga</nav>
+
+<div class="hero">
+  <div class="scarf"></div>
+  <h1>La Liga Quizzes &amp; Trivia</h1>
+  <p class="sub">5,934 players · 408,925 appearances ·
+    50 clubs · 39 seasons</p>
+  <p class="note">Records cover 1988/89 to 2026/27.
+    <a href="/tools/data.html">What the dataset covers</a>.</p>
+</div>
+
+<h2>Play La Liga</h2>
+<p class="sub">Every club in the competition at once. Pick a game and it starts —
+  or scroll down and choose a single club instead.</p>
+<ul class="games">
+        <li class="game">
+          <a href="/games/hol.html?scope=comp_la-liga&amp;stat=appearances&amp;play=1">
+            <h3>Higher or Lower <span class="variant">Appearances</span></h3>
+            <p>Which player made more appearances?</p>
+            <span class="go">Play &rarr;</span>
+          </a>
+        </li>
+        <li class="game">
+          <a href="/games/hol.html?scope=comp_la-liga&amp;stat=goals&amp;play=1">
+            <h3>Higher or Lower <span class="variant">Goals</span></h3>
+            <p>Which player scored more?</p>
+            <span class="go">Play &rarr;</span>
+          </a>
+        </li>
+        <li class="game">
+          <a href="/games/xi.html?scope=comp_la-liga&amp;objective=appearances&amp;play=1">
+            <h3>Starting XI <span class="variant">Appearances</span></h3>
+            <p>Build the most-capped eleven.</p>
+            <span class="go">Play &rarr;</span>
+          </a>
+        </li>
+        <li class="game">
+          <a href="/games/xi.html?scope=comp_la-liga&amp;objective=goals&amp;play=1">
+            <h3>Starting XI <span class="variant">Goals</span></h3>
+            <p>Build the highest-scoring eleven.</p>
+            <span class="go">Play &rarr;</span>
+          </a>
+        </li>
+        <li class="game">
+          <a href="/games/alpha.html?scope=comp_la-liga&amp;play=1">
+            <h3>Player Alphabet</h3>
+            <p>Name a player for every letter.</p>
+            <span class="go">Play &rarr;</span>
+          </a>
+        </li>
+        <li class="game">
+          <a href="/games/whoami.html?scope=comp_la-liga&amp;play=1">
+            <h3>Who Am I?</h3>
+            <p>Guess the player from five clues.</p>
+            <span class="go">Play &rarr;</span>
+          </a>
+        </li>
+        <li class="game">
+          <a href="/games/quiz.html?scope=comp_la-liga&amp;play=1">
+            <h3>Trivia Quiz</h3>
+            <p>Ten questions from the record books.</p>
+            <span class="go">Play &rarr;</span>
+          </a>
+        </li>
+</ul>
+
+<h2>La Liga all-time records</h2>
+<p class="sub">Across every club in the competition, 1988/89 to 2026/27.</p>
+<div class="tables">
+  <div class="table-wrap">
+    <h3 style="font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);margin:0 0 6px">Most appearances</h3>
+    <table>
+      <thead><tr><th></th><th>Player</th><th>Club</th><th class="num">Apps</th><th class="num">Goals</th></tr></thead>
+      <tbody>
+        <tr>
+            <td class="rank">1</td>
+            <td>Joaquín</td>
+            <td class="club"><a href="/teams/real-betis/">Real Betis</a></td>
+            <td class="num">623</td>
+            <td class="num">77</td>
+          </tr>
+        <tr>
+            <td class="rank">2</td>
+            <td>Raúl García</td>
+            <td class="club"><a href="/teams/athletic-club/">Athletic Club</a></td>
+            <td class="num">609</td>
+            <td class="num">111</td>
+          </tr>
+        <tr>
+            <td class="rank">3</td>
+            <td>Antoine Griezmann</td>
+            <td class="club"><a href="/teams/atletico-madrid/">Atlético Madrid</a></td>
+            <td class="num">564</td>
+            <td class="num">205</td>
+          </tr>
+        <tr>
+            <td class="rank">4</td>
+            <td>Daniel Parejo</td>
+            <td class="club"><a href="/teams/valencia/">Valencia</a></td>
+            <td class="num">558</td>
+            <td class="num">78</td>
+          </tr>
+        <tr>
+            <td class="rank">5</td>
+            <td>Raúl</td>
+            <td class="club"><a href="/teams/real-madrid/">Real Madrid</a></td>
+            <td class="num">550</td>
+            <td class="num">230</td>
+          </tr>
+        <tr>
+            <td class="rank">6</td>
+            <td>Sergio Ramos</td>
+            <td class="club"><a href="/teams/real-madrid/">Real Madrid</a></td>
+            <td class="num">536</td>
+            <td class="num">77</td>
+          </tr>
+        <tr>
+            <td class="rank">7</td>
+            <td>Koke</td>
+            <td class="club"><a href="/teams/atletico-madrid/">Atlético Madrid</a></td>
+            <td class="num">524</td>
+            <td class="num">40</td>
+          </tr>
+        <tr>
+            <td class="rank">8</td>
+            <td>Lionel Messi</td>
+            <td class="club"><a href="/teams/barcelona/">Barcelona</a></td>
+            <td class="num">519</td>
+            <td class="num">474</td>
+          </tr>
+        <tr>
+            <td class="rank">9</td>
+            <td>Jesús Navas</td>
+            <td class="club"><a href="/teams/sevilla/">Sevilla</a></td>
+            <td class="num">518</td>
+            <td class="num">26</td>
+          </tr>
+        <tr>
+            <td class="rank">10</td>
+            <td>Iker Casillas</td>
+            <td class="club"><a href="/teams/real-madrid/">Real Madrid</a></td>
+            <td class="num">510</td>
+            <td class="num">0</td>
+          </tr>
+        <tr>
+            <td class="rank">11</td>
+            <td>Xavi</td>
+            <td class="club"><a href="/teams/barcelona/">Barcelona</a></td>
+            <td class="num">505</td>
+            <td class="num">58</td>
+          </tr>
+        <tr>
+            <td class="rank">12</td>
+            <td>Sergio Busquets</td>
+            <td class="club"><a href="/teams/barcelona/">Barcelona</a></td>
+            <td class="num">481</td>
+            <td class="num">10</td>
+          </tr>
+        <tr>
+            <td class="rank">13</td>
+            <td>Fernando Hierro</td>
+            <td class="club"><a href="/teams/real-madrid/">Real Madrid</a></td>
+            <td class="num">467</td>
+            <td class="num">104</td>
+          </tr>
+        <tr>
+            <td class="rank">14</td>
+            <td>Donato</td>
+            <td class="club"><a href="/teams/deportivo-la-coruna/">Deportivo La Coruna</a></td>
+            <td class="num">467</td>
+            <td class="num">50</td>
+          </tr>
+        <tr>
+            <td class="rank">15</td>
+            <td>Joseba Etxeberria</td>
+            <td class="club"><a href="/teams/athletic-club/">Athletic Club</a></td>
+            <td class="num">452</td>
+            <td class="num">91</td>
+          </tr>
+        <tr>
+            <td class="rank">16</td>
+            <td>Pedro Munitis</td>
+            <td class="club"><a href="/teams/racing-santander/">Racing Santander</a></td>
+            <td class="num">445</td>
+            <td class="num">43</td>
+          </tr>
+        <tr>
+            <td class="rank">17</td>
+            <td>Ismael Urzaiz</td>
+            <td class="club"><a href="/teams/athletic-club/">Athletic Club</a></td>
+            <td class="num">444</td>
+            <td class="num">131</td>
+          </tr>
+        <tr>
+            <td class="rank">18</td>
+            <td>Aritz Aduriz</td>
+            <td class="club"><a href="/teams/athletic-club/">Athletic Club</a></td>
+            <td class="num">443</td>
+            <td class="num">158</td>
+          </tr>
+        <tr>
+            <td class="rank">19</td>
+            <td>Andrés Iniesta</td>
+            <td class="club"><a href="/teams/barcelona/">Barcelona</a></td>
+            <td class="num">442</td>
+            <td class="num">35</td>
+          </tr>
+        <tr>
+            <td class="rank">20</td>
+            <td>Karim Benzema</td>
+            <td class="club"><a href="/teams/real-madrid/">Real Madrid</a></td>
+            <td class="num">439</td>
+            <td class="num">238</td>
+          </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="table-wrap">
+    <h3 style="font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);margin:0 0 6px">Most goals</h3>
+    <table>
+      <thead><tr><th></th><th>Player</th><th>Club</th><th class="num">Goals</th><th class="num">Apps</th></tr></thead>
+      <tbody>
+        <tr>
+            <td class="rank">1</td>
+            <td>Lionel Messi</td>
+            <td class="club"><a href="/teams/barcelona/">Barcelona</a></td>
+            <td class="num">474</td>
+            <td class="num">519</td>
+          </tr>
+        <tr>
+            <td class="rank">2</td>
+            <td>Cristiano Ronaldo</td>
+            <td class="club"><a href="/teams/real-madrid/">Real Madrid</a></td>
+            <td class="num">311</td>
+            <td class="num">292</td>
+          </tr>
+        <tr>
+            <td class="rank">3</td>
+            <td>Karim Benzema</td>
+            <td class="club"><a href="/teams/real-madrid/">Real Madrid</a></td>
+            <td class="num">238</td>
+            <td class="num">439</td>
+          </tr>
+        <tr>
+            <td class="rank">4</td>
+            <td>Raúl</td>
+            <td class="club"><a href="/teams/real-madrid/">Real Madrid</a></td>
+            <td class="num">230</td>
+            <td class="num">550</td>
+          </tr>
+        <tr>
+            <td class="rank">5</td>
+            <td>Antoine Griezmann</td>
+            <td class="club"><a href="/teams/atletico-madrid/">Atlético Madrid</a></td>
+            <td class="num">205</td>
+            <td class="num">564</td>
+          </tr>
+        <tr>
+            <td class="rank">6</td>
+            <td>David Villa</td>
+            <td class="club"><a href="/teams/valencia/">Valencia</a></td>
+            <td class="num">185</td>
+            <td class="num">352</td>
+          </tr>
+        <tr>
+            <td class="rank">7</td>
+            <td>Luis Suárez</td>
+            <td class="club"><a href="/teams/barcelona/">Barcelona</a></td>
+            <td class="num">178</td>
+            <td class="num">258</td>
+          </tr>
+        <tr>
+            <td class="rank">8</td>
+            <td>Iago Aspas</td>
+            <td class="club"><a href="/teams/celta-vigo/">Celta Vigo</a></td>
+            <td class="num">171</td>
+            <td class="num">425</td>
+          </tr>
+        <tr>
+            <td class="rank">9</td>
+            <td>Samuel Eto&#39;o</td>
+            <td class="club"><a href="/teams/barcelona/">Barcelona</a></td>
+            <td class="num">161</td>
+            <td class="num">278</td>
+          </tr>
+        <tr>
+            <td class="rank">10</td>
+            <td>Aritz Aduriz</td>
+            <td class="club"><a href="/teams/athletic-club/">Athletic Club</a></td>
+            <td class="num">158</td>
+            <td class="num">443</td>
+          </tr>
+        <tr>
+            <td class="rank">11</td>
+            <td>Raúl Tamudo</td>
+            <td class="club"><a href="/teams/espanyol/">Espanyol</a></td>
+            <td class="num">146</td>
+            <td class="num">407</td>
+          </tr>
+        <tr>
+            <td class="rank">12</td>
+            <td>Gerard Moreno</td>
+            <td class="club"><a href="/teams/villarreal/">Villarreal</a></td>
+            <td class="num">133</td>
+            <td class="num">348</td>
+          </tr>
+        <tr>
+            <td class="rank">13</td>
+            <td>Ismael Urzaiz</td>
+            <td class="club"><a href="/teams/athletic-club/">Athletic Club</a></td>
+            <td class="num">131</td>
+            <td class="num">444</td>
+          </tr>
+        <tr>
+            <td class="rank">14</td>
+            <td>Roberto Soldado</td>
+            <td class="club"><a href="/teams/valencia/">Valencia</a></td>
+            <td class="num">129</td>
+            <td class="num">325</td>
+          </tr>
+        <tr>
+            <td class="rank">15</td>
+            <td>Lyuboslav Penev</td>
+            <td class="club"><a href="/teams/valencia/">Valencia</a></td>
+            <td class="num">129</td>
+            <td class="num">305</td>
+          </tr>
+        <tr>
+            <td class="rank">16</td>
+            <td>Diego Forlán</td>
+            <td class="club"><a href="/teams/atletico-madrid/">Atlético Madrid</a></td>
+            <td class="num">127</td>
+            <td class="num">240</td>
+          </tr>
+        <tr>
+            <td class="rank">17</td>
+            <td>Álvaro Negredo</td>
+            <td class="club"><a href="/teams/sevilla/">Sevilla</a></td>
+            <td class="num">127</td>
+            <td class="num">361</td>
+          </tr>
+        <tr>
+            <td class="rank">18</td>
+            <td>Fernando Morientes</td>
+            <td class="club"><a href="/teams/real-madrid/">Real Madrid</a></td>
+            <td class="num">125</td>
+            <td class="num">336</td>
+          </tr>
+        <tr>
+            <td class="rank">19</td>
+            <td>Ronaldo</td>
+            <td class="club"><a href="/teams/real-madrid/">Real Madrid</a></td>
+            <td class="num">117</td>
+            <td class="num">164</td>
+          </tr>
+        <tr>
+            <td class="rank">20</td>
+            <td>Cristhian Stuani</td>
+            <td class="club"><a href="/teams/girona/">Girona</a></td>
+            <td class="num">116</td>
+            <td class="num">346</td>
+          </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<h2>Clubs in La Liga</h2>
+<p class="sub">50 clubs have played in La Liga in this dataset.
+  Each has its own page, records and games.</p>
+<div class="clubs">
+        <a href="/teams/valladolid/" style="--club:#5A2D82"><i></i>Valladolid<span>516</span></a>
+        <a href="/teams/albacete/" style="--club:hsl(55, 57%, 38%)"><i></i>Albacete<span>468</span></a>
+        <a href="/teams/zaragoza/" style="--club:#004C99"><i></i>Zaragoza<span>461</span></a>
+        <a href="/teams/tenerife/" style="--club:#1C3A7A"><i></i>Tenerife<span>434</span></a>
+        <a href="/teams/elche/" style="--club:hsl(325, 73%, 38%)"><i></i>Elche<span>429</span></a>
+        <a href="/teams/espanyol/" style="--club:#007FC8"><i></i>Espanyol<span>425</span></a>
+        <a href="/teams/sevilla/" style="--club:#D4021D"><i></i>Sevilla<span>420</span></a>
+        <a href="/teams/mallorca/" style="--club:#E20613"><i></i>Mallorca<span>410</span></a>
+        <a href="/teams/sporting-gijon/" style="--club:#CC2229"><i></i>Sporting Gijón<span>406</span></a>
+        <a href="/teams/malaga/" style="--club:#009EE3"><i></i>Málaga<span>397</span></a>
+        <a href="/teams/atletico-madrid/" style="--club:#CB3524"><i></i>Atlético Madrid<span>388</span></a>
+        <a href="/teams/rayo-vallecano/" style="--club:#E53027"><i></i>Rayo Vallecano<span>386</span></a>
+        <a href="/teams/celta-vigo/" style="--club:#8AC3EE"><i></i>Celta Vigo<span>385</span></a>
+        <a href="/teams/valencia/" style="--club:#EE3524"><i></i>Valencia<span>382</span></a>
+        <a href="/teams/racing-santander/" style="--club:#00A651"><i></i>Racing Santander<span>378</span></a>
+        <a href="/teams/real-betis/" style="--club:#00954C"><i></i>Real Betis<span>367</span></a>
+        <a href="/teams/levante/" style="--club:#BD0811"><i></i>Levante<span>363</span></a>
+        <a href="/teams/deportivo-la-coruna/" style="--club:#0033A0"><i></i>Deportivo La Coruna<span>360</span></a>
+        <a href="/teams/cordoba/" style="--club:hsl(193, 58%, 38%)"><i></i>Córdoba<span>357</span></a>
+        <a href="/teams/barcelona/" style="--club:#A50044"><i></i>Barcelona<span>356</span></a>
+        <a href="/teams/almeria/" style="--club:hsl(275, 57%, 38%)"><i></i>Almería<span>356</span></a>
+        <a href="/teams/alaves/" style="--club:#003DA5"><i></i>Alavés<span>354</span></a>
+        <a href="/teams/las-palmas/" style="--club:hsl(275, 57%, 38%)"><i></i>Las Palmas<span>350</span></a>
+        <a href="/teams/getafe/" style="--club:#004FA3"><i></i>Getafe<span>331</span></a>
+        <a href="/teams/cadiz/" style="--club:hsl(40, 71%, 38%)"><i></i>Cádiz<span>330</span></a>
+        <a href="/teams/eibar/" style="--club:hsl(10, 55%, 38%)"><i></i>Eibar<span>324</span></a>
+        <a href="/teams/oviedo/" style="--club:hsl(263, 58%, 38%)"><i></i>Oviedo<span>322</span></a>
+        <a href="/teams/villarreal/" style="--club:#FFCD00"><i></i>Villarreal<span>313</span></a>
+        <a href="/teams/osasuna/" style="--club:#D91A2A"><i></i>Osasuna<span>313</span></a>
+        <a href="/teams/real-madrid/" style="--club:#FEBE10"><i></i>Real Madrid<span>311</span></a>
+        <a href="/teams/real-sociedad/" style="--club:#143C8B"><i></i>Real Sociedad<span>300</span></a>
+        <a href="/teams/granada/" style="--club:#E30613"><i></i>Granada<span>296</span></a>
+        <a href="/teams/numancia/" style="--club:hsl(293, 74%, 38%)"><i></i>Numancia<span>282</span></a>
+        <a href="/teams/huesca/" style="--club:hsl(55, 57%, 38%)"><i></i>Huesca<span>269</span></a>
+        <a href="/teams/gimnastic/" style="--club:hsl(135, 65%, 38%)"><i></i>Gimnàstic<span>267</span></a>
+        <a href="/teams/leganes/" style="--club:hsl(340, 55%, 38%)"><i></i>Leganés<span>257</span></a>
+        <a href="/teams/girona/" style="--club:hsl(33, 58%, 38%)"><i></i>Girona<span>256</span></a>
+        <a href="/teams/athletic-club/" style="--club:#EE2523"><i></i>Athletic Club<span>227</span></a>
+        <a href="/teams/real-murcia/" style="--club:hsl(283, 66%, 38%)"><i></i>Real Murcia<span>221</span></a>
+        <a href="/teams/recreativo/" style="--club:hsl(83, 62%, 38%)"><i></i>Recreativo<span>220</span></a>
+        <a href="/teams/castellon/" style="--club:hsl(210, 55%, 38%)"><i></i>Castellon<span>198</span></a>
+        <a href="/teams/hercules/" style="--club:hsl(220, 67%, 38%)"><i></i>Hércules<span>190</span></a>
+        <a href="/teams/salamanca/" style="--club:hsl(255, 73%, 38%)"><i></i>Salamanca<span>184</span></a>
+        <a href="/teams/xerez/" style="--club:hsl(53, 62%, 38%)"><i></i>Xerez<span>167</span></a>
+        <a href="/teams/extremadura/" style="--club:hsl(348, 68%, 38%)"><i></i>Extremadura<span>123</span></a>
+        <a href="/teams/logrones/" style="--club:hsl(220, 63%, 38%)"><i></i>Logroñés<span>117</span></a>
+        <a href="/teams/compostela/" style="--club:hsl(140, 71%, 38%)"><i></i>Compostela<span>73</span></a>
+        <a href="/teams/lleida/" style="--club:hsl(250, 63%, 38%)"><i></i>Lleida<span>60</span></a>
+        <a href="/teams/merida/" style="--club:hsl(178, 56%, 38%)"><i></i>Mérida<span>42</span></a>
+        <a href="/teams/real-burgos/" style="--club:hsl(130, 59%, 38%)"><i></i>Real Burgos<span>41</span></a>
+</div>
+
+<h2>Community games</h2>
+<p class="sub">Made by players from the same database — different rules, same real records.</p>
+<div id="communityBox"><p class="empty">Loading…</p></div>
+<a class="cta" href="/community/?build=1">Build a La Liga game &rarr;</a>
+
+<h2>Ask about La Liga</h2>
+<p class="sub">Answers come from the database and are never invented — if the data does not
+  support an answer, it says so.</p>
+<form class="ask" id="askForm">
+  <input id="askQ" autocomplete="off" maxlength="300"
+         placeholder="Top scorers in La Liga"
+         aria-label="Ask a question about La Liga">
+  <button type="submit">Ask</button>
+</form>
+<div class="ask-examples">
+          <button type="button" data-q="Top scorers in La Liga">Top scorers in La Liga</button>
+          <button type="button" data-q="Which English players have the most appearances for Valladolid?">Which English players have the most appearances for Valladolid?</button>
+          <button type="button" data-q="Who has played for both Valladolid and Albacete?">Who has played for both Valladolid and Albacete?</button>
+</div>
+<div id="askAnswer"></div>
+
+<h2>Other competitions</h2>
+<div class="related">
+          <a href="/competitions/fa-cup/">FA Cup</a>
+          <a href="/competitions/efl-cup/">EFL Cup</a>
+          <a href="/competitions/segunda-division/">Segunda División</a>
+          <a href="/competitions/league-one/">League One</a>
+          <a href="/competitions/league-two/">League Two</a>
+          <a href="/competitions/champions-league/">Champions League</a>
+          <a href="/competitions/championship/">Championship</a>
+          <a href="/competitions/serie-a/">Serie A</a>
+          <a href="/competitions/premier-league/">Premier League</a>
+          <a href="/competitions/bundesliga/">Bundesliga</a>
+          <a href="/competitions/ligue-1/">Ligue 1</a>
+</div>
+
+<footer class="page">
+  Player statistics compiled from official league and competition sources.
+  <a href="/tools/data.html">Coverage and last update</a> ·
+  <a href="/competitions/">All competitions</a> ·
+  <a href="/teams/">All teams</a> ·
+  <a href="/ask/">Ask TeleStats</a>
+</footer>
+
+</div>
+
+<script>
+window.TS_COMPETITION = {"slug":"la-liga","name":"La Liga","scope":"comp_la-liga"};
+</script>
+<script src="/js/ts-scope.js"></script>
+<script src="/js/competition-page.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/js/ts-auth.js"></script>
+<script src="/js/ts-data.js"></script>
+<script src="/js/ts-nav.js"></script>
+<script>
+  (async function () {
+    try { await TSAuth.init(); } catch (e) { console.error('[TeleStats] Auth init failed:', e); }
+    try { TSNav.render(); } catch (e) { console.error('[TeleStats] Nav render failed:', e); }
+  })();
+</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TeleStats","item":"https://telestats.net"},{"@type":"ListItem","position":2,"name":"Competitions","item":"https://telestats.net/competitions/"},{"@type":"ListItem","position":3,"name":"La Liga","item":"https://telestats.net/competitions/la-liga/"}]},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Who has the most La Liga appearances?","acceptedAnswer":{"@type":"Answer","text":"Joaquín has the most La Liga appearances in the TeleStats database with 623 for Real Betis."}}]}]}</script>
+</body>
+</html>

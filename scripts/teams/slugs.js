@@ -37,10 +37,15 @@ const { createClient } = require('@supabase/supabase-js');
 const db = createClient(process.env.Supabase_Project_URL, process.env.Supabase_Service_Role,
                         { auth: { persistSession: false } });
 
-// Competitions whose clubs get a page: the four English tiers and the rest of
-// the big five. Cups are excluded — a club's cup record belongs on its page,
-// but "FA Cup" is not a club's home.
-const PAGE_COMPETITIONS = [7, 8, 11, 12, 1, 3, 9, 6];
+// Competitions whose clubs get a page: the four English tiers, the rest of the
+// big five, and Spain's second tier. Cups are excluded — a club's cup record
+// belongs on its page, but "FA Cup" is not a club's home.
+//
+// ADDING A COMPETITION MEANS ADDING IT HERE. Segunda was loaded, aggregated
+// and live in the database for its clubs to get no pages at all, because this
+// list had not heard of it and the generator reported "0 to add" rather than
+// an error. scripts/fbref/preflight.js now checks this list against the data.
+const PAGE_COMPETITIONS = [7, 8, 11, 12, 1, 3, 9, 6, 13];
 
 // ─── Slug rules ─────────────────────────────────────────────────────────────
 

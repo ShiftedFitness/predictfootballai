@@ -104,6 +104,20 @@ const CASES = [
   // answered with an empty game.
   ['hol_start',         'bad subset 400',   post({ action: 'get_players', scopeId: 'team_sunderland_serie-a+championship', statType: 'appearances' }), 400],
 
+  // Competition-wide scopes. Five of these existed as legacy ids inside two
+  // games' own arrays; the other seven did not exist at all, so a whole-league
+  // game was impossible for the Championship, both lower English tiers, Segunda
+  // and the cups. Segunda is checked because it is newest and its slug was
+  // wrong once already ("segunda-divisi-n" resolved to nothing).
+  ['hol_start',         'comp · segunda',   post({ action: 'get_players', scopeId: 'comp_segunda-division', statType: 'appearances' })],
+  ['alpha_start',       'comp · league two', post({ action: 'get_alphabet', scopeId: 'comp_league-two' })],
+  ['whoami_start',      'comp · championship', post({ action: 'start_game', scopeId: 'comp_championship' })],
+  ['xi_start',          'comp · segunda',   post({ action: 'get_best_xi', scopeId: 'comp_segunda-division',
+                                                   formation: '4-4-2', objective: 'appearances' })],
+  ['quiz_start',        'comp · segunda',   post({ action: 'generate_quiz', scopeId: 'comp_segunda-division' })],
+  ['competition-extras', 'segunda',         get('?slug=segunda-division')],
+  ['competition-extras', 'bad slug 400',    get('?slug=not-a-competition'), 400],
+
   // Team pages: the leaderboard and community list that are fetched after paint.
   ['team-extras',       'leaderboard',      get('?slug=manchester-united')],
   ['team-extras',       'quiet club',       get('?slug=plymouth-argyle')],

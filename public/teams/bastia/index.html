@@ -52,6 +52,9 @@
   .crest { width: 52px; height: 60px; flex: 0 0 auto; filter: drop-shadow(0 2px 6px rgba(0,0,0,.45)); }
   .hero h1 { font-size: 1.65rem; line-height: 1.2; margin: 0 0 5px; }
   .sub { color: var(--text-secondary); margin: 0; font-size: .9rem; }
+  .sub a.complink { color: var(--text-secondary); text-decoration: underline;
+                    text-decoration-color: rgba(255,255,255,.22); }
+  .sub a.complink:hover { color: var(--accent); }
   .scope-note { color: var(--text-muted); font-size: .76rem; margin: 6px 0 0; }
   .scope-note a { color: var(--accent); }
 
@@ -182,9 +185,9 @@
     <nav>
       <a href="/daily/">Daily</a>
       <a href="/games/">Games</a>
+      <a href="/competitions/">Competitions</a>
       <a href="/teams/">Teams</a>
       <a href="/ask/">Ask</a>
-      <a href="/leaderboard/">Leaderboard</a>
       <a href="/community/">Community</a>
     </nav>
   </div>
@@ -205,7 +208,8 @@
     </svg>
     <div>
       <h1>Bastia Football Quizzes &amp; Trivia</h1>
-      <p class="sub">214 players · 7,454 appearances · Ligue 1</p>
+      <p class="sub">214 players · 7,454 appearances ·
+        <a class="complink" href="/competitions/ligue-1/">Ligue 1</a></p>
       <p class="scope-note">Records cover 1995/96 to 2016/17.
         <a href="/tools/data.html">Full dataset scope</a>.</p>
     </div>
@@ -393,17 +397,17 @@
           </tr>
         <tr>
             <td class="rank">13</td>
-            <td>Patrick Moreau</td>
-            <td class="num">99</td>
-            <td class="num">5</td>
-            <td class="yr">1996/97–2000/01</td>
-          </tr>
-        <tr>
-            <td class="rank">14</td>
             <td>Sébastien Piocelle</td>
             <td class="num">99</td>
             <td class="num">0</td>
             <td class="yr">2000/01–2004/05</td>
+          </tr>
+        <tr>
+            <td class="rank">14</td>
+            <td>Patrick Moreau</td>
+            <td class="num">99</td>
+            <td class="num">5</td>
+            <td class="yr">1996/97–2000/01</td>
           </tr>
         <tr>
             <td class="rank">15</td>
@@ -549,7 +553,7 @@
 </div><!-- /wrap -->
 
 <script>
-window.TS_TEAM = {"slug":"bastia","name":"Bastia","comps":["Ligue 1"],"defaultScope":"team_bastia_ligue-1","potd":[{"n":"Morlaye Soumah","a":233,"g":0,"f":"1995/96","t":"2002/03"},{"n":"Piotr Świerczewski","a":180,"g":12,"f":"1995/96","t":"2000/01"},{"n":"Frédéric Mendy","a":158,"g":2,"f":"1997/98","t":"2003/04"},{"n":"Nicolas Penneteau","a":145,"g":0,"f":"1998/99","t":"2004/05"},{"n":"Frédéric Née","a":143,"g":45,"f":"1998/99","t":"2004/05"},{"n":"Pierre-Yves André","a":133,"g":31,"f":"1997/98","t":"2004/05"},{"n":"Julian Palmieri","a":132,"g":5,"f":"2012/13","t":"2015/16"},{"n":"Pierre Laurent","a":129,"g":22,"f":"1995/96","t":"2000/01"},{"n":"Yannick Cahuzac","a":129,"g":4,"f":"2012/13","t":"2016/17"},{"n":"Éric Durand","a":128,"g":0,"f":"1997/98","t":"2000/01"},{"n":"François Modesto","a":108,"g":4,"f":"1997/98","t":"2015/16"},{"n":"Cédric Uras","a":103,"g":1,"f":"2001/02","t":"2004/05"},{"n":"Patrick Moreau","a":99,"g":5,"f":"1996/97","t":"2000/01"},{"n":"Sébastien Piocelle","a":99,"g":0,"f":"2000/01","t":"2004/05"},{"n":"Sébastien Squillaci","a":97,"g":5,"f":"2013/14","t":"2016/17"}]};
+window.TS_TEAM = {"slug":"bastia","name":"Bastia","comps":["Ligue 1"],"defaultScope":"team_bastia_ligue-1","potd":[{"n":"Morlaye Soumah","a":233,"g":0,"f":"1995/96","t":"2002/03"},{"n":"Piotr Świerczewski","a":180,"g":12,"f":"1995/96","t":"2000/01"},{"n":"Frédéric Mendy","a":158,"g":2,"f":"1997/98","t":"2003/04"},{"n":"Nicolas Penneteau","a":145,"g":0,"f":"1998/99","t":"2004/05"},{"n":"Frédéric Née","a":143,"g":45,"f":"1998/99","t":"2004/05"},{"n":"Pierre-Yves André","a":133,"g":31,"f":"1997/98","t":"2004/05"},{"n":"Julian Palmieri","a":132,"g":5,"f":"2012/13","t":"2015/16"},{"n":"Pierre Laurent","a":129,"g":22,"f":"1995/96","t":"2000/01"},{"n":"Yannick Cahuzac","a":129,"g":4,"f":"2012/13","t":"2016/17"},{"n":"Éric Durand","a":128,"g":0,"f":"1997/98","t":"2000/01"},{"n":"François Modesto","a":108,"g":4,"f":"1997/98","t":"2015/16"},{"n":"Cédric Uras","a":103,"g":1,"f":"2001/02","t":"2004/05"},{"n":"Sébastien Piocelle","a":99,"g":0,"f":"2000/01","t":"2004/05"},{"n":"Patrick Moreau","a":99,"g":5,"f":"1996/97","t":"2000/01"},{"n":"Sébastien Squillaci","a":97,"g":5,"f":"2013/14","t":"2016/17"}]};
 </script>
 <script src="/js/ts-scope.js"></script>
 <script src="/js/team-page.js"></script>

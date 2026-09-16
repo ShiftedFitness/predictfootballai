@@ -24,6 +24,28 @@ const PLANS = {
   }
 };
 
+/**
+ * A Day Pass comes off the price of Pro if you upgrade while it is still
+ * running.
+ *
+ * The point is to remove the "which one do I buy?" hesitation, which makes
+ * people buy neither. With the credit there is no wrong answer: the Day Pass
+ * is a risk-free way in, and upgrading during it costs exactly what going
+ * straight to Pro would have.
+ *
+ * WITHIN THE PASS'S OWN WINDOW, and no longer. The deadline is what makes it
+ * a decision rather than an open-ended discount, so the credit is tied to
+ * pro_expires_at — the same 24 hours the pass itself runs for.
+ *
+ * The credit is taken from a REAL RECORDED PAYMENT, never from the tier flag.
+ * A day pass granted by hand, by a refund that has not settled, or by anything
+ * other than money arriving must not discount anything.
+ */
+const CREDIT_PLAN = 'day_pass';
+// Stripe will not process a GBP charge under 30p; the floor is here so an
+// unexpected credit can never produce a session that fails at the till.
+const MIN_CHARGE = 30;
+
 exports.handler = async (event) => {
   const cors = handleOptions(event);
   if (cors) return cors;
@@ -72,6 +94,34 @@ exports.handler = async (event) => {
   if (hasActiveDayPass && planKey === 'day_pass') return respond(409, 'You already have an active Day Pass');
   // Allow day_pass → lifetime upgrade
 
+  // 2b. Day Pass credit, if one is running and was actually paid for.
+  let credit = 0;
+  if (planKey === 'lifetime' && hasActiveDayPass) {
+    const { data: paid } = await client
+      .from('ts_payments')
+      .select('amount_total, created_at')
+      .eq('user_id', userId)
+      .eq('plan_type', CREDIT_PLAN)
+      .eq('status', 'paid')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    // Only the pass that is actually running: a payment older than the current
+    // window belongs to a pass that has already expired and been used.
+    if (paid && paid.amount_total > 0) {
+      const passStarted = new Date(user.pro_expires_at).getTime() - 24 * 60 * 60 * 1000;
+      if (new Date(paid.created_at).getTime() >= passStarted - 60_000) {
+        credit = Math.min(paid.amount_total, plan.amount - MIN_CHARGE);
+      }
+    }
+  }
+
+  const amount = plan.amount - credit;
+  const describe = credit
+    ? `${plan.description} Your £${(credit / 100).toFixed(2)} Day Pass has been credited.`
+    : plan.description;
+
   // 3. Determine origin for redirect URLs
   const origin = event.headers.origin
     || event.headers.referer?.replace(/\/[^\/]*$/, '')
@@ -81,7 +131,14 @@ exports.handler = async (event) => {
     // 4. Create Stripe Checkout Session
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
-      payment_method_types: ['card'],
+      // NOT payment_method_types: ['card'].
+      //
+      // Naming card explicitly turns OFF Apple Pay, Google Pay and Link, so
+      // every buyer had to type a full card number, expiry and CVC on a phone
+      // to spend 99p. Letting Stripe decide shows a wallet button where the
+      // device supports one, which for an impulse purchase at this price is
+      // worth more than any discount.
+      automatic_payment_methods: { enabled: true },
       customer_email: user.email,
       line_items: [
         {
@@ -89,10 +146,10 @@ exports.handler = async (event) => {
             currency: 'gbp',
             product_data: {
               name: plan.name,
-              description: plan.description,
+              description: describe,
               images: ['https://res.cloudinary.com/dbfvogb95/image/upload/v1770835428/Screenshot_2026-02-11_at_19.43.16_m7urul.png']
             },
-            unit_amount: plan.amount,
+            unit_amount: amount,
           },
           quantity: 1,
         }
@@ -100,7 +157,9 @@ exports.handler = async (event) => {
       metadata: {
         ts_user_id: String(userId),
         ts_email: user.email,
-        ts_plan: planKey
+        ts_plan: planKey,
+        // Recorded so a payment row can be reconciled against the list price.
+        ts_credit_pence: String(credit),
       },
       success_url: `${origin}/upgrade/?payment=success&plan=${planKey}`,
       cancel_url: `${origin}/upgrade/?payment=cancelled`,

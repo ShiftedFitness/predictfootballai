@@ -5,17 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="/js/ts-analytics.js"></script>
 <title>Albacete Football Quiz &amp; Trivia Games | TeleStats</title>
-<meta name="description" content="Play Albacete football quizzes and trivia games built from 124 players and 3,606 appearances in La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta name="description" content="Play Albacete football quizzes and trivia games built from 468 players and 14,565 appearances in Segunda División and La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
 <link rel="canonical" href="https://telestats.net/teams/albacete/">
 <meta name="theme-color" content="hsl(55, 57%, 38%)">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Albacete Football Quiz &amp; Trivia Games | TeleStats">
-<meta property="og:description" content="Play Albacete football quizzes and trivia games built from 124 players and 3,606 appearances in La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta property="og:description" content="Play Albacete football quizzes and trivia games built from 468 players and 14,565 appearances in Segunda División and La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
 <meta property="og:url" content="https://telestats.net/teams/albacete/">
 <meta property="og:site_name" content="TeleStats">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Albacete Football Quiz &amp; Trivia Games | TeleStats">
-<meta name="twitter:description" content="Play Albacete football quizzes and trivia games built from 124 players and 3,606 appearances in La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta name="twitter:description" content="Play Albacete football quizzes and trivia games built from 468 players and 14,565 appearances in Segunda División and La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
 <link rel="stylesheet" href="/telestats-theme.css">
 <style>
   :root { --club: hsl(55, 57%, 38%); --club-2: hsl(73, 57%, 26%); }
@@ -52,6 +52,9 @@
   .crest { width: 52px; height: 60px; flex: 0 0 auto; filter: drop-shadow(0 2px 6px rgba(0,0,0,.45)); }
   .hero h1 { font-size: 1.65rem; line-height: 1.2; margin: 0 0 5px; }
   .sub { color: var(--text-secondary); margin: 0; font-size: .9rem; }
+  .sub a.complink { color: var(--text-secondary); text-decoration: underline;
+                    text-decoration-color: rgba(255,255,255,.22); }
+  .sub a.complink:hover { color: var(--accent); }
   .scope-note { color: var(--text-muted); font-size: .76rem; margin: 6px 0 0; }
   .scope-note a { color: var(--accent); }
 
@@ -182,9 +185,9 @@
     <nav>
       <a href="/daily/">Daily</a>
       <a href="/games/">Games</a>
+      <a href="/competitions/">Competitions</a>
       <a href="/teams/">Teams</a>
       <a href="/ask/">Ask</a>
-      <a href="/leaderboard/">Leaderboard</a>
       <a href="/community/">Community</a>
     </nav>
   </div>
@@ -205,8 +208,9 @@
     </svg>
     <div>
       <h1>Albacete Football Quizzes &amp; Trivia</h1>
-      <p class="sub">124 players · 3,606 appearances · La Liga</p>
-      <p class="scope-note">Records cover 1991/92 to 2004/05.
+      <p class="sub">468 players · 14,565 appearances ·
+        <a class="complink" href="/competitions/segunda-division/">Segunda División</a>, <a class="complink" href="/competitions/la-liga/">La Liga</a></p>
+      <p class="scope-note">Records cover 1991/92 to 2026/27.
         <a href="/tools/data.html">Full dataset scope</a>.</p>
     </div>
   </div>
@@ -216,8 +220,8 @@
   <summary>New here? What this page is</summary>
   <div class="body">
     <p>This is a set of free football games about <strong>Albacete</strong>, generated
-      from real appearance and goal records — 124 players who have turned out
-      for the club in La Liga, going back to 1991/92.</p>
+      from real appearance and goal records — 468 players who have turned out
+      for the club in Segunda División and La Liga, going back to 1991/92.</p>
     <p>Pick a game below and it starts straight away on Albacete. No sign-up, no app.
       Make an account only if you want your scores kept and your name on the club's board.</p>
     <p>Everything you see here comes from the TeleStats database. Nothing is written by an AI
@@ -243,11 +247,23 @@
 
 <h2 id="play">Play Albacete</h2>
 <p class="sub">The five TeleStats games, set up for Albacete. Click one and it starts.</p>
-      
+      <div class="chips" id="compChips" role="group"
+       aria-label="Choose which competitions to play">
+        <button type="button" class="chip all on" data-all="1" aria-pressed="true">All competitions</button>
+        <button type="button" class="chip on"
+                data-comp="Segunda División"
+                data-slug="segunda-division"
+                aria-pressed="true">Segunda División</button>
+        <button type="button" class="chip on"
+                data-comp="La Liga"
+                data-slug="la-liga"
+                aria-pressed="true">La Liga</button>
+      </div>
+      <p class="chip-note" id="chipNote"></p>
       <ul class="games">
         <li class="game">
           <a class="game-go" data-path="/games/hol.html"
-             href="/games/hol.html?scope=team_albacete_la-liga&amp;play=1">
+             href="/games/hol.html?scope=team_albacete_all&amp;play=1">
             <h3>Albacete Higher or Lower</h3>
             <p>Which player has more appearances?</p>
             <span class="go">Play now &rarr;</span>
@@ -255,7 +271,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/alpha.html"
-             href="/games/alpha.html?scope=team_albacete_la-liga&amp;play=1">
+             href="/games/alpha.html?scope=team_albacete_all&amp;play=1">
             <h3>Albacete Player Alphabet</h3>
             <p>Name a player for every letter of the alphabet.</p>
             <span class="go">Play now &rarr;</span>
@@ -263,7 +279,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/xi.html"
-             href="/games/xi.html?scope=team_albacete_la-liga&amp;play=1">
+             href="/games/xi.html?scope=team_albacete_all&amp;play=1">
             <h3>Albacete Starting XI</h3>
             <p>Build the strongest eleven you can.</p>
             <span class="go">Play now &rarr;</span>
@@ -271,7 +287,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/whoami.html"
-             href="/games/whoami.html?scope=team_albacete_la-liga&amp;play=1">
+             href="/games/whoami.html?scope=team_albacete_all&amp;play=1">
             <h3>Albacete Who Am I?</h3>
             <p>Guess the player from five clues.</p>
             <span class="go">Play now &rarr;</span>
@@ -279,7 +295,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/quiz.html"
-             href="/games/quiz.html?scope=team_albacete_la-liga&amp;play=1">
+             href="/games/quiz.html?scope=team_albacete_all&amp;play=1">
             <h3>Albacete Trivia Quiz</h3>
             <p>Ten questions from this club’s record.</p>
             <span class="go">Play now &rarr;</span>
@@ -323,94 +339,94 @@
           </tr>
         <tr>
             <td class="rank">3</td>
-            <td>Santi</td>
-            <td class="num">110</td>
-            <td class="num">2</td>
-            <td class="yr">1992/93–2004/05</td>
+            <td>Tomeu Nadal</td>
+            <td class="num">152</td>
+            <td class="num">0</td>
+            <td class="yr">2017/18–2020/21</td>
           </tr>
         <tr>
             <td class="rank">4</td>
+            <td>Manuel Fuster</td>
+            <td class="num">151</td>
+            <td class="num">22</td>
+            <td class="yr">2019/20–2023/24</td>
+          </tr>
+        <tr>
+            <td class="rank">5</td>
+            <td>Álvaro Rubio</td>
+            <td class="num">146</td>
+            <td class="num">0</td>
+            <td class="yr">2001/02–2005/06</td>
+          </tr>
+        <tr>
+            <td class="rank">6</td>
+            <td>Roman Zozulya</td>
+            <td class="num">140</td>
+            <td class="num">26</td>
+            <td class="yr">2017/18–2020/21</td>
+          </tr>
+        <tr>
+            <td class="rank">7</td>
+            <td>Óscar Montiel</td>
+            <td class="num">138</td>
+            <td class="num">1</td>
+            <td class="yr">2001/02–2004/05</td>
+          </tr>
+        <tr>
+            <td class="rank">8</td>
+            <td>Santi</td>
+            <td class="num">136</td>
+            <td class="num">3</td>
+            <td class="yr">1992/93–2006/07</td>
+          </tr>
+        <tr>
+            <td class="rank">9</td>
+            <td>Álvaro Arroyo</td>
+            <td class="num">130</td>
+            <td class="num">1</td>
+            <td class="yr">2017/18–2020/21</td>
+          </tr>
+        <tr>
+            <td class="rank">10</td>
+            <td>Riki Rodríguez</td>
+            <td class="num">128</td>
+            <td class="num">2</td>
+            <td class="yr">2022/23–2025/26</td>
+          </tr>
+        <tr>
+            <td class="rank">11</td>
+            <td>Paco Peña</td>
+            <td class="num">118</td>
+            <td class="num">1</td>
+            <td class="yr">2002/03–2005/06</td>
+          </tr>
+        <tr>
+            <td class="rank">12</td>
+            <td>Líbero Parri</td>
+            <td class="num">115</td>
+            <td class="num">28</td>
+            <td class="yr">2002/03–2007/08</td>
+          </tr>
+        <tr>
+            <td class="rank">13</td>
             <td>Antonio López Alfaro</td>
             <td class="num">108</td>
             <td class="num">16</td>
             <td class="yr">1991/92–1994/95</td>
           </tr>
         <tr>
-            <td class="rank">5</td>
+            <td class="rank">14</td>
             <td>José María Cabrera Menéndez</td>
             <td class="num">108</td>
             <td class="num">15</td>
             <td class="yr">1991/92–1993/94</td>
           </tr>
         <tr>
-            <td class="rank">6</td>
-            <td>Delfí Geli</td>
-            <td class="num">103</td>
-            <td class="num">9</td>
-            <td class="yr">1991/92–1993/94</td>
-          </tr>
-        <tr>
-            <td class="rank">7</td>
-            <td>Juan Antonio Chesa</td>
-            <td class="num">96</td>
-            <td class="num">7</td>
-            <td class="yr">1991/92–1995/96</td>
-          </tr>
-        <tr>
-            <td class="rank">8</td>
-            <td>Manuel Salvador Serra</td>
-            <td class="num">89</td>
-            <td class="num">0</td>
-            <td class="yr">1991/92–1995/96</td>
-          </tr>
-        <tr>
-            <td class="rank">9</td>
-            <td>Sotero López</td>
-            <td class="num">83</td>
-            <td class="num">0</td>
-            <td class="yr">1991/92–1995/96</td>
-          </tr>
-        <tr>
-            <td class="rank">10</td>
-            <td>Nenad Bjelica</td>
-            <td class="num">79</td>
-            <td class="num">19</td>
-            <td class="yr">1992/93–1995/96</td>
-          </tr>
-        <tr>
-            <td class="rank">11</td>
-            <td>Juan Carlos Balaguer</td>
-            <td class="num">78</td>
-            <td class="num">0</td>
-            <td class="yr">1991/92–1995/96</td>
-          </tr>
-        <tr>
-            <td class="rank">12</td>
-            <td>Esteve Fradera</td>
-            <td class="num">72</td>
-            <td class="num">1</td>
-            <td class="yr">1993/94–1994/95</td>
-          </tr>
-        <tr>
-            <td class="rank">13</td>
-            <td>Antonio Pacheco</td>
-            <td class="num">67</td>
-            <td class="num">19</td>
-            <td class="yr">2003/04–2004/05</td>
-          </tr>
-        <tr>
-            <td class="rank">14</td>
-            <td>Paco Peña</td>
-            <td class="num">63</td>
-            <td class="num">0</td>
-            <td class="yr">2003/04–2004/05</td>
-          </tr>
-        <tr>
             <td class="rank">15</td>
-            <td>Josep María Sala y Boix</td>
-            <td class="num">61</td>
-            <td class="num">2</td>
-            <td class="yr">1993/94–1994/95</td>
+            <td>David Sánchez</td>
+            <td class="num">107</td>
+            <td class="num">4</td>
+            <td class="yr">2003/04–2006/07</td>
           </tr>
       </tbody>
     </table>
@@ -431,57 +447,57 @@
           </tr>
         <tr>
             <td class="rank">2</td>
+            <td>Líbero Parri</td>
+            <td class="num">28</td>
+            <td class="num">115</td>
+          </tr>
+        <tr>
+            <td class="rank">3</td>
+            <td>José Jesús Perera</td>
+            <td class="num">28</td>
+            <td class="num">73</td>
+          </tr>
+        <tr>
+            <td class="rank">4</td>
+            <td>Roman Zozulya</td>
+            <td class="num">26</td>
+            <td class="num">140</td>
+          </tr>
+        <tr>
+            <td class="rank">5</td>
+            <td>Higinio Marín</td>
+            <td class="num">26</td>
+            <td class="num">95</td>
+          </tr>
+        <tr>
+            <td class="rank">6</td>
+            <td>Antonio Pacheco</td>
+            <td class="num">23</td>
+            <td class="num">86</td>
+          </tr>
+        <tr>
+            <td class="rank">7</td>
+            <td>Cristhian Stuani</td>
+            <td class="num">22</td>
+            <td class="num">39</td>
+          </tr>
+        <tr>
+            <td class="rank">8</td>
+            <td>Manuel Fuster</td>
+            <td class="num">22</td>
+            <td class="num">151</td>
+          </tr>
+        <tr>
+            <td class="rank">9</td>
             <td>Nenad Bjelica</td>
             <td class="num">19</td>
             <td class="num">79</td>
           </tr>
         <tr>
-            <td class="rank">3</td>
-            <td>Antonio Pacheco</td>
-            <td class="num">19</td>
-            <td class="num">67</td>
-          </tr>
-        <tr>
-            <td class="rank">4</td>
-            <td>Antonio López Alfaro</td>
-            <td class="num">16</td>
-            <td class="num">108</td>
-          </tr>
-        <tr>
-            <td class="rank">5</td>
-            <td>José María Cabrera Menéndez</td>
-            <td class="num">15</td>
-            <td class="num">108</td>
-          </tr>
-        <tr>
-            <td class="rank">6</td>
-            <td>Raúl Dos Santos</td>
-            <td class="num">15</td>
-            <td class="num">46</td>
-          </tr>
-        <tr>
-            <td class="rank">7</td>
-            <td>Luna</td>
-            <td class="num">10</td>
-            <td class="num">25</td>
-          </tr>
-        <tr>
-            <td class="rank">8</td>
-            <td>Delfí Geli</td>
-            <td class="num">9</td>
-            <td class="num">103</td>
-          </tr>
-        <tr>
-            <td class="rank">9</td>
-            <td>Carlos Aranda</td>
-            <td class="num">8</td>
-            <td class="num">25</td>
-          </tr>
-        <tr>
             <td class="rank">10</td>
-            <td>Nílson Esidio Mora</td>
-            <td class="num">8</td>
-            <td class="num">25</td>
+            <td>Rubén Cruz Gil</td>
+            <td class="num">17</td>
+            <td class="num">69</td>
           </tr>
       </tbody>
     </table>
@@ -495,6 +511,13 @@
       <thead><tr><th>Competition</th><th class="num">Players</th><th>Seasons</th><th class="num">Count</th><th>Games</th></tr></thead>
       <tbody>
         <tr>
+            <td>Segunda División</td>
+            <td class="num">372</td>
+            <td class="yr">2001/02–2026/27</td>
+            <td class="num">5</td>
+            <td class="yes">Playable</td>
+          </tr>
+        <tr>
             <td>La Liga</td>
             <td class="num">124</td>
             <td class="yr">1991/92–2004/05</td>
@@ -507,35 +530,35 @@
 </details>
 
 <h2>Ask about Albacete</h2>
-<p class="sub">Ask the database a question. Answers come from 124 Albacete
+<p class="sub">Ask the database a question. Answers come from 468 Albacete
   players and are never invented — if the data does not support an answer, it says so.</p>
 <form class="ask" id="askForm">
   <input id="askQ" autocomplete="off" maxlength="300"
-         placeholder="Who has played for both Albacete and Sevilla?"
+         placeholder="Who has played for both Albacete and Valladolid?"
          aria-label="Ask a question about Albacete">
   <button type="submit">Ask</button>
 </form>
 <div class="ask-examples">
-          <button type="button" data-q="Who has played for both Albacete and Sevilla?">Who has played for both Albacete and Sevilla?</button>
-          <button type="button" data-q="Top scorers for Albacete in La Liga">Top scorers for Albacete in La Liga</button>
+          <button type="button" data-q="Who has played for both Albacete and Valladolid?">Who has played for both Albacete and Valladolid?</button>
+          <button type="button" data-q="Top scorers for Albacete in Segunda División">Top scorers for Albacete in Segunda División</button>
           <button type="button" data-q="Which English players have the most appearances for Albacete?">Which English players have the most appearances for Albacete?</button>
 </div>
 <div id="askAnswer"></div>
 
 <h2>More teams</h2>
 <div class="related">
-          <a href="/teams/sevilla/">Sevilla</a>
-          <a href="/teams/espanyol/">Espanyol</a>
-          <a href="/teams/atletico-madrid/">Atlético Madrid</a>
-          <a href="/teams/valencia/">Valencia</a>
-          <a href="/teams/real-betis/">Real Betis</a>
-          <a href="/teams/barcelona/">Barcelona</a>
           <a href="/teams/valladolid/">Valladolid</a>
-          <a href="/teams/celta-vigo/">Celta Vigo</a>
+          <a href="/teams/zaragoza/">Zaragoza</a>
+          <a href="/teams/tenerife/">Tenerife</a>
+          <a href="/teams/elche/">Elche</a>
+          <a href="/teams/espanyol/">Espanyol</a>
+          <a href="/teams/sevilla/">Sevilla</a>
           <a href="/teams/mallorca/">Mallorca</a>
-          <a href="/teams/real-madrid/">Real Madrid</a>
+          <a href="/teams/sporting-gijon/">Sporting Gijón</a>
+          <a href="/teams/malaga/">Málaga</a>
+          <a href="/teams/atletico-madrid/">Atlético Madrid</a>
           <a href="/teams/rayo-vallecano/">Rayo Vallecano</a>
-          <a href="/teams/villarreal/">Villarreal</a>
+          <a href="/teams/celta-vigo/">Celta Vigo</a>
 </div>
 
 <footer class="page">
@@ -549,7 +572,7 @@
 </div><!-- /wrap -->
 
 <script>
-window.TS_TEAM = {"slug":"albacete","name":"Albacete","comps":["La Liga"],"defaultScope":"team_albacete_la-liga","potd":[{"n":"José Zalazar","a":180,"g":57,"f":"1991/92","t":"1995/96"},{"n":"Rafael Collado García","a":160,"g":3,"f":"1991/92","t":"1995/96"},{"n":"Santi","a":110,"g":2,"f":"1992/93","t":"2004/05"},{"n":"Antonio López Alfaro","a":108,"g":16,"f":"1991/92","t":"1994/95"},{"n":"José María Cabrera Menéndez","a":108,"g":15,"f":"1991/92","t":"1993/94"},{"n":"Delfí Geli","a":103,"g":9,"f":"1991/92","t":"1993/94"},{"n":"Juan Antonio Chesa","a":96,"g":7,"f":"1991/92","t":"1995/96"},{"n":"Manuel Salvador Serra","a":89,"g":0,"f":"1991/92","t":"1995/96"},{"n":"Sotero López","a":83,"g":0,"f":"1991/92","t":"1995/96"},{"n":"Nenad Bjelica","a":79,"g":19,"f":"1992/93","t":"1995/96"},{"n":"Juan Carlos Balaguer","a":78,"g":0,"f":"1991/92","t":"1995/96"},{"n":"Esteve Fradera","a":72,"g":1,"f":"1993/94","t":"1994/95"},{"n":"Antonio Pacheco","a":67,"g":19,"f":"2003/04","t":"2004/05"},{"n":"Paco Peña","a":63,"g":0,"f":"2003/04","t":"2004/05"},{"n":"Josep María Sala y Boix","a":61,"g":2,"f":"1993/94","t":"1994/95"}]};
+window.TS_TEAM = {"slug":"albacete","name":"Albacete","comps":["Segunda División","La Liga"],"defaultScope":"team_albacete_all","potd":[{"n":"José Zalazar","a":180,"g":57,"f":"1991/92","t":"1995/96"},{"n":"Rafael Collado García","a":160,"g":3,"f":"1991/92","t":"1995/96"},{"n":"Tomeu Nadal","a":152,"g":0,"f":"2017/18","t":"2020/21"},{"n":"Manuel Fuster","a":151,"g":22,"f":"2019/20","t":"2023/24"},{"n":"Álvaro Rubio","a":146,"g":0,"f":"2001/02","t":"2005/06"},{"n":"Roman Zozulya","a":140,"g":26,"f":"2017/18","t":"2020/21"},{"n":"Óscar Montiel","a":138,"g":1,"f":"2001/02","t":"2004/05"},{"n":"Santi","a":136,"g":3,"f":"1992/93","t":"2006/07"},{"n":"Álvaro Arroyo","a":130,"g":1,"f":"2017/18","t":"2020/21"},{"n":"Riki Rodríguez","a":128,"g":2,"f":"2022/23","t":"2025/26"},{"n":"Paco Peña","a":118,"g":1,"f":"2002/03","t":"2005/06"},{"n":"Líbero Parri","a":115,"g":28,"f":"2002/03","t":"2007/08"},{"n":"Antonio López Alfaro","a":108,"g":16,"f":"1991/92","t":"1994/95"},{"n":"José María Cabrera Menéndez","a":108,"g":15,"f":"1991/92","t":"1993/94"},{"n":"David Sánchez","a":107,"g":4,"f":"2003/04","t":"2006/07"}]};
 </script>
 <script src="/js/ts-scope.js"></script>
 <script src="/js/team-page.js"></script>
@@ -566,6 +589,6 @@ window.TS_TEAM = {"slug":"albacete","name":"Albacete","comps":["La Liga"],"defau
     try { TSNav.render(); } catch (e) { console.error('[TeleStats] Nav render failed:', e); }
   })();
 </script>
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TeleStats","item":"https://telestats.net"},{"@type":"ListItem","position":2,"name":"Teams","item":"https://telestats.net/teams/"},{"@type":"ListItem","position":3,"name":"Albacete","item":"https://telestats.net/teams/albacete/"}]},{"@type":"SportsTeam","name":"Albacete","sport":"Association football","url":"https://telestats.net/teams/albacete/"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is the Albacete page on TeleStats?","acceptedAnswer":{"@type":"Answer","text":"Free Albacete football quizzes and trivia games generated from real appearance and goal records for 124 players across La Liga. No sign-up is needed to play."}}]}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TeleStats","item":"https://telestats.net"},{"@type":"ListItem","position":2,"name":"Teams","item":"https://telestats.net/teams/"},{"@type":"ListItem","position":3,"name":"Albacete","item":"https://telestats.net/teams/albacete/"}]},{"@type":"SportsTeam","name":"Albacete","sport":"Association football","url":"https://telestats.net/teams/albacete/"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is the Albacete page on TeleStats?","acceptedAnswer":{"@type":"Answer","text":"Free Albacete football quizzes and trivia games generated from real appearance and goal records for 468 players across Segunda División and La Liga. No sign-up is needed to play."}}]}]}</script>
 </body>
 </html>

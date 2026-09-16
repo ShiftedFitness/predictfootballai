@@ -5,17 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="/js/ts-analytics.js"></script>
 <title>Racing Santander Football Quiz &amp; Trivia Games | TeleStats</title>
-<meta name="description" content="Play Racing Santander football quizzes and trivia games built from 234 players and 9,556 appearances in La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta name="description" content="Play Racing Santander football quizzes and trivia games built from 378 players and 14,607 appearances in La Liga and Segunda División. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
 <link rel="canonical" href="https://telestats.net/teams/racing-santander/">
 <meta name="theme-color" content="#00A651">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Racing Santander Football Quiz &amp; Trivia Games | TeleStats">
-<meta property="og:description" content="Play Racing Santander football quizzes and trivia games built from 234 players and 9,556 appearances in La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta property="og:description" content="Play Racing Santander football quizzes and trivia games built from 378 players and 14,607 appearances in La Liga and Segunda División. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
 <meta property="og:url" content="https://telestats.net/teams/racing-santander/">
 <meta property="og:site_name" content="TeleStats">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Racing Santander Football Quiz &amp; Trivia Games | TeleStats">
-<meta name="twitter:description" content="Play Racing Santander football quizzes and trivia games built from 234 players and 9,556 appearances in La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta name="twitter:description" content="Play Racing Santander football quizzes and trivia games built from 378 players and 14,607 appearances in La Liga and Segunda División. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
 <link rel="stylesheet" href="/telestats-theme.css">
 <style>
   :root { --club: #00A651; --club-2: #007e29; }
@@ -52,6 +52,9 @@
   .crest { width: 52px; height: 60px; flex: 0 0 auto; filter: drop-shadow(0 2px 6px rgba(0,0,0,.45)); }
   .hero h1 { font-size: 1.65rem; line-height: 1.2; margin: 0 0 5px; }
   .sub { color: var(--text-secondary); margin: 0; font-size: .9rem; }
+  .sub a.complink { color: var(--text-secondary); text-decoration: underline;
+                    text-decoration-color: rgba(255,255,255,.22); }
+  .sub a.complink:hover { color: var(--accent); }
   .scope-note { color: var(--text-muted); font-size: .76rem; margin: 6px 0 0; }
   .scope-note a { color: var(--accent); }
 
@@ -182,9 +185,9 @@
     <nav>
       <a href="/daily/">Daily</a>
       <a href="/games/">Games</a>
+      <a href="/competitions/">Competitions</a>
       <a href="/teams/">Teams</a>
       <a href="/ask/">Ask</a>
-      <a href="/leaderboard/">Leaderboard</a>
       <a href="/community/">Community</a>
     </nav>
   </div>
@@ -205,7 +208,8 @@
     </svg>
     <div>
       <h1>Racing Santander Football Quizzes &amp; Trivia</h1>
-      <p class="sub">234 players · 9,556 appearances · La Liga</p>
+      <p class="sub">378 players · 14,607 appearances ·
+        <a class="complink" href="/competitions/la-liga/">La Liga</a>, <a class="complink" href="/competitions/segunda-division/">Segunda División</a></p>
       <p class="scope-note">Records cover 1993/94 to 2026/27.
         <a href="/tools/data.html">Full dataset scope</a>.</p>
     </div>
@@ -216,8 +220,8 @@
   <summary>New here? What this page is</summary>
   <div class="body">
     <p>This is a set of free football games about <strong>Racing Santander</strong>, generated
-      from real appearance and goal records — 234 players who have turned out
-      for the club in La Liga, going back to 1993/94.</p>
+      from real appearance and goal records — 378 players who have turned out
+      for the club in La Liga and Segunda División, going back to 1993/94.</p>
     <p>Pick a game below and it starts straight away on Racing Santander. No sign-up, no app.
       Make an account only if you want your scores kept and your name on the club's board.</p>
     <p>Everything you see here comes from the TeleStats database. Nothing is written by an AI
@@ -243,11 +247,23 @@
 
 <h2 id="play">Play Racing Santander</h2>
 <p class="sub">The five TeleStats games, set up for Racing Santander. Click one and it starts.</p>
-      
+      <div class="chips" id="compChips" role="group"
+       aria-label="Choose which competitions to play">
+        <button type="button" class="chip all on" data-all="1" aria-pressed="true">All competitions</button>
+        <button type="button" class="chip on"
+                data-comp="La Liga"
+                data-slug="la-liga"
+                aria-pressed="true">La Liga</button>
+        <button type="button" class="chip on"
+                data-comp="Segunda División"
+                data-slug="segunda-division"
+                aria-pressed="true">Segunda División</button>
+      </div>
+      <p class="chip-note" id="chipNote"></p>
       <ul class="games">
         <li class="game">
           <a class="game-go" data-path="/games/hol.html"
-             href="/games/hol.html?scope=team_racing-santander_la-liga&amp;play=1">
+             href="/games/hol.html?scope=team_racing-santander_all&amp;play=1">
             <h3>Racing Santander Higher or Lower</h3>
             <p>Which player has more appearances?</p>
             <span class="go">Play now &rarr;</span>
@@ -255,7 +271,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/alpha.html"
-             href="/games/alpha.html?scope=team_racing-santander_la-liga&amp;play=1">
+             href="/games/alpha.html?scope=team_racing-santander_all&amp;play=1">
             <h3>Racing Santander Player Alphabet</h3>
             <p>Name a player for every letter of the alphabet.</p>
             <span class="go">Play now &rarr;</span>
@@ -263,7 +279,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/xi.html"
-             href="/games/xi.html?scope=team_racing-santander_la-liga&amp;play=1">
+             href="/games/xi.html?scope=team_racing-santander_all&amp;play=1">
             <h3>Racing Santander Starting XI</h3>
             <p>Build the strongest eleven you can.</p>
             <span class="go">Play now &rarr;</span>
@@ -271,7 +287,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/whoami.html"
-             href="/games/whoami.html?scope=team_racing-santander_la-liga&amp;play=1">
+             href="/games/whoami.html?scope=team_racing-santander_all&amp;play=1">
             <h3>Racing Santander Who Am I?</h3>
             <p>Guess the player from five clues.</p>
             <span class="go">Play now &rarr;</span>
@@ -279,7 +295,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/quiz.html"
-             href="/games/quiz.html?scope=team_racing-santander_la-liga&amp;play=1">
+             href="/games/quiz.html?scope=team_racing-santander_all&amp;play=1">
             <h3>Racing Santander Trivia Quiz</h3>
             <p>Ten questions from this club’s record.</p>
             <span class="go">Play now &rarr;</span>
@@ -317,7 +333,7 @@
         <tr>
             <td class="rank">2</td>
             <td>José María Ceballos</td>
-            <td class="num">284</td>
+            <td class="num">293</td>
             <td class="num">0</td>
             <td class="yr">1993/94–2002/03</td>
           </tr>
@@ -337,10 +353,10 @@
           </tr>
         <tr>
             <td class="rank">5</td>
-            <td>Óscar Serrano</td>
-            <td class="num">177</td>
-            <td class="num">13</td>
-            <td class="yr">2005/06–2011/12</td>
+            <td>José Moratón</td>
+            <td class="num">188</td>
+            <td class="num">5</td>
+            <td class="yr">1998/99–2009/10</td>
           </tr>
         <tr>
             <td class="rank">6</td>
@@ -351,66 +367,66 @@
           </tr>
         <tr>
             <td class="rank">7</td>
+            <td>Óscar Serrano</td>
+            <td class="num">177</td>
+            <td class="num">13</td>
+            <td class="yr">2005/06–2011/12</td>
+          </tr>
+        <tr>
+            <td class="rank">8</td>
             <td>Pablo Pinillos Caro</td>
             <td class="num">172</td>
             <td class="num">3</td>
             <td class="yr">2005/06–2010/11</td>
           </tr>
         <tr>
-            <td class="rank">8</td>
-            <td>José Moratón</td>
-            <td class="num">156</td>
-            <td class="num">4</td>
-            <td class="yr">1998/99–2009/10</td>
-          </tr>
-        <tr>
             <td class="rank">9</td>
-            <td>Txema Alonso</td>
-            <td class="num">149</td>
-            <td class="num">4</td>
-            <td class="yr">1995/96–2000/01</td>
+            <td>Iñigo Vicente</td>
+            <td class="num">166</td>
+            <td class="num">22</td>
+            <td class="yr">2022/23–2026/27</td>
           </tr>
         <tr>
             <td class="rank">10</td>
-            <td>Vladimir Beschastnykh</td>
-            <td class="num">139</td>
-            <td class="num">28</td>
-            <td class="yr">1996/97–2000/01</td>
-          </tr>
-        <tr>
-            <td class="rank">11</td>
-            <td>Pablo Alfaro</td>
-            <td class="num">130</td>
-            <td class="num">2</td>
-            <td class="yr">1993/94–2006/07</td>
-          </tr>
-        <tr>
-            <td class="rank">12</td>
-            <td>Ismael Ruiz</td>
-            <td class="num">129</td>
-            <td class="num">8</td>
-            <td class="yr">1995/96–2002/03</td>
-          </tr>
-        <tr>
-            <td class="rank">13</td>
             <td>Sietes</td>
-            <td class="num">125</td>
+            <td class="num">164</td>
             <td class="num">0</td>
             <td class="yr">1997/98–2002/03</td>
           </tr>
         <tr>
-            <td class="rank">14</td>
+            <td class="rank">11</td>
+            <td>Txema Alonso</td>
+            <td class="num">161</td>
+            <td class="num">4</td>
+            <td class="yr">1995/96–2001/02</td>
+          </tr>
+        <tr>
+            <td class="rank">12</td>
+            <td>Ismael Ruiz</td>
+            <td class="num">160</td>
+            <td class="num">10</td>
+            <td class="yr">1995/96–2002/03</td>
+          </tr>
+        <tr>
+            <td class="rank">13</td>
             <td>Fernando Morán</td>
-            <td class="num">125</td>
-            <td class="num">6</td>
+            <td class="num">152</td>
+            <td class="num">11</td>
             <td class="yr">1996/97–2004/05</td>
           </tr>
         <tr>
+            <td class="rank">14</td>
+            <td>Mario Regueiro</td>
+            <td class="num">141</td>
+            <td class="num">23</td>
+            <td class="yr">2000/01–2004/05</td>
+          </tr>
+        <tr>
             <td class="rank">15</td>
-            <td>David Villabona</td>
-            <td class="num">119</td>
-            <td class="num">11</td>
-            <td class="yr">1993/94–1999/00</td>
+            <td>Vladimir Beschastnykh</td>
+            <td class="num">139</td>
+            <td class="num">28</td>
+            <td class="yr">1996/97–2000/01</td>
           </tr>
       </tbody>
     </table>
@@ -425,63 +441,63 @@
       <tbody>
         <tr>
             <td class="rank">1</td>
+            <td>Andrés Martín</td>
+            <td class="num">46</td>
+            <td class="num">108</td>
+          </tr>
+        <tr>
+            <td class="rank">2</td>
+            <td>Javi Guerrero</td>
+            <td class="num">43</td>
+            <td class="num">132</td>
+          </tr>
+        <tr>
+            <td class="rank">3</td>
             <td>Pedro Munitis</td>
             <td class="num">35</td>
             <td class="num">304</td>
           </tr>
         <tr>
-            <td class="rank">2</td>
-            <td>Javi Guerrero</td>
-            <td class="num">33</td>
-            <td class="num">104</td>
-          </tr>
-        <tr>
-            <td class="rank">3</td>
+            <td class="rank">4</td>
             <td>Salva Ballesta</td>
             <td class="num">29</td>
             <td class="num">52</td>
           </tr>
         <tr>
-            <td class="rank">4</td>
+            <td class="rank">5</td>
             <td>Vladimir Beschastnykh</td>
             <td class="num">28</td>
             <td class="num">139</td>
           </tr>
         <tr>
-            <td class="rank">5</td>
+            <td class="rank">6</td>
+            <td>Arana</td>
+            <td class="num">28</td>
+            <td class="num">85</td>
+          </tr>
+        <tr>
+            <td class="rank">7</td>
             <td>Fernando Correa</td>
             <td class="num">27</td>
             <td class="num">72</td>
           </tr>
         <tr>
-            <td class="rank">6</td>
+            <td class="rank">8</td>
+            <td>Rodolfo Bodipo</td>
+            <td class="num">27</td>
+            <td class="num">80</td>
+          </tr>
+        <tr>
+            <td class="rank">9</td>
             <td>Mohamed Tchité</td>
             <td class="num">25</td>
             <td class="num">88</td>
           </tr>
         <tr>
-            <td class="rank">7</td>
+            <td class="rank">10</td>
             <td>Nikola Žigić</td>
             <td class="num">24</td>
             <td class="num">51</td>
-          </tr>
-        <tr>
-            <td class="rank">8</td>
-            <td>Dmitri Popov</td>
-            <td class="num">22</td>
-            <td class="num">98</td>
-          </tr>
-        <tr>
-            <td class="rank">9</td>
-            <td>Mario Regueiro</td>
-            <td class="num">22</td>
-            <td class="num">114</td>
-          </tr>
-        <tr>
-            <td class="rank">10</td>
-            <td>Yossi Benayoun</td>
-            <td class="num">20</td>
-            <td class="num">101</td>
           </tr>
       </tbody>
     </table>
@@ -496,9 +512,16 @@
       <tbody>
         <tr>
             <td>La Liga</td>
-            <td class="num">234</td>
+            <td class="num">239</td>
             <td class="yr">1993/94–2026/27</td>
             <td class="num">12</td>
+            <td class="yes">Playable</td>
+          </tr>
+        <tr>
+            <td>Segunda División</td>
+            <td class="num">187</td>
+            <td class="yr">2001/02–2025/26</td>
+            <td class="num">4</td>
             <td class="yes">Playable</td>
           </tr>
       </tbody>
@@ -507,16 +530,16 @@
 </details>
 
 <h2>Ask about Racing Santander</h2>
-<p class="sub">Ask the database a question. Answers come from 234 Racing Santander
+<p class="sub">Ask the database a question. Answers come from 378 Racing Santander
   players and are never invented — if the data does not support an answer, it says so.</p>
 <form class="ask" id="askForm">
   <input id="askQ" autocomplete="off" maxlength="300"
-         placeholder="Who has played for both Racing Santander and Sevilla?"
+         placeholder="Who has played for both Racing Santander and Valladolid?"
          aria-label="Ask a question about Racing Santander">
   <button type="submit">Ask</button>
 </form>
 <div class="ask-examples">
-          <button type="button" data-q="Who has played for both Racing Santander and Sevilla?">Who has played for both Racing Santander and Sevilla?</button>
+          <button type="button" data-q="Who has played for both Racing Santander and Valladolid?">Who has played for both Racing Santander and Valladolid?</button>
           <button type="button" data-q="Top scorers for Racing Santander in La Liga">Top scorers for Racing Santander in La Liga</button>
           <button type="button" data-q="Which English players have the most appearances for Racing Santander?">Which English players have the most appearances for Racing Santander?</button>
 </div>
@@ -524,18 +547,18 @@
 
 <h2>More teams</h2>
 <div class="related">
-          <a href="/teams/sevilla/">Sevilla</a>
-          <a href="/teams/espanyol/">Espanyol</a>
-          <a href="/teams/atletico-madrid/">Atlético Madrid</a>
-          <a href="/teams/valencia/">Valencia</a>
-          <a href="/teams/real-betis/">Real Betis</a>
-          <a href="/teams/barcelona/">Barcelona</a>
           <a href="/teams/valladolid/">Valladolid</a>
-          <a href="/teams/celta-vigo/">Celta Vigo</a>
+          <a href="/teams/albacete/">Albacete</a>
+          <a href="/teams/zaragoza/">Zaragoza</a>
+          <a href="/teams/tenerife/">Tenerife</a>
+          <a href="/teams/elche/">Elche</a>
+          <a href="/teams/espanyol/">Espanyol</a>
+          <a href="/teams/sevilla/">Sevilla</a>
           <a href="/teams/mallorca/">Mallorca</a>
-          <a href="/teams/real-madrid/">Real Madrid</a>
+          <a href="/teams/sporting-gijon/">Sporting Gijón</a>
+          <a href="/teams/malaga/">Málaga</a>
+          <a href="/teams/atletico-madrid/">Atlético Madrid</a>
           <a href="/teams/rayo-vallecano/">Rayo Vallecano</a>
-          <a href="/teams/villarreal/">Villarreal</a>
 </div>
 
 <footer class="page">
@@ -549,7 +572,7 @@
 </div><!-- /wrap -->
 
 <script>
-window.TS_TEAM = {"slug":"racing-santander","name":"Racing Santander","comps":["La Liga"],"defaultScope":"team_racing-santander_la-liga","potd":[{"n":"Pedro Munitis","a":304,"g":35,"f":"1994/95","t":"2011/12"},{"n":"José María Ceballos","a":284,"g":0,"f":"1993/94","t":"2002/03"},{"n":"Gonzalo Colsa","a":227,"g":16,"f":"1997/98","t":"2011/12"},{"n":"Jesús Merino Landaluce","a":189,"g":12,"f":"1993/94","t":"1998/99"},{"n":"Óscar Serrano","a":177,"g":13,"f":"2005/06","t":"2011/12"},{"n":"Toño","a":177,"g":0,"f":"2004/05","t":"2011/12"},{"n":"Pablo Pinillos Caro","a":172,"g":3,"f":"2005/06","t":"2010/11"},{"n":"José Moratón","a":156,"g":4,"f":"1998/99","t":"2009/10"},{"n":"Txema Alonso","a":149,"g":4,"f":"1995/96","t":"2000/01"},{"n":"Vladimir Beschastnykh","a":139,"g":28,"f":"1996/97","t":"2000/01"},{"n":"Pablo Alfaro","a":130,"g":2,"f":"1993/94","t":"2006/07"},{"n":"Ismael Ruiz","a":129,"g":8,"f":"1995/96","t":"2002/03"},{"n":"Sietes","a":125,"g":0,"f":"1997/98","t":"2002/03"},{"n":"Fernando Morán","a":125,"g":6,"f":"1996/97","t":"2004/05"},{"n":"David Villabona","a":119,"g":11,"f":"1993/94","t":"1999/00"}]};
+window.TS_TEAM = {"slug":"racing-santander","name":"Racing Santander","comps":["La Liga","Segunda División"],"defaultScope":"team_racing-santander_all","potd":[{"n":"Pedro Munitis","a":304,"g":35,"f":"1994/95","t":"2011/12"},{"n":"José María Ceballos","a":293,"g":0,"f":"1993/94","t":"2002/03"},{"n":"Gonzalo Colsa","a":227,"g":16,"f":"1997/98","t":"2011/12"},{"n":"Jesús Merino Landaluce","a":189,"g":12,"f":"1993/94","t":"1998/99"},{"n":"José Moratón","a":188,"g":5,"f":"1998/99","t":"2009/10"},{"n":"Toño","a":177,"g":0,"f":"2004/05","t":"2011/12"},{"n":"Óscar Serrano","a":177,"g":13,"f":"2005/06","t":"2011/12"},{"n":"Pablo Pinillos Caro","a":172,"g":3,"f":"2005/06","t":"2010/11"},{"n":"Iñigo Vicente","a":166,"g":22,"f":"2022/23","t":"2026/27"},{"n":"Sietes","a":164,"g":0,"f":"1997/98","t":"2002/03"},{"n":"Txema Alonso","a":161,"g":4,"f":"1995/96","t":"2001/02"},{"n":"Ismael Ruiz","a":160,"g":10,"f":"1995/96","t":"2002/03"},{"n":"Fernando Morán","a":152,"g":11,"f":"1996/97","t":"2004/05"},{"n":"Mario Regueiro","a":141,"g":23,"f":"2000/01","t":"2004/05"},{"n":"Vladimir Beschastnykh","a":139,"g":28,"f":"1996/97","t":"2000/01"}]};
 </script>
 <script src="/js/ts-scope.js"></script>
 <script src="/js/team-page.js"></script>
@@ -566,6 +589,6 @@ window.TS_TEAM = {"slug":"racing-santander","name":"Racing Santander","comps":["
     try { TSNav.render(); } catch (e) { console.error('[TeleStats] Nav render failed:', e); }
   })();
 </script>
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TeleStats","item":"https://telestats.net"},{"@type":"ListItem","position":2,"name":"Teams","item":"https://telestats.net/teams/"},{"@type":"ListItem","position":3,"name":"Racing Santander","item":"https://telestats.net/teams/racing-santander/"}]},{"@type":"SportsTeam","name":"Racing Santander","sport":"Association football","url":"https://telestats.net/teams/racing-santander/"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is the Racing Santander page on TeleStats?","acceptedAnswer":{"@type":"Answer","text":"Free Racing Santander football quizzes and trivia games generated from real appearance and goal records for 234 players across La Liga. No sign-up is needed to play."}}]}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TeleStats","item":"https://telestats.net"},{"@type":"ListItem","position":2,"name":"Teams","item":"https://telestats.net/teams/"},{"@type":"ListItem","position":3,"name":"Racing Santander","item":"https://telestats.net/teams/racing-santander/"}]},{"@type":"SportsTeam","name":"Racing Santander","sport":"Association football","url":"https://telestats.net/teams/racing-santander/"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is the Racing Santander page on TeleStats?","acceptedAnswer":{"@type":"Answer","text":"Free Racing Santander football quizzes and trivia games generated from real appearance and goal records for 378 players across La Liga and Segunda División. No sign-up is needed to play."}}]}]}</script>
 </body>
 </html>

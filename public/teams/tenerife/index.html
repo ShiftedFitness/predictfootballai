@@ -5,17 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="/js/ts-analytics.js"></script>
 <title>Tenerife Football Quiz &amp; Trivia Games | TeleStats</title>
-<meta name="description" content="Play Tenerife football quizzes and trivia games built from 135 players and 6,186 appearances in La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta name="description" content="Play Tenerife football quizzes and trivia games built from 434 players and 18,305 appearances in Segunda División and La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
 <link rel="canonical" href="https://telestats.net/teams/tenerife/">
 <meta name="theme-color" content="#1C3A7A">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Tenerife Football Quiz &amp; Trivia Games | TeleStats">
-<meta property="og:description" content="Play Tenerife football quizzes and trivia games built from 135 players and 6,186 appearances in La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta property="og:description" content="Play Tenerife football quizzes and trivia games built from 434 players and 18,305 appearances in Segunda División and La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
 <meta property="og:url" content="https://telestats.net/teams/tenerife/">
 <meta property="og:site_name" content="TeleStats">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Tenerife Football Quiz &amp; Trivia Games | TeleStats">
-<meta name="twitter:description" content="Play Tenerife football quizzes and trivia games built from 135 players and 6,186 appearances in La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta name="twitter:description" content="Play Tenerife football quizzes and trivia games built from 434 players and 18,305 appearances in Segunda División and La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
 <link rel="stylesheet" href="/telestats-theme.css">
 <style>
   :root { --club: #1C3A7A; --club-2: #001252; }
@@ -52,6 +52,9 @@
   .crest { width: 52px; height: 60px; flex: 0 0 auto; filter: drop-shadow(0 2px 6px rgba(0,0,0,.45)); }
   .hero h1 { font-size: 1.65rem; line-height: 1.2; margin: 0 0 5px; }
   .sub { color: var(--text-secondary); margin: 0; font-size: .9rem; }
+  .sub a.complink { color: var(--text-secondary); text-decoration: underline;
+                    text-decoration-color: rgba(255,255,255,.22); }
+  .sub a.complink:hover { color: var(--accent); }
   .scope-note { color: var(--text-muted); font-size: .76rem; margin: 6px 0 0; }
   .scope-note a { color: var(--accent); }
 
@@ -182,9 +185,9 @@
     <nav>
       <a href="/daily/">Daily</a>
       <a href="/games/">Games</a>
+      <a href="/competitions/">Competitions</a>
       <a href="/teams/">Teams</a>
       <a href="/ask/">Ask</a>
-      <a href="/leaderboard/">Leaderboard</a>
       <a href="/community/">Community</a>
     </nav>
   </div>
@@ -205,8 +208,9 @@
     </svg>
     <div>
       <h1>Tenerife Football Quizzes &amp; Trivia</h1>
-      <p class="sub">135 players · 6,186 appearances · La Liga</p>
-      <p class="scope-note">Records cover 1989/90 to 2009/10.
+      <p class="sub">434 players · 18,305 appearances ·
+        <a class="complink" href="/competitions/segunda-division/">Segunda División</a>, <a class="complink" href="/competitions/la-liga/">La Liga</a></p>
+      <p class="scope-note">Records cover 1989/90 to 2026/27.
         <a href="/tools/data.html">Full dataset scope</a>.</p>
     </div>
   </div>
@@ -216,8 +220,8 @@
   <summary>New here? What this page is</summary>
   <div class="body">
     <p>This is a set of free football games about <strong>Tenerife</strong>, generated
-      from real appearance and goal records — 135 players who have turned out
-      for the club in La Liga, going back to 1989/90.</p>
+      from real appearance and goal records — 434 players who have turned out
+      for the club in Segunda División and La Liga, going back to 1989/90.</p>
     <p>Pick a game below and it starts straight away on Tenerife. No sign-up, no app.
       Make an account only if you want your scores kept and your name on the club's board.</p>
     <p>Everything you see here comes from the TeleStats database. Nothing is written by an AI
@@ -243,11 +247,23 @@
 
 <h2 id="play">Play Tenerife</h2>
 <p class="sub">The five TeleStats games, set up for Tenerife. Click one and it starts.</p>
-      
+      <div class="chips" id="compChips" role="group"
+       aria-label="Choose which competitions to play">
+        <button type="button" class="chip all on" data-all="1" aria-pressed="true">All competitions</button>
+        <button type="button" class="chip on"
+                data-comp="Segunda División"
+                data-slug="segunda-division"
+                aria-pressed="true">Segunda División</button>
+        <button type="button" class="chip on"
+                data-comp="La Liga"
+                data-slug="la-liga"
+                aria-pressed="true">La Liga</button>
+      </div>
+      <p class="chip-note" id="chipNote"></p>
       <ul class="games">
         <li class="game">
           <a class="game-go" data-path="/games/hol.html"
-             href="/games/hol.html?scope=team_tenerife_la-liga&amp;play=1">
+             href="/games/hol.html?scope=team_tenerife_all&amp;play=1">
             <h3>Tenerife Higher or Lower</h3>
             <p>Which player has more appearances?</p>
             <span class="go">Play now &rarr;</span>
@@ -255,7 +271,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/alpha.html"
-             href="/games/alpha.html?scope=team_tenerife_la-liga&amp;play=1">
+             href="/games/alpha.html?scope=team_tenerife_all&amp;play=1">
             <h3>Tenerife Player Alphabet</h3>
             <p>Name a player for every letter of the alphabet.</p>
             <span class="go">Play now &rarr;</span>
@@ -263,7 +279,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/xi.html"
-             href="/games/xi.html?scope=team_tenerife_la-liga&amp;play=1">
+             href="/games/xi.html?scope=team_tenerife_all&amp;play=1">
             <h3>Tenerife Starting XI</h3>
             <p>Build the strongest eleven you can.</p>
             <span class="go">Play now &rarr;</span>
@@ -271,7 +287,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/whoami.html"
-             href="/games/whoami.html?scope=team_tenerife_la-liga&amp;play=1">
+             href="/games/whoami.html?scope=team_tenerife_all&amp;play=1">
             <h3>Tenerife Who Am I?</h3>
             <p>Guess the player from five clues.</p>
             <span class="go">Play now &rarr;</span>
@@ -279,7 +295,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/quiz.html"
-             href="/games/quiz.html?scope=team_tenerife_la-liga&amp;play=1">
+             href="/games/quiz.html?scope=team_tenerife_all&amp;play=1">
             <h3>Tenerife Trivia Quiz</h3>
             <p>Ten questions from this club’s record.</p>
             <span class="go">Play now &rarr;</span>
@@ -309,108 +325,108 @@
       <tbody>
         <tr>
             <td class="rank">1</td>
+            <td>Aitor Sanz</td>
+            <td class="num">356</td>
+            <td class="num">12</td>
+            <td class="yr">2013/14–2024/25</td>
+          </tr>
+        <tr>
+            <td class="rank">2</td>
             <td>Felipe Miñambres</td>
             <td class="num">310</td>
             <td class="num">33</td>
             <td class="yr">1989/90–1998/99</td>
           </tr>
         <tr>
-            <td class="rank">2</td>
+            <td class="rank">3</td>
+            <td>Suso Santana</td>
+            <td class="num">287</td>
+            <td class="num">33</td>
+            <td class="yr">2006/07–2020/21</td>
+          </tr>
+        <tr>
+            <td class="rank">4</td>
+            <td>Carlos Ruiz</td>
+            <td class="num">274</td>
+            <td class="num">13</td>
+            <td class="yr">2013/14–2022/23</td>
+          </tr>
+        <tr>
+            <td class="rank">5</td>
             <td>Chano</td>
             <td class="num">249</td>
             <td class="num">27</td>
             <td class="yr">1991/92–1998/99</td>
           </tr>
         <tr>
-            <td class="rank">3</td>
+            <td class="rank">6</td>
+            <td>Ricardo León Brito</td>
+            <td class="num">235</td>
+            <td class="num">8</td>
+            <td class="yr">2005/06–2015/16</td>
+          </tr>
+        <tr>
+            <td class="rank">7</td>
             <td>Julio Llorente</td>
             <td class="num">234</td>
             <td class="num">17</td>
             <td class="yr">1990/91–1998/99</td>
           </tr>
         <tr>
-            <td class="rank">4</td>
+            <td class="rank">8</td>
+            <td>Vitolo</td>
+            <td class="num">210</td>
+            <td class="num">6</td>
+            <td class="yr">2001/02–2017/18</td>
+          </tr>
+        <tr>
+            <td class="rank">9</td>
+            <td>Dani Hernández</td>
+            <td class="num">207</td>
+            <td class="num">0</td>
+            <td class="yr">2014/15–2021/22</td>
+          </tr>
+        <tr>
+            <td class="rank">10</td>
             <td>Antonio Mata</td>
             <td class="num">196</td>
             <td class="num">5</td>
             <td class="yr">1991/92–1998/99</td>
           </tr>
         <tr>
-            <td class="rank">5</td>
+            <td class="rank">11</td>
+            <td>Alberto Jiménez</td>
+            <td class="num">181</td>
+            <td class="num">1</td>
+            <td class="yr">2013/14–2020/21</td>
+          </tr>
+        <tr>
+            <td class="rank">12</td>
+            <td>Pablo Sicilia</td>
+            <td class="num">168</td>
+            <td class="num">11</td>
+            <td class="yr">2006/07–2010/11</td>
+          </tr>
+        <tr>
+            <td class="rank">13</td>
+            <td>Raúl Cámara</td>
+            <td class="num">165</td>
+            <td class="num">1</td>
+            <td class="yr">2013/14–2018/19</td>
+          </tr>
+        <tr>
+            <td class="rank">14</td>
             <td>César Gómez</td>
             <td class="num">164</td>
             <td class="num">3</td>
             <td class="yr">1992/93–1996/97</td>
           </tr>
         <tr>
-            <td class="rank">6</td>
-            <td>Toño Hernández</td>
-            <td class="num">152</td>
-            <td class="num">9</td>
-            <td class="yr">1989/90–1994/95</td>
-          </tr>
-        <tr>
-            <td class="rank">7</td>
-            <td>Juanele</td>
-            <td class="num">151</td>
-            <td class="num">27</td>
-            <td class="yr">1994/95–1998/99</td>
-          </tr>
-        <tr>
-            <td class="rank">8</td>
-            <td>Antonio Pinilla</td>
-            <td class="num">149</td>
-            <td class="num">25</td>
-            <td class="yr">1993/94–1998/99</td>
-          </tr>
-        <tr>
-            <td class="rank">9</td>
-            <td>Juan Antonio Pizzi</td>
-            <td class="num">141</td>
-            <td class="num">76</td>
-            <td class="yr">1991/92–1995/96</td>
-          </tr>
-        <tr>
-            <td class="rank">10</td>
-            <td>Quique Estebaranz</td>
-            <td class="num">137</td>
-            <td class="num">31</td>
-            <td class="yr">1989/90–1992/93</td>
-          </tr>
-        <tr>
-            <td class="rank">11</td>
-            <td>Alexis</td>
-            <td class="num">128</td>
-            <td class="num">6</td>
-            <td class="yr">1995/96–2001/02</td>
-          </tr>
-        <tr>
-            <td class="rank">12</td>
-            <td>Slaviša Jokanović</td>
-            <td class="num">123</td>
-            <td class="num">17</td>
-            <td class="yr">1995/96–1998/99</td>
-          </tr>
-        <tr>
-            <td class="rank">13</td>
-            <td>Marcelo Ojeda</td>
-            <td class="num">121</td>
-            <td class="num">0</td>
-            <td class="yr">1994/95–1997/98</td>
-          </tr>
-        <tr>
-            <td class="rank">14</td>
-            <td>Fernando Redondo</td>
-            <td class="num">103</td>
-            <td class="num">8</td>
-            <td class="yr">1990/91–1993/94</td>
-          </tr>
-        <tr>
             <td class="rank">15</td>
-            <td>Antonio Robaina</td>
-            <td class="num">102</td>
-            <td class="num">4</td>
-            <td class="yr">1995/96–1998/99</td>
+            <td>Ángel Rodríguez</td>
+            <td class="num">164</td>
+            <td class="num">26</td>
+            <td class="yr">2005/06–2024/25</td>
           </tr>
       </tbody>
     </table>
@@ -425,63 +441,63 @@
       <tbody>
         <tr>
             <td class="rank">1</td>
+            <td>Nino</td>
+            <td class="num">78</td>
+            <td class="num">159</td>
+          </tr>
+        <tr>
+            <td class="rank">2</td>
             <td>Juan Antonio Pizzi</td>
             <td class="num">76</td>
             <td class="num">141</td>
           </tr>
         <tr>
-            <td class="rank">2</td>
+            <td class="rank">3</td>
+            <td>Enric Gallego</td>
+            <td class="num">38</td>
+            <td class="num">148</td>
+          </tr>
+        <tr>
+            <td class="rank">4</td>
             <td>Felipe Miñambres</td>
             <td class="num">33</td>
             <td class="num">310</td>
           </tr>
         <tr>
-            <td class="rank">3</td>
+            <td class="rank">5</td>
+            <td>Suso Santana</td>
+            <td class="num">33</td>
+            <td class="num">287</td>
+          </tr>
+        <tr>
+            <td class="rank">6</td>
             <td>Quique Estebaranz</td>
             <td class="num">31</td>
             <td class="num">137</td>
           </tr>
         <tr>
-            <td class="rank">4</td>
+            <td class="rank">7</td>
+            <td>Keko</td>
+            <td class="num">28</td>
+            <td class="num">76</td>
+          </tr>
+        <tr>
+            <td class="rank">8</td>
             <td>Chano</td>
             <td class="num">27</td>
             <td class="num">249</td>
           </tr>
         <tr>
-            <td class="rank">5</td>
-            <td>Oscar Dertycia</td>
-            <td class="num">27</td>
-            <td class="num">90</td>
-          </tr>
-        <tr>
-            <td class="rank">6</td>
+            <td class="rank">9</td>
             <td>Juanele</td>
             <td class="num">27</td>
             <td class="num">151</td>
           </tr>
         <tr>
-            <td class="rank">7</td>
-            <td>Antonio Pinilla</td>
-            <td class="num">25</td>
-            <td class="num">149</td>
-          </tr>
-        <tr>
-            <td class="rank">8</td>
-            <td>Rommel Fernández</td>
-            <td class="num">23</td>
-            <td class="num">64</td>
-          </tr>
-        <tr>
-            <td class="rank">9</td>
-            <td>Roy Makaay</td>
-            <td class="num">21</td>
-            <td class="num">72</td>
-          </tr>
-        <tr>
             <td class="rank">10</td>
-            <td>Pier</td>
-            <td class="num">19</td>
-            <td class="num">89</td>
+            <td>Alejandro Alfaro</td>
+            <td class="num">27</td>
+            <td class="num">78</td>
           </tr>
       </tbody>
     </table>
@@ -495,6 +511,13 @@
       <thead><tr><th>Competition</th><th class="num">Players</th><th>Seasons</th><th class="num">Count</th><th>Games</th></tr></thead>
       <tbody>
         <tr>
+            <td>Segunda División</td>
+            <td class="num">332</td>
+            <td class="yr">2002/03–2026/27</td>
+            <td class="num">11</td>
+            <td class="yes">Playable</td>
+          </tr>
+        <tr>
             <td>La Liga</td>
             <td class="num">135</td>
             <td class="yr">1989/90–2009/10</td>
@@ -507,35 +530,35 @@
 </details>
 
 <h2>Ask about Tenerife</h2>
-<p class="sub">Ask the database a question. Answers come from 135 Tenerife
+<p class="sub">Ask the database a question. Answers come from 434 Tenerife
   players and are never invented — if the data does not support an answer, it says so.</p>
 <form class="ask" id="askForm">
   <input id="askQ" autocomplete="off" maxlength="300"
-         placeholder="Who has played for both Tenerife and Sevilla?"
+         placeholder="Who has played for both Tenerife and Valladolid?"
          aria-label="Ask a question about Tenerife">
   <button type="submit">Ask</button>
 </form>
 <div class="ask-examples">
-          <button type="button" data-q="Who has played for both Tenerife and Sevilla?">Who has played for both Tenerife and Sevilla?</button>
-          <button type="button" data-q="Top scorers for Tenerife in La Liga">Top scorers for Tenerife in La Liga</button>
+          <button type="button" data-q="Who has played for both Tenerife and Valladolid?">Who has played for both Tenerife and Valladolid?</button>
+          <button type="button" data-q="Top scorers for Tenerife in Segunda División">Top scorers for Tenerife in Segunda División</button>
           <button type="button" data-q="Which English players have the most appearances for Tenerife?">Which English players have the most appearances for Tenerife?</button>
 </div>
 <div id="askAnswer"></div>
 
 <h2>More teams</h2>
 <div class="related">
-          <a href="/teams/sevilla/">Sevilla</a>
-          <a href="/teams/espanyol/">Espanyol</a>
-          <a href="/teams/atletico-madrid/">Atlético Madrid</a>
-          <a href="/teams/valencia/">Valencia</a>
-          <a href="/teams/real-betis/">Real Betis</a>
-          <a href="/teams/barcelona/">Barcelona</a>
           <a href="/teams/valladolid/">Valladolid</a>
-          <a href="/teams/celta-vigo/">Celta Vigo</a>
+          <a href="/teams/albacete/">Albacete</a>
+          <a href="/teams/zaragoza/">Zaragoza</a>
+          <a href="/teams/elche/">Elche</a>
+          <a href="/teams/espanyol/">Espanyol</a>
+          <a href="/teams/sevilla/">Sevilla</a>
           <a href="/teams/mallorca/">Mallorca</a>
-          <a href="/teams/real-madrid/">Real Madrid</a>
+          <a href="/teams/sporting-gijon/">Sporting Gijón</a>
+          <a href="/teams/malaga/">Málaga</a>
+          <a href="/teams/atletico-madrid/">Atlético Madrid</a>
           <a href="/teams/rayo-vallecano/">Rayo Vallecano</a>
-          <a href="/teams/villarreal/">Villarreal</a>
+          <a href="/teams/celta-vigo/">Celta Vigo</a>
 </div>
 
 <footer class="page">
@@ -549,7 +572,7 @@
 </div><!-- /wrap -->
 
 <script>
-window.TS_TEAM = {"slug":"tenerife","name":"Tenerife","comps":["La Liga"],"defaultScope":"team_tenerife_la-liga","potd":[{"n":"Felipe Miñambres","a":310,"g":33,"f":"1989/90","t":"1998/99"},{"n":"Chano","a":249,"g":27,"f":"1991/92","t":"1998/99"},{"n":"Julio Llorente","a":234,"g":17,"f":"1990/91","t":"1998/99"},{"n":"Antonio Mata","a":196,"g":5,"f":"1991/92","t":"1998/99"},{"n":"César Gómez","a":164,"g":3,"f":"1992/93","t":"1996/97"},{"n":"Toño Hernández","a":152,"g":9,"f":"1989/90","t":"1994/95"},{"n":"Juanele","a":151,"g":27,"f":"1994/95","t":"1998/99"},{"n":"Antonio Pinilla","a":149,"g":25,"f":"1993/94","t":"1998/99"},{"n":"Juan Antonio Pizzi","a":141,"g":76,"f":"1991/92","t":"1995/96"},{"n":"Quique Estebaranz","a":137,"g":31,"f":"1989/90","t":"1992/93"},{"n":"Alexis","a":128,"g":6,"f":"1995/96","t":"2001/02"},{"n":"Slaviša Jokanović","a":123,"g":17,"f":"1995/96","t":"1998/99"},{"n":"Marcelo Ojeda","a":121,"g":0,"f":"1994/95","t":"1997/98"},{"n":"Fernando Redondo","a":103,"g":8,"f":"1990/91","t":"1993/94"},{"n":"Antonio Robaina","a":102,"g":4,"f":"1995/96","t":"1998/99"}]};
+window.TS_TEAM = {"slug":"tenerife","name":"Tenerife","comps":["Segunda División","La Liga"],"defaultScope":"team_tenerife_all","potd":[{"n":"Aitor Sanz","a":356,"g":12,"f":"2013/14","t":"2024/25"},{"n":"Felipe Miñambres","a":310,"g":33,"f":"1989/90","t":"1998/99"},{"n":"Suso Santana","a":287,"g":33,"f":"2006/07","t":"2020/21"},{"n":"Carlos Ruiz","a":274,"g":13,"f":"2013/14","t":"2022/23"},{"n":"Chano","a":249,"g":27,"f":"1991/92","t":"1998/99"},{"n":"Ricardo León Brito","a":235,"g":8,"f":"2005/06","t":"2015/16"},{"n":"Julio Llorente","a":234,"g":17,"f":"1990/91","t":"1998/99"},{"n":"Vitolo","a":210,"g":6,"f":"2001/02","t":"2017/18"},{"n":"Dani Hernández","a":207,"g":0,"f":"2014/15","t":"2021/22"},{"n":"Antonio Mata","a":196,"g":5,"f":"1991/92","t":"1998/99"},{"n":"Alberto Jiménez","a":181,"g":1,"f":"2013/14","t":"2020/21"},{"n":"Pablo Sicilia","a":168,"g":11,"f":"2006/07","t":"2010/11"},{"n":"Raúl Cámara","a":165,"g":1,"f":"2013/14","t":"2018/19"},{"n":"César Gómez","a":164,"g":3,"f":"1992/93","t":"1996/97"},{"n":"Ángel Rodríguez","a":164,"g":26,"f":"2005/06","t":"2024/25"}]};
 </script>
 <script src="/js/ts-scope.js"></script>
 <script src="/js/team-page.js"></script>
@@ -566,6 +589,6 @@ window.TS_TEAM = {"slug":"tenerife","name":"Tenerife","comps":["La Liga"],"defau
     try { TSNav.render(); } catch (e) { console.error('[TeleStats] Nav render failed:', e); }
   })();
 </script>
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TeleStats","item":"https://telestats.net"},{"@type":"ListItem","position":2,"name":"Teams","item":"https://telestats.net/teams/"},{"@type":"ListItem","position":3,"name":"Tenerife","item":"https://telestats.net/teams/tenerife/"}]},{"@type":"SportsTeam","name":"Tenerife","sport":"Association football","url":"https://telestats.net/teams/tenerife/"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is the Tenerife page on TeleStats?","acceptedAnswer":{"@type":"Answer","text":"Free Tenerife football quizzes and trivia games generated from real appearance and goal records for 135 players across La Liga. No sign-up is needed to play."}}]}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TeleStats","item":"https://telestats.net"},{"@type":"ListItem","position":2,"name":"Teams","item":"https://telestats.net/teams/"},{"@type":"ListItem","position":3,"name":"Tenerife","item":"https://telestats.net/teams/tenerife/"}]},{"@type":"SportsTeam","name":"Tenerife","sport":"Association football","url":"https://telestats.net/teams/tenerife/"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is the Tenerife page on TeleStats?","acceptedAnswer":{"@type":"Answer","text":"Free Tenerife football quizzes and trivia games generated from real appearance and goal records for 434 players across Segunda División and La Liga. No sign-up is needed to play."}}]}]}</script>
 </body>
 </html>

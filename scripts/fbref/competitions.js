@@ -37,6 +37,13 @@ const COMPETITIONS = [
   { id: 3,  fbref: 11,  slug: 'Serie-A-Stats',             name: 'Serie A',          country: 'ITA', tier: 1, type: 'league', first: 1988, have: [1992, 2025] },
   { id: 9,  fbref: 20,  slug: 'Bundesliga-Stats',          name: 'Bundesliga',       country: 'GER', tier: 1, type: 'league', first: 1988, have: [1992, 2025] },
   { id: 6,  fbref: 13,  slug: 'Ligue-1-Stats',             name: 'Ligue 1',          country: 'FRA', tier: 1, type: 'league', first: 1995, have: [1995, 2025] },
+
+  // Spain's second tier. Added deliberately and on its own rather than as part
+  // of a sweep of European second divisions: there is a specific audience to
+  // reach with it, and every new competition widens the club-name surface that
+  // has to stay correct. FBref holds 26 seasons, 2001-02 to the current one,
+  // in exactly the stats_standard shape the parser already reads.
+  { id: 13, fbref: 17,  slug: 'Segunda-Division-Stats',    name: 'Segunda División', country: 'ESP', tier: 2, type: 'league', first: 2001, have: null },
 ];
 
 /** The season currently being played. 2026 means 2026-27. */

@@ -5,17 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="/js/ts-analytics.js"></script>
 <title>Rayo Vallecano Football Quiz &amp; Trivia Games | TeleStats</title>
-<meta name="description" content="Play Rayo Vallecano football quizzes and trivia games built from 307 players and 10,946 appearances in La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta name="description" content="Play Rayo Vallecano football quizzes and trivia games built from 386 players and 15,762 appearances in La Liga and Segunda División. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
 <link rel="canonical" href="https://telestats.net/teams/rayo-vallecano/">
 <meta name="theme-color" content="#E53027">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Rayo Vallecano Football Quiz &amp; Trivia Games | TeleStats">
-<meta property="og:description" content="Play Rayo Vallecano football quizzes and trivia games built from 307 players and 10,946 appearances in La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta property="og:description" content="Play Rayo Vallecano football quizzes and trivia games built from 386 players and 15,762 appearances in La Liga and Segunda División. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
 <meta property="og:url" content="https://telestats.net/teams/rayo-vallecano/">
 <meta property="og:site_name" content="TeleStats">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Rayo Vallecano Football Quiz &amp; Trivia Games | TeleStats">
-<meta name="twitter:description" content="Play Rayo Vallecano football quizzes and trivia games built from 307 players and 10,946 appearances in La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta name="twitter:description" content="Play Rayo Vallecano football quizzes and trivia games built from 386 players and 15,762 appearances in La Liga and Segunda División. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
 <link rel="stylesheet" href="/telestats-theme.css">
 <style>
   :root { --club: #E53027; --club-2: #bd0800; }
@@ -52,6 +52,9 @@
   .crest { width: 52px; height: 60px; flex: 0 0 auto; filter: drop-shadow(0 2px 6px rgba(0,0,0,.45)); }
   .hero h1 { font-size: 1.65rem; line-height: 1.2; margin: 0 0 5px; }
   .sub { color: var(--text-secondary); margin: 0; font-size: .9rem; }
+  .sub a.complink { color: var(--text-secondary); text-decoration: underline;
+                    text-decoration-color: rgba(255,255,255,.22); }
+  .sub a.complink:hover { color: var(--accent); }
   .scope-note { color: var(--text-muted); font-size: .76rem; margin: 6px 0 0; }
   .scope-note a { color: var(--accent); }
 
@@ -182,9 +185,9 @@
     <nav>
       <a href="/daily/">Daily</a>
       <a href="/games/">Games</a>
+      <a href="/competitions/">Competitions</a>
       <a href="/teams/">Teams</a>
       <a href="/ask/">Ask</a>
-      <a href="/leaderboard/">Leaderboard</a>
       <a href="/community/">Community</a>
     </nav>
   </div>
@@ -205,7 +208,8 @@
     </svg>
     <div>
       <h1>Rayo Vallecano Football Quizzes &amp; Trivia</h1>
-      <p class="sub">307 players · 10,946 appearances · La Liga</p>
+      <p class="sub">386 players · 15,762 appearances ·
+        <a class="complink" href="/competitions/la-liga/">La Liga</a>, <a class="complink" href="/competitions/segunda-division/">Segunda División</a></p>
       <p class="scope-note">Records cover 1989/90 to 2026/27.
         <a href="/tools/data.html">Full dataset scope</a>.</p>
     </div>
@@ -216,8 +220,8 @@
   <summary>New here? What this page is</summary>
   <div class="body">
     <p>This is a set of free football games about <strong>Rayo Vallecano</strong>, generated
-      from real appearance and goal records — 307 players who have turned out
-      for the club in La Liga, going back to 1989/90.</p>
+      from real appearance and goal records — 386 players who have turned out
+      for the club in La Liga and Segunda División, going back to 1989/90.</p>
     <p>Pick a game below and it starts straight away on Rayo Vallecano. No sign-up, no app.
       Make an account only if you want your scores kept and your name on the club's board.</p>
     <p>Everything you see here comes from the TeleStats database. Nothing is written by an AI
@@ -243,11 +247,23 @@
 
 <h2 id="play">Play Rayo Vallecano</h2>
 <p class="sub">The five TeleStats games, set up for Rayo Vallecano. Click one and it starts.</p>
-      
+      <div class="chips" id="compChips" role="group"
+       aria-label="Choose which competitions to play">
+        <button type="button" class="chip all on" data-all="1" aria-pressed="true">All competitions</button>
+        <button type="button" class="chip on"
+                data-comp="La Liga"
+                data-slug="la-liga"
+                aria-pressed="true">La Liga</button>
+        <button type="button" class="chip on"
+                data-comp="Segunda División"
+                data-slug="segunda-division"
+                aria-pressed="true">Segunda División</button>
+      </div>
+      <p class="chip-note" id="chipNote"></p>
       <ul class="games">
         <li class="game">
           <a class="game-go" data-path="/games/hol.html"
-             href="/games/hol.html?scope=team_rayo-vallecano_la-liga&amp;play=1">
+             href="/games/hol.html?scope=team_rayo-vallecano_all&amp;play=1">
             <h3>Rayo Vallecano Higher or Lower</h3>
             <p>Which player has more appearances?</p>
             <span class="go">Play now &rarr;</span>
@@ -255,7 +271,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/alpha.html"
-             href="/games/alpha.html?scope=team_rayo-vallecano_la-liga&amp;play=1">
+             href="/games/alpha.html?scope=team_rayo-vallecano_all&amp;play=1">
             <h3>Rayo Vallecano Player Alphabet</h3>
             <p>Name a player for every letter of the alphabet.</p>
             <span class="go">Play now &rarr;</span>
@@ -263,7 +279,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/xi.html"
-             href="/games/xi.html?scope=team_rayo-vallecano_la-liga&amp;play=1">
+             href="/games/xi.html?scope=team_rayo-vallecano_all&amp;play=1">
             <h3>Rayo Vallecano Starting XI</h3>
             <p>Build the strongest eleven you can.</p>
             <span class="go">Play now &rarr;</span>
@@ -271,7 +287,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/whoami.html"
-             href="/games/whoami.html?scope=team_rayo-vallecano_la-liga&amp;play=1">
+             href="/games/whoami.html?scope=team_rayo-vallecano_all&amp;play=1">
             <h3>Rayo Vallecano Who Am I?</h3>
             <p>Guess the player from five clues.</p>
             <span class="go">Play now &rarr;</span>
@@ -279,7 +295,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/quiz.html"
-             href="/games/quiz.html?scope=team_rayo-vallecano_la-liga&amp;play=1">
+             href="/games/quiz.html?scope=team_rayo-vallecano_all&amp;play=1">
             <h3>Rayo Vallecano Trivia Quiz</h3>
             <p>Ten questions from this club’s record.</p>
             <span class="go">Play now &rarr;</span>
@@ -309,108 +325,108 @@
       <tbody>
         <tr>
             <td class="rank">1</td>
-            <td>Álvaro García</td>
-            <td class="num">209</td>
-            <td class="num">31</td>
-            <td class="yr">2018/19–2026/27</td>
+            <td>Óscar Trejo</td>
+            <td class="num">300</td>
+            <td class="num">38</td>
+            <td class="yr">2010/11–2025/26</td>
           </tr>
         <tr>
             <td class="rank">2</td>
+            <td>Álvaro García</td>
+            <td class="num">286</td>
+            <td class="num">38</td>
+            <td class="yr">2018/19–2026/27</td>
+          </tr>
+        <tr>
+            <td class="rank">3</td>
+            <td>Óscar Valentín</td>
+            <td class="num">240</td>
+            <td class="num">2</td>
+            <td class="yr">2019/20–2026/27</td>
+          </tr>
+        <tr>
+            <td class="rank">4</td>
+            <td>Míchel</td>
+            <td class="num">233</td>
+            <td class="num">28</td>
+            <td class="yr">1993/94–2011/12</td>
+          </tr>
+        <tr>
+            <td class="rank">5</td>
+            <td>Isaac Palazón Camacho</td>
+            <td class="num">229</td>
+            <td class="num">32</td>
+            <td class="yr">2019/20–2026/27</td>
+          </tr>
+        <tr>
+            <td class="rank">6</td>
+            <td>Tito</td>
+            <td class="num">222</td>
+            <td class="num">5</td>
+            <td class="yr">2009/10–2019/20</td>
+          </tr>
+        <tr>
+            <td class="rank">7</td>
+            <td>Adri Embarba</td>
+            <td class="num">222</td>
+            <td class="num">33</td>
+            <td class="yr">2013/14–2024/25</td>
+          </tr>
+        <tr>
+            <td class="rank">8</td>
+            <td>Roberto Trashorras</td>
+            <td class="num">211</td>
+            <td class="num">8</td>
+            <td class="yr">2011/12–2017/18</td>
+          </tr>
+        <tr>
+            <td class="rank">9</td>
+            <td>Unai López</td>
+            <td class="num">201</td>
+            <td class="num">8</td>
+            <td class="yr">2017/18–2026/27</td>
+          </tr>
+        <tr>
+            <td class="rank">10</td>
+            <td>Santi Comesaña</td>
+            <td class="num">200</td>
+            <td class="num">13</td>
+            <td class="yr">2016/17–2022/23</td>
+          </tr>
+        <tr>
+            <td class="rank">11</td>
             <td>Jesús Diego Cota</td>
             <td class="num">197</td>
             <td class="num">2</td>
             <td class="yr">1989/90–2001/02</td>
           </tr>
         <tr>
-            <td class="rank">3</td>
+            <td class="rank">12</td>
+            <td>Piti</td>
+            <td class="num">191</td>
+            <td class="num">45</td>
+            <td class="yr">2008/09–2016/17</td>
+          </tr>
+        <tr>
+            <td class="rank">13</td>
+            <td>Stole Dimitrievski</td>
+            <td class="num">186</td>
+            <td class="num">0</td>
+            <td class="yr">2018/19–2023/24</td>
+          </tr>
+        <tr>
+            <td class="rank">14</td>
             <td>Alcázar</td>
             <td class="num">181</td>
             <td class="num">2</td>
             <td class="yr">1993/94–2001/02</td>
           </tr>
         <tr>
-            <td class="rank">4</td>
-            <td>Isaac Palazón Camacho</td>
-            <td class="num">176</td>
-            <td class="num">22</td>
-            <td class="yr">2021/22–2026/27</td>
-          </tr>
-        <tr>
-            <td class="rank">5</td>
-            <td>Óscar Valentín</td>
-            <td class="num">173</td>
-            <td class="num">2</td>
-            <td class="yr">2021/22–2026/27</td>
-          </tr>
-        <tr>
-            <td class="rank">6</td>
-            <td>Roberto Trashorras</td>
-            <td class="num">170</td>
-            <td class="num">7</td>
-            <td class="yr">2011/12–2015/16</td>
-          </tr>
-        <tr>
-            <td class="rank">7</td>
-            <td>Tito</td>
-            <td class="num">170</td>
-            <td class="num">3</td>
-            <td class="yr">2011/12–2018/19</td>
-          </tr>
-        <tr>
-            <td class="rank">8</td>
-            <td>Ramón de Quintana</td>
-            <td class="num">163</td>
-            <td class="num">6</td>
-            <td class="yr">1995/96–2002/03</td>
-          </tr>
-        <tr>
-            <td class="rank">9</td>
-            <td>Unai López</td>
-            <td class="num">159</td>
-            <td class="num">5</td>
-            <td class="yr">2021/22–2026/27</td>
-          </tr>
-        <tr>
-            <td class="rank">10</td>
-            <td>Pathé Ciss</td>
-            <td class="num">159</td>
-            <td class="num">10</td>
-            <td class="yr">2021/22–2026/27</td>
-          </tr>
-        <tr>
-            <td class="rank">11</td>
-            <td>Óscar Trejo</td>
-            <td class="num">149</td>
-            <td class="num">8</td>
-            <td class="yr">2018/19–2025/26</td>
-          </tr>
-        <tr>
-            <td class="rank">12</td>
-            <td>Iván Balliu</td>
-            <td class="num">146</td>
-            <td class="num">1</td>
-            <td class="yr">2021/22–2026/27</td>
-          </tr>
-        <tr>
-            <td class="rank">13</td>
-            <td>Florian Lejeune</td>
-            <td class="num">144</td>
-            <td class="num">11</td>
-            <td class="yr">2022/23–2026/27</td>
-          </tr>
-        <tr>
-            <td class="rank">14</td>
-            <td>Míchel</td>
-            <td class="num">143</td>
-            <td class="num">21</td>
-            <td class="yr">1993/94–2011/12</td>
-          </tr>
-        <tr>
             <td class="rank">15</td>
             <td>Bolo</td>
-            <td class="num">127</td>
-            <td class="num">24</td>
-            <td class="yr">1999/00–2002/03</td>
+            <td class="num">168</td>
+            <td class="num">33</td>
+            <td class="yr">1999/00–2003/04</td>
           </tr>
       </tbody>
     </table>
@@ -425,63 +441,63 @@
       <tbody>
         <tr>
             <td class="rank">1</td>
-            <td>Álvaro García</td>
-            <td class="num">31</td>
-            <td class="num">209</td>
+            <td>Piti</td>
+            <td class="num">45</td>
+            <td class="num">191</td>
           </tr>
         <tr>
             <td class="rank">2</td>
+            <td>Raúl de Tomás</td>
+            <td class="num">43</td>
+            <td class="num">111</td>
+          </tr>
+        <tr>
+            <td class="rank">3</td>
+            <td>Óscar Trejo</td>
+            <td class="num">38</td>
+            <td class="num">300</td>
+          </tr>
+        <tr>
+            <td class="rank">4</td>
+            <td>Álvaro García</td>
+            <td class="num">38</td>
+            <td class="num">286</td>
+          </tr>
+        <tr>
+            <td class="rank">5</td>
+            <td>Bolo</td>
+            <td class="num">33</td>
+            <td class="num">168</td>
+          </tr>
+        <tr>
+            <td class="rank">6</td>
+            <td>Adri Embarba</td>
+            <td class="num">33</td>
+            <td class="num">222</td>
+          </tr>
+        <tr>
+            <td class="rank">7</td>
+            <td>Isaac Palazón Camacho</td>
+            <td class="num">32</td>
+            <td class="num">229</td>
+          </tr>
+        <tr>
+            <td class="rank">8</td>
             <td>Alberto Bueno</td>
             <td class="num">28</td>
             <td class="num">73</td>
           </tr>
         <tr>
-            <td class="rank">3</td>
-            <td>Bolo</td>
-            <td class="num">24</td>
-            <td class="num">127</td>
-          </tr>
-        <tr>
-            <td class="rank">4</td>
-            <td>Guilherme</td>
-            <td class="num">24</td>
-            <td class="num">72</td>
-          </tr>
-        <tr>
-            <td class="rank">5</td>
-            <td>Elvir Bolić</td>
-            <td class="num">22</td>
-            <td class="num">98</td>
-          </tr>
-        <tr>
-            <td class="rank">6</td>
-            <td>Isaac Palazón Camacho</td>
-            <td class="num">22</td>
-            <td class="num">176</td>
-          </tr>
-        <tr>
-            <td class="rank">7</td>
-            <td>Míchel</td>
-            <td class="num">21</td>
-            <td class="num">143</td>
-          </tr>
-        <tr>
-            <td class="rank">8</td>
-            <td>Piti</td>
-            <td class="num">21</td>
-            <td class="num">78</td>
-          </tr>
-        <tr>
             <td class="rank">9</td>
-            <td>Sergio Camello</td>
-            <td class="num">20</td>
-            <td class="num">117</td>
+            <td>Míchel</td>
+            <td class="num">28</td>
+            <td class="num">233</td>
           </tr>
         <tr>
             <td class="rank">10</td>
-            <td>Raúl de Tomás</td>
-            <td class="num">19</td>
-            <td class="num">79</td>
+            <td>David Aganzo</td>
+            <td class="num">28</td>
+            <td class="num">72</td>
           </tr>
       </tbody>
     </table>
@@ -496,9 +512,16 @@
       <tbody>
         <tr>
             <td>La Liga</td>
-            <td class="num">307</td>
+            <td class="num">311</td>
             <td class="yr">1989/90–2026/27</td>
             <td class="num">8</td>
+            <td class="yes">Playable</td>
+          </tr>
+        <tr>
+            <td>Segunda División</td>
+            <td class="num">153</td>
+            <td class="yr">2003/04–2020/21</td>
+            <td class="num">4</td>
             <td class="yes">Playable</td>
           </tr>
       </tbody>
@@ -507,16 +530,16 @@
 </details>
 
 <h2>Ask about Rayo Vallecano</h2>
-<p class="sub">Ask the database a question. Answers come from 307 Rayo Vallecano
+<p class="sub">Ask the database a question. Answers come from 386 Rayo Vallecano
   players and are never invented — if the data does not support an answer, it says so.</p>
 <form class="ask" id="askForm">
   <input id="askQ" autocomplete="off" maxlength="300"
-         placeholder="Who has played for both Rayo Vallecano and Sevilla?"
+         placeholder="Who has played for both Rayo Vallecano and Valladolid?"
          aria-label="Ask a question about Rayo Vallecano">
   <button type="submit">Ask</button>
 </form>
 <div class="ask-examples">
-          <button type="button" data-q="Who has played for both Rayo Vallecano and Sevilla?">Who has played for both Rayo Vallecano and Sevilla?</button>
+          <button type="button" data-q="Who has played for both Rayo Vallecano and Valladolid?">Who has played for both Rayo Vallecano and Valladolid?</button>
           <button type="button" data-q="Top scorers for Rayo Vallecano in La Liga">Top scorers for Rayo Vallecano in La Liga</button>
           <button type="button" data-q="Which English players have the most appearances for Rayo Vallecano?">Which English players have the most appearances for Rayo Vallecano?</button>
 </div>
@@ -524,18 +547,18 @@
 
 <h2>More teams</h2>
 <div class="related">
-          <a href="/teams/sevilla/">Sevilla</a>
-          <a href="/teams/espanyol/">Espanyol</a>
-          <a href="/teams/atletico-madrid/">Atlético Madrid</a>
-          <a href="/teams/valencia/">Valencia</a>
-          <a href="/teams/real-betis/">Real Betis</a>
-          <a href="/teams/barcelona/">Barcelona</a>
           <a href="/teams/valladolid/">Valladolid</a>
-          <a href="/teams/celta-vigo/">Celta Vigo</a>
+          <a href="/teams/albacete/">Albacete</a>
+          <a href="/teams/zaragoza/">Zaragoza</a>
+          <a href="/teams/tenerife/">Tenerife</a>
+          <a href="/teams/elche/">Elche</a>
+          <a href="/teams/espanyol/">Espanyol</a>
+          <a href="/teams/sevilla/">Sevilla</a>
           <a href="/teams/mallorca/">Mallorca</a>
-          <a href="/teams/real-madrid/">Real Madrid</a>
-          <a href="/teams/villarreal/">Villarreal</a>
-          <a href="/teams/getafe/">Getafe</a>
+          <a href="/teams/sporting-gijon/">Sporting Gijón</a>
+          <a href="/teams/malaga/">Málaga</a>
+          <a href="/teams/atletico-madrid/">Atlético Madrid</a>
+          <a href="/teams/celta-vigo/">Celta Vigo</a>
 </div>
 
 <footer class="page">
@@ -549,7 +572,7 @@
 </div><!-- /wrap -->
 
 <script>
-window.TS_TEAM = {"slug":"rayo-vallecano","name":"Rayo Vallecano","comps":["La Liga"],"defaultScope":"team_rayo-vallecano_la-liga","potd":[{"n":"Álvaro García","a":209,"g":31,"f":"2018/19","t":"2026/27"},{"n":"Jesús Diego Cota","a":197,"g":2,"f":"1989/90","t":"2001/02"},{"n":"Alcázar","a":181,"g":2,"f":"1993/94","t":"2001/02"},{"n":"Isaac Palazón Camacho","a":176,"g":22,"f":"2021/22","t":"2026/27"},{"n":"Óscar Valentín","a":173,"g":2,"f":"2021/22","t":"2026/27"},{"n":"Roberto Trashorras","a":170,"g":7,"f":"2011/12","t":"2015/16"},{"n":"Tito","a":170,"g":3,"f":"2011/12","t":"2018/19"},{"n":"Ramón de Quintana","a":163,"g":6,"f":"1995/96","t":"2002/03"},{"n":"Unai López","a":159,"g":5,"f":"2021/22","t":"2026/27"},{"n":"Pathé Ciss","a":159,"g":10,"f":"2021/22","t":"2026/27"},{"n":"Óscar Trejo","a":149,"g":8,"f":"2018/19","t":"2025/26"},{"n":"Iván Balliu","a":146,"g":1,"f":"2021/22","t":"2026/27"},{"n":"Florian Lejeune","a":144,"g":11,"f":"2022/23","t":"2026/27"},{"n":"Míchel","a":143,"g":21,"f":"1993/94","t":"2011/12"},{"n":"Bolo","a":127,"g":24,"f":"1999/00","t":"2002/03"}]};
+window.TS_TEAM = {"slug":"rayo-vallecano","name":"Rayo Vallecano","comps":["La Liga","Segunda División"],"defaultScope":"team_rayo-vallecano_all","potd":[{"n":"Óscar Trejo","a":300,"g":38,"f":"2010/11","t":"2025/26"},{"n":"Álvaro García","a":286,"g":38,"f":"2018/19","t":"2026/27"},{"n":"Óscar Valentín","a":240,"g":2,"f":"2019/20","t":"2026/27"},{"n":"Míchel","a":233,"g":28,"f":"1993/94","t":"2011/12"},{"n":"Isaac Palazón Camacho","a":229,"g":32,"f":"2019/20","t":"2026/27"},{"n":"Tito","a":222,"g":5,"f":"2009/10","t":"2019/20"},{"n":"Adri Embarba","a":222,"g":33,"f":"2013/14","t":"2024/25"},{"n":"Roberto Trashorras","a":211,"g":8,"f":"2011/12","t":"2017/18"},{"n":"Unai López","a":201,"g":8,"f":"2017/18","t":"2026/27"},{"n":"Santi Comesaña","a":200,"g":13,"f":"2016/17","t":"2022/23"},{"n":"Jesús Diego Cota","a":197,"g":2,"f":"1989/90","t":"2001/02"},{"n":"Piti","a":191,"g":45,"f":"2008/09","t":"2016/17"},{"n":"Stole Dimitrievski","a":186,"g":0,"f":"2018/19","t":"2023/24"},{"n":"Alcázar","a":181,"g":2,"f":"1993/94","t":"2001/02"},{"n":"Bolo","a":168,"g":33,"f":"1999/00","t":"2003/04"}]};
 </script>
 <script src="/js/ts-scope.js"></script>
 <script src="/js/team-page.js"></script>
@@ -566,6 +589,6 @@ window.TS_TEAM = {"slug":"rayo-vallecano","name":"Rayo Vallecano","comps":["La L
     try { TSNav.render(); } catch (e) { console.error('[TeleStats] Nav render failed:', e); }
   })();
 </script>
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TeleStats","item":"https://telestats.net"},{"@type":"ListItem","position":2,"name":"Teams","item":"https://telestats.net/teams/"},{"@type":"ListItem","position":3,"name":"Rayo Vallecano","item":"https://telestats.net/teams/rayo-vallecano/"}]},{"@type":"SportsTeam","name":"Rayo Vallecano","sport":"Association football","url":"https://telestats.net/teams/rayo-vallecano/"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is the Rayo Vallecano page on TeleStats?","acceptedAnswer":{"@type":"Answer","text":"Free Rayo Vallecano football quizzes and trivia games generated from real appearance and goal records for 307 players across La Liga. No sign-up is needed to play."}}]}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TeleStats","item":"https://telestats.net"},{"@type":"ListItem","position":2,"name":"Teams","item":"https://telestats.net/teams/"},{"@type":"ListItem","position":3,"name":"Rayo Vallecano","item":"https://telestats.net/teams/rayo-vallecano/"}]},{"@type":"SportsTeam","name":"Rayo Vallecano","sport":"Association football","url":"https://telestats.net/teams/rayo-vallecano/"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is the Rayo Vallecano page on TeleStats?","acceptedAnswer":{"@type":"Answer","text":"Free Rayo Vallecano football quizzes and trivia games generated from real appearance and goal records for 386 players across La Liga and Segunda División. No sign-up is needed to play."}}]}]}</script>
 </body>
 </html>

@@ -5,17 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="/js/ts-analytics.js"></script>
 <title>Castellon Football Quiz &amp; Trivia Games | TeleStats</title>
-<meta name="description" content="Play Castellon football quizzes and trivia games built from 33 players and 976 appearances in La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta name="description" content="Play Castellon football quizzes and trivia games built from 198 players and 5,958 appearances in Segunda División and La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
 <link rel="canonical" href="https://telestats.net/teams/castellon/">
 <meta name="theme-color" content="hsl(210, 55%, 38%)">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Castellon Football Quiz &amp; Trivia Games | TeleStats">
-<meta property="og:description" content="Play Castellon football quizzes and trivia games built from 33 players and 976 appearances in La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta property="og:description" content="Play Castellon football quizzes and trivia games built from 198 players and 5,958 appearances in Segunda División and La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
 <meta property="og:url" content="https://telestats.net/teams/castellon/">
 <meta property="og:site_name" content="TeleStats">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Castellon Football Quiz &amp; Trivia Games | TeleStats">
-<meta name="twitter:description" content="Play Castellon football quizzes and trivia games built from 33 players and 976 appearances in La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta name="twitter:description" content="Play Castellon football quizzes and trivia games built from 198 players and 5,958 appearances in Segunda División and La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
 <link rel="stylesheet" href="/telestats-theme.css">
 <style>
   :root { --club: hsl(210, 55%, 38%); --club-2: hsl(228, 55%, 26%); }
@@ -52,6 +52,9 @@
   .crest { width: 52px; height: 60px; flex: 0 0 auto; filter: drop-shadow(0 2px 6px rgba(0,0,0,.45)); }
   .hero h1 { font-size: 1.65rem; line-height: 1.2; margin: 0 0 5px; }
   .sub { color: var(--text-secondary); margin: 0; font-size: .9rem; }
+  .sub a.complink { color: var(--text-secondary); text-decoration: underline;
+                    text-decoration-color: rgba(255,255,255,.22); }
+  .sub a.complink:hover { color: var(--accent); }
   .scope-note { color: var(--text-muted); font-size: .76rem; margin: 6px 0 0; }
   .scope-note a { color: var(--accent); }
 
@@ -182,9 +185,9 @@
     <nav>
       <a href="/daily/">Daily</a>
       <a href="/games/">Games</a>
+      <a href="/competitions/">Competitions</a>
       <a href="/teams/">Teams</a>
       <a href="/ask/">Ask</a>
-      <a href="/leaderboard/">Leaderboard</a>
       <a href="/community/">Community</a>
     </nav>
   </div>
@@ -205,8 +208,9 @@
     </svg>
     <div>
       <h1>Castellon Football Quizzes &amp; Trivia</h1>
-      <p class="sub">33 players · 976 appearances · La Liga</p>
-      <p class="scope-note">Records cover 1989/90 to 1990/91.
+      <p class="sub">198 players · 5,958 appearances ·
+        <a class="complink" href="/competitions/segunda-division/">Segunda División</a>, <a class="complink" href="/competitions/la-liga/">La Liga</a></p>
+      <p class="scope-note">Records cover 1989/90 to 2026/27.
         <a href="/tools/data.html">Full dataset scope</a>.</p>
     </div>
   </div>
@@ -216,8 +220,8 @@
   <summary>New here? What this page is</summary>
   <div class="body">
     <p>This is a set of free football games about <strong>Castellon</strong>, generated
-      from real appearance and goal records — 33 players who have turned out
-      for the club in La Liga, going back to 1989/90.</p>
+      from real appearance and goal records — 198 players who have turned out
+      for the club in Segunda División and La Liga, going back to 1989/90.</p>
     <p>Pick a game below and it starts straight away on Castellon. No sign-up, no app.
       Make an account only if you want your scores kept and your name on the club's board.</p>
     <p>Everything you see here comes from the TeleStats database. Nothing is written by an AI
@@ -243,11 +247,23 @@
 
 <h2 id="play">Play Castellon</h2>
 <p class="sub">The five TeleStats games, set up for Castellon. Click one and it starts.</p>
-      
+      <div class="chips" id="compChips" role="group"
+       aria-label="Choose which competitions to play">
+        <button type="button" class="chip all on" data-all="1" aria-pressed="true">All competitions</button>
+        <button type="button" class="chip on"
+                data-comp="Segunda División"
+                data-slug="segunda-division"
+                aria-pressed="true">Segunda División</button>
+        <button type="button" class="chip on"
+                data-comp="La Liga"
+                data-slug="la-liga"
+                aria-pressed="true">La Liga</button>
+      </div>
+      <p class="chip-note" id="chipNote"></p>
       <ul class="games">
         <li class="game">
           <a class="game-go" data-path="/games/hol.html"
-             href="/games/hol.html?scope=team_castellon_la-liga&amp;play=1">
+             href="/games/hol.html?scope=team_castellon_all&amp;play=1">
             <h3>Castellon Higher or Lower</h3>
             <p>Which player has more appearances?</p>
             <span class="go">Play now &rarr;</span>
@@ -255,7 +271,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/alpha.html"
-             href="/games/alpha.html?scope=team_castellon_la-liga&amp;play=1">
+             href="/games/alpha.html?scope=team_castellon_all&amp;play=1">
             <h3>Castellon Player Alphabet</h3>
             <p>Name a player for every letter of the alphabet.</p>
             <span class="go">Play now &rarr;</span>
@@ -263,7 +279,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/xi.html"
-             href="/games/xi.html?scope=team_castellon_la-liga&amp;play=1">
+             href="/games/xi.html?scope=team_castellon_all&amp;play=1">
             <h3>Castellon Starting XI</h3>
             <p>Build the strongest eleven you can.</p>
             <span class="go">Play now &rarr;</span>
@@ -271,7 +287,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/whoami.html"
-             href="/games/whoami.html?scope=team_castellon_la-liga&amp;play=1">
+             href="/games/whoami.html?scope=team_castellon_all&amp;play=1">
             <h3>Castellon Who Am I?</h3>
             <p>Guess the player from five clues.</p>
             <span class="go">Play now &rarr;</span>
@@ -279,7 +295,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/quiz.html"
-             href="/games/quiz.html?scope=team_castellon_la-liga&amp;play=1">
+             href="/games/quiz.html?scope=team_castellon_all&amp;play=1">
             <h3>Castellon Trivia Quiz</h3>
             <p>Ten questions from this club’s record.</p>
             <span class="go">Play now &rarr;</span>
@@ -309,108 +325,108 @@
       <tbody>
         <tr>
             <td class="rank">1</td>
+            <td>Ángel Dealbert</td>
+            <td class="num">133</td>
+            <td class="num">0</td>
+            <td class="yr">2005/06–2008/09</td>
+          </tr>
+        <tr>
+            <td class="rank">2</td>
+            <td>Pedro</td>
+            <td class="num">124</td>
+            <td class="num">1</td>
+            <td class="yr">2005/06–2009/10</td>
+          </tr>
+        <tr>
+            <td class="rank">3</td>
+            <td>Mario Rosas</td>
+            <td class="num">123</td>
+            <td class="num">16</td>
+            <td class="yr">2005/06–2008/09</td>
+          </tr>
+        <tr>
+            <td class="rank">4</td>
+            <td>José Mora</td>
+            <td class="num">114</td>
+            <td class="num">4</td>
+            <td class="yr">2005/06–2008/09</td>
+          </tr>
+        <tr>
+            <td class="rank">5</td>
+            <td>José Tabares</td>
+            <td class="num">104</td>
+            <td class="num">29</td>
+            <td class="yr">2005/06–2009/10</td>
+          </tr>
+        <tr>
+            <td class="rank">6</td>
+            <td>Álvaro Baigorri</td>
+            <td class="num">93</td>
+            <td class="num">1</td>
+            <td class="yr">2006/07–2009/10</td>
+          </tr>
+        <tr>
+            <td class="rank">7</td>
+            <td>Juan Zamora</td>
+            <td class="num">87</td>
+            <td class="num">5</td>
+            <td class="yr">2005/06–2009/10</td>
+          </tr>
+        <tr>
+            <td class="rank">8</td>
+            <td>Daniel Pendín</td>
+            <td class="num">86</td>
+            <td class="num">5</td>
+            <td class="yr">2006/07–2009/10</td>
+          </tr>
+        <tr>
+            <td class="rank">9</td>
+            <td>Rafita</td>
+            <td class="num">86</td>
+            <td class="num">2</td>
+            <td class="yr">2007/08–2009/10</td>
+          </tr>
+        <tr>
+            <td class="rank">10</td>
+            <td>Aurelio Santos</td>
+            <td class="num">84</td>
+            <td class="num">8</td>
+            <td class="yr">2005/06–2008/09</td>
+          </tr>
+        <tr>
+            <td class="rank">11</td>
+            <td>Raúl Sánchez</td>
+            <td class="num">79</td>
+            <td class="num">22</td>
+            <td class="yr">2005/06–2026/27</td>
+          </tr>
+        <tr>
+            <td class="rank">12</td>
+            <td>Alberto Jiménez</td>
+            <td class="num">79</td>
+            <td class="num">3</td>
+            <td class="yr">2024/25–2026/27</td>
+          </tr>
+        <tr>
+            <td class="rank">13</td>
+            <td>Leonardo Ulloa</td>
+            <td class="num">78</td>
+            <td class="num">30</td>
+            <td class="yr">2008/09–2009/10</td>
+          </tr>
+        <tr>
+            <td class="rank">14</td>
+            <td>Xavi Oliva</td>
+            <td class="num">76</td>
+            <td class="num">0</td>
+            <td class="yr">2005/06–2008/09</td>
+          </tr>
+        <tr>
+            <td class="rank">15</td>
             <td>Emilio Isierte</td>
             <td class="num">75</td>
             <td class="num">0</td>
             <td class="yr">1989/90–1990/91</td>
-          </tr>
-        <tr>
-            <td class="rank">2</td>
-            <td>Raúl Cruselles</td>
-            <td class="num">72</td>
-            <td class="num">13</td>
-            <td class="yr">1989/90–1990/91</td>
-          </tr>
-        <tr>
-            <td class="rank">3</td>
-            <td>Javier Valls</td>
-            <td class="num">71</td>
-            <td class="num">3</td>
-            <td class="yr">1989/90–1990/91</td>
-          </tr>
-        <tr>
-            <td class="rank">4</td>
-            <td>Antonio Manchado</td>
-            <td class="num">66</td>
-            <td class="num">0</td>
-            <td class="yr">1989/90–1990/91</td>
-          </tr>
-        <tr>
-            <td class="rank">5</td>
-            <td>Alfredo Monfort</td>
-            <td class="num">65</td>
-            <td class="num">0</td>
-            <td class="yr">1989/90–1990/91</td>
-          </tr>
-        <tr>
-            <td class="rank">6</td>
-            <td>Adolfo Fernández Leal</td>
-            <td class="num">62</td>
-            <td class="num">2</td>
-            <td class="yr">1989/90–1990/91</td>
-          </tr>
-        <tr>
-            <td class="rank">7</td>
-            <td>Walter Pelletti</td>
-            <td class="num">55</td>
-            <td class="num">2</td>
-            <td class="yr">1989/90–1990/91</td>
-          </tr>
-        <tr>
-            <td class="rank">8</td>
-            <td>Pedro Alcañiz</td>
-            <td class="num">54</td>
-            <td class="num">13</td>
-            <td class="yr">1989/90–1990/91</td>
-          </tr>
-        <tr>
-            <td class="rank">9</td>
-            <td>Javier Ibeas</td>
-            <td class="num">50</td>
-            <td class="num">0</td>
-            <td class="yr">1989/90–1990/91</td>
-          </tr>
-        <tr>
-            <td class="rank">10</td>
-            <td>Víctor Salvador</td>
-            <td class="num">37</td>
-            <td class="num">4</td>
-            <td class="yr">1989/90–1990/91</td>
-          </tr>
-        <tr>
-            <td class="rank">11</td>
-            <td>José Manuel Hurtado</td>
-            <td class="num">35</td>
-            <td class="num">1</td>
-            <td class="yr">1989/90–1990/91</td>
-          </tr>
-        <tr>
-            <td class="rank">12</td>
-            <td>Ángel Luis Morón</td>
-            <td class="num">34</td>
-            <td class="num">1</td>
-            <td class="yr">1990/91–1990/91</td>
-          </tr>
-        <tr>
-            <td class="rank">13</td>
-            <td>Enrique Ayúcar</td>
-            <td class="num">34</td>
-            <td class="num">3</td>
-            <td class="yr">1989/90–1989/90</td>
-          </tr>
-        <tr>
-            <td class="rank">14</td>
-            <td>Ximet</td>
-            <td class="num">31</td>
-            <td class="num">0</td>
-            <td class="yr">1989/90–1990/91</td>
-          </tr>
-        <tr>
-            <td class="rank">15</td>
-            <td>Benito Sánchez</td>
-            <td class="num">30</td>
-            <td class="num">1</td>
-            <td class="yr">1990/91–1990/91</td>
           </tr>
       </tbody>
     </table>
@@ -425,63 +441,63 @@
       <tbody>
         <tr>
             <td class="rank">1</td>
+            <td>Leonardo Ulloa</td>
+            <td class="num">30</td>
+            <td class="num">78</td>
+          </tr>
+        <tr>
+            <td class="rank">2</td>
+            <td>José Tabares</td>
+            <td class="num">29</td>
+            <td class="num">104</td>
+          </tr>
+        <tr>
+            <td class="rank">3</td>
+            <td>Raúl Sánchez</td>
+            <td class="num">22</td>
+            <td class="num">79</td>
+          </tr>
+        <tr>
+            <td class="rank">4</td>
+            <td>Álex Calatrava</td>
+            <td class="num">20</td>
+            <td class="num">73</td>
+          </tr>
+        <tr>
+            <td class="rank">5</td>
+            <td>Israel Suero</td>
+            <td class="num">18</td>
+            <td class="num">73</td>
+          </tr>
+        <tr>
+            <td class="rank">6</td>
+            <td>Ousmane Camara</td>
+            <td class="num">17</td>
+            <td class="num">56</td>
+          </tr>
+        <tr>
+            <td class="rank">7</td>
+            <td>Mario Rosas</td>
+            <td class="num">16</td>
+            <td class="num">123</td>
+          </tr>
+        <tr>
+            <td class="rank">8</td>
+            <td>Manuel Arana</td>
+            <td class="num">14</td>
+            <td class="num">69</td>
+          </tr>
+        <tr>
+            <td class="rank">9</td>
             <td>Pedro Alcañiz</td>
             <td class="num">13</td>
             <td class="num">54</td>
           </tr>
         <tr>
-            <td class="rank">2</td>
+            <td class="rank">10</td>
             <td>Raúl Cruselles</td>
             <td class="num">13</td>
             <td class="num">72</td>
-          </tr>
-        <tr>
-            <td class="rank">3</td>
-            <td>Mario Cabrera</td>
-            <td class="num">5</td>
-            <td class="num">26</td>
-          </tr>
-        <tr>
-            <td class="rank">4</td>
-            <td>Víctor Salvador</td>
-            <td class="num">4</td>
-            <td class="num">37</td>
-          </tr>
-        <tr>
-            <td class="rank">5</td>
-            <td>Igor Dobrovolski</td>
-            <td class="num">3</td>
-            <td class="num">14</td>
-          </tr>
-        <tr>
-            <td class="rank">6</td>
-            <td>Enrique Ayúcar</td>
-            <td class="num">3</td>
-            <td class="num">34</td>
-          </tr>
-        <tr>
-            <td class="rank">7</td>
-            <td>Javier Valls</td>
-            <td class="num">3</td>
-            <td class="num">71</td>
-          </tr>
-        <tr>
-            <td class="rank">8</td>
-            <td>Adolfo Fernández Leal</td>
-            <td class="num">2</td>
-            <td class="num">62</td>
-          </tr>
-        <tr>
-            <td class="rank">9</td>
-            <td>Walter Pelletti</td>
-            <td class="num">2</td>
-            <td class="num">55</td>
-          </tr>
-        <tr>
-            <td class="rank">10</td>
-            <td>Nduka Ugbade</td>
-            <td class="num">2</td>
-            <td class="num">21</td>
           </tr>
       </tbody>
     </table>
@@ -495,6 +511,13 @@
       <thead><tr><th>Competition</th><th class="num">Players</th><th>Seasons</th><th class="num">Count</th><th>Games</th></tr></thead>
       <tbody>
         <tr>
+            <td>Segunda División</td>
+            <td class="num">165</td>
+            <td class="yr">2005/06–2026/27</td>
+            <td class="num">5</td>
+            <td class="yes">Playable</td>
+          </tr>
+        <tr>
             <td>La Liga</td>
             <td class="num">33</td>
             <td class="yr">1989/90–1990/91</td>
@@ -507,35 +530,35 @@
 </details>
 
 <h2>Ask about Castellon</h2>
-<p class="sub">Ask the database a question. Answers come from 33 Castellon
+<p class="sub">Ask the database a question. Answers come from 198 Castellon
   players and are never invented — if the data does not support an answer, it says so.</p>
 <form class="ask" id="askForm">
   <input id="askQ" autocomplete="off" maxlength="300"
-         placeholder="Who has played for both Castellon and Sevilla?"
+         placeholder="Who has played for both Castellon and Valladolid?"
          aria-label="Ask a question about Castellon">
   <button type="submit">Ask</button>
 </form>
 <div class="ask-examples">
-          <button type="button" data-q="Who has played for both Castellon and Sevilla?">Who has played for both Castellon and Sevilla?</button>
-          <button type="button" data-q="Top scorers for Castellon in La Liga">Top scorers for Castellon in La Liga</button>
+          <button type="button" data-q="Who has played for both Castellon and Valladolid?">Who has played for both Castellon and Valladolid?</button>
+          <button type="button" data-q="Top scorers for Castellon in Segunda División">Top scorers for Castellon in Segunda División</button>
           <button type="button" data-q="Which English players have the most appearances for Castellon?">Which English players have the most appearances for Castellon?</button>
 </div>
 <div id="askAnswer"></div>
 
 <h2>More teams</h2>
 <div class="related">
-          <a href="/teams/sevilla/">Sevilla</a>
-          <a href="/teams/espanyol/">Espanyol</a>
-          <a href="/teams/atletico-madrid/">Atlético Madrid</a>
-          <a href="/teams/valencia/">Valencia</a>
-          <a href="/teams/real-betis/">Real Betis</a>
-          <a href="/teams/barcelona/">Barcelona</a>
           <a href="/teams/valladolid/">Valladolid</a>
-          <a href="/teams/celta-vigo/">Celta Vigo</a>
+          <a href="/teams/albacete/">Albacete</a>
+          <a href="/teams/zaragoza/">Zaragoza</a>
+          <a href="/teams/tenerife/">Tenerife</a>
+          <a href="/teams/elche/">Elche</a>
+          <a href="/teams/espanyol/">Espanyol</a>
+          <a href="/teams/sevilla/">Sevilla</a>
           <a href="/teams/mallorca/">Mallorca</a>
-          <a href="/teams/real-madrid/">Real Madrid</a>
+          <a href="/teams/sporting-gijon/">Sporting Gijón</a>
+          <a href="/teams/malaga/">Málaga</a>
+          <a href="/teams/atletico-madrid/">Atlético Madrid</a>
           <a href="/teams/rayo-vallecano/">Rayo Vallecano</a>
-          <a href="/teams/villarreal/">Villarreal</a>
 </div>
 
 <footer class="page">
@@ -549,7 +572,7 @@
 </div><!-- /wrap -->
 
 <script>
-window.TS_TEAM = {"slug":"castellon","name":"Castellon","comps":["La Liga"],"defaultScope":"team_castellon_la-liga","potd":[{"n":"Emilio Isierte","a":75,"g":0,"f":"1989/90","t":"1990/91"},{"n":"Raúl Cruselles","a":72,"g":13,"f":"1989/90","t":"1990/91"},{"n":"Javier Valls","a":71,"g":3,"f":"1989/90","t":"1990/91"},{"n":"Antonio Manchado","a":66,"g":0,"f":"1989/90","t":"1990/91"},{"n":"Alfredo Monfort","a":65,"g":0,"f":"1989/90","t":"1990/91"},{"n":"Adolfo Fernández Leal","a":62,"g":2,"f":"1989/90","t":"1990/91"},{"n":"Walter Pelletti","a":55,"g":2,"f":"1989/90","t":"1990/91"},{"n":"Pedro Alcañiz","a":54,"g":13,"f":"1989/90","t":"1990/91"},{"n":"Javier Ibeas","a":50,"g":0,"f":"1989/90","t":"1990/91"},{"n":"Víctor Salvador","a":37,"g":4,"f":"1989/90","t":"1990/91"},{"n":"José Manuel Hurtado","a":35,"g":1,"f":"1989/90","t":"1990/91"},{"n":"Ángel Luis Morón","a":34,"g":1,"f":"1990/91","t":"1990/91"},{"n":"Enrique Ayúcar","a":34,"g":3,"f":"1989/90","t":"1989/90"},{"n":"Ximet","a":31,"g":0,"f":"1989/90","t":"1990/91"},{"n":"Benito Sánchez","a":30,"g":1,"f":"1990/91","t":"1990/91"}]};
+window.TS_TEAM = {"slug":"castellon","name":"Castellon","comps":["Segunda División","La Liga"],"defaultScope":"team_castellon_all","potd":[{"n":"Ángel Dealbert","a":133,"g":0,"f":"2005/06","t":"2008/09"},{"n":"Pedro","a":124,"g":1,"f":"2005/06","t":"2009/10"},{"n":"Mario Rosas","a":123,"g":16,"f":"2005/06","t":"2008/09"},{"n":"José Mora","a":114,"g":4,"f":"2005/06","t":"2008/09"},{"n":"José Tabares","a":104,"g":29,"f":"2005/06","t":"2009/10"},{"n":"Álvaro Baigorri","a":93,"g":1,"f":"2006/07","t":"2009/10"},{"n":"Juan Zamora","a":87,"g":5,"f":"2005/06","t":"2009/10"},{"n":"Daniel Pendín","a":86,"g":5,"f":"2006/07","t":"2009/10"},{"n":"Rafita","a":86,"g":2,"f":"2007/08","t":"2009/10"},{"n":"Aurelio Santos","a":84,"g":8,"f":"2005/06","t":"2008/09"},{"n":"Raúl Sánchez","a":79,"g":22,"f":"2005/06","t":"2026/27"},{"n":"Alberto Jiménez","a":79,"g":3,"f":"2024/25","t":"2026/27"},{"n":"Leonardo Ulloa","a":78,"g":30,"f":"2008/09","t":"2009/10"},{"n":"Xavi Oliva","a":76,"g":0,"f":"2005/06","t":"2008/09"},{"n":"Emilio Isierte","a":75,"g":0,"f":"1989/90","t":"1990/91"}]};
 </script>
 <script src="/js/ts-scope.js"></script>
 <script src="/js/team-page.js"></script>
@@ -566,6 +589,6 @@ window.TS_TEAM = {"slug":"castellon","name":"Castellon","comps":["La Liga"],"def
     try { TSNav.render(); } catch (e) { console.error('[TeleStats] Nav render failed:', e); }
   })();
 </script>
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TeleStats","item":"https://telestats.net"},{"@type":"ListItem","position":2,"name":"Teams","item":"https://telestats.net/teams/"},{"@type":"ListItem","position":3,"name":"Castellon","item":"https://telestats.net/teams/castellon/"}]},{"@type":"SportsTeam","name":"Castellon","sport":"Association football","url":"https://telestats.net/teams/castellon/"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is the Castellon page on TeleStats?","acceptedAnswer":{"@type":"Answer","text":"Free Castellon football quizzes and trivia games generated from real appearance and goal records for 33 players across La Liga. No sign-up is needed to play."}}]}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TeleStats","item":"https://telestats.net"},{"@type":"ListItem","position":2,"name":"Teams","item":"https://telestats.net/teams/"},{"@type":"ListItem","position":3,"name":"Castellon","item":"https://telestats.net/teams/castellon/"}]},{"@type":"SportsTeam","name":"Castellon","sport":"Association football","url":"https://telestats.net/teams/castellon/"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is the Castellon page on TeleStats?","acceptedAnswer":{"@type":"Answer","text":"Free Castellon football quizzes and trivia games generated from real appearance and goal records for 198 players across Segunda División and La Liga. No sign-up is needed to play."}}]}]}</script>
 </body>
 </html>

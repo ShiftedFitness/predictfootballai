@@ -5,17 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="/js/ts-analytics.js"></script>
 <title>Zaragoza Football Quiz &amp; Trivia Games | TeleStats</title>
-<meta name="description" content="Play Zaragoza football quizzes and trivia games built from 232 players and 11,893 appearances in La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta name="description" content="Play Zaragoza football quizzes and trivia games built from 461 players and 21,117 appearances in Segunda División and La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
 <link rel="canonical" href="https://telestats.net/teams/zaragoza/">
 <meta name="theme-color" content="#004C99">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Zaragoza Football Quiz &amp; Trivia Games | TeleStats">
-<meta property="og:description" content="Play Zaragoza football quizzes and trivia games built from 232 players and 11,893 appearances in La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta property="og:description" content="Play Zaragoza football quizzes and trivia games built from 461 players and 21,117 appearances in Segunda División and La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
 <meta property="og:url" content="https://telestats.net/teams/zaragoza/">
 <meta property="og:site_name" content="TeleStats">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Zaragoza Football Quiz &amp; Trivia Games | TeleStats">
-<meta name="twitter:description" content="Play Zaragoza football quizzes and trivia games built from 232 players and 11,893 appearances in La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
+<meta name="twitter:description" content="Play Zaragoza football quizzes and trivia games built from 461 players and 21,117 appearances in Segunda División and La Liga. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.">
 <link rel="stylesheet" href="/telestats-theme.css">
 <style>
   :root { --club: #004C99; --club-2: #002471; }
@@ -52,6 +52,9 @@
   .crest { width: 52px; height: 60px; flex: 0 0 auto; filter: drop-shadow(0 2px 6px rgba(0,0,0,.45)); }
   .hero h1 { font-size: 1.65rem; line-height: 1.2; margin: 0 0 5px; }
   .sub { color: var(--text-secondary); margin: 0; font-size: .9rem; }
+  .sub a.complink { color: var(--text-secondary); text-decoration: underline;
+                    text-decoration-color: rgba(255,255,255,.22); }
+  .sub a.complink:hover { color: var(--accent); }
   .scope-note { color: var(--text-muted); font-size: .76rem; margin: 6px 0 0; }
   .scope-note a { color: var(--accent); }
 
@@ -182,9 +185,9 @@
     <nav>
       <a href="/daily/">Daily</a>
       <a href="/games/">Games</a>
+      <a href="/competitions/">Competitions</a>
       <a href="/teams/">Teams</a>
       <a href="/ask/">Ask</a>
-      <a href="/leaderboard/">Leaderboard</a>
       <a href="/community/">Community</a>
     </nav>
   </div>
@@ -205,8 +208,9 @@
     </svg>
     <div>
       <h1>Zaragoza Football Quizzes &amp; Trivia</h1>
-      <p class="sub">232 players · 11,893 appearances · La Liga</p>
-      <p class="scope-note">Records cover 1988/89 to 2012/13.
+      <p class="sub">461 players · 21,117 appearances ·
+        <a class="complink" href="/competitions/segunda-division/">Segunda División</a>, <a class="complink" href="/competitions/la-liga/">La Liga</a></p>
+      <p class="scope-note">Records cover 1988/89 to 2025/26.
         <a href="/tools/data.html">Full dataset scope</a>.</p>
     </div>
   </div>
@@ -216,8 +220,8 @@
   <summary>New here? What this page is</summary>
   <div class="body">
     <p>This is a set of free football games about <strong>Zaragoza</strong>, generated
-      from real appearance and goal records — 232 players who have turned out
-      for the club in La Liga, going back to 1988/89.</p>
+      from real appearance and goal records — 461 players who have turned out
+      for the club in Segunda División and La Liga, going back to 1988/89.</p>
     <p>Pick a game below and it starts straight away on Zaragoza. No sign-up, no app.
       Make an account only if you want your scores kept and your name on the club's board.</p>
     <p>Everything you see here comes from the TeleStats database. Nothing is written by an AI
@@ -243,11 +247,23 @@
 
 <h2 id="play">Play Zaragoza</h2>
 <p class="sub">The five TeleStats games, set up for Zaragoza. Click one and it starts.</p>
-      
+      <div class="chips" id="compChips" role="group"
+       aria-label="Choose which competitions to play">
+        <button type="button" class="chip all on" data-all="1" aria-pressed="true">All competitions</button>
+        <button type="button" class="chip on"
+                data-comp="Segunda División"
+                data-slug="segunda-division"
+                aria-pressed="true">Segunda División</button>
+        <button type="button" class="chip on"
+                data-comp="La Liga"
+                data-slug="la-liga"
+                aria-pressed="true">La Liga</button>
+      </div>
+      <p class="chip-note" id="chipNote"></p>
       <ul class="games">
         <li class="game">
           <a class="game-go" data-path="/games/hol.html"
-             href="/games/hol.html?scope=team_zaragoza_la-liga&amp;play=1">
+             href="/games/hol.html?scope=team_zaragoza_all&amp;play=1">
             <h3>Zaragoza Higher or Lower</h3>
             <p>Which player has more appearances?</p>
             <span class="go">Play now &rarr;</span>
@@ -255,7 +271,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/alpha.html"
-             href="/games/alpha.html?scope=team_zaragoza_la-liga&amp;play=1">
+             href="/games/alpha.html?scope=team_zaragoza_all&amp;play=1">
             <h3>Zaragoza Player Alphabet</h3>
             <p>Name a player for every letter of the alphabet.</p>
             <span class="go">Play now &rarr;</span>
@@ -263,7 +279,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/xi.html"
-             href="/games/xi.html?scope=team_zaragoza_la-liga&amp;play=1">
+             href="/games/xi.html?scope=team_zaragoza_all&amp;play=1">
             <h3>Zaragoza Starting XI</h3>
             <p>Build the strongest eleven you can.</p>
             <span class="go">Play now &rarr;</span>
@@ -271,7 +287,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/whoami.html"
-             href="/games/whoami.html?scope=team_zaragoza_la-liga&amp;play=1">
+             href="/games/whoami.html?scope=team_zaragoza_all&amp;play=1">
             <h3>Zaragoza Who Am I?</h3>
             <p>Guess the player from five clues.</p>
             <span class="go">Play now &rarr;</span>
@@ -279,7 +295,7 @@
         </li>
         <li class="game">
           <a class="game-go" data-path="/games/quiz.html"
-             href="/games/quiz.html?scope=team_zaragoza_la-liga&amp;play=1">
+             href="/games/quiz.html?scope=team_zaragoza_all&amp;play=1">
             <h3>Zaragoza Trivia Quiz</h3>
             <p>Ten questions from this club’s record.</p>
             <span class="go">Play now &rarr;</span>
@@ -316,101 +332,101 @@
           </tr>
         <tr>
             <td class="rank">2</td>
+            <td>Alberto Zapater</td>
+            <td class="num">380</td>
+            <td class="num">10</td>
+            <td class="yr">2004/05–2022/23</td>
+          </tr>
+        <tr>
+            <td class="rank">3</td>
+            <td>Santiago Aragón</td>
+            <td class="num">302</td>
+            <td class="num">34</td>
+            <td class="yr">1992/93–2002/03</td>
+          </tr>
+        <tr>
+            <td class="rank">4</td>
             <td>Alberto Belsué</td>
             <td class="num">277</td>
             <td class="num">7</td>
             <td class="yr">1988/89–1998/99</td>
           </tr>
         <tr>
-            <td class="rank">3</td>
+            <td class="rank">5</td>
             <td>Francisco Higuera</td>
             <td class="num">276</td>
             <td class="num">63</td>
             <td class="yr">1988/89–1996/97</td>
           </tr>
         <tr>
-            <td class="rank">4</td>
-            <td>Santiago Aragón</td>
-            <td class="num">274</td>
-            <td class="num">30</td>
-            <td class="yr">1992/93–2001/02</td>
-          </tr>
-        <tr>
-            <td class="rank">5</td>
+            <td class="rank">6</td>
             <td>Miguel Pardeza</td>
             <td class="num">243</td>
             <td class="num">60</td>
             <td class="yr">1988/89–1996/97</td>
           </tr>
         <tr>
-            <td class="rank">6</td>
+            <td class="rank">7</td>
             <td>Gus Poyet</td>
             <td class="num">239</td>
             <td class="num">63</td>
             <td class="yr">1990/91–1996/97</td>
           </tr>
         <tr>
-            <td class="rank">7</td>
+            <td class="rank">8</td>
             <td>Jesús Solana</td>
             <td class="num">233</td>
             <td class="num">4</td>
             <td class="yr">1991/92–1999/00</td>
           </tr>
         <tr>
-            <td class="rank">8</td>
+            <td class="rank">9</td>
+            <td>Cristian Álvarez</td>
+            <td class="num">230</td>
+            <td class="num">1</td>
+            <td class="yr">2017/18–2023/24</td>
+          </tr>
+        <tr>
+            <td class="rank">10</td>
             <td>Juanmi</td>
             <td class="num">222</td>
             <td class="num">0</td>
             <td class="yr">1993/94–2001/02</td>
           </tr>
         <tr>
-            <td class="rank">9</td>
+            <td class="rank">11</td>
             <td>Leonardo Ponzio</td>
-            <td class="num">196</td>
-            <td class="num">9</td>
+            <td class="num">214</td>
+            <td class="num">11</td>
             <td class="yr">2003/04–2011/12</td>
           </tr>
         <tr>
-            <td class="rank">10</td>
+            <td class="rank">12</td>
+            <td>Francho Serrano</td>
+            <td class="num">191</td>
+            <td class="num">12</td>
+            <td class="yr">2020/21–2025/26</td>
+          </tr>
+        <tr>
+            <td class="rank">13</td>
             <td>Luis Cuartero</td>
-            <td class="num">178</td>
+            <td class="num">190</td>
             <td class="num">0</td>
             <td class="yr">1992/93–2007/08</td>
           </tr>
         <tr>
-            <td class="rank">11</td>
+            <td class="rank">14</td>
+            <td>Paco</td>
+            <td class="num">168</td>
+            <td class="num">1</td>
+            <td class="yr">1998/99–2003/04</td>
+          </tr>
+        <tr>
+            <td class="rank">15</td>
             <td>Jesús García Sanjuán</td>
             <td class="num">167</td>
             <td class="num">5</td>
             <td class="yr">1990/91–1997/98</td>
-          </tr>
-        <tr>
-            <td class="rank">12</td>
-            <td>Andoni Cedrún</td>
-            <td class="num">157</td>
-            <td class="num">0</td>
-            <td class="yr">1989/90–1994/95</td>
-          </tr>
-        <tr>
-            <td class="rank">13</td>
-            <td>Roberto Acuña</td>
-            <td class="num">152</td>
-            <td class="num">20</td>
-            <td class="yr">1997/98–2001/02</td>
-          </tr>
-        <tr>
-            <td class="rank">14</td>
-            <td>José Ignacio</td>
-            <td class="num">145</td>
-            <td class="num">7</td>
-            <td class="yr">1997/98–2001/02</td>
-          </tr>
-        <tr>
-            <td class="rank">15</td>
-            <td>Ander Garitano</td>
-            <td class="num">144</td>
-            <td class="num">15</td>
-            <td class="yr">1996/97–2001/02</td>
           </tr>
       </tbody>
     </table>
@@ -449,39 +465,39 @@
           </tr>
         <tr>
             <td class="rank">5</td>
+            <td>Ewerthon</td>
+            <td class="num">48</td>
+            <td class="num">111</td>
+          </tr>
+        <tr>
+            <td class="rank">6</td>
+            <td>Yordi</td>
+            <td class="num">45</td>
+            <td class="num">164</td>
+          </tr>
+        <tr>
+            <td class="rank">7</td>
             <td>Savo Milošević</td>
             <td class="num">44</td>
             <td class="num">88</td>
           </tr>
         <tr>
-            <td class="rank">6</td>
+            <td class="rank">8</td>
             <td>Juan Esnáider</td>
             <td class="num">40</td>
             <td class="num">79</td>
           </tr>
         <tr>
-            <td class="rank">7</td>
-            <td>David Villa</td>
-            <td class="num">31</td>
-            <td class="num">73</td>
-          </tr>
-        <tr>
-            <td class="rank">8</td>
-            <td>Santiago Aragón</td>
-            <td class="num">30</td>
-            <td class="num">274</td>
-          </tr>
-        <tr>
             <td class="rank">9</td>
-            <td>Yordi</td>
-            <td class="num">29</td>
-            <td class="num">130</td>
+            <td>Santiago Aragón</td>
+            <td class="num">34</td>
+            <td class="num">302</td>
           </tr>
         <tr>
             <td class="rank">10</td>
-            <td>Fernando Morientes</td>
-            <td class="num">28</td>
-            <td class="num">66</td>
+            <td>Ángel Rodríguez</td>
+            <td class="num">32</td>
+            <td class="num">74</td>
           </tr>
       </tbody>
     </table>
@@ -495,6 +511,13 @@
       <thead><tr><th>Competition</th><th class="num">Players</th><th>Seasons</th><th class="num">Count</th><th>Games</th></tr></thead>
       <tbody>
         <tr>
+            <td>Segunda División</td>
+            <td class="num">290</td>
+            <td class="yr">2002/03–2025/26</td>
+            <td class="num">8</td>
+            <td class="yes">Playable</td>
+          </tr>
+        <tr>
             <td>La Liga</td>
             <td class="num">232</td>
             <td class="yr">1988/89–2012/13</td>
@@ -507,35 +530,35 @@
 </details>
 
 <h2>Ask about Zaragoza</h2>
-<p class="sub">Ask the database a question. Answers come from 232 Zaragoza
+<p class="sub">Ask the database a question. Answers come from 461 Zaragoza
   players and are never invented — if the data does not support an answer, it says so.</p>
 <form class="ask" id="askForm">
   <input id="askQ" autocomplete="off" maxlength="300"
-         placeholder="Who has played for both Zaragoza and Sevilla?"
+         placeholder="Who has played for both Zaragoza and Valladolid?"
          aria-label="Ask a question about Zaragoza">
   <button type="submit">Ask</button>
 </form>
 <div class="ask-examples">
-          <button type="button" data-q="Who has played for both Zaragoza and Sevilla?">Who has played for both Zaragoza and Sevilla?</button>
-          <button type="button" data-q="Top scorers for Zaragoza in La Liga">Top scorers for Zaragoza in La Liga</button>
+          <button type="button" data-q="Who has played for both Zaragoza and Valladolid?">Who has played for both Zaragoza and Valladolid?</button>
+          <button type="button" data-q="Top scorers for Zaragoza in Segunda División">Top scorers for Zaragoza in Segunda División</button>
           <button type="button" data-q="Which English players have the most appearances for Zaragoza?">Which English players have the most appearances for Zaragoza?</button>
 </div>
 <div id="askAnswer"></div>
 
 <h2>More teams</h2>
 <div class="related">
-          <a href="/teams/sevilla/">Sevilla</a>
-          <a href="/teams/espanyol/">Espanyol</a>
-          <a href="/teams/atletico-madrid/">Atlético Madrid</a>
-          <a href="/teams/valencia/">Valencia</a>
-          <a href="/teams/real-betis/">Real Betis</a>
-          <a href="/teams/barcelona/">Barcelona</a>
           <a href="/teams/valladolid/">Valladolid</a>
-          <a href="/teams/celta-vigo/">Celta Vigo</a>
+          <a href="/teams/albacete/">Albacete</a>
+          <a href="/teams/tenerife/">Tenerife</a>
+          <a href="/teams/elche/">Elche</a>
+          <a href="/teams/espanyol/">Espanyol</a>
+          <a href="/teams/sevilla/">Sevilla</a>
           <a href="/teams/mallorca/">Mallorca</a>
-          <a href="/teams/real-madrid/">Real Madrid</a>
+          <a href="/teams/sporting-gijon/">Sporting Gijón</a>
+          <a href="/teams/malaga/">Málaga</a>
+          <a href="/teams/atletico-madrid/">Atlético Madrid</a>
           <a href="/teams/rayo-vallecano/">Rayo Vallecano</a>
-          <a href="/teams/villarreal/">Villarreal</a>
+          <a href="/teams/celta-vigo/">Celta Vigo</a>
 </div>
 
 <footer class="page">
@@ -549,7 +572,7 @@
 </div><!-- /wrap -->
 
 <script>
-window.TS_TEAM = {"slug":"zaragoza","name":"Zaragoza","comps":["La Liga"],"defaultScope":"team_zaragoza_la-liga","potd":[{"n":"Xavier Aguado","a":383,"g":23,"f":"1990/91","t":"2001/02"},{"n":"Alberto Belsué","a":277,"g":7,"f":"1988/89","t":"1998/99"},{"n":"Francisco Higuera","a":276,"g":63,"f":"1988/89","t":"1996/97"},{"n":"Santiago Aragón","a":274,"g":30,"f":"1992/93","t":"2001/02"},{"n":"Miguel Pardeza","a":243,"g":60,"f":"1988/89","t":"1996/97"},{"n":"Gus Poyet","a":239,"g":63,"f":"1990/91","t":"1996/97"},{"n":"Jesús Solana","a":233,"g":4,"f":"1991/92","t":"1999/00"},{"n":"Juanmi","a":222,"g":0,"f":"1993/94","t":"2001/02"},{"n":"Leonardo Ponzio","a":196,"g":9,"f":"2003/04","t":"2011/12"},{"n":"Luis Cuartero","a":178,"g":0,"f":"1992/93","t":"2007/08"},{"n":"Jesús García Sanjuán","a":167,"g":5,"f":"1990/91","t":"1997/98"},{"n":"Andoni Cedrún","a":157,"g":0,"f":"1989/90","t":"1994/95"},{"n":"Roberto Acuña","a":152,"g":20,"f":"1997/98","t":"2001/02"},{"n":"José Ignacio","a":145,"g":7,"f":"1997/98","t":"2001/02"},{"n":"Ander Garitano","a":144,"g":15,"f":"1996/97","t":"2001/02"}]};
+window.TS_TEAM = {"slug":"zaragoza","name":"Zaragoza","comps":["Segunda División","La Liga"],"defaultScope":"team_zaragoza_all","potd":[{"n":"Xavier Aguado","a":383,"g":23,"f":"1990/91","t":"2001/02"},{"n":"Alberto Zapater","a":380,"g":10,"f":"2004/05","t":"2022/23"},{"n":"Santiago Aragón","a":302,"g":34,"f":"1992/93","t":"2002/03"},{"n":"Alberto Belsué","a":277,"g":7,"f":"1988/89","t":"1998/99"},{"n":"Francisco Higuera","a":276,"g":63,"f":"1988/89","t":"1996/97"},{"n":"Miguel Pardeza","a":243,"g":60,"f":"1988/89","t":"1996/97"},{"n":"Gus Poyet","a":239,"g":63,"f":"1990/91","t":"1996/97"},{"n":"Jesús Solana","a":233,"g":4,"f":"1991/92","t":"1999/00"},{"n":"Cristian Álvarez","a":230,"g":1,"f":"2017/18","t":"2023/24"},{"n":"Juanmi","a":222,"g":0,"f":"1993/94","t":"2001/02"},{"n":"Leonardo Ponzio","a":214,"g":11,"f":"2003/04","t":"2011/12"},{"n":"Francho Serrano","a":191,"g":12,"f":"2020/21","t":"2025/26"},{"n":"Luis Cuartero","a":190,"g":0,"f":"1992/93","t":"2007/08"},{"n":"Paco","a":168,"g":1,"f":"1998/99","t":"2003/04"},{"n":"Jesús García Sanjuán","a":167,"g":5,"f":"1990/91","t":"1997/98"}]};
 </script>
 <script src="/js/ts-scope.js"></script>
 <script src="/js/team-page.js"></script>
@@ -566,6 +589,6 @@ window.TS_TEAM = {"slug":"zaragoza","name":"Zaragoza","comps":["La Liga"],"defau
     try { TSNav.render(); } catch (e) { console.error('[TeleStats] Nav render failed:', e); }
   })();
 </script>
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TeleStats","item":"https://telestats.net"},{"@type":"ListItem","position":2,"name":"Teams","item":"https://telestats.net/teams/"},{"@type":"ListItem","position":3,"name":"Zaragoza","item":"https://telestats.net/teams/zaragoza/"}]},{"@type":"SportsTeam","name":"Zaragoza","sport":"Association football","url":"https://telestats.net/teams/zaragoza/"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is the Zaragoza page on TeleStats?","acceptedAnswer":{"@type":"Answer","text":"Free Zaragoza football quizzes and trivia games generated from real appearance and goal records for 232 players across La Liga. No sign-up is needed to play."}}]}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TeleStats","item":"https://telestats.net"},{"@type":"ListItem","position":2,"name":"Teams","item":"https://telestats.net/teams/"},{"@type":"ListItem","position":3,"name":"Zaragoza","item":"https://telestats.net/teams/zaragoza/"}]},{"@type":"SportsTeam","name":"Zaragoza","sport":"Association football","url":"https://telestats.net/teams/zaragoza/"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is the Zaragoza page on TeleStats?","acceptedAnswer":{"@type":"Answer","text":"Free Zaragoza football quizzes and trivia games generated from real appearance and goal records for 461 players across Segunda División and La Liga. No sign-up is needed to play."}}]}]}</script>
 </body>
 </html>

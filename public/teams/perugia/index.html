@@ -52,6 +52,9 @@
   .crest { width: 52px; height: 60px; flex: 0 0 auto; filter: drop-shadow(0 2px 6px rgba(0,0,0,.45)); }
   .hero h1 { font-size: 1.65rem; line-height: 1.2; margin: 0 0 5px; }
   .sub { color: var(--text-secondary); margin: 0; font-size: .9rem; }
+  .sub a.complink { color: var(--text-secondary); text-decoration: underline;
+                    text-decoration-color: rgba(255,255,255,.22); }
+  .sub a.complink:hover { color: var(--accent); }
   .scope-note { color: var(--text-muted); font-size: .76rem; margin: 6px 0 0; }
   .scope-note a { color: var(--accent); }
 
@@ -182,9 +185,9 @@
     <nav>
       <a href="/daily/">Daily</a>
       <a href="/games/">Games</a>
+      <a href="/competitions/">Competitions</a>
       <a href="/teams/">Teams</a>
       <a href="/ask/">Ask</a>
-      <a href="/leaderboard/">Leaderboard</a>
       <a href="/community/">Community</a>
     </nav>
   </div>
@@ -205,7 +208,8 @@
     </svg>
     <div>
       <h1>Perugia Football Quizzes &amp; Trivia</h1>
-      <p class="sub">137 players · 3,269 appearances · Serie A</p>
+      <p class="sub">137 players · 3,269 appearances ·
+        <a class="complink" href="/competitions/serie-a/">Serie A</a></p>
       <p class="scope-note">Records cover 1996/97 to 2003/04.
         <a href="/tools/data.html">Full dataset scope</a>.</p>
     </div>
@@ -529,8 +533,8 @@
           <a href="/teams/internazionale/">Internazionale</a>
           <a href="/teams/parma/">Parma</a>
           <a href="/teams/torino/">Torino</a>
-          <a href="/teams/roma/">Roma</a>
           <a href="/teams/bologna/">Bologna</a>
+          <a href="/teams/roma/">Roma</a>
           <a href="/teams/genoa/">Genoa</a>
           <a href="/teams/udinese/">Udinese</a>
           <a href="/teams/milan/">Milan</a>

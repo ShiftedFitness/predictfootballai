@@ -1,0 +1,2239 @@
+{
+ "note": "What each club is CALLED, keyed on fbref_squad_id. Applied by scripts/fbref/load.js on every ingest so a re-load cannot revert a name the application resolves clubs by. Regenerate with scripts/fbref/snapshot_club_names.js --write AFTER a deliberate rename, never before.",
+ "generated": "2026-09-16T12:58:10.892Z",
+ "count": 558,
+ "names": {
+  "17859612": {
+   "name": "Valladolid",
+   "short": "Valladolid"
+  },
+  "17892952": {
+   "name": "Stoke City",
+   "short": "Stoke City"
+  },
+  "19538871": {
+   "name": "Manchester Utd",
+   "short": "Manchester United"
+  },
+  "22327064": {
+   "name": "Tranmere Rovers",
+   "short": "Tranmere Rovers"
+  },
+  "25622401": {
+   "name": "Amiens",
+   "short": "Amiens"
+  },
+  "54195385": {
+   "name": "Troyes",
+   "short": "Troyes"
+  },
+  "54864664": {
+   "name": "St Pauli",
+   "short": "St Pauli"
+  },
+  "63505675": {
+   "name": "Compostela",
+   "short": "Compostela"
+  },
+  "74229020": {
+   "name": "Caen",
+   "short": "Caen"
+  },
+  "93493607": {
+   "name": "Bristol City",
+   "short": "Bristol City"
+  },
+  "d3fd31cc": {
+   "name": "Everton",
+   "short": "Everton"
+  },
+  "33c895d4": {
+   "name": "Southampton",
+   "short": "Southampton"
+  },
+  "4a04a02b": {
+   "name": "Oldham Athletic",
+   "short": "Oldham Athletic"
+  },
+  "18bb7c10": {
+   "name": "Arsenal",
+   "short": "Arsenal"
+  },
+  "a757999c": {
+   "name": "Queens Park Rangers",
+   "short": "QPR"
+  },
+  "361ca564": {
+   "name": "Tottenham Hotspur",
+   "short": "Tottenham"
+  },
+  "cff3d9bb": {
+   "name": "Chelsea",
+   "short": "Chelsea"
+  },
+  "bba7d733": {
+   "name": "Sheffield Weds",
+   "short": "Sheffield Wednesday"
+  },
+  "e090f40b": {
+   "name": "Blackburn Rovers",
+   "short": "Blackburn"
+  },
+  "3679c494": {
+   "name": "Wimbledon",
+   "short": "Wimbledon"
+  },
+  "47c64c55": {
+   "name": "Crystal Palace",
+   "short": "Crystal Palace"
+  },
+  "f7e3dfe9": {
+   "name": "Coventry City",
+   "short": "Coventry City"
+  },
+  "8602292d": {
+   "name": "Aston Villa",
+   "short": "Aston Villa"
+  },
+  "b74092de": {
+   "name": "Ipswich Town",
+   "short": "Ipswich Town"
+  },
+  "e4a775cb": {
+   "name": "Nottingham Forest",
+   "short": "Nottingham"
+  },
+  "1df6b87e": {
+   "name": "Sheffield United",
+   "short": "Sheffield United"
+  },
+  "822bd0ba": {
+   "name": "Liverpool",
+   "short": "Liverpool"
+  },
+  "5bfb9659": {
+   "name": "Leeds United",
+   "short": "Leeds United"
+  },
+  "1c781004": {
+   "name": "Norwich City",
+   "short": "Norwich City"
+  },
+  "b8fd03ef": {
+   "name": "Manchester City",
+   "short": "Manchester City"
+  },
+  "7f59c601": {
+   "name": "Middlesbrough",
+   "short": "Middlesbrough"
+  },
+  "1b295b25": {
+   "name": "Swindon Town",
+   "short": "Swindon Town"
+  },
+  "7c21e445": {
+   "name": "West Ham United",
+   "short": "West Ham"
+  },
+  "b2b47a98": {
+   "name": "Newcastle United",
+   "short": "Newcastle"
+  },
+  "a2d435b3": {
+   "name": "Leicester City",
+   "short": "Leicester City"
+  },
+  "445d3104": {
+   "name": "Bolton Wanderers",
+   "short": "Bolton"
+  },
+  "8ef52968": {
+   "name": "Sunderland",
+   "short": "Sunderland"
+  },
+  "26ab47ee": {
+   "name": "Derby County",
+   "short": "Derby County"
+  },
+  "293cb36b": {
+   "name": "Barnsley",
+   "short": "Barnsley"
+  },
+  "7a8db6d4": {
+   "name": "Charlton Athletic",
+   "short": "Charlton Athletic"
+  },
+  "2abfe087": {
+   "name": "Watford",
+   "short": "Watford"
+  },
+  "3148d79f": {
+   "name": "Bradford City",
+   "short": "Bradford City"
+  },
+  "fd962109": {
+   "name": "Fulham",
+   "short": "Fulham"
+  },
+  "60c6b05f": {
+   "name": "West Bromwich Albion",
+   "short": "West Brom"
+  },
+  "ec79b7c2": {
+   "name": "Birmingham City",
+   "short": "Birmingham City"
+  },
+  "76ffc013": {
+   "name": "Portsmouth",
+   "short": "Portsmouth"
+  },
+  "8cec06e1": {
+   "name": "Wolves",
+   "short": "Wolverhampton Wanderers"
+  },
+  "e59ddc76": {
+   "name": "Wigan Athletic",
+   "short": "Wigan Athletic"
+  },
+  "b0ac61ff": {
+   "name": "Reading",
+   "short": "Reading"
+  },
+  "bd8769d1": {
+   "name": "Hull City",
+   "short": "Hull City"
+  },
+  "943e8050": {
+   "name": "Burnley",
+   "short": "Burnley"
+  },
+  "7cbf5cb4": {
+   "name": "Blackpool",
+   "short": "Blackpool"
+  },
+  "fb10988f": {
+   "name": "Swansea City",
+   "short": "Swansea City"
+  },
+  "75fae011": {
+   "name": "Cardiff City",
+   "short": "Cardiff City"
+  },
+  "4ba7cbea": {
+   "name": "Bournemouth",
+   "short": "Bournemouth"
+  },
+  "d07537b9": {
+   "name": "Brighton",
+   "short": "Brighton and Hove Albion"
+  },
+  "f5922ca5": {
+   "name": "Huddersfield Town",
+   "short": "Huddersfield"
+  },
+  "cd051869": {
+   "name": "Brentford",
+   "short": "Brentford"
+  },
+  "e297cd13": {
+   "name": "Luton Town",
+   "short": "Luton Town"
+  },
+  "22df8478": {
+   "name": "Preston North End",
+   "short": "Preston"
+  },
+  "a18a87d7": {
+   "name": "Grimsby Town",
+   "short": "Grimsby Town"
+  },
+  "d96bbc04": {
+   "name": "Walsall",
+   "short": "Walsall"
+  },
+  "c6ce4b54": {
+   "name": "Stockport",
+   "short": "Stockport"
+  },
+  "5f01284a": {
+   "name": "Gillingham",
+   "short": "Gillingham"
+  },
+  "f13a527f": {
+   "name": "Crewe Alexandra",
+   "short": "Crewe Alexandra"
+  },
+  "375d66f1": {
+   "name": "Rotherham United",
+   "short": "Rotherham"
+  },
+  "e3c537a1": {
+   "name": "Millwall",
+   "short": "Millwall"
+  },
+  "32a1480e": {
+   "name": "Plymouth Argyle",
+   "short": "Plymouth Argyle"
+  },
+  "2b9f86b0": {
+   "name": "Southend United",
+   "short": "Southend United"
+  },
+  "b17b8146": {
+   "name": "Colchester United",
+   "short": "Colchester"
+  },
+  "3149e189": {
+   "name": "Scunthorpe United",
+   "short": "Scunthorpe"
+  },
+  "03d10d77": {
+   "name": "Doncaster Rovers",
+   "short": "Doncaster"
+  },
+  "d6e6321c": {
+   "name": "Peterborough United",
+   "short": "Peterborough"
+  },
+  "bd5179b9": {
+   "name": "Yeovil Town",
+   "short": "Yeovil Town"
+  },
+  "fcf5b1e1": {
+   "name": "Milton Keynes Dons",
+   "short": "MK Dons"
+  },
+  "b09787c5": {
+   "name": "Burton Albion",
+   "short": "Burton Albion"
+  },
+  "43c2583e": {
+   "name": "Wycombe Wanderers",
+   "short": "Wycombe"
+  },
+  "604617a2": {
+   "name": "Oxford United",
+   "short": "Oxford United"
+  },
+  "dad7970b": {
+   "name": "Wrexham",
+   "short": "Wrexham"
+  },
+  "d76b7bed": {
+   "name": "Lincoln City",
+   "short": "Lincoln City"
+  },
+  "986a26c1": {
+   "name": "Northampton Town",
+   "short": "Northampton"
+  },
+  "ce786972": {
+   "name": "Chesterfield",
+   "short": "Chesterfield"
+  },
+  "3b27de1f": {
+   "name": "Notts County",
+   "short": "Notts County"
+  },
+  "7c4744f7": {
+   "name": "Cheltenham Town",
+   "short": "Cheltenham"
+  },
+  "62657aa0": {
+   "name": "Port Vale",
+   "short": "Port Vale"
+  },
+  "13cb8449": {
+   "name": "Mansfield Town",
+   "short": "Mansfield Town"
+  },
+  "2af58c3d": {
+   "name": "Hartlepool United",
+   "short": "Hartlepool"
+  },
+  "26f3c471": {
+   "name": "Rushden and Diamonds",
+   "short": "R&D"
+  },
+  "02d8c2aa": {
+   "name": "Torquay",
+   "short": "Torquay United"
+  },
+  "590e9120": {
+   "name": "Leyton Orient",
+   "short": "Leyton Orient"
+  },
+  "120cfbbd": {
+   "name": "Carlisle United",
+   "short": "Carlisle United"
+  },
+  "654f3ca6": {
+   "name": "Bristol Rovers",
+   "short": "Bristol Rovers"
+  },
+  "d8736fdd": {
+   "name": "Hereford United",
+   "short": "Hereford United"
+  },
+  "05791fbc": {
+   "name": "Exeter City",
+   "short": "Exeter City"
+  },
+  "51e48db2": {
+   "name": "Rochdale",
+   "short": "Rochdale"
+  },
+  "4db00b00": {
+   "name": "Dagenham and Redbridge",
+   "short": "Dag & Red"
+  },
+  "aca0450a": {
+   "name": "Stevenage",
+   "short": "Stevenage"
+  },
+  "cbc02110": {
+   "name": "Bury",
+   "short": "Bury"
+  },
+  "0cd8eef2": {
+   "name": "Crawley Town",
+   "short": "Crawley Town"
+  },
+  "b435dbf5": {
+   "name": "Shrewsbury Town",
+   "short": "Shrewsbury"
+  },
+  "d6a369a2": {
+   "name": "Fleetwood Town",
+   "short": "Fleetwood Town"
+  },
+  "8b9bf22a": {
+   "name": "AFC Wimbledon",
+   "short": "AFC Wimbledon"
+  },
+  "9172ba36": {
+   "name": "Accrington Stanley",
+   "short": "Accrington"
+  },
+  "6ca73159": {
+   "name": "Morecambe",
+   "short": "Morecambe"
+  },
+  "41da1cf3": {
+   "name": "Cambridge United",
+   "short": "Cambridge"
+  },
+  "f1eb9593": {
+   "name": "Forest Green Rovers",
+   "short": "Forest Green"
+  },
+  "6a9477ca": {
+   "name": "Bromley",
+   "short": "Bromley"
+  },
+  "4792ab67": {
+   "name": "Macclesfield Town",
+   "short": "Macclesfield"
+  },
+  "3902ac3a": {
+   "name": "Darlington",
+   "short": "Darlington"
+  },
+  "74a48ef5": {
+   "name": "Boston United",
+   "short": "Boston United"
+  },
+  "fa7569e4": {
+   "name": "Kidderminster",
+   "short": "Kidderminster Harriers"
+  },
+  "e272e7a8": {
+   "name": "York City",
+   "short": "York City"
+  },
+  "793f90cb": {
+   "name": "Chester City",
+   "short": "Chester City"
+  },
+  "2e91bf26": {
+   "name": "Barnet",
+   "short": "Barnet"
+  },
+  "a8290768": {
+   "name": "Aldershot Town",
+   "short": "Aldershot Town"
+  },
+  "6c15d7e1": {
+   "name": "Newport County",
+   "short": "Newport County"
+  },
+  "4cefb8c7": {
+   "name": "Salford City FC",
+   "short": "Salford City FC"
+  },
+  "802d1b47": {
+   "name": "Harrogate Town",
+   "short": "Harrogate Town"
+  },
+  "8efa4cdf": {
+   "name": "Barrow",
+   "short": "Barrow"
+  },
+  "7ef53dcf": {
+   "name": "Sutton United",
+   "short": "Sutton United"
+  },
+  "38154f92": {
+   "name": "FC Halifax Town",
+   "short": "FC Halifax Town"
+  },
+  "6cbef56e": {
+   "name": "Braintree Town",
+   "short": "Braintree Town"
+  },
+  "591f08b4": {
+   "name": "Telford United",
+   "short": "Telford United"
+  },
+  "c4aa160b": {
+   "name": "Concord Rangers",
+   "short": "Concord Rngers"
+  },
+  "250e0f45": {
+   "name": "Gateshead",
+   "short": "Gateshead"
+  },
+  "60d44c62": {
+   "name": "Fylde",
+   "short": "Fylde"
+  },
+  "c30e88bc": {
+   "name": "Woking",
+   "short": "Woking"
+  },
+  "634f08b3": {
+   "name": "Hemel Hempstead Town",
+   "short": "Hemel"
+  },
+  "5b0b2bd7": {
+   "name": "Weston super Mare",
+   "short": "Weston-sr-Mare"
+  },
+  "c9638571": {
+   "name": "Gosport Borough",
+   "short": "Gosport"
+  },
+  "551328d6": {
+   "name": "Southport",
+   "short": "Southport"
+  },
+  "b58dea12": {
+   "name": "Norton United",
+   "short": "Norton United"
+  },
+  "962bc612": {
+   "name": "Eastleigh",
+   "short": "Eastleigh"
+  },
+  "bf41d73a": {
+   "name": "Dover Athletic",
+   "short": "Dover Athletic"
+  },
+  "d4547110": {
+   "name": "Dartford",
+   "short": "Dartford"
+  },
+  "150ca7e0": {
+   "name": "Basingstoke Town",
+   "short": "Basingstoke"
+  },
+  "5bb68ee3": {
+   "name": "Maidstone Utd",
+   "short": "Maidstone United"
+  },
+  "407ae013": {
+   "name": "Chester",
+   "short": "Chester"
+  },
+  "0c5e8a59": {
+   "name": "East Thurrock United",
+   "short": "East Thurrock Utd"
+  },
+  "2621920d": {
+   "name": "Havant & W'ville",
+   "short": "Havant and Waterlooville"
+  },
+  "2385c881": {
+   "name": "Blyth Spartans",
+   "short": "Blyth Spartans"
+  },
+  "3e317057": {
+   "name": "Warrington Town",
+   "short": "Warrington Town"
+  },
+  "b30f94be": {
+   "name": "Altrincham",
+   "short": "Altrincham"
+  },
+  "526a6c40": {
+   "name": "Worcester City",
+   "short": "Worcester City"
+  },
+  "0ed698dc": {
+   "name": "Staines Town FC",
+   "short": "Staines Town FC"
+  },
+  "443f55b6": {
+   "name": "Brackley Town",
+   "short": "Brackley Town"
+  },
+  "66c5f006": {
+   "name": "Northwich Vic",
+   "short": "Northwich Vic"
+  },
+  "65038f3e": {
+   "name": "Whitehawk FC",
+   "short": "Whitehawk FC"
+  },
+  "a3b1d6fb": {
+   "name": "FC United of Manchester",
+   "short": "FC United"
+  },
+  "aea94879": {
+   "name": "Welling United",
+   "short": "Welling United"
+  },
+  "6598bf6b": {
+   "name": "Wealdstone FC",
+   "short": "Wealdstone FC"
+  },
+  "7f3a0611": {
+   "name": "Didcot Town FC",
+   "short": "Didcot Town FC"
+  },
+  "7cf2360b": {
+   "name": "Maidenhead United",
+   "short": "Maidenhead"
+  },
+  "ec724f18": {
+   "name": "Chesham United",
+   "short": "Chesham United"
+  },
+  "521d0055": {
+   "name": "Gainsborough Trinity",
+   "short": "Gainsborough"
+  },
+  "b1dea8b9": {
+   "name": "Stourbridge FC",
+   "short": "Stourbridge FC"
+  },
+  "92ed4b3c": {
+   "name": "Barwell FC",
+   "short": "Barwell FC"
+  },
+  "fe0e252b": {
+   "name": "Stalybridge Celtic",
+   "short": "Stalybridge"
+  },
+  "dfecd529": {
+   "name": "St Albans City",
+   "short": "St Albans City"
+  },
+  "8550eb99": {
+   "name": "Boreham Wood",
+   "short": "Boreham Wood"
+  },
+  "0e497b8d": {
+   "name": "Merstham FC",
+   "short": "Merstham FC"
+  },
+  "0ec6c3db": {
+   "name": "Alfreton Town",
+   "short": "Alfreton Town"
+  },
+  "e0521277": {
+   "name": "Spennymoor Town",
+   "short": "Spennymoor"
+  },
+  "84eeb440": {
+   "name": "Westfields FC",
+   "short": "Westfields FC"
+  },
+  "9e85547f": {
+   "name": "Solihull Moors",
+   "short": "Solihull Moors"
+  },
+  "5f40f1aa": {
+   "name": "Harrow Borough",
+   "short": "Harrow Borough"
+  },
+  "890ca1be": {
+   "name": "Curzon Ashton",
+   "short": "Curzon Ashton"
+  },
+  "2c650cec": {
+   "name": "Eastbourne Bor",
+   "short": "Eastbourne Bor"
+  },
+  "3842cbd0": {
+   "name": "Taunton Town",
+   "short": "Taunton Town"
+  },
+  "3e0743ad": {
+   "name": "Stamford AFC",
+   "short": "Stamford AFC"
+  },
+  "334ae512": {
+   "name": "SL Aquaforce",
+   "short": "SL Aquaforce"
+  },
+  "6791c26a": {
+   "name": "Truro City FC",
+   "short": "Truro City FC"
+  },
+  "7c79be7c": {
+   "name": "Leatherhead FC",
+   "short": "Leatherhead FC"
+  },
+  "9f1a0d0f": {
+   "name": "Ebbsfleet United",
+   "short": "Ebbsfleet United"
+  },
+  "8768fd23": {
+   "name": "Heybridge Swifts",
+   "short": "Heybridge Swifts"
+  },
+  "c03b95cb": {
+   "name": "Chelmsford City",
+   "short": "Chelmsford City"
+  },
+  "bfc0fcdc": {
+   "name": "Hyde United FC",
+   "short": "Hyde United FC"
+  },
+  "9407702a": {
+   "name": "Nantwich Town",
+   "short": "Nantwich Town"
+  },
+  "dd320a9c": {
+   "name": "Chorley FC",
+   "short": "Chorley FC"
+  },
+  "f60cbb9d": {
+   "name": "Billericay Town",
+   "short": "Billericay Town"
+  },
+  "430d5511": {
+   "name": "Guiseley",
+   "short": "Guiseley"
+  },
+  "c4fb374f": {
+   "name": "Hereford",
+   "short": "Hereford"
+  },
+  "14e0df25": {
+   "name": "Slough Town FC",
+   "short": "Slough Town FC"
+  },
+  "2a0a34ae": {
+   "name": "Oxford City FC",
+   "short": "Oxford City FC"
+  },
+  "0c421caf": {
+   "name": "Haringey Borough",
+   "short": "Haringey"
+  },
+  "0eeb3a15": {
+   "name": "Hitchin Town FC",
+   "short": "Hitchin Town FC"
+  },
+  "2b361221": {
+   "name": "Metropolitan Police",
+   "short": "Metro Police"
+  },
+  "8e5b0dc7": {
+   "name": "Hampton and Richmond Borough",
+   "short": "Hampton/Richmond"
+  },
+  "8d7f0947": {
+   "name": "Carshalton Athletic",
+   "short": "Carshalton Ath."
+  },
+  "e8979067": {
+   "name": "Maldon and Tiptree",
+   "short": "Maldon & Tiptree"
+  },
+  "8bdee328": {
+   "name": "Chichester City",
+   "short": "Chichester City"
+  },
+  "1a91ea5d": {
+   "name": "Kingstonian FC",
+   "short": "Kingstonian FC"
+  },
+  "d99fb76d": {
+   "name": "Chippenham Town",
+   "short": "Chippenham"
+  },
+  "e44c15dd": {
+   "name": "Dulwich Hamlet",
+   "short": "Dulwich Hamlet"
+  },
+  "f970e6e0": {
+   "name": "Hayes&Yeading",
+   "short": "HayesandYeading"
+  },
+  "37ff0328": {
+   "name": "South Shields",
+   "short": "South Shields"
+  },
+  "3556d37a": {
+   "name": "Skelmersdale United",
+   "short": "Skelmersdale Utd"
+  },
+  "942ba9cb": {
+   "name": "Cray Valley Paper Mills",
+   "short": "Cray Valley"
+  },
+  "50b284c9": {
+   "name": "Tonbridge Angels",
+   "short": "Tonbridge"
+  },
+  "d7dbae42": {
+   "name": "Banbury United",
+   "short": "Banbury United"
+  },
+  "ac17e8b2": {
+   "name": "Marine FC",
+   "short": "Marine FC"
+  },
+  "0ce564ff": {
+   "name": "King's Lynn Town FC",
+   "short": "Kings Lynn Town FC"
+  },
+  "276c9299": {
+   "name": "Canvey Island",
+   "short": "Canvey Island"
+  },
+  "034e0831": {
+   "name": "Bishops Stortford",
+   "short": "B. Stortford"
+  },
+  "dd903901": {
+   "name": "Yate Town FC",
+   "short": "Yate Town FC"
+  },
+  "03ca571f": {
+   "name": "Bowers and Pitsea",
+   "short": "Bowers & Pitsea"
+  },
+  "545b8a92": {
+   "name": "Stratford Town",
+   "short": "Stratford Town"
+  },
+  "d06d7955": {
+   "name": "AFC Sudbury",
+   "short": "AFC Sudbury"
+  },
+  "c7f9816b": {
+   "name": "Horsham FC",
+   "short": "Horsham FC"
+  },
+  "ad55c5e3": {
+   "name": "Buxton FC",
+   "short": "Buxton FC"
+  },
+  "5b03fc2d": {
+   "name": "Alvechurch FC",
+   "short": "Alvechurch FC"
+  },
+  "927f22b5": {
+   "name": "Bracknell Town",
+   "short": "Bracknell Town"
+  },
+  "137e9691": {
+   "name": "Farnborough FC",
+   "short": "Farnborough FC"
+  },
+  "3cce464f": {
+   "name": "Merthyr Town",
+   "short": "Merthyr Town"
+  },
+  "6dc6688d": {
+   "name": "Weymouth",
+   "short": "Weymouth"
+  },
+  "d0684a25": {
+   "name": "Needham Market",
+   "short": "Needham Market"
+  },
+  "95360cc4": {
+   "name": "Coalville Town",
+   "short": "Coalville Town"
+  },
+  "cc9afa4b": {
+   "name": "Worthing FC",
+   "short": "Worthing FC"
+  },
+  "0f2ac378": {
+   "name": "Ramsgate FC",
+   "short": "Ramsgate FC"
+  },
+  "7ee8d7c2": {
+   "name": "Worksop Town",
+   "short": "Worksop Town"
+  },
+  "238e263d": {
+   "name": "Scarborough Athletic",
+   "short": "Scarborough"
+  },
+  "287d30c7": {
+   "name": "Whitby Town FC",
+   "short": "Whitby Town FC"
+  },
+  "c6d5afe2": {
+   "name": "Sheppey and Sheerness United",
+   "short": "Sheppey/Sheer."
+  },
+  "31a305e0": {
+   "name": "Kettering Town",
+   "short": "Kettering Town"
+  },
+  "9d313acf": {
+   "name": "Rushall Olympic",
+   "short": "Rushall Olympic"
+  },
+  "2dd4700c": {
+   "name": "Hednesford Town",
+   "short": "Hednesford"
+  },
+  "6711b681": {
+   "name": "Tamworth",
+   "short": "Tamworth"
+  },
+  "3b47a2b5": {
+   "name": "Harborough Town",
+   "short": "Harborough"
+  },
+  "f3bb7341": {
+   "name": "Chatham Town",
+   "short": "Chatham Town"
+  },
+  "336080cb": {
+   "name": "AFC Totton",
+   "short": "AFC Totton"
+  },
+  "ac5773a5": {
+   "name": "Macclesfield FC",
+   "short": "Macclesfield FC"
+  },
+  "3f53cc7a": {
+   "name": "Valletta FC",
+   "short": "Valletta FC"
+  },
+  "dc56fe14": {
+   "name": "Milan",
+   "short": "Milan"
+  },
+  "f3d8c8b9": {
+   "name": "Malmö",
+   "short": "Malmo"
+  },
+  "0f9294bd": {
+   "name": "Beşiktaş",
+   "short": "Besiktas"
+  },
+  "53a2f082": {
+   "name": "Real Madrid",
+   "short": "Real Madrid"
+  },
+  "d48ad4ff": {
+   "name": "Napoli",
+   "short": "Napoli"
+  },
+  "ac36c181": {
+   "name": "Dresden",
+   "short": "Dresden"
+  },
+  "5725cc7b": {
+   "name": "Marseille",
+   "short": "Marseille"
+  },
+  "924759ab": {
+   "name": "Lillestrom",
+   "short": "Lillestrøm"
+  },
+  "5e876ee6": {
+   "name": "Porto",
+   "short": "Porto"
+  },
+  "5b8cfb05": {
+   "name": "Lahti",
+   "short": "Lahti"
+  },
+  "f3a5726c": {
+   "name": "Panathinaikos",
+   "short": "Panathinaikos"
+  },
+  "cbde2682": {
+   "name": "CSKA Sofia",
+   "short": "CSKA Sofia"
+  },
+  "054efa67": {
+   "name": "Bayern Munich",
+   "short": "Bayern Munich"
+  },
+  "108607cf": {
+   "name": "Ujpest",
+   "short": "Újpest"
+  },
+  "437a3040": {
+   "name": "FC Swarovski Tirol",
+   "short": "Swarovski Tirol"
+  },
+  "fdba14df": {
+   "name": "Lech Poznań",
+   "short": "Lech Poznan"
+  },
+  "ecb862be": {
+   "name": "Sparta Prague",
+   "short": "Sparta Prague"
+  },
+  "8c635914": {
+   "name": "Spartak Moscow",
+   "short": "Spartak Moscow"
+  },
+  "099c6eb5": {
+   "name": "Red Star",
+   "short": "Red Star"
+  },
+  "f1e6c5f1": {
+   "name": "Club Brugge",
+   "short": "Club Brugge"
+  },
+  "7b66a29c": {
+   "name": "Grasshopper",
+   "short": "Grasshopper"
+  },
+  "273f6e65": {
+   "name": "KA",
+   "short": "KA"
+  },
+  "3a5124b2": {
+   "name": "Union Luxembourg",
+   "short": "US Luxembourg"
+  },
+  "d1c1d627": {
+   "name": "Dinamo Tirana",
+   "short": "Dinamo Tirana"
+  },
+  "86b7acd2": {
+   "name": "Rangers",
+   "short": "Rangers"
+  },
+  "8a814429": {
+   "name": "St Patricks Athletic",
+   "short": "St Patrick's"
+  },
+  "4472d406": {
+   "name": "Dinamo București",
+   "short": "Dinamo Bucuresti"
+  },
+  "3f5150ef": {
+   "name": "Odense",
+   "short": "Odense"
+  },
+  "eab315a6": {
+   "name": "APOEL FC",
+   "short": "APOEL FC"
+  },
+  "63fd3c74": {
+   "name": "Portadown FC",
+   "short": "Portadown FC"
+  },
+  "e334d850": {
+   "name": "PSV",
+   "short": "PSV Eindhoven"
+  },
+  "8e23de35": {
+   "name": "FC U Craiova",
+   "short": "FC U Craiova"
+  },
+  "a77c513e": {
+   "name": "Benfica",
+   "short": "Benfica"
+  },
+  "c734e22f": {
+   "name": "Dynamo Kyiv",
+   "short": "Dynamo Kyiv"
+  },
+  "bc31a6e4": {
+   "name": "Hansa Rostock",
+   "short": "Hansa Rostock"
+  },
+  "206d90db": {
+   "name": "Barcelona",
+   "short": "Barcelona"
+  },
+  "ef1ab26a": {
+   "name": "Göteborg",
+   "short": "Goteborg"
+  },
+  "8cac5dfa": {
+   "name": "Honvéd",
+   "short": "Honved"
+  },
+  "8dff1828": {
+   "name": "Apollon Limassol",
+   "short": "Apollon Limassol"
+  },
+  "5a8bd0bd": {
+   "name": "Fram",
+   "short": "Fram"
+  },
+  "af973273": {
+   "name": "Hamrun Spartans FC",
+   "short": "Ħamrun Spartans"
+  },
+  "ab75e049": {
+   "name": "Brøndby",
+   "short": "Brondby"
+  },
+  "08ad393c": {
+   "name": "Anderlecht",
+   "short": "Anderlecht"
+  },
+  "8ff9e3b3": {
+   "name": "Sampdoria",
+   "short": "Sampdoria"
+  },
+  "e4a9d483": {
+   "name": "Dundalk FC",
+   "short": "Dundalk FC"
+  },
+  "90e37d3a": {
+   "name": "Rosenborg",
+   "short": "Rosenborg"
+  },
+  "f57d98b3": {
+   "name": "FC Etar",
+   "short": "FC Etar"
+  },
+  "3d81ccdb": {
+   "name": "Flamurtari Vlore",
+   "short": "Flamurtari Vlorë"
+  },
+  "3458af25": {
+   "name": "Zaglebie Lubin",
+   "short": "Zagłębie Lubin"
+  },
+  "73a27a73": {
+   "name": "Kaiserslautern",
+   "short": "Kaiserslautern"
+  },
+  "ee0bccc5": {
+   "name": "Austria Wien",
+   "short": "Austria Wien"
+  },
+  "d7319d80": {
+   "name": "HJK Helsinki",
+   "short": "HJK Helsinki"
+  },
+  "d5348c80": {
+   "name": "AEK Athens",
+   "short": "AEK Athens"
+  },
+  "6611f992": {
+   "name": "Ferencváros",
+   "short": "Ferencvaros"
+  },
+  "a8e312ec": {
+   "name": "Tavriya Simferopol",
+   "short": "Tavriya"
+  },
+  "f0c0c2c2": {
+   "name": "CSKA Moscow",
+   "short": "CSKA Moscow"
+  },
+  "2eaa8331": {
+   "name": "Sion",
+   "short": "Sion"
+  },
+  "89873a40": {
+   "name": "Skonto FC",
+   "short": "Skonto FC"
+  },
+  "ead990c4": {
+   "name": "KV",
+   "short": "KV"
+  },
+  "4c6489de": {
+   "name": "Žalgiris",
+   "short": "Zalgiris"
+  },
+  "892ab902": {
+   "name": "Olimpija",
+   "short": "Olimpija Ljubljana"
+  },
+  "eaa4ec68": {
+   "name": "Glentoran",
+   "short": "Glentoran"
+  },
+  "713d0672": {
+   "name": "Lyngby",
+   "short": "Lyngby"
+  },
+  "04c011d8": {
+   "name": "Maccabi Tel Aviv FC",
+   "short": "Maccabi Tel Aviv"
+  },
+  "598bc722": {
+   "name": "Stuttgart",
+   "short": "Stuttgart"
+  },
+  "0b26f976": {
+   "name": "Viking",
+   "short": "Viking"
+  },
+  "ae7f2f70": {
+   "name": "Slovan Bratislava",
+   "short": "Slovan Bratislava"
+  },
+  "7ae2a403": {
+   "name": "ÍA",
+   "short": "IA"
+  },
+  "edd0d381": {
+   "name": "Dinamo Zagreb",
+   "short": "Dinamo Zagreb"
+  },
+  "a27bd9af": {
+   "name": "Aarau",
+   "short": "Aarau"
+  },
+  "ecd11ca2": {
+   "name": "Galatasaray",
+   "short": "Galatasaray"
+  },
+  "79000faa": {
+   "name": "Beitar Jerusalem",
+   "short": "Beitar Jerusalem"
+  },
+  "e2a78c9d": {
+   "name": "Dinamo Minsk",
+   "short": "Dinamo Minsk"
+  },
+  "4c96013a": {
+   "name": "Linfield FC",
+   "short": "Linfield FC"
+  },
+  "4936d1b7": {
+   "name": "Cork City",
+   "short": "Cork City"
+  },
+  "62add3bf": {
+   "name": "Werder Bremen",
+   "short": "Werder Bremen"
+  },
+  "b0333581": {
+   "name": "AIK Stockholm",
+   "short": "AIK Stockholm"
+  },
+  "fb4ca611": {
+   "name": "Feyenoord",
+   "short": "Feyenoord"
+  },
+  "fd6114db": {
+   "name": "Monaco",
+   "short": "Monaco"
+  },
+  "3a7a27c6": {
+   "name": "Levski Sofia",
+   "short": "Levski Sofia"
+  },
+  "9c088d4e": {
+   "name": "Floriana FC",
+   "short": "Floriana FC"
+  },
+  "aed59852": {
+   "name": "Steaua",
+   "short": "Steaua Bucuresti"
+  },
+  "18050b20": {
+   "name": "FC Copenhagen",
+   "short": "FC Copenhagen"
+  },
+  "50f2a074": {
+   "name": "RB Salzburg",
+   "short": "Red Bull Salzburg"
+  },
+  "e2d8892c": {
+   "name": "Paris Saint-Germain",
+   "short": "Paris Saint Germain"
+  },
+  "6777e16d": {
+   "name": "Hajduk Split",
+   "short": "Hajduk Split"
+  },
+  "19c3f8c4": {
+   "name": "Ajax",
+   "short": "Ajax"
+  },
+  "a73408a7": {
+   "name": "Legia Warsaw",
+   "short": "Legia Warsaw"
+  },
+  "add600ae": {
+   "name": "Dortmund",
+   "short": "Dortmund"
+  },
+  "7e746554": {
+   "name": "Aalborg",
+   "short": "Aalborg"
+  },
+  "d7a486cd": {
+   "name": "Nantes",
+   "short": "Nantes"
+  },
+  "e0652b02": {
+   "name": "Juventus",
+   "short": "Juventus"
+  },
+  "db3b9613": {
+   "name": "Atlético Madrid",
+   "short": "Atletico Madrid"
+  },
+  "ae1e2d7d": {
+   "name": "Fenerbahçe",
+   "short": "Fenerbahce"
+  },
+  "5ae09109": {
+   "name": "Auxerre",
+   "short": "Auxerre"
+  },
+  "2232debd": {
+   "name": "Widzew Łódź",
+   "short": "Widzew Lodz"
+  },
+  "912e4c40": {
+   "name": "Rapid Wien",
+   "short": "Rapid Wien"
+  },
+  "eab4234c": {
+   "name": "Parma",
+   "short": "Parma"
+  },
+  "2fdb4aef": {
+   "name": "Olympiacos",
+   "short": "Olympiacos"
+  },
+  "13dc44fd": {
+   "name": "Sporting CP",
+   "short": "Sporting CP"
+  },
+  "c7a9f859": {
+   "name": "Leverkusen",
+   "short": "Leverkusen"
+  },
+  "f75c6442": {
+   "name": "Košice",
+   "short": "Kosice"
+  },
+  "9ea31445": {
+   "name": "Lierse",
+   "short": "Lierse"
+  },
+  "2b390eca": {
+   "name": "Athletic Club",
+   "short": "Athletic Club"
+  },
+  "3f4fe568": {
+   "name": "Sturm Graz",
+   "short": "Sturm Graz"
+  },
+  "d609edc0": {
+   "name": "Inter",
+   "short": "Internazionale"
+  },
+  "fd4e0f7d": {
+   "name": "Lens",
+   "short": "Lens"
+  },
+  "f0479d7b": {
+   "name": "Willem II",
+   "short": "Willem II"
+  },
+  "421387cf": {
+   "name": "Fiorentina",
+   "short": "Fiorentina"
+  },
+  "123f3efe": {
+   "name": "Bordeaux",
+   "short": "Bordeaux"
+  },
+  "37b7e9e2": {
+   "name": "Boavista",
+   "short": "Boavista"
+  },
+  "dcc91a7b": {
+   "name": "Valencia",
+   "short": "Valencia"
+  },
+  "7213da33": {
+   "name": "Lazio",
+   "short": "Lazio"
+  },
+  "2818f8bc": {
+   "name": "Hertha BSC",
+   "short": "Hertha BSC"
+  },
+  "174bd5a0": {
+   "name": "Molde",
+   "short": "Molde"
+  },
+  "2aae7689": {
+   "name": "NK Maribor",
+   "short": "NK Maribor"
+  },
+  "e89d5a28": {
+   "name": "Shakhtar Donetsk",
+   "short": "Shakhtar D."
+  },
+  "d53c0b06": {
+   "name": "Lyon",
+   "short": "Lyon"
+  },
+  "f8a195cc": {
+   "name": "Helsingborg",
+   "short": "Helsingborg"
+  },
+  "26790c6a": {
+   "name": "Hamburger SV",
+   "short": "Hamburger SV"
+  },
+  "2a60ed82": {
+   "name": "Dep La Coruña",
+   "short": "Deportivo La Coruna"
+  },
+  "193ff7aa": {
+   "name": "Heerenveen",
+   "short": "Heerenveen"
+  },
+  "c539e393": {
+   "name": "Schalke 04",
+   "short": "Schalke 04"
+  },
+  "b81aa4fa": {
+   "name": "Celtic",
+   "short": "Celtic"
+  },
+  "2aa12281": {
+   "name": "Mallorca",
+   "short": "Mallorca"
+  },
+  "cf74a709": {
+   "name": "Roma",
+   "short": "Roma"
+  },
+  "cb188c0c": {
+   "name": "Lille",
+   "short": "Lille"
+  },
+  "5a8dc328": {
+   "name": "Loko Moscow",
+   "short": "Lokomotiv Moscow"
+  },
+  "187832f5": {
+   "name": "Maccabi Haifa",
+   "short": "Maccabi Haifa"
+  },
+  "d3d9424a": {
+   "name": "Basel",
+   "short": "Basel"
+  },
+  "1e972a99": {
+   "name": "Genk",
+   "short": "Genk"
+  },
+  "e31d1cd9": {
+   "name": "Real Sociedad",
+   "short": "Real Sociedad"
+  },
+  "dde3e804": {
+   "name": "Partizan",
+   "short": "Partizan"
+  },
+  "f25da7fb": {
+   "name": "Celta Vigo",
+   "short": "Celta Vigo"
+  },
+  "9ae758c2": {
+   "name": "Thun",
+   "short": "Thun"
+  },
+  "2a8183b3": {
+   "name": "Villarreal",
+   "short": "Villarreal"
+  },
+  "fc536746": {
+   "name": "Real Betis",
+   "short": "Real Betis"
+  },
+  "04eea015": {
+   "name": "Udinese",
+   "short": "Udinese"
+  },
+  "6c6f5a68": {
+   "name": "Artmedia",
+   "short": "Artmedia Bratislava"
+  },
+  "ad2be733": {
+   "name": "Sevilla",
+   "short": "Sevilla"
+  },
+  "111cbfb1": {
+   "name": "Slavia Prague",
+   "short": "Slavia Prague"
+  },
+  "ff04e205": {
+   "name": "CFR Cluj",
+   "short": "CFR Cluj"
+  },
+  "98ce363d": {
+   "name": "Zenit",
+   "short": "Zenit"
+  },
+  "d27fe90c": {
+   "name": "Anorthosis",
+   "short": "Anorthosis Famagusta"
+  },
+  "b983b638": {
+   "name": "BATE Borisov",
+   "short": "BATE Borisov"
+  },
+  "22a5a99c": {
+   "name": "Zürich",
+   "short": "Zurich"
+  },
+  "33c6b26e": {
+   "name": "Standard Liège",
+   "short": "Standard Liege"
+  },
+  "5625a7da": {
+   "name": "Rubin Kazan",
+   "short": "Rubin Kazan"
+  },
+  "ef6395f6": {
+   "name": "Unirea Urziceni",
+   "short": "Unirea Urziceni"
+  },
+  "3986b791": {
+   "name": "AZ Alkmaar",
+   "short": "AZ Alkmaar"
+  },
+  "4eaa11d7": {
+   "name": "Wolfsburg",
+   "short": "Wolfsburg"
+  },
+  "e24ac92e": {
+   "name": "Debrecen",
+   "short": "Debrecen"
+  },
+  "8bb196a5": {
+   "name": "Hapoel Tel Aviv",
+   "short": "Hapoel Tel Aviv"
+  },
+  "69d84c29": {
+   "name": "Braga",
+   "short": "Braga"
+  },
+  "e5dea1f1": {
+   "name": "MŠK Žilina",
+   "short": "MSK Zilina"
+  },
+  "6a3b81bf": {
+   "name": "Bursaspor",
+   "short": "Bursaspor"
+  },
+  "a1f721d3": {
+   "name": "Twente",
+   "short": "Twente"
+  },
+  "c8ad3091": {
+   "name": "Trabzonspor",
+   "short": "Trabzonspor"
+  },
+  "86edb46e": {
+   "name": "Oțelul Galați",
+   "short": "Otelul Galati"
+  },
+  "02cd81bf": {
+   "name": "Viktoria Plzeň",
+   "short": "Viktoria Plzen"
+  },
+  "281b0e73": {
+   "name": "Montpellier",
+   "short": "Montpellier"
+  },
+  "1c896955": {
+   "name": "Málaga",
+   "short": "Malaga"
+  },
+  "1850e3f9": {
+   "name": "Nordsjælland",
+   "short": "Nordsjaelland"
+  },
+  "488c6ba1": {
+   "name": "Ludogorets Razgrad",
+   "short": "Ludogorets"
+  },
+  "c72c8787": {
+   "name": "FC Astana",
+   "short": "FC Astana"
+  },
+  "51e5a603": {
+   "name": "Gent",
+   "short": "Gent"
+  },
+  "32f3ee20": {
+   "name": "Gladbach",
+   "short": "Monchengladbach"
+  },
+  "d60423ef": {
+   "name": "Rostov",
+   "short": "Rostov"
+  },
+  "44b65410": {
+   "name": "Qarabağ",
+   "short": "Qarabag"
+  },
+  "acbb6a5b": {
+   "name": "RB Leipzig",
+   "short": "RB Leipzig"
+  },
+  "4b682260": {
+   "name": "Young Boys",
+   "short": "Young Boys"
+  },
+  "033ea6b8": {
+   "name": "Hoffenheim",
+   "short": "Hoffenheim"
+  },
+  "922493f3": {
+   "name": "Atalanta",
+   "short": "Atalanta"
+  },
+  "b3072e00": {
+   "name": "Rennes",
+   "short": "Rennes"
+  },
+  "bff39cf5": {
+   "name": "Başakşehir",
+   "short": "Istanbul Basaksehir"
+  },
+  "3c4fb635": {
+   "name": "Midtjylland",
+   "short": "Midtjylland"
+  },
+  "fa11a9cc": {
+   "name": "Krasnodar",
+   "short": "Krasnodar"
+  },
+  "50995c1e": {
+   "name": "FC Sheriff Tiraspol",
+   "short": "Sheriff Tiraspol"
+  },
+  "f0ac8ee6": {
+   "name": "Eintracht Frankfurt",
+   "short": "Frankfurt"
+  },
+  "7a41008f": {
+   "name": "Union Berlin",
+   "short": "Union Berlin"
+  },
+  "c2e6b53b": {
+   "name": "Antwerp",
+   "short": "Antwerp"
+  },
+  "1d8099f8": {
+   "name": "Bologna",
+   "short": "Bologna"
+  },
+  "fb08dbb3": {
+   "name": "Brest",
+   "short": "Brest"
+  },
+  "9024a00a": {
+   "name": "Girona",
+   "short": "Girona"
+  },
+  "768fb565": {
+   "name": "FC Kairat",
+   "short": "FC Kairat"
+  },
+  "d86248bd": {
+   "name": "BodoGlimt",
+   "short": "Bodø/Glimt"
+  },
+  "cb42669e": {
+   "name": "Pafos FC",
+   "short": "Pafos FC"
+  },
+  "e14f61a5": {
+   "name": "Union SG",
+   "short": "Union SG"
+  },
+  "696c8d95": {
+   "name": "Logroñés",
+   "short": "Logrones"
+  },
+  "800303a0": {
+   "name": "Zaragoza",
+   "short": "Zaragoza"
+  },
+  "bb9efd50": {
+   "name": "Sporting Gijón",
+   "short": "Sporting Gijon"
+  },
+  "a8661628": {
+   "name": "Espanyol",
+   "short": "Espanyol"
+  },
+  "ffbf3fa8": {
+   "name": "Málaga",
+   "short": "Malaga"
+  },
+  "03c57e2b": {
+   "name": "Osasuna",
+   "short": "Osasuna"
+  },
+  "6c8b07df": {
+   "name": "Elche",
+   "short": "Elche"
+  },
+  "ab358912": {
+   "name": "Oviedo",
+   "short": "Oviedo"
+  },
+  "ee7c297c": {
+   "name": "Cádiz",
+   "short": "Cadiz"
+  },
+  "ab0dc306": {
+   "name": "Real Murcia",
+   "short": "Real Murcia"
+  },
+  "9eef2995": {
+   "name": "Castellon",
+   "short": "Castellón"
+  },
+  "98e8af82": {
+   "name": "Rayo Vallecano",
+   "short": "Rayo Vallecano"
+  },
+  "27cc9c62": {
+   "name": "Tenerife",
+   "short": "Tenerife"
+  },
+  "fde10d5a": {
+   "name": "Real Burgos",
+   "short": "Real Burgos"
+  },
+  "b7e3e46e": {
+   "name": "Albacete",
+   "short": "Albacete"
+  },
+  "def43993": {
+   "name": "Lleida",
+   "short": "Lleida"
+  },
+  "dee3bbc8": {
+   "name": "Racing Sant",
+   "short": "Racing Santander"
+  },
+  "c32656d6": {
+   "name": "Salamanca",
+   "short": "Salamanca"
+  },
+  "819b92aa": {
+   "name": "Mérida",
+   "short": "Merida"
+  },
+  "4222a514": {
+   "name": "Hércules",
+   "short": "Hercules"
+  },
+  "be3375e1": {
+   "name": "Extremadura",
+   "short": "Extremadura"
+  },
+  "8d6fd021": {
+   "name": "Alavés",
+   "short": "Alaves"
+  },
+  "76d8bafa": {
+   "name": "Numancia",
+   "short": "Numancia"
+  },
+  "0049d422": {
+   "name": "Las Palmas",
+   "short": "Las Palmas"
+  },
+  "6e1d6d95": {
+   "name": "Recreativo",
+   "short": "Recreativo"
+  },
+  "7848bd64": {
+   "name": "Getafe",
+   "short": "Getafe"
+  },
+  "9800b6a1": {
+   "name": "Levante",
+   "short": "Levante"
+  },
+  "d5de8ff3": {
+   "name": "Gimnàstic",
+   "short": "Gimnastic"
+  },
+  "78ecf4bb": {
+   "name": "Almería",
+   "short": "Almeria"
+  },
+  "c653e8bf": {
+   "name": "Xerez",
+   "short": "Xerez"
+  },
+  "a0435291": {
+   "name": "Granada",
+   "short": "Granada"
+  },
+  "bea5c710": {
+   "name": "Eibar",
+   "short": "Eibar"
+  },
+  "6009ff35": {
+   "name": "Córdoba",
+   "short": "Cordoba"
+  },
+  "7c6f2c78": {
+   "name": "Leganés",
+   "short": "Leganes"
+  },
+  "c6c493e6": {
+   "name": "Huesca",
+   "short": "Huesca"
+  },
+  "72c031e3": {
+   "name": "Ascoli",
+   "short": "Ascoli"
+  },
+  "283f2557": {
+   "name": "Cesena",
+   "short": "Cesena"
+  },
+  "28c9c3cd": {
+   "name": "Como",
+   "short": "Como"
+  },
+  "4cceedfc": {
+   "name": "Pisa",
+   "short": "Pisa"
+  },
+  "ffcbe334": {
+   "name": "Lecce",
+   "short": "Lecce"
+  },
+  "105360fe": {
+   "name": "Torino",
+   "short": "Torino"
+  },
+  "b985784c": {
+   "name": "Pescara",
+   "short": "Pescara"
+  },
+  "0e72edf2": {
+   "name": "Hellas Verona",
+   "short": "Hellas Verona"
+  },
+  "658bf2de": {
+   "name": "Genoa",
+   "short": "Genoa"
+  },
+  "01baa639": {
+   "name": "Bari",
+   "short": "Bari"
+  },
+  "9aad3a77": {
+   "name": "Cremonese",
+   "short": "Cremonese"
+  },
+  "c4260e09": {
+   "name": "Cagliari",
+   "short": "Cagliari"
+  },
+  "948f8c03": {
+   "name": "Foggia",
+   "short": "Foggia"
+  },
+  "1d2f81d0": {
+   "name": "Ancona",
+   "short": "Ancona"
+  },
+  "4ef57aeb": {
+   "name": "Brescia",
+   "short": "Brescia"
+  },
+  "19008e93": {
+   "name": "Reggiana",
+   "short": "Reggiana"
+  },
+  "81e923a1": {
+   "name": "Piacenza",
+   "short": "Piacenza"
+  },
+  "4e5f8b9a": {
+   "name": "Padova",
+   "short": "Padova"
+  },
+  "2591250b": {
+   "name": "Vicenza",
+   "short": "Vicenza"
+  },
+  "37cba288": {
+   "name": "Perugia",
+   "short": "Perugia"
+  },
+  "a3d88bd8": {
+   "name": "Empoli",
+   "short": "Empoli"
+  },
+  "af5d5982": {
+   "name": "Venezia",
+   "short": "Venezia"
+  },
+  "c5577084": {
+   "name": "Salernitana",
+   "short": "Salernitana"
+  },
+  "46f8c29f": {
+   "name": "Reggina",
+   "short": "Reggina"
+  },
+  "cc919b35": {
+   "name": "Chievo",
+   "short": "Chievo"
+  },
+  "71a3700b": {
+   "name": "Modena",
+   "short": "Modena"
+  },
+  "45a2f824": {
+   "name": "Siena",
+   "short": "Siena"
+  },
+  "ee058a17": {
+   "name": "Palermo",
+   "short": "Palermo"
+  },
+  "939201df": {
+   "name": "Livorno",
+   "short": "Livorno"
+  },
+  "fe2dc36d": {
+   "name": "Messina",
+   "short": "Messina"
+  },
+  "f71ec3ae": {
+   "name": "Treviso",
+   "short": "Treviso"
+  },
+  "7b046f08": {
+   "name": "Catania",
+   "short": "Catania"
+  },
+  "6c37111f": {
+   "name": "Novara",
+   "short": "Novara"
+  },
+  "e2befd26": {
+   "name": "Sassuolo",
+   "short": "Sassuolo"
+  },
+  "6a7ad59d": {
+   "name": "Frosinone",
+   "short": "Frosinone"
+  },
+  "71f07916": {
+   "name": "Carpi",
+   "short": "Carpi"
+  },
+  "3074d7b1": {
+   "name": "Crotone",
+   "short": "Crotone"
+  },
+  "4fcb34fd": {
+   "name": "Benevento",
+   "short": "Benevento"
+  },
+  "1d2fe027": {
+   "name": "SPAL",
+   "short": "SPAL"
+  },
+  "68449f6d": {
+   "name": "Spezia",
+   "short": "Spezia"
+  },
+  "21680aa4": {
+   "name": "Monza",
+   "short": "Monza"
+  },
+  "6f2c108c": {
+   "name": "Nürnberg",
+   "short": "Nurnberg"
+  },
+  "ee8f53af": {
+   "name": "Stuttgarter Kickers",
+   "short": "Stuttg. Kickers"
+  },
+  "bc357bf7": {
+   "name": "Köln",
+   "short": "Koln"
+  },
+  "08610664": {
+   "name": "Uerdingen",
+   "short": "Uerdingen"
+  },
+  "b42c6323": {
+   "name": "Bochum",
+   "short": "Bochum"
+  },
+  "151d706e": {
+   "name": "Waldhof Mannheim",
+   "short": "Mannheim"
+  },
+  "33ba9d7b": {
+   "name": "Karlsruher",
+   "short": "Karlsruher"
+  },
+  "60b5e41f": {
+   "name": "Hannover 96",
+   "short": "Hannover 96"
+  },
+  "b1278397": {
+   "name": "Düsseldorf",
+   "short": "Dusseldorf"
+  },
+  "89a86c55": {
+   "name": "Homburg",
+   "short": "Homburg"
+  },
+  "6f7db76a": {
+   "name": "Wattenscheid",
+   "short": "Wattenscheid"
+  },
+  "bbfd364f": {
+   "name": "MSV Duisburg",
+   "short": "MSV Duisburg"
+  },
+  "eb4b278c": {
+   "name": "Saarbrücken",
+   "short": "Saarbrucken"
+  },
+  "473affe3": {
+   "name": "VfB Leipzig",
+   "short": "VfB Leipzig"
+  },
+  "a486e511": {
+   "name": "Freiburg",
+   "short": "Freiburg"
+  },
+  "2fbdf057": {
+   "name": "1860 Munich",
+   "short": "1860 Munich"
+  },
+  "247c4b67": {
+   "name": "Arminia",
+   "short": "Arminia Bielefeld"
+  },
+  "ba68a0c5": {
+   "name": "Unterhaching",
+   "short": "Unterhaching"
+  },
+  "291257b3": {
+   "name": "Ulm",
+   "short": "Ulm"
+  },
+  "7675ab36": {
+   "name": "Energie Cottbus",
+   "short": "Energie Cottbus"
+  },
+  "a224b06a": {
+   "name": "Mainz 05",
+   "short": "Mainz 05"
+  },
+  "3659060d": {
+   "name": "AA Aachen",
+   "short": "Alemannia Aachen"
+  },
+  "0cdc4311": {
+   "name": "Augsburg",
+   "short": "Augsburg"
+  },
+  "12192a4c": {
+   "name": "Greuther Fürth",
+   "short": "Greuther Furth"
+  },
+  "8107958d": {
+   "name": "BTSV",
+   "short": "Eintracht Braunschweig"
+  },
+  "d9f93f02": {
+   "name": "Paderborn 07",
+   "short": "Paderborn 07"
+  },
+  "12eb2039": {
+   "name": "Ingolstadt",
+   "short": "Ingolstadt"
+  },
+  "6a6967fc": {
+   "name": "Darmstadt 98",
+   "short": "Darmstadt 98"
+  },
+  "18d9d2a7": {
+   "name": "Heidenheim",
+   "short": "Heidenheim"
+  },
+  "2ac661d9": {
+   "name": "Holstein Kiel",
+   "short": "Holstein Kiel"
+  },
+  "fe686760": {
+   "name": "Elversberg",
+   "short": "Elversberg"
+  },
+  "5dca7789": {
+   "name": "Gueugnon",
+   "short": "Gueugnon"
+  },
+  "f83960ae": {
+   "name": "Metz",
+   "short": "Metz"
+  },
+  "6283be2c": {
+   "name": "Bastia",
+   "short": "Bastia"
+  },
+  "132ebc33": {
+   "name": "Nice",
+   "short": "Nice"
+  },
+  "d298ef2c": {
+   "name": "Saint-Étienne",
+   "short": "Saint Etienne"
+  },
+  "5c2737db": {
+   "name": "Le Havre",
+   "short": "Le Havre"
+  },
+  "d41b5f53": {
+   "name": "Guingamp",
+   "short": "Guingamp"
+  },
+  "c0d3eab4": {
+   "name": "Strasbourg",
+   "short": "Strasbourg"
+  },
+  "69a82db6": {
+   "name": "Cannes",
+   "short": "Cannes"
+  },
+  "82e8a66d": {
+   "name": "Martigues",
+   "short": "Martigues"
+  },
+  "e88fc6e5": {
+   "name": "Nancy",
+   "short": "Nancy"
+  },
+  "43d17b20": {
+   "name": "Châteauroux",
+   "short": "Chateauroux"
+  },
+  "3f8c4b5f": {
+   "name": "Toulouse",
+   "short": "Toulouse"
+  },
+  "d2c87802": {
+   "name": "Lorient",
+   "short": "Lorient"
+  },
+  "b9cd3c9a": {
+   "name": "Sochaux",
+   "short": "Sochaux"
+  },
+  "e4e952b9": {
+   "name": "Sedan",
+   "short": "Sedan"
+  },
+  "7a54bb4f": {
+   "name": "Ajaccio",
+   "short": "Ajaccio"
+  },
+  "cd5d7aa6": {
+   "name": "Le Mans",
+   "short": "Le Mans"
+  },
+  "70f96e85": {
+   "name": "Istres",
+   "short": "Istres"
+  },
+  "259d3345": {
+   "name": "Valenciennes",
+   "short": "Valenciennes"
+  },
+  "40aa7280": {
+   "name": "Grenoble Foot",
+   "short": "Grenoble Foot"
+  },
+  "98973a5c": {
+   "name": "Boulogne",
+   "short": "Boulogne"
+  },
+  "e95faa7f": {
+   "name": "Arles-Avignon",
+   "short": "Arles Avignon"
+  },
+  "8dfb7350": {
+   "name": "Dijon",
+   "short": "Dijon"
+  },
+  "633fbb6e": {
+   "name": "Evian",
+   "short": "Evian"
+  },
+  "7fdd64e0": {
+   "name": "Reims",
+   "short": "Reims"
+  },
+  "69236f98": {
+   "name": "Angers",
+   "short": "Angers"
+  },
+  "73905dde": {
+   "name": "Gazélec Ajaccio",
+   "short": "Gazelec Ajaccio"
+  },
+  "1cbf5f9e": {
+   "name": "Nîmes",
+   "short": "Nimes"
+  },
+  "d9676424": {
+   "name": "Clermont Foot",
+   "short": "Clermont Foot"
+  },
+  "056a5a75": {
+   "name": "Paris FC",
+   "short": "Paris FC"
+  }
+ }
+}
