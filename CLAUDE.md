@@ -30,9 +30,11 @@ predictfootballai/
 │   │   ├── index.html         # Canvas-based Sensible Soccer clone
 │   │   ├── game.js            # Game engine (physics, rendering)
 │   │   └── levels.js          # Iconic goal recreations
-│   ├── teams/                 # 313 STATIC team pages, generated — do not hand-edit
+│   ├── teams/                 # 355 STATIC team pages, generated — do not hand-edit
 │   │   ├── index.html         #   hub, grouped by competition
 │   │   └── <slug>/index.html  #   e.g. /teams/plymouth-argyle/
+│   ├── competitions/          # 12 STATIC competition pages + hub, generated
+│   ├── matchups/              # club-vs-club pages (built, not yet published)
 │   ├── daily/index.html       # The TeleStats Daily (challenge + streak)
 │   ├── ask/index.html         # Ask TeleStats
 │   ├── fives/index.html       # Fives landing page (marketing)
@@ -53,7 +55,9 @@ predictfootballai/
 │   │   ├── ts-nav.js          # Nav component — persistent bar, user badge, level display
 │   │   ├── ts-scope.js        # ?scope= / &play=1 handling, shared by all games
 │   │   ├── ts-streak.js       # Daily streaks (localStorage) + spoiler-safe share grid
-│   │   └── team-page.js       # Team page behaviour (chips, player of the day, extras)
+│   │   ├── team-page.js       # Team page behaviour (filter, mystery player, extras)
+│   │   ├── competition-page.js# Competition page behaviour
+│   │   └── matchup-page.js    # Matchup page behaviour
 │   ├── community/             # Community game browser/builder
 │   ├── leaderboard/           # Global XP rankings
 │   ├── profile/               # User profile (XP, stats, achievements)
@@ -90,9 +94,12 @@ predictfootballai/
 │   ├── leaderboard.js         # Global/game leaderboards
 │   └── _deprecated/           # 13 deprecated functions
 ├── data/teams/
-│   ├── slugs.json             # 313 teams. A URL CONTRACT — generated once, never recomputed
+│   ├── slugs.json             # 355 teams. A URL CONTRACT — generated once, never recomputed
+│   ├── club_names.json        # What each club is CALLED — survives re-ingest
+│   ├── club_merges.json       # Which FBref squads are one club
+│   ├── matchups.json          # Which club pairings deserve a page
 │   └── legacy_scopes.json     # 1,476 old scope ids -> team slug, for play history
-├── data/daily/pool.json       # 399 scopes good enough to be a daily challenge
+├── data/daily/pool.json       # 550 scopes good enough to be a daily challenge
 ├── sql/                       # 5 migration files
 ├── supabase/                  # RLS policies, payment table
 ├── scripts/
@@ -247,8 +254,9 @@ Every Sunday `.github/workflows/weekly-analytics.yml` pulls GA4 + Search Console
 (`netlify/functions/analytics-stats.js`: token-protected, counts only) and commits `analytics/reports/latest.md`.
 No LLM step, no site changes; `/seo-review` reviews it and proposes changes for approval. TeleStats settings live in
 `analytics/site.config.mjs`; the engine `scripts/analytics/*.mjs` is shared with the Tagsy repo (copy improvements both
-ways). The "Plays by game" table needs `game_type` registered as an event-scoped custom dimension in GA4. Known gap: most
-finished rounds are not being saved to `ts_game_sessions`, so database play counts are a sample. See `docs/analytics-automation.md`.
+ways). The "Plays by game" table needs `game_type` registered as an event-scoped custom dimension in GA4. New anonymous
+`ts_users` rows are inflated by crawlers that run JS (416 rows vs 39 GA4 users, Oct 2026): read them as an upper bound.
+See `docs/analytics-automation.md`.
 
 ## Pricing Model
 - **Free (no account):** Limited game access
@@ -256,6 +264,27 @@ finished rounds are not being saved to `ts_game_sessions`, so database play coun
 - **Pro (£4.99 one-time):** Full access, all features
 - **Day pass:** 24-hour trial before purchase
 - XP/leveling system with football-themed progression tiers
+
+## Team pages — spoiler containment
+
+Team page records are the reason a stranger finds the site ("Arsenal top
+goalscorers" is a real query) and ALSO the answers to our own games. The
+resolution: records are fully server-rendered inside native `<details>`, closed
+by default, with a visible warning. Google reads the markup; a visitor chooses
+to see it. **There is never crawler-specific content** — the bytes Googlebot
+gets are the bytes a person gets.
+
+The corollary is a rule any change to these pages must keep: **no player name,
+ranking or record may appear outside those disclosures** — not in a heading, a
+card, an Ask suggestion or the structured data. The mystery player is the one
+deliberate exception and reveals on a click. Its pool is shuffled before it is
+written into the page, because in leader order it was a ranked list of the
+club's most-used players sitting in view-source.
+
+Verify after any change:
+
+    node -e '…'   # the audit in SESSION_LOG under "Team page redesign"
+                  # 355 pages · 0 open by default · 0 names leaking
 
 ## Known Gotchas
 - Fives auth (`predict_users`) is separate from main TeleStats auth (`ts_users`) — two different user tables
@@ -278,9 +307,15 @@ finished rounds are not being saved to `ts_game_sessions`, so database play coun
   storage before Ask leaves beta
 - `whoami.html`'s frontend `SCOPES` array is still a sixth copy of the club
   list — it takes linked scope ids on trust and lets the server validate them
-- Team page colours: 187 clubs have researched colours, 126 derive one from a
-  hash of the slug. Nothing on a page calls the shield a crest, because a real
-  badge is somebody's trademark
+- Team page colours: 214 clubs have researched colours (every English one), 98
+  derive one from a hash of the slug. Nothing on a page calls the shield a
+  crest, because a real badge is somebody's trademark
+- `rebuild_aggregates()` RPC times out via PostgREST — use
+  `npm run aggregates` (scripts/fbref/rebuild_aggregates.js), which folds the
+  same three tables in JavaScript and upserts in chunks
+- **Run `npm run preflight` before any load.** The database holds decisions
+  FBref does not know about (club merges, established names), and a decision
+  that exists only in the database is overwritten by the next ingest, silently
 
 ## Rules for Claude
 - Do NOT commit or push to git — ever

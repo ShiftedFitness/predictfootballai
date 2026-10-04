@@ -151,7 +151,7 @@ function renderHub(rows) {
   .wrap { max-width: 1000px; margin: 0 auto; padding: 0 18px 50px; }
   .ts-header { border-bottom: 1px solid var(--rule, #24313A); background: var(--bg-card, #131A20); }
   .ts-header .inner { max-width: 1000px; margin: 0 auto; padding: 11px 18px;
-                      display: flex; align-items: center; gap: 18px; }
+                      display: flex; align-items: center; gap: 18px;  flex-wrap: wrap;}
   .ts-header .brand { font-weight: 700; letter-spacing: .04em; color: var(--text-primary, #F2F5F7);
                       text-decoration: none; font-family: 'Space Mono', ui-monospace, monospace; }
   .ts-header nav { display: flex; gap: 15px; flex-wrap: wrap; }
@@ -342,12 +342,50 @@ ${sections}
       last: Math.max(...comps.map((c) => c.last_season)),
     };
 
-    // Related teams: others sharing a competition, biggest first. This is the
-    // internal linking spine — no team page should be an orphan.
+    // ── related clubs ────────────────────────────────────────────────────
+    //
+    // "Shares any competition, biggest squad first" put Oldham Athletic,
+    // Swindon Town and Barnsley on the Arsenal page. Two things were wrong.
+    //
+    // The CUPS relate everything: 110 clubs have played in the FA Cup, so any
+    // English club shares a competition with almost any other. Relatedness is
+    // judged on LEAGUE competitions only.
+    //
+    // And "biggest squad" is not prominence — it is turnover. A League Two club
+    // churns through 500 players in 25 seasons while Arsenal used 287; sorting
+    // on it ranks the lower leagues above everyone. Clubs are ranked by how
+    // much of their history they share with this one: same division, weighted
+    // by the number of seasons they were both in it.
+    const LEAGUES_ONLY = (name) => !/Cup|Shield|Champions League/.test(name);
+    const myLeagues = comps.map((x) => x.competition_name).filter(LEAGUES_ONLY);
+    const mySeasons = new Map();
+    for (const r of compByClub.get(team.club_id) || []) {
+      if (!LEAGUES_ONLY(r.competition_name)) continue;
+      const cur = mySeasons.get(r.competition_name) || { lo: Infinity, hi: -Infinity };
+      cur.lo = Math.min(cur.lo, r.first_season);
+      cur.hi = Math.max(cur.hi, r.last_season);
+      mySeasons.set(r.competition_name, cur);
+    }
+
     const related = teams.all()
-      .filter((t) => t.slug !== team.slug && t.competitions.some((c) => comps.some((x) => x.competition_name === c)))
-      .sort((a, b) => b.players - a.players)
-      .slice(0, 12);
+      .filter((t) => t.slug !== team.slug &&
+                     t.competitions.some((cName) => myLeagues.includes(cName)))
+      .map((t) => {
+        // Overlapping YEARS in a shared division, not merely a shared name:
+        // two clubs that were both in the Championship but twenty years apart
+        // are less related than two who were there together.
+        let overlap = 0;
+        for (const r of compByClub.get(t.club_id) || []) {
+          const mine = mySeasons.get(r.competition_name);
+          if (!mine) continue;
+          overlap += Math.max(0, Math.min(mine.hi, r.last_season) - Math.max(mine.lo, r.first_season) + 1);
+        }
+        return { t, overlap };
+      })
+      .filter((x) => x.overlap > 0)
+      .sort((a, b) => b.overlap - a.overlap || b.t.players - a.t.players)
+      .slice(0, 12)
+      .map((x) => x.t);
 
     const playableComps = comps.filter((c) =>
       c.players >= MIN_PLAYERS_TO_PLAY && c.topApps >= MIN_TOP_APPEARANCES);
@@ -366,6 +404,17 @@ ${sections}
     if (!isIndexable) noindexed++;
   }
 
+  console.log(`\n  ✓ ${written} team pages written to public/teams/`);
+
+  // The hub and the sitemap describe the WHOLE set, so they are only correct
+  // after a whole build. Writing them from a one-team run publishes a hub
+  // linking one club and a sitemap that drops the other 354 — which is worse
+  // than not regenerating them at all.
+  if (only.length) {
+    console.log(`    hub and sitemap left alone (partial build)\n`);
+    return;
+  }
+
   // The hub, so nothing is orphaned, and a sitemap of what deserves indexing.
   const built = list
     .filter((t) => byClub.has(t.club_id))
@@ -381,7 +430,6 @@ ${sections}
     urls.map((u) => `  <url><loc>${u}</loc><lastmod>${today}</lastmod></url>`).join('\n') +
     `\n</urlset>\n`);
 
-  console.log(`\n  ✓ ${written} team pages written to public/teams/`);
   console.log(`  ✓ public/teams/index.html — hub linking all ${built.length}`);
   console.log(`  ✓ public/sitemap-teams.xml — ${urls.length} indexable URLs`);
   console.log(`    ${written - noindexed} indexable · ${noindexed} noindex,follow (too thin)\n`);

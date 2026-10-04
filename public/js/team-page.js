@@ -63,11 +63,16 @@
       return 'team_' + T.slug + '_' + picked.map(function (c) { return c.dataset.slug; }).join('+');
     }
 
+    var sel = null;          // assigned below, read by paint()
+
     function paint() {
       var picked = chosen();
       var isAll = picked.length === each.length;
       all.classList.toggle('on', isAll);
       all.setAttribute('aria-pressed', String(isAll));
+      // Lets the stylesheet show "All" as the active segment while nothing has
+      // actually been narrowed, instead of lighting up every competition.
+      box.classList.toggle('every', isAll);
       each.forEach(function (c) {
         c.setAttribute('aria-pressed', String(c.classList.contains('on')));
       });
@@ -91,11 +96,13 @@
       });
 
       note.textContent = isAll
-        ? 'Playing ' + T.name + ' across all ' + each.length +
-          ' competitions — tap one to narrow it down.'
-        : 'Playing ' + T.name + ' in ' +
-          picked.map(function (c) { return c.dataset.comp; }).join(' and ') +
-          ' only — tap another to add it.';
+        ? 'Playing all ' + each.length + ' competitions.'
+        : 'Playing ' + picked.map(function (c) { return c.dataset.comp; }).join(' and ') + ' only.';
+
+      // Mirror into the select. A subset of two or more has no single option
+      // to show, so it falls back to "All competitions" rather than lying
+      // about which one is active — the note underneath says what is really on.
+      if (sel) sel.value = (picked.length === 1 && !isAll) ? picked[0].dataset.slug : '';
     }
 
     all.addEventListener('click', function () {
@@ -105,6 +112,25 @@
       each.forEach(function (c) { c.classList.add('on'); });
       paint();
     });
+
+    // ── the mobile face of the same control ────────────────────────────────
+    //
+    // Six segments is most of a phone viewport, so narrow screens get a select
+    // instead. It is NOT a second copy of the state: it writes to the same
+    // buttons and then repaints, so there is only ever one answer to "which
+    // competitions are on" and no way for the two to disagree.
+    //
+    // The select is single-choice by design. Multi-select on a phone means a
+    // multiple-size listbox, which is worse than the pills it replaced; the
+    // segmented control keeps the subset behaviour where there is room for it.
+    sel = $('compSelect');
+    if (sel) {
+      sel.addEventListener('change', function () {
+        var want = sel.value;
+        each.forEach(function (o) { o.classList.toggle('on', !want || o.dataset.slug === want); });
+        paint();
+      });
+    }
 
     each.forEach(function (c) {
       c.addEventListener('click', function () {
@@ -157,7 +183,9 @@
       if (p.g) bits.push(num(p.g) + ' goal' + (p.g === 1 ? '' : 's'));
       if (p.f) bits.push(p.f === p.t ? p.f : p.f + ' to ' + p.t);
       $('potdLine').textContent = bits.join(' · ') + ' for ' + T.name + '.';
-      btn.textContent = 'Play a game about ' + T.name;
+      // The strip is one line tall; "Play a game about Brighton and Hove
+      // Albion" wraps it to three on a phone.
+      btn.textContent = 'Play';
       btn.onclick = function () {
         var first = document.querySelector('a.game-go[href]');
         if (first) first.click(); else location.hash = '#play';
@@ -192,18 +220,30 @@
         // Leaderboard
         if (boardBox) {
           if (!d.leaderboard || !d.leaderboard.length) {
-            boardBox.innerHTML = '<p class="empty">Nobody has posted a score on ' +
-              esc(T.name) + ' yet. Play a game above and you are top of the board.</p>';
+            // Framed as an opportunity, not as a vacancy. "Nobody has played
+            // this" tells a first-time visitor the site is empty.
+            boardBox.innerHTML = '<p class="empty">No ' + esc(T.name) +
+              ' scores yet — play a game and the top spot is yours.</p>' +
+              '<a class="mini" href="#play">Play ' + esc(T.name) + ' &rarr;</a>';
           } else {
-            boardBox.innerHTML = '<div class="boards">' + d.leaderboard.map(function (b) {
-              return '<div class="board"><h4>' + esc(gameName(b.game_type)) + '</h4><ol>' +
-                b.entries.map(function (e) {
-                  return '<li>' + esc(e.name) +
-                    ' <span class="pts">' + num(e.score) + '</span></li>';
-                }).join('') + '</ol></div>';
-            }).join('') + '</div>' +
-            '<p class="empty">' + num(d.plays) + ' round' + (d.plays === 1 ? '' : 's') +
-            ' played on ' + esc(T.name) + ' so far.</p>';
+            // ONE board, not a panel per game type.
+            //
+            // Splitting by game produced three or four bordered boxes holding
+            // one name each, which made a quiet club look abandoned rather
+            // than new. The busiest game is shown, the rest are a line of
+            // text, and the full table is a click away.
+            var top = d.leaderboard[0];
+            var rest = d.leaderboard.slice(1)
+              .filter(function (b) { return b.entries.length; })
+              .map(function (b) { return gameName(b.game_type); });
+            boardBox.innerHTML =
+              '<div class="board"><h3>' + esc(gameName(top.game_type)) + '</h3><ol>' +
+              top.entries.slice(0, 5).map(function (e) {
+                return '<li>' + esc(e.name) + '<span class="pts">' + num(e.score) + '</span></li>';
+              }).join('') + '</ol></div>' +
+              '<p class="empty" style="margin-top:9px">' + num(d.plays) + ' round' +
+              (d.plays === 1 ? '' : 's') + ' played on ' + esc(T.name) +
+              (rest.length ? ' · also ' + rest.join(', ') : '') + '</p>';
           }
         }
 
@@ -211,17 +251,17 @@
         // in the markup around this box, not here.
         if (commBox) {
           if (!d.community || !d.community.length) {
-            commBox.innerHTML = '<p class="empty">No community games about ' + esc(T.name) +
-              ' yet — there are ' + num(d.community_total) +
-              ' across the site. Yours would be the first for this club.</p>';
+            commBox.innerHTML = '<p class="empty">Nothing for ' + esc(T.name) +
+              ' yet — community games are built by players from the same database.</p>' +
+              '<a class="mini" href="/community/?build=1">Build one &rarr;</a>';
           } else {
-            commBox.innerHTML = '<ul class="community">' + d.community.map(function (g) {
+            commBox.innerHTML = '<ul class="community">' + d.community.slice(0, 4).map(function (g) {
               return '<li><a href="/community/?game=' + encodeURIComponent(g.id) + '">' +
                 '<h4>' + esc(g.title) + '</h4>' +
-                (g.description ? '<p>' + esc(String(g.description).slice(0, 130)) + '</p>' : '') +
                 '<span class="meta">' + esc(gameName(g.game_type)) + ' · ' +
                 num(g.plays) + ' play' + (g.plays === 1 ? '' : 's') + '</span></a></li>';
-            }).join('') + '</ul>';
+            }).join('') + '</ul>' +
+            '<a class="mini" href="/community/?build=1">Build a ' + esc(T.name) + ' game &rarr;</a>';
           }
         }
       })

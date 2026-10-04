@@ -481,7 +481,12 @@ select:focus {
   font-size: 15px;
   border-bottom: 1px solid rgba(255,255,255,0.04);
 }
-@media (max-width: 640px) {
+/* The hamburger takes over at 900px, not 640px.
+   The nav was four links when 640 was chosen; it is now seven — Home, Daily,
+   Games, Competitions, Teams, Ask, Leaderboard, Community — and between about
+   640 and 900 they ran past the right edge and gave EVERY page on the site a
+   horizontal scrollbar at tablet width. The page content was never the cause. */
+@media (max-width: 900px) {
   .ts-nav-links, .ts-nav-right { display: none; }
   .ts-nav-hamburger { display: flex; margin-left: auto; }
   .ts-nav.mobile-open .ts-nav-mobile { display: flex; }

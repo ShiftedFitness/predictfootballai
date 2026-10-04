@@ -113,10 +113,10 @@ export default {
   // Counts from TeleStats' own database (netlify/functions/analytics-stats.js). No cookies or ad blockers involved.
   firstParty: {
     title: 'What people actually did (TeleStats database)',
-    description: 'From Supabase. Accounts = sign-ups in Supabase Auth (an anonymous player who signs up keeps their old row, so ts_users dates can’t be used). Payments = Stripe webhook rows in ts_payments.',
+    description: 'From Supabase. Accounts = sign-ups in Supabase Auth (an anonymous player who signs up keeps their old row, so ts_users dates can’t be used). Payments = Stripe webhook rows in ts_payments. Anonymous player rows are created for any browser that runs the site’s JavaScript, including search-engine crawlers that GA4 filters out (28 days to 3 Oct: 416 rows vs 39 GA4 users), so read them as an upper bound, not as people.',
     rows: [
       { key: 'newAccounts', label: 'Accounts created (incl. Fives sign-ups)', primary: true },
-      { key: 'newAnonPlayers', label: 'New anonymous players' },
+      { key: 'newAnonPlayers', label: 'New anonymous player rows (inflated by crawlers, see note)' },
       { key: 'savedSessions', label: 'Game sessions saved' },
       { key: 'activePlayers', label: 'Players with a saved session' },
       { key: 'dailyPlays', label: 'Daily plays recorded' },
@@ -135,7 +135,7 @@ export default {
           { key: 'sessions', label: 'Sessions' },
           { key: 'players', label: 'Players' },
         ],
-        note: 'Only plays saved to `ts_game_sessions`. As of Oct 2026 most plays are not being saved (about 220 sessions since February against hundreds of new players a month), so treat this as a sample of who plays what, not a count. GA4’s “Plays by game” is the volume.',
+        note: 'Plays saved to `ts_game_sessions`. This matched GA4 when checked in Oct 2026 (28 days to 3 Oct: 3 saved sessions, 2 GA4 game completions).',
       },
     ],
     snapshot: [

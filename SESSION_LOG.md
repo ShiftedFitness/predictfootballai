@@ -2889,7 +2889,13 @@ changes. `/seo-review` in a Claude session reviews it and proposes changes for a
 - [x] Workflow (Sun 07:11 UTC), `/seo-review` command, docs/analytics-automation.md, package scripts, deploy-skip, CLAUDE.md
 - [ ] Owner: service account access, GA4 `game_type` custom dimension, Netlify + GitHub secrets, push, first run
 
-## Finding: most plays aren't saved
-`ts_game_sessions` has ~220 rows since Feb; only 3 in the last 28 days against 416 new anonymous players. RLS allows
-inserts, so `TSData.logGameSession` is failing or being skipped for most players. Not fixed in this session (would also
-affect free-play limits via `ts_daily_plays`). Flagged to the owner.
+## Finding (corrected after the first real GA4 pull)
+First guess was that most plays weren't being saved. Wrong: GA4 shows 2 `game_complete` and the DB 3 sessions in the
+28 days to 3 Oct, so saving works. What's inflated is the anonymous player count: 416 new `ts_users` rows vs 39 GA4
+users. Most likely crawlers that execute JS (Googlebot does) hitting `ensure-anon-user`. Report labels it accordingly.
+Real traffic is small: 39 users, 56 sessions, 7 game starts, 12 Ask questions, 1 sign-up submit in 28 days.
+
+## Local setup done
+- Service-account key (new key on `mft-analytics-reader@malagafootballtours`) at `~/.config/shiftedlabs/ga-service-account.json`
+  (chmod 600). It sees GA4 TeleStats = property **550795096**. Search Console: not yet shared for telestats.
+- `.env.local`: GA4_PROPERTY_ID, GOOGLE_SERVICE_ACCOUNT_FILE, ANALYTICS_STATS_URL/TOKEN. First local report written.

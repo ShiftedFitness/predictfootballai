@@ -113,6 +113,17 @@
   [headers.values]
     Cache-Control = "public, max-age=0, must-revalidate"
 
+# The global stylesheet, for the same reason as /js/*.
+#
+# It is the other half of the contract between every page and the shared code:
+# a nav breakpoint lives in here, and a visitor holding a cached copy gets the
+# old layout against new markup. It is one small file; correctness beats the
+# bytes.
+[[headers]]
+  for = "/telestats-theme.css"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
 # A club we now present as one but FBref holds as two. The old URL was indexed
 # and may be linked, so it redirects rather than 404s — 301 so the surviving
 # page inherits whatever the old one had earned.

@@ -56,11 +56,11 @@ Report-only commits don't trigger a Netlify deploy (`ignore` in `netlify.toml`).
    (reads `.env` / `.env.local`; set `GOOGLE_SERVICE_ACCOUNT_FILE` to the key
    file kept **outside** the repo).
 
-## Known data gap (Oct 2026)
-`TSData.logGameSession` should save every finished round to
-`ts_game_sessions`, but only ~220 sessions exist since February (3 in the
-28 days to 3 Oct, against 416 new anonymous players). Until that's fixed, the
-database per-game table is a sample and GA4 is the volume.
+## Reading the database numbers (checked Oct 2026)
+- **Game sessions agree with GA4**: 28 days to 3 Oct, 3 rows in `ts_game_sessions` vs 2 GA4 `game_complete`.
+- **Anonymous player rows are inflated**: 416 new anonymous `ts_users` rows vs 39 GA4 users in the same window.
+  A row is created for any browser that runs the site's JavaScript, including crawlers (e.g. Googlebot renders
+  JS) that GA4 filters out. Treat that count as an upper bound, not as people.
 
 ## Security
 - Google credentials never reach the analysis step; scopes are read-only.

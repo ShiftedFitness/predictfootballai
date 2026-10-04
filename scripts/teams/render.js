@@ -1,10 +1,6 @@
 /**
  * render.js — the HTML of a team page.
  *
- * Split out of build.js, which is now only about fetching and folding the
- * data. The page had grown to the point where the query code was hard to find
- * inside it.
- *
  * STATIC WHERE IT MATTERS.
  *
  * Everything a search engine needs — the players, the records, the game links,
@@ -12,6 +8,25 @@
  * the leaderboard and the community games, both of which change whenever
  * somebody plays or builds something and neither of which anybody arrives from
  * a search for. Those load from /team-extras after paint.
+ *
+ * SPOILERS AND SEARCH, WHICH PULL IN OPPOSITE DIRECTIONS.
+ *
+ * The records are the reason a stranger finds this page — "Arsenal top
+ * goalscorers" is a real query with a definitive answer we hold. They are also
+ * the answers to our own games: showing a ranked list of Arsenal scorers above
+ * a button marked "guess Arsenal's top scorer" is giving the game away.
+ *
+ * The resolution is that the records are FULLY SERVER-RENDERED and CLOSED BY
+ * DEFAULT, inside native <details>. Google reads the markup; a visitor sees a
+ * labelled, warned, one-click disclosure. There is no crawler-specific
+ * content anywhere on this page — the bytes Googlebot receives are the bytes a
+ * person receives.
+ *
+ * The corollary is a rule the rest of the page has to keep: no player name,
+ * ranking or record may appear OUTSIDE those disclosures. Not in a heading,
+ * not in a card preview, not in an Ask suggestion, not in the structured data.
+ * The one deliberate exception is the mystery player, which is a game of its
+ * own and reveals on a click.
  */
 
 const colours = require('./colours');
@@ -34,7 +49,6 @@ const listOf = (xs) => xs.length <= 1 ? (xs[0] || '')
 
 /**
  * Up to three letters for the badge. "Plymouth Argyle" -> PA, "Everton" -> EVE.
- * Initials of a multi-word name, otherwise the opening letters of a single one.
  */
 function initials(name) {
   const words = String(name).replace(/[^A-Za-z\s]/g, ' ').split(/\s+/).filter(Boolean);
@@ -45,8 +59,8 @@ function initials(name) {
 /**
  * A shield in the club's colours with its initials on it.
  *
- * Explicitly NOT a crest. A real badge is somebody's trademark, and 126 of
- * these clubs have a colour derived from a hash of the slug rather than a
+ * Explicitly NOT a crest. A real badge is somebody's trademark, and a quarter
+ * of these clubs have a colour derived from a hash of the slug rather than a
  * researched one. So it is a placeholder that looks like it belongs to the
  * club, and nothing on the page calls it a badge of the club.
  */
@@ -61,7 +75,7 @@ function shield(team, c) {
     </svg>`;
 }
 
-/** A "?" on a shirt, for the player of the day before it is revealed. */
+/** A "?" on a shirt, for the mystery player before it is revealed. */
 function mysteryShirt(c) {
   return `<svg class="shirt" viewBox="0 0 64 64" aria-hidden="true">
       <path d="M22 8 32 14 42 8l14 8-6 12-6-3v31H20V25l-6 3-6-12Z"
@@ -73,12 +87,47 @@ function mysteryShirt(c) {
 
 // ─── the games ──────────────────────────────────────────────────────────────
 
+/**
+ * Five games, five identities.
+ *
+ * They used to be five dark boxes with the same shape, the same length of
+ * sentence and the same "Play now" link — indistinguishable at a glance, which
+ * made the most interesting thing on the page look like a table of contents.
+ * Each now carries its own mark, drawn from what the game actually does: two
+ * arrows for a comparison, letters for the alphabet, a formation for the
+ * eleven, a question for the mystery, a ticked list for the quiz.
+ *
+ * The icons are inline SVG — no sprite, no font, no request. `currentColor`
+ * lets each card tint its own mark without a second copy of the markup.
+ */
 const GAMES = [
-  { key: 'hol',      name: 'Higher or Lower', path: '/games/hol.html',      blurb: 'Which player has more appearances?' },
-  { key: 'alpha',    name: 'Player Alphabet', path: '/games/alpha.html',    blurb: 'Name a player for every letter of the alphabet.' },
-  { key: 'xi',       name: 'Starting XI',     path: '/games/xi.html',       blurb: 'Build the strongest eleven you can.' },
-  { key: 'whoami',   name: 'Who Am I?',       path: '/games/whoami.html',   blurb: 'Guess the player from five clues.' },
-  { key: 'quiz',     name: 'Trivia Quiz',     path: '/games/quiz.html',     blurb: 'Ten questions from this club’s record.' },
+  {
+    key: 'hol', name: 'Higher or Lower', path: '/games/hol.html',
+    blurb: 'Who made more appearances?',
+    icon: '<path d="M7 15V5m0 0L3.5 8.5M7 5l3.5 3.5" /><path d="M17 9v10m0 0 3.5-3.5M17 19l-3.5-3.5" />',
+  },
+  {
+    key: 'alpha', name: 'Player Alphabet', path: '/games/alpha.html',
+    blurb: 'Name a player for every letter.',
+    icon: '<path d="M3 18 7 6l4 12M4.3 14.5h5.4" /><path d="M14 6h6l-6 12h6" />',
+  },
+  {
+    key: 'xi', name: 'Starting XI', path: '/games/xi.html',
+    blurb: 'Build your ultimate eleven.',
+    icon: '<circle cx="12" cy="4.5" r="1.6"/><circle cx="5" cy="11" r="1.6"/><circle cx="12" cy="11" r="1.6"/>' +
+          '<circle cx="19" cy="11" r="1.6"/><circle cx="7.5" cy="18" r="1.6"/><circle cx="16.5" cy="18" r="1.6"/>' +
+          '<path d="M12 6.1v3.3M6.2 12.3 7.1 16.4M17.8 12.3l-.9 4.1"/>',
+  },
+  {
+    key: 'whoami', name: 'Who Am I?', path: '/games/whoami.html',
+    blurb: 'Five clues. One footballer.',
+    icon: '<circle cx="12" cy="12" r="9"/><path d="M9.3 9.3a2.8 2.8 0 1 1 3.4 3.9v1.3"/><circle cx="12" cy="17.4" r=".9" fill="currentColor" stroke="none"/>',
+  },
+  {
+    key: 'quiz', name: 'Trivia Quiz', path: '/games/quiz.html',
+    blurb: 'Ten questions. How many can you nail?',
+    icon: '<path d="m3 6.5 2 2 3-3.5M3 13l2 2 3-3.5M3 19.5l2 2 3-3.5"/><path d="M12 6h9M12 13h9M12 20h9"/>',
+  },
 ];
 
 // ─── the page ───────────────────────────────────────────────────────────────
@@ -92,61 +141,103 @@ function render(team, d, related, opts) {
   const url = `${SITE}/teams/${team.slug}/`;
   const compList = comps.map((x) => x.competition_name);
   const playableNames = playable.map((x) => x.competition_name);
-
   const indexable = team.players >= teams.INDEXABLE_MIN_PLAYERS && playable.length > 0;
 
   // The link a game card points at before any JavaScript runs: every
-  // competition the club has a playable game in. That is also what the
-  // competition chips start on, so the static href and the scripted one agree.
+  // competition the club has a playable game in. That is also what the filter
+  // starts on, so the static href and the scripted one agree.
   const defaultScope = teams.scopeIdForMany(team.slug, playableNames);
 
+  // ── metadata ─────────────────────────────────────────────────────────────
+  // The title leads with what people search for — "Arsenal stats", "Arsenal
+  // top scorers" — rather than with what we would like them to do. The quizzes
+  // are the second half of the sentence, not the first.
+  const title = `${team.name} Stats, Top Scorers, Records & Quizzes | TeleStats`;
+  const coverage = `${season(span.first)}–${season(span.last)}`;
   const description =
-    `Play ${team.name} football quizzes and trivia games built from ` +
-    `${num(team.players)} players and ${num(totals.appearances)} appearances in ` +
-    `${listOf(compList)}. Higher or Lower, Starting XI, Player Alphabet, Who Am I and a trivia quiz.`;
-
-  const title = `${team.name} Football Quiz & Trivia Games | TeleStats`;
+    `${team.name} player records from a real football database: ${num(team.players)} players, ` +
+    `${num(totals.appearances)} appearances and ${num(totals.goals)} goals across ` +
+    `${listOf(compList)}, ${coverage}. Appearance leaders, top scorers, and five free ` +
+    `${team.name} quizzes built from the same data.`;
 
   // ── games ────────────────────────────────────────────────────────────────
   // &play=1 so the link goes to the game, not to a picker offering every other
-  // club — which is what it did before, and read as if the link went nowhere.
-  const gameCards = !defaultScope ? '' : GAMES.map((g) => `<li class="game">
-          <a class="game-go" data-path="${esc(g.path)}"
+  // club. The whole card is the anchor, so the target is the card, not a
+  // five-character "Play now" at the bottom of it.
+  const gameCards = !defaultScope ? '' : GAMES.map((g) => `<li>
+          <a class="game-go" data-game="${esc(g.key)}" data-path="${esc(g.path)}"
              href="${esc(g.path)}?scope=${encodeURIComponent(defaultScope)}&amp;play=1">
-            <h3>${esc(team.name)} ${esc(g.name)}</h3>
-            <p>${esc(g.blurb)}</p>
-            <span class="go">Play now &rarr;</span>
+            <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"
+                 aria-hidden="true">${g.icon}</svg>
+            <span class="gname">${esc(g.name)}</span>
+            <span class="gblurb">${esc(g.blurb)}</span>
+            <span class="gplay">Play<svg viewBox="0 0 16 16" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
+              ><path d="M3 8h9M9 4.5 12.5 8 9 11.5"/></svg></span>
           </a>
         </li>`).join('\n        ');
 
-  // ── competition chips ────────────────────────────────────────────────────
-  // Only competitions with a playable game get a chip. Offering "Plymouth
-  // Argyle in the Championship" when four players have one appearance each
-  // produces a game with nothing to ask, which is worse than not offering it.
-  const chips = playable.length < 2 ? '' : `<div class="chips" id="compChips" role="group"
-       aria-label="Choose which competitions to play">
-        <button type="button" class="chip all on" data-all="1" aria-pressed="true">All competitions</button>
-        ${playable.map((x) => `<button type="button" class="chip on"
-                data-comp="${esc(x.competition_name)}"
-                data-slug="${esc(teams.competitionSlug(x.competition_name))}"
-                aria-pressed="true">${esc(x.competition_name)}</button>`).join('\n        ')}
-      </div>
-      <p class="chip-note" id="chipNote"></p>`;
+  // ── competition filter ───────────────────────────────────────────────────
+  // One source of truth, two faces. The buttons hold the state — team-page.js
+  // reads .chip.on and writes the game hrefs from it — and the select mirrors
+  // them for narrow screens, where six wrapping pills were most of a phone
+  // viewport. Only one is visible at a time; the select drives the buttons so
+  // there is never a second copy of the state to keep in step.
+  const filter = playable.length < 2 ? '' : `<div class="filter">
+        <div class="seg every" id="compChips" role="group" aria-label="Competitions to play">
+          <button type="button" class="chip all on" data-all="1" aria-pressed="true">All</button>
+          ${playable.map((x) => `<button type="button" class="chip on"
+                  data-comp="${esc(x.competition_name)}"
+                  data-slug="${esc(teams.competitionSlug(x.competition_name))}"
+                  aria-pressed="true">${esc(x.competition_name)}</button>`).join('\n          ')}
+        </div>
+        <label class="sel" for="compSelect">
+          <span class="vh">Competition to play</span>
+          <select id="compSelect">
+            <option value="">All competitions</option>
+            ${playable.map((x) => `<option value="${esc(teams.competitionSlug(x.competition_name))}"
+                    >${esc(x.competition_name)}</option>`).join('\n            ')}
+          </select>
+        </label>
+        <p class="filter-note" id="chipNote"></p>
+      </div>`;
 
-  // ── player of the day ────────────────────────────────────────────────────
-  // Chosen in the browser from a list baked into the page, seeded on today's
-  // date. A build-time choice would be frozen until the next deploy, and a
-  // server call would be a request for something nobody searches for. This
-  // changes daily, is the same for everyone, and works with no network.
-  const potdPool = leaders.slice(0, 25).map((p) => ({
-    n: p.player_name, a: p.appearances, g: p.goals,
-    f: season(p.first_season), t: season(p.last_season),
-  }));
+  // The mystery player draws from the appearance leaders, which is the one
+  // place a record legitimately leaves the disclosures — it is a game, and it
+  // reveals on a click like every other.
+  //
+  // SHUFFLED, deterministically, before it is written into the page. The pool
+  // has to be in the HTML for the daily pick to work offline and without a
+  // request, and in leader order it was a ranked list of the club's most-used
+  // players sitting in view-source — the answer to the appearances game, for
+  // anyone who thought to look. Shuffling removes the ranking; the numbers are
+  // still there, so this raises the effort rather than making it impossible,
+  // and nothing is rendered either way.
+  //
+  // The seed is the slug, so the order is stable across builds: a pool that
+  // reshuffled every deploy would change the day's mystery player mid-day.
+  const potdPool = (() => {
+    const pool = leaders.slice(0, 25).map((p) => ({
+      n: p.player_name, a: p.appearances, g: p.goals,
+      f: season(p.first_season), t: season(p.last_season),
+    }));
+    let h = 2166136261;
+    for (let i = 0; i < team.slug.length; i++) {
+      h ^= team.slug.charCodeAt(i); h = Math.imul(h, 16777619);
+    }
+    for (let i = pool.length - 1; i > 0; i--) {
+      h = Math.imul(h ^ i, 16777619);
+      const j = (h >>> 0) % (i + 1);
+      [pool[i], pool[j]] = [pool[j], pool[i]];
+    }
+    return pool;
+  })();
 
-  // ── stats tables ─────────────────────────────────────────────────────────
+  // ── records: server-rendered, closed, warned ─────────────────────────────
   const leaderRows = leaders.map((p, i) => `<tr>
             <td class="rank">${i + 1}</td>
-            <td>${esc(p.player_name)}</td>
+            <td class="who">${esc(p.player_name)}</td>
             <td class="num">${num(p.appearances)}</td>
             <td class="num">${num(p.goals)}</td>
             <td class="yr">${season(p.first_season)}–${season(p.last_season)}</td>
@@ -154,13 +245,15 @@ function render(team, d, related, opts) {
 
   const scorerRows = scorers.map((p, i) => `<tr>
             <td class="rank">${i + 1}</td>
-            <td>${esc(p.player_name)}</td>
+            <td class="who">${esc(p.player_name)}</td>
             <td class="num">${num(p.goals)}</td>
             <td class="num">${num(p.appearances)}</td>
+            <td class="yr">${season(p.first_season)}–${season(p.last_season)}</td>
           </tr>`).join('\n        ');
 
   const compRows = comps.map((x) => `<tr>
-            <td>${esc(x.competition_name)}</td>
+            <td class="who"><a href="/competitions/${esc(teams.competitionSlug(x.competition_name))}/"
+              >${esc(x.competition_name)}</a></td>
             <td class="num">${num(x.players)}</td>
             <td class="yr">${season(x.first_season)}–${season(x.last_season)}</td>
             <td class="num">${x.seasons}</td>
@@ -169,17 +262,29 @@ function render(team, d, related, opts) {
           </tr>`).join('\n        ');
 
   // ── ask ──────────────────────────────────────────────────────────────────
+  // Suggestions are deliberately CROSS-CLUB or by nationality. "Top scorers for
+  // Arsenal" was one of these, and one click answered the Arsenal top-scorer
+  // game sitting a few hundred pixels above it.
   const askPartner = (related[0] && related[0].name) || 'Manchester United';
-  const topComp = withArticle((comps[0] && comps[0].competition_name) || 'Premier League');
+  const askPartner2 = (related[1] && related[1].name) || 'Chelsea';
   const askExamples = [
     `Who has played for both ${team.name} and ${askPartner}?`,
-    `Top scorers for ${team.name} in ${topComp}`,
-    `Which English players have the most appearances for ${team.name}?`,
+    `Which ${team.name} players also played for ${askPartner2}?`,
+    `Which clubs did ${team.name}'s players come from?`,
   ].map((q) => `<button type="button" data-q="${esc(q)}">${esc(q)}</button>`).join('\n          ');
 
-  const relatedLinks = related.map((r) =>
-    `<a href="/teams/${esc(r.slug)}/">${esc(r.name)}</a>`).join('\n          ');
+  // ── related ──────────────────────────────────────────────────────────────
+  // Eight, not thirty. The rest stay crawlable from /teams/ and the club's own
+  // competition pages, both linked here, so nothing is orphaned by trimming.
+  const nearby = related.slice(0, 8);
+  const relatedLinks = nearby.map((r) => {
+    const rc = colours.forTeam(r);
+    return `<a href="/teams/${esc(r.slug)}/" style="--club:${rc.primary}"><i></i>${esc(r.name)}</a>`;
+  }).join('\n          ');
 
+  // ── structured data ──────────────────────────────────────────────────────
+  // Only what is honestly true, and nothing that leaks a record. The FAQ answer
+  // describes the page's scope; it does not name a player or a ranking.
   const jsonLd = {
     '@context': 'https://schema.org',
     '@graph': [
@@ -192,20 +297,29 @@ function render(team, d, related, opts) {
         ],
       },
       { '@type': 'SportsTeam', name: team.name, sport: 'Association football', url },
-      // The explainer is a real question a first-time visitor asks, answered on
-      // the page in the same words. Nothing here is invented for the markup.
       {
         '@type': 'FAQPage',
-        mainEntity: [{
-          '@type': 'Question',
-          name: `What is the ${team.name} page on TeleStats?`,
-          acceptedAnswer: {
-            '@type': 'Answer',
-            text: `Free ${team.name} football quizzes and trivia games generated from real ` +
-                  `appearance and goal records for ${num(team.players)} players across ` +
-                  `${listOf(compList)}. No sign-up is needed to play.`,
+        mainEntity: [
+          {
+            '@type': 'Question',
+            name: `What ${team.name} records does TeleStats hold?`,
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: `Appearance and goal records for ${num(team.players)} ${team.name} players ` +
+                    `across ${listOf(compList)}, covering ${coverage} — ` +
+                    `${num(totals.appearances)} appearances and ${num(totals.goals)} goals in total.`,
+            },
           },
-        }],
+          {
+            '@type': 'Question',
+            name: `Are the ${team.name} games free?`,
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: `Yes. All five ${team.name} games are free to play and need no account. ` +
+                    `Signing in keeps your scores and puts you on the club's leaderboard.`,
+            },
+          },
+        ],
       },
     ],
   };
@@ -219,173 +333,333 @@ function render(team, d, related, opts) {
 <title>${esc(title)}</title>
 <meta name="description" content="${esc(description)}">
 <link rel="canonical" href="${url}">
-${indexable ? '' : '<meta name="robots" content="noindex,follow">\n'}<meta name="theme-color" content="${c.primary}">
+${indexable ? '' : '<meta name="robots" content="noindex,follow">\n'}<meta name="theme-color" content="#0B0F12">
 <meta property="og:type" content="website">
 <meta property="og:title" content="${esc(title)}">
 <meta property="og:description" content="${esc(description)}">
 <meta property="og:url" content="${url}">
 <meta property="og:site_name" content="TeleStats">
+<meta property="og:locale" content="en_GB">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="${esc(title)}">
 <meta name="twitter:description" content="${esc(description)}">
 <link rel="stylesheet" href="/telestats-theme.css">
 <style>
-  :root { --club: ${c.primary}; --club-2: ${c.secondary}; }
-  body { margin: 0; }
-  .wrap { max-width: 940px; margin: 0 auto; padding: 0 18px 60px; }
+  /* ── tokens ──────────────────────────────────────────────────────────────
+     One scale for space, one for radius, three surfaces, three text weights.
+     The old page reached for a bordered card every time it needed to group two
+     things, which is how it ended up as a column of grey rectangles. Here a
+     border is the exception: grouping is done with surface and space, and a
+     hairline only appears where something genuinely has to be divided. */
+  :root {
+    --club: ${c.primary};
+    --club-2: ${c.secondary};
+    --bg: #0A0E11;
+    --s1: #11161B;          /* raised surface  */
+    --s2: #161C23;          /* hover / nested  */
+    --line: rgba(255,255,255,.07);
+    --line-2: rgba(255,255,255,.12);
+    --fg: #EEF3F7;
+    --fg-2: #9FAEBB;
+    --fg-3: #6B7A87;
+    --cyan: var(--accent-cyan, #00E5FF);
+    --r: 12px;
+    --r-sm: 9px;
+    --mono: 'Space Mono', ui-monospace, SFMono-Regular, monospace;
+  }
+
+  body { margin: 0; background: var(--bg); color: var(--fg); }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 0 20px 64px; }
+  .vh { position: absolute; width: 1px; height: 1px; overflow: hidden;
+        clip: rect(0 0 0 0); white-space: nowrap; }
 
   /* Fallback header. TSNav removes .ts-header and prepends the real one, so
      this is what a visitor sees before the script runs, and all a search
-     engine ever sees. Without it the page opened with no way back to the
-     site and read as if it belonged somewhere else. */
-  .ts-header { border-bottom: 1px solid var(--rule, #24313A); background: var(--bg-card, #131A20); }
-  .ts-header .inner { max-width: 940px; margin: 0 auto; padding: 11px 18px;
-                      display: flex; align-items: center; gap: 18px; }
-  .ts-header .brand { font-weight: 700; letter-spacing: .04em; color: var(--text-primary, #F2F5F7);
-                      text-decoration: none; font-family: 'Space Mono', ui-monospace, monospace; }
+     engine ever sees. */
+  .ts-header { border-bottom: 1px solid var(--line); background: var(--s1); }
+  .ts-header .inner { max-width: 860px; margin: 0 auto; padding: 11px 20px;
+                      display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+  .ts-header .brand { font-weight: 700; letter-spacing: .04em; color: var(--fg);
+                      text-decoration: none; font-family: var(--mono); }
   .ts-header nav { display: flex; gap: 15px; flex-wrap: wrap; }
-  .ts-header nav a { font-size: .82rem; color: var(--text-secondary, #9FB0BC); text-decoration: none; }
-  .ts-header nav a:hover { color: var(--accent, #00E5FF); }
+  .ts-header nav a { font-size: .82rem; color: var(--fg-2); text-decoration: none; }
+  .ts-header nav a:hover { color: var(--cyan); }
 
-  nav.crumbs { font-size: .78rem; color: var(--text-secondary); margin: 16px 0 12px; }
-  nav.crumbs a { color: var(--accent); text-decoration: none; }
+  nav.crumbs { font-size: .76rem; color: var(--fg-3); margin: 16px 0 14px; }
+  nav.crumbs a { color: var(--fg-2); text-decoration: none; }
+  nav.crumbs a:hover { color: var(--cyan); }
 
-  /* Hero: scarf stripes, shield, name. The point is that landing here feels
-     like arriving somewhere about this club. */
-  .hero { position: relative; overflow: hidden; border-radius: 12px; padding: 22px 22px 20px;
-          border: 1px solid var(--rule, #24313A); margin-bottom: 8px;
-          background:
-            linear-gradient(160deg, color-mix(in srgb, var(--club) 30%, transparent), transparent 62%),
-            var(--bg-card, #131A20); }
-  .scarf { position: absolute; inset: 0 0 auto 0; height: 6px;
-           background: repeating-linear-gradient(90deg,
-             var(--club) 0 26px, var(--club-2) 26px 52px); }
-  .hero-row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
-  .crest { width: 52px; height: 60px; flex: 0 0 auto; filter: drop-shadow(0 2px 6px rgba(0,0,0,.45)); }
-  .hero h1 { font-size: 1.65rem; line-height: 1.2; margin: 0 0 5px; }
-  .sub { color: var(--text-secondary); margin: 0; font-size: .9rem; }
-  .sub a.complink { color: var(--text-secondary); text-decoration: underline;
-                    text-decoration-color: rgba(255,255,255,.22); }
-  .sub a.complink:hover { color: var(--accent); }
-  .scope-note { color: var(--text-muted); font-size: .76rem; margin: 6px 0 0; }
-  .scope-note a { color: var(--accent); }
+  /* ── hero ───────────────────────────────────────────────────────────────
+     Compact on purpose. The club colour is a 3px rule and the crest, not a
+     gradient over the whole block — enough to say whose page this is without
+     turning the top of every page into a different colour wash. */
+  .hero { display: flex; align-items: center; gap: 16px; padding: 4px 0 18px;
+          border-bottom: 1px solid var(--line); margin-bottom: 20px; }
+  .hero .crest { width: 46px; height: 53px; flex: 0 0 auto;
+                 filter: drop-shadow(0 2px 7px rgba(0,0,0,.5)); }
+  .hero h1 { font-size: 1.55rem; line-height: 1.18; margin: 0 0 3px;
+             letter-spacing: -.012em; font-weight: 800; }
+  .hero .tag { color: var(--fg-2); font-size: .86rem; margin: 0; }
+  .figs { display: flex; gap: 22px; margin: 14px 0 0; flex-wrap: wrap; }
+  .fig { display: flex; flex-direction: column; gap: 1px; }
+  .fig b { font-family: var(--mono); font-size: 1.12rem; font-weight: 700;
+           font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+  .fig span { font-size: .67rem; text-transform: uppercase; letter-spacing: .09em;
+              color: var(--fg-3); }
+  .cover { font-size: .76rem; color: var(--fg-3); margin: 13px 0 0; }
+  .cover a { color: var(--fg-2); }
 
-  /* Explainer: shut by default on a return visit, open the first time. */
-  details.explainer { border: 1px solid var(--rule, #24313A); border-radius: 9px;
-                      background: var(--bg-card, #131A20); margin: 12px 0 26px; }
-  details.explainer > summary { cursor: pointer; padding: 11px 15px; font-size: .87rem;
-                                font-weight: 600; list-style: none; }
-  details.explainer > summary::-webkit-details-marker { display: none; }
-  details.explainer > summary::after { content: ' \\25BE'; color: var(--text-muted); }
-  details.explainer[open] > summary::after { content: ' \\25B4'; }
-  details.explainer .body { padding: 0 15px 14px; font-size: .87rem; line-height: 1.55;
-                            color: var(--text-secondary); max-width: 68ch; }
-  details.explainer .body p { margin: 0 0 9px; }
+  /* ── the two ways in ────────────────────────────────────────────────────
+     Play and explore, side by side, immediately. The page offers statistics
+     AND games and a first-time visitor should not have to scroll to learn
+     that. Cyan carries the primary action; the club colour marks the other. */
+  .paths { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 34px; }
+  /* A club with too few played matches has no games to offer, so it does not
+     get a card promising five of them. */
+  .paths.one { grid-template-columns: 1fr; }
+  .path { display: flex; flex-direction: column; justify-content: center; gap: 3px;
+          min-height: 76px; padding: 14px 16px; border-radius: var(--r);
+          text-decoration: none; color: var(--fg); background: var(--s1);
+          border: 1px solid var(--line); transition: background .14s, border-color .14s; }
+  .path:hover { background: var(--s2); }
+  .path strong { font-size: .97rem; font-weight: 700; }
+  .path span { font-size: .78rem; color: var(--fg-2); }
+  .path.primary { border-color: color-mix(in srgb, var(--cyan) 42%, transparent);
+                  background: linear-gradient(180deg, color-mix(in srgb, var(--cyan) 9%, var(--s1)), var(--s1)); }
+  .path.primary:hover { border-color: var(--cyan); }
+  .path.primary strong { color: var(--cyan); }
+  .path.alt { border-left: 3px solid var(--club); }
 
-  h2 { font-size: 1.12rem; margin: 30px 0 4px; }
-  h2 + .sub { margin-bottom: 12px; }
-  h3.sub-head { font-size: .95rem; margin: 26px 0 3px; }
+  /* ── section rhythm ─────────────────────────────────────────────────────
+     One heading style, one spacing step. Headings are monospace because that
+     is the brand's voice; body copy is not, because 300 words of monospace is
+     a wall. */
+  section { margin-bottom: 38px; }
+  h2 { font-family: var(--mono); font-size: 1.02rem; font-weight: 700; margin: 0 0 3px;
+       letter-spacing: -.01em; }
+  h2 + .lede { color: var(--fg-2); font-size: .83rem; margin: 0 0 14px; max-width: 62ch; line-height: 1.5; }
+  .head { display: flex; align-items: baseline; justify-content: space-between;
+          gap: 12px; margin-bottom: 14px; }
+  .head h2 { margin: 0; }
+  .head a { font-size: .78rem; color: var(--fg-2); text-decoration: none; white-space: nowrap; }
+  .head a:hover { color: var(--cyan); }
 
-  /* Player of the day */
-  .potd { display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
-          border: 1px solid var(--rule, #24313A); border-radius: 11px; padding: 16px 18px;
-          background: linear-gradient(120deg, color-mix(in srgb, var(--club) 15%, transparent), transparent 55%),
-                      var(--bg-card, #131A20); }
-  .shirt { width: 66px; height: 66px; flex: 0 0 auto; }
-  .potd-body { flex: 1; min-width: 220px; }
-  .potd .eyebrow { font-size: .68rem; text-transform: uppercase; letter-spacing: .1em;
-                   color: var(--text-muted); margin: 0 0 4px; }
-  .potd .name { font-size: 1.22rem; font-weight: 700; margin: 0 0 4px; }
-  .potd .line { font-size: .85rem; color: var(--text-secondary); margin: 0; }
-  .potd button.reveal { margin-top: 9px; padding: 8px 15px; border: 0; border-radius: 7px;
-                        font-weight: 600; font-size: .84rem; cursor: pointer;
-                        background: var(--accent, #00E5FF); color: #0B0F12; }
+  /* ── games ──────────────────────────────────────────────────────────────
+     The card is the link. Each has its own mark in the club colour, which is
+     the one place the club's identity recurs after the hero. */
+  /* Explicit column counts rather than auto-fit.
+     auto-fit with a min width gave 4 + 1 at tablet sizes, leaving the fifth
+     game orphaned on its own row — the one layout that reads as a mistake
+     rather than a choice. Five across at full width, 3 + 2 at tablet, 2 + 2 + 1
+     on a phone: every one of those looks deliberate. */
+  ul.games { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px;
+             grid-template-columns: repeat(5, 1fr); }
+  a.game-go { display: grid; grid-template-rows: auto auto 1fr auto; gap: 2px;
+              height: 100%; box-sizing: border-box; padding: 15px 15px 13px;
+              border-radius: var(--r); background: var(--s1); border: 1px solid var(--line);
+              text-decoration: none; color: var(--fg);
+              transition: background .14s, border-color .14s, transform .14s; }
+  a.game-go:hover, a.game-go:focus-visible { background: var(--s2);
+              border-color: color-mix(in srgb, var(--club) 55%, var(--line-2));
+              transform: translateY(-2px); }
+  a.game-go:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+  a.game-go .ico { width: 22px; height: 22px; color: var(--club); margin-bottom: 8px; }
+  a.game-go .gname { font-family: var(--mono); font-size: .85rem; font-weight: 700;
+                     line-height: 1.25; }
+  a.game-go .gblurb { font-size: .75rem; color: var(--fg-2); line-height: 1.38; margin-top: 3px; }
+  a.game-go .gplay { display: inline-flex; align-items: center; gap: 4px; margin-top: 11px;
+                     font-size: .76rem; font-weight: 700; color: var(--cyan); }
+  a.game-go .gplay svg { width: 13px; height: 13px; transition: transform .14s; }
+  a.game-go:hover .gplay svg { transform: translateX(3px); }
 
-  /* Competition chips */
-  .chips { display: flex; flex-wrap: wrap; gap: 7px; margin: 4px 0 6px; }
-  .chip { font-size: .79rem; padding: 6px 12px; border-radius: 999px; cursor: pointer;
-          border: 1px solid var(--rule, #24313A); background: transparent;
-          color: var(--text-secondary); font: inherit; font-size: .79rem; }
-  .chip.on { background: var(--club); border-color: var(--club); color: #fff; font-weight: 600; }
-  .chip-note { font-size: .76rem; color: var(--text-muted); margin: 0 0 14px; min-height: 1.1em; }
+  /* ── competition filter ─────────────────────────────────────────────────
+     A segmented control, not a row of bright pills. The selected state is a
+     filled segment; everything else is quiet. */
+  .filter { margin-bottom: 14px; }
+  .seg { display: inline-flex; flex-wrap: wrap; gap: 2px; padding: 3px;
+         background: var(--s1); border: 1px solid var(--line); border-radius: 10px; }
+  .chip { font: inherit; font-size: .78rem; padding: 6px 12px; border-radius: 7px;
+          border: 0; background: transparent; color: var(--fg-2); cursor: pointer;
+          min-height: 32px; transition: background .12s, color .12s; }
+  .chip:hover { color: var(--fg); background: rgba(255,255,255,.05); }
+  /* Selected is a raised segment, NOT the club colour. Every competition is
+     on by default, so colouring the selected state filled the control with
+     four or five solid club-coloured pills — the single loudest thing on the
+     page, to say "nothing is filtered". Club colour stays on the crest, the
+     game marks and a couple of hairlines. */
+  .chip.on { background: rgba(255,255,255,.09); color: var(--fg); font-weight: 600; }
+  /* When everything is on, only "All" reads as active: the individual
+     competitions are not a choice anybody has made yet. */
+  .seg.every .chip[data-comp].on { background: transparent; color: var(--fg-2); font-weight: 400; }
+  .seg.every .chip[data-comp].on:hover { background: rgba(255,255,255,.05); color: var(--fg); }
+  .chip.all.on { box-shadow: inset 0 -2px 0 var(--club); }
+  .chip:focus-visible { outline: 2px solid var(--cyan); outline-offset: 1px; }
+  .sel { display: none; }
+  .sel select { width: 100%; box-sizing: border-box; font: inherit; font-size: .88rem;
+                padding: 11px 13px; min-height: 44px; border-radius: 10px;
+                background: var(--s1); color: var(--fg); border: 1px solid var(--line-2); }
+  .filter-note { font-size: .74rem; color: var(--fg-3); margin: 8px 2px 0; min-height: 1.05em; }
 
-  ul.games { list-style: none; padding: 0; margin: 0; display: grid;
-             grid-template-columns: repeat(auto-fit, minmax(232px, 1fr)); gap: 11px; }
-  li.game { background: var(--bg-card, #131A20); border: 1px solid var(--rule, #24313A);
-            border-radius: 9px; transition: border-color .15s, transform .15s; }
-  li.game:hover { border-color: var(--club); transform: translateY(-1px); }
-  a.game-go { display: block; padding: 14px 15px; text-decoration: none; color: inherit; height: 100%; }
-  li.game h3 { font-size: .95rem; margin: 0 0 4px; }
-  li.game p { font-size: .81rem; color: var(--text-secondary); margin: 0 0 10px; line-height: 1.4; }
-  li.game .go { font-size: .8rem; font-weight: 600; color: var(--accent, #00E5FF); }
+  /* ── mystery player ─────────────────────────────────────────────────────
+     A strip, not a panel. It was the tallest thing on the page for one button. */
+  .potd { display: flex; align-items: center; gap: 14px; padding: 12px 15px;
+          border-radius: var(--r); background: var(--s1);
+          border: 1px solid var(--line); border-left: 3px solid var(--club); }
+  .potd .shirt { width: 40px; height: 40px; flex: 0 0 auto; }
+  .potd .pbody { flex: 1; min-width: 0; }
+  .potd .peyebrow { font-size: .64rem; text-transform: uppercase; letter-spacing: .1em;
+                    color: var(--fg-3); margin: 0 0 2px; }
+  .potd .pname { font-family: var(--mono); font-size: .97rem; font-weight: 700; margin: 0; }
+  .potd .pline { font-size: .77rem; color: var(--fg-2); margin: 2px 0 0; line-height: 1.4; }
+  .potd .reveal { flex: 0 0 auto; font: inherit; font-size: .79rem; font-weight: 700;
+                  padding: 9px 15px; min-height: 40px; border: 0; border-radius: 9px;
+                  background: var(--cyan); color: #06181C; cursor: pointer; }
+  .potd .reveal:hover { filter: brightness(1.08); }
+  .potd .reveal:focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
 
-  .lane-note { font-size: .82rem; color: var(--text-secondary); margin: 3px 0 12px; max-width: 66ch; }
-  .cta { display: inline-block; margin-top: 10px; font-size: .84rem; font-weight: 600;
-         padding: 9px 15px; border-radius: 7px; text-decoration: none;
-         border: 1px solid var(--club); color: var(--text-primary, #F2F5F7); }
-  .cta:hover { background: var(--club); color: #fff; }
+  /* ── records ────────────────────────────────────────────────────────────
+     Closed by default and server-rendered inside. The warning is not decoration:
+     these are the answers to the games above. */
+  .spoil { display: flex; align-items: center; gap: 7px; font-size: .75rem;
+           color: var(--fg-3); margin: 0 0 12px; }
+  .spoil svg { width: 14px; height: 14px; flex: 0 0 auto; color: var(--club); }
+  details.rec { background: var(--s1); border-radius: var(--r-sm); margin-bottom: 7px;
+                border: 1px solid var(--line); }
+  details.rec > summary { display: flex; align-items: center; gap: 10px; cursor: pointer;
+                          padding: 13px 15px; font-size: .88rem; font-weight: 600;
+                          list-style: none; min-height: 46px; box-sizing: border-box; }
+  details.rec > summary::-webkit-details-marker { display: none; }
+  details.rec > summary:focus-visible { outline: 2px solid var(--cyan); outline-offset: -2px;
+                                        border-radius: var(--r-sm); }
+  details.rec .chev { margin-left: auto; width: 15px; height: 15px; color: var(--fg-3);
+                      transition: transform .18s; flex: 0 0 auto; }
+  details.rec[open] .chev { transform: rotate(180deg); }
+  details.rec .rbody { padding: 0 15px 14px; overflow-x: auto; }
+  details.rec table { border-collapse: collapse; width: 100%; font-size: .84rem;
+                      min-width: 330px; }
+  details.rec th, details.rec td { text-align: left; padding: 7px 9px;
+                                   border-bottom: 1px solid var(--line); }
+  details.rec tr:last-child td { border-bottom: 0; }
+  details.rec th { font-size: .66rem; text-transform: uppercase; letter-spacing: .07em;
+                   color: var(--fg-3); font-weight: 600; }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; font-family: var(--mono);
+           font-size: .8rem; }
+  td.rank { color: var(--fg-3); width: 2em; font-variant-numeric: tabular-nums; }
+  td.who { font-weight: 500; }
+  td.who a { color: var(--fg); text-decoration: none; }
+  td.who a:hover { color: var(--cyan); }
+  td.yr { color: var(--fg-3); white-space: nowrap; font-size: .76rem; }
+  td.yes { color: var(--cyan); font-size: .74rem; }
+  td.no { color: var(--fg-3); font-size: .74rem; }
 
-  /* Community + leaderboard, both filled in after paint */
-  .community { list-style: none; padding: 0; margin: 0; display: grid;
-               grid-template-columns: repeat(auto-fit, minmax(232px, 1fr)); gap: 11px; }
-  .community li { background: var(--bg-card, #131A20); border: 1px dashed var(--rule, #3A4A55);
-                  border-radius: 9px; padding: 13px 15px; }
-  .community a { color: inherit; text-decoration: none; }
-  .community h4 { font-size: .9rem; margin: 0 0 4px; }
-  .community p { font-size: .79rem; color: var(--text-secondary); margin: 0 0 7px; line-height: 1.4; }
-  .community .meta { font-size: .72rem; color: var(--text-muted); }
-  .boards { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 14px; }
-  .board { border: 1px solid var(--rule, #24313A); border-radius: 9px; padding: 12px 14px;
-           background: var(--bg-card, #131A20); }
-  .board h4 { font-size: .82rem; text-transform: uppercase; letter-spacing: .06em;
-              color: var(--text-muted); margin: 0 0 8px; }
-  .board ol { margin: 0; padding-left: 1.3em; font-size: .86rem; }
-  .board li { padding: 2px 0; }
-  .board .pts { color: var(--text-muted); font-variant-numeric: tabular-nums; }
-  .empty { font-size: .84rem; color: var(--text-muted); margin: 6px 0 0; }
+  /* ── ask ────────────────────────────────────────────────────────────────── */
+  form.ask { display: flex; gap: 8px; margin: 0 0 10px; }
+  form.ask input { flex: 1; min-width: 0; padding: 12px 15px; font: inherit; font-size: .9rem;
+                   min-height: 46px; box-sizing: border-box; border-radius: 10px;
+                   border: 1px solid var(--line-2); background: var(--s1); color: var(--fg); }
+  form.ask input:focus { outline: none; border-color: var(--cyan); }
+  form.ask button { padding: 0 20px; min-height: 46px; font: inherit; font-weight: 700;
+                    font-size: .88rem; border: 0; border-radius: 10px;
+                    background: var(--cyan); color: #06181C; cursor: pointer; }
+  .ask-examples { display: flex; flex-wrap: wrap; gap: 6px; }
+  .ask-examples button { font: inherit; font-size: .76rem; padding: 7px 12px; min-height: 34px;
+                         border-radius: 999px; border: 1px solid var(--line-2);
+                         background: transparent; color: var(--fg-2); cursor: pointer; }
+  .ask-examples button:hover { color: var(--fg); border-color: var(--fg-3); }
+  #askAnswer:empty { display: none; }
+  #askAnswer { margin-top: 12px; }
+  #askAnswer .msg { font-size: .9rem; line-height: 1.55; margin: 0 0 9px; }
+  #askAnswer table { border-collapse: collapse; width: 100%; font-size: .83rem; }
+  #askAnswer td { padding: 6px 8px; border-bottom: 1px solid var(--line); }
+  #askAnswer .prov { font-size: .72rem; color: var(--fg-3); margin: 8px 0 0; }
 
-  /* Stats: shut on load, per feedback. The content is still in the HTML, so
-     it is still indexed and still readable with JavaScript off. */
-  details.stats { border: 1px solid var(--rule, #24313A); border-radius: 9px;
-                  background: var(--bg-card, #131A20); margin-bottom: 11px; }
-  details.stats > summary { cursor: pointer; padding: 12px 15px; font-weight: 600;
-                            font-size: .95rem; list-style: none; }
-  details.stats > summary::-webkit-details-marker { display: none; }
-  details.stats > summary::after { content: ' \\25BE'; color: var(--text-muted); }
-  details.stats[open] > summary::after { content: ' \\25B4'; }
-  details.stats .body { padding: 0 15px 12px; overflow-x: auto; }
+  /* ── leaderboard + community, side by side ──────────────────────────────── */
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .board { font-size: .84rem; }
+  .board h3 { font-size: .66rem; text-transform: uppercase; letter-spacing: .09em;
+              color: var(--fg-3); margin: 0 0 7px; font-weight: 600; }
+  .board ol { margin: 0; padding: 0; list-style: none; counter-reset: r; }
+  .board li { display: flex; gap: 9px; padding: 5px 0; border-bottom: 1px solid var(--line);
+              counter-increment: r; }
+  .board li:last-child { border-bottom: 0; }
+  .board li::before { content: counter(r); color: var(--fg-3); font-variant-numeric: tabular-nums;
+                      min-width: 1.2em; font-size: .78rem; }
+  .board .pts { margin-left: auto; font-family: var(--mono); font-size: .8rem;
+                font-variant-numeric: tabular-nums; color: var(--fg-2); }
+  .community { list-style: none; padding: 0; margin: 0; display: grid; gap: 7px; }
+  .community li a { display: block; padding: 11px 13px; border-radius: var(--r-sm);
+                    background: var(--s1); border: 1px solid var(--line);
+                    text-decoration: none; color: var(--fg); }
+  .community li a:hover { background: var(--s2); }
+  .community h4 { font-size: .85rem; margin: 0 0 2px; }
+  .community .meta { font-size: .72rem; color: var(--fg-3); }
+  .empty { font-size: .8rem; color: var(--fg-3); margin: 0; }
+  .mini { display: inline-block; margin-top: 10px; font-size: .78rem; font-weight: 600;
+          color: var(--cyan); text-decoration: none; }
+  .mini:hover { text-decoration: underline; }
 
-  table { border-collapse: collapse; width: 100%; font-size: .86rem; }
-  th, td { text-align: left; padding: 6px 9px; border-bottom: 1px solid var(--rule, #24313A); }
-  th { font-size: .7rem; text-transform: uppercase; letter-spacing: .05em; color: var(--text-muted); }
-  td.num { text-align: right; font-variant-numeric: tabular-nums; }
-  td.rank { color: var(--text-muted); width: 2em; }
-  td.yr { color: var(--text-secondary); white-space: nowrap; }
-  td.yes { color: var(--accent, #00E5FF); font-size: .78rem; }
-  td.no { color: var(--text-muted); font-size: .78rem; }
+  /* ── related ────────────────────────────────────────────────────────────── */
+  .related { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px; }
+  .related a { display: flex; align-items: center; gap: 8px; font-size: .82rem; padding: 8px 11px;
+               min-height: 38px; box-sizing: border-box; border-radius: var(--r-sm);
+               border: 1px solid var(--line); color: var(--fg); text-decoration: none; }
+  .related a i { width: 3px; align-self: stretch; border-radius: 2px; background: var(--club);
+                 flex: 0 0 auto; }
+  .related a:hover { background: var(--s1); border-color: var(--line-2); }
 
-  .related { display: flex; flex-wrap: wrap; gap: 7px; }
-  .related a { font-size: .81rem; color: var(--accent); text-decoration: none;
-               padding: 4px 10px; border: 1px solid var(--rule, #24313A); border-radius: 6px; }
-  form.ask { display: flex; gap: 8px; margin: 10px 0; }
-  form.ask input { flex: 1; padding: 10px 13px; font-size: .93rem; border-radius: 7px;
-                   border: 1px solid var(--rule, #24313A); background: var(--bg-card, #131A20);
-                   color: var(--text-primary, #F2F5F7); }
-  form.ask button { padding: 10px 17px; font-weight: 600; border: 0; border-radius: 7px;
-                    background: var(--accent, #00E5FF); color: #0B0F12; cursor: pointer; }
-  .ask-examples { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
-  .ask-examples button { font-size: .77rem; padding: 5px 10px; border-radius: 5px; border: 0;
-                         background: var(--bg-elevated, #1E272E); color: var(--accent);
-                         cursor: pointer; font-family: inherit; }
-  #askAnswer .msg { font-size: .95rem; line-height: 1.5; margin: 10px 0; }
-  #askAnswer .prov { font-size: .73rem; color: var(--text-muted); }
-  footer.page { margin-top: 44px; padding-top: 16px; font-size: .77rem; color: var(--text-muted);
-                border-top: 1px solid var(--rule, #24313A); }
-  footer.page a { color: var(--accent); }
+  footer.page { margin-top: 10px; padding-top: 18px; font-size: .75rem; color: var(--fg-3);
+                border-top: 1px solid var(--line); line-height: 1.7; }
+  footer.page a { color: var(--fg-2); }
+  footer.page a:hover { color: var(--cyan); }
 
-  @media (max-width: 560px) {
-    .hero h1 { font-size: 1.32rem; }
-    .wrap { padding: 0 13px 46px; }
+  /* ── narrow ─────────────────────────────────────────────────────────────
+     Deliberate decisions, not a stack of the desktop blocks: the filter
+     becomes a select, the two columns become one, the games go two-up rather
+     than one-up so the section stays a glance rather than a scroll. */
+  @media (max-width: 860px) {
+    ul.games { grid-template-columns: repeat(3, 1fr); }
+  }
+  @media (max-width: 720px) {
+    .two { grid-template-columns: 1fr; gap: 26px; }
+  }
+  @media (max-width: 620px) {
+    .wrap { padding: 0 14px 48px; }
+    .ts-header .inner { padding: 10px 14px; gap: 12px;  flex-wrap: wrap;}
+    .hero { gap: 13px; padding-bottom: 15px; margin-bottom: 17px; }
+    .hero .crest { width: 38px; height: 44px; }
+    .hero h1 { font-size: 1.18rem; }
+    .hero .tag { font-size: .8rem; }
+    .figs { gap: 16px; margin-top: 12px; }
+    .fig b { font-size: 1rem; }
+    .paths { grid-template-columns: 1fr; gap: 8px; margin-bottom: 28px; }
+    .path { min-height: 62px; padding: 12px 14px; }
+    section { margin-bottom: 30px; }
+    ul.games { grid-template-columns: repeat(2, 1fr); gap: 7px; }
+    a.game-go { padding: 12px 12px 11px; }
+    a.game-go .gblurb { font-size: .74rem; }
+    /* The segmented control is six pills on a phone; a select is one row. */
+    .seg { display: none; }
+    .sel { display: block; }
+    .potd { gap: 11px; padding: 11px 12px; flex-wrap: wrap; }
+    .potd .reveal { width: 100%; min-height: 44px; }
+    .related { grid-template-columns: 1fr 1fr; }
+    /* ~44px for anything a thumb lands on, per the platform guidance. The
+       desktop sizes are comfortable with a pointer and too small without one. */
+    .related a { min-height: 44px; }
+    .ask-examples button { min-height: 44px; padding: 10px 14px; }
+    details.rec > summary { min-height: 52px; }
+    .head a { padding: 6px 0; }
+  }
+  @media (max-width: 380px) {
+    ul.games { grid-template-columns: 1fr; }
+    .paths { gap: 7px; }
+    .figs { gap: 14px; }
+  }
+
+  /* Honour the setting. Nothing here is load-bearing animation. */
+  @media (prefers-reduced-motion: reduce) {
+    * { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+    a.game-go:hover { transform: none; }
   }
 </style>
 </head>
@@ -409,124 +683,169 @@ ${indexable ? '' : '<meta name="robots" content="noindex,follow">\n'}<meta name=
 
 <nav class="crumbs"><a href="/">TeleStats</a> › <a href="/teams/">Teams</a> › ${esc(team.name)}</nav>
 
-<div class="hero">
-  <div class="scarf"></div>
-  <div class="hero-row">
-    ${shield(team, c)}
-    <div>
-      <h1>${esc(team.name)} Football Quizzes &amp; Trivia</h1>
-      <p class="sub">${num(team.players)} players · ${num(totals.appearances)} appearances ·
-        ${compList.map((c) => `<a class="complink" href="/competitions/${esc(teams.competitionSlug(c))}/">${esc(c)}</a>`).join(', ')}</p>
-      <p class="scope-note">Records cover ${esc(season(span.first))} to ${esc(season(span.last))}.
-        <a href="/tools/data.html">Full dataset scope</a>.</p>
-    </div>
+<header class="hero">
+  ${shield(team, c)}
+  <div>
+    <h1>${esc(team.name)} Stats, Records &amp; Football Quizzes</h1>
+    <p class="tag">Player records and five free games, from a real football database.</p>
   </div>
+</header>
+
+<div class="figs">
+  <div class="fig"><b>${num(team.players)}</b><span>Players</span></div>
+  <div class="fig"><b>${num(totals.appearances)}</b><span>Appearances</span></div>
+  <div class="fig"><b>${num(totals.goals)}</b><span>Goals</span></div>
+</div>
+<p class="cover">${esc(listOf(compList))} · ${esc(coverage)} ·
+  <a href="/tools/data.html">what the dataset covers</a></p>
+
+<div class="paths${gameCards ? '' : ' one'}">
+  ${gameCards ? `<a class="path primary" href="#play">
+    <strong>Play ${esc(team.name)}</strong>
+    <span>Five football challenges</span>
+  </a>` : ''}
+  <a class="path alt" href="#records">
+    <strong>Explore the records</strong>
+    <span>${num(team.players)} players, appearances, scorers and seasons</span>
+  </a>
 </div>
 
-<details class="explainer" id="explainer">
-  <summary>New here? What this page is</summary>
-  <div class="body">
-    <p>This is a set of free football games about <strong>${esc(team.name)}</strong>, generated
-      from real appearance and goal records — ${num(team.players)} players who have turned out
-      for the club in ${esc(listOf(compList))}, going back to ${esc(season(span.first))}.</p>
-    <p>Pick a game below and it starts straight away on ${esc(team.name)}. No sign-up, no app.
-      Make an account only if you want your scores kept and your name on the club's board.</p>
-    <p>Everything you see here comes from the TeleStats database. Nothing is written by an AI
-      and nothing is guessed — if a fact is not in the data, the site says so rather than
-      inventing one.</p>
+<section id="play">
+  ${gameCards ? `<div class="head">
+    <h2>Play ${esc(team.name)}</h2>
+    <a href="/games/">All games &rarr;</a>
   </div>
-</details>
+  ${filter}
+  <ul class="games">
+        ${gameCards}
+  </ul>` : `<h2>Play ${esc(team.name)}</h2>
+  <p class="lede">Not enough matches have been played in a single competition to build a fair
+    game yet — every player has much the same record. The records below are complete, and the
+    games appear here as the season is played.</p>`}
+</section>
 
-<section class="potd" id="potd" data-team="${esc(team.name)}">
-  ${mysteryShirt(c)}
-  <div class="potd-body">
-    <p class="eyebrow">${esc(team.name)} · Player of the day</p>
-    <p class="name" id="potdName">Who is it?</p>
-    <p class="line" id="potdLine">One of this club's most-used players. Reveal to find out.</p>
+<section>
+  <div class="potd" id="potd" data-team="${esc(team.name)}">
+    ${mysteryShirt(c)}
+    <div class="pbody">
+      <p class="peyebrow">Today's mystery ${esc(team.name)} player</p>
+      <p class="pname" id="potdName">Think you know who it is?</p>
+      <p class="pline" id="potdLine">One of the club's most-used players. A new one every day.</p>
+    </div>
     <button type="button" class="reveal" id="potdBtn">Reveal</button>
   </div>
 </section>
 
-<h2 id="play">Play ${esc(team.name)}</h2>
-${gameCards ? `<p class="sub">The five TeleStats games, set up for ${esc(team.name)}. Click one and it starts.</p>
-      ${chips}
-      <ul class="games">
-        ${gameCards}
-      </ul>` : `<p class="sub">${esc(team.name)} does not have enough played matches in a single
-  competition to build a fair game yet — the season is only a few rounds old and every player
-  has the same number of appearances. The records below are complete, and games will appear
-  here as the season is played.</p>`}
+<section id="records">
+  <div class="head">
+    <h2>${esc(team.name)} records</h2>
+    <a href="/tools/data.html">Data coverage &rarr;</a>
+  </div>
+  <p class="spoil">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+         stroke-linecap="round" aria-hidden="true"><path d="M12 9v4m0 3.5v.01"/><path d="M10.3 3.9 2.4 17.4A1.9 1.9 0 0 0 4 20.3h16a1.9 1.9 0 0 0 1.6-2.9L13.7 3.9a1.9 1.9 0 0 0-3.4 0Z"/></svg>
+    These are the answers to the games above — open them when you are ready.
+  </p>
 
-<h3 class="sub-head">Community games about ${esc(team.name)}</h3>
-<p class="lane-note">The five above are the official TeleStats games. These are made by players,
-  using the same database — different rules, different lists, same real records.</p>
-<div id="communityBox"><p class="empty">Loading…</p></div>
-<a class="cta" href="/community/?build=1">Make your own ${esc(team.name)} game &rarr;</a>
-
-<h2>${esc(team.name)} leaderboard</h2>
-<p class="sub">Best scores on ${esc(team.name)} games, by game type. Sign in before you play to
-  get your name on it — or see the <a href="/leaderboard/">site-wide leaderboard</a>.</p>
-<div id="boardBox"><p class="empty">Loading…</p></div>
-
-<h2>${esc(team.name)} records</h2>
-<p class="sub">The data these games are built from.</p>
-
-<details class="stats">
-  <summary>${esc(team.name)} appearance leaders</summary>
-  <div class="body">
-    <table>
-      <thead><tr><th></th><th>Player</th><th class="num">Apps</th><th class="num">Goals</th><th>Seasons</th></tr></thead>
-      <tbody>
+  <details class="rec">
+    <summary>Most ${esc(team.name)} appearances
+      <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+    </summary>
+    <div class="rbody">
+      <h3 class="vh">${esc(team.name)} appearance leaders</h3>
+      <table>
+        <thead><tr><th></th><th>Player</th><th class="num">Apps</th><th class="num">Goals</th><th>Seasons</th></tr></thead>
+        <tbody>
         ${leaderRows}
-      </tbody>
-    </table>
-  </div>
-</details>
+        </tbody>
+      </table>
+    </div>
+  </details>
 
-<details class="stats">
-  <summary>${esc(team.name)} top scorers</summary>
-  <div class="body">
-    <table>
-      <thead><tr><th></th><th>Player</th><th class="num">Goals</th><th class="num">Apps</th></tr></thead>
-      <tbody>
+  <details class="rec">
+    <summary>${esc(team.name)} top goalscorers
+      <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+    </summary>
+    <div class="rbody">
+      <h3 class="vh">${esc(team.name)} leading goalscorers</h3>
+      <table>
+        <thead><tr><th></th><th>Player</th><th class="num">Goals</th><th class="num">Apps</th><th>Seasons</th></tr></thead>
+        <tbody>
         ${scorerRows}
-      </tbody>
-    </table>
-  </div>
-</details>
+        </tbody>
+      </table>
+    </div>
+  </details>
 
-<details class="stats">
-  <summary>${esc(team.name)} competitions in the database</summary>
-  <div class="body">
-    <table>
-      <thead><tr><th>Competition</th><th class="num">Players</th><th>Seasons</th><th class="num">Count</th><th>Games</th></tr></thead>
-      <tbody>
+  <details class="rec">
+    <summary>Competitions and seasons in the database
+      <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+    </summary>
+    <div class="rbody">
+      <h3 class="vh">${esc(team.name)} competition coverage</h3>
+      <table>
+        <thead><tr><th>Competition</th><th class="num">Players</th><th>Seasons</th><th class="num">Count</th><th>Games</th></tr></thead>
+        <tbody>
         ${compRows}
-      </tbody>
-    </table>
-  </div>
-</details>
+        </tbody>
+      </table>
+    </div>
+  </details>
+</section>
 
-<h2>Ask about ${esc(team.name)}</h2>
-<p class="sub">Ask the database a question. Answers come from ${num(team.players)} ${esc(team.name)}
-  players and are never invented — if the data does not support an answer, it says so.</p>
-<form class="ask" id="askForm">
-  <input id="askQ" autocomplete="off" maxlength="300"
-         placeholder="Who has played for both ${esc(team.name)} and ${esc(askPartner)}?"
-         aria-label="Ask a question about ${esc(team.name)}">
-  <button type="submit">Ask</button>
-</form>
-<div class="ask-examples">
+<section>
+  <h2>Curious about ${esc(team.name)}? Just ask.</h2>
+  <p class="lede">Answers come from the database, never invented. If the data does not support
+    an answer, it says so.</p>
+  <form class="ask" id="askForm">
+    <input id="askQ" autocomplete="off" maxlength="300"
+           placeholder="Who has played for both ${esc(team.name)} and ${esc(askPartner)}?"
+           aria-label="Ask a question about ${esc(team.name)}">
+    <button type="submit">Ask</button>
+  </form>
+  <div class="ask-examples">
           ${askExamples}
-</div>
-<div id="askAnswer"></div>
+  </div>
+  <div id="askAnswer"></div>
+</section>
 
-${related.length ? `<h2>More teams</h2>\n<div class="related">\n          ${relatedLinks}\n</div>` : ''}
+<section>
+  <div class="two">
+    <div>
+      <div class="head">
+        <h2>Leaderboard</h2>
+        <a href="/leaderboard/">Full table &rarr;</a>
+      </div>
+      <div id="boardBox"><p class="empty">Loading…</p></div>
+    </div>
+    <div>
+      <div class="head">
+        <h2>Community games</h2>
+        <a href="/community/">Browse &rarr;</a>
+      </div>
+      <div id="communityBox"><p class="empty">Loading…</p></div>
+    </div>
+  </div>
+</section>
+
+${nearby.length ? `<section>
+  <div class="head">
+    <h2>More clubs</h2>
+    <a href="/teams/">Browse all teams &rarr;</a>
+  </div>
+  <div class="related">
+          ${relatedLinks}
+  </div>
+</section>` : ''}
 
 <footer class="page">
-  Player statistics from the TeleStats football database.
+  ${esc(team.name)} player statistics compiled from official league and competition sources,
+  covering ${esc(listOf(compList))}, ${esc(coverage)}.
   <a href="/tools/data.html">Coverage and last update</a> ·
-  <a href="/games/">All games</a> ·
+  <a href="/competitions/">All competitions</a> ·
   <a href="/teams/">All teams</a> ·
   <a href="/ask/">Ask TeleStats</a>
 </footer>
@@ -540,19 +859,19 @@ window.TS_TEAM = ${JSON.stringify({
 })};
 </script>
 <script src="/js/ts-scope.js"></script>
-<script src="/js/team-page.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/js/ts-auth.js"></script>
-<script src="/js/ts-data.js"></script>
-<script src="/js/ts-nav.js"></script>
-<script>
+<script src="/js/team-page.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+<script src="/js/ts-auth.js" defer></script>
+<script src="/js/ts-data.js" defer></script>
+<script src="/js/ts-nav.js" defer></script>
+<script defer>
   // The real site header, which replaces the static fallback above. Wrapped
   // because a team page must stay readable if auth is down — the games, the
   // records and the ask box do not need a signed-in user.
-  (async function () {
+  window.addEventListener('load', async function () {
     try { await TSAuth.init(); } catch (e) { console.error('[TeleStats] Auth init failed:', e); }
     try { TSNav.render(); } catch (e) { console.error('[TeleStats] Nav render failed:', e); }
-  })();
+  });
 </script>
 <script type="application/ld+json">${JSON.stringify(jsonLd)}</script>
 </body>
