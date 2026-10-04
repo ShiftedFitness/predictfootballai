@@ -2899,3 +2899,52 @@ Real traffic is small: 39 users, 56 sessions, 7 game starts, 12 Ask questions, 1
 - Service-account key (new key on `mft-analytics-reader@malagafootballtours`) at `~/.config/shiftedlabs/ga-service-account.json`
   (chmod 600). It sees GA4 TeleStats = property **550795096**. Search Console: not yet shared for telestats.
 - `.env.local`: GA4_PROPERTY_ID, GOOGLE_SERVICE_ACCOUNT_FILE, ANALYTICS_STATS_URL/TOKEN. First local report written.
+- Search Console shared (owner, 4 Oct): `sc-domain:telestats.net`, siteFullUser. Local report now includes search:
+  28d to 1 Oct = 29 clicks / 255 impressions, almost all brand ("telestats" 23 clicks at #1; "tele stat" 59 impr at 3.7, 1 click).
+
+---
+
+## The deploy that didn't happen — 4 Oct 2026
+
+The redesign commit (ec415ce, 382 files) never reached the site. Netlify did
+not fail it — it SKIPPED it:
+
+    Failed to fetch cache, continuing with build
+    No cached dependencies found. Cloning fresh repo
+    Canceled build due to no content change
+    User-specified ignore command returned exit code 0. Returning early.
+
+### Mechanism, proven rather than guessed
+The ignore command was:
+
+    git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- . ':(exclude)…'
+
+$CACHED_COMMIT_REF is EMPTY whenever Netlify has no cache to compare against —
+a first build, an evicted cache, or a fetch that simply failed, which is what
+the log shows. Unquoted and empty, it disappears from the command line, leaving
+
+    git diff --quiet $COMMIT_REF -- .
+
+which compares the WORKING TREE against that commit rather than comparing two
+commits. In a freshly cloned repo those are identical, so it exits 0 and
+Netlify is told nothing changed.
+
+Reproduced locally, both directions:
+
+    CACHED_COMMIT_REF=""        -> exit 0  (skip)   <- the bug
+    CACHED_COMMIT_REF=HEAD~1    -> exit 1  (build)
+    non-excluded files in ec415ce: 382
+
+The failure is silent and self-perpetuating: no cache means no deploy, and no
+deploy means no cache. It has presumably been skipping builds since the
+analytics automation added this rule — any build that lost its cache.
+
+### Fix
+Guard for a missing or unresolvable ref and build in that case. Verified in all
+four scenarios: cache lost -> BUILD, ref not in clone -> BUILD, real change ->
+BUILD, genuinely nothing changed -> SKIP (the Sunday analytics commit, which is
+the whole point of the rule, still skips).
+
+### Live state at the time of writing
+Segunda, the competition pages and the data refresh (commit 0bcdb1b) ARE live —
+that build had its cache. Only the team-page redesign is missing.

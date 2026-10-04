@@ -2,8 +2,36 @@
   functions = "netlify/functions"
   publish = "public"
   # Skip the deploy when a commit only touches the weekly analytics report
-  # (the GitHub Action commits one every Sunday). Exit 0 = no site changes = skip.
-  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- . ':(exclude)analytics' ':(exclude).github' ':(exclude).claude' ':(exclude)docs' ':(exclude)SESSION_LOG.md'"
+  # (the GitHub Action commits one every Sunday). Exit 0 = no site changes = skip,
+  # anything non-zero = build.
+  #
+  # THE GUARD IS NOT OPTIONAL. $CACHED_COMMIT_REF is empty whenever Netlify has
+  # no cache to compare against — a first build, an evicted cache, or a cache
+  # fetch that simply failed, which is what happened on 4 Oct 2026. Unquoted and
+  # empty, it disappears from the command line, and
+  #
+  #     git diff --quiet $COMMIT_REF -- .
+  #
+  # compares the WORKING TREE against that commit instead of comparing two
+  # commits. In a freshly cloned repo those are identical, so it exits 0, and
+  # Netlify is told nothing changed. That build skipped a commit touching 382
+  # files, including every team page.
+  #
+  # The failure is silent and self-perpetuating: no cache means no deploy, and
+  # no deploy means no cache. When in doubt, BUILD — a redundant deploy costs a
+  # couple of minutes, a skipped one costs however long it takes somebody to
+  # notice the site never changed.
+  ignore = '''
+    if [ -z "$CACHED_COMMIT_REF" ]; then
+      echo "No CACHED_COMMIT_REF (first build, or the cache was lost) — building."
+      exit 1
+    fi
+    if ! git cat-file -e "$CACHED_COMMIT_REF^{commit}" 2>/dev/null; then
+      echo "CACHED_COMMIT_REF $CACHED_COMMIT_REF is not in this clone — building."
+      exit 1
+    fi
+    git diff --quiet "$CACHED_COMMIT_REF" "$COMMIT_REF" -- . ':(exclude)analytics' ':(exclude).github' ':(exclude).claude' ':(exclude)docs' ':(exclude)SESSION_LOG.md'
+  '''
 
 # Cache headers: HTML pages should always revalidate, static assets can cache longer
 [[headers]]
