@@ -65,7 +65,36 @@ _Not available yet: register `game_type` as an event-scoped custom dimension in 
 
 ## 6. What people actually did (TeleStats database)
 
-_Not available this run (the first-party endpoint is not configured or did not respond)._
+_From Supabase. Accounts = sign-ups in Supabase Auth (an anonymous player who signs up keeps their old row, so ts_users dates can’t be used). Payments = Stripe webhook rows in ts_payments. Anonymous player rows are created for any browser that runs the site’s JavaScript, including search-engine crawlers that GA4 filters out (28 days to 3 Oct: 416 rows vs 39 GA4 users), so read them as an upper bound, not as people._
+
+| | 7d | vs prev | 28d | vs prev |
+|---|---|---|---|---|
+| **Accounts created (incl. Fives sign-ups)** | 0 | — | 1 | new |
+| New anonymous player rows (inflated by crawlers, see note) | 301 | +514.3% | 416 | +193.0% |
+| Game sessions saved | 0 | — | 3 | −40.0% |
+| Players with a saved session | 0 | — | 2 | +100.0% |
+| Daily plays recorded | 0 | — | 3 | −40.0% |
+| **Pro payments** | 0 | — | 0 | — |
+| … lifetime Pro | 0 | — | 0 | — |
+| … day passes | 0 | — | 0 | — |
+| **Revenue** | £0.00 | — | £0.00 | — |
+
+**Games played (database) (28d)**
+
+_Plays saved to `ts_game_sessions`. This matched GA4 when checked in Oct 2026 (28 days to 3 Oct: 3 saved sessions, 2 GA4 game completions)._
+
+| Game | Sessions | Players | vs prev (Sessions) |
+|---|---|---|---|
+| Higher or Lower | 2 | 1 | −50.0% |
+| Player Alphabet | 1 | 1 | new |
+
+**Totals right now**
+
+| | Total |
+|---|---|
+| Accounts (all time, incl. Fives players: same Supabase Auth) | 45 |
+| Pro users now (incl. promo/referral unlocks) | 3 |
+| Day passes active now | 0 |
 
 ## 7. Acquisition
 
