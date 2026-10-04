@@ -1,36 +1,50 @@
 [build]
   functions = "netlify/functions"
   publish = "public"
-  # Skip the deploy when a commit only touches the weekly analytics report
-  # (the GitHub Action commits one every Sunday). Exit 0 = no site changes = skip,
-  # anything non-zero = build.
+  # Skip the deploy ONLY when a commit touches nothing but the weekly analytics
+  # report (a GitHub Action commits one every Sunday) and other non-site files.
   #
-  # THE GUARD IS NOT OPTIONAL. $CACHED_COMMIT_REF is empty whenever Netlify has
-  # no cache to compare against — a first build, an evicted cache, or a cache
-  # fetch that simply failed, which is what happened on 4 Oct 2026. Unquoted and
-  # empty, it disappears from the command line, and
+  # Exit 0 = skip. Exit anything else = build.
   #
-  #     git diff --quiet $COMMIT_REF -- .
+  # INVERTED ON PURPOSE: this builds unless it can PROVE every changed file is
+  # ignorable. The previous version asked the opposite question — "did git find
+  # a difference?" — and every way of failing to find one meant "skip", which
+  # is the wrong default when the cost of a wrong skip is a deploy that silently
+  # never happens.
   #
-  # compares the WORKING TREE against that commit instead of comparing two
-  # commits. In a freshly cloned repo those are identical, so it exits 0, and
-  # Netlify is told nothing changed. That build skipped a commit touching 382
-  # files, including every team page.
+  # It went wrong twice on 4 Oct 2026. Netlify could not fetch its cache, and
+  # with no cache CACHED_COMMIT_REF comes back equal to COMMIT_REF. A diff
+  # between a commit and itself is empty, so the rule reported "nothing changed"
+  # and skipped — first a 382-file commit containing every team page, then the
+  # commit that was meant to fix it. The failure is a deadlock: no build means
+  # no cache, no cache means the refs match, matching refs mean no build.
   #
-  # The failure is silent and self-perpetuating: no cache means no deploy, and
-  # no deploy means no cache. When in doubt, BUILD — a redundant deploy costs a
-  # couple of minutes, a skipped one costs however long it takes somebody to
-  # notice the site never changed.
+  # Hence the three guards before the diff is trusted at all. If anything is
+  # missing, equal, unresolvable or unreadable, BUILD. A redundant deploy costs
+  # two minutes; a skipped one costs however long it takes somebody to notice
+  # the site never changed.
   ignore = '''
-    if [ -z "$CACHED_COMMIT_REF" ]; then
-      echo "No CACHED_COMMIT_REF (first build, or the cache was lost) — building."
-      exit 1
+    set -u
+    if [ -z "${CACHED_COMMIT_REF:-}" ]; then
+      echo "ignore: no CACHED_COMMIT_REF — building."; exit 1
+    fi
+    if [ "$CACHED_COMMIT_REF" = "$COMMIT_REF" ]; then
+      echo "ignore: CACHED_COMMIT_REF equals COMMIT_REF ($COMMIT_REF) — nothing to compare, building."; exit 1
     fi
     if ! git cat-file -e "$CACHED_COMMIT_REF^{commit}" 2>/dev/null; then
-      echo "CACHED_COMMIT_REF $CACHED_COMMIT_REF is not in this clone — building."
-      exit 1
+      echo "ignore: $CACHED_COMMIT_REF is not in this clone — building."; exit 1
     fi
-    git diff --quiet "$CACHED_COMMIT_REF" "$COMMIT_REF" -- . ':(exclude)analytics' ':(exclude).github' ':(exclude).claude' ':(exclude)docs' ':(exclude)SESSION_LOG.md'
+    CHANGED=$(git diff --name-only "$CACHED_COMMIT_REF" "$COMMIT_REF") || {
+      echo "ignore: git diff failed — building."; exit 1
+    }
+    if [ -z "$CHANGED" ]; then
+      echo "ignore: empty file list — building rather than assuming nothing changed."; exit 1
+    fi
+    if printf '%s\n' "$CHANGED" | grep -qvE '^(analytics/|[.]github/|[.]claude/|docs/|SESSION_LOG[.]md$)'; then
+      echo "ignore: site files changed — building."; exit 1
+    fi
+    echo "ignore: only analytics/docs/log files changed — skipping."
+    exit 0
   '''
 
 # Cache headers: HTML pages should always revalidate, static assets can cache longer
