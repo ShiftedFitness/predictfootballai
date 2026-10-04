@@ -1055,9 +1055,7 @@ function showRules(){document.getElementById('rulesOverlay').classList.add('acti
 function closeRules(){document.getElementById('rulesOverlay').classList.remove('active');}
 </script>
 
-<footer style="text-align:center;padding:16px 16px 72px;font-size:11px;color:var(--muted);opacity:0.6;">
-  TeleStats.net &middot; Built by <a href="https://shiftedlabs.ai" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">Shifted.Labs</a>
-</footer>
+<footer style="text-align:center;padding:16px 16px 72px;font-size:11px;color:var(--muted);opacity:0.6;"></footer>
 
 <script>
 // ============================================================
@@ -1149,6 +1147,12 @@ async function init() {
     if (preset) selectedScope = preset.id;
 
     renderSetup();
+
+    // Arrived from a club page: the team is decided. Formation and objective
+    // are still the player's to change — only the club is locked.
+    if (preset && window.TSScope) {
+      TSScope.lockTeam?.({ container: $('scopeGrid'), label: preset.label });
+    }
   } catch (err) {
     console.error('Failed to load game config:', err);
     $('step1').innerHTML = '<div class="card"><p style="color:var(--danger)">Failed to load. Please refresh.</p></div>';
@@ -1205,7 +1209,7 @@ function renderSetup() {
   // Arrived from a team page with the club, division and game already chosen.
   // Starting XI still needs a formation and an objective, both of which have
   // sensible defaults already selected, so there is nothing left to ask.
-  if (window.TSScope) TSScope.play(function () { return $('startGameBtn'); });
+  if (window.TSScope) TSScope.play?.(function () { return $('startGameBtn'); });
 }
 
 const SCOPE_CATEGORIES = [
@@ -2432,6 +2436,7 @@ document.getElementById('tsClock').textContent = new Date().toTimeString().slice
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/js/ts-auth.js"></script>
 <script src="/js/ts-data.js"></script>
+<script src="/js/ts-footer.js"></script>
 <script src="/js/ts-nav.js"></script>
 <script>
 (async function tsIntegrate() {

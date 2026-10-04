@@ -63,8 +63,6 @@
       return 'team_' + T.slug + '_' + picked.map(function (c) { return c.dataset.slug; }).join('+');
     }
 
-    var sel = null;          // assigned below, read by paint()
-
     function paint() {
       var picked = chosen();
       var isAll = picked.length === each.length;
@@ -85,6 +83,9 @@
           a.removeAttribute('href');
         });
         note.textContent = 'Pick at least one competition.';
+        // The empty state has to mirror too, or the button keeps advertising
+        // the selection the Clear beside it has just thrown away.
+        mirror(picked, false);
         return;
       }
 
@@ -101,10 +102,25 @@
       note.textContent = isAll ? ''
         : 'Playing ' + picked.map(function (c) { return c.dataset.comp; }).join(' and ') + ' only.';
 
-      // Mirror into the select. A subset of two or more has no single option
-      // to show, so it falls back to "All competitions" rather than lying
-      // about which one is active — the note underneath says what is really on.
-      if (sel) sel.value = (picked.length === 1 && !isAll) ? picked[0].dataset.slug : '';
+      mirror(picked, isAll);
+    }
+
+    // ── the phone's face of the same state ─────────────────────────────────
+    // Checkboxes and a label, written FROM the buttons above and never the
+    // other way round at paint time, so the two cannot disagree about which
+    // competitions are on.
+    function mirror(picked, isAll) {
+      if (boxes.length) {
+        var on = {};
+        picked.forEach(function (c) { on[c.dataset.slug] = true; });
+        boxes.forEach(function (b) { b.checked = !!on[b.dataset.slug]; });
+      }
+      if (!label) return;
+      label.textContent = 'Competitions: ' + (
+        !picked.length ? 'none'
+        : isAll ? 'All'
+        : picked.length === 1 ? picked[0].dataset.comp
+        : picked.length + ' selected');
     }
 
     all.addEventListener('click', function () {
@@ -115,24 +131,69 @@
       paint();
     });
 
-    // ── the mobile face of the same control ────────────────────────────────
+    // ── the phone control ─────────────────────────────────────────────────
     //
-    // Six segments is most of a phone viewport, so narrow screens get a select
-    // instead. It is NOT a second copy of the state: it writes to the same
-    // buttons and then repaints, so there is only ever one answer to "which
-    // competitions are on" and no way for the two to disagree.
+    // It was a <select>, which can only say "one competition, or all of them".
+    // A Sunderland supporter on a phone therefore could not play the Premier
+    // League and Championship records together — the exact thing the
+    // segmented control exists for. Now: a disclosure button that says what is
+    // on, and checkboxes.
     //
-    // The select is single-choice by design. Multi-select on a phone means a
-    // multiple-size listbox, which is worse than the pills it replaced; the
-    // segmented control keeps the subset behaviour where there is room for it.
-    sel = $('compSelect');
-    if (sel) {
-      sel.addEventListener('change', function () {
-        var want = sel.value;
-        each.forEach(function (o) { o.classList.toggle('on', !want || o.dataset.slug === want); });
-        paint();
+    // Each checkbox writes to its BUTTON above and repaints, so the subset
+    // logic, the scope id and the link rewriting are the same code path the
+    // desktop control uses. There is no second filtering implementation that
+    // only runs on a phone.
+    var toggle = $('compToggle');
+    var panel = $('compPanel');
+    var label = $('compToggleLabel');
+    var boxes = panel ? [].slice.call(panel.querySelectorAll('input[type=checkbox]')) : [];
+
+    function bySlug(slug) {
+      for (var i = 0; i < each.length; i++) if (each[i].dataset.slug === slug) return each[i];
+      return null;
+    }
+
+    if (toggle && panel) {
+      toggle.addEventListener('click', function () {
+        var open = toggle.getAttribute('aria-expanded') === 'true';
+        toggle.setAttribute('aria-expanded', String(!open));
+        panel.hidden = open;
+      });
+      document.addEventListener('click', function (e) {
+        if (panel.hidden) return;
+        if (e.target.closest && e.target.closest('.msel')) return;
+        toggle.setAttribute('aria-expanded', 'false');
+        panel.hidden = true;
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.key !== 'Escape' || panel.hidden) return;
+        toggle.setAttribute('aria-expanded', 'false');
+        panel.hidden = true;
+        toggle.focus();
       });
     }
+
+    boxes.forEach(function (b) {
+      b.addEventListener('change', function () {
+        var chip = bySlug(b.dataset.slug);
+        if (chip) chip.classList.toggle('on', b.checked);
+        paint();
+      });
+    });
+
+    // "Clear" is allowed to empty the selection. paint() already refuses to
+    // build links to nothing and says so, which is a better answer than a
+    // control that silently ignores the button it just offered.
+    var selAll = $('compAll');
+    var selNone = $('compNone');
+    if (selAll) selAll.addEventListener('click', function () {
+      each.forEach(function (o) { o.classList.add('on'); });
+      paint();
+    });
+    if (selNone) selNone.addEventListener('click', function () {
+      each.forEach(function (o) { o.classList.remove('on'); });
+      paint();
+    });
 
     each.forEach(function (c) {
       c.addEventListener('click', function () {
@@ -157,46 +218,124 @@
     paint();
   })();
 
-  // ── Player of the day ─────────────────────────────────────────────────────
-  (function potd() {
-    var btn = $('potdBtn');
-    if (!btn || !T.potd || !T.potd.length) {
-      var box = $('potd');
-      if (box) box.style.display = 'none';
-      return;
+  // ── Mystery player ────────────────────────────────────────────────────────
+  //
+  // A daily guessing game, built on the Who Am I? endpoint rather than a
+  // second guessing engine: same masking, same clue generator (which already
+  // obeys "never name a competition the scope does not cover"), same
+  // server-side answer check, same encrypted id. `daily: true` makes the pick
+  // deterministic per club per UTC day.
+  //
+  // The answer is never in this page, so there is nothing to read in
+  // view-source and nothing to scrape for tomorrow.
+  (function mystery() {
+    var box = $('potd');
+    if (!box) return;
+    var scope = box.getAttribute('data-scope');
+    if (!scope) { box.style.display = 'none'; return; }
+
+    var blanksEl = $('potdBlanks');
+    var lineEl = $('potdLine');
+    var form = $('potdForm');
+    var input = $('potdInput');
+    var acts = $('potdActs');
+    var clueBtn = $('potdClue');
+    var giveUpBtn = $('potdGiveUp');
+    var scoreEl = $('potdScore');
+
+    // 100 / 60 / 30 for one, two or three clues; nothing for a reveal. Simple
+    // enough to state on the widget, which is the point of showing it.
+    var SCORES = [100, 60, 30, 10];
+    var state = { id: null, clues: [], shown: 1, done: false, wrong: 0 };
+
+    function score() { return state.shown <= SCORES.length ? SCORES[state.shown - 1] : 0; }
+    function paintScore() {
+      scoreEl.textContent = state.done ? '' : score() + ' pts';
     }
 
-    // Seeded on the club and the date, so everyone looking at Plymouth Argyle
-    // today sees the same player, and tomorrow it is a different one — with no
-    // rebuild and no request.
-    var day = new Date();
-    var seedStr = T.slug + '|' + day.getUTCFullYear() + '-' +
-                  (day.getUTCMonth() + 1) + '-' + day.getUTCDate();
-    var h = 2166136261;
-    for (var i = 0; i < seedStr.length; i++) {
-      h ^= seedStr.charCodeAt(i);
-      h = Math.imul(h, 16777619);
+    function showClue() {
+      var c = state.clues[state.shown - 1];
+      lineEl.innerHTML = c ? '<b>Clue ' + state.shown + ':</b> ' + esc(c) : '';
+      clueBtn.hidden = state.shown >= state.clues.length;
+      paintScore();
     }
-    var p = T.potd[(h >>> 0) % T.potd.length];
 
-    function reveal() {
-      $('potdName').textContent = p.n;
-      var bits = [num(p.a) + ' appearance' + (p.a === 1 ? '' : 's')];
-      if (p.g) bits.push(num(p.g) + ' goal' + (p.g === 1 ? '' : 's'));
-      if (p.f) bits.push(p.f === p.t ? p.f : p.f + ' to ' + p.t);
-      $('potdLine').textContent = bits.join(' · ') + ' for ' + T.name + '.';
-      // The strip is one line tall; "Play a game about Brighton and Hove
-      // Albion" wraps it to three on a phone.
-      btn.textContent = 'Play';
-      btn.onclick = function () {
-        var first = document.querySelector('a.game-go[href]');
-        if (first) first.click(); else location.hash = '#play';
-      };
-      if (window.TSAnalytics) {
-        TSAnalytics.trackEvent?.('team_potd_reveal', { team: T.slug });
-      }
+    fetch(API + '/whoami_start', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'start_game', scopeId: scope, daily: true }),
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (!d || d.error || !d.blanks) throw new Error(d && d.error);
+        state.id = d.playerId;
+        state.clues = d.clues || [];
+        blanksEl.textContent = d.blanks;
+        form.hidden = false;
+        acts.hidden = false;
+        showClue();
+      })
+      .catch(function () {
+        // A failure here must not leave a half-built game on the page.
+        box.style.display = 'none';
+      });
+
+    clueBtn.addEventListener('click', function () {
+      if (state.done || state.shown >= state.clues.length) return;
+      state.shown++;
+      showClue();
+    });
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var guess = input.value.trim();
+      if (!guess || state.done) return;
+      check({ guess: guess });
+    });
+
+    giveUpBtn.addEventListener('click', function () {
+      if (state.done) return;
+      check({ giveUp: true });
+    });
+
+    function check(extra) {
+      var body = { action: 'check_answer', playerId: state.id, scopeId: scope };
+      for (var k in extra) body[k] = extra[k];
+      fetch(API + '/whoami_start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          if (!d || d.error) return;
+          if (d.correct || extra.giveUp) return finish(d, !!d.correct);
+          // A wrong guess says so and nothing else. Saying "not quite, but
+          // close" would be a clue the game did not mean to give.
+          state.wrong++;
+          lineEl.innerHTML = '<b>Not ' + esc(guess()) + '.</b> ' +
+            esc(state.clues[state.shown - 1] || '');
+          input.value = '';
+          input.focus();
+        })
+        .catch(function () { /* leave the game as it was */ });
+
+      function guess() { return extra.guess || ''; }
     }
-    btn.addEventListener('click', reveal);
+
+    function finish(d, won) {
+      state.done = true;
+      var name = (d.player && d.player.name) || '';
+      blanksEl.textContent = name;
+      blanksEl.classList.toggle('got', won);
+      form.hidden = true;
+      acts.hidden = true;
+      var pts = won ? score() : 0;
+      lineEl.innerHTML = won
+        ? '<b>Correct \u2014 ' + esc(name) + '.</b> ' + pts + ' points. Back tomorrow.'
+        : '<b>It was ' + esc(name) + '.</b> Back tomorrow for another.';
+      if (window.TSAnalytics) TSAnalytics.teamPotdReveal?.(T.slug);
+    }
   })();
 
   // ── Leaderboard and community games ───────────────────────────────────────
@@ -209,6 +348,28 @@
     quiz: 'Trivia Quiz', bullseye: 'Bullseye', goal_recreator: 'Goal Recreator',
   };
   var gameName = function (k) { return GAME_NAMES[k] || String(k || '').replace(/_/g, ' '); };
+
+  // Where a community game is actually PLAYED.
+  //
+  // These cards linked to /community/?game=<id>, and the community page has
+  // never read a `game` parameter — so clicking a specific challenge landed
+  // the visitor on the hub to go and find it again. The community grid itself
+  // has always used this URL; the team page was simply using a different one
+  // that nothing implements.
+  //
+  // quiz and whoami are absent on purpose: neither game page reads
+  // ?community=, so a link into them would start a generic round instead of
+  // the authored one. Those fall back to the hub, which is the honest answer.
+  var COMMUNITY_PAGES = {
+    bullseye: 'bullseye', starting_xi: 'xi', higher_lower: 'hol',
+    player_alphabet: 'alpha', alphabet: 'alpha',
+  };
+  var communityHref = function (g) {
+    var page = COMMUNITY_PAGES[g.game_type];
+    return page
+      ? '/games/' + page + '.html?community=' + encodeURIComponent(g.id)
+      : '/community/';
+  };
 
   (function extras() {
     var boardBox = $('boardBox');
@@ -253,7 +414,7 @@
           // The distinction from the five official games is made in the markup
           // around this box, not here.
           commBox.innerHTML = '<ul class="community">' + d.community.slice(0, 4).map(function (g) {
-            return '<li><a href="/community/?game=' + encodeURIComponent(g.id) + '">' +
+            return '<li><a href="' + communityHref(g) + '">' +
               '<h4>' + esc(g.title) + '</h4>' +
               '<span class="meta">' + esc(gameName(g.game_type)) + ' \u00b7 ' +
               num(g.plays) + ' play' + (g.plays === 1 ? '' : 's') + '</span></a></li>';
@@ -270,6 +431,44 @@
         // block simply does not appear. Both its links are reachable from the
         // site nav and the page footer either way.
       });
+  })();
+
+  // ── How to play ───────────────────────────────────────────────────────────
+  // One open at a time, closes on Escape or an outside click. The button is a
+  // sibling of the card's anchor, so nothing here has to cancel a navigation
+  // that was never going to start.
+  (function howTo() {
+    var btns = document.querySelectorAll('.howto');
+    if (!btns.length) return;
+
+    function closeAll(except) {
+      for (var i = 0; i < btns.length; i++) {
+        if (btns[i] === except) continue;
+        btns[i].setAttribute('aria-expanded', 'false');
+        var pop = document.getElementById(btns[i].getAttribute('aria-controls'));
+        if (pop) pop.hidden = true;
+      }
+    }
+
+    Array.prototype.forEach.call(btns, function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var pop = document.getElementById(btn.getAttribute('aria-controls'));
+        if (!pop) return;
+        var open = btn.getAttribute('aria-expanded') === 'true';
+        closeAll(btn);
+        btn.setAttribute('aria-expanded', open ? 'false' : 'true');
+        pop.hidden = open;
+      });
+    });
+
+    document.addEventListener('click', function (e) {
+      if (!e.target.closest || !e.target.closest('.howto, .howpop')) closeAll(null);
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closeAll(null);
+    });
   })();
 
   // ── Ask TeleStats ─────────────────────────────────────────────────────────

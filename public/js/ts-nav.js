@@ -213,8 +213,8 @@
       this.countVisit();
       this.showInstallPrompt();
 
-      // ── Footer: database last updated ──
-      this.renderFooterMeta();
+      // ── The shared footer ──
+      try { this.renderFooterMeta(); } catch (e) { /* a footer is never fatal */ }
 
       // ── Welcome screen after email confirmation ──
       if (TSAuth._justConfirmedEmail) {
@@ -814,37 +814,20 @@
     },
 
     /**
-     * Fetch and render "Database last updated" in footer.
+     * The shared footer.
+     *
+     * This used to fetch `meta.current_season_last_updated` and append
+     * "Database last updated 15 Feb 2026" to whatever <footer> it found. That
+     * value is a hand-written note, and it had been seven months out of date
+     * while /tools/data correctly showed September — two answers to one
+     * question, which is the whole reason the footer is now one component with
+     * one source. See ts-footer.js.
+     *
+     * Optional invocation: a browser holding a cached ts-nav.js that predates
+     * ts-footer.js must not throw here and stop the nav wiring its buttons.
      */
-    async renderFooterMeta() {
-      const footer = document.querySelector('footer');
-      if (!footer) return;
-
-      try {
-        const API_BASE = window.location.hostname === 'localhost'
-          ? 'http://localhost:8888/.netlify/functions' : '/.netlify/functions';
-        const res = await fetch(API_BASE + '/meta');
-        if (!res.ok) return;
-        const meta = await res.json();
-        // One line, one date, and a way to see what it means. The old version
-        // printed two timestamps to the minute — "Current season stats updated:
-        // 15 Feb 2026 21:34 / Database updated: 15 Feb 2026" — which is more
-        // precision than anybody wants and no explanation of the difference.
-        const info = meta.current_season_last_updated;
-        if (info && info.value !== 'never') {
-          const d = new Date(info.updated_at);
-          const formatted = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-          let el = document.getElementById('tsLastUpdated');
-          if (!el) {
-            el = document.createElement('div');
-            el.id = 'tsLastUpdated';
-            el.style.cssText = 'margin-top:4px;opacity:0.5;font-size:0.75em;';
-            footer.appendChild(el);
-          }
-          el.innerHTML = 'Database last updated ' + formatted +
-            ' <a href="/tools/data.html" style="color:inherit;text-decoration:underline;">see coverage</a>';
-        }
-      } catch { /* silent */ }
+    renderFooterMeta() {
+      if (window.TSFooter && window.TSFooter.render) window.TSFooter.render();
     },
 
     /**

@@ -183,8 +183,6 @@ footer {
 </div>
 
 <footer>
-  <div>TeleStats.net &middot; Built by <a href="https://shiftedlabs.ai" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">Shifted.Labs</a></div>
-  <div id="lastUpdated" style="margin-top:4px;opacity:0.5;font-size:0.8em;"></div>
 </footer>
 
 <script>
@@ -200,29 +198,16 @@ updateClock();
 setInterval(updateClock, 30000);
 
 /* Fetch last-updated metadata */
-(async function() {
-  try {
-    const API_BASE = window.location.hostname === 'localhost'
-      ? 'http://localhost:8888/.netlify/functions'
-      : '/.netlify/functions';
-    const res = await fetch(API_BASE + '/meta');
-    if (!res.ok) return;
-    const meta = await res.json();
-    const info = meta.current_season_last_updated;
-    if (info && info.value !== 'never') {
-      const d = new Date(info.updated_at);
-      const formatted = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
-        + ' ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-      document.getElementById('lastUpdated').textContent = 'Current season stats updated: ' + formatted;
-    } else {
-      document.getElementById('lastUpdated').textContent = 'Current season stats: not yet loaded';
-    }
-  } catch(e) { /* silently fail */ }
-})();
+// The "Current season stats updated" line is gone.
+// It fetched meta.current_season_last_updated — a hand-written note that said
+// 15 Feb 2026 while the data itself had been refreshed on 16 Sep 2026. The
+// shared footer (ts-footer.js) now states one date on every page, derived
+// from the dataset.
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/js/ts-auth.js"></script>
 <script src="/js/ts-data.js"></script>
+<script src="/js/ts-footer.js"></script>
 <script src="/js/ts-nav.js"></script>
 <script>
 (async function () {

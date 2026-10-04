@@ -1626,6 +1626,44 @@ $('singlePlayerBtn').onclick = () => {
   show('step3');
 };
 
+// ── Launched from a team or competition page ─────────────────────────────
+//
+// Bullseye loaded ts-scope.js like the other five games but, unlike them,
+// never asked it anything. So /games/bullseye.html?scope=team_liverpool_all
+// landed on the mode picker, having already been told the club, the
+// competitions and the game — the exact dead end ts-scope exists to prevent.
+//
+// A real hidden control rather than calling chooseCategory() directly, so the
+// shared curtain and the "you came from Liverpool" line behave here exactly as
+// they do in the other five.
+(function scopeLaunch() {
+  if (!window.TSScope || !TSScope.requestedId) return;
+  var id = TSScope.requestedId();
+  if (!id || !/^(team|comp)_[a-z0-9+_-]+$/.test(id)) return;
+
+  var from = (TSScope.sourceTeam && TSScope.sourceTeam())
+          || (TSScope.sourceCompetition && TSScope.sourceCompetition()) || '';
+  var title = from
+    ? from.replace(/-/g, ' ').replace(/\b\w/g, function (c) { return c.toUpperCase(); })
+    : 'Your team';
+
+  var btn = document.createElement('button');
+  btn.id = 'scopeStartBtn';
+  btn.type = 'button';
+  btn.style.display = 'none';
+  btn.onclick = function () {
+    // The same state the Single Player button sets, because this IS a single
+    // player game that skipped the question.
+    window.gameSetup = { names: ['You'], isSinglePlayer: true };
+    hide('step1');
+    // The server returns the real, properly-cased name in meta.categoryName;
+    // this title only labels the loading step.
+    chooseCategory({ id: id, title: title, flag: '\uD83C\uDFDF\uFE0F' });
+  };
+  document.body.appendChild(btn);
+  TSScope.play?.(function () { return btn; });
+})();
+
 // Multiplayer: go to player count selection
 $('multiplayerBtn').onclick = () => {
   hide('step1');
@@ -3893,12 +3931,11 @@ function updateBullseyeSetting(key,val){
 }
 </script>
 
-<footer style="text-align:center;padding:16px;font-size:11px;color:var(--muted);opacity:0.6;">
-  TeleStats.net &middot; Built by <a href="https://shiftedlabs.ai" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">Shifted.Labs</a>
-</footer>
+<footer style="text-align:center;padding:16px;font-size:11px;color:var(--muted);opacity:0.6;"></footer>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/js/ts-auth.js"></script>
 <script src="/js/ts-data.js"></script>
+<script src="/js/ts-footer.js"></script>
 <script src="/js/ts-nav.js"></script>
 <script>
 (async function tsIntegrate() {

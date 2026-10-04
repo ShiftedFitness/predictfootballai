@@ -4,53 +4,183 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="/js/ts-analytics.js"></script>
-<title>Football Team Quizzes &amp; Trivia Games by Club | TeleStats</title>
-<meta name="description" content="Pick your club and play football quizzes built from real data. 355 teams across the Premier League, Championship, League One, League Two, La Liga, Serie A, Bundesliga and Ligue 1.">
+<title>Football Teams: Player Stats, Records &amp; Games | TeleStats</title>
+<meta name="description" content="Explore football player records, appearances, goals and games for 355 clubs. Find your team and discover football history on TeleStats.">
 <link rel="canonical" href="https://telestats.net/teams/">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Football Team Quizzes &amp; Trivia Games by Club | TeleStats">
-<meta property="og:description" content="Pick your club and play football quizzes built from real data. 355 teams across the Premier League, Championship, League One, League Two, La Liga, Serie A, Bundesliga and Ligue 1.">
+<meta property="og:title" content="Football Teams: Player Stats, Records &amp; Games | TeleStats">
+<meta property="og:description" content="Explore football player records, appearances, goals and games for 355 clubs. Find your team and discover football history on TeleStats.">
 <meta property="og:url" content="https://telestats.net/teams/">
 <meta name="twitter:card" content="summary">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/telestats-theme.css">
 <style>
-  body { margin: 0; }
-  .wrap { max-width: 1000px; margin: 0 auto; padding: 0 18px 50px; }
-  .ts-header { border-bottom: 1px solid var(--rule, #24313A); background: var(--bg-card, #131A20); }
-  .ts-header .inner { max-width: 1000px; margin: 0 auto; padding: 11px 18px;
-                      display: flex; align-items: center; gap: 18px;  flex-wrap: wrap;}
-  .ts-header .brand { font-weight: 700; letter-spacing: .04em; color: var(--text-primary, #F2F5F7);
-                      text-decoration: none; font-family: 'Space Mono', ui-monospace, monospace; }
-  .ts-header nav { display: flex; gap: 15px; flex-wrap: wrap; }
-  .ts-header nav a { font-size: .82rem; color: var(--text-secondary, #9FB0BC); text-decoration: none; }
-  nav.crumbs { margin-top: 16px; }
-  nav.crumbs { font-size: .8rem; color: var(--text-secondary); margin-bottom: 14px; }
-  nav.crumbs a { color: var(--accent); text-decoration: none; }
-  h1 { font-size: 1.7rem; margin: 0 0 6px; }
-  .lede { color: var(--text-secondary); margin: 0 0 26px; max-width: 60ch; }
-  h2 { font-size: 1.1rem; margin: 26px 0 2px; }
-  .count { font-size: .78rem; color: var(--text-muted); margin: 0 0 10px; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 6px; }
-  .grid a { display: flex; align-items: center; gap: 9px; font-size: .85rem;
-            padding: 7px 11px; border: 1px solid var(--rule, #24313A); border-radius: 6px;
-            color: var(--text-primary, #F2F5F7); text-decoration: none;
-            transition: border-color .12s, background .12s; }
-  /* A bar of the club's colour rather than a dot: at 4px it reads as the club
-     without pretending to be a badge. */
-  .grid a i { width: 4px; align-self: stretch; min-height: 17px; border-radius: 2px;
-              background: var(--club, #4A5A66); flex: 0 0 auto; }
-  .grid a:hover { border-color: var(--club, var(--accent)); background: rgba(255,255,255,.03); }
+  /* The same tokens as a club page, so the hub belongs to the same product. */
+  :root {
+    --bg: #0A0E11; --s0: #090C0F; --s1: #11161B; --s2: #161C23;
+    --line: rgba(255,255,255,.07); --line-2: rgba(255,255,255,.12);
+    --fg: #EEF3F7; --fg-2: #9FAEBB; --fg-3: #6B7A87;
+    --cyan: var(--accent-cyan, #00E5FF);
+    --r: 12px;
+    --mono: 'Space Mono', ui-monospace, SFMono-Regular, monospace;
+  }
+  body { margin: 0; background: var(--bg); color: var(--fg);
+         font-family: Inter, system-ui, -apple-system, sans-serif; }
+  .wrap { max-width: 920px; margin: 0 auto; padding: 0 20px 64px; }
+  .vh { position: absolute; width: 1px; height: 1px; overflow: hidden;
+        clip: rect(0 0 0 0); white-space: nowrap; }
 
-  .find { margin: 0 0 22px; }
-  .find input { width: 100%; box-sizing: border-box; padding: 12px 15px; font-size: .95rem;
-                border-radius: 9px; border: 1px solid var(--rule, #24313A);
-                background: var(--bg-card, #131A20); color: var(--text-primary, #F2F5F7);
-                font-family: inherit; }
-  .find input:focus { outline: none; border-color: var(--accent, #00E5FF); }
-  .find .hint { font-size: .76rem; color: var(--text-muted); margin: 7px 2px 0; min-height: 1.1em; }
-  section[hidden] { display: none; }
-  footer { margin-top: 40px; font-size: .78rem; color: var(--text-muted); }
-  footer a { color: var(--accent); }
+  .ts-header { border-bottom: 1px solid var(--line); background: var(--s1); }
+  .ts-header .inner { max-width: 920px; margin: 0 auto; padding: 11px 20px;
+                      display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+  .ts-header .brand { font-weight: 700; letter-spacing: .04em; color: var(--fg);
+                      text-decoration: none; font-family: var(--mono); }
+  .ts-header nav { display: flex; gap: 15px; flex-wrap: wrap; }
+  .ts-header nav a { font-size: .82rem; color: var(--fg-2); text-decoration: none; }
+  nav.crumbs { font-size: .76rem; color: var(--fg-3); margin: 16px 0 14px; }
+  nav.crumbs a { color: var(--fg-2); text-decoration: none; }
+
+  /* ── hero ───────────────────────────────────────────────────────────────
+     The editorial line is the display type; the H1 underneath it is the one
+     that has to say what this page IS. Both are real text — nothing is hidden
+     from anybody, and the search box is above the fold on a phone. */
+  .hero { padding: 2px 0 0; margin-bottom: 22px; }
+  .kicker { font-family: var(--mono); font-size: clamp(1.5rem, 5.4vw, 2.1rem);
+            font-weight: 700; letter-spacing: -.03em; line-height: 1.12; margin: 0 0 8px; }
+  .kicker em { font-style: normal; color: var(--cyan); }
+  h1 { font-size: .95rem; font-weight: 600; color: var(--fg-2); margin: 0 0 6px;
+       letter-spacing: 0; }
+  .lede { color: var(--fg-3); font-size: .84rem; margin: 0 0 16px; max-width: 60ch;
+          line-height: 1.5; }
+  .lede b { color: var(--fg-2); font-weight: 600; }
+
+  /* ── search ─────────────────────────────────────────────────────────────
+     The main action. One input, a live list of matches, Enter goes to the top
+     one. No request: every club is already on the page. */
+  .find { position: relative; margin: 0 0 8px; }
+  .find input { width: 100%; box-sizing: border-box; padding: 15px 44px 15px 46px;
+                font: inherit; font-size: 1rem; min-height: 54px; border-radius: 12px;
+                border: 1px solid var(--line-2); background: var(--s1); color: var(--fg); }
+  .find input::placeholder { color: var(--fg-3); }
+  .find input:focus { outline: none; border-color: var(--cyan); }
+  .find .mag { position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+               width: 18px; height: 18px; color: var(--fg-3); pointer-events: none; }
+  .find .clear { position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+                 width: 36px; height: 36px; display: none; align-items: center;
+                 justify-content: center; border: 0; border-radius: 50%; cursor: pointer;
+                 background: transparent; color: var(--fg-2); font-size: 20px; line-height: 1; }
+  .find .clear:hover { color: var(--fg); background: rgba(255,255,255,.07); }
+  .find.has .clear { display: flex; }
+  .sugg { position: absolute; z-index: 20; top: calc(100% + 6px); left: 0; right: 0;
+          margin: 0; padding: 6px; list-style: none; border-radius: 12px;
+          background: var(--s2); border: 1px solid var(--line-2);
+          box-shadow: 0 16px 40px rgba(0,0,0,.62); max-height: 320px; overflow-y: auto; }
+  .sugg[hidden] { display: none; }
+  .sugg a { display: flex; align-items: center; gap: 10px; padding: 10px 11px;
+            min-height: 44px; box-sizing: border-box; border-radius: 8px;
+            text-decoration: none; color: var(--fg); font-size: .9rem; }
+  .sugg li.on a, .sugg a:hover { background: rgba(255,255,255,.07); }
+  .sugg i { width: 4px; align-self: stretch; min-height: 20px; border-radius: 2px;
+            background: var(--club, var(--fg-3)); flex: 0 0 auto; }
+  .sugg .where { margin-left: auto; font-size: .72rem; color: var(--fg-3); }
+  .examples { font-size: .76rem; color: var(--fg-3); margin: 0 0 26px; }
+  .examples b { color: var(--fg-2); font-weight: 500; }
+  .nores { font-size: .84rem; color: var(--fg-2); padding: 12px 2px 0; }
+  .nores[hidden] { display: none; }
+
+  h2 { font-family: var(--mono); font-size: 1rem; font-weight: 700; margin: 0 0 3px; }
+  .sublede { color: var(--fg-3); font-size: .78rem; margin: 0 0 14px; }
+  section.band { margin-bottom: 34px; }
+
+  /* ── featured ───────────────────────────────────────────────────────────
+     Eight clubs with a shield each. The shields stop here: 355 of them would
+     be 355 inline SVGs on one page to decorate a list of links. */
+  ul.feat { list-style: none; padding: 0; margin: 0; display: grid; gap: 9px;
+            grid-template-columns: repeat(4, 1fr); }
+  ul.feat a { display: flex; flex-direction: column; align-items: center; gap: 5px;
+              padding: 15px 10px 13px; border-radius: var(--r); text-decoration: none;
+              color: var(--fg); background: var(--s1); border: 1px solid var(--line);
+              transition: border-color .14s, background .14s, transform .14s; }
+  ul.feat a:hover { background: var(--s2); transform: translateY(-2px);
+                    border-color: color-mix(in srgb, var(--club) 60%, var(--line-2)); }
+  ul.feat .crest { width: 34px; height: 39px; }
+  ul.feat .fn { font-family: var(--mono); font-size: .8rem; font-weight: 700;
+                text-align: center; line-height: 1.25; }
+  ul.feat .fm { font-size: .68rem; color: var(--fg-3); }
+
+  /* ── directory ──────────────────────────────────────────────────────────
+     Rows, not cards. 355 cards is the mistake this page already made once in
+     a different shape. */
+  .ctabs { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 16px; }
+  .ctab { font: inherit; font-size: .82rem; font-weight: 600; padding: 8px 14px;
+          min-height: 38px; border-radius: 999px; cursor: pointer;
+          background: var(--s1); color: var(--fg-2); border: 1px solid var(--line); }
+  .ctab:hover { color: var(--fg); border-color: var(--line-2); }
+  .ctab.on { background: var(--cyan); color: #06181C; border-color: var(--cyan); }
+  .ctab:focus-visible, .cchip:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+
+  .cblock { margin-bottom: 26px; }
+  .cblock[hidden] { display: none; }
+  .chead { display: flex; align-items: baseline; gap: 10px; margin-bottom: 8px; }
+  .chead h3 { font-family: var(--mono); font-size: .92rem; margin: 0; }
+  .ccount { font-size: .72rem; color: var(--fg-3); }
+  .cfilter { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 11px; }
+  .cchip { font: inherit; font-size: .75rem; padding: 6px 11px; min-height: 32px;
+           border-radius: 7px; cursor: pointer; background: transparent;
+           color: var(--fg-3); border: 1px solid var(--line); }
+  .cchip:hover { color: var(--fg); }
+  .cchip.on { background: rgba(255,255,255,.09); color: var(--fg); border-color: var(--line-2); }
+  .histnote { font-size: .72rem; color: var(--fg-3); margin: 0 0 10px; }
+
+  ul.clist { list-style: none; padding: 0; margin: 0;
+             columns: 3; column-gap: 18px; }
+  ul.clist li { break-inside: avoid; }
+  ul.clist a { display: flex; align-items: center; gap: 9px; padding: 7px 2px;
+               min-height: 34px; box-sizing: border-box; font-size: .85rem;
+               color: var(--fg); text-decoration: none;
+               border-bottom: 1px solid var(--line); }
+  ul.clist a:hover { color: var(--cyan); }
+  ul.clist a[hidden] { display: none; }
+  ul.clist i { width: 3px; align-self: stretch; min-height: 18px; border-radius: 2px;
+               background: var(--club, var(--fg-3)); flex: 0 0 auto; }
+  ul.clist .cn { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  ul.clist .cm { margin-left: auto; font-size: .7rem; color: var(--fg-3);
+                 font-variant-numeric: tabular-nums; }
+
+  .showall { display: block; width: 100%; margin-top: 10px; font: inherit; font-size: .8rem;
+             font-weight: 600; padding: 10px; min-height: 42px; cursor: pointer;
+             border-radius: 9px; background: transparent; color: var(--fg-2);
+             border: 1px solid var(--line-2); }
+  .showall:hover { color: var(--fg); border-color: var(--fg-3); }
+  .showall[hidden] { display: none; }
+  .showall:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+
+  footer.page { margin-top: 10px; padding-top: 18px; font-size: .75rem; color: var(--fg-3);
+                border-top: 1px solid var(--line); line-height: 1.7; }
+  footer.page a { color: var(--fg-2); }
+  footer.page a:hover { color: var(--cyan); }
+
+  @media (max-width: 860px) { ul.clist { columns: 2; } }
+  @media (max-width: 620px) {
+    .wrap { padding: 0 14px 48px; }
+    nav.crumbs { margin: 10px 0 9px; }
+    .kicker { font-size: clamp(1.35rem, 7vw, 1.8rem); }
+    h1 { font-size: .86rem; }
+    .lede { font-size: .79rem; margin-bottom: 13px; }
+    .find input { font-size: 16px; /* iOS zooms anything smaller on focus */
+                  padding: 14px 42px 14px 42px; min-height: 50px; }
+    .examples { margin-bottom: 22px; }
+    ul.feat { grid-template-columns: repeat(2, 1fr); }
+    ul.clist { columns: 1; }
+    ul.clist a { min-height: 40px; }
+    section.band { margin-bottom: 28px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    ul.feat a { transition: none; }
+    ul.feat a:hover { transform: none; }
+  }
 </style>
 </head>
 <body>
@@ -71,593 +201,798 @@
 </header>
 
 <div class="wrap">
-<nav class="crumbs"><a href="/">TeleStats</a> › Teams</nav>
-<h1>Football Games by Team</h1>
-<p class="lede">Pick your club and play football quizzes built from real data. 355 teams across the Premier League, Championship, League One, League Two, La Liga, Serie A, Bundesliga and Ligue 1.</p>
+<nav class="crumbs"><a href="/">TeleStats</a> &rsaquo; Teams</nav>
 
-<div class="find">
-  <input id="teamFind" type="search" autocomplete="off" spellcheck="false"
-         placeholder="Find your club — try Malaga, Sheff, Argyle…"
-         aria-label="Search for a club">
-  <p class="hint" id="findHint"></p>
+<div class="hero">
+  <p class="kicker">Your club. Your history. <em>Your games.</em></p>
+  <h1>Football teams: player stats, records and games</h1>
+  <p class="lede">Player records, appearances, goals and five free games for
+    <b>355 clubs</b> across England, Spain, Italy, Germany and France.</p>
+
+  <div class="find" id="findBox">
+    <svg class="mag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+      stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    <input id="teamFind" type="search" autocomplete="off" autocorrect="off"
+           autocapitalize="off" spellcheck="false" enterkeyhint="go"
+           role="combobox" aria-expanded="false" aria-autocomplete="list"
+           aria-controls="findSugg" placeholder="Find your club&hellip;"
+           aria-label="Search for a football club">
+    <button type="button" class="clear" id="findClear" aria-label="Clear search">&times;</button>
+    <ul class="sugg" id="findSugg" role="listbox" aria-label="Matching clubs" hidden></ul>
+  </div>
+  <p class="examples">Try <b>Arsenal</b>, <b>M&aacute;laga</b>, <b>Man Utd</b> or <b>Barcelona</b></p>
+  <p class="nores" id="findNone" hidden></p>
 </div>
 
-<section data-comp>
-  <h2>Premier League</h2>
-  <p class="count">51 clubs</p>
-  <div class="grid">
-        <a href="/teams/arsenal/" data-name="arsenal" style="--club:#EF0107"><i></i>Arsenal</a>
-        <a href="/teams/aston-villa/" data-name="aston villa" style="--club:#670E36"><i></i>Aston Villa</a>
-        <a href="/teams/barnsley/" data-name="barnsley" style="--club:#E4002B"><i></i>Barnsley</a>
-        <a href="/teams/birmingham-city/" data-name="birmingham city" style="--club:#0000AA"><i></i>Birmingham City</a>
-        <a href="/teams/blackburn-rovers/" data-name="blackburn rovers" style="--club:#009EDB"><i></i>Blackburn Rovers</a>
-        <a href="/teams/blackpool/" data-name="blackpool" style="--club:#F68712"><i></i>Blackpool</a>
-        <a href="/teams/bolton-wanderers/" data-name="bolton wanderers" style="--club:#1D2D5A"><i></i>Bolton Wanderers</a>
-        <a href="/teams/bournemouth/" data-name="bournemouth" style="--club:#DA291C"><i></i>Bournemouth</a>
-        <a href="/teams/bradford-city/" data-name="bradford city" style="--club:#8A2432"><i></i>Bradford City</a>
-        <a href="/teams/brentford/" data-name="brentford" style="--club:#E30613"><i></i>Brentford</a>
-        <a href="/teams/brighton-and-hove-albion/" data-name="brighton and hove albion" style="--club:#0057B8"><i></i>Brighton and Hove Albion</a>
-        <a href="/teams/burnley/" data-name="burnley" style="--club:#6C1D45"><i></i>Burnley</a>
-        <a href="/teams/cardiff-city/" data-name="cardiff city" style="--club:#0070B5"><i></i>Cardiff City</a>
-        <a href="/teams/charlton-athletic/" data-name="charlton athletic" style="--club:#D4021D"><i></i>Charlton Athletic</a>
-        <a href="/teams/chelsea/" data-name="chelsea" style="--club:#034694"><i></i>Chelsea</a>
-        <a href="/teams/coventry-city/" data-name="coventry city" style="--club:#00A3E0"><i></i>Coventry City</a>
-        <a href="/teams/crystal-palace/" data-name="crystal palace" style="--club:#1B458F"><i></i>Crystal Palace</a>
-        <a href="/teams/derby-county/" data-name="derby county" style="--club:#000000"><i></i>Derby County</a>
-        <a href="/teams/everton/" data-name="everton" style="--club:#003399"><i></i>Everton</a>
-        <a href="/teams/fulham/" data-name="fulham" style="--club:#000000"><i></i>Fulham</a>
-        <a href="/teams/huddersfield-town/" data-name="huddersfield town" style="--club:#0E63AD"><i></i>Huddersfield Town</a>
-        <a href="/teams/hull-city/" data-name="hull city" style="--club:#F5A12D"><i></i>Hull City</a>
-        <a href="/teams/ipswich-town/" data-name="ipswich town" style="--club:#0044AA"><i></i>Ipswich Town</a>
-        <a href="/teams/leeds-united/" data-name="leeds united" style="--club:#FFCD00"><i></i>Leeds United</a>
-        <a href="/teams/leicester-city/" data-name="leicester city" style="--club:#003090"><i></i>Leicester City</a>
-        <a href="/teams/liverpool/" data-name="liverpool" style="--club:#C8102E"><i></i>Liverpool</a>
-        <a href="/teams/luton-town/" data-name="luton town" style="--club:#F78F1E"><i></i>Luton Town</a>
-        <a href="/teams/manchester-city/" data-name="manchester city" style="--club:#6CABDD"><i></i>Manchester City</a>
-        <a href="/teams/manchester-united/" data-name="manchester united" style="--club:#DA291C"><i></i>Manchester United</a>
-        <a href="/teams/middlesbrough/" data-name="middlesbrough" style="--club:#E4002B"><i></i>Middlesbrough</a>
-        <a href="/teams/newcastle-united/" data-name="newcastle united" style="--club:#000000"><i></i>Newcastle United</a>
-        <a href="/teams/norwich-city/" data-name="norwich city" style="--club:#FFF200"><i></i>Norwich City</a>
-        <a href="/teams/nottingham-forest/" data-name="nottingham forest" style="--club:#DD0000"><i></i>Nottingham Forest</a>
-        <a href="/teams/oldham-athletic/" data-name="oldham athletic" style="--club:#004C97"><i></i>Oldham Athletic</a>
-        <a href="/teams/portsmouth/" data-name="portsmouth" style="--club:#001489"><i></i>Portsmouth</a>
-        <a href="/teams/queens-park-rangers/" data-name="queens park rangers" style="--club:#005CAB"><i></i>Queens Park Rangers</a>
-        <a href="/teams/reading/" data-name="reading" style="--club:#004494"><i></i>Reading</a>
-        <a href="/teams/sheffield-united/" data-name="sheffield united" style="--club:#EE2737"><i></i>Sheffield United</a>
-        <a href="/teams/sheffield-wednesday/" data-name="sheffield wednesday" style="--club:#0066B2"><i></i>Sheffield Wednesday</a>
-        <a href="/teams/southampton/" data-name="southampton" style="--club:#D71920"><i></i>Southampton</a>
-        <a href="/teams/stoke-city/" data-name="stoke city" style="--club:#E03A3E"><i></i>Stoke City</a>
-        <a href="/teams/sunderland/" data-name="sunderland" style="--club:#EB172B"><i></i>Sunderland</a>
-        <a href="/teams/swansea-city/" data-name="swansea city" style="--club:#000000"><i></i>Swansea City</a>
-        <a href="/teams/swindon-town/" data-name="swindon town" style="--club:#DA291C"><i></i>Swindon Town</a>
-        <a href="/teams/tottenham-hotspur/" data-name="tottenham hotspur" style="--club:#132257"><i></i>Tottenham Hotspur</a>
-        <a href="/teams/watford/" data-name="watford" style="--club:#FBEE23"><i></i>Watford</a>
-        <a href="/teams/west-bromwich-albion/" data-name="west bromwich albion" style="--club:#122F67"><i></i>West Bromwich Albion</a>
-        <a href="/teams/west-ham-united/" data-name="west ham united" style="--club:#7A263A"><i></i>West Ham United</a>
-        <a href="/teams/wigan-athletic/" data-name="wigan athletic" style="--club:#1D59AF"><i></i>Wigan Athletic</a>
-        <a href="/teams/wimbledon/" data-name="wimbledon" style="--club:#00008B"><i></i>Wimbledon</a>
-        <a href="/teams/wolverhampton-wanderers/" data-name="wolverhampton wanderers" style="--club:#FDB913"><i></i>Wolverhampton Wanderers</a>
-  </div>
+<section class="band">
+  <h2>Featured clubs</h2>
+  <p class="sublede">A few to start with &mdash; every club below has the same records and games.</p>
+  <ul class="feat">
+        <li><a href="/teams/arsenal/" style="--club:#EF0107">
+            <svg class="crest" viewBox="0 0 56 64" role="img" aria-label="Arsenal">
+      <path d="M4 4h48v30c0 14-12 23-24 26C16 57 4 48 4 34Z" fill="#EF0107" stroke="#c70000" stroke-width="3"/>
+      <path d="M4 20h48v8H4Z" fill="#c70000" opacity=".55"/>
+      <text x="28" y="40" text-anchor="middle" font-size="15" font-weight="700"
+            font-family="Space Mono, ui-monospace, monospace" fill="#fff">ARS</text>
+    </svg>
+            <span class="fn">Arsenal</span>
+            <span class="fm">287 players</span>
+          </a></li>
+        <li><a href="/teams/liverpool/" style="--club:#C8102E">
+            <svg class="crest" viewBox="0 0 56 64" role="img" aria-label="Liverpool">
+      <path d="M4 4h48v30c0 14-12 23-24 26C16 57 4 48 4 34Z" fill="#C8102E" stroke="#a00006" stroke-width="3"/>
+      <path d="M4 20h48v8H4Z" fill="#a00006" opacity=".55"/>
+      <text x="28" y="40" text-anchor="middle" font-size="15" font-weight="700"
+            font-family="Space Mono, ui-monospace, monospace" fill="#fff">LIV</text>
+    </svg>
+            <span class="fn">Liverpool</span>
+            <span class="fm">313 players</span>
+          </a></li>
+        <li><a href="/teams/manchester-united/" style="--club:#DA291C">
+            <svg class="crest" viewBox="0 0 56 64" role="img" aria-label="Manchester United">
+      <path d="M4 4h48v30c0 14-12 23-24 26C16 57 4 48 4 34Z" fill="#DA291C" stroke="#b20100" stroke-width="3"/>
+      <path d="M4 20h48v8H4Z" fill="#b20100" opacity=".55"/>
+      <text x="28" y="40" text-anchor="middle" font-size="19" font-weight="700"
+            font-family="Space Mono, ui-monospace, monospace" fill="#fff">MU</text>
+    </svg>
+            <span class="fn">Manchester United</span>
+            <span class="fm">268 players</span>
+          </a></li>
+        <li><a href="/teams/chelsea/" style="--club:#034694">
+            <svg class="crest" viewBox="0 0 56 64" role="img" aria-label="Chelsea">
+      <path d="M4 4h48v30c0 14-12 23-24 26C16 57 4 48 4 34Z" fill="#034694" stroke="#001e6c" stroke-width="3"/>
+      <path d="M4 20h48v8H4Z" fill="#001e6c" opacity=".55"/>
+      <text x="28" y="40" text-anchor="middle" font-size="15" font-weight="700"
+            font-family="Space Mono, ui-monospace, monospace" fill="#fff">CHE</text>
+    </svg>
+            <span class="fn">Chelsea</span>
+            <span class="fm">337 players</span>
+          </a></li>
+        <li><a href="/teams/barcelona/" style="--club:#A50044">
+            <svg class="crest" viewBox="0 0 56 64" role="img" aria-label="Barcelona">
+      <path d="M4 4h48v30c0 14-12 23-24 26C16 57 4 48 4 34Z" fill="#A50044" stroke="#7d001c" stroke-width="3"/>
+      <path d="M4 20h48v8H4Z" fill="#7d001c" opacity=".55"/>
+      <text x="28" y="40" text-anchor="middle" font-size="15" font-weight="700"
+            font-family="Space Mono, ui-monospace, monospace" fill="#fff">BAR</text>
+    </svg>
+            <span class="fn">Barcelona</span>
+            <span class="fm">356 players</span>
+          </a></li>
+        <li><a href="/teams/real-madrid/" style="--club:#FEBE10">
+            <svg class="crest" viewBox="0 0 56 64" role="img" aria-label="Real Madrid">
+      <path d="M4 4h48v30c0 14-12 23-24 26C16 57 4 48 4 34Z" fill="#FEBE10" stroke="#d69600" stroke-width="3"/>
+      <path d="M4 20h48v8H4Z" fill="#d69600" opacity=".55"/>
+      <text x="28" y="40" text-anchor="middle" font-size="19" font-weight="700"
+            font-family="Space Mono, ui-monospace, monospace" fill="#fff">RM</text>
+    </svg>
+            <span class="fn">Real Madrid</span>
+            <span class="fm">311 players</span>
+          </a></li>
+        <li><a href="/teams/bayern-munich/" style="--club:#DC052D">
+            <svg class="crest" viewBox="0 0 56 64" role="img" aria-label="Bayern Munich">
+      <path d="M4 4h48v30c0 14-12 23-24 26C16 57 4 48 4 34Z" fill="#DC052D" stroke="#b40005" stroke-width="3"/>
+      <path d="M4 20h48v8H4Z" fill="#b40005" opacity=".55"/>
+      <text x="28" y="40" text-anchor="middle" font-size="19" font-weight="700"
+            font-family="Space Mono, ui-monospace, monospace" fill="#fff">BM</text>
+    </svg>
+            <span class="fn">Bayern Munich</span>
+            <span class="fm">283 players</span>
+          </a></li>
+        <li><a href="/teams/juventus/" style="--club:#000000">
+            <svg class="crest" viewBox="0 0 56 64" role="img" aria-label="Juventus">
+      <path d="M4 4h48v30c0 14-12 23-24 26C16 57 4 48 4 34Z" fill="#000000" stroke="#000000" stroke-width="3"/>
+      <path d="M4 20h48v8H4Z" fill="#000000" opacity=".55"/>
+      <text x="28" y="40" text-anchor="middle" font-size="15" font-weight="700"
+            font-family="Space Mono, ui-monospace, monospace" fill="#fff">JUV</text>
+    </svg>
+            <span class="fn">Juventus</span>
+            <span class="fm">358 players</span>
+          </a></li>
+  </ul>
 </section>
 
-<section data-comp>
-  <h2>Championship</h2>
-  <p class="count">65 clubs</p>
-  <div class="grid">
-        <a href="/teams/aston-villa/" data-name="aston villa" style="--club:#670E36"><i></i>Aston Villa</a>
-        <a href="/teams/barnsley/" data-name="barnsley" style="--club:#E4002B"><i></i>Barnsley</a>
-        <a href="/teams/birmingham-city/" data-name="birmingham city" style="--club:#0000AA"><i></i>Birmingham City</a>
-        <a href="/teams/blackburn-rovers/" data-name="blackburn rovers" style="--club:#009EDB"><i></i>Blackburn Rovers</a>
-        <a href="/teams/blackpool/" data-name="blackpool" style="--club:#F68712"><i></i>Blackpool</a>
-        <a href="/teams/bolton-wanderers/" data-name="bolton wanderers" style="--club:#1D2D5A"><i></i>Bolton Wanderers</a>
-        <a href="/teams/bournemouth/" data-name="bournemouth" style="--club:#DA291C"><i></i>Bournemouth</a>
-        <a href="/teams/bradford-city/" data-name="bradford city" style="--club:#8A2432"><i></i>Bradford City</a>
-        <a href="/teams/brentford/" data-name="brentford" style="--club:#E30613"><i></i>Brentford</a>
-        <a href="/teams/brighton-and-hove-albion/" data-name="brighton and hove albion" style="--club:#0057B8"><i></i>Brighton and Hove Albion</a>
-        <a href="/teams/bristol-city/" data-name="bristol city" style="--club:#E31B23"><i></i>Bristol City</a>
-        <a href="/teams/burnley/" data-name="burnley" style="--club:#6C1D45"><i></i>Burnley</a>
-        <a href="/teams/burton-albion/" data-name="burton albion" style="--club:#FFC20E"><i></i>Burton Albion</a>
-        <a href="/teams/cardiff-city/" data-name="cardiff city" style="--club:#0070B5"><i></i>Cardiff City</a>
-        <a href="/teams/charlton-athletic/" data-name="charlton athletic" style="--club:#D4021D"><i></i>Charlton Athletic</a>
-        <a href="/teams/colchester-united/" data-name="colchester united" style="--club:#005DAA"><i></i>Colchester United</a>
-        <a href="/teams/coventry-city/" data-name="coventry city" style="--club:#00A3E0"><i></i>Coventry City</a>
-        <a href="/teams/crewe-alexandra/" data-name="crewe alexandra" style="--club:#DA291C"><i></i>Crewe Alexandra</a>
-        <a href="/teams/crystal-palace/" data-name="crystal palace" style="--club:#1B458F"><i></i>Crystal Palace</a>
-        <a href="/teams/derby-county/" data-name="derby county" style="--club:#000000"><i></i>Derby County</a>
-        <a href="/teams/doncaster-rovers/" data-name="doncaster rovers" style="--club:#DA291C"><i></i>Doncaster Rovers</a>
-        <a href="/teams/fulham/" data-name="fulham" style="--club:#000000"><i></i>Fulham</a>
-        <a href="/teams/gillingham/" data-name="gillingham" style="--club:#0055A5"><i></i>Gillingham</a>
-        <a href="/teams/grimsby-town/" data-name="grimsby town" style="--club:#000000"><i></i>Grimsby Town</a>
-        <a href="/teams/huddersfield-town/" data-name="huddersfield town" style="--club:#0E63AD"><i></i>Huddersfield Town</a>
-        <a href="/teams/hull-city/" data-name="hull city" style="--club:#F5A12D"><i></i>Hull City</a>
-        <a href="/teams/ipswich-town/" data-name="ipswich town" style="--club:#0044AA"><i></i>Ipswich Town</a>
-        <a href="/teams/leeds-united/" data-name="leeds united" style="--club:#FFCD00"><i></i>Leeds United</a>
-        <a href="/teams/leicester-city/" data-name="leicester city" style="--club:#003090"><i></i>Leicester City</a>
-        <a href="/teams/lincoln-city/" data-name="lincoln city" style="--club:#DA291C"><i></i>Lincoln City</a>
-        <a href="/teams/luton-town/" data-name="luton town" style="--club:#F78F1E"><i></i>Luton Town</a>
-        <a href="/teams/manchester-city/" data-name="manchester city" style="--club:#6CABDD"><i></i>Manchester City</a>
-        <a href="/teams/middlesbrough/" data-name="middlesbrough" style="--club:#E4002B"><i></i>Middlesbrough</a>
-        <a href="/teams/millwall/" data-name="millwall" style="--club:#00246B"><i></i>Millwall</a>
-        <a href="/teams/milton-keynes-dons/" data-name="milton keynes dons" style="--club:#FFFFFF"><i></i>Milton Keynes Dons</a>
-        <a href="/teams/newcastle-united/" data-name="newcastle united" style="--club:#000000"><i></i>Newcastle United</a>
-        <a href="/teams/norwich-city/" data-name="norwich city" style="--club:#FFF200"><i></i>Norwich City</a>
-        <a href="/teams/nottingham-forest/" data-name="nottingham forest" style="--club:#DD0000"><i></i>Nottingham Forest</a>
-        <a href="/teams/oxford-united/" data-name="oxford united" style="--club:#FFF200"><i></i>Oxford United</a>
-        <a href="/teams/peterborough-united/" data-name="peterborough united" style="--club:#0057B8"><i></i>Peterborough United</a>
-        <a href="/teams/plymouth-argyle/" data-name="plymouth argyle" style="--club:#007B5F"><i></i>Plymouth Argyle</a>
-        <a href="/teams/portsmouth/" data-name="portsmouth" style="--club:#001489"><i></i>Portsmouth</a>
-        <a href="/teams/preston-north-end/" data-name="preston north end" style="--club:#B2B2B2"><i></i>Preston North End</a>
-        <a href="/teams/queens-park-rangers/" data-name="queens park rangers" style="--club:#005CAB"><i></i>Queens Park Rangers</a>
-        <a href="/teams/reading/" data-name="reading" style="--club:#004494"><i></i>Reading</a>
-        <a href="/teams/rotherham-united/" data-name="rotherham united" style="--club:#D50032"><i></i>Rotherham United</a>
-        <a href="/teams/scunthorpe-united/" data-name="scunthorpe united" style="--club:#8A1538"><i></i>Scunthorpe United</a>
-        <a href="/teams/sheffield-united/" data-name="sheffield united" style="--club:#EE2737"><i></i>Sheffield United</a>
-        <a href="/teams/sheffield-wednesday/" data-name="sheffield wednesday" style="--club:#0066B2"><i></i>Sheffield Wednesday</a>
-        <a href="/teams/southampton/" data-name="southampton" style="--club:#D71920"><i></i>Southampton</a>
-        <a href="/teams/southend-united/" data-name="southend united" style="--club:#00549F"><i></i>Southend United</a>
-        <a href="/teams/stockport/" data-name="stockport" style="--club:#004B9B"><i></i>Stockport</a>
-        <a href="/teams/stoke-city/" data-name="stoke city" style="--club:#E03A3E"><i></i>Stoke City</a>
-        <a href="/teams/sunderland/" data-name="sunderland" style="--club:#EB172B"><i></i>Sunderland</a>
-        <a href="/teams/swansea-city/" data-name="swansea city" style="--club:#000000"><i></i>Swansea City</a>
-        <a href="/teams/walsall/" data-name="walsall" style="--club:#DA291C"><i></i>Walsall</a>
-        <a href="/teams/watford/" data-name="watford" style="--club:#FBEE23"><i></i>Watford</a>
-        <a href="/teams/west-bromwich-albion/" data-name="west bromwich albion" style="--club:#122F67"><i></i>West Bromwich Albion</a>
-        <a href="/teams/west-ham-united/" data-name="west ham united" style="--club:#7A263A"><i></i>West Ham United</a>
-        <a href="/teams/wigan-athletic/" data-name="wigan athletic" style="--club:#1D59AF"><i></i>Wigan Athletic</a>
-        <a href="/teams/wimbledon/" data-name="wimbledon" style="--club:#00008B"><i></i>Wimbledon</a>
-        <a href="/teams/wolverhampton-wanderers/" data-name="wolverhampton wanderers" style="--club:#FDB913"><i></i>Wolverhampton Wanderers</a>
-        <a href="/teams/wrexham/" data-name="wrexham" style="--club:#DA291C"><i></i>Wrexham</a>
-        <a href="/teams/wycombe-wanderers/" data-name="wycombe wanderers" style="--club:#003DA5"><i></i>Wycombe Wanderers</a>
-        <a href="/teams/yeovil-town/" data-name="yeovil town" style="--club:#007A33"><i></i>Yeovil Town</a>
+<section class="band">
+  <h2>All 355 clubs</h2>
+  <p class="sublede">Grouped by country, A&ndash;Z. The number beside each club is how many
+    of its players we hold records for.</p>
+
+  <div class="ctabs" role="group" aria-label="Filter clubs by country">
+    <button type="button" class="ctab on" data-country="">All countries</button>
+    <button type="button" class="ctab" data-country="ENG"
+      >England</button>
+    <button type="button" class="ctab" data-country="ESP"
+      >Spain</button>
+    <button type="button" class="ctab" data-country="ITA"
+      >Italy</button>
+    <button type="button" class="ctab" data-country="GER"
+      >Germany</button>
+    <button type="button" class="ctab" data-country="FRA"
+      >France</button>
   </div>
+  <p class="histnote">Competition filters show clubs we hold <strong>records</strong> for in that
+    competition at any point in its history &mdash; not the current league table.</p>
+
+<section class="cblock" data-country="ENG">
+  <div class="chead">
+    <h3>England</h3>
+    <span class="ccount">114 clubs</span>
+  </div>
+  <div class="cfilter" role="group" aria-label="England competitions">
+    <button type="button" class="cchip on" data-comp="">All</button>
+            <button type="button" class="cchip" data-comp="premier league"
+              >Premier League</button>
+            <button type="button" class="cchip" data-comp="championship"
+              >Championship</button>
+            <button type="button" class="cchip" data-comp="league one"
+              >League One</button>
+            <button type="button" class="cchip" data-comp="league two"
+              >League Two</button>
+            <button type="button" class="cchip" data-comp="fa cup"
+              >FA Cup</button>
+            <button type="button" class="cchip" data-comp="efl cup"
+              >EFL Cup</button>
+  </div>
+  <ul class="clist">
+          <li><a href="/teams/accrington-stanley/" data-k="accrington stanley" data-c="efl cup|fa cup|league one|league two" style="--club:#DA291C"><i></i><span class="cn">Accrington Stanley</span><span class="cm">358</span></a></li>
+          <li><a href="/teams/afc-wimbledon/" data-k="afc wimbledon|wimbledon afc" data-c="efl cup|fa cup|league one|league two" style="--club:#0033A0"><i></i><span class="cn">AFC Wimbledon</span><span class="cm">273</span></a></li>
+          <li><a href="/teams/aldershot-town/" data-k="aldershot town" data-c="fa cup|league two" style="--club:#E41B17"><i></i><span class="cn">Aldershot Town</span><span class="cm">197</span></a></li>
+          <li><a href="/teams/arsenal/" data-k="arsenal|afc|gunners" data-c="champions league|efl cup|fa cup|premier league" style="--club:#EF0107"><i></i><span class="cn">Arsenal</span><span class="cm">287</span></a></li>
+          <li><a href="/teams/aston-villa/" data-k="aston villa|villa|avfc" data-c="champions league|championship|efl cup|fa cup|premier league" style="--club:#670E36"><i></i><span class="cn">Aston Villa</span><span class="cm">352</span></a></li>
+          <li><a href="/teams/barnet/" data-k="barnet" data-c="efl cup|fa cup|league two" style="--club:#F5A623"><i></i><span class="cn">Barnet</span><span class="cm">343</span></a></li>
+          <li><a href="/teams/barnsley/" data-k="barnsley" data-c="championship|efl cup|fa cup|league one|premier league" style="--club:#E4002B"><i></i><span class="cn">Barnsley</span><span class="cm">490</span></a></li>
+          <li><a href="/teams/barrow/" data-k="barrow" data-c="efl cup|fa cup|league two" style="--club:#003DA5"><i></i><span class="cn">Barrow</span><span class="cm">141</span></a></li>
+          <li><a href="/teams/birmingham-city/" data-k="birmingham city" data-c="championship|efl cup|fa cup|league one|premier league" style="--club:#0000AA"><i></i><span class="cn">Birmingham City</span><span class="cm">389</span></a></li>
+          <li><a href="/teams/blackburn-rovers/" data-k="blackburn rovers" data-c="champions league|championship|efl cup|fa cup|league one|premier league" style="--club:#009EDB"><i></i><span class="cn">Blackburn Rovers</span><span class="cm">395</span></a></li>
+          <li><a href="/teams/blackpool/" data-k="blackpool" data-c="championship|efl cup|fa cup|league one|league two|premier league" style="--club:#F68712"><i></i><span class="cn">Blackpool</span><span class="cm">470</span></a></li>
+          <li><a href="/teams/bolton-wanderers/" data-k="bolton wanderers" data-c="championship|efl cup|fa cup|league one|league two|premier league" style="--club:#1D2D5A"><i></i><span class="cn">Bolton Wanderers</span><span class="cm">447</span></a></li>
+          <li><a href="/teams/boston-united/" data-k="boston united" data-c="fa cup|league two" style="--club:#D2AB67"><i></i><span class="cn">Boston United</span><span class="cm">142</span></a></li>
+          <li><a href="/teams/bournemouth/" data-k="bournemouth" data-c="championship|efl cup|fa cup|league one|league two|premier league" style="--club:#DA291C"><i></i><span class="cn">Bournemouth</span><span class="cm">297</span></a></li>
+          <li><a href="/teams/bradford-city/" data-k="bradford city" data-c="championship|efl cup|fa cup|league one|league two|premier league" style="--club:#8A2432"><i></i><span class="cn">Bradford City</span><span class="cm">493</span></a></li>
+          <li><a href="/teams/brentford/" data-k="brentford" data-c="championship|efl cup|fa cup|league one|league two|premier league" style="--club:#E30613"><i></i><span class="cn">Brentford</span><span class="cm">371</span></a></li>
+          <li><a href="/teams/brighton-and-hove-albion/" data-k="brighton and hove albion|brighton|seagulls" data-c="championship|efl cup|fa cup|league one|premier league" style="--club:#0057B8"><i></i><span class="cn">Brighton and Hove Albion</span><span class="cm">347</span></a></li>
+          <li><a href="/teams/bristol-city/" data-k="bristol city" data-c="championship|efl cup|fa cup|league one" style="--club:#E31B23"><i></i><span class="cn">Bristol City</span><span class="cm">336</span></a></li>
+          <li><a href="/teams/bristol-rovers/" data-k="bristol rovers" data-c="efl cup|fa cup|league one|league two" style="--club:#005BAA"><i></i><span class="cn">Bristol Rovers</span><span class="cm">389</span></a></li>
+          <li><a href="/teams/bromley/" data-k="bromley" data-c="efl cup|fa cup|league one|league two" style="--club:#FFFFFF"><i></i><span class="cn">Bromley</span><span class="cm">115</span></a></li>
+          <li><a href="/teams/burnley/" data-k="burnley" data-c="championship|efl cup|fa cup|premier league" style="--club:#6C1D45"><i></i><span class="cn">Burnley</span><span class="cm">288</span></a></li>
+          <li><a href="/teams/burton-albion/" data-k="burton albion" data-c="championship|efl cup|fa cup|league one|league two" style="--club:#FFC20E"><i></i><span class="cn">Burton Albion</span><span class="cm">333</span></a></li>
+          <li><a href="/teams/bury/" data-k="bury" data-c="efl cup|fa cup|league one|league two" style="--club:#004B9B"><i></i><span class="cn">Bury</span><span class="cm">332</span></a></li>
+          <li><a href="/teams/cambridge-united/" data-k="cambridge united" data-c="efl cup|fa cup|league one|league two" style="--club:#F8B300"><i></i><span class="cn">Cambridge United</span><span class="cm">283</span></a></li>
+          <li><a href="/teams/cardiff-city/" data-k="cardiff city" data-c="championship|efl cup|fa cup|league one|premier league" style="--club:#0070B5"><i></i><span class="cn">Cardiff City</span><span class="cm">348</span></a></li>
+          <li><a href="/teams/carlisle-united/" data-k="carlisle united" data-c="efl cup|fa cup|league one|league two" style="--club:#003399"><i></i><span class="cn">Carlisle United</span><span class="cm">426</span></a></li>
+          <li><a href="/teams/charlton-athletic/" data-k="charlton athletic" data-c="championship|efl cup|fa cup|league one|premier league" style="--club:#D4021D"><i></i><span class="cn">Charlton Athletic</span><span class="cm">451</span></a></li>
+          <li><a href="/teams/chelsea/" data-k="chelsea|cfc|blues" data-c="champions league|efl cup|fa cup|premier league" style="--club:#034694"><i></i><span class="cn">Chelsea</span><span class="cm">337</span></a></li>
+          <li><a href="/teams/cheltenham-town/" data-k="cheltenham town" data-c="efl cup|fa cup|league one|league two" style="--club:#DA291C"><i></i><span class="cn">Cheltenham Town</span><span class="cm">424</span></a></li>
+          <li><a href="/teams/chester-city/" data-k="chester city" data-c="league two" style="--club:#0033A0"><i></i><span class="cn">Chester City</span><span class="cm">113</span></a></li>
+          <li><a href="/teams/chesterfield/" data-k="chesterfield" data-c="efl cup|fa cup|league one|league two" style="--club:#0072CE"><i></i><span class="cn">Chesterfield</span><span class="cm">382</span></a></li>
+          <li><a href="/teams/colchester-united/" data-k="colchester united" data-c="championship|efl cup|fa cup|league one|league two" style="--club:#005DAA"><i></i><span class="cn">Colchester United</span><span class="cm">381</span></a></li>
+          <li><a href="/teams/coventry-city/" data-k="coventry city" data-c="championship|efl cup|fa cup|league one|league two|premier league" style="--club:#00A3E0"><i></i><span class="cn">Coventry City</span><span class="cm">500</span></a></li>
+          <li><a href="/teams/crawley-town/" data-k="crawley town" data-c="efl cup|fa cup|league one|league two" style="--club:#E4002B"><i></i><span class="cn">Crawley Town</span><span class="cm">314</span></a></li>
+          <li><a href="/teams/crewe-alexandra/" data-k="crewe alexandra" data-c="championship|efl cup|fa cup|league one|league two" style="--club:#DA291C"><i></i><span class="cn">Crewe Alexandra</span><span class="cm">342</span></a></li>
+          <li><a href="/teams/crystal-palace/" data-k="crystal palace|palace|cpfc" data-c="championship|efl cup|fa cup|premier league" style="--club:#1B458F"><i></i><span class="cn">Crystal Palace</span><span class="cm">366</span></a></li>
+          <li><a href="/teams/dagenham-and-redbridge/" data-k="dagenham and redbridge" data-c="efl cup|fa cup|league one|league two" style="--club:#E4002B"><i></i><span class="cn">Dagenham and Redbridge</span><span class="cm">215</span></a></li>
+          <li><a href="/teams/darlington/" data-k="darlington" data-c="fa cup|league two" style="--club:#FFFFFF"><i></i><span class="cn">Darlington</span><span class="cm">222</span></a></li>
+          <li><a href="/teams/derby-county/" data-k="derby county" data-c="championship|efl cup|fa cup|league one|premier league" style="--club:#000000"><i></i><span class="cn">Derby County</span><span class="cm">439</span></a></li>
+          <li><a href="/teams/doncaster-rovers/" data-k="doncaster rovers" data-c="championship|efl cup|fa cup|league one|league two" style="--club:#DA291C"><i></i><span class="cn">Doncaster Rovers</span><span class="cm">379</span></a></li>
+          <li><a href="/teams/everton/" data-k="everton|efc|toffees" data-c="efl cup|fa cup|premier league" style="--club:#003399"><i></i><span class="cn">Everton</span><span class="cm">295</span></a></li>
+          <li><a href="/teams/exeter-city/" data-k="exeter city" data-c="efl cup|fa cup|league one|league two" style="--club:#DA291C"><i></i><span class="cn">Exeter City</span><span class="cm">286</span></a></li>
+          <li><a href="/teams/fleetwood-town/" data-k="fleetwood town" data-c="efl cup|fa cup|league one|league two" style="--club:#E4002B"><i></i><span class="cn">Fleetwood Town</span><span class="cm">274</span></a></li>
+          <li><a href="/teams/forest-green-rovers/" data-k="forest green rovers" data-c="efl cup|fa cup|league one|league two" style="--club:#00A94F"><i></i><span class="cn">Forest Green Rovers</span><span class="cm">187</span></a></li>
+          <li><a href="/teams/fulham/" data-k="fulham" data-c="championship|efl cup|fa cup|premier league" style="--club:#000000"><i></i><span class="cn">Fulham</span><span class="cm">327</span></a></li>
+          <li><a href="/teams/gillingham/" data-k="gillingham" data-c="championship|efl cup|fa cup|league one|league two" style="--club:#0055A5"><i></i><span class="cn">Gillingham</span><span class="cm">421</span></a></li>
+          <li><a href="/teams/grimsby-town/" data-k="grimsby town" data-c="championship|efl cup|fa cup|league one|league two" style="--club:#000000"><i></i><span class="cn">Grimsby Town</span><span class="cm">406</span></a></li>
+          <li><a href="/teams/harrogate-town/" data-k="harrogate town" data-c="efl cup|fa cup|league two" style="--club:#FDB913"><i></i><span class="cn">Harrogate Town</span><span class="cm">112</span></a></li>
+          <li><a href="/teams/hartlepool-united/" data-k="hartlepool united" data-c="efl cup|fa cup|league one|league two" style="--club:#003DA5"><i></i><span class="cn">Hartlepool United</span><span class="cm">297</span></a></li>
+          <li><a href="/teams/hereford-united/" data-k="hereford united" data-c="league one|league two" style="--club:#FFFFFF"><i></i><span class="cn">Hereford United</span><span class="cm">142</span></a></li>
+          <li><a href="/teams/huddersfield-town/" data-k="huddersfield town" data-c="championship|efl cup|fa cup|league one|league two|premier league" style="--club:#0E63AD"><i></i><span class="cn">Huddersfield Town</span><span class="cm">359</span></a></li>
+          <li><a href="/teams/hull-city/" data-k="hull city" data-c="championship|efl cup|fa cup|league one|league two|premier league" style="--club:#F5A12D"><i></i><span class="cn">Hull City</span><span class="cm">393</span></a></li>
+          <li><a href="/teams/ipswich-town/" data-k="ipswich town" data-c="championship|efl cup|fa cup|league one|premier league" style="--club:#0044AA"><i></i><span class="cn">Ipswich Town</span><span class="cm">424</span></a></li>
+          <li><a href="/teams/kidderminster-harriers/" data-k="kidderminster harriers" data-c="fa cup|league two" style="--club:#E4002B"><i></i><span class="cn">Kidderminster Harriers</span><span class="cm">132</span></a></li>
+          <li><a href="/teams/leeds-united/" data-k="leeds united|leeds" data-c="champions league|championship|efl cup|fa cup|league one|premier league" style="--club:#FFCD00"><i></i><span class="cn">Leeds United</span><span class="cm">445</span></a></li>
+          <li><a href="/teams/leicester-city/" data-k="leicester city|leicester|foxes" data-c="champions league|championship|efl cup|fa cup|league one|premier league" style="--club:#003090"><i></i><span class="cn">Leicester City</span><span class="cm">392</span></a></li>
+          <li><a href="/teams/leyton-orient/" data-k="leyton orient" data-c="efl cup|fa cup|league one|league two" style="--club:#DA291C"><i></i><span class="cn">Leyton Orient</span><span class="cm">392</span></a></li>
+          <li><a href="/teams/lincoln-city/" data-k="lincoln city" data-c="championship|efl cup|fa cup|league one|league two" style="--club:#DA291C"><i></i><span class="cn">Lincoln City</span><span class="cm">361</span></a></li>
+          <li><a href="/teams/liverpool/" data-k="liverpool|lfc|reds" data-c="champions league|efl cup|fa cup|premier league" style="--club:#C8102E"><i></i><span class="cn">Liverpool</span><span class="cm">313</span></a></li>
+          <li><a href="/teams/luton-town/" data-k="luton town" data-c="championship|efl cup|fa cup|league one|league two|premier league" style="--club:#F78F1E"><i></i><span class="cn">Luton Town</span><span class="cm">299</span></a></li>
+          <li><a href="/teams/macclesfield-town/" data-k="macclesfield town" data-c="efl cup|fa cup|league two" style="--club:#0072CE"><i></i><span class="cn">Macclesfield Town</span><span class="cm">249</span></a></li>
+          <li><a href="/teams/manchester-city/" data-k="manchester city|man city|mancity|mcfc" data-c="champions league|championship|efl cup|fa cup|premier league" style="--club:#6CABDD"><i></i><span class="cn">Manchester City</span><span class="cm">326</span></a></li>
+          <li><a href="/teams/manchester-united/" data-k="manchester united|man utd|man united|manutd|mufc|red devils" data-c="champions league|efl cup|fa cup|premier league" style="--club:#DA291C"><i></i><span class="cn">Manchester United</span><span class="cm">268</span></a></li>
+          <li><a href="/teams/mansfield-town/" data-k="mansfield town" data-c="efl cup|fa cup|league one|league two" style="--club:#FFD700"><i></i><span class="cn">Mansfield Town</span><span class="cm">346</span></a></li>
+          <li><a href="/teams/middlesbrough/" data-k="middlesbrough" data-c="championship|efl cup|fa cup|premier league" style="--club:#E4002B"><i></i><span class="cn">Middlesbrough</span><span class="cm">420</span></a></li>
+          <li><a href="/teams/millwall/" data-k="millwall" data-c="championship|efl cup|fa cup|league one" style="--club:#00246B"><i></i><span class="cn">Millwall</span><span class="cm">349</span></a></li>
+          <li><a href="/teams/milton-keynes-dons/" data-k="milton keynes dons|mk dons" data-c="championship|efl cup|fa cup|league one|league two" style="--club:#FFFFFF"><i></i><span class="cn">Milton Keynes Dons</span><span class="cm">373</span></a></li>
+          <li><a href="/teams/morecambe/" data-k="morecambe" data-c="efl cup|fa cup|league one|league two" style="--club:#DA291C"><i></i><span class="cn">Morecambe</span><span class="cm">273</span></a></li>
+          <li><a href="/teams/newcastle-united/" data-k="newcastle united|newcastle|nufc|toon|magpies" data-c="champions league|championship|efl cup|fa cup|premier league" style="--club:#000000"><i></i><span class="cn">Newcastle United</span><span class="cm">308</span></a></li>
+          <li><a href="/teams/newport-county/" data-k="newport county" data-c="efl cup|fa cup|league two" style="--club:#F5A623"><i></i><span class="cn">Newport County</span><span class="cm">275</span></a></li>
+          <li><a href="/teams/northampton-town/" data-k="northampton town" data-c="efl cup|fa cup|league one|league two" style="--club:#7C2529"><i></i><span class="cn">Northampton Town</span><span class="cm">481</span></a></li>
+          <li><a href="/teams/norwich-city/" data-k="norwich city" data-c="championship|efl cup|fa cup|league one|premier league" style="--club:#FFF200"><i></i><span class="cn">Norwich City</span><span class="cm">375</span></a></li>
+          <li><a href="/teams/nottingham-forest/" data-k="nottingham forest|notts forest|forest|nffc" data-c="championship|efl cup|fa cup|league one|premier league" style="--club:#DD0000"><i></i><span class="cn">Nottingham Forest</span><span class="cm">447</span></a></li>
+          <li><a href="/teams/notts-county/" data-k="notts county" data-c="efl cup|fa cup|league one|league two" style="--club:#000000"><i></i><span class="cn">Notts County</span><span class="cm">443</span></a></li>
+          <li><a href="/teams/oldham-athletic/" data-k="oldham athletic" data-c="efl cup|fa cup|league one|league two|premier league" style="--club:#004C97"><i></i><span class="cn">Oldham Athletic</span><span class="cm">516</span></a></li>
+          <li><a href="/teams/oxford-united/" data-k="oxford united" data-c="championship|efl cup|fa cup|league one|league two" style="--club:#FFF200"><i></i><span class="cn">Oxford United</span><span class="cm">374</span></a></li>
+          <li><a href="/teams/peterborough-united/" data-k="peterborough united" data-c="championship|efl cup|fa cup|league one|league two" style="--club:#0057B8"><i></i><span class="cn">Peterborough United</span><span class="cm">397</span></a></li>
+          <li><a href="/teams/plymouth-argyle/" data-k="plymouth argyle" data-c="championship|efl cup|fa cup|league one|league two" style="--club:#007B5F"><i></i><span class="cn">Plymouth Argyle</span><span class="cm">385</span></a></li>
+          <li><a href="/teams/port-vale/" data-k="port vale" data-c="efl cup|fa cup|league one|league two" style="--club:#000000"><i></i><span class="cn">Port Vale</span><span class="cm">410</span></a></li>
+          <li><a href="/teams/portsmouth/" data-k="portsmouth" data-c="championship|efl cup|fa cup|league one|league two|premier league" style="--club:#001489"><i></i><span class="cn">Portsmouth</span><span class="cm">456</span></a></li>
+          <li><a href="/teams/preston-north-end/" data-k="preston north end" data-c="championship|efl cup|fa cup|league one" style="--club:#B2B2B2"><i></i><span class="cn">Preston North End</span><span class="cm">335</span></a></li>
+          <li><a href="/teams/queens-park-rangers/" data-k="queens park rangers|qpr" data-c="championship|efl cup|fa cup|league one|premier league" style="--club:#005CAB"><i></i><span class="cn">Queens Park Rangers</span><span class="cm">410</span></a></li>
+          <li><a href="/teams/reading/" data-k="reading" data-c="championship|efl cup|fa cup|league one|premier league" style="--club:#004494"><i></i><span class="cn">Reading</span><span class="cm">334</span></a></li>
+          <li><a href="/teams/rochdale/" data-k="rochdale" data-c="efl cup|fa cup|league one|league two" style="--club:#004B87"><i></i><span class="cn">Rochdale</span><span class="cm">382</span></a></li>
+          <li><a href="/teams/rotherham-united/" data-k="rotherham united" data-c="championship|efl cup|fa cup|league one|league two" style="--club:#D50032"><i></i><span class="cn">Rotherham United</span><span class="cm">420</span></a></li>
+          <li><a href="/teams/rushden-and-diamonds/" data-k="rushden and diamonds" data-c="league one|league two" style="--club:#005BAC"><i></i><span class="cn">Rushden and Diamonds</span><span class="cm">83</span></a></li>
+          <li><a href="/teams/salford-city-fc/" data-k="salford city fc" data-c="efl cup|fa cup|league two" style="--club:#DA291C"><i></i><span class="cn">Salford City FC</span><span class="cm">174</span></a></li>
+          <li><a href="/teams/scunthorpe-united/" data-k="scunthorpe united" data-c="championship|efl cup|fa cup|league one|league two" style="--club:#8A1538"><i></i><span class="cn">Scunthorpe United</span><span class="cm">342</span></a></li>
+          <li><a href="/teams/sheffield-united/" data-k="sheffield united|sheff utd|sheff united|blades" data-c="championship|efl cup|fa cup|league one|premier league" style="--club:#EE2737"><i></i><span class="cn">Sheffield United</span><span class="cm">433</span></a></li>
+          <li><a href="/teams/sheffield-wednesday/" data-k="sheffield wednesday|sheff wed|sheffield weds|swfc|owls" data-c="championship|efl cup|fa cup|league one|premier league" style="--club:#0066B2"><i></i><span class="cn">Sheffield Wednesday</span><span class="cm">494</span></a></li>
+          <li><a href="/teams/shrewsbury-town/" data-k="shrewsbury town" data-c="efl cup|fa cup|league one|league two" style="--club:#0053A0"><i></i><span class="cn">Shrewsbury Town</span><span class="cm">449</span></a></li>
+          <li><a href="/teams/southampton/" data-k="southampton" data-c="championship|efl cup|fa cup|league one|premier league" style="--club:#D71920"><i></i><span class="cn">Southampton</span><span class="cm">399</span></a></li>
+          <li><a href="/teams/southend-united/" data-k="southend united" data-c="championship|efl cup|fa cup|league one|league two" style="--club:#00549F"><i></i><span class="cn">Southend United</span><span class="cm">329</span></a></li>
+          <li><a href="/teams/stevenage/" data-k="stevenage" data-c="efl cup|fa cup|league one|league two" style="--club:#E4002B"><i></i><span class="cn">Stevenage</span><span class="cm">347</span></a></li>
+          <li><a href="/teams/stockport/" data-k="stockport" data-c="championship|efl cup|fa cup|league one|league two" style="--club:#004B9B"><i></i><span class="cn">Stockport</span><span class="cm">340</span></a></li>
+          <li><a href="/teams/stoke-city/" data-k="stoke city" data-c="championship|efl cup|fa cup|premier league" style="--club:#E03A3E"><i></i><span class="cn">Stoke City</span><span class="cm">323</span></a></li>
+          <li><a href="/teams/sunderland/" data-k="sunderland" data-c="championship|efl cup|fa cup|league one|premier league" style="--club:#EB172B"><i></i><span class="cn">Sunderland</span><span class="cm">412</span></a></li>
+          <li><a href="/teams/sutton-united/" data-k="sutton united" data-c="efl cup|fa cup|league two" style="--club:#F5A12D"><i></i><span class="cn">Sutton United</span><span class="cm">122</span></a></li>
+          <li><a href="/teams/swansea-city/" data-k="swansea city" data-c="championship|efl cup|fa cup|league one|league two|premier league" style="--club:#000000"><i></i><span class="cn">Swansea City</span><span class="cm">321</span></a></li>
+          <li><a href="/teams/swindon-town/" data-k="swindon town" data-c="efl cup|fa cup|league one|league two|premier league" style="--club:#DA291C"><i></i><span class="cn">Swindon Town</span><span class="cm">511</span></a></li>
+          <li><a href="/teams/torquay-united/" data-k="torquay united" data-c="fa cup|league one|league two" style="--club:#FFCE00"><i></i><span class="cn">Torquay United</span><span class="cm">240</span></a></li>
+          <li><a href="/teams/tottenham-hotspur/" data-k="tottenham hotspur|spurs|thfc" data-c="champions league|efl cup|fa cup|premier league" style="--club:#132257"><i></i><span class="cn">Tottenham Hotspur</span><span class="cm">320</span></a></li>
+          <li><a href="/teams/tranmere-rovers/" data-k="tranmere rovers" data-c="efl cup|fa cup|league one|league two" style="--club:#FFFFFF"><i></i><span class="cn">Tranmere Rovers</span><span class="cm">373</span></a></li>
+          <li><a href="/teams/walsall/" data-k="walsall" data-c="championship|efl cup|fa cup|league one|league two" style="--club:#DA291C"><i></i><span class="cn">Walsall</span><span class="cm">428</span></a></li>
+          <li><a href="/teams/watford/" data-k="watford" data-c="championship|efl cup|fa cup|premier league" style="--club:#FBEE23"><i></i><span class="cn">Watford</span><span class="cm">401</span></a></li>
+          <li><a href="/teams/west-bromwich-albion/" data-k="west bromwich albion|west brom|wba|baggies" data-c="championship|efl cup|fa cup|premier league" style="--club:#122F67"><i></i><span class="cn">West Bromwich Albion</span><span class="cm">320</span></a></li>
+          <li><a href="/teams/west-ham-united/" data-k="west ham united|west ham|whufc|hammers" data-c="championship|efl cup|fa cup|premier league" style="--club:#7A263A"><i></i><span class="cn">West Ham United</span><span class="cm">398</span></a></li>
+          <li><a href="/teams/wigan-athletic/" data-k="wigan athletic" data-c="championship|efl cup|fa cup|league one|premier league" style="--club:#1D59AF"><i></i><span class="cn">Wigan Athletic</span><span class="cm">394</span></a></li>
+          <li><a href="/teams/wimbledon/" data-k="wimbledon" data-c="championship|premier league" style="--club:#00008B"><i></i><span class="cn">Wimbledon</span><span class="cm">109</span></a></li>
+          <li><a href="/teams/wolverhampton-wanderers/" data-k="wolverhampton wanderers|wolves" data-c="championship|efl cup|fa cup|league one|premier league" style="--club:#FDB913"><i></i><span class="cn">Wolverhampton Wanderers</span><span class="cm">305</span></a></li>
+          <li><a href="/teams/wrexham/" data-k="wrexham" data-c="championship|efl cup|fa cup|league one|league two" style="--club:#DA291C"><i></i><span class="cn">Wrexham</span><span class="cm">204</span></a></li>
+          <li><a href="/teams/wycombe-wanderers/" data-k="wycombe wanderers" data-c="championship|efl cup|fa cup|league one|league two" style="--club:#003DA5"><i></i><span class="cn">Wycombe Wanderers</span><span class="cm">390</span></a></li>
+          <li><a href="/teams/yeovil-town/" data-k="yeovil town" data-c="championship|efl cup|fa cup|league one|league two" style="--club:#007A33"><i></i><span class="cn">Yeovil Town</span><span class="cm">382</span></a></li>
+          <li><a href="/teams/york-city/" data-k="york city" data-c="efl cup|fa cup|league two" style="--club:#E4002B"><i></i><span class="cn">York City</span><span class="cm">246</span></a></li>
+  </ul>
+  <button type="button" class="showall" data-n="114"
+    >Show all 114 England clubs</button>
 </section>
 
-<section data-comp>
-  <h2>League One</h2>
-  <p class="count">83 clubs</p>
-  <div class="grid">
-        <a href="/teams/accrington-stanley/" data-name="accrington stanley" style="--club:#DA291C"><i></i>Accrington Stanley</a>
-        <a href="/teams/afc-wimbledon/" data-name="afc wimbledon" style="--club:#0033A0"><i></i>AFC Wimbledon</a>
-        <a href="/teams/barnsley/" data-name="barnsley" style="--club:#E4002B"><i></i>Barnsley</a>
-        <a href="/teams/birmingham-city/" data-name="birmingham city" style="--club:#0000AA"><i></i>Birmingham City</a>
-        <a href="/teams/blackburn-rovers/" data-name="blackburn rovers" style="--club:#009EDB"><i></i>Blackburn Rovers</a>
-        <a href="/teams/blackpool/" data-name="blackpool" style="--club:#F68712"><i></i>Blackpool</a>
-        <a href="/teams/bolton-wanderers/" data-name="bolton wanderers" style="--club:#1D2D5A"><i></i>Bolton Wanderers</a>
-        <a href="/teams/bournemouth/" data-name="bournemouth" style="--club:#DA291C"><i></i>Bournemouth</a>
-        <a href="/teams/bradford-city/" data-name="bradford city" style="--club:#8A2432"><i></i>Bradford City</a>
-        <a href="/teams/brentford/" data-name="brentford" style="--club:#E30613"><i></i>Brentford</a>
-        <a href="/teams/brighton-and-hove-albion/" data-name="brighton and hove albion" style="--club:#0057B8"><i></i>Brighton and Hove Albion</a>
-        <a href="/teams/bristol-city/" data-name="bristol city" style="--club:#E31B23"><i></i>Bristol City</a>
-        <a href="/teams/bristol-rovers/" data-name="bristol rovers" style="--club:#005BAA"><i></i>Bristol Rovers</a>
-        <a href="/teams/bromley/" data-name="bromley" style="--club:#FFFFFF"><i></i>Bromley</a>
-        <a href="/teams/burton-albion/" data-name="burton albion" style="--club:#FFC20E"><i></i>Burton Albion</a>
-        <a href="/teams/bury/" data-name="bury" style="--club:#004B9B"><i></i>Bury</a>
-        <a href="/teams/cambridge-united/" data-name="cambridge united" style="--club:#F8B300"><i></i>Cambridge United</a>
-        <a href="/teams/cardiff-city/" data-name="cardiff city" style="--club:#0070B5"><i></i>Cardiff City</a>
-        <a href="/teams/carlisle-united/" data-name="carlisle united" style="--club:#003399"><i></i>Carlisle United</a>
-        <a href="/teams/charlton-athletic/" data-name="charlton athletic" style="--club:#D4021D"><i></i>Charlton Athletic</a>
-        <a href="/teams/cheltenham-town/" data-name="cheltenham town" style="--club:#DA291C"><i></i>Cheltenham Town</a>
-        <a href="/teams/chesterfield/" data-name="chesterfield" style="--club:#0072CE"><i></i>Chesterfield</a>
-        <a href="/teams/colchester-united/" data-name="colchester united" style="--club:#005DAA"><i></i>Colchester United</a>
-        <a href="/teams/coventry-city/" data-name="coventry city" style="--club:#00A3E0"><i></i>Coventry City</a>
-        <a href="/teams/crawley-town/" data-name="crawley town" style="--club:#E4002B"><i></i>Crawley Town</a>
-        <a href="/teams/crewe-alexandra/" data-name="crewe alexandra" style="--club:#DA291C"><i></i>Crewe Alexandra</a>
-        <a href="/teams/dagenham-and-redbridge/" data-name="dagenham and redbridge" style="--club:#E4002B"><i></i>Dagenham and Redbridge</a>
-        <a href="/teams/derby-county/" data-name="derby county" style="--club:#000000"><i></i>Derby County</a>
-        <a href="/teams/doncaster-rovers/" data-name="doncaster rovers" style="--club:#DA291C"><i></i>Doncaster Rovers</a>
-        <a href="/teams/exeter-city/" data-name="exeter city" style="--club:#DA291C"><i></i>Exeter City</a>
-        <a href="/teams/fleetwood-town/" data-name="fleetwood town" style="--club:#E4002B"><i></i>Fleetwood Town</a>
-        <a href="/teams/forest-green-rovers/" data-name="forest green rovers" style="--club:#00A94F"><i></i>Forest Green Rovers</a>
-        <a href="/teams/gillingham/" data-name="gillingham" style="--club:#0055A5"><i></i>Gillingham</a>
-        <a href="/teams/grimsby-town/" data-name="grimsby town" style="--club:#000000"><i></i>Grimsby Town</a>
-        <a href="/teams/hartlepool-united/" data-name="hartlepool united" style="--club:#003DA5"><i></i>Hartlepool United</a>
-        <a href="/teams/hereford-united/" data-name="hereford united" style="--club:#FFFFFF"><i></i>Hereford United</a>
-        <a href="/teams/huddersfield-town/" data-name="huddersfield town" style="--club:#0E63AD"><i></i>Huddersfield Town</a>
-        <a href="/teams/hull-city/" data-name="hull city" style="--club:#F5A12D"><i></i>Hull City</a>
-        <a href="/teams/ipswich-town/" data-name="ipswich town" style="--club:#0044AA"><i></i>Ipswich Town</a>
-        <a href="/teams/leeds-united/" data-name="leeds united" style="--club:#FFCD00"><i></i>Leeds United</a>
-        <a href="/teams/leicester-city/" data-name="leicester city" style="--club:#003090"><i></i>Leicester City</a>
-        <a href="/teams/leyton-orient/" data-name="leyton orient" style="--club:#DA291C"><i></i>Leyton Orient</a>
-        <a href="/teams/lincoln-city/" data-name="lincoln city" style="--club:#DA291C"><i></i>Lincoln City</a>
-        <a href="/teams/luton-town/" data-name="luton town" style="--club:#F78F1E"><i></i>Luton Town</a>
-        <a href="/teams/mansfield-town/" data-name="mansfield town" style="--club:#FFD700"><i></i>Mansfield Town</a>
-        <a href="/teams/millwall/" data-name="millwall" style="--club:#00246B"><i></i>Millwall</a>
-        <a href="/teams/milton-keynes-dons/" data-name="milton keynes dons" style="--club:#FFFFFF"><i></i>Milton Keynes Dons</a>
-        <a href="/teams/morecambe/" data-name="morecambe" style="--club:#DA291C"><i></i>Morecambe</a>
-        <a href="/teams/northampton-town/" data-name="northampton town" style="--club:#7C2529"><i></i>Northampton Town</a>
-        <a href="/teams/norwich-city/" data-name="norwich city" style="--club:#FFF200"><i></i>Norwich City</a>
-        <a href="/teams/nottingham-forest/" data-name="nottingham forest" style="--club:#DD0000"><i></i>Nottingham Forest</a>
-        <a href="/teams/notts-county/" data-name="notts county" style="--club:#000000"><i></i>Notts County</a>
-        <a href="/teams/oldham-athletic/" data-name="oldham athletic" style="--club:#004C97"><i></i>Oldham Athletic</a>
-        <a href="/teams/oxford-united/" data-name="oxford united" style="--club:#FFF200"><i></i>Oxford United</a>
-        <a href="/teams/peterborough-united/" data-name="peterborough united" style="--club:#0057B8"><i></i>Peterborough United</a>
-        <a href="/teams/plymouth-argyle/" data-name="plymouth argyle" style="--club:#007B5F"><i></i>Plymouth Argyle</a>
-        <a href="/teams/port-vale/" data-name="port vale" style="--club:#000000"><i></i>Port Vale</a>
-        <a href="/teams/portsmouth/" data-name="portsmouth" style="--club:#001489"><i></i>Portsmouth</a>
-        <a href="/teams/preston-north-end/" data-name="preston north end" style="--club:#B2B2B2"><i></i>Preston North End</a>
-        <a href="/teams/queens-park-rangers/" data-name="queens park rangers" style="--club:#005CAB"><i></i>Queens Park Rangers</a>
-        <a href="/teams/reading/" data-name="reading" style="--club:#004494"><i></i>Reading</a>
-        <a href="/teams/rochdale/" data-name="rochdale" style="--club:#004B87"><i></i>Rochdale</a>
-        <a href="/teams/rotherham-united/" data-name="rotherham united" style="--club:#D50032"><i></i>Rotherham United</a>
-        <a href="/teams/rushden-and-diamonds/" data-name="rushden and diamonds" style="--club:#005BAC"><i></i>Rushden and Diamonds</a>
-        <a href="/teams/scunthorpe-united/" data-name="scunthorpe united" style="--club:#8A1538"><i></i>Scunthorpe United</a>
-        <a href="/teams/sheffield-united/" data-name="sheffield united" style="--club:#EE2737"><i></i>Sheffield United</a>
-        <a href="/teams/sheffield-wednesday/" data-name="sheffield wednesday" style="--club:#0066B2"><i></i>Sheffield Wednesday</a>
-        <a href="/teams/shrewsbury-town/" data-name="shrewsbury town" style="--club:#0053A0"><i></i>Shrewsbury Town</a>
-        <a href="/teams/southampton/" data-name="southampton" style="--club:#D71920"><i></i>Southampton</a>
-        <a href="/teams/southend-united/" data-name="southend united" style="--club:#00549F"><i></i>Southend United</a>
-        <a href="/teams/stevenage/" data-name="stevenage" style="--club:#E4002B"><i></i>Stevenage</a>
-        <a href="/teams/stockport/" data-name="stockport" style="--club:#004B9B"><i></i>Stockport</a>
-        <a href="/teams/sunderland/" data-name="sunderland" style="--club:#EB172B"><i></i>Sunderland</a>
-        <a href="/teams/swansea-city/" data-name="swansea city" style="--club:#000000"><i></i>Swansea City</a>
-        <a href="/teams/swindon-town/" data-name="swindon town" style="--club:#DA291C"><i></i>Swindon Town</a>
-        <a href="/teams/torquay-united/" data-name="torquay united" style="--club:#FFCE00"><i></i>Torquay United</a>
-        <a href="/teams/tranmere-rovers/" data-name="tranmere rovers" style="--club:#FFFFFF"><i></i>Tranmere Rovers</a>
-        <a href="/teams/walsall/" data-name="walsall" style="--club:#DA291C"><i></i>Walsall</a>
-        <a href="/teams/wigan-athletic/" data-name="wigan athletic" style="--club:#1D59AF"><i></i>Wigan Athletic</a>
-        <a href="/teams/wolverhampton-wanderers/" data-name="wolverhampton wanderers" style="--club:#FDB913"><i></i>Wolverhampton Wanderers</a>
-        <a href="/teams/wrexham/" data-name="wrexham" style="--club:#DA291C"><i></i>Wrexham</a>
-        <a href="/teams/wycombe-wanderers/" data-name="wycombe wanderers" style="--club:#003DA5"><i></i>Wycombe Wanderers</a>
-        <a href="/teams/yeovil-town/" data-name="yeovil town" style="--club:#007A33"><i></i>Yeovil Town</a>
+<section class="cblock" data-country="ESP">
+  <div class="chead">
+    <h3>Spain</h3>
+    <span class="ccount">93 clubs</span>
   </div>
+  <div class="cfilter" role="group" aria-label="Spain competitions">
+    <button type="button" class="cchip on" data-comp="">All</button>
+            <button type="button" class="cchip" data-comp="la liga"
+              >La Liga</button>
+            <button type="button" class="cchip" data-comp="segunda division"
+              >Segunda División</button>
+  </div>
+  <ul class="clist">
+          <li><a href="/teams/alaves/" data-k="alaves" data-c="la liga|segunda division" style="--club:#003DA5"><i></i><span class="cn">Alavés</span><span class="cm">354</span></a></li>
+          <li><a href="/teams/albacete/" data-k="albacete" data-c="la liga|segunda division" style="--club:hsl(55, 57%, 38%)"><i></i><span class="cn">Albacete</span><span class="cm">468</span></a></li>
+          <li><a href="/teams/alcorcon/" data-k="alcorcon" data-c="segunda division" style="--club:hsl(90, 67%, 38%)"><i></i><span class="cn">Alcorcon</span><span class="cm">230</span></a></li>
+          <li><a href="/teams/alcoyano/" data-k="alcoyano" data-c="segunda division" style="--club:hsl(3, 70%, 38%)"><i></i><span class="cn">Alcoyano</span><span class="cm">28</span></a></li>
+          <li><a href="/teams/algeciras/" data-k="algeciras" data-c="segunda division" style="--club:hsl(75, 69%, 38%)"><i></i><span class="cn">Algeciras</span><span class="cm">27</span></a></li>
+          <li><a href="/teams/alicante/" data-k="alicante" data-c="segunda division" style="--club:hsl(210, 55%, 38%)"><i></i><span class="cn">Alicante</span><span class="cm">30</span></a></li>
+          <li><a href="/teams/almeria/" data-k="almeria" data-c="la liga|segunda division" style="--club:hsl(275, 57%, 38%)"><i></i><span class="cn">Almería</span><span class="cm">356</span></a></li>
+          <li><a href="/teams/amorebieta/" data-k="amorebieta" data-c="segunda division" style="--club:hsl(250, 67%, 38%)"><i></i><span class="cn">Amorebieta</span><span class="cm">55</span></a></li>
+          <li><a href="/teams/athletic-bilbao-b/" data-k="athletic bilbao b" data-c="segunda division" style="--club:hsl(200, 59%, 38%)"><i></i><span class="cn">Athletic Bilbao B</span><span class="cm">27</span></a></li>
+          <li><a href="/teams/athletic-club/" data-k="athletic club|athletic bilbao|bilbao" data-c="champions league|la liga" style="--club:#EE2523"><i></i><span class="cn">Athletic Club</span><span class="cm">227</span></a></li>
+          <li><a href="/teams/atletico-madrid/" data-k="atletico madrid|atletico|atleti" data-c="champions league|la liga|segunda division" style="--club:#CB3524"><i></i><span class="cn">Atlético Madrid</span><span class="cm">388</span></a></li>
+          <li><a href="/teams/badajoz/" data-k="badajoz" data-c="segunda division" style="--club:hsl(355, 69%, 38%)"><i></i><span class="cn">Badajoz</span><span class="cm">43</span></a></li>
+          <li><a href="/teams/barcelona/" data-k="barcelona|barca|fc barcelona|fcb" data-c="champions league|la liga" style="--club:#A50044"><i></i><span class="cn">Barcelona</span><span class="cm">356</span></a></li>
+          <li><a href="/teams/barcelona-b/" data-k="barcelona b" data-c="segunda division" style="--club:hsl(258, 68%, 38%)"><i></i><span class="cn">Barcelona B</span><span class="cm">109</span></a></li>
+          <li><a href="/teams/burgos/" data-k="burgos" data-c="segunda division" style="--club:hsl(288, 72%, 38%)"><i></i><span class="cn">Burgos</span><span class="cm">115</span></a></li>
+          <li><a href="/teams/cadiz/" data-k="cadiz" data-c="la liga|segunda division" style="--club:hsl(40, 71%, 38%)"><i></i><span class="cn">Cádiz</span><span class="cm">330</span></a></li>
+          <li><a href="/teams/cartagena/" data-k="cartagena" data-c="segunda division" style="--club:hsl(173, 70%, 38%)"><i></i><span class="cn">Cartagena</span><span class="cm">186</span></a></li>
+          <li><a href="/teams/castellon/" data-k="castellon" data-c="la liga|segunda division" style="--club:hsl(210, 55%, 38%)"><i></i><span class="cn">Castellon</span><span class="cm">198</span></a></li>
+          <li><a href="/teams/celta-de-vigo-b/" data-k="celta de vigo b" data-c="segunda division" style="--club:hsl(213, 70%, 38%)"><i></i><span class="cn">Celta de Vigo B</span><span class="cm">22</span></a></li>
+          <li><a href="/teams/celta-vigo/" data-k="celta vigo|celta" data-c="champions league|la liga|segunda division" style="--club:#8AC3EE"><i></i><span class="cn">Celta Vigo</span><span class="cm">385</span></a></li>
+          <li><a href="/teams/ceuta/" data-k="ceuta" data-c="segunda division" style="--club:hsl(23, 58%, 38%)"><i></i><span class="cn">Ceuta</span><span class="cm">51</span></a></li>
+          <li><a href="/teams/cf-fuenlabrada/" data-k="cf fuenlabrada" data-c="segunda division" style="--club:hsl(275, 65%, 38%)"><i></i><span class="cn">CF Fuenlabrada</span><span class="cm">73</span></a></li>
+          <li><a href="/teams/ciudad-murcia/" data-k="ciudad murcia" data-c="segunda division" style="--club:hsl(63, 58%, 38%)"><i></i><span class="cn">Ciudad Murcia</span><span class="cm">86</span></a></li>
+          <li><a href="/teams/compostela/" data-k="compostela" data-c="la liga|segunda division" style="--club:hsl(140, 71%, 38%)"><i></i><span class="cn">Compostela</span><span class="cm">73</span></a></li>
+          <li><a href="/teams/cordoba/" data-k="cordoba" data-c="la liga|segunda division" style="--club:hsl(193, 58%, 38%)"><i></i><span class="cn">Córdoba</span><span class="cm">357</span></a></li>
+          <li><a href="/teams/cultural-leonesa/" data-k="cultural leonesa" data-c="segunda division" style="--club:hsl(223, 62%, 38%)"><i></i><span class="cn">Cultural Leonesa</span><span class="cm">61</span></a></li>
+          <li><a href="/teams/deportivo-la-coruna/" data-k="deportivo la coruna|deportivo|depor" data-c="champions league|la liga|segunda division" style="--club:#0033A0"><i></i><span class="cn">Deportivo La Coruna</span><span class="cm">360</span></a></li>
+          <li><a href="/teams/eibar/" data-k="eibar" data-c="la liga|segunda division" style="--club:hsl(10, 55%, 38%)"><i></i><span class="cn">Eibar</span><span class="cm">324</span></a></li>
+          <li><a href="/teams/elche/" data-k="elche" data-c="la liga|segunda division" style="--club:hsl(325, 73%, 38%)"><i></i><span class="cn">Elche</span><span class="cm">429</span></a></li>
+          <li><a href="/teams/eldense/" data-k="eldense" data-c="segunda division" style="--club:hsl(203, 74%, 38%)"><i></i><span class="cn">Eldense</span><span class="cm">75</span></a></li>
+          <li><a href="/teams/espanyol/" data-k="espanyol" data-c="la liga|segunda division" style="--club:#007FC8"><i></i><span class="cn">Espanyol</span><span class="cm">425</span></a></li>
+          <li><a href="/teams/extremadura/" data-k="extremadura" data-c="la liga|segunda division" style="--club:hsl(348, 68%, 38%)"><i></i><span class="cn">Extremadura</span><span class="cm">123</span></a></li>
+          <li><a href="/teams/fc-andorra/" data-k="fc andorra" data-c="segunda division" style="--club:hsl(115, 57%, 38%)"><i></i><span class="cn">FC Andorra</span><span class="cm">79</span></a></li>
+          <li><a href="/teams/getafe/" data-k="getafe" data-c="la liga|segunda division" style="--club:#004FA3"><i></i><span class="cn">Getafe</span><span class="cm">331</span></a></li>
+          <li><a href="/teams/gimnastic/" data-k="gimnastic" data-c="la liga|segunda division" style="--club:hsl(135, 65%, 38%)"><i></i><span class="cn">Gimnàstic</span><span class="cm">267</span></a></li>
+          <li><a href="/teams/girona/" data-k="girona" data-c="champions league|la liga|segunda division" style="--club:hsl(33, 58%, 38%)"><i></i><span class="cn">Girona</span><span class="cm">256</span></a></li>
+          <li><a href="/teams/granada/" data-k="granada" data-c="la liga|segunda division" style="--club:#E30613"><i></i><span class="cn">Granada</span><span class="cm">296</span></a></li>
+          <li><a href="/teams/granada-74/" data-k="granada 74" data-c="segunda division" style="--club:hsl(113, 62%, 38%)"><i></i><span class="cn">Granada 74</span><span class="cm">30</span></a></li>
+          <li><a href="/teams/guadalajara/" data-k="guadalajara" data-c="segunda division" style="--club:hsl(250, 71%, 38%)"><i></i><span class="cn">Guadalajara</span><span class="cm">41</span></a></li>
+          <li><a href="/teams/hercules/" data-k="hercules" data-c="la liga|segunda division" style="--club:hsl(220, 67%, 38%)"><i></i><span class="cn">Hércules</span><span class="cm">190</span></a></li>
+          <li><a href="/teams/huesca/" data-k="huesca" data-c="la liga|segunda division" style="--club:hsl(55, 57%, 38%)"><i></i><span class="cn">Huesca</span><span class="cm">269</span></a></li>
+          <li><a href="/teams/ibiza/" data-k="ibiza" data-c="segunda division" style="--club:hsl(180, 71%, 38%)"><i></i><span class="cn">Ibiza</span><span class="cm">52</span></a></li>
+          <li><a href="/teams/jaen/" data-k="jaen" data-c="segunda division" style="--club:hsl(43, 74%, 38%)"><i></i><span class="cn">Jaen</span><span class="cm">55</span></a></li>
+          <li><a href="/teams/las-palmas/" data-k="las palmas" data-c="la liga|segunda division" style="--club:hsl(275, 57%, 38%)"><i></i><span class="cn">Las Palmas</span><span class="cm">350</span></a></li>
+          <li><a href="/teams/leganes/" data-k="leganes" data-c="la liga|segunda division" style="--club:hsl(340, 55%, 38%)"><i></i><span class="cn">Leganés</span><span class="cm">257</span></a></li>
+          <li><a href="/teams/levante/" data-k="levante" data-c="la liga|segunda division" style="--club:#BD0811"><i></i><span class="cn">Levante</span><span class="cm">363</span></a></li>
+          <li><a href="/teams/llagostera/" data-k="llagostera" data-c="segunda division" style="--club:hsl(8, 56%, 38%)"><i></i><span class="cn">Llagostera</span><span class="cm">44</span></a></li>
+          <li><a href="/teams/lleida/" data-k="lleida" data-c="la liga|segunda division" style="--club:hsl(250, 63%, 38%)"><i></i><span class="cn">Lleida</span><span class="cm">60</span></a></li>
+          <li><a href="/teams/logrones/" data-k="logrones" data-c="la liga" style="--club:hsl(220, 63%, 38%)"><i></i><span class="cn">Logroñés</span><span class="cm">117</span></a></li>
+          <li><a href="/teams/lorca-deportiva/" data-k="lorca deportiva" data-c="segunda division" style="--club:hsl(38, 60%, 38%)"><i></i><span class="cn">Lorca Deportiva</span><span class="cm">39</span></a></li>
+          <li><a href="/teams/lorca-fc/" data-k="lorca fc" data-c="segunda division" style="--club:hsl(135, 65%, 38%)"><i></i><span class="cn">Lorca FC</span><span class="cm">35</span></a></li>
+          <li><a href="/teams/lugo/" data-k="lugo" data-c="segunda division" style="--club:hsl(120, 63%, 38%)"><i></i><span class="cn">Lugo</span><span class="cm">173</span></a></li>
+          <li><a href="/teams/malaga/" data-k="malaga|malaga cf" data-c="champions league|la liga|segunda division" style="--club:#009EE3"><i></i><span class="cn">Málaga</span><span class="cm">397</span></a></li>
+          <li><a href="/teams/malaga-b/" data-k="malaga b" data-c="segunda division" style="--club:hsl(303, 66%, 38%)"><i></i><span class="cn">Malaga B</span><span class="cm">54</span></a></li>
+          <li><a href="/teams/mallorca/" data-k="mallorca" data-c="champions league|la liga|segunda division" style="--club:#E20613"><i></i><span class="cn">Mallorca</span><span class="cm">410</span></a></li>
+          <li><a href="/teams/merida/" data-k="merida" data-c="la liga" style="--club:hsl(178, 56%, 38%)"><i></i><span class="cn">Mérida</span><span class="cm">42</span></a></li>
+          <li><a href="/teams/mirandes/" data-k="mirandes" data-c="segunda division" style="--club:hsl(300, 55%, 38%)"><i></i><span class="cn">Mirandes</span><span class="cm">259</span></a></li>
+          <li><a href="/teams/numancia/" data-k="numancia" data-c="la liga|segunda division" style="--club:hsl(293, 74%, 38%)"><i></i><span class="cn">Numancia</span><span class="cm">282</span></a></li>
+          <li><a href="/teams/osasuna/" data-k="osasuna" data-c="la liga|segunda division" style="--club:#D91A2A"><i></i><span class="cn">Osasuna</span><span class="cm">313</span></a></li>
+          <li><a href="/teams/oviedo/" data-k="oviedo" data-c="la liga|segunda division" style="--club:hsl(263, 58%, 38%)"><i></i><span class="cn">Oviedo</span><span class="cm">322</span></a></li>
+          <li><a href="/teams/poli-ejido/" data-k="poli ejido" data-c="segunda division" style="--club:hsl(158, 68%, 38%)"><i></i><span class="cn">Poli Ejido</span><span class="cm">117</span></a></li>
+          <li><a href="/teams/ponferradina/" data-k="ponferradina" data-c="segunda division" style="--club:hsl(100, 63%, 38%)"><i></i><span class="cn">Ponferradina</span><span class="cm">191</span></a></li>
+          <li><a href="/teams/pontevedra/" data-k="pontevedra" data-c="segunda division" style="--club:hsl(28, 72%, 38%)"><i></i><span class="cn">Pontevedra</span><span class="cm">27</span></a></li>
+          <li><a href="/teams/racing-ferrol/" data-k="racing ferrol" data-c="segunda division" style="--club:hsl(220, 67%, 38%)"><i></i><span class="cn">Racing Ferrol</span><span class="cm">160</span></a></li>
+          <li><a href="/teams/racing-santander/" data-k="racing santander" data-c="la liga|segunda division" style="--club:#00A651"><i></i><span class="cn">Racing Santander</span><span class="cm">378</span></a></li>
+          <li><a href="/teams/rayo-majadahonda/" data-k="rayo majadahonda" data-c="segunda division" style="--club:hsl(33, 58%, 38%)"><i></i><span class="cn">Rayo Majadahonda</span><span class="cm">27</span></a></li>
+          <li><a href="/teams/rayo-vallecano/" data-k="rayo vallecano" data-c="la liga|segunda division" style="--club:#E53027"><i></i><span class="cn">Rayo Vallecano</span><span class="cm">386</span></a></li>
+          <li><a href="/teams/real-betis/" data-k="real betis" data-c="champions league|la liga|segunda division" style="--club:#00954C"><i></i><span class="cn">Real Betis</span><span class="cm">367</span></a></li>
+          <li><a href="/teams/real-burgos/" data-k="real burgos" data-c="la liga" style="--club:hsl(130, 59%, 38%)"><i></i><span class="cn">Real Burgos</span><span class="cm">41</span></a></li>
+          <li><a href="/teams/real-madrid/" data-k="real madrid|madrid|real" data-c="champions league|la liga" style="--club:#FEBE10"><i></i><span class="cn">Real Madrid</span><span class="cm">311</span></a></li>
+          <li><a href="/teams/real-madrid-castilla/" data-k="real madrid castilla" data-c="segunda division" style="--club:hsl(138, 64%, 38%)"><i></i><span class="cn">Real Madrid Castilla</span><span class="cm">88</span></a></li>
+          <li><a href="/teams/real-murcia/" data-k="real murcia" data-c="la liga|segunda division" style="--club:hsl(283, 66%, 38%)"><i></i><span class="cn">Real Murcia</span><span class="cm">221</span></a></li>
+          <li><a href="/teams/real-sociedad/" data-k="real sociedad|sociedad|la real" data-c="champions league|la liga|segunda division" style="--club:#143C8B"><i></i><span class="cn">Real Sociedad</span><span class="cm">300</span></a></li>
+          <li><a href="/teams/real-sociedad-b/" data-k="real sociedad b" data-c="segunda division" style="--club:hsl(148, 72%, 38%)"><i></i><span class="cn">Real Sociedad B</span><span class="cm">67</span></a></li>
+          <li><a href="/teams/real-union/" data-k="real union" data-c="segunda division" style="--club:hsl(163, 74%, 38%)"><i></i><span class="cn">Real Union</span><span class="cm">26</span></a></li>
+          <li><a href="/teams/recreativo/" data-k="recreativo" data-c="la liga|segunda division" style="--club:hsl(83, 62%, 38%)"><i></i><span class="cn">Recreativo</span><span class="cm">220</span></a></li>
+          <li><a href="/teams/reus/" data-k="reus" data-c="segunda division" style="--club:hsl(70, 55%, 38%)"><i></i><span class="cn">Reus</span><span class="cm">51</span></a></li>
+          <li><a href="/teams/sabadell/" data-k="sabadell" data-c="segunda division" style="--club:hsl(293, 74%, 38%)"><i></i><span class="cn">Sabadell</span><span class="cm">115</span></a></li>
+          <li><a href="/teams/salamanca/" data-k="salamanca" data-c="la liga|segunda division" style="--club:hsl(255, 73%, 38%)"><i></i><span class="cn">Salamanca</span><span class="cm">184</span></a></li>
+          <li><a href="/teams/sevilla/" data-k="sevilla" data-c="champions league|la liga" style="--club:#D4021D"><i></i><span class="cn">Sevilla</span><span class="cm">420</span></a></li>
+          <li><a href="/teams/sevilla-atletico/" data-k="sevilla atletico" data-c="segunda division" style="--club:hsl(48, 60%, 38%)"><i></i><span class="cn">Sevilla Atletico</span><span class="cm">94</span></a></li>
+          <li><a href="/teams/sporting-gijon/" data-k="sporting gijon|sporting|gijon" data-c="la liga|segunda division" style="--club:#CC2229"><i></i><span class="cn">Sporting Gijón</span><span class="cm">406</span></a></li>
+          <li><a href="/teams/tenerife/" data-k="tenerife" data-c="la liga|segunda division" style="--club:#1C3A7A"><i></i><span class="cn">Tenerife</span><span class="cm">434</span></a></li>
+          <li><a href="/teams/terrassa/" data-k="terrassa" data-c="segunda division" style="--club:hsl(345, 57%, 38%)"><i></i><span class="cn">Terrassa</span><span class="cm">43</span></a></li>
+          <li><a href="/teams/ucam-murcia/" data-k="ucam murcia" data-c="segunda division" style="--club:hsl(68, 64%, 38%)"><i></i><span class="cn">UCAM Murcia</span><span class="cm">31</span></a></li>
+          <li><a href="/teams/ud-logrones/" data-k="ud logrones" data-c="segunda division" style="--club:hsl(105, 61%, 38%)"><i></i><span class="cn">UD Logrones</span><span class="cm">31</span></a></li>
+          <li><a href="/teams/valencia/" data-k="valencia" data-c="champions league|la liga" style="--club:#EE3524"><i></i><span class="cn">Valencia</span><span class="cm">382</span></a></li>
+          <li><a href="/teams/valladolid/" data-k="valladolid" data-c="la liga|segunda division" style="--club:#5A2D82"><i></i><span class="cn">Valladolid</span><span class="cm">516</span></a></li>
+          <li><a href="/teams/vecindario/" data-k="vecindario" data-c="segunda division" style="--club:hsl(58, 72%, 38%)"><i></i><span class="cn">Vecindario</span><span class="cm">30</span></a></li>
+          <li><a href="/teams/villarreal/" data-k="villarreal" data-c="champions league|la liga|segunda division" style="--club:#FFCD00"><i></i><span class="cn">Villarreal</span><span class="cm">313</span></a></li>
+          <li><a href="/teams/villarreal-b/" data-k="villarreal b" data-c="segunda division" style="--club:hsl(350, 63%, 38%)"><i></i><span class="cn">Villarreal B</span><span class="cm">120</span></a></li>
+          <li><a href="/teams/xerez/" data-k="xerez" data-c="la liga|segunda division" style="--club:hsl(53, 62%, 38%)"><i></i><span class="cn">Xerez</span><span class="cm">167</span></a></li>
+          <li><a href="/teams/zaragoza/" data-k="zaragoza" data-c="la liga|segunda division" style="--club:#004C99"><i></i><span class="cn">Zaragoza</span><span class="cm">461</span></a></li>
+  </ul>
+  <button type="button" class="showall" data-n="93"
+    >Show all 93 Spain clubs</button>
 </section>
 
-<section data-comp>
-  <h2>League Two</h2>
-  <p class="count">73 clubs</p>
-  <div class="grid">
-        <a href="/teams/accrington-stanley/" data-name="accrington stanley" style="--club:#DA291C"><i></i>Accrington Stanley</a>
-        <a href="/teams/afc-wimbledon/" data-name="afc wimbledon" style="--club:#0033A0"><i></i>AFC Wimbledon</a>
-        <a href="/teams/aldershot-town/" data-name="aldershot town" style="--club:#E41B17"><i></i>Aldershot Town</a>
-        <a href="/teams/barnet/" data-name="barnet" style="--club:#F5A623"><i></i>Barnet</a>
-        <a href="/teams/barrow/" data-name="barrow" style="--club:#003DA5"><i></i>Barrow</a>
-        <a href="/teams/blackpool/" data-name="blackpool" style="--club:#F68712"><i></i>Blackpool</a>
-        <a href="/teams/bolton-wanderers/" data-name="bolton wanderers" style="--club:#1D2D5A"><i></i>Bolton Wanderers</a>
-        <a href="/teams/boston-united/" data-name="boston united" style="--club:#D2AB67"><i></i>Boston United</a>
-        <a href="/teams/bournemouth/" data-name="bournemouth" style="--club:#DA291C"><i></i>Bournemouth</a>
-        <a href="/teams/bradford-city/" data-name="bradford city" style="--club:#8A2432"><i></i>Bradford City</a>
-        <a href="/teams/brentford/" data-name="brentford" style="--club:#E30613"><i></i>Brentford</a>
-        <a href="/teams/bristol-rovers/" data-name="bristol rovers" style="--club:#005BAA"><i></i>Bristol Rovers</a>
-        <a href="/teams/bromley/" data-name="bromley" style="--club:#FFFFFF"><i></i>Bromley</a>
-        <a href="/teams/burton-albion/" data-name="burton albion" style="--club:#FFC20E"><i></i>Burton Albion</a>
-        <a href="/teams/bury/" data-name="bury" style="--club:#004B9B"><i></i>Bury</a>
-        <a href="/teams/cambridge-united/" data-name="cambridge united" style="--club:#F8B300"><i></i>Cambridge United</a>
-        <a href="/teams/carlisle-united/" data-name="carlisle united" style="--club:#003399"><i></i>Carlisle United</a>
-        <a href="/teams/cheltenham-town/" data-name="cheltenham town" style="--club:#DA291C"><i></i>Cheltenham Town</a>
-        <a href="/teams/chester-city/" data-name="chester city" style="--club:#0033A0"><i></i>Chester City</a>
-        <a href="/teams/chesterfield/" data-name="chesterfield" style="--club:#0072CE"><i></i>Chesterfield</a>
-        <a href="/teams/colchester-united/" data-name="colchester united" style="--club:#005DAA"><i></i>Colchester United</a>
-        <a href="/teams/coventry-city/" data-name="coventry city" style="--club:#00A3E0"><i></i>Coventry City</a>
-        <a href="/teams/crawley-town/" data-name="crawley town" style="--club:#E4002B"><i></i>Crawley Town</a>
-        <a href="/teams/crewe-alexandra/" data-name="crewe alexandra" style="--club:#DA291C"><i></i>Crewe Alexandra</a>
-        <a href="/teams/dagenham-and-redbridge/" data-name="dagenham and redbridge" style="--club:#E4002B"><i></i>Dagenham and Redbridge</a>
-        <a href="/teams/darlington/" data-name="darlington" style="--club:#FFFFFF"><i></i>Darlington</a>
-        <a href="/teams/doncaster-rovers/" data-name="doncaster rovers" style="--club:#DA291C"><i></i>Doncaster Rovers</a>
-        <a href="/teams/exeter-city/" data-name="exeter city" style="--club:#DA291C"><i></i>Exeter City</a>
-        <a href="/teams/fleetwood-town/" data-name="fleetwood town" style="--club:#E4002B"><i></i>Fleetwood Town</a>
-        <a href="/teams/forest-green-rovers/" data-name="forest green rovers" style="--club:#00A94F"><i></i>Forest Green Rovers</a>
-        <a href="/teams/gillingham/" data-name="gillingham" style="--club:#0055A5"><i></i>Gillingham</a>
-        <a href="/teams/grimsby-town/" data-name="grimsby town" style="--club:#000000"><i></i>Grimsby Town</a>
-        <a href="/teams/harrogate-town/" data-name="harrogate town" style="--club:#FDB913"><i></i>Harrogate Town</a>
-        <a href="/teams/hartlepool-united/" data-name="hartlepool united" style="--club:#003DA5"><i></i>Hartlepool United</a>
-        <a href="/teams/hereford-united/" data-name="hereford united" style="--club:#FFFFFF"><i></i>Hereford United</a>
-        <a href="/teams/huddersfield-town/" data-name="huddersfield town" style="--club:#0E63AD"><i></i>Huddersfield Town</a>
-        <a href="/teams/hull-city/" data-name="hull city" style="--club:#F5A12D"><i></i>Hull City</a>
-        <a href="/teams/kidderminster-harriers/" data-name="kidderminster harriers" style="--club:#E4002B"><i></i>Kidderminster Harriers</a>
-        <a href="/teams/leyton-orient/" data-name="leyton orient" style="--club:#DA291C"><i></i>Leyton Orient</a>
-        <a href="/teams/lincoln-city/" data-name="lincoln city" style="--club:#DA291C"><i></i>Lincoln City</a>
-        <a href="/teams/luton-town/" data-name="luton town" style="--club:#F78F1E"><i></i>Luton Town</a>
-        <a href="/teams/macclesfield-town/" data-name="macclesfield town" style="--club:#0072CE"><i></i>Macclesfield Town</a>
-        <a href="/teams/mansfield-town/" data-name="mansfield town" style="--club:#FFD700"><i></i>Mansfield Town</a>
-        <a href="/teams/milton-keynes-dons/" data-name="milton keynes dons" style="--club:#FFFFFF"><i></i>Milton Keynes Dons</a>
-        <a href="/teams/morecambe/" data-name="morecambe" style="--club:#DA291C"><i></i>Morecambe</a>
-        <a href="/teams/newport-county/" data-name="newport county" style="--club:#F5A623"><i></i>Newport County</a>
-        <a href="/teams/northampton-town/" data-name="northampton town" style="--club:#7C2529"><i></i>Northampton Town</a>
-        <a href="/teams/notts-county/" data-name="notts county" style="--club:#000000"><i></i>Notts County</a>
-        <a href="/teams/oldham-athletic/" data-name="oldham athletic" style="--club:#004C97"><i></i>Oldham Athletic</a>
-        <a href="/teams/oxford-united/" data-name="oxford united" style="--club:#FFF200"><i></i>Oxford United</a>
-        <a href="/teams/peterborough-united/" data-name="peterborough united" style="--club:#0057B8"><i></i>Peterborough United</a>
-        <a href="/teams/plymouth-argyle/" data-name="plymouth argyle" style="--club:#007B5F"><i></i>Plymouth Argyle</a>
-        <a href="/teams/port-vale/" data-name="port vale" style="--club:#000000"><i></i>Port Vale</a>
-        <a href="/teams/portsmouth/" data-name="portsmouth" style="--club:#001489"><i></i>Portsmouth</a>
-        <a href="/teams/rochdale/" data-name="rochdale" style="--club:#004B87"><i></i>Rochdale</a>
-        <a href="/teams/rotherham-united/" data-name="rotherham united" style="--club:#D50032"><i></i>Rotherham United</a>
-        <a href="/teams/rushden-and-diamonds/" data-name="rushden and diamonds" style="--club:#005BAC"><i></i>Rushden and Diamonds</a>
-        <a href="/teams/salford-city-fc/" data-name="salford city fc" style="--club:#DA291C"><i></i>Salford City FC</a>
-        <a href="/teams/scunthorpe-united/" data-name="scunthorpe united" style="--club:#8A1538"><i></i>Scunthorpe United</a>
-        <a href="/teams/shrewsbury-town/" data-name="shrewsbury town" style="--club:#0053A0"><i></i>Shrewsbury Town</a>
-        <a href="/teams/southend-united/" data-name="southend united" style="--club:#00549F"><i></i>Southend United</a>
-        <a href="/teams/stevenage/" data-name="stevenage" style="--club:#E4002B"><i></i>Stevenage</a>
-        <a href="/teams/stockport/" data-name="stockport" style="--club:#004B9B"><i></i>Stockport</a>
-        <a href="/teams/sutton-united/" data-name="sutton united" style="--club:#F5A12D"><i></i>Sutton United</a>
-        <a href="/teams/swansea-city/" data-name="swansea city" style="--club:#000000"><i></i>Swansea City</a>
-        <a href="/teams/swindon-town/" data-name="swindon town" style="--club:#DA291C"><i></i>Swindon Town</a>
-        <a href="/teams/torquay-united/" data-name="torquay united" style="--club:#FFCE00"><i></i>Torquay United</a>
-        <a href="/teams/tranmere-rovers/" data-name="tranmere rovers" style="--club:#FFFFFF"><i></i>Tranmere Rovers</a>
-        <a href="/teams/walsall/" data-name="walsall" style="--club:#DA291C"><i></i>Walsall</a>
-        <a href="/teams/wrexham/" data-name="wrexham" style="--club:#DA291C"><i></i>Wrexham</a>
-        <a href="/teams/wycombe-wanderers/" data-name="wycombe wanderers" style="--club:#003DA5"><i></i>Wycombe Wanderers</a>
-        <a href="/teams/yeovil-town/" data-name="yeovil town" style="--club:#007A33"><i></i>Yeovil Town</a>
-        <a href="/teams/york-city/" data-name="york city" style="--club:#E4002B"><i></i>York City</a>
+<section class="cblock" data-country="ITA">
+  <div class="chead">
+    <h3>Italy</h3>
+    <span class="ccount">53 clubs</span>
   </div>
+  <div class="cfilter" role="group" aria-label="Italy competitions">
+    <button type="button" class="cchip on" data-comp="">All</button>
+            <button type="button" class="cchip" data-comp="serie a"
+              >Serie A</button>
+  </div>
+  <ul class="clist">
+          <li><a href="/teams/ancona/" data-k="ancona" data-c="serie a" style="--club:hsl(358, 68%, 38%)"><i></i><span class="cn">Ancona</span><span class="cm">60</span></a></li>
+          <li><a href="/teams/ascoli/" data-k="ascoli" data-c="serie a" style="--club:hsl(60, 67%, 38%)"><i></i><span class="cn">Ascoli</span><span class="cm">100</span></a></li>
+          <li><a href="/teams/atalanta/" data-k="atalanta" data-c="champions league|serie a" style="--club:#1E71B8"><i></i><span class="cn">Atalanta</span><span class="cm">410</span></a></li>
+          <li><a href="/teams/bari/" data-k="bari" data-c="serie a" style="--club:hsl(138, 56%, 38%)"><i></i><span class="cn">Bari</span><span class="cm">174</span></a></li>
+          <li><a href="/teams/benevento/" data-k="benevento" data-c="serie a" style="--club:hsl(213, 62%, 38%)"><i></i><span class="cn">Benevento</span><span class="cm">66</span></a></li>
+          <li><a href="/teams/bologna/" data-k="bologna" data-c="champions league|serie a" style="--club:#1A2F48"><i></i><span class="cn">Bologna</span><span class="cm">399</span></a></li>
+          <li><a href="/teams/brescia/" data-k="brescia" data-c="serie a" style="--club:#004B93"><i></i><span class="cn">Brescia</span><span class="cm">190</span></a></li>
+          <li><a href="/teams/cagliari/" data-k="cagliari" data-c="serie a" style="--club:#8B0000"><i></i><span class="cn">Cagliari</span><span class="cm">372</span></a></li>
+          <li><a href="/teams/carpi/" data-k="carpi" data-c="serie a" style="--club:hsl(5, 65%, 38%)"><i></i><span class="cn">Carpi</span><span class="cm">35</span></a></li>
+          <li><a href="/teams/catania/" data-k="catania" data-c="serie a" style="--club:#E3000B"><i></i><span class="cn">Catania</span><span class="cm">104</span></a></li>
+          <li><a href="/teams/cesena/" data-k="cesena" data-c="serie a" style="--club:hsl(340, 71%, 38%)"><i></i><span class="cn">Cesena</span><span class="cm">126</span></a></li>
+          <li><a href="/teams/chievo/" data-k="chievo" data-c="serie a" style="--club:#1C3C8B"><i></i><span class="cn">Chievo</span><span class="cm">223</span></a></li>
+          <li><a href="/teams/como/" data-k="como" data-c="champions league|serie a" style="--club:hsl(133, 74%, 38%)"><i></i><span class="cn">Como</span><span class="cm">106</span></a></li>
+          <li><a href="/teams/cremonese/" data-k="cremonese" data-c="serie a" style="--club:hsl(265, 73%, 38%)"><i></i><span class="cn">Cremonese</span><span class="cm">121</span></a></li>
+          <li><a href="/teams/crotone/" data-k="crotone" data-c="serie a" style="--club:hsl(118, 56%, 38%)"><i></i><span class="cn">Crotone</span><span class="cm">72</span></a></li>
+          <li><a href="/teams/empoli/" data-k="empoli" data-c="serie a" style="--club:#005BA6"><i></i><span class="cn">Empoli</span><span class="cm">264</span></a></li>
+          <li><a href="/teams/fiorentina/" data-k="fiorentina" data-c="champions league|serie a" style="--club:#482C83"><i></i><span class="cn">Fiorentina</span><span class="cm">451</span></a></li>
+          <li><a href="/teams/foggia/" data-k="foggia" data-c="serie a" style="--club:hsl(25, 73%, 38%)"><i></i><span class="cn">Foggia</span><span class="cm">50</span></a></li>
+          <li><a href="/teams/frosinone/" data-k="frosinone" data-c="serie a" style="--club:hsl(70, 59%, 38%)"><i></i><span class="cn">Frosinone</span><span class="cm">104</span></a></li>
+          <li><a href="/teams/genoa/" data-k="genoa" data-c="serie a" style="--club:#93192A"><i></i><span class="cn">Genoa</span><span class="cm">395</span></a></li>
+          <li><a href="/teams/hellas-verona/" data-k="hellas verona" data-c="serie a" style="--club:#003DA5"><i></i><span class="cn">Hellas Verona</span><span class="cm">344</span></a></li>
+          <li><a href="/teams/internazionale/" data-k="internazionale|inter|inter milan" data-c="champions league|serie a" style="--club:#009DDC"><i></i><span class="cn">Internazionale</span><span class="cm">407</span></a></li>
+          <li><a href="/teams/juventus/" data-k="juventus|juve|juventus fc" data-c="champions league|serie a" style="--club:#000000"><i></i><span class="cn">Juventus</span><span class="cm">358</span></a></li>
+          <li><a href="/teams/lazio/" data-k="lazio|ss lazio" data-c="champions league|serie a" style="--club:#87D8F7"><i></i><span class="cn">Lazio</span><span class="cm">346</span></a></li>
+          <li><a href="/teams/lecce/" data-k="lecce" data-c="serie a" style="--club:#FFED00"><i></i><span class="cn">Lecce</span><span class="cm">332</span></a></li>
+          <li><a href="/teams/livorno/" data-k="livorno" data-c="serie a" style="--club:hsl(175, 61%, 38%)"><i></i><span class="cn">Livorno</span><span class="cm">118</span></a></li>
+          <li><a href="/teams/messina/" data-k="messina" data-c="serie a" style="--club:hsl(108, 64%, 38%)"><i></i><span class="cn">Messina</span><span class="cm">64</span></a></li>
+          <li><a href="/teams/milan/" data-k="milan|ac milan|acm|rossoneri" data-c="champions league|serie a" style="--club:#FB090B"><i></i><span class="cn">Milan</span><span class="cm">378</span></a></li>
+          <li><a href="/teams/modena/" data-k="modena" data-c="serie a" style="--club:hsl(303, 66%, 38%)"><i></i><span class="cn">Modena</span><span class="cm">37</span></a></li>
+          <li><a href="/teams/monza/" data-k="monza" data-c="serie a" style="--club:hsl(240, 71%, 38%)"><i></i><span class="cn">Monza</span><span class="cm">78</span></a></li>
+          <li><a href="/teams/napoli/" data-k="napoli|ssc napoli" data-c="champions league|serie a" style="--club:#009FE3"><i></i><span class="cn">Napoli</span><span class="cm">322</span></a></li>
+          <li><a href="/teams/novara/" data-k="novara" data-c="serie a" style="--club:hsl(355, 57%, 38%)"><i></i><span class="cn">Novara</span><span class="cm">32</span></a></li>
+          <li><a href="/teams/padova/" data-k="padova" data-c="serie a" style="--club:hsl(345, 61%, 38%)"><i></i><span class="cn">Padova</span><span class="cm">38</span></a></li>
+          <li><a href="/teams/palermo/" data-k="palermo" data-c="serie a" style="--club:#F1AABB"><i></i><span class="cn">Palermo</span><span class="cm">182</span></a></li>
+          <li><a href="/teams/parma/" data-k="parma" data-c="champions league|serie a" style="--club:#FEDD00"><i></i><span class="cn">Parma</span><span class="cm">405</span></a></li>
+          <li><a href="/teams/perugia/" data-k="perugia" data-c="serie a" style="--club:hsl(235, 65%, 38%)"><i></i><span class="cn">Perugia</span><span class="cm">137</span></a></li>
+          <li><a href="/teams/pescara/" data-k="pescara" data-c="serie a" style="--club:hsl(315, 61%, 38%)"><i></i><span class="cn">Pescara</span><span class="cm">115</span></a></li>
+          <li><a href="/teams/piacenza/" data-k="piacenza" data-c="serie a" style="--club:hsl(330, 63%, 38%)"><i></i><span class="cn">Piacenza</span><span class="cm">109</span></a></li>
+          <li><a href="/teams/pisa/" data-k="pisa" data-c="serie a" style="--club:hsl(145, 57%, 38%)"><i></i><span class="cn">Pisa</span><span class="cm">72</span></a></li>
+          <li><a href="/teams/reggiana/" data-k="reggiana" data-c="serie a" style="--club:hsl(8, 60%, 38%)"><i></i><span class="cn">Reggiana</span><span class="cm">68</span></a></li>
+          <li><a href="/teams/reggina/" data-k="reggina" data-c="serie a" style="--club:#6D2247"><i></i><span class="cn">Reggina</span><span class="cm">135</span></a></li>
+          <li><a href="/teams/roma/" data-k="roma|as roma" data-c="champions league|serie a" style="--club:#8E1F2F"><i></i><span class="cn">Roma</span><span class="cm">397</span></a></li>
+          <li><a href="/teams/salernitana/" data-k="salernitana" data-c="serie a" style="--club:hsl(273, 70%, 38%)"><i></i><span class="cn">Salernitana</span><span class="cm">106</span></a></li>
+          <li><a href="/teams/sampdoria/" data-k="sampdoria" data-c="champions league|serie a" style="--club:#0065A4"><i></i><span class="cn">Sampdoria</span><span class="cm">366</span></a></li>
+          <li><a href="/teams/sassuolo/" data-k="sassuolo" data-c="serie a" style="--club:#00A850"><i></i><span class="cn">Sassuolo</span><span class="cm">168</span></a></li>
+          <li><a href="/teams/siena/" data-k="siena" data-c="serie a" style="--club:#000000"><i></i><span class="cn">Siena</span><span class="cm">149</span></a></li>
+          <li><a href="/teams/spal/" data-k="spal" data-c="serie a" style="--club:hsl(153, 62%, 38%)"><i></i><span class="cn">SPAL</span><span class="cm">62</span></a></li>
+          <li><a href="/teams/spezia/" data-k="spezia" data-c="serie a" style="--club:hsl(313, 66%, 38%)"><i></i><span class="cn">Spezia</span><span class="cm">70</span></a></li>
+          <li><a href="/teams/torino/" data-k="torino" data-c="serie a" style="--club:#8B1A2B"><i></i><span class="cn">Torino</span><span class="cm">403</span></a></li>
+          <li><a href="/teams/treviso/" data-k="treviso" data-c="serie a" style="--club:hsl(318, 72%, 38%)"><i></i><span class="cn">Treviso</span><span class="cm">34</span></a></li>
+          <li><a href="/teams/udinese/" data-k="udinese" data-c="champions league|serie a" style="--club:#000000"><i></i><span class="cn">Udinese</span><span class="cm">392</span></a></li>
+          <li><a href="/teams/venezia/" data-k="venezia" data-c="serie a" style="--club:hsl(73, 70%, 38%)"><i></i><span class="cn">Venezia</span><span class="cm">153</span></a></li>
+          <li><a href="/teams/vicenza/" data-k="vicenza" data-c="serie a" style="--club:hsl(43, 70%, 38%)"><i></i><span class="cn">Vicenza</span><span class="cm">75</span></a></li>
+  </ul>
+  <button type="button" class="showall" data-n="53"
+    >Show all 53 Italy clubs</button>
 </section>
 
-<section data-comp>
-  <h2>La Liga</h2>
-  <p class="count">50 clubs</p>
-  <div class="grid">
-        <a href="/teams/alaves/" data-name="alaves" style="--club:#003DA5"><i></i>Alavés</a>
-        <a href="/teams/albacete/" data-name="albacete" style="--club:hsl(55, 57%, 38%)"><i></i>Albacete</a>
-        <a href="/teams/almeria/" data-name="almeria" style="--club:hsl(275, 57%, 38%)"><i></i>Almería</a>
-        <a href="/teams/athletic-club/" data-name="athletic club" style="--club:#EE2523"><i></i>Athletic Club</a>
-        <a href="/teams/atletico-madrid/" data-name="atletico madrid" style="--club:#CB3524"><i></i>Atlético Madrid</a>
-        <a href="/teams/barcelona/" data-name="barcelona" style="--club:#A50044"><i></i>Barcelona</a>
-        <a href="/teams/cadiz/" data-name="cadiz" style="--club:hsl(40, 71%, 38%)"><i></i>Cádiz</a>
-        <a href="/teams/castellon/" data-name="castellon" style="--club:hsl(210, 55%, 38%)"><i></i>Castellon</a>
-        <a href="/teams/celta-vigo/" data-name="celta vigo" style="--club:#8AC3EE"><i></i>Celta Vigo</a>
-        <a href="/teams/compostela/" data-name="compostela" style="--club:hsl(140, 71%, 38%)"><i></i>Compostela</a>
-        <a href="/teams/cordoba/" data-name="cordoba" style="--club:hsl(193, 58%, 38%)"><i></i>Córdoba</a>
-        <a href="/teams/deportivo-la-coruna/" data-name="deportivo la coruna" style="--club:#0033A0"><i></i>Deportivo La Coruna</a>
-        <a href="/teams/eibar/" data-name="eibar" style="--club:hsl(10, 55%, 38%)"><i></i>Eibar</a>
-        <a href="/teams/elche/" data-name="elche" style="--club:hsl(325, 73%, 38%)"><i></i>Elche</a>
-        <a href="/teams/espanyol/" data-name="espanyol" style="--club:#007FC8"><i></i>Espanyol</a>
-        <a href="/teams/extremadura/" data-name="extremadura" style="--club:hsl(348, 68%, 38%)"><i></i>Extremadura</a>
-        <a href="/teams/getafe/" data-name="getafe" style="--club:#004FA3"><i></i>Getafe</a>
-        <a href="/teams/gimnastic/" data-name="gimnastic" style="--club:hsl(135, 65%, 38%)"><i></i>Gimnàstic</a>
-        <a href="/teams/girona/" data-name="girona" style="--club:hsl(33, 58%, 38%)"><i></i>Girona</a>
-        <a href="/teams/granada/" data-name="granada" style="--club:#E30613"><i></i>Granada</a>
-        <a href="/teams/hercules/" data-name="hercules" style="--club:hsl(220, 67%, 38%)"><i></i>Hércules</a>
-        <a href="/teams/huesca/" data-name="huesca" style="--club:hsl(55, 57%, 38%)"><i></i>Huesca</a>
-        <a href="/teams/las-palmas/" data-name="las palmas" style="--club:hsl(275, 57%, 38%)"><i></i>Las Palmas</a>
-        <a href="/teams/leganes/" data-name="leganes" style="--club:hsl(340, 55%, 38%)"><i></i>Leganés</a>
-        <a href="/teams/levante/" data-name="levante" style="--club:#BD0811"><i></i>Levante</a>
-        <a href="/teams/lleida/" data-name="lleida" style="--club:hsl(250, 63%, 38%)"><i></i>Lleida</a>
-        <a href="/teams/logrones/" data-name="logrones" style="--club:hsl(220, 63%, 38%)"><i></i>Logroñés</a>
-        <a href="/teams/malaga/" data-name="malaga" style="--club:#009EE3"><i></i>Málaga</a>
-        <a href="/teams/mallorca/" data-name="mallorca" style="--club:#E20613"><i></i>Mallorca</a>
-        <a href="/teams/merida/" data-name="merida" style="--club:hsl(178, 56%, 38%)"><i></i>Mérida</a>
-        <a href="/teams/numancia/" data-name="numancia" style="--club:hsl(293, 74%, 38%)"><i></i>Numancia</a>
-        <a href="/teams/osasuna/" data-name="osasuna" style="--club:#D91A2A"><i></i>Osasuna</a>
-        <a href="/teams/oviedo/" data-name="oviedo" style="--club:hsl(263, 58%, 38%)"><i></i>Oviedo</a>
-        <a href="/teams/racing-santander/" data-name="racing santander" style="--club:#00A651"><i></i>Racing Santander</a>
-        <a href="/teams/rayo-vallecano/" data-name="rayo vallecano" style="--club:#E53027"><i></i>Rayo Vallecano</a>
-        <a href="/teams/real-betis/" data-name="real betis" style="--club:#00954C"><i></i>Real Betis</a>
-        <a href="/teams/real-burgos/" data-name="real burgos" style="--club:hsl(130, 59%, 38%)"><i></i>Real Burgos</a>
-        <a href="/teams/real-madrid/" data-name="real madrid" style="--club:#FEBE10"><i></i>Real Madrid</a>
-        <a href="/teams/real-murcia/" data-name="real murcia" style="--club:hsl(283, 66%, 38%)"><i></i>Real Murcia</a>
-        <a href="/teams/real-sociedad/" data-name="real sociedad" style="--club:#143C8B"><i></i>Real Sociedad</a>
-        <a href="/teams/recreativo/" data-name="recreativo" style="--club:hsl(83, 62%, 38%)"><i></i>Recreativo</a>
-        <a href="/teams/salamanca/" data-name="salamanca" style="--club:hsl(255, 73%, 38%)"><i></i>Salamanca</a>
-        <a href="/teams/sevilla/" data-name="sevilla" style="--club:#D4021D"><i></i>Sevilla</a>
-        <a href="/teams/sporting-gijon/" data-name="sporting gijon" style="--club:#CC2229"><i></i>Sporting Gijón</a>
-        <a href="/teams/tenerife/" data-name="tenerife" style="--club:#1C3A7A"><i></i>Tenerife</a>
-        <a href="/teams/valencia/" data-name="valencia" style="--club:#EE3524"><i></i>Valencia</a>
-        <a href="/teams/valladolid/" data-name="valladolid" style="--club:#5A2D82"><i></i>Valladolid</a>
-        <a href="/teams/villarreal/" data-name="villarreal" style="--club:#FFCD00"><i></i>Villarreal</a>
-        <a href="/teams/xerez/" data-name="xerez" style="--club:hsl(53, 62%, 38%)"><i></i>Xerez</a>
-        <a href="/teams/zaragoza/" data-name="zaragoza" style="--club:#004C99"><i></i>Zaragoza</a>
+<section class="cblock" data-country="GER">
+  <div class="chead">
+    <h3>Germany</h3>
+    <span class="ccount">49 clubs</span>
   </div>
+  <div class="cfilter" role="group" aria-label="Germany competitions">
+    <button type="button" class="cchip on" data-comp="">All</button>
+            <button type="button" class="cchip" data-comp="bundesliga"
+              >Bundesliga</button>
+  </div>
+  <ul class="clist">
+          <li><a href="/teams/1860-munich/" data-k="1860 munich" data-c="bundesliga" style="--club:#00529C"><i></i><span class="cn">1860 Munich</span><span class="cm">102</span></a></li>
+          <li><a href="/teams/alemannia-aachen/" data-k="alemannia aachen" data-c="bundesliga" style="--club:hsl(260, 63%, 38%)"><i></i><span class="cn">Alemannia Aachen</span><span class="cm">27</span></a></li>
+          <li><a href="/teams/arminia-bielefeld/" data-k="arminia bielefeld" data-c="bundesliga" style="--club:#00447C"><i></i><span class="cn">Arminia Bielefeld</span><span class="cm">166</span></a></li>
+          <li><a href="/teams/augsburg/" data-k="augsburg" data-c="bundesliga" style="--club:#BA3733"><i></i><span class="cn">Augsburg</span><span class="cm">171</span></a></li>
+          <li><a href="/teams/bayern-munich/" data-k="bayern munich|bayern|fc bayern|fcb munich" data-c="bundesliga|champions league" style="--club:#DC052D"><i></i><span class="cn">Bayern Munich</span><span class="cm">283</span></a></li>
+          <li><a href="/teams/bochum/" data-k="bochum" data-c="bundesliga" style="--club:#005BA6"><i></i><span class="cn">Bochum</span><span class="cm">251</span></a></li>
+          <li><a href="/teams/darmstadt-98/" data-k="darmstadt 98" data-c="bundesliga" style="--club:hsl(183, 62%, 38%)"><i></i><span class="cn">Darmstadt 98</span><span class="cm">72</span></a></li>
+          <li><a href="/teams/dortmund/" data-k="dortmund|borussia dortmund|bvb" data-c="bundesliga|champions league" style="--club:#FDE100"><i></i><span class="cn">Dortmund</span><span class="cm">315</span></a></li>
+          <li><a href="/teams/dresden/" data-k="dresden" data-c="bundesliga|champions league" style="--club:hsl(275, 61%, 38%)"><i></i><span class="cn">Dresden</span><span class="cm">56</span></a></li>
+          <li><a href="/teams/dusseldorf/" data-k="dusseldorf" data-c="bundesliga" style="--club:hsl(100, 59%, 38%)"><i></i><span class="cn">Düsseldorf</span><span class="cm">136</span></a></li>
+          <li><a href="/teams/eintracht-braunschweig/" data-k="eintracht braunschweig" data-c="bundesliga" style="--club:hsl(245, 57%, 38%)"><i></i><span class="cn">Eintracht Braunschweig</span><span class="cm">27</span></a></li>
+          <li><a href="/teams/eintracht-frankfurt/" data-k="eintracht frankfurt|frankfurt" data-c="bundesliga|champions league" style="--club:#E1000F"><i></i><span class="cn">Eintracht Frankfurt</span><span class="cm">366</span></a></li>
+          <li><a href="/teams/elversberg/" data-k="elversberg" data-c="bundesliga" style="--club:hsl(230, 63%, 38%)"><i></i><span class="cn">Elversberg</span><span class="cm">19</span></a></li>
+          <li><a href="/teams/energie-cottbus/" data-k="energie cottbus" data-c="bundesliga" style="--club:hsl(108, 56%, 38%)"><i></i><span class="cn">Energie Cottbus</span><span class="cm">87</span></a></li>
+          <li><a href="/teams/freiburg/" data-k="freiburg" data-c="bundesliga" style="--club:#000000"><i></i><span class="cn">Freiburg</span><span class="cm">259</span></a></li>
+          <li><a href="/teams/greuther-furth/" data-k="greuther furth" data-c="bundesliga" style="--club:hsl(148, 56%, 38%)"><i></i><span class="cn">Greuther Fürth</span><span class="cm">61</span></a></li>
+          <li><a href="/teams/hamburger-sv/" data-k="hamburger sv|hamburg|hsv" data-c="bundesliga|champions league" style="--club:#005B9A"><i></i><span class="cn">Hamburger SV</span><span class="cm">344</span></a></li>
+          <li><a href="/teams/hannover-96/" data-k="hannover 96" data-c="bundesliga" style="--club:#1E8C35"><i></i><span class="cn">Hannover 96</span><span class="cm">206</span></a></li>
+          <li><a href="/teams/hansa-rostock/" data-k="hansa rostock" data-c="bundesliga|champions league" style="--club:#003D7E"><i></i><span class="cn">Hansa Rostock</span><span class="cm">133</span></a></li>
+          <li><a href="/teams/heidenheim/" data-k="heidenheim" data-c="bundesliga" style="--club:hsl(118, 56%, 38%)"><i></i><span class="cn">Heidenheim</span><span class="cm">43</span></a></li>
+          <li><a href="/teams/hertha-bsc/" data-k="hertha bsc" data-c="bundesliga|champions league" style="--club:#005BA6"><i></i><span class="cn">Hertha BSC</span><span class="cm">271</span></a></li>
+          <li><a href="/teams/hoffenheim/" data-k="hoffenheim" data-c="bundesliga|champions league" style="--club:#1961B5"><i></i><span class="cn">Hoffenheim</span><span class="cm">203</span></a></li>
+          <li><a href="/teams/holstein-kiel/" data-k="holstein kiel" data-c="bundesliga" style="--club:hsl(18, 56%, 38%)"><i></i><span class="cn">Holstein Kiel</span><span class="cm">27</span></a></li>
+          <li><a href="/teams/homburg/" data-k="homburg" data-c="bundesliga" style="--club:hsl(218, 68%, 38%)"><i></i><span class="cn">Homburg</span><span class="cm">22</span></a></li>
+          <li><a href="/teams/ingolstadt/" data-k="ingolstadt" data-c="bundesliga" style="--club:hsl(175, 65%, 38%)"><i></i><span class="cn">Ingolstadt</span><span class="cm">31</span></a></li>
+          <li><a href="/teams/kaiserslautern/" data-k="kaiserslautern" data-c="bundesliga|champions league" style="--club:#E3000B"><i></i><span class="cn">Kaiserslautern</span><span class="cm">210</span></a></li>
+          <li><a href="/teams/karlsruher/" data-k="karlsruher" data-c="bundesliga" style="--club:hsl(270, 71%, 38%)"><i></i><span class="cn">Karlsruher</span><span class="cm">107</span></a></li>
+          <li><a href="/teams/koln/" data-k="koln|cologne|fc koln" data-c="bundesliga" style="--club:#ED1C24"><i></i><span class="cn">Köln</span><span class="cm">336</span></a></li>
+          <li><a href="/teams/leverkusen/" data-k="leverkusen|bayer leverkusen|bayer" data-c="bundesliga|champions league" style="--club:#E32221"><i></i><span class="cn">Leverkusen</span><span class="cm">308</span></a></li>
+          <li><a href="/teams/mainz-05/" data-k="mainz 05" data-c="bundesliga" style="--club:#ED1C24"><i></i><span class="cn">Mainz 05</span><span class="cm">234</span></a></li>
+          <li><a href="/teams/monchengladbach/" data-k="monchengladbach|borussia monchengladbach|gladbach" data-c="bundesliga|champions league" style="--club:#000000"><i></i><span class="cn">Monchengladbach</span><span class="cm">322</span></a></li>
+          <li><a href="/teams/msv-duisburg/" data-k="msv duisburg" data-c="bundesliga" style="--club:#004B93"><i></i><span class="cn">MSV Duisburg</span><span class="cm">141</span></a></li>
+          <li><a href="/teams/nurnberg/" data-k="nurnberg" data-c="bundesliga" style="--club:#8B0000"><i></i><span class="cn">Nürnberg</span><span class="cm">251</span></a></li>
+          <li><a href="/teams/paderborn-07/" data-k="paderborn 07" data-c="bundesliga" style="--club:hsl(310, 55%, 38%)"><i></i><span class="cn">Paderborn 07</span><span class="cm">68</span></a></li>
+          <li><a href="/teams/rb-leipzig/" data-k="rb leipzig|leipzig" data-c="bundesliga|champions league" style="--club:#DD0741"><i></i><span class="cn">RB Leipzig</span><span class="cm">102</span></a></li>
+          <li><a href="/teams/saarbrucken/" data-k="saarbrucken" data-c="bundesliga" style="--club:hsl(230, 63%, 38%)"><i></i><span class="cn">Saarbrücken</span><span class="cm">21</span></a></li>
+          <li><a href="/teams/schalke-04/" data-k="schalke 04|schalke" data-c="bundesliga|champions league" style="--club:#004D9D"><i></i><span class="cn">Schalke 04</span><span class="cm">326</span></a></li>
+          <li><a href="/teams/st-pauli/" data-k="st pauli" data-c="bundesliga" style="--club:hsl(25, 57%, 38%)"><i></i><span class="cn">St Pauli</span><span class="cm">150</span></a></li>
+          <li><a href="/teams/stuttgart/" data-k="stuttgart" data-c="bundesliga|champions league" style="--club:#E32219"><i></i><span class="cn">Stuttgart</span><span class="cm">362</span></a></li>
+          <li><a href="/teams/stuttgarter-kickers/" data-k="stuttgarter kickers" data-c="bundesliga" style="--club:hsl(43, 70%, 38%)"><i></i><span class="cn">Stuttgarter Kickers</span><span class="cm">39</span></a></li>
+          <li><a href="/teams/uerdingen/" data-k="uerdingen" data-c="bundesliga" style="--club:hsl(240, 71%, 38%)"><i></i><span class="cn">Uerdingen</span><span class="cm">76</span></a></li>
+          <li><a href="/teams/ulm/" data-k="ulm" data-c="bundesliga" style="--club:hsl(253, 62%, 38%)"><i></i><span class="cn">Ulm</span><span class="cm">21</span></a></li>
+          <li><a href="/teams/union-berlin/" data-k="union berlin" data-c="bundesliga|champions league" style="--club:hsl(273, 70%, 38%)"><i></i><span class="cn">Union Berlin</span><span class="cm">103</span></a></li>
+          <li><a href="/teams/unterhaching/" data-k="unterhaching" data-c="bundesliga" style="--club:hsl(23, 66%, 38%)"><i></i><span class="cn">Unterhaching</span><span class="cm">31</span></a></li>
+          <li><a href="/teams/vfb-leipzig/" data-k="vfb leipzig" data-c="bundesliga" style="--club:hsl(230, 59%, 38%)"><i></i><span class="cn">VfB Leipzig</span><span class="cm">24</span></a></li>
+          <li><a href="/teams/waldhof-mannheim/" data-k="waldhof mannheim" data-c="bundesliga" style="--club:hsl(165, 69%, 38%)"><i></i><span class="cn">Waldhof Mannheim</span><span class="cm">31</span></a></li>
+          <li><a href="/teams/wattenscheid/" data-k="wattenscheid" data-c="bundesliga" style="--club:hsl(335, 65%, 38%)"><i></i><span class="cn">Wattenscheid</span><span class="cm">43</span></a></li>
+          <li><a href="/teams/werder-bremen/" data-k="werder bremen" data-c="bundesliga|champions league" style="--club:#1D9053"><i></i><span class="cn">Werder Bremen</span><span class="cm">303</span></a></li>
+          <li><a href="/teams/wolfsburg/" data-k="wolfsburg" data-c="bundesliga|champions league" style="--club:#65B32E"><i></i><span class="cn">Wolfsburg</span><span class="cm">309</span></a></li>
+  </ul>
+  <button type="button" class="showall" data-n="49"
+    >Show all 49 Germany clubs</button>
 </section>
 
-<section data-comp>
-  <h2>Serie A</h2>
-  <p class="count">53 clubs</p>
-  <div class="grid">
-        <a href="/teams/ancona/" data-name="ancona" style="--club:hsl(358, 68%, 38%)"><i></i>Ancona</a>
-        <a href="/teams/ascoli/" data-name="ascoli" style="--club:hsl(60, 67%, 38%)"><i></i>Ascoli</a>
-        <a href="/teams/atalanta/" data-name="atalanta" style="--club:#1E71B8"><i></i>Atalanta</a>
-        <a href="/teams/bari/" data-name="bari" style="--club:hsl(138, 56%, 38%)"><i></i>Bari</a>
-        <a href="/teams/benevento/" data-name="benevento" style="--club:hsl(213, 62%, 38%)"><i></i>Benevento</a>
-        <a href="/teams/bologna/" data-name="bologna" style="--club:#1A2F48"><i></i>Bologna</a>
-        <a href="/teams/brescia/" data-name="brescia" style="--club:#004B93"><i></i>Brescia</a>
-        <a href="/teams/cagliari/" data-name="cagliari" style="--club:#8B0000"><i></i>Cagliari</a>
-        <a href="/teams/carpi/" data-name="carpi" style="--club:hsl(5, 65%, 38%)"><i></i>Carpi</a>
-        <a href="/teams/catania/" data-name="catania" style="--club:#E3000B"><i></i>Catania</a>
-        <a href="/teams/cesena/" data-name="cesena" style="--club:hsl(340, 71%, 38%)"><i></i>Cesena</a>
-        <a href="/teams/chievo/" data-name="chievo" style="--club:#1C3C8B"><i></i>Chievo</a>
-        <a href="/teams/como/" data-name="como" style="--club:hsl(133, 74%, 38%)"><i></i>Como</a>
-        <a href="/teams/cremonese/" data-name="cremonese" style="--club:hsl(265, 73%, 38%)"><i></i>Cremonese</a>
-        <a href="/teams/crotone/" data-name="crotone" style="--club:hsl(118, 56%, 38%)"><i></i>Crotone</a>
-        <a href="/teams/empoli/" data-name="empoli" style="--club:#005BA6"><i></i>Empoli</a>
-        <a href="/teams/fiorentina/" data-name="fiorentina" style="--club:#482C83"><i></i>Fiorentina</a>
-        <a href="/teams/foggia/" data-name="foggia" style="--club:hsl(25, 73%, 38%)"><i></i>Foggia</a>
-        <a href="/teams/frosinone/" data-name="frosinone" style="--club:hsl(70, 59%, 38%)"><i></i>Frosinone</a>
-        <a href="/teams/genoa/" data-name="genoa" style="--club:#93192A"><i></i>Genoa</a>
-        <a href="/teams/hellas-verona/" data-name="hellas verona" style="--club:#003DA5"><i></i>Hellas Verona</a>
-        <a href="/teams/internazionale/" data-name="internazionale" style="--club:#009DDC"><i></i>Internazionale</a>
-        <a href="/teams/juventus/" data-name="juventus" style="--club:#000000"><i></i>Juventus</a>
-        <a href="/teams/lazio/" data-name="lazio" style="--club:#87D8F7"><i></i>Lazio</a>
-        <a href="/teams/lecce/" data-name="lecce" style="--club:#FFED00"><i></i>Lecce</a>
-        <a href="/teams/livorno/" data-name="livorno" style="--club:hsl(175, 61%, 38%)"><i></i>Livorno</a>
-        <a href="/teams/messina/" data-name="messina" style="--club:hsl(108, 64%, 38%)"><i></i>Messina</a>
-        <a href="/teams/milan/" data-name="milan" style="--club:#FB090B"><i></i>Milan</a>
-        <a href="/teams/modena/" data-name="modena" style="--club:hsl(303, 66%, 38%)"><i></i>Modena</a>
-        <a href="/teams/monza/" data-name="monza" style="--club:hsl(240, 71%, 38%)"><i></i>Monza</a>
-        <a href="/teams/napoli/" data-name="napoli" style="--club:#009FE3"><i></i>Napoli</a>
-        <a href="/teams/novara/" data-name="novara" style="--club:hsl(355, 57%, 38%)"><i></i>Novara</a>
-        <a href="/teams/padova/" data-name="padova" style="--club:hsl(345, 61%, 38%)"><i></i>Padova</a>
-        <a href="/teams/palermo/" data-name="palermo" style="--club:#F1AABB"><i></i>Palermo</a>
-        <a href="/teams/parma/" data-name="parma" style="--club:#FEDD00"><i></i>Parma</a>
-        <a href="/teams/perugia/" data-name="perugia" style="--club:hsl(235, 65%, 38%)"><i></i>Perugia</a>
-        <a href="/teams/pescara/" data-name="pescara" style="--club:hsl(315, 61%, 38%)"><i></i>Pescara</a>
-        <a href="/teams/piacenza/" data-name="piacenza" style="--club:hsl(330, 63%, 38%)"><i></i>Piacenza</a>
-        <a href="/teams/pisa/" data-name="pisa" style="--club:hsl(145, 57%, 38%)"><i></i>Pisa</a>
-        <a href="/teams/reggiana/" data-name="reggiana" style="--club:hsl(8, 60%, 38%)"><i></i>Reggiana</a>
-        <a href="/teams/reggina/" data-name="reggina" style="--club:#6D2247"><i></i>Reggina</a>
-        <a href="/teams/roma/" data-name="roma" style="--club:#8E1F2F"><i></i>Roma</a>
-        <a href="/teams/salernitana/" data-name="salernitana" style="--club:hsl(273, 70%, 38%)"><i></i>Salernitana</a>
-        <a href="/teams/sampdoria/" data-name="sampdoria" style="--club:#0065A4"><i></i>Sampdoria</a>
-        <a href="/teams/sassuolo/" data-name="sassuolo" style="--club:#00A850"><i></i>Sassuolo</a>
-        <a href="/teams/siena/" data-name="siena" style="--club:#000000"><i></i>Siena</a>
-        <a href="/teams/spal/" data-name="spal" style="--club:hsl(153, 62%, 38%)"><i></i>SPAL</a>
-        <a href="/teams/spezia/" data-name="spezia" style="--club:hsl(313, 66%, 38%)"><i></i>Spezia</a>
-        <a href="/teams/torino/" data-name="torino" style="--club:#8B1A2B"><i></i>Torino</a>
-        <a href="/teams/treviso/" data-name="treviso" style="--club:hsl(318, 72%, 38%)"><i></i>Treviso</a>
-        <a href="/teams/udinese/" data-name="udinese" style="--club:#000000"><i></i>Udinese</a>
-        <a href="/teams/venezia/" data-name="venezia" style="--club:hsl(73, 70%, 38%)"><i></i>Venezia</a>
-        <a href="/teams/vicenza/" data-name="vicenza" style="--club:hsl(43, 70%, 38%)"><i></i>Vicenza</a>
+<section class="cblock" data-country="FRA">
+  <div class="chead">
+    <h3>France</h3>
+    <span class="ccount">46 clubs</span>
   </div>
+  <div class="cfilter" role="group" aria-label="France competitions">
+    <button type="button" class="cchip on" data-comp="">All</button>
+            <button type="button" class="cchip" data-comp="ligue 1"
+              >Ligue 1</button>
+  </div>
+  <ul class="clist">
+          <li><a href="/teams/ajaccio/" data-k="ajaccio" data-c="ligue 1" style="--club:hsl(343, 62%, 38%)"><i></i><span class="cn">Ajaccio</span><span class="cm">162</span></a></li>
+          <li><a href="/teams/amiens/" data-k="amiens" data-c="ligue 1" style="--club:hsl(275, 57%, 38%)"><i></i><span class="cn">Amiens</span><span class="cm">54</span></a></li>
+          <li><a href="/teams/angers/" data-k="angers" data-c="ligue 1" style="--club:#000000"><i></i><span class="cn">Angers</span><span class="cm">140</span></a></li>
+          <li><a href="/teams/arles-avignon/" data-k="arles-avignon" data-c="ligue 1" style="--club:hsl(58, 72%, 38%)"><i></i><span class="cn">Arles-Avignon</span><span class="cm">34</span></a></li>
+          <li><a href="/teams/auxerre/" data-k="auxerre" data-c="champions league|ligue 1" style="--club:#FFFFFF"><i></i><span class="cn">Auxerre</span><span class="cm">218</span></a></li>
+          <li><a href="/teams/bastia/" data-k="bastia" data-c="ligue 1" style="--club:#009FE3"><i></i><span class="cn">Bastia</span><span class="cm">214</span></a></li>
+          <li><a href="/teams/bordeaux/" data-k="bordeaux" data-c="champions league|ligue 1" style="--club:#13244A"><i></i><span class="cn">Bordeaux</span><span class="cm">277</span></a></li>
+          <li><a href="/teams/boulogne/" data-k="boulogne" data-c="ligue 1" style="--club:hsl(170, 55%, 38%)"><i></i><span class="cn">Boulogne</span><span class="cm">33</span></a></li>
+          <li><a href="/teams/brest/" data-k="brest" data-c="champions league|ligue 1" style="--club:hsl(183, 62%, 38%)"><i></i><span class="cn">Brest</span><span class="cm">145</span></a></li>
+          <li><a href="/teams/caen/" data-k="caen" data-c="ligue 1" style="--club:#003DA5"><i></i><span class="cn">Caen</span><span class="cm">172</span></a></li>
+          <li><a href="/teams/cannes/" data-k="cannes" data-c="ligue 1" style="--club:hsl(108, 64%, 38%)"><i></i><span class="cn">Cannes</span><span class="cm">57</span></a></li>
+          <li><a href="/teams/chateauroux/" data-k="chateauroux" data-c="ligue 1" style="--club:hsl(275, 61%, 38%)"><i></i><span class="cn">Châteauroux</span><span class="cm">26</span></a></li>
+          <li><a href="/teams/clermont-foot/" data-k="clermont foot" data-c="ligue 1" style="--club:hsl(345, 61%, 38%)"><i></i><span class="cn">Clermont Foot</span><span class="cm">56</span></a></li>
+          <li><a href="/teams/dijon/" data-k="dijon" data-c="ligue 1" style="--club:hsl(208, 56%, 38%)"><i></i><span class="cn">Dijon</span><span class="cm">105</span></a></li>
+          <li><a href="/teams/evian/" data-k="evian" data-c="ligue 1" style="--club:hsl(355, 69%, 38%)"><i></i><span class="cn">Evian</span><span class="cm">64</span></a></li>
+          <li><a href="/teams/gazelec-ajaccio/" data-k="gazelec ajaccio" data-c="ligue 1" style="--club:hsl(48, 72%, 38%)"><i></i><span class="cn">Gazélec Ajaccio</span><span class="cm">23</span></a></li>
+          <li><a href="/teams/grenoble-foot/" data-k="grenoble foot" data-c="ligue 1" style="--club:hsl(260, 59%, 38%)"><i></i><span class="cn">Grenoble Foot</span><span class="cm">45</span></a></li>
+          <li><a href="/teams/gueugnon/" data-k="gueugnon" data-c="ligue 1" style="--club:hsl(143, 70%, 38%)"><i></i><span class="cn">Gueugnon</span><span class="cm">25</span></a></li>
+          <li><a href="/teams/guingamp/" data-k="guingamp" data-c="ligue 1" style="--club:#E30613"><i></i><span class="cn">Guingamp</span><span class="cm">164</span></a></li>
+          <li><a href="/teams/istres/" data-k="istres" data-c="ligue 1" style="--club:hsl(193, 58%, 38%)"><i></i><span class="cn">Istres</span><span class="cm">31</span></a></li>
+          <li><a href="/teams/le-havre/" data-k="le havre" data-c="ligue 1" style="--club:hsl(268, 64%, 38%)"><i></i><span class="cn">Le Havre</span><span class="cm">186</span></a></li>
+          <li><a href="/teams/le-mans/" data-k="le mans" data-c="ligue 1" style="--club:hsl(250, 71%, 38%)"><i></i><span class="cn">Le Mans</span><span class="cm">106</span></a></li>
+          <li><a href="/teams/lens/" data-k="lens" data-c="champions league|ligue 1" style="--club:#E2001A"><i></i><span class="cn">Lens</span><span class="cm">283</span></a></li>
+          <li><a href="/teams/lille/" data-k="lille|losc" data-c="champions league|ligue 1" style="--club:#D71920"><i></i><span class="cn">Lille</span><span class="cm">303</span></a></li>
+          <li><a href="/teams/lorient/" data-k="lorient" data-c="ligue 1" style="--club:#F47920"><i></i><span class="cn">Lorient</span><span class="cm">256</span></a></li>
+          <li><a href="/teams/lyon/" data-k="lyon|ol|olympique lyonnais" data-c="champions league|ligue 1" style="--club:#003DA5"><i></i><span class="cn">Lyon</span><span class="cm">306</span></a></li>
+          <li><a href="/teams/marseille/" data-k="marseille|om|olympique marseille" data-c="champions league|ligue 1" style="--club:#009FE3"><i></i><span class="cn">Marseille</span><span class="cm">440</span></a></li>
+          <li><a href="/teams/martigues/" data-k="martigues" data-c="ligue 1" style="--club:hsl(320, 63%, 38%)"><i></i><span class="cn">Martigues</span><span class="cm">26</span></a></li>
+          <li><a href="/teams/metz/" data-k="metz" data-c="ligue 1" style="--club:#6D2832"><i></i><span class="cn">Metz</span><span class="cm">307</span></a></li>
+          <li><a href="/teams/monaco/" data-k="monaco|as monaco" data-c="champions league|ligue 1" style="--club:#C8102E"><i></i><span class="cn">Monaco</span><span class="cm">371</span></a></li>
+          <li><a href="/teams/montpellier/" data-k="montpellier" data-c="champions league|ligue 1" style="--club:#003DA5"><i></i><span class="cn">Montpellier</span><span class="cm">249</span></a></li>
+          <li><a href="/teams/nancy/" data-k="nancy" data-c="ligue 1" style="--club:#E4002B"><i></i><span class="cn">Nancy</span><span class="cm">146</span></a></li>
+          <li><a href="/teams/nantes/" data-k="nantes" data-c="champions league|ligue 1" style="--club:#FFED00"><i></i><span class="cn">Nantes</span><span class="cm">318</span></a></li>
+          <li><a href="/teams/nice/" data-k="nice" data-c="ligue 1" style="--club:#000000"><i></i><span class="cn">Nice</span><span class="cm">338</span></a></li>
+          <li><a href="/teams/nimes/" data-k="nimes" data-c="ligue 1" style="--club:hsl(243, 70%, 38%)"><i></i><span class="cn">Nîmes</span><span class="cm">52</span></a></li>
+          <li><a href="/teams/paris-fc/" data-k="paris fc" data-c="ligue 1" style="--club:hsl(20, 63%, 38%)"><i></i><span class="cn">Paris FC</span><span class="cm">35</span></a></li>
+          <li><a href="/teams/paris-saint-germain/" data-k="paris saint-germain|psg|paris sg|paris" data-c="champions league|ligue 1" style="--club:#004170"><i></i><span class="cn">Paris Saint-Germain</span><span class="cm">328</span></a></li>
+          <li><a href="/teams/reims/" data-k="reims" data-c="ligue 1" style="--club:#E30613"><i></i><span class="cn">Reims</span><span class="cm">155</span></a></li>
+          <li><a href="/teams/rennes/" data-k="rennes" data-c="champions league|ligue 1" style="--club:#E4002B"><i></i><span class="cn">Rennes</span><span class="cm">372</span></a></li>
+          <li><a href="/teams/saint-etienne/" data-k="saint-etienne|st etienne|asse" data-c="ligue 1" style="--club:#006A3D"><i></i><span class="cn">Saint-Étienne</span><span class="cm">300</span></a></li>
+          <li><a href="/teams/sedan/" data-k="sedan" data-c="ligue 1" style="--club:hsl(140, 55%, 38%)"><i></i><span class="cn">Sedan</span><span class="cm">81</span></a></li>
+          <li><a href="/teams/sochaux/" data-k="sochaux" data-c="ligue 1" style="--club:#FEDD00"><i></i><span class="cn">Sochaux</span><span class="cm">160</span></a></li>
+          <li><a href="/teams/strasbourg/" data-k="strasbourg" data-c="ligue 1" style="--club:#009FE3"><i></i><span class="cn">Strasbourg</span><span class="cm">270</span></a></li>
+          <li><a href="/teams/toulouse/" data-k="toulouse" data-c="ligue 1" style="--club:#5B2B82"><i></i><span class="cn">Toulouse</span><span class="cm">312</span></a></li>
+          <li><a href="/teams/troyes/" data-k="troyes" data-c="ligue 1" style="--club:#004FA3"><i></i><span class="cn">Troyes</span><span class="cm">218</span></a></li>
+          <li><a href="/teams/valenciennes/" data-k="valenciennes" data-c="ligue 1" style="--club:hsl(295, 73%, 38%)"><i></i><span class="cn">Valenciennes</span><span class="cm">85</span></a></li>
+  </ul>
+  <button type="button" class="showall" data-n="46"
+    >Show all 46 France clubs</button>
+</section>
 </section>
 
-<section data-comp>
-  <h2>Bundesliga</h2>
-  <p class="count">49 clubs</p>
-  <div class="grid">
-        <a href="/teams/1860-munich/" data-name="1860 munich" style="--club:#00529C"><i></i>1860 Munich</a>
-        <a href="/teams/alemannia-aachen/" data-name="alemannia aachen" style="--club:hsl(260, 63%, 38%)"><i></i>Alemannia Aachen</a>
-        <a href="/teams/arminia-bielefeld/" data-name="arminia bielefeld" style="--club:#00447C"><i></i>Arminia Bielefeld</a>
-        <a href="/teams/augsburg/" data-name="augsburg" style="--club:#BA3733"><i></i>Augsburg</a>
-        <a href="/teams/bayern-munich/" data-name="bayern munich" style="--club:#DC052D"><i></i>Bayern Munich</a>
-        <a href="/teams/bochum/" data-name="bochum" style="--club:#005BA6"><i></i>Bochum</a>
-        <a href="/teams/darmstadt-98/" data-name="darmstadt 98" style="--club:hsl(183, 62%, 38%)"><i></i>Darmstadt 98</a>
-        <a href="/teams/dortmund/" data-name="dortmund" style="--club:#FDE100"><i></i>Dortmund</a>
-        <a href="/teams/dresden/" data-name="dresden" style="--club:hsl(275, 61%, 38%)"><i></i>Dresden</a>
-        <a href="/teams/dusseldorf/" data-name="dusseldorf" style="--club:hsl(100, 59%, 38%)"><i></i>Düsseldorf</a>
-        <a href="/teams/eintracht-braunschweig/" data-name="eintracht braunschweig" style="--club:hsl(245, 57%, 38%)"><i></i>Eintracht Braunschweig</a>
-        <a href="/teams/eintracht-frankfurt/" data-name="eintracht frankfurt" style="--club:#E1000F"><i></i>Eintracht Frankfurt</a>
-        <a href="/teams/elversberg/" data-name="elversberg" style="--club:hsl(230, 63%, 38%)"><i></i>Elversberg</a>
-        <a href="/teams/energie-cottbus/" data-name="energie cottbus" style="--club:hsl(108, 56%, 38%)"><i></i>Energie Cottbus</a>
-        <a href="/teams/freiburg/" data-name="freiburg" style="--club:#000000"><i></i>Freiburg</a>
-        <a href="/teams/greuther-furth/" data-name="greuther furth" style="--club:hsl(148, 56%, 38%)"><i></i>Greuther Fürth</a>
-        <a href="/teams/hamburger-sv/" data-name="hamburger sv" style="--club:#005B9A"><i></i>Hamburger SV</a>
-        <a href="/teams/hannover-96/" data-name="hannover 96" style="--club:#1E8C35"><i></i>Hannover 96</a>
-        <a href="/teams/hansa-rostock/" data-name="hansa rostock" style="--club:#003D7E"><i></i>Hansa Rostock</a>
-        <a href="/teams/heidenheim/" data-name="heidenheim" style="--club:hsl(118, 56%, 38%)"><i></i>Heidenheim</a>
-        <a href="/teams/hertha-bsc/" data-name="hertha bsc" style="--club:#005BA6"><i></i>Hertha BSC</a>
-        <a href="/teams/hoffenheim/" data-name="hoffenheim" style="--club:#1961B5"><i></i>Hoffenheim</a>
-        <a href="/teams/holstein-kiel/" data-name="holstein kiel" style="--club:hsl(18, 56%, 38%)"><i></i>Holstein Kiel</a>
-        <a href="/teams/homburg/" data-name="homburg" style="--club:hsl(218, 68%, 38%)"><i></i>Homburg</a>
-        <a href="/teams/ingolstadt/" data-name="ingolstadt" style="--club:hsl(175, 65%, 38%)"><i></i>Ingolstadt</a>
-        <a href="/teams/kaiserslautern/" data-name="kaiserslautern" style="--club:#E3000B"><i></i>Kaiserslautern</a>
-        <a href="/teams/karlsruher/" data-name="karlsruher" style="--club:hsl(270, 71%, 38%)"><i></i>Karlsruher</a>
-        <a href="/teams/koln/" data-name="koln" style="--club:#ED1C24"><i></i>Köln</a>
-        <a href="/teams/leverkusen/" data-name="leverkusen" style="--club:#E32221"><i></i>Leverkusen</a>
-        <a href="/teams/mainz-05/" data-name="mainz 05" style="--club:#ED1C24"><i></i>Mainz 05</a>
-        <a href="/teams/monchengladbach/" data-name="monchengladbach" style="--club:#000000"><i></i>Monchengladbach</a>
-        <a href="/teams/msv-duisburg/" data-name="msv duisburg" style="--club:#004B93"><i></i>MSV Duisburg</a>
-        <a href="/teams/nurnberg/" data-name="nurnberg" style="--club:#8B0000"><i></i>Nürnberg</a>
-        <a href="/teams/paderborn-07/" data-name="paderborn 07" style="--club:hsl(310, 55%, 38%)"><i></i>Paderborn 07</a>
-        <a href="/teams/rb-leipzig/" data-name="rb leipzig" style="--club:#DD0741"><i></i>RB Leipzig</a>
-        <a href="/teams/saarbrucken/" data-name="saarbrucken" style="--club:hsl(230, 63%, 38%)"><i></i>Saarbrücken</a>
-        <a href="/teams/schalke-04/" data-name="schalke 04" style="--club:#004D9D"><i></i>Schalke 04</a>
-        <a href="/teams/st-pauli/" data-name="st pauli" style="--club:hsl(25, 57%, 38%)"><i></i>St Pauli</a>
-        <a href="/teams/stuttgart/" data-name="stuttgart" style="--club:#E32219"><i></i>Stuttgart</a>
-        <a href="/teams/stuttgarter-kickers/" data-name="stuttgarter kickers" style="--club:hsl(43, 70%, 38%)"><i></i>Stuttgarter Kickers</a>
-        <a href="/teams/uerdingen/" data-name="uerdingen" style="--club:hsl(240, 71%, 38%)"><i></i>Uerdingen</a>
-        <a href="/teams/ulm/" data-name="ulm" style="--club:hsl(253, 62%, 38%)"><i></i>Ulm</a>
-        <a href="/teams/union-berlin/" data-name="union berlin" style="--club:hsl(273, 70%, 38%)"><i></i>Union Berlin</a>
-        <a href="/teams/unterhaching/" data-name="unterhaching" style="--club:hsl(23, 66%, 38%)"><i></i>Unterhaching</a>
-        <a href="/teams/vfb-leipzig/" data-name="vfb leipzig" style="--club:hsl(230, 59%, 38%)"><i></i>VfB Leipzig</a>
-        <a href="/teams/waldhof-mannheim/" data-name="waldhof mannheim" style="--club:hsl(165, 69%, 38%)"><i></i>Waldhof Mannheim</a>
-        <a href="/teams/wattenscheid/" data-name="wattenscheid" style="--club:hsl(335, 65%, 38%)"><i></i>Wattenscheid</a>
-        <a href="/teams/werder-bremen/" data-name="werder bremen" style="--club:#1D9053"><i></i>Werder Bremen</a>
-        <a href="/teams/wolfsburg/" data-name="wolfsburg" style="--club:#65B32E"><i></i>Wolfsburg</a>
-  </div>
-</section>
-
-<section data-comp>
-  <h2>Ligue 1</h2>
-  <p class="count">46 clubs</p>
-  <div class="grid">
-        <a href="/teams/ajaccio/" data-name="ajaccio" style="--club:hsl(343, 62%, 38%)"><i></i>Ajaccio</a>
-        <a href="/teams/amiens/" data-name="amiens" style="--club:hsl(275, 57%, 38%)"><i></i>Amiens</a>
-        <a href="/teams/angers/" data-name="angers" style="--club:#000000"><i></i>Angers</a>
-        <a href="/teams/arles-avignon/" data-name="arles-avignon" style="--club:hsl(58, 72%, 38%)"><i></i>Arles-Avignon</a>
-        <a href="/teams/auxerre/" data-name="auxerre" style="--club:#FFFFFF"><i></i>Auxerre</a>
-        <a href="/teams/bastia/" data-name="bastia" style="--club:#009FE3"><i></i>Bastia</a>
-        <a href="/teams/bordeaux/" data-name="bordeaux" style="--club:#13244A"><i></i>Bordeaux</a>
-        <a href="/teams/boulogne/" data-name="boulogne" style="--club:hsl(170, 55%, 38%)"><i></i>Boulogne</a>
-        <a href="/teams/brest/" data-name="brest" style="--club:hsl(183, 62%, 38%)"><i></i>Brest</a>
-        <a href="/teams/caen/" data-name="caen" style="--club:#003DA5"><i></i>Caen</a>
-        <a href="/teams/cannes/" data-name="cannes" style="--club:hsl(108, 64%, 38%)"><i></i>Cannes</a>
-        <a href="/teams/chateauroux/" data-name="chateauroux" style="--club:hsl(275, 61%, 38%)"><i></i>Châteauroux</a>
-        <a href="/teams/clermont-foot/" data-name="clermont foot" style="--club:hsl(345, 61%, 38%)"><i></i>Clermont Foot</a>
-        <a href="/teams/dijon/" data-name="dijon" style="--club:hsl(208, 56%, 38%)"><i></i>Dijon</a>
-        <a href="/teams/evian/" data-name="evian" style="--club:hsl(355, 69%, 38%)"><i></i>Evian</a>
-        <a href="/teams/gazelec-ajaccio/" data-name="gazelec ajaccio" style="--club:hsl(48, 72%, 38%)"><i></i>Gazélec Ajaccio</a>
-        <a href="/teams/grenoble-foot/" data-name="grenoble foot" style="--club:hsl(260, 59%, 38%)"><i></i>Grenoble Foot</a>
-        <a href="/teams/gueugnon/" data-name="gueugnon" style="--club:hsl(143, 70%, 38%)"><i></i>Gueugnon</a>
-        <a href="/teams/guingamp/" data-name="guingamp" style="--club:#E30613"><i></i>Guingamp</a>
-        <a href="/teams/istres/" data-name="istres" style="--club:hsl(193, 58%, 38%)"><i></i>Istres</a>
-        <a href="/teams/le-havre/" data-name="le havre" style="--club:hsl(268, 64%, 38%)"><i></i>Le Havre</a>
-        <a href="/teams/le-mans/" data-name="le mans" style="--club:hsl(250, 71%, 38%)"><i></i>Le Mans</a>
-        <a href="/teams/lens/" data-name="lens" style="--club:#E2001A"><i></i>Lens</a>
-        <a href="/teams/lille/" data-name="lille" style="--club:#D71920"><i></i>Lille</a>
-        <a href="/teams/lorient/" data-name="lorient" style="--club:#F47920"><i></i>Lorient</a>
-        <a href="/teams/lyon/" data-name="lyon" style="--club:#003DA5"><i></i>Lyon</a>
-        <a href="/teams/marseille/" data-name="marseille" style="--club:#009FE3"><i></i>Marseille</a>
-        <a href="/teams/martigues/" data-name="martigues" style="--club:hsl(320, 63%, 38%)"><i></i>Martigues</a>
-        <a href="/teams/metz/" data-name="metz" style="--club:#6D2832"><i></i>Metz</a>
-        <a href="/teams/monaco/" data-name="monaco" style="--club:#C8102E"><i></i>Monaco</a>
-        <a href="/teams/montpellier/" data-name="montpellier" style="--club:#003DA5"><i></i>Montpellier</a>
-        <a href="/teams/nancy/" data-name="nancy" style="--club:#E4002B"><i></i>Nancy</a>
-        <a href="/teams/nantes/" data-name="nantes" style="--club:#FFED00"><i></i>Nantes</a>
-        <a href="/teams/nice/" data-name="nice" style="--club:#000000"><i></i>Nice</a>
-        <a href="/teams/nimes/" data-name="nimes" style="--club:hsl(243, 70%, 38%)"><i></i>Nîmes</a>
-        <a href="/teams/paris-fc/" data-name="paris fc" style="--club:hsl(20, 63%, 38%)"><i></i>Paris FC</a>
-        <a href="/teams/paris-saint-germain/" data-name="paris saint-germain" style="--club:#004170"><i></i>Paris Saint-Germain</a>
-        <a href="/teams/reims/" data-name="reims" style="--club:#E30613"><i></i>Reims</a>
-        <a href="/teams/rennes/" data-name="rennes" style="--club:#E4002B"><i></i>Rennes</a>
-        <a href="/teams/saint-etienne/" data-name="saint-etienne" style="--club:#006A3D"><i></i>Saint-Étienne</a>
-        <a href="/teams/sedan/" data-name="sedan" style="--club:hsl(140, 55%, 38%)"><i></i>Sedan</a>
-        <a href="/teams/sochaux/" data-name="sochaux" style="--club:#FEDD00"><i></i>Sochaux</a>
-        <a href="/teams/strasbourg/" data-name="strasbourg" style="--club:#009FE3"><i></i>Strasbourg</a>
-        <a href="/teams/toulouse/" data-name="toulouse" style="--club:#5B2B82"><i></i>Toulouse</a>
-        <a href="/teams/troyes/" data-name="troyes" style="--club:#004FA3"><i></i>Troyes</a>
-        <a href="/teams/valenciennes/" data-name="valenciennes" style="--club:hsl(295, 73%, 38%)"><i></i>Valenciennes</a>
-  </div>
-</section>
-
-<footer>
-  <a href="/daily/">Today's challenge</a> ·
-  <a href="/games/">All games</a> ·
-  <a href="/ask/">Ask TeleStats a question</a> ·
-  <a href="/tools/data.html">Dataset coverage</a>
+<footer class="page">
+  Player statistics compiled from official league and competition sources.
+  <a href="/daily/">Today's challenge</a> &middot;
+  <a href="/games/">All games</a> &middot;
+  <a href="/competitions/">Browse by competition</a> &middot;
+  <a href="/ask/">Ask TeleStats</a> &middot;
+  <a href="/tools/data.html">Data coverage</a>
 </footer>
 </div><!-- /wrap -->
 <script>
 (function () {
   'use strict';
   var input = document.getElementById('teamFind');
-  var hint = document.getElementById('findHint');
   if (!input) return;
-  var links = [].slice.call(document.querySelectorAll('.grid a'));
-  var sections = [].slice.call(document.querySelectorAll('section[data-comp]'));
+  var box = document.getElementById('findBox');
+  var sugg = document.getElementById('findSugg');
+  var none = document.getElementById('findNone');
+  var clear = document.getElementById('findClear');
+  var tabs = [].slice.call(document.querySelectorAll('.ctab'));
+  var blocks = [].slice.call(document.querySelectorAll('.cblock'));
+  var links = [].slice.call(document.querySelectorAll('ul.clist a'));
 
-  function apply() {
-    // Accent-folded, so "malaga" finds "Málaga" and "koln" finds "Köln". The
-    // clubs most likely to be typed without their accents are exactly the ones
-    // a naive match would hide.
-    var q = input.value.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
-    var shown = 0;
-    links.forEach(function (a) {
-      var hit = !q || a.dataset.name.indexOf(q) !== -1;
-      a.hidden = !hit;
-      if (hit) shown++;
-    });
-    // A competition with nothing left in it hides its heading too, or the page
-    // becomes a column of empty league names.
-    sections.forEach(function (sec) {
-      sec.hidden = !sec.querySelector('.grid a:not([hidden])');
-    });
-    hint.textContent = !q ? ''
-      : shown === 0 ? 'No club matches “' + input.value.trim() + '”.'
-      : shown === 1 ? '1 club' : shown + ' clubs';
+  // Every row, read ONCE. data-k already holds the folded name and the
+  // maintained aliases, so a keystroke is a substring test over an array that
+  // was built at load, not 355 string normalisations.
+  var ROWS = links.map(function (a) {
+    return {
+      el: a,
+      href: a.getAttribute('href'),
+      name: a.querySelector('.cn').textContent,
+      keys: a.getAttribute('data-k') || '',
+      comps: a.getAttribute('data-c') || '',
+      country: a.closest('.cblock').getAttribute('data-country'),
+      block: a.closest('.cblock'),
+    };
+  });
+  var COUNTRY_NAMES = {};
+  blocks.forEach(function (b) {
+    COUNTRY_NAMES[b.getAttribute('data-country')] = b.querySelector('h3').textContent;
+  });
+
+  function fold(v) {
+    return String(v || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
   }
 
-  input.addEventListener('input', apply);
-  // Enter goes straight to the top match — the point is to reach one club fast.
-  input.addEventListener('keydown', function (e) {
-    if (e.key !== 'Enter') return;
-    var visible = links.filter(function (a) { return !a.hidden; });
-    if (visible.length) window.location.href = visible[0].getAttribute('href');
+  var country = '';          // '' = every country
+  var comps = {};            // country code -> folded competition, '' = all
+  var active = -1;           // highlighted suggestion
+
+  /** Matches, best first: a name that STARTS with the query beats one that merely contains it. */
+  function search(q) {
+    if (!q) return [];
+    var starts = [], has = [];
+    for (var i = 0; i < ROWS.length; i++) {
+      var parts = ROWS[i].keys.split('|');
+      var best = -1;
+      for (var j = 0; j < parts.length; j++) {
+        var at = parts[j].indexOf(q);
+        if (at === -1) continue;
+        if (at === 0) { best = 0; break; }
+        if (best === -1) best = at;
+      }
+      if (best === 0) starts.push(ROWS[i]);
+      else if (best > 0) has.push(ROWS[i]);
+    }
+    return starts.concat(has);
+  }
+
+  function renderSuggestions(hits, q) {
+    if (!q) { hide(); return; }
+    if (!hits.length) {
+      hide();
+      none.hidden = false;
+      none.textContent = 'No club matches “' + input.value.trim() +
+        '”. Try a shorter word, or browse by country below.';
+      return;
+    }
+    none.hidden = true;
+    sugg.innerHTML = hits.slice(0, 8).map(function (r, i) {
+      var club = r.el.style.getPropertyValue('--club');
+      return '<li role="option" aria-selected="' + (i === 0) + '"' + (i === 0 ? ' class="on"' : '') +
+        '><a href="' + r.href + '" style="--club:' + club + '" tabindex="-1">' +
+        '<i></i><span>' + r.name + '</span>' +
+        '<span class="where">' + (COUNTRY_NAMES[r.country] || '') + '</span></a></li>';
+    }).join('');
+    sugg.hidden = false;
+    input.setAttribute('aria-expanded', 'true');
+    active = 0;
+  }
+
+  function hide() {
+    sugg.hidden = true;
+    sugg.innerHTML = '';
+    input.setAttribute('aria-expanded', 'false');
+    none.hidden = true;
+    active = -1;
+  }
+
+  function move(step) {
+    var items = sugg.querySelectorAll('li');
+    if (!items.length) return;
+    active = (active + step + items.length) % items.length;
+    for (var i = 0; i < items.length; i++) {
+      items[i].classList.toggle('on', i === active);
+      items[i].setAttribute('aria-selected', String(i === active));
+    }
+    items[active].scrollIntoView({ block: 'nearest' });
+  }
+
+  /**
+   * The directory underneath, filtered by country and competition, and capped.
+   *
+   * One pass decides both things per row, so the cap counts MATCHING rows
+   * rather than positions in the markup — otherwise filtering to a competition
+   * with 90 clubs would still show the first 24 slots of the unfiltered list.
+   */
+  var CAP = 24;
+  var expanded = {};
+
+  function paintDirectory() {
+    blocks.forEach(function (b) {
+      var code = b.getAttribute('data-country');
+      b.hidden = !!country && country !== code;
+    });
+
+    var seen = {};
+    ROWS.forEach(function (r) {
+      var want = comps[r.country] || '';
+      var matches = !want || r.comps.split('|').indexOf(want) !== -1;
+      if (!matches) { r.el.hidden = true; return; }
+      seen[r.country] = (seen[r.country] || 0) + 1;
+      r.el.hidden = !expanded[r.country] && seen[r.country] > CAP;
+    });
+
+    blocks.forEach(function (b) {
+      var code = b.getAttribute('data-country');
+      var total = seen[code] || 0;
+      var count = b.querySelector('.ccount');
+      if (count) count.textContent = total + (total === 1 ? ' club' : ' clubs');
+      var btn = b.querySelector('.showall');
+      if (!btn) return;
+      btn.hidden = expanded[code] || total <= CAP;
+      btn.textContent = 'Show all ' + total + ' ' +
+        b.querySelector('h3').textContent + ' clubs';
+    });
+  }
+
+  document.querySelectorAll('.showall').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var code = btn.closest('.cblock').getAttribute('data-country');
+      expanded[code] = true;
+      paintDirectory();
+      // Focus the first row that was just revealed, so a keyboard user is not
+      // left where a button used to be.
+      var rows = btn.closest('.cblock').querySelectorAll('ul.clist a:not([hidden])');
+      if (rows.length > CAP) rows[CAP].focus();
+    });
   });
-  apply();
+
+  input.addEventListener('input', function () {
+    var q = fold(input.value);
+    box.classList.toggle('has', !!input.value);
+    renderSuggestions(search(q), q);
+  });
+
+  input.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowDown') { e.preventDefault(); move(1); return; }
+    if (e.key === 'ArrowUp') { e.preventDefault(); move(-1); return; }
+    if (e.key === 'Escape') { hide(); return; }
+    if (e.key !== 'Enter') return;
+    // Enter goes to the highlighted club. Reaching one club fast is the job.
+    var chosen = sugg.querySelector('li.on a');
+    if (chosen) { e.preventDefault(); window.location.href = chosen.getAttribute('href'); }
+  });
+
+  clear.addEventListener('click', function () {
+    input.value = '';
+    box.classList.remove('has');
+    hide();
+    input.focus();
+  });
+
+  document.addEventListener('click', function (e) {
+    if (!e.target.closest || !e.target.closest('.find')) hide();
+  });
+
+  tabs.forEach(function (t) {
+    t.addEventListener('click', function () {
+      country = t.getAttribute('data-country');
+      tabs.forEach(function (o) { o.classList.toggle('on', o === t); });
+      paintDirectory();
+    });
+  });
+
+  paintDirectory();   // apply the cap once the script is here to undo it
+
+  document.querySelectorAll('.cfilter').forEach(function (group) {
+    var code = group.closest('.cblock').getAttribute('data-country');
+    var chips = [].slice.call(group.querySelectorAll('.cchip'));
+    chips.forEach(function (c) {
+      c.addEventListener('click', function () {
+        comps[code] = c.getAttribute('data-comp');
+        chips.forEach(function (o) { o.classList.toggle('on', o === c); });
+        paintDirectory();
+      });
+    });
+  });
 })();
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/js/ts-auth.js"></script>
 <script src="/js/ts-data.js"></script>
+<script src="/js/ts-footer.js"></script>
 <script src="/js/ts-nav.js"></script>
 <script>
   (async function () {
@@ -665,6 +1000,6 @@
     try { TSNav.render(); } catch (e) { console.error('[TeleStats] Nav render failed:', e); }
   })();
 </script>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TeleStats","item":"https://telestats.net"},{"@type":"ListItem","position":2,"name":"Teams","item":"https://telestats.net/teams/"}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TeleStats","item":"https://telestats.net"},{"@type":"ListItem","position":2,"name":"Teams","item":"https://telestats.net/teams/"}]},{"@type":"CollectionPage","name":"Football Teams: Player Stats, Records & Games | TeleStats","description":"Explore football player records, appearances, goals and games for 355 clubs. Find your team and discover football history on TeleStats.","url":"https://telestats.net/teams/"}]}</script>
 </body>
 </html>

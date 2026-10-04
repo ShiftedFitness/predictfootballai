@@ -533,8 +533,8 @@ async function fetchFromView(supabase, competitionName, clubName = null, nationa
 /**
  * Fetch from view across MULTIPLE competitions (for Big 5 British etc.)
  */
-async function fetchFromViewMultiComp(supabase, competitionNames, nationalityCodes = null, metric = 'appearances') {
-  console.log('[fetchFromViewMultiComp]', { competitionNames, nationalityCodes, metric });
+async function fetchFromViewMultiComp(supabase, competitionNames, nationalityCodes = null, metric = 'appearances', clubName = null) {
+  console.log('[fetchFromViewMultiComp]', { competitionNames, nationalityCodes, metric, clubName });
 
   const buildQuery = () => {
     let query = supabase
@@ -542,6 +542,11 @@ async function fetchFromViewMultiComp(supabase, competitionNames, nationalityCod
       .select('player_uid, player_name, nationality_norm, competition_name, club_name, appearances, goals, assists, minutes, seasons')
       .in('competition_name', competitionNames)
       .gt(metric === 'goals' ? 'goals' : 'appearances', 0);
+
+    // One club across several competitions — a team page's "all competitions"
+    // or a chosen subset. The rows still fold per player below, so a player's
+    // league and cup appearances for that club add up into one total.
+    if (clubName) query = query.eq('club_name', clubName);
 
     if (nationalityCodes) {
       const codes = Array.isArray(nationalityCodes) ? nationalityCodes : [nationalityCodes];
@@ -1168,17 +1173,42 @@ exports.handler = async (event) => {
     // handles the older laliga_club_X form; this one covers all 313 clubs,
     // including every English club outside the top flight, which the older
     // form has no prefix for.
-    else if (categoryId && /^team_[a-z0-9-]+_[a-z0-9-]+$/.test(categoryId)) {
+    // TEAM SCOPES — the vocabulary the team pages and the daily use.
+    //   team_<slug>_<comp>                  one club, one competition
+    //   team_<slug>_<comp>+<comp>           one club, a chosen subset
+    //   team_<slug>_all                     one club, every competition
+    //
+    // The `+` has to be in the pattern or a subset id never reaches here and
+    // comes back as "unknown scope". And `_all` resolves with competitionName
+    // null, which the old single-competition fetch turned into
+    // .eq('competition_name', null) — a query that matches nothing. Launching
+    // Bullseye from a team page sends `_all`, so that was every one of them.
+    else if (categoryId && /^team_[a-z0-9-]+_[a-z0-9-]+(?:\+[a-z0-9-]+)*$/.test(categoryId)) {
       const scope = teams.resolve(categoryId);
       if (!scope) {
         return respond(400, { error: `Unknown team scope: ${categoryId}` });
       }
-      competition = scope.competitionName;
-      categoryName = `${scope.teamName} (${scope.competitionName})`;
+
+      // One list, however the scope spelled it, so there is no branch that
+      // only runs sometimes.
+      let compNames = scope.competitionNames
+        || (scope.competitionName ? [scope.competitionName] : null);
+      if (!compNames) {
+        const t = scope.slug ? teams.bySlug(scope.slug) : null;
+        compNames = (t && t.competitions) ? t.competitions.slice() : null;
+      }
+      if (!compNames || !compNames.length) {
+        return respond(400, { error: `No competitions for scope: ${categoryId}` });
+      }
+
+      competition = compNames[0];
+      categoryName = compNames.length === 1
+        ? `${scope.teamName} (${compNames[0]})`
+        : `${scope.teamName} (${compNames.length} competitions)`;
       categoryFlag = '\uD83C\uDFDF\uFE0F';
       // clubName must be the string the database stores, not the display name:
       // "Sheffield Weds", not "Sheffield Wednesday".
-      players = await fetchFromView(supabase, competition, scope.clubName, null, metric);
+      players = await fetchFromViewMultiComp(supabase, compNames, null, metric, scope.clubName);
     }
 
     // DYNAMIC LEAGUE CLUB CATEGORIES (La Liga, Serie A, Bundesliga)

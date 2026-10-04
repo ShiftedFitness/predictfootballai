@@ -2,7 +2,8 @@
  * whoami_start.js — "Who Am I?" Football Trivia Game
  *
  * Endpoints (via `action` field in POST body):
- *   start_game    → Pick a random player for a scope, return blanks + clues
+ *   start_game    → Pick a player for a scope, return blanks + clues
+ *                   (`daily: true` = the same player all day, per scope)
  *   check_answer  → Check a user's guess against the hidden player
  */
 
@@ -819,9 +820,32 @@ exports.handler = async (event) => {
 
       console.log(`[whoami_start] Difficulty "${difficulty || 'any'}" → pool size: ${pool.length}`);
 
-      // Pick a random player from the filtered pool
-      const randomIndex = Math.floor(Math.random() * pool.length);
-      const player = pool[randomIndex];
+      // Pick a player.
+      //
+      // `daily: true` makes the choice deterministic per scope per UTC day, so
+      // the mystery player on a club page is the same for everybody until
+      // midnight and survives a reload — a daily challenge nobody can reroll.
+      //
+      // The seed is hashed SERVER-SIDE from the scope and the date. Sending a
+      // seed the browser could compute would let anyone ask for tomorrow's
+      // date, and the whole point of the encrypted id is that the answer never
+      // leaves this function.
+      //
+      // Sorting the pool first matters: `eligible` arrives in whatever order
+      // the query returned, which is not guaranteed stable between calls, and
+      // an index into an unstable list is not deterministic.
+      const { daily } = body;
+      let player;
+      if (daily) {
+        const ordered = pool.slice().sort((a, b) =>
+          String(a.player_uid).localeCompare(String(b.player_uid)));
+        const day = new Date().toISOString().slice(0, 10);   // UTC
+        const digest = crypto.createHmac('sha256', ENCRYPTION_SECRET)
+          .update(`${scope.id}|${day}`).digest();
+        player = ordered[digest.readUInt32BE(0) % ordered.length];
+      } else {
+        player = pool[Math.floor(Math.random() * pool.length)];
+      }
 
       // Build blanks pattern
       const blanks = buildBlanks(player.name);
@@ -956,15 +980,20 @@ exports.handler = async (event) => {
 
       const actualName = fixMojibake(playerData.player_name);
       const normalizedActual = normalize(actualName);
-      const normalizedGuess = normalize(guess);
+      // Giving up sends no guess, which the guard above explicitly allows —
+      // so everything below has to cope with its absence rather than assume a
+      // string. `guess.trim()` did not, and threw before the reveal was built.
+      const rawGuess = typeof guess === 'string' ? guess : '';
+      const normalizedGuess = normalize(rawGuess);
 
       // Fuzzy match: compare normalized forms
       // Also try matching against individual name parts (first name, last name)
       const actualParts = normalizedActual.split(/\s+/);
       const guessParts = normalizedGuess.split(/\s+/);
 
-      // Exact full-name match (normalized)
-      let isCorrect = normalizedGuess === normalizedActual;
+      // Exact full-name match (normalized). An empty guess is never correct,
+      // or giving up would be scored as getting it right.
+      let isCorrect = !!normalizedGuess && normalizedGuess === normalizedActual;
 
       // If not exact, try matching with reordered parts
       // (e.g. "Bergkamp Dennis" should match "Dennis Bergkamp")
@@ -989,7 +1018,7 @@ exports.handler = async (event) => {
 
       const result = {
         correct: isCorrect,
-        guess: guess.trim(),
+        guess: rawGuess.trim(),
       };
 
       if (isCorrect || giveUp) {

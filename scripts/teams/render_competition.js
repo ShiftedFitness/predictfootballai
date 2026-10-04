@@ -358,6 +358,7 @@ window.TS_COMPETITION = ${JSON.stringify({ slug: comp.slug, name: comp.name, sco
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/js/ts-auth.js"></script>
 <script src="/js/ts-data.js"></script>
+<script src="/js/ts-footer.js"></script>
 <script src="/js/ts-nav.js"></script>
 <script>
   (async function () {

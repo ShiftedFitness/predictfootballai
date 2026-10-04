@@ -387,6 +387,7 @@ window.TS_MATCHUP = ${JSON.stringify({ slug: m.slug, a: A.slug, b: B.slug })};
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/js/ts-auth.js"></script>
 <script src="/js/ts-data.js"></script>
+<script src="/js/ts-footer.js"></script>
 <script src="/js/ts-nav.js"></script>
 <script>
   (async function () {

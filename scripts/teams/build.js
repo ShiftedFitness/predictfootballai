@@ -38,7 +38,8 @@ const { createClient } = require('@supabase/supabase-js');
 const db = createClient(process.env.Supabase_Project_URL, process.env.Supabase_Service_Role,
                         { auth: { persistSession: false } });
 const teams = require(path.join(ROOT, 'netlify', 'functions', '_teams.js'));
-const { render } = require('./render');
+const { render, shield } = require('./render');
+const ALIASES = require(path.join(ROOT, 'data', 'teams', 'aliases.json'));
 const colours = require('./colours');
 
 const SITE = 'https://telestats.net';
@@ -87,47 +88,142 @@ async function page(table, cols) {
  * 313 URLs being orphans. Grouped by competition because that is how a person
  * looks for a club, and it puts the four English tiers in ladder order.
  */
+/**
+ * The Teams hub — "find your club", not a sitemap.
+ *
+ * It used to be a search box over eight competition sections, each listing
+ * every club that had ever played in that competition. A club in four
+ * divisions appeared four times, the page ran to several hundred links, and
+ * the grouping quietly implied current league membership: Oldham sat under
+ * "Premier League" because of 1990s records.
+ *
+ * Now: one country per club, so every club appears exactly ONCE in the
+ * unfiltered directory; competitions are a filter over that, labelled as
+ * records rather than tables; and the fastest route — search — is the first
+ * thing on the page.
+ *
+ * Everything stays in the server-rendered HTML. The filtering only hides rows
+ * that are already there, so a visitor without JavaScript sees all 355 clubs
+ * and every link remains crawlable.
+ */
+const COUNTRIES = [
+  { code: 'ENG', name: 'England', comps: ['Premier League', 'Championship', 'League One', 'League Two', 'FA Cup', 'EFL Cup'] },
+  { code: 'ESP', name: 'Spain', comps: ['La Liga', 'Segunda División'] },
+  { code: 'ITA', name: 'Italy', comps: ['Serie A'] },
+  { code: 'GER', name: 'Germany', comps: ['Bundesliga'] },
+  { code: 'FRA', name: 'France', comps: ['Ligue 1'] },
+];
+
+/**
+ * Editorially featured, and labelled as such.
+ *
+ * Not "most popular": nothing here measures that, and a made-up ranking on a
+ * statistics site is the one thing this page must not do. Spread across the
+ * five countries so the hub does not read as an English site with extras.
+ */
+/**
+ * How many clubs a country shows before "Show all".
+ *
+ * England alone is 114 rows; all five countries ran the page to 15,700px, or
+ * about eighteen phone screens of links. The rest are STILL IN THE HTML and
+ * still crawlable — they are hidden with the hidden attribute, which is what
+ * the country and competition filters already use, not removed from the
+ * document. A visitor without JavaScript sees all 355, because the capping
+ * only happens once the script runs.
+ */
+const CAP = 24;
+
+const FEATURED = [
+  'arsenal', 'liverpool', 'manchester-united', 'chelsea',
+  'barcelona', 'real-madrid', 'bayern-munich', 'juventus',
+];
+
+/** Lowercase, accents removed — the same folding the search applies to a query. */
+function fold(v) {
+  return String(v || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+}
+
 function renderHub(rows) {
-  const GROUPS = [
-    ['Premier League', 'ENG'], ['Championship', 'ENG'], ['League One', 'ENG'], ['League Two', 'ENG'],
-    ['La Liga', 'ESP'], ['Serie A', 'ITA'], ['Bundesliga', 'GER'], ['Ligue 1', 'FRA'],
-  ];
-  const seen = new Set();
-  const sections = GROUPS.map(([comp]) => {
+  const bySlug = new Map(rows.map((r) => [r.team.slug, r]));
+  const total = rows.length;
+
+  // ── the directory: one country per club, alphabetical ───────────────────
+  const sections = COUNTRIES.map((country) => {
     const members = rows
-      .filter((r) => r.team.competitions.includes(comp))
-      .sort((a, b) => a.team.name.localeCompare(b.team.name));
+      .filter((r) => r.team.country === country.code)
+      .sort((a, b) => a.team.name.localeCompare(b.team.name, 'en'));
     if (!members.length) return '';
+
     const links = members.map((m) => {
-      seen.add(m.team.slug);
-      const c = colours.forTeam(m.team);
-      // data-name carries a lowercase, accent-folded copy so the search box can
-      // match "malaga" against "Málaga" without refolding 312 names per keystroke.
-      const key = m.team.name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-      return `<a href="/teams/${esc(m.team.slug)}/" data-name="${esc(key)}" ` +
-             `style="--club:${c.primary}"><i></i>${esc(m.team.name)}</a>`;
-    }).join('\n        ');
-    return `<section data-comp>
-  <h2>${esc(comp)}</h2>
-  <p class="count">${members.length} clubs</p>
-  <div class="grid">
-        ${links}
+      const t = m.team;
+      const c = colours.forTeam(t);
+      // Everything the search can match on, folded once here rather than 355
+      // times per keystroke: the club's name, and its real-world nicknames.
+      const keys = [fold(t.name), ...(ALIASES[t.slug] || [])].join('|');
+      // Which competitions it has records in, so the filter can hide rows
+      // without a second copy of the club list.
+      const comps = t.competitions.map((x) => fold(x)).join('|');
+      return `<li><a href="/teams/${esc(t.slug)}/" data-k="${esc(keys)}" ` +
+        `data-c="${esc(comps)}" style="--club:${c.primary}"><i></i>` +
+        `<span class="cn">${esc(t.name)}</span>` +
+        `<span class="cm">${esc(String(t.players))}</span></a></li>`;
+    }).join('\n          ');
+
+    const chips = country.comps
+      .filter((comp) => members.some((m) => m.team.competitions.includes(comp)))
+      .map((comp) => `<button type="button" class="cchip" data-comp="${esc(fold(comp))}"
+              >${esc(comp)}</button>`).join('\n            ');
+
+    return `<section class="cblock" data-country="${esc(country.code)}">
+  <div class="chead">
+    <h3>${esc(country.name)}</h3>
+    <span class="ccount">${members.length} clubs</span>
   </div>
+  ${chips ? `<div class="cfilter" role="group" aria-label="${esc(country.name)} competitions">
+    <button type="button" class="cchip on" data-comp="">All</button>
+            ${chips}
+  </div>` : ''}
+  <ul class="clist">
+          ${links}
+  </ul>
+  ${members.length > CAP ? `<button type="button" class="showall" data-n="${members.length}"
+    >Show all ${members.length} ${esc(country.name)} clubs</button>` : ''}
 </section>`;
   }).filter(Boolean).join('\n\n');
 
-  const title = 'Football Team Quizzes & Trivia Games by Club | TeleStats';
+  // ── featured ────────────────────────────────────────────────────────────
+  const featured = FEATURED.map((slug) => {
+    const r = bySlug.get(slug);
+    if (!r) return '';
+    const t = r.team;
+    const c = colours.forTeam(t);
+    return `<li><a href="/teams/${esc(t.slug)}/" style="--club:${c.primary}">
+            ${shield(t, c)}
+            <span class="fn">${esc(t.name)}</span>
+            <span class="fm">${Number(t.players).toLocaleString('en-GB')} players</span>
+          </a></li>`;
+  }).filter(Boolean).join('\n        ');
+  const title = 'Football Teams: Player Stats, Records & Games | TeleStats';
   const description =
-    `Pick your club and play football quizzes built from real data. ` +
-    `${rows.length} teams across the Premier League, Championship, League One, League Two, ` +
-    `La Liga, Serie A, Bundesliga and Ligue 1.`;
+    `Explore football player records, appearances, goals and games for ${total} clubs. ` +
+    `Find your team and discover football history on TeleStats.`;
 
   const jsonLd = {
     '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'TeleStats', item: SITE },
-      { '@type': 'ListItem', position: 2, name: 'Teams', item: `${SITE}/teams/` },
+    '@graph': [
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'TeleStats', item: SITE },
+          { '@type': 'ListItem', position: 2, name: 'Teams', item: `${SITE}/teams/` },
+        ],
+      },
+      {
+        '@type': 'CollectionPage',
+        name: title,
+        description,
+        url: `${SITE}/teams/`,
+      },
     ],
   };
 
@@ -145,45 +241,175 @@ function renderHub(rows) {
 <meta property="og:description" content="${esc(description)}">
 <meta property="og:url" content="${SITE}/teams/">
 <meta name="twitter:card" content="summary">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/telestats-theme.css">
 <style>
-  body { margin: 0; }
-  .wrap { max-width: 1000px; margin: 0 auto; padding: 0 18px 50px; }
-  .ts-header { border-bottom: 1px solid var(--rule, #24313A); background: var(--bg-card, #131A20); }
-  .ts-header .inner { max-width: 1000px; margin: 0 auto; padding: 11px 18px;
-                      display: flex; align-items: center; gap: 18px;  flex-wrap: wrap;}
-  .ts-header .brand { font-weight: 700; letter-spacing: .04em; color: var(--text-primary, #F2F5F7);
-                      text-decoration: none; font-family: 'Space Mono', ui-monospace, monospace; }
-  .ts-header nav { display: flex; gap: 15px; flex-wrap: wrap; }
-  .ts-header nav a { font-size: .82rem; color: var(--text-secondary, #9FB0BC); text-decoration: none; }
-  nav.crumbs { margin-top: 16px; }
-  nav.crumbs { font-size: .8rem; color: var(--text-secondary); margin-bottom: 14px; }
-  nav.crumbs a { color: var(--accent); text-decoration: none; }
-  h1 { font-size: 1.7rem; margin: 0 0 6px; }
-  .lede { color: var(--text-secondary); margin: 0 0 26px; max-width: 60ch; }
-  h2 { font-size: 1.1rem; margin: 26px 0 2px; }
-  .count { font-size: .78rem; color: var(--text-muted); margin: 0 0 10px; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 6px; }
-  .grid a { display: flex; align-items: center; gap: 9px; font-size: .85rem;
-            padding: 7px 11px; border: 1px solid var(--rule, #24313A); border-radius: 6px;
-            color: var(--text-primary, #F2F5F7); text-decoration: none;
-            transition: border-color .12s, background .12s; }
-  /* A bar of the club's colour rather than a dot: at 4px it reads as the club
-     without pretending to be a badge. */
-  .grid a i { width: 4px; align-self: stretch; min-height: 17px; border-radius: 2px;
-              background: var(--club, #4A5A66); flex: 0 0 auto; }
-  .grid a:hover { border-color: var(--club, var(--accent)); background: rgba(255,255,255,.03); }
+  /* The same tokens as a club page, so the hub belongs to the same product. */
+  :root {
+    --bg: #0A0E11; --s0: #090C0F; --s1: #11161B; --s2: #161C23;
+    --line: rgba(255,255,255,.07); --line-2: rgba(255,255,255,.12);
+    --fg: #EEF3F7; --fg-2: #9FAEBB; --fg-3: #6B7A87;
+    --cyan: var(--accent-cyan, #00E5FF);
+    --r: 12px;
+    --mono: 'Space Mono', ui-monospace, SFMono-Regular, monospace;
+  }
+  body { margin: 0; background: var(--bg); color: var(--fg);
+         font-family: Inter, system-ui, -apple-system, sans-serif; }
+  .wrap { max-width: 920px; margin: 0 auto; padding: 0 20px 64px; }
+  .vh { position: absolute; width: 1px; height: 1px; overflow: hidden;
+        clip: rect(0 0 0 0); white-space: nowrap; }
 
-  .find { margin: 0 0 22px; }
-  .find input { width: 100%; box-sizing: border-box; padding: 12px 15px; font-size: .95rem;
-                border-radius: 9px; border: 1px solid var(--rule, #24313A);
-                background: var(--bg-card, #131A20); color: var(--text-primary, #F2F5F7);
-                font-family: inherit; }
-  .find input:focus { outline: none; border-color: var(--accent, #00E5FF); }
-  .find .hint { font-size: .76rem; color: var(--text-muted); margin: 7px 2px 0; min-height: 1.1em; }
-  section[hidden] { display: none; }
-  footer { margin-top: 40px; font-size: .78rem; color: var(--text-muted); }
-  footer a { color: var(--accent); }
+  .ts-header { border-bottom: 1px solid var(--line); background: var(--s1); }
+  .ts-header .inner { max-width: 920px; margin: 0 auto; padding: 11px 20px;
+                      display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+  .ts-header .brand { font-weight: 700; letter-spacing: .04em; color: var(--fg);
+                      text-decoration: none; font-family: var(--mono); }
+  .ts-header nav { display: flex; gap: 15px; flex-wrap: wrap; }
+  .ts-header nav a { font-size: .82rem; color: var(--fg-2); text-decoration: none; }
+  nav.crumbs { font-size: .76rem; color: var(--fg-3); margin: 16px 0 14px; }
+  nav.crumbs a { color: var(--fg-2); text-decoration: none; }
+
+  /* ── hero ───────────────────────────────────────────────────────────────
+     The editorial line is the display type; the H1 underneath it is the one
+     that has to say what this page IS. Both are real text — nothing is hidden
+     from anybody, and the search box is above the fold on a phone. */
+  .hero { padding: 2px 0 0; margin-bottom: 22px; }
+  .kicker { font-family: var(--mono); font-size: clamp(1.5rem, 5.4vw, 2.1rem);
+            font-weight: 700; letter-spacing: -.03em; line-height: 1.12; margin: 0 0 8px; }
+  .kicker em { font-style: normal; color: var(--cyan); }
+  h1 { font-size: .95rem; font-weight: 600; color: var(--fg-2); margin: 0 0 6px;
+       letter-spacing: 0; }
+  .lede { color: var(--fg-3); font-size: .84rem; margin: 0 0 16px; max-width: 60ch;
+          line-height: 1.5; }
+  .lede b { color: var(--fg-2); font-weight: 600; }
+
+  /* ── search ─────────────────────────────────────────────────────────────
+     The main action. One input, a live list of matches, Enter goes to the top
+     one. No request: every club is already on the page. */
+  .find { position: relative; margin: 0 0 8px; }
+  .find input { width: 100%; box-sizing: border-box; padding: 15px 44px 15px 46px;
+                font: inherit; font-size: 1rem; min-height: 54px; border-radius: 12px;
+                border: 1px solid var(--line-2); background: var(--s1); color: var(--fg); }
+  .find input::placeholder { color: var(--fg-3); }
+  .find input:focus { outline: none; border-color: var(--cyan); }
+  .find .mag { position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+               width: 18px; height: 18px; color: var(--fg-3); pointer-events: none; }
+  .find .clear { position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+                 width: 36px; height: 36px; display: none; align-items: center;
+                 justify-content: center; border: 0; border-radius: 50%; cursor: pointer;
+                 background: transparent; color: var(--fg-2); font-size: 20px; line-height: 1; }
+  .find .clear:hover { color: var(--fg); background: rgba(255,255,255,.07); }
+  .find.has .clear { display: flex; }
+  .sugg { position: absolute; z-index: 20; top: calc(100% + 6px); left: 0; right: 0;
+          margin: 0; padding: 6px; list-style: none; border-radius: 12px;
+          background: var(--s2); border: 1px solid var(--line-2);
+          box-shadow: 0 16px 40px rgba(0,0,0,.62); max-height: 320px; overflow-y: auto; }
+  .sugg[hidden] { display: none; }
+  .sugg a { display: flex; align-items: center; gap: 10px; padding: 10px 11px;
+            min-height: 44px; box-sizing: border-box; border-radius: 8px;
+            text-decoration: none; color: var(--fg); font-size: .9rem; }
+  .sugg li.on a, .sugg a:hover { background: rgba(255,255,255,.07); }
+  .sugg i { width: 4px; align-self: stretch; min-height: 20px; border-radius: 2px;
+            background: var(--club, var(--fg-3)); flex: 0 0 auto; }
+  .sugg .where { margin-left: auto; font-size: .72rem; color: var(--fg-3); }
+  .examples { font-size: .76rem; color: var(--fg-3); margin: 0 0 26px; }
+  .examples b { color: var(--fg-2); font-weight: 500; }
+  .nores { font-size: .84rem; color: var(--fg-2); padding: 12px 2px 0; }
+  .nores[hidden] { display: none; }
+
+  h2 { font-family: var(--mono); font-size: 1rem; font-weight: 700; margin: 0 0 3px; }
+  .sublede { color: var(--fg-3); font-size: .78rem; margin: 0 0 14px; }
+  section.band { margin-bottom: 34px; }
+
+  /* ── featured ───────────────────────────────────────────────────────────
+     Eight clubs with a shield each. The shields stop here: 355 of them would
+     be 355 inline SVGs on one page to decorate a list of links. */
+  ul.feat { list-style: none; padding: 0; margin: 0; display: grid; gap: 9px;
+            grid-template-columns: repeat(4, 1fr); }
+  ul.feat a { display: flex; flex-direction: column; align-items: center; gap: 5px;
+              padding: 15px 10px 13px; border-radius: var(--r); text-decoration: none;
+              color: var(--fg); background: var(--s1); border: 1px solid var(--line);
+              transition: border-color .14s, background .14s, transform .14s; }
+  ul.feat a:hover { background: var(--s2); transform: translateY(-2px);
+                    border-color: color-mix(in srgb, var(--club) 60%, var(--line-2)); }
+  ul.feat .crest { width: 34px; height: 39px; }
+  ul.feat .fn { font-family: var(--mono); font-size: .8rem; font-weight: 700;
+                text-align: center; line-height: 1.25; }
+  ul.feat .fm { font-size: .68rem; color: var(--fg-3); }
+
+  /* ── directory ──────────────────────────────────────────────────────────
+     Rows, not cards. 355 cards is the mistake this page already made once in
+     a different shape. */
+  .ctabs { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 16px; }
+  .ctab { font: inherit; font-size: .82rem; font-weight: 600; padding: 8px 14px;
+          min-height: 38px; border-radius: 999px; cursor: pointer;
+          background: var(--s1); color: var(--fg-2); border: 1px solid var(--line); }
+  .ctab:hover { color: var(--fg); border-color: var(--line-2); }
+  .ctab.on { background: var(--cyan); color: #06181C; border-color: var(--cyan); }
+  .ctab:focus-visible, .cchip:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+
+  .cblock { margin-bottom: 26px; }
+  .cblock[hidden] { display: none; }
+  .chead { display: flex; align-items: baseline; gap: 10px; margin-bottom: 8px; }
+  .chead h3 { font-family: var(--mono); font-size: .92rem; margin: 0; }
+  .ccount { font-size: .72rem; color: var(--fg-3); }
+  .cfilter { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 11px; }
+  .cchip { font: inherit; font-size: .75rem; padding: 6px 11px; min-height: 32px;
+           border-radius: 7px; cursor: pointer; background: transparent;
+           color: var(--fg-3); border: 1px solid var(--line); }
+  .cchip:hover { color: var(--fg); }
+  .cchip.on { background: rgba(255,255,255,.09); color: var(--fg); border-color: var(--line-2); }
+  .histnote { font-size: .72rem; color: var(--fg-3); margin: 0 0 10px; }
+
+  ul.clist { list-style: none; padding: 0; margin: 0;
+             columns: 3; column-gap: 18px; }
+  ul.clist li { break-inside: avoid; }
+  ul.clist a { display: flex; align-items: center; gap: 9px; padding: 7px 2px;
+               min-height: 34px; box-sizing: border-box; font-size: .85rem;
+               color: var(--fg); text-decoration: none;
+               border-bottom: 1px solid var(--line); }
+  ul.clist a:hover { color: var(--cyan); }
+  ul.clist a[hidden] { display: none; }
+  ul.clist i { width: 3px; align-self: stretch; min-height: 18px; border-radius: 2px;
+               background: var(--club, var(--fg-3)); flex: 0 0 auto; }
+  ul.clist .cn { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  ul.clist .cm { margin-left: auto; font-size: .7rem; color: var(--fg-3);
+                 font-variant-numeric: tabular-nums; }
+
+  .showall { display: block; width: 100%; margin-top: 10px; font: inherit; font-size: .8rem;
+             font-weight: 600; padding: 10px; min-height: 42px; cursor: pointer;
+             border-radius: 9px; background: transparent; color: var(--fg-2);
+             border: 1px solid var(--line-2); }
+  .showall:hover { color: var(--fg); border-color: var(--fg-3); }
+  .showall[hidden] { display: none; }
+  .showall:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+
+  footer.page { margin-top: 10px; padding-top: 18px; font-size: .75rem; color: var(--fg-3);
+                border-top: 1px solid var(--line); line-height: 1.7; }
+  footer.page a { color: var(--fg-2); }
+  footer.page a:hover { color: var(--cyan); }
+
+  @media (max-width: 860px) { ul.clist { columns: 2; } }
+  @media (max-width: 620px) {
+    .wrap { padding: 0 14px 48px; }
+    nav.crumbs { margin: 10px 0 9px; }
+    .kicker { font-size: clamp(1.35rem, 7vw, 1.8rem); }
+    h1 { font-size: .86rem; }
+    .lede { font-size: .79rem; margin-bottom: 13px; }
+    .find input { font-size: 16px; /* iOS zooms anything smaller on focus */
+                  padding: 14px 42px 14px 42px; min-height: 50px; }
+    .examples { margin-bottom: 22px; }
+    ul.feat { grid-template-columns: repeat(2, 1fr); }
+    ul.clist { columns: 1; }
+    ul.clist a { min-height: 40px; }
+    section.band { margin-bottom: 28px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    ul.feat a { transition: none; }
+    ul.feat a:hover { transform: none; }
+  }
 </style>
 </head>
 <body>
@@ -204,69 +430,266 @@ function renderHub(rows) {
 </header>
 
 <div class="wrap">
-<nav class="crumbs"><a href="/">TeleStats</a> › Teams</nav>
-<h1>Football Games by Team</h1>
-<p class="lede">${esc(description)}</p>
+<nav class="crumbs"><a href="/">TeleStats</a> &rsaquo; Teams</nav>
 
-<div class="find">
-  <input id="teamFind" type="search" autocomplete="off" spellcheck="false"
-         placeholder="Find your club — try Malaga, Sheff, Argyle…"
-         aria-label="Search for a club">
-  <p class="hint" id="findHint"></p>
+<div class="hero">
+  <p class="kicker">Your club. Your history. <em>Your games.</em></p>
+  <h1>Football teams: player stats, records and games</h1>
+  <p class="lede">Player records, appearances, goals and five free games for
+    <b>${total} clubs</b> across England, Spain, Italy, Germany and France.</p>
+
+  <div class="find" id="findBox">
+    <svg class="mag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+      stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    <input id="teamFind" type="search" autocomplete="off" autocorrect="off"
+           autocapitalize="off" spellcheck="false" enterkeyhint="go"
+           role="combobox" aria-expanded="false" aria-autocomplete="list"
+           aria-controls="findSugg" placeholder="Find your club&hellip;"
+           aria-label="Search for a football club">
+    <button type="button" class="clear" id="findClear" aria-label="Clear search">&times;</button>
+    <ul class="sugg" id="findSugg" role="listbox" aria-label="Matching clubs" hidden></ul>
+  </div>
+  <p class="examples">Try <b>Arsenal</b>, <b>M&aacute;laga</b>, <b>Man Utd</b> or <b>Barcelona</b></p>
+  <p class="nores" id="findNone" hidden></p>
 </div>
 
-${sections}
+<section class="band">
+  <h2>Featured clubs</h2>
+  <p class="sublede">A few to start with &mdash; every club below has the same records and games.</p>
+  <ul class="feat">
+        ${featured}
+  </ul>
+</section>
 
-<footer>
-  <a href="/daily/">Today's challenge</a> ·
-  <a href="/games/">All games</a> ·
-  <a href="/ask/">Ask TeleStats a question</a> ·
-  <a href="/tools/data.html">Dataset coverage</a>
+<section class="band">
+  <h2>All ${total} clubs</h2>
+  <p class="sublede">Grouped by country, A&ndash;Z. The number beside each club is how many
+    of its players we hold records for.</p>
+
+  <div class="ctabs" role="group" aria-label="Filter clubs by country">
+    <button type="button" class="ctab on" data-country="">All countries</button>
+    ${COUNTRIES.map((c) => `<button type="button" class="ctab" data-country="${esc(c.code)}"
+      >${esc(c.name)}</button>`).join('\n    ')}
+  </div>
+  <p class="histnote">Competition filters show clubs we hold <strong>records</strong> for in that
+    competition at any point in its history &mdash; not the current league table.</p>
+
+${sections}
+</section>
+
+<footer class="page">
+  Player statistics compiled from official league and competition sources.
+  <a href="/daily/">Today's challenge</a> &middot;
+  <a href="/games/">All games</a> &middot;
+  <a href="/competitions/">Browse by competition</a> &middot;
+  <a href="/ask/">Ask TeleStats</a> &middot;
+  <a href="/tools/data.html">Data coverage</a>
 </footer>
 </div><!-- /wrap -->
 <script>
 (function () {
   'use strict';
   var input = document.getElementById('teamFind');
-  var hint = document.getElementById('findHint');
   if (!input) return;
-  var links = [].slice.call(document.querySelectorAll('.grid a'));
-  var sections = [].slice.call(document.querySelectorAll('section[data-comp]'));
+  var box = document.getElementById('findBox');
+  var sugg = document.getElementById('findSugg');
+  var none = document.getElementById('findNone');
+  var clear = document.getElementById('findClear');
+  var tabs = [].slice.call(document.querySelectorAll('.ctab'));
+  var blocks = [].slice.call(document.querySelectorAll('.cblock'));
+  var links = [].slice.call(document.querySelectorAll('ul.clist a'));
 
-  function apply() {
-    // Accent-folded, so "malaga" finds "Málaga" and "koln" finds "Köln". The
-    // clubs most likely to be typed without their accents are exactly the ones
-    // a naive match would hide.
-    var q = input.value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
-    var shown = 0;
-    links.forEach(function (a) {
-      var hit = !q || a.dataset.name.indexOf(q) !== -1;
-      a.hidden = !hit;
-      if (hit) shown++;
-    });
-    // A competition with nothing left in it hides its heading too, or the page
-    // becomes a column of empty league names.
-    sections.forEach(function (sec) {
-      sec.hidden = !sec.querySelector('.grid a:not([hidden])');
-    });
-    hint.textContent = !q ? ''
-      : shown === 0 ? 'No club matches \u201C' + input.value.trim() + '\u201D.'
-      : shown === 1 ? '1 club' : shown + ' clubs';
+  // Every row, read ONCE. data-k already holds the folded name and the
+  // maintained aliases, so a keystroke is a substring test over an array that
+  // was built at load, not 355 string normalisations.
+  var ROWS = links.map(function (a) {
+    return {
+      el: a,
+      href: a.getAttribute('href'),
+      name: a.querySelector('.cn').textContent,
+      keys: a.getAttribute('data-k') || '',
+      comps: a.getAttribute('data-c') || '',
+      country: a.closest('.cblock').getAttribute('data-country'),
+      block: a.closest('.cblock'),
+    };
+  });
+  var COUNTRY_NAMES = {};
+  blocks.forEach(function (b) {
+    COUNTRY_NAMES[b.getAttribute('data-country')] = b.querySelector('h3').textContent;
+  });
+
+  function fold(v) {
+    return String(v || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
   }
 
-  input.addEventListener('input', apply);
-  // Enter goes straight to the top match — the point is to reach one club fast.
-  input.addEventListener('keydown', function (e) {
-    if (e.key !== 'Enter') return;
-    var visible = links.filter(function (a) { return !a.hidden; });
-    if (visible.length) window.location.href = visible[0].getAttribute('href');
+  var country = '';          // '' = every country
+  var comps = {};            // country code -> folded competition, '' = all
+  var active = -1;           // highlighted suggestion
+
+  /** Matches, best first: a name that STARTS with the query beats one that merely contains it. */
+  function search(q) {
+    if (!q) return [];
+    var starts = [], has = [];
+    for (var i = 0; i < ROWS.length; i++) {
+      var parts = ROWS[i].keys.split('|');
+      var best = -1;
+      for (var j = 0; j < parts.length; j++) {
+        var at = parts[j].indexOf(q);
+        if (at === -1) continue;
+        if (at === 0) { best = 0; break; }
+        if (best === -1) best = at;
+      }
+      if (best === 0) starts.push(ROWS[i]);
+      else if (best > 0) has.push(ROWS[i]);
+    }
+    return starts.concat(has);
+  }
+
+  function renderSuggestions(hits, q) {
+    if (!q) { hide(); return; }
+    if (!hits.length) {
+      hide();
+      none.hidden = false;
+      none.textContent = 'No club matches “' + input.value.trim() +
+        '”. Try a shorter word, or browse by country below.';
+      return;
+    }
+    none.hidden = true;
+    sugg.innerHTML = hits.slice(0, 8).map(function (r, i) {
+      var club = r.el.style.getPropertyValue('--club');
+      return '<li role="option" aria-selected="' + (i === 0) + '"' + (i === 0 ? ' class="on"' : '') +
+        '><a href="' + r.href + '" style="--club:' + club + '" tabindex="-1">' +
+        '<i></i><span>' + r.name + '</span>' +
+        '<span class="where">' + (COUNTRY_NAMES[r.country] || '') + '</span></a></li>';
+    }).join('');
+    sugg.hidden = false;
+    input.setAttribute('aria-expanded', 'true');
+    active = 0;
+  }
+
+  function hide() {
+    sugg.hidden = true;
+    sugg.innerHTML = '';
+    input.setAttribute('aria-expanded', 'false');
+    none.hidden = true;
+    active = -1;
+  }
+
+  function move(step) {
+    var items = sugg.querySelectorAll('li');
+    if (!items.length) return;
+    active = (active + step + items.length) % items.length;
+    for (var i = 0; i < items.length; i++) {
+      items[i].classList.toggle('on', i === active);
+      items[i].setAttribute('aria-selected', String(i === active));
+    }
+    items[active].scrollIntoView({ block: 'nearest' });
+  }
+
+  /**
+   * The directory underneath, filtered by country and competition, and capped.
+   *
+   * One pass decides both things per row, so the cap counts MATCHING rows
+   * rather than positions in the markup — otherwise filtering to a competition
+   * with 90 clubs would still show the first 24 slots of the unfiltered list.
+   */
+  var CAP = 24;
+  var expanded = {};
+
+  function paintDirectory() {
+    blocks.forEach(function (b) {
+      var code = b.getAttribute('data-country');
+      b.hidden = !!country && country !== code;
+    });
+
+    var seen = {};
+    ROWS.forEach(function (r) {
+      var want = comps[r.country] || '';
+      var matches = !want || r.comps.split('|').indexOf(want) !== -1;
+      if (!matches) { r.el.hidden = true; return; }
+      seen[r.country] = (seen[r.country] || 0) + 1;
+      r.el.hidden = !expanded[r.country] && seen[r.country] > CAP;
+    });
+
+    blocks.forEach(function (b) {
+      var code = b.getAttribute('data-country');
+      var total = seen[code] || 0;
+      var count = b.querySelector('.ccount');
+      if (count) count.textContent = total + (total === 1 ? ' club' : ' clubs');
+      var btn = b.querySelector('.showall');
+      if (!btn) return;
+      btn.hidden = expanded[code] || total <= CAP;
+      btn.textContent = 'Show all ' + total + ' ' +
+        b.querySelector('h3').textContent + ' clubs';
+    });
+  }
+
+  document.querySelectorAll('.showall').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var code = btn.closest('.cblock').getAttribute('data-country');
+      expanded[code] = true;
+      paintDirectory();
+      // Focus the first row that was just revealed, so a keyboard user is not
+      // left where a button used to be.
+      var rows = btn.closest('.cblock').querySelectorAll('ul.clist a:not([hidden])');
+      if (rows.length > CAP) rows[CAP].focus();
+    });
   });
-  apply();
+
+  input.addEventListener('input', function () {
+    var q = fold(input.value);
+    box.classList.toggle('has', !!input.value);
+    renderSuggestions(search(q), q);
+  });
+
+  input.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowDown') { e.preventDefault(); move(1); return; }
+    if (e.key === 'ArrowUp') { e.preventDefault(); move(-1); return; }
+    if (e.key === 'Escape') { hide(); return; }
+    if (e.key !== 'Enter') return;
+    // Enter goes to the highlighted club. Reaching one club fast is the job.
+    var chosen = sugg.querySelector('li.on a');
+    if (chosen) { e.preventDefault(); window.location.href = chosen.getAttribute('href'); }
+  });
+
+  clear.addEventListener('click', function () {
+    input.value = '';
+    box.classList.remove('has');
+    hide();
+    input.focus();
+  });
+
+  document.addEventListener('click', function (e) {
+    if (!e.target.closest || !e.target.closest('.find')) hide();
+  });
+
+  tabs.forEach(function (t) {
+    t.addEventListener('click', function () {
+      country = t.getAttribute('data-country');
+      tabs.forEach(function (o) { o.classList.toggle('on', o === t); });
+      paintDirectory();
+    });
+  });
+
+  paintDirectory();   // apply the cap once the script is here to undo it
+
+  document.querySelectorAll('.cfilter').forEach(function (group) {
+    var code = group.closest('.cblock').getAttribute('data-country');
+    var chips = [].slice.call(group.querySelectorAll('.cchip'));
+    chips.forEach(function (c) {
+      c.addEventListener('click', function () {
+        comps[code] = c.getAttribute('data-comp');
+        chips.forEach(function (o) { o.classList.toggle('on', o === c); });
+        paintDirectory();
+      });
+    });
+  });
 })();
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/js/ts-auth.js"></script>
 <script src="/js/ts-data.js"></script>
+<script src="/js/ts-footer.js"></script>
 <script src="/js/ts-nav.js"></script>
 <script>
   (async function () {
@@ -276,8 +699,7 @@ ${sections}
 </script>
 <script type="application/ld+json">${JSON.stringify(jsonLd)}</script>
 </body>
-</html>
-`;
+</html>`;
 }
 
 // ─── main ───────────────────────────────────────────────────────────────────

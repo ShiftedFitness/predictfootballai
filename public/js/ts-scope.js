@@ -141,6 +141,87 @@
     return true;
   }
 
+  /**
+   * Lock the team choice to the one the link already made.
+   *
+   * A visitor who clicked "Liverpool — Starting XI" on the Liverpool page has
+   * chosen the club. Landing on a picker offering Country XI, Wonders and
+   * every other club — and, worse, being able to change to Arsenal inside a
+   * journey labelled Liverpool — makes the link look like it went nowhere.
+   * &play=1 hid that by starting immediately, but the setup screen is still
+   * reachable: without the flag, after a replay, or with the browser's Back
+   * button.
+   *
+   * So the step is replaced rather than hidden. Hiding a form field leaves the
+   * choice live underneath it; this removes the control and states what is
+   * locked, with a way out that genuinely exits the club's journey by dropping
+   * the scope from the URL.
+   *
+   *   TSScope.lockTeam?.({ container: document.getElementById('scopeGrid'),
+   *                       label: 'Liverpool (all competitions)' })
+   *
+   * CALL IT WITH OPTIONAL INVOCATION, like every other shared method on this
+   * site. A browser holding yesterday's cached ts-scope.js has no lockTeam,
+   * and in xi.html the call sits inside init()'s try block — so a plain call
+   * threw and the whole game rendered "Failed to load. Please refresh.
+   *
+   * Does nothing when no scope was requested, so a visitor who came from the
+   * Games menu keeps the full picker.
+   */
+  function lockTeam(opts) {
+    if (!opts || !opts.container) return false;
+    if (!param('scope')) return false;
+    var box = opts.container;
+    if (box.getAttribute('data-ts-locked') === '1') return true;
+
+    var name = opts.label || prettySource() || 'your team';
+
+    var row = document.createElement('div');
+    row.className = 'ts-locked-scope';
+    row.setAttribute('style',
+      'display:flex;align-items:center;gap:10px;flex-wrap:wrap;' +
+      'padding:12px 14px;border-radius:10px;background:rgba(255,255,255,.04);' +
+      'border:1px solid rgba(255,255,255,.12)');
+    row.innerHTML =
+      '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" ' +
+      'stroke-width="2" stroke-linecap="round" aria-hidden="true" style="flex:0 0 auto;opacity:.7">' +
+      '<rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>' +
+      '<strong style="font-size:.95rem">' + escapeHtml(name) + '</strong>' +
+      '<a href="' + escapeHtml(withoutScope()) + '" ' +
+      'style="margin-left:auto;font-size:.82rem;opacity:.75;color:inherit">Change team</a>';
+
+    box.parentNode.insertBefore(row, box);
+    box.style.display = 'none';
+    box.setAttribute('data-ts-locked', '1');
+    return true;
+  }
+
+  /** This page, minus anything that pins it to one club. */
+  function withoutScope() {
+    try {
+      var u = new URL(window.location.href);
+      ['scope', 'play', 'team', 'competition', 'from'].forEach(function (k) {
+        u.searchParams.delete(k);
+      });
+      return u.pathname + (u.searchParams.toString() ? '?' + u.searchParams : '');
+    } catch (_) {
+      return window.location.pathname;
+    }
+  }
+
+  function prettySource() {
+    var from = sourceTeam() || sourceCompetition();
+    return from
+      ? from.replace(/-/g, ' ').replace(/\b\w/g, function (c) { return c.toUpperCase(); })
+      : '';
+  }
+
+  function escapeHtml(v) {
+    return String(v == null ? '' : v).replace(/[&<>"]/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+    });
+  }
+
   /** Hide the page behind a "loading" panel that names what is coming. */
   function curtain() {
     if (document.getElementById('ts-curtain')) return;
@@ -236,5 +317,6 @@
                      autostart: autostart, play: play, sourceTeam: sourceTeam,
                      param: param, variant: variant,
                      sourceCompetition: sourceCompetition,
-                     curtain: curtain, uncurtain: uncurtain };
+                     curtain: curtain, uncurtain: uncurtain,
+                     lockTeam: lockTeam, withoutScope: withoutScope };
 })();

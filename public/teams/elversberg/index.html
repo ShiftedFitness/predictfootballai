@@ -192,6 +192,27 @@
   .gplay svg { width: 14px; height: 14px; transition: transform .14s; }
   a.game-go:hover .gplay svg { transform: translateX(3px); }
 
+  /* ── how to play ────────────────────────────────────────────────────────
+     A question mark in the corner of each card. The card stays one link to
+     the game; this sits above it, so a visitor who does not know what
+     "Bullseye" means can find out without being sent somewhere to read. */
+  ul.games li { position: relative; }
+  .howto { position: absolute; top: 6px; right: 6px; z-index: 2;
+           width: 30px; height: 30px; display: flex; align-items: center;
+           justify-content: center; padding: 0; border-radius: 50%; cursor: pointer;
+           border: 1px solid var(--line-2); background: rgba(10,14,17,.72);
+           color: var(--fg-2); backdrop-filter: blur(3px); }
+  .howto svg { width: 15px; height: 15px; }
+  .howto:hover { color: var(--fg); border-color: var(--fg-3); }
+  .howto:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+  .howto[aria-expanded="true"] { background: var(--cyan); color: #06181C;
+                                 border-color: var(--cyan); }
+  .howpop { position: absolute; z-index: 3; top: 40px; right: 6px; left: 6px;
+            padding: 11px 13px; border-radius: 10px; font-size: .77rem;
+            line-height: 1.45; color: var(--fg); background: var(--s2);
+            border: 1px solid var(--line-2); box-shadow: 0 10px 28px rgba(0,0,0,.55); }
+  .howpop[hidden] { display: none; }
+
   /* ── competition filter ─────────────────────────────────────────────────
      A segmented control, not a row of bright pills. The selected state is a
      filled segment; everything else is quiet. */
@@ -215,43 +236,82 @@
   .chip.all.on { box-shadow: inset 0 -2px 0 var(--club); }
   .chip:focus-visible { outline: 2px solid var(--cyan); outline-offset: 1px; }
   .sel { display: none; }
-  /* The native control, dressed. appearance:none loses the platform chevron,
-     so one is drawn in as a background SVG — in --fg-2 rather than the browser
-     default, which on a near-black field was almost invisible. The native
-     POPUP is kept: a custom listbox would be a worse, less accessible version
-     of something the phone already does well. */
-  .sel select { width: 100%; box-sizing: border-box; font: inherit; font-size: .9rem;
-                font-weight: 600; padding: 11px 40px 11px 14px; min-height: 46px;
-                border-radius: 10px; background-color: var(--s1); color: var(--fg);
-                border: 1px solid var(--line-2); cursor: pointer;
-                -webkit-appearance: none; appearance: none;
-                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%239FAEBB' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-                background-repeat: no-repeat;
-                background-position: right 14px center; }
-  .sel select:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
-  /* No reserved line. min-height held 20px open on every page for a message
-     that only appears once somebody filters — directly above the games, which
-     is the space this whole pass is trying to win back. The note only ever
-     appears after a tap, so the shift it causes is one the visitor caused. */
+  /* The phone control: a button that says what is on, and a panel of
+     checkboxes. Native checkboxes with an accent-color rather than a drawn
+     replacement — they are already accessible, already keyboard-operable, and
+     already look right once they are the brand colour. */
+  .msel { display: none; position: relative; }
+  .mselbtn { width: 100%; box-sizing: border-box; display: flex; align-items: center;
+             justify-content: space-between; gap: 10px; font: inherit; font-size: .9rem;
+             font-weight: 600; padding: 11px 14px; min-height: 46px; cursor: pointer;
+             border-radius: 10px; background: var(--s1); color: var(--fg);
+             border: 1px solid var(--line-2); text-align: left; }
+  .mselbtn svg { width: 15px; height: 15px; color: var(--fg-2); flex: 0 0 auto;
+                 transition: transform .16s; }
+  .mselbtn[aria-expanded="true"] svg { transform: rotate(180deg); }
+  .mselbtn:focus-visible, .mselpanel button:focus-visible {
+             outline: 2px solid var(--cyan); outline-offset: 2px; }
+  .mselpanel { position: absolute; z-index: 5; top: calc(100% + 6px); left: 0; right: 0;
+               padding: 6px; border-radius: 12px; background: var(--s2);
+               border: 1px solid var(--line-2); box-shadow: 0 14px 34px rgba(0,0,0,.6); }
+  .mselpanel[hidden] { display: none; }
+  .mselrow { display: flex; align-items: center; gap: 11px; padding: 10px 11px;
+             min-height: 44px; box-sizing: border-box; border-radius: 8px;
+             font-size: .87rem; cursor: pointer; }
+  .mselrow:hover { background: rgba(255,255,255,.05); }
+  .mselrow input { width: 19px; height: 19px; flex: 0 0 auto; accent-color: var(--cyan);
+                   cursor: pointer; margin: 0; }
+  .mselrow:has(input:checked) { color: var(--fg); }
+  .mselrow:has(input:focus-visible) { outline: 2px solid var(--cyan); outline-offset: -2px; }
+  .mselacts { display: flex; gap: 6px; padding: 6px 5px 2px; margin-top: 4px;
+              border-top: 1px solid var(--line); }
+  .mselacts button { flex: 1; font: inherit; font-size: .78rem; font-weight: 600;
+                     padding: 9px; min-height: 40px; cursor: pointer; border-radius: 8px;
+                     background: transparent; color: var(--fg-2);
+                     border: 1px solid var(--line-2); }
+  .mselacts button:hover { color: var(--fg); border-color: var(--fg-3); }
+
   .filter-note { font-size: .74rem; color: var(--fg-3); margin: 8px 2px 0; }
   .filter-note:empty { display: none; }
 
   /* ── mystery player ─────────────────────────────────────────────────────
      A strip, not a panel. It was the tallest thing on the page for one button. */
-  .potd { display: flex; align-items: center; gap: 14px; padding: 12px 15px;
+  /* ── mystery player ─────────────────────────────────────────────────────
+     A daily guessing game that still has to fit on a strip. It starts as one
+     line of blanks and a clue; the input and the buttons appear once the
+     player's turn actually begins. */
+  .potd { display: flex; align-items: flex-start; gap: 14px; padding: 13px 15px;
           border-radius: var(--r); background: var(--s1);
           border: 1px solid var(--line); border-left: 3px solid var(--club); }
-  .potd .shirt { width: 40px; height: 40px; flex: 0 0 auto; }
+  .potd .shirt { width: 38px; height: 38px; flex: 0 0 auto; margin-top: 2px; }
   .potd .pbody { flex: 1; min-width: 0; }
   .potd .peyebrow { font-size: .64rem; text-transform: uppercase; letter-spacing: .1em;
-                    color: var(--fg-3); margin: 0 0 2px; }
-  .potd .pname { font-family: var(--mono); font-size: .97rem; font-weight: 700; margin: 0; }
-  .potd .pline { font-size: .77rem; color: var(--fg-2); margin: 2px 0 0; line-height: 1.4; }
-  .potd .reveal { flex: 0 0 auto; font: inherit; font-size: .79rem; font-weight: 700;
-                  padding: 9px 15px; min-height: 40px; border: 0; border-radius: 9px;
-                  background: var(--cyan); color: #06181C; cursor: pointer; }
-  .potd .reveal:hover { filter: brightness(1.08); }
-  .potd .reveal:focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
+                    color: var(--fg-3); margin: 0 0 4px; }
+  .potd .blanks { font-family: var(--mono); font-size: .98rem; font-weight: 700;
+                  letter-spacing: .04em; margin: 0; white-space: pre-wrap;
+                  overflow-wrap: break-word; line-height: 1.45; }
+  .potd .blanks.got { color: var(--cyan); }
+  .potd .pline { font-size: .78rem; color: var(--fg-2); margin: 5px 0 0; line-height: 1.45; }
+  .potd .pline b { color: var(--fg); font-weight: 600; }
+  .pguess { display: flex; gap: 6px; margin-top: 9px; }
+  .pguess[hidden] { display: none; }
+  .pguess input { flex: 1; min-width: 0; font: inherit; font-size: .85rem; padding: 9px 11px;
+                  min-height: 40px; box-sizing: border-box; border-radius: 8px;
+                  background: var(--bg); color: var(--fg); border: 1px solid var(--line-2); }
+  .pguess input:focus { outline: none; border-color: var(--cyan); }
+  .pguess button { font: inherit; font-size: .82rem; font-weight: 700; padding: 0 16px;
+                   min-height: 40px; border: 0; border-radius: 8px; cursor: pointer;
+                   background: var(--cyan); color: #06181C; }
+  .pacts { display: flex; align-items: center; gap: 8px; margin-top: 9px; flex-wrap: wrap; }
+  .pacts[hidden] { display: none; }
+  .pacts button { font: inherit; font-size: .76rem; font-weight: 600; padding: 7px 12px;
+                  min-height: 36px; cursor: pointer; border-radius: 8px;
+                  background: transparent; color: var(--fg-2); border: 1px solid var(--line-2); }
+  .pacts button:hover { color: var(--fg); border-color: var(--fg-3); }
+  .pacts button.quiet { border-color: transparent; color: var(--fg-3); }
+  .pacts .pscore { margin-left: auto; font-family: var(--mono); font-size: .76rem;
+                   font-weight: 700; color: var(--fg-3); }
+  .potd :focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
 
   /* ── records ────────────────────────────────────────────────────────────
      Closed by default and server-rendered inside. The warning is not decoration:
@@ -434,15 +494,18 @@
     a.game-go.feat .gplay { margin-top: 9px; font-size: .78rem; }
     a.game-go:not(.feat) .artbox { height: 74px; padding: 7px 9px; }
     .gtext { padding: 10px 11px 11px; }
+    .howto { width: 34px; height: 34px; top: 5px; right: 5px; }
     .gname { font-size: .8rem; }
     .gblurb { font-size: .71rem; margin-top: 2px; }
 
     .seg { display: none; }
-    .sel { display: block; }
+    .msel { display: block; }
     .chip { min-height: 44px; }
     .potd { gap: 11px; padding: 11px 12px; }
-    .potd .shirt { width: 34px; height: 34px; }
-    .potd .reveal { min-height: 44px; padding: 0 20px; }
+    .potd .shirt { width: 32px; height: 32px; }
+    .potd .blanks { font-size: .86rem; letter-spacing: .02em; }
+    .pguess input, .pguess button { min-height: 44px; }
+    .pacts button { min-height: 40px; }
     .askbox { padding: 15px 14px 16px; border-radius: 12px; }
     /* Two suggestions, not three, and rows rather than pills.
        A real question about two clubs does not fit on one line at 390px, and
@@ -532,7 +595,14 @@
 </section>
 
 <section>
-  <div class="potd" id="potd" data-team="Elversberg">
+  <!-- A daily guessing game, not a reveal button.
+       The answer is NOT in this page. It used to be: the whole 25-player pool
+       was written into TS_TEAM.potd so the reveal could work offline, which
+       left a shuffled-but-complete list of the club's most-used players in
+       view-source — the answers to the appearances game. Now the player is
+       chosen server-side per club per day, the id travels encrypted, and
+       guesses are checked by the same endpoint that runs Who Am I? -->
+  <div class="potd" id="potd" data-scope="">
     <svg class="shirt" viewBox="0 0 64 64" aria-hidden="true">
       <path d="M22 8 32 14 42 8l14 8-6 12-6-3v31H20V25l-6 3-6-12Z"
             fill="hsl(230, 63%, 38%)" stroke="hsl(248, 63%, 26%)" stroke-width="2.5" stroke-linejoin="round"/>
@@ -541,10 +611,19 @@
     </svg>
     <div class="pbody">
       <p class="peyebrow">Mystery player</p>
-      <p class="pname" id="potdName">Who is it?</p>
-      <p class="pline" id="potdLine">One of the club&rsquo;s most-used. A new one daily.</p>
+      <p class="blanks" id="potdBlanks" aria-label="Hidden player name">&nbsp;</p>
+      <p class="pline" id="potdLine">Loading today&rsquo;s player&hellip;</p>
+      <form class="pguess" id="potdForm" hidden autocomplete="off">
+        <input id="potdInput" type="text" maxlength="60" placeholder="Name the player"
+               aria-label="Your guess" autocomplete="off" spellcheck="false">
+        <button type="submit">Guess</button>
+      </form>
+      <div class="pacts" id="potdActs" hidden>
+        <button type="button" id="potdClue">Another clue</button>
+        <button type="button" id="potdGiveUp" class="quiet">Give up</button>
+        <span class="pscore" id="potdScore">100 pts</span>
+      </div>
     </div>
-    <button type="button" class="reveal" id="potdBtn">Reveal</button>
   </div>
 </section>
 
@@ -824,13 +903,14 @@
 </div><!-- /wrap -->
 
 <script>
-window.TS_TEAM = {"slug":"elversberg","name":"Elversberg","comps":[],"defaultScope":null,"potd":[{"n":"Noah Darvich","a":2,"g":0,"f":"2026/27","t":"2026/27"},{"n":"Łukasz Poręba","a":3,"g":0,"f":"2026/27","t":"2026/27"},{"n":"David Mokwa","a":3,"g":2,"f":"2026/27","t":"2026/27"},{"n":"Maximilian Rohr","a":3,"g":0,"f":"2026/27","t":"2026/27"},{"n":"Francis Onyeka","a":3,"g":0,"f":"2026/27","t":"2026/27"},{"n":"Lukas Pinckert","a":3,"g":0,"f":"2026/27","t":"2026/27"},{"n":"Lasse Günther","a":3,"g":0,"f":"2026/27","t":"2026/27"},{"n":"Amara Conde","a":2,"g":0,"f":"2026/27","t":"2026/27"},{"n":"Nicolas Kristof","a":3,"g":0,"f":"2026/27","t":"2026/27"},{"n":"Lukas Petkov","a":3,"g":1,"f":"2026/27","t":"2026/27"},{"n":"Maurice Krattenmacher","a":3,"g":3,"f":"2026/27","t":"2026/27"},{"n":"Cole Campbell","a":3,"g":1,"f":"2026/27","t":"2026/27"},{"n":"Felix Keidel","a":3,"g":1,"f":"2026/27","t":"2026/27"},{"n":"Jan Gyamerah","a":3,"g":0,"f":"2026/27","t":"2026/27"},{"n":"Noel Futkeu","a":2,"g":0,"f":"2026/27","t":"2026/27"}]};
+window.TS_TEAM = {"slug":"elversberg","name":"Elversberg","comps":[],"defaultScope":null};
 </script>
 <script src="/js/ts-scope.js"></script>
 <script src="/js/team-page.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
 <script src="/js/ts-auth.js" defer></script>
 <script src="/js/ts-data.js" defer></script>
+<script src="/js/ts-footer.js" defer></script>
 <script src="/js/ts-nav.js" defer></script>
 <script defer>
   // The real site header, which replaces the static fallback above. Wrapped

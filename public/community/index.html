@@ -357,7 +357,8 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/js/ts-auth.js"></script>
   <script src="/js/ts-data.js"></script>
-  <script src="/js/ts-nav.js"></script>
+  <script src="/js/ts-footer.js"></script>
+<script src="/js/ts-nav.js"></script>
   <script>
     (async function () {
       try { await TSAuth.init(); } catch (e) { console.error('[TeleStats] Auth init failed:', e); }
@@ -515,6 +516,31 @@
           });
         });
       }
+
+      // ── /community/?game=<id> ────────────────────────────────────────────
+      //
+      // Team pages used to link here with a game id, and this page had no idea
+      // what to do with it, so a visitor who clicked one specific challenge
+      // arrived at a list of all of them. Those links now point straight at
+      // the game, but the old shape is public and may be bookmarked or shared,
+      // so it is honoured rather than silently ignored.
+      (async function deepLink() {
+        const wanted = new URLSearchParams(location.search).get('game');
+        if (!wanted) return;
+        const PAGES = {
+          bullseye: 'bullseye', starting_xi: 'xi', higher_lower: 'hol',
+          player_alphabet: 'alpha', alphabet: 'alpha',
+        };
+        try {
+          const g = await TSData.getCommunityGameById(wanted);
+          const page = g && PAGES[g.game_type];
+          // replace(), not assign(): the hub was never a page the visitor
+          // chose, so Back should return them to wherever they came from
+          // rather than to a redirect that fires again.
+          if (page) location.replace('/games/' + page + '.html?community=' +
+            encodeURIComponent(wanted));
+        } catch (e) { /* fall through to the hub, which is a fine place to be */ }
+      })();
 
       // ============================================================
       // BUILDER STATE

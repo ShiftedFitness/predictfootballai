@@ -3072,3 +3072,74 @@ anything was playable.
   999px pill wrapped over two lines reads as a pill that went wrong.
 
 Fixed in passing: `Build a Arsenal game`.
+
+## Gameplay, navigation & monetisation brief
+
+Phase 1 — gameplay and navigation:
+- [ ] 1. Bullseye replaces Trivia Quiz on team pages (+ illustration, + team scope)
+- [ ] 2. Mystery Player → real daily guessing game (mask, clues, guess, score)
+- [ ] 3. Lock team context when a game is launched from a team page
+- [ ] 4. Fix community-game deep links
+- [ ] 5. "How to play" on each game card
+- [ ] 6. Multi-competition selection on mobile (shared state with desktop)
+- [ ] 7. Shared TeleStats header on /tools/*
+- [ ] 8. Data Coverage: neutral dates, no freshness warning, themed
+
+Phase 2 — monetisation: review existing Pro/entitlements FIRST, report before
+changing anything that touches existing customers.
+
+Added mid-flight: Teams hub (/teams/) redesign — search with aliases, country
+and competition browsing, featured clubs, compact directory, all 355 links
+server-rendered. Queued after Phase 1 gameplay items.
+
+Added mid-flight: one shared footer across every public page, with the data
+date from a single authoritative source (never hardcoded, never a build date).
+
+## Phase 1 complete — gameplay, navigation, footer, Teams hub
+
+1. **Bullseye replaces Trivia Quiz** on club pages, with a dartboard
+   illustration. Two real bugs fixed behind it: `match_start.js` rejected `+`
+   subset ids, and for `team_<club>_all` it passed `competitionName: null`
+   into `.eq('competition_name', null)` — a query that matches nothing. Team
+   pages send `_all`, so Bullseye was broken from all 355 of them. Bullseye
+   also loaded ts-scope.js without ever calling it, so `?scope=…&play=1`
+   landed on the mode picker; it now has a hidden start control like the rest.
+2. **Mystery Player is a game.** Built on the Who Am I? endpoint rather than a
+   second guessing engine — same masking, clue generator, encrypted id and
+   server-side checking. `daily: true` picks deterministically per club per UTC
+   day from an HMAC the browser cannot compute, so nobody can ask for
+   tomorrow. Scores 100/60/30/10 by clues used, 0 for giving up.
+   **This removed the last spoiler**: TS_TEAM.potd used to carry 25 players
+   into view-source; TS_TEAM is now 140 bytes with no player data.
+   Fixed a pre-existing crash: check_answer permitted `giveUp` without a
+   `guess`, then called `guess.trim()`.
+3. **Team context locks.** `TSScope.lockTeam()` replaces the picker with the
+   chosen club and a "Change team" link that drops the scope. All five games.
+4. **Community deep links.** Team pages linked to `/community/?game=<id>`,
+   which that page has never read. They now link where the community grid
+   links; the old shape redirects so shared links still work.
+5. **How to play** — a question mark on each card, as a SIBLING of the anchor
+   (a button inside an `<a>` is invalid and taps land unpredictably).
+6. **Multi-competition on mobile.** The `<select>` could only say "one or all";
+   checkboxes now write to the same buttons the desktop control uses, so there
+   is one filtering implementation, not two.
+7. **Tools pages** get the shared header; `/ask/` and `/goals/` had none either.
+8. **Data Coverage** states a date and no verdict. "Getting old" counted
+   calendar days, which during an international break calls a correct database
+   stale for doing nothing wrong.
+
+**One footer, one date.** The footer read `meta.current_season_last_updated` —
+a hand-written note last edited 15 Feb 2026 — while the data was refreshed 16
+Sep 2026 and /tools/data said so. Three components, three answers. ts-footer.js
+derives it from the dataset, so it and the coverage page agree by construction.
+
+**Teams hub rebuilt.** One country per club, so each appears ONCE; competitions
+are a filter labelled as records rather than tables; search covers 355 clubs
+with a maintained alias map (Man Utd, Spurs, Barca, PSG, Sheff Wed…) and
+accent folding. Capped at 24 per country with Show-all: 15,730px -> 7,053px,
+with all 355 links still in the HTML and nothing hidden before JS runs.
+
+**Deploy hazard found:** calling `TSScope.lockTeam()` plainly broke the whole
+Starting XI page when the browser held a cached ts-scope.js, because the call
+sits inside init()'s try block. Every shared-module call in the game pages is
+now optional invocation, as CLAUDE.md already requires for ts-analytics.
