@@ -19,7 +19,9 @@
     "preflight": "node scripts/fbref/preflight.js",
     "aggregates": "node scripts/fbref/rebuild_aggregates.js --write",
     "analytics:weekly": "node scripts/analytics/run-weekly.mjs",
-    "analytics:weekly:noemail": "node scripts/analytics/run-weekly.mjs --no-email"
+    "analytics:weekly:noemail": "node scripts/analytics/run-weekly.mjs --no-email",
+    "ga": "node scripts/analytics/ga-query.mjs",
+    "check:spoilers": "node scripts/checks/spoilers.js"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.117.1",

@@ -95,8 +95,10 @@
         a.href = a.dataset.path + '?scope=' + encodeURIComponent(id) + '&play=1';
       });
 
-      note.textContent = isAll
-        ? 'Playing all ' + each.length + ' competitions.'
+      // Silent when nothing is filtered. "Playing all 4 competitions" is the
+      // default state restating itself under a control whose first segment
+      // already says All, and it is the line every visitor reads first.
+      note.textContent = isAll ? ''
         : 'Playing ' + picked.map(function (c) { return c.dataset.comp; }).join(' and ') + ' only.';
 
       // Mirror into the select. A subset of two or more has no single option
@@ -211,64 +213,63 @@
   (function extras() {
     var boardBox = $('boardBox');
     var commBox = $('communityBox');
+    var sect = $('extras');
+    var boardCol = $('boardCol');
+    var commCol = $('commCol');
 
     fetch(API + '/team-extras?slug=' + encodeURIComponent(T.slug))
       .then(function (r) { return r.json(); })
       .then(function (d) {
         if (d.error) throw new Error(d.error);
 
-        // Leaderboard
-        if (boardBox) {
-          if (!d.leaderboard || !d.leaderboard.length) {
-            // Framed as an opportunity, not as a vacancy. "Nobody has played
-            // this" tells a first-time visitor the site is empty.
-            boardBox.innerHTML = '<p class="empty">No ' + esc(T.name) +
-              ' scores yet — play a game and the top spot is yours.</p>' +
-              '<a class="mini" href="#play">Play ' + esc(T.name) + ' &rarr;</a>';
-          } else {
-            // ONE board, not a panel per game type.
-            //
-            // Splitting by game produced three or four bordered boxes holding
-            // one name each, which made a quiet club look abandoned rather
-            // than new. The busiest game is shown, the rest are a line of
-            // text, and the full table is a click away.
-            var top = d.leaderboard[0];
-            var rest = d.leaderboard.slice(1)
-              .filter(function (b) { return b.entries.length; })
-              .map(function (b) { return gameName(b.game_type); });
-            boardBox.innerHTML =
-              '<div class="board"><h3>' + esc(gameName(top.game_type)) + '</h3><ol>' +
-              top.entries.slice(0, 5).map(function (e) {
-                return '<li>' + esc(e.name) + '<span class="pts">' + num(e.score) + '</span></li>';
-              }).join('') + '</ol></div>' +
-              '<p class="empty" style="margin-top:9px">' + num(d.plays) + ' round' +
-              (d.plays === 1 ? '' : 's') + ' played on ' + esc(T.name) +
-              (rest.length ? ' · also ' + rest.join(', ') : '') + '</p>';
-          }
+        // Leaderboard and community games, both of which are usually empty on
+        // a new club. An empty one is hidden rather than filled with a sentence
+        // about being empty; the invitation it was carrying moves to a single
+        // quiet line, and if both are empty the whole block never appears.
+        var hasBoard = !!(d.leaderboard && d.leaderboard.length);
+        var hasComm = !!(d.community && d.community.length);
+
+        if (hasBoard && boardBox) {
+          // ONE board, not a panel per game type. Splitting by game produced
+          // three or four bordered boxes holding one name each, which made a
+          // quiet club look abandoned rather than new. The busiest game is
+          // shown, the rest are a line of text, the full table is a click away.
+          var top = d.leaderboard[0];
+          var rest = d.leaderboard.slice(1)
+            .filter(function (b) { return b.entries.length; })
+            .map(function (b) { return gameName(b.game_type); });
+          boardBox.innerHTML =
+            '<div class="board"><h3>' + esc(gameName(top.game_type)) + '</h3><ol>' +
+            top.entries.slice(0, 5).map(function (e) {
+              return '<li>' + esc(e.name) + '<span class="pts">' + num(e.score) + '</span></li>';
+            }).join('') + '</ol></div>' +
+            '<p class="empty" style="margin-top:9px">' + num(d.plays) + ' round' +
+            (d.plays === 1 ? '' : 's') + ' played on ' + esc(T.name) +
+            (rest.length ? ' \u00b7 also ' + rest.join(', ') : '') +
+            (hasComm ? '' : ' \u00b7 <a href="/community/?build=1">build a ' +
+              esc(T.name) + ' game</a>') + '</p>';
         }
 
-        // Community games. The distinction from the five official games is made
-        // in the markup around this box, not here.
-        if (commBox) {
-          if (!d.community || !d.community.length) {
-            commBox.innerHTML = '<p class="empty">Nothing for ' + esc(T.name) +
-              ' yet — community games are built by players from the same database.</p>' +
-              '<a class="mini" href="/community/?build=1">Build one &rarr;</a>';
-          } else {
-            commBox.innerHTML = '<ul class="community">' + d.community.slice(0, 4).map(function (g) {
-              return '<li><a href="/community/?game=' + encodeURIComponent(g.id) + '">' +
-                '<h4>' + esc(g.title) + '</h4>' +
-                '<span class="meta">' + esc(gameName(g.game_type)) + ' · ' +
-                num(g.plays) + ' play' + (g.plays === 1 ? '' : 's') + '</span></a></li>';
-            }).join('') + '</ul>' +
-            '<a class="mini" href="/community/?build=1">Build a ' + esc(T.name) + ' game &rarr;</a>';
-          }
+        if (hasComm && commBox) {
+          // The distinction from the five official games is made in the markup
+          // around this box, not here.
+          commBox.innerHTML = '<ul class="community">' + d.community.slice(0, 4).map(function (g) {
+            return '<li><a href="/community/?game=' + encodeURIComponent(g.id) + '">' +
+              '<h4>' + esc(g.title) + '</h4>' +
+              '<span class="meta">' + esc(gameName(g.game_type)) + ' \u00b7 ' +
+              num(g.plays) + ' play' + (g.plays === 1 ? '' : 's') + '</span></a></li>';
+          }).join('') + '</ul>' +
+          '<a class="mini" href="/community/?build=1">Build a ' + esc(T.name) + ' game &rarr;</a>';
         }
+
+        if (boardCol) boardCol.hidden = !hasBoard;
+        if (commCol) commCol.hidden = !hasComm;
+        if (sect) sect.hidden = !(hasBoard || hasComm);
       })
       .catch(function () {
-        // A failure here must not look like "this club has nothing".
-        if (boardBox) boardBox.innerHTML = '<p class="empty">Could not load the leaderboard.</p>';
-        if (commBox) commBox.innerHTML = '<p class="empty">Could not load community games.</p>';
+        // A failure here must not look like "this club has nothing", so the
+        // block simply does not appear. Both its links are reachable from the
+        // site nav and the page footer either way.
       });
   })();
 

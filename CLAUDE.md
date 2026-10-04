@@ -257,6 +257,9 @@ No LLM step, no site changes; `/seo-review` reviews it and proposes changes for 
 ways). The "Plays by game" table needs `game_type` registered as an event-scoped custom dimension in GA4. New anonymous
 `ts_users` rows are inflated by crawlers that run JS (416 rows vs 39 GA4 users, Oct 2026): read them as an upper bound.
 See `docs/analytics-automation.md`.
+Ad-hoc questions ("how did these players get here?", "what did today's sign-up play?"): the project skill
+`.claude/skills/telestats-analytics/SKILL.md` + `scripts/analytics/ga-query.mjs` (read-only GA4/Search Console queries) +
+read-only Supabase SQL. Never print emails/usernames/ids in answers.
 
 ## Pricing Model
 - **Free (no account):** Limited game access

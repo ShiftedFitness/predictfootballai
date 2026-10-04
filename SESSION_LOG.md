@@ -2948,3 +2948,84 @@ the whole point of the rule, still skips).
 ### Live state at the time of writing
 Segunda, the competition pages and the data refresh (commit 0bcdb1b) ARE live —
 that build had its cache. Only the team-page redesign is missing.
+- First GitHub Action run (4 Oct, manual): green, committed `analytics/reports/2026-10-04.md` (eab5f2d). Verified it reads
+  TeleStats (39 users / 56 sessions in 28d, not MFT's ~550), DB section filled (45 accounts, 3 Pro), search filled.
+  "Plays by game" empty until GA4 has data under the `game_type` dimension registered today.
+- Deploy skip incident: the first `ignore` rule skipped real deploys when Netlify had no cache (CACHED_COMMIT_REF ==
+  COMMIT_REF). Replaced (by owner) with a rule that only skips when every changed file is provably ignorable; Tagsy's copy fixed to match.
+- Added `telestats-analytics` project skill + `scripts/analytics/ga-query.mjs` for ad-hoc questions.
+  First question answered (4 Oct): today's sign-up (07:55 UTC) came from **Bing** to /teams/west-bromwich-albion/ on a UK
+  tablet, played 3 West Brom games (Higher or Lower, Player Alphabet, Pop Quiz) 07:51-07:53, ~7.5 min engaged, then
+  signed up. A Leganés visitor (Spain, desktop) also arrived from **Bing** to /teams/leganes/, played 3 Higher or Lower
+  rounds 10:44-10:46, ~4 min engaged, stayed anonymous. Team pages are getting Bing traffic.
+- Indexing check (4 Oct): **no sitemap submitted in Google Search Console**; URL Inspection says /teams/, /teams/leganes/,
+  /teams/west-bromwich-albion/, /teams/arsenal/, /competitions/premier-league/ and /sitemap.xml are "unknown to Google".
+  Only the homepage + a few game pages are indexed. 0 of 362 team/competition URLs have had a Google impression in 90 days.
+  Pages themselves are fine (unique title/description, canonical, sitemap with lastmod, robots.txt Sitemap line).
+  Bing found them via robots.txt → today's visitors. Owner actions: submit sitemap.xml in GSC, request indexing for hubs,
+  set up Bing Webmaster Tools.
+- 7-day pattern: 27 Sep–3 Oct = 9 sessions, all homepage, 0–23s, no games. Games before today: 6 Sep (1), 14 Sep (2), both
+  direct. 4 Oct = first visitors arriving from search on deep (team) pages who played (2 players, 6 games, 1 sign-up).
+
+## Team page redesign
+
+The first pass removed clutter and called it design. This one rebuilds the
+visual layer.
+
+- **Hero.** The club's own name is the headline at display size with the crest
+  beside it. The SEO wording lives inside the same `<h1>` as a second line, so
+  the title and H1 requirements hold without the page opening on one 48px
+  monospace sentence. The `<h1>` is a grid, so the crest sits next to the NAME
+  at every width — flex had aligned it to the bottom of the whole heading,
+  parking it beside the small print on a phone.
+- **Five illustrations, not five icons.** A pitch with an eleven on it for the
+  featured Starting XI card; two shirts for Higher or Lower; a shirt with
+  nobody in it for Who Am I?; letter tiles for Player Alphabet; a ticked
+  question list for Trivia. Inline SVG, no requests, a few hundred bytes each,
+  every one tinted from the club's colour.
+- **`ink()`.** Those illustrations put a glyph inside a shape filled with the
+  club colour, and a hardcoded white `?` disappears on Norwich yellow. Picks
+  black or white by contrast ratio with a margin, so Arsenal keeps a white
+  number on a red shirt and Norwich gets a black one on yellow.
+- **Bento.** Featured card spans two columns and both rows; the other four fill
+  the 2x2 beside it. Two-up with the featured card full width below 900px;
+  fixed illustration height below 620px so the two titles share a baseline.
+- **Removed** the giant Play/Explore cards, which pointed at sections directly
+  beneath them.
+- **Empty states collapse.** The leaderboard and community block hides itself
+  when there is nothing in it, rather than announcing twice under two headings
+  that the club has nothing. The "build one" invitation moves to a single line.
+- **Related clubs** are eight links, not eight bordered rectangles.
+- **Removed** "Playing all 4 competitions" — the default state restating itself
+  under a control whose first segment already says All.
+
+Preserved: title and H1 wording, the closed server-rendered spoiler-protected
+records, every URL, the `team-page.js` DOM contract, scoring and analytics.
+- Sitemap submitted to Google Search Console via API (owner approved, 4 Oct 17:18 UTC): `https://telestats.net/sitemap.xml`,
+  accepted (204), pending first download. Service account is a Full user; the weekly job still only requests read-only scope.
+  Owner to "Request indexing" (UI only) for: /teams/, /competitions/, /competitions/premier-league/, /competitions/championship/,
+  /teams/west-bromwich-albion/, /teams/leganes/, /teams/sunderland/, /teams/leeds-united/, /teams/ipswich-town/, /teams/plymouth-argyle/.
+
+### The audit
+
+CLAUDE.md points here for it, so it is a command rather than a snippet:
+
+```bash
+npm run check:spoilers
+```
+
+`scripts/checks/spoilers.js` walks every generated page and exits non-zero if
+any `<details class="rec">` is open by default, any page lost its records, or
+any player name from a records table appears in VISIBLE markup outside those
+disclosures. Current: **355 pages · 0 open · 0 names leaking**.
+
+Two things it deliberately does not count, because both are correct:
+
+- **Names inside `<script>`.** The mystery-player pool is written into the page
+  and revealed on a click. It is shuffled first, so view-source gives an
+  unordered set rather than a ranked list — the known, accepted residual.
+- **Competition names.** The third disclosure holds competitions, not players,
+  in the same `td.who`. A competition name is *supposed* to be visible — it is
+  in the coverage line and on the filter. Players are the unlinked cells;
+  competitions link to `/competitions/<slug>/`. The first version of this audit
+  missed that and reported 837 leaks, every one of them a false positive.

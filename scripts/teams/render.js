@@ -88,46 +88,148 @@ function mysteryShirt(c) {
 // ─── the games ──────────────────────────────────────────────────────────────
 
 /**
- * Five games, five identities.
+ * Five games, five pictures.
  *
- * They used to be five dark boxes with the same shape, the same length of
- * sentence and the same "Play now" link — indistinguishable at a glance, which
- * made the most interesting thing on the page look like a table of contents.
- * Each now carries its own mark, drawn from what the game actually does: two
- * arrows for a comparison, letters for the alphabet, a formation for the
- * eleven, a question for the mystery, a ticked list for the quiz.
+ * They were five charcoal cards with a 22px icon each: tidy, legible, and
+ * completely uninviting — the most entertaining thing on the site rendered as
+ * a table of contents. These are proper illustrations drawn in the vocabulary
+ * of the game itself: a pitch with an eleven on it, two shirts being compared,
+ * a shirt with no name, an alphabet, a row of questions.
  *
- * The icons are inline SVG — no sprite, no font, no request. `currentColor`
- * lets each card tint its own mark without a second copy of the markup.
+ * All inline SVG on a 2-colour palette — the club's own, plus the page's muted
+ * grey. No images, no sprite sheet, no requests, a few hundred bytes each, and
+ * every one tints itself from the club colour so Plymouth's pitch is green and
+ * Arsenal's is red without a second copy of anything.
+ */
+
+/**
+ * Black or white, whichever can be read on the club's own colour.
+ *
+ * The illustrations put a glyph INSIDE a shape filled with the primary, and a
+ * hardcoded white "?" disappears on Norwich yellow, Watford amber or City's
+ * light blue.
+ *
+ * Contrast ratios rather than a luminance threshold, and white wins ties by
+ * default. The bare 0.179 crossover put Arsenal red (L = 0.184) on the dark
+ * side by a thousandth, which is true — black scores 4.68 against white's
+ * 4.49 — and wrong: those are the same contrast to a reader, and a white
+ * number on a red shirt is what the shirt actually looks like. Black has to
+ * be clearly better, not barely, before it is used.
+ */
+function ink(hex) {
+  const m = /^#?([0-9a-f]{6})$/i.exec(String(hex || '').trim());
+  if (!m) return '#FFFFFF';
+  const lin = (v) => (v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4));
+  const [r, g, b] = [0, 2, 4].map((i) => lin(parseInt(m[1].slice(i, i + 2), 16) / 255));
+  const L = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  const onWhite = 1.05 / (L + 0.05);
+  const onBlack = (L + 0.05) / 0.05;
+  return onBlack > onWhite * 1.4 ? '#0A0E11' : '#FFFFFF';
+}
+
+/** The featured card: a pitch with an eleven standing on it. */
+function pitchArt(c) {
+  const spots = [
+    [100, 18],
+    [36, 42], [78, 38], [122, 38], [164, 42],
+    [36, 80], [78, 78], [122, 78], [164, 80],
+    [76, 106], [124, 106],
+  ];
+  return `<svg class="art art-pitch" viewBox="0 0 200 124" aria-hidden="true"
+         preserveAspectRatio="xMidYMid meet">
+      <g fill="none" stroke="#fff" stroke-opacity=".26" stroke-width="1.1">
+        <rect x="7" y="7" width="186" height="110" rx="2"/>
+        <path d="M7 62h186"/>
+        <circle cx="100" cy="62" r="19"/>
+        <path d="M64 7v15h72V7M64 117v-15h72v15"/>
+      </g>
+      <g class="dots">
+        ${spots.map(([x, y]) => `<circle cx="${x}" cy="${y}" r="6" fill="${c.primary}"
+          stroke="${c.secondary}" stroke-width="1.6"/>`).join('')}
+      </g>
+    </svg>`;
+}
+
+/** Two shirts, one up one down. */
+function holArt(c) {
+  const shirt = (x, y, fill, stroke) =>
+    `<g transform="translate(${x} ${y})"><path d="M14 2 24 8 34 2l10 6-4 9-5-2.5V38H18V14.5L13 17 9 8Z"
+       fill="${fill}" stroke="${stroke}" stroke-width="2" stroke-linejoin="round"/></g>`;
+  return `<svg class="art" viewBox="0 0 120 64" aria-hidden="true">
+      ${shirt(4, 6, c.primary, c.secondary)}
+      ${shirt(60, 18, 'transparent', 'currentColor')}
+      <g fill="none" stroke="${c.primary}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M52 20v-9m0 0-3.5 3.5M52 11l3.5 3.5"/>
+      </g>
+      <g fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M110 44v9m0 0 3.5-3.5M110 53l-3.5-3.5"/>
+      </g>
+    </svg>`;
+}
+
+/** A shirt with nobody in it. */
+function whoArt(c) {
+  return `<svg class="art" viewBox="0 0 120 64" aria-hidden="true">
+      <g transform="translate(29 1) scale(1.55)">
+        <path d="M14 2 24 8 34 2l10 6-4 9-5-2.5V38H18V14.5L13 17 9 8Z"
+              fill="${c.primary}" stroke="${c.secondary}" stroke-width="1.6" stroke-linejoin="round"/>
+        <text x="26.5" y="30" text-anchor="middle" font-size="16" font-weight="700"
+              font-family="Space Mono, ui-monospace, monospace" fill="${ink(c.primary)}">?</text>
+      </g>
+    </svg>`;
+}
+
+/** The alphabet, mostly unfilled. */
+function alphaArt(c) {
+  const row = (letters, y, lit) => letters.split('').map((ch, i) => {
+    const on = lit.includes(i);
+    return `<g transform="translate(${6 + i * 19} ${y})">
+      <rect width="15" height="17" rx="3" fill="${on ? c.primary : 'transparent'}"
+            stroke="${on ? c.primary : 'currentColor'}" stroke-width="1.3"/>
+      <text x="7.5" y="12.6" text-anchor="middle" font-size="9.5" font-weight="700"
+            font-family="Space Mono, ui-monospace, monospace"
+            fill="${on ? ink(c.primary) : 'currentColor'}">${ch}</text></g>`;
+  }).join('');
+  return `<svg class="art" viewBox="0 0 120 64" aria-hidden="true">
+      ${row('ABCDE', 10, [0, 3])}
+      ${row('FGHIJ', 34, [1])}
+    </svg>`;
+}
+
+/** Ten questions, a few answered. */
+function quizArt(c) {
+  const rows = [0, 1, 2, 3].map((i) => {
+    const done = i < 2;
+    return `<g transform="translate(10 ${7 + i * 14})">
+      <rect width="11" height="11" rx="3" fill="${done ? c.primary : 'transparent'}"
+            stroke="${done ? c.primary : 'currentColor'}" stroke-width="1.3"/>
+      ${done ? `<path d="m3 5.6 2.2 2.2L8.4 3.4" fill="none" stroke="${ink(c.primary)}"
+        stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>` : ''}
+      <rect x="19" y="3" width="${[64, 52, 70, 44][i]}" height="5" rx="2.5"
+            fill="currentColor" opacity="${done ? '.5' : '.26'}"/></g>`;
+  }).join('');
+  return `<svg class="art" viewBox="0 0 120 64" aria-hidden="true">${rows}</svg>`;
+}
+
+/**
+ * The featured game is Starting XI, and the choice is about the picture rather
+ * than the game: a pitch with an eleven on it says "football" from across the
+ * room in a way no icon does, and the featured slot is the one a visitor sees
+ * before they read anything.
  */
 const GAMES = [
-  {
-    key: 'hol', name: 'Higher or Lower', path: '/games/hol.html',
-    blurb: 'Who made more appearances?',
-    icon: '<path d="M7 15V5m0 0L3.5 8.5M7 5l3.5 3.5" /><path d="M17 9v10m0 0 3.5-3.5M17 19l-3.5-3.5" />',
-  },
-  {
-    key: 'alpha', name: 'Player Alphabet', path: '/games/alpha.html',
-    blurb: 'Name a player for every letter.',
-    icon: '<path d="M3 18 7 6l4 12M4.3 14.5h5.4" /><path d="M14 6h6l-6 12h6" />',
-  },
-  {
-    key: 'xi', name: 'Starting XI', path: '/games/xi.html',
+  { key: 'xi', name: 'Starting XI', path: '/games/xi.html', featured: true,
     blurb: 'Build your ultimate eleven.',
-    icon: '<circle cx="12" cy="4.5" r="1.6"/><circle cx="5" cy="11" r="1.6"/><circle cx="12" cy="11" r="1.6"/>' +
-          '<circle cx="19" cy="11" r="1.6"/><circle cx="7.5" cy="18" r="1.6"/><circle cx="16.5" cy="18" r="1.6"/>' +
-          '<path d="M12 6.1v3.3M6.2 12.3 7.1 16.4M17.8 12.3l-.9 4.1"/>',
-  },
-  {
-    key: 'whoami', name: 'Who Am I?', path: '/games/whoami.html',
-    blurb: 'Five clues. One footballer.',
-    icon: '<circle cx="12" cy="12" r="9"/><path d="M9.3 9.3a2.8 2.8 0 1 1 3.4 3.9v1.3"/><circle cx="12" cy="17.4" r=".9" fill="currentColor" stroke="none"/>',
-  },
-  {
-    key: 'quiz', name: 'Trivia Quiz', path: '/games/quiz.html',
-    blurb: 'Ten questions. How many can you nail?',
-    icon: '<path d="m3 6.5 2 2 3-3.5M3 13l2 2 3-3.5M3 19.5l2 2 3-3.5"/><path d="M12 6h9M12 13h9M12 20h9"/>',
-  },
+    long: 'Pick the best player for every position and see how close you get to the club\u2019s strongest side.',
+    art: pitchArt },
+  { key: 'hol', name: 'Higher or Lower', path: '/games/hol.html',
+    blurb: 'Who made more appearances?', art: holArt },
+  { key: 'whoami', name: 'Who Am I?', path: '/games/whoami.html',
+    blurb: 'Five clues. One footballer.', art: whoArt },
+  { key: 'alpha', name: 'Player Alphabet', path: '/games/alpha.html',
+    blurb: 'Name a player for every letter.', art: alphaArt },
+  { key: 'quiz', name: 'Trivia Quiz', path: '/games/quiz.html',
+    blurb: 'Ten questions. How many?', art: quizArt },
 ];
 
 // ─── the page ───────────────────────────────────────────────────────────────
@@ -164,19 +266,37 @@ function render(team, d, related, opts) {
   // &play=1 so the link goes to the game, not to a picker offering every other
   // club. The whole card is the anchor, so the target is the card, not a
   // five-character "Play now" at the bottom of it.
-  const gameCards = !defaultScope ? '' : GAMES.map((g) => `<li>
-          <a class="game-go" data-game="${esc(g.key)}" data-path="${esc(g.path)}"
-             href="${esc(g.path)}?scope=${encodeURIComponent(defaultScope)}&amp;play=1">
-            <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                 stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"
-                 aria-hidden="true">${g.icon}</svg>
-            <span class="gname">${esc(g.name)}</span>
-            <span class="gblurb">${esc(g.blurb)}</span>
-            <span class="gplay">Play<svg viewBox="0 0 16 16" fill="none" stroke="currentColor"
-              stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
-              ><path d="M3 8h9M9 4.5 12.5 8 9 11.5"/></svg></span>
+  const gameCards = !defaultScope ? '' : GAMES.map((g) => {
+    const href = `${esc(g.path)}?scope=${encodeURIComponent(defaultScope)}&amp;play=1`;
+    const open = `<a class="game-go${g.featured ? ' feat' : ''}" data-game="${esc(g.key)}"` +
+      ` data-path="${esc(g.path)}" href="${href}">`;
+    // The featured card earns the extra words; the four beside it get one line
+    // each, because four paragraphs in a 2x2 is a page of text.
+    if (g.featured) {
+      return `<li class="feat">
+          ${open}
+            <span class="artbox">${g.art(c)}</span>
+            <span class="gtext">
+              <span class="gtag">Start here</span>
+              <span class="gname">${esc(g.name)}</span>
+              <span class="gblurb">${esc(g.long)}</span>
+              <span class="gplay">Play ${esc(team.name)} XI<svg viewBox="0 0 16 16" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round" aria-hidden="true"><path d="M3 8h9M9 4.5 12.5 8 9 11.5"/></svg></span>
+            </span>
           </a>
-        </li>`).join('\n        ');
+        </li>`;
+    }
+    return `<li>
+          ${open}
+            <span class="artbox">${g.art(c)}</span>
+            <span class="gtext">
+              <span class="gname">${esc(g.name)}</span>
+              <span class="gblurb">${esc(g.blurb)}</span>
+            </span>
+          </a>
+        </li>`;
+  }).join('\n        ');
 
   // ── competition filter ───────────────────────────────────────────────────
   // One source of truth, two faces. The buttons hold the state — team-page.js
@@ -279,7 +399,7 @@ function render(team, d, related, opts) {
   const nearby = related.slice(0, 8);
   const relatedLinks = nearby.map((r) => {
     const rc = colours.forTeam(r);
-    return `<a href="/teams/${esc(r.slug)}/" style="--club:${rc.primary}"><i></i>${esc(r.name)}</a>`;
+    return `<li><a href="/teams/${esc(r.slug)}/" style="--club:${rc.primary}"><i></i>${esc(r.name)}</a></li>`;
   }).join('\n          ');
 
   // ── structured data ──────────────────────────────────────────────────────
@@ -355,6 +475,7 @@ ${indexable ? '' : '<meta name="robots" content="noindex,follow">\n'}<meta name=
     --club: ${c.primary};
     --club-2: ${c.secondary};
     --bg: #0A0E11;
+    --s0: #090C0F;
     --s1: #11161B;          /* raised surface  */
     --s2: #161C23;          /* hover / nested  */
     --line: rgba(255,255,255,.07);
@@ -389,46 +510,43 @@ ${indexable ? '' : '<meta name="robots" content="noindex,follow">\n'}<meta name=
   nav.crumbs a { color: var(--fg-2); text-decoration: none; }
   nav.crumbs a:hover { color: var(--cyan); }
 
-  /* ── hero ───────────────────────────────────────────────────────────────
-     Compact on purpose. The club colour is a 3px rule and the crest, not a
-     gradient over the whole block — enough to say whose page this is without
-     turning the top of every page into a different colour wash. */
-  .hero { display: flex; align-items: center; gap: 16px; padding: 4px 0 18px;
-          border-bottom: 1px solid var(--line); margin-bottom: 20px; }
-  .hero .crest { width: 46px; height: 53px; flex: 0 0 auto;
-                 filter: drop-shadow(0 2px 7px rgba(0,0,0,.5)); }
-  .hero h1 { font-size: 1.55rem; line-height: 1.18; margin: 0 0 3px;
-             letter-spacing: -.012em; font-weight: 800; }
-  .hero .tag { color: var(--fg-2); font-size: .86rem; margin: 0; }
-  .figs { display: flex; gap: 22px; margin: 14px 0 0; flex-wrap: wrap; }
-  .fig { display: flex; flex-direction: column; gap: 1px; }
-  .fig b { font-family: var(--mono); font-size: 1.12rem; font-weight: 700;
-           font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
-  .fig span { font-size: .67rem; text-transform: uppercase; letter-spacing: .09em;
-              color: var(--fg-3); }
-  .cover { font-size: .76rem; color: var(--fg-3); margin: 13px 0 0; }
-  .cover a { color: var(--fg-2); }
+  /* ── hero ─────────────────────────────────────────────────────────────
+     The club's own name is the headline, at display size, with the crest
+     beside it. The SEO wording is still inside the same <h1> — it is the
+     second line of it rather than the whole thing, because one 40px monospace
+     sentence is a page title, not a football page.
 
-  /* ── the two ways in ────────────────────────────────────────────────────
-     Play and explore, side by side, immediately. The page offers statistics
-     AND games and a first-time visitor should not have to scroll to learn
-     that. Cyan carries the primary action; the club colour marks the other. */
-  .paths { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 34px; }
-  /* A club with too few played matches has no games to offer, so it does not
-     get a card promising five of them. */
-  .paths.one { grid-template-columns: 1fr; }
-  .path { display: flex; flex-direction: column; justify-content: center; gap: 3px;
-          min-height: 76px; padding: 14px 16px; border-radius: var(--r);
-          text-decoration: none; color: var(--fg); background: var(--s1);
-          border: 1px solid var(--line); transition: background .14s, border-color .14s; }
-  .path:hover { background: var(--s2); }
-  .path strong { font-size: .97rem; font-weight: 700; }
-  .path span { font-size: .78rem; color: var(--fg-2); }
-  .path.primary { border-color: color-mix(in srgb, var(--cyan) 42%, transparent);
-                  background: linear-gradient(180deg, color-mix(in srgb, var(--cyan) 9%, var(--s1)), var(--s1)); }
-  .path.primary:hover { border-color: var(--cyan); }
-  .path.primary strong { color: var(--cyan); }
-  .path.alt { border-left: 3px solid var(--club); }
+     The club colour appears three times here and nowhere else in the block:
+     the crest, a 3px rule under the name, and the rule above the figures. */
+  .hero { padding: 2px 0 0; margin-bottom: 26px; }
+  /* The <h1> is the grid, so the crest, the club name and the SEO line are
+     placed rather than stacked. The crest spans both rows beside the name and
+     the strapline; on a phone it keeps row one with the name and the strapline
+     drops to full width. Aligning it to the bottom of the whole heading, as
+     flex did, parked the crest next to the small print. */
+  .hero h1 { margin: 0; font-weight: 400; display: grid;
+             grid-template-columns: auto minmax(0, 1fr); column-gap: 16px;
+             align-items: center; }
+  .hero .crest { width: 60px; height: 69px; grid-row: 1 / 3; align-self: center; }
+  .hero .cn { grid-column: 2; font-size: clamp(2rem, 7.4vw, 3rem); font-weight: 800;
+              line-height: .94; letter-spacing: -.035em; padding-bottom: 9px;
+              box-shadow: inset 0 -3px 0 var(--club); justify-self: start;
+              text-wrap: balance; }
+  .hero .hsub { grid-column: 2; font-size: .87rem; font-weight: 400; color: var(--fg-2);
+                margin-top: 9px; line-height: 1.35; }
+
+  /* A stat line, not three cards. Hairline rules and tabular figures: this is
+     the one place on the page where a dashboard look is the right look. */
+  .figs { display: flex; margin: 20px 0 0; border-top: 2px solid var(--club);
+          border-bottom: 1px solid var(--line); }
+  .fig { flex: 1; min-width: 0; padding: 10px 0 11px; }
+  .fig + .fig { border-left: 1px solid var(--line); padding-left: 15px; }
+  .fig b { display: block; font-family: var(--mono); font-size: 1.32rem; font-weight: 700;
+           font-variant-numeric: tabular-nums; letter-spacing: -.035em; line-height: 1.1; }
+  .fig span { font-size: .64rem; text-transform: uppercase; letter-spacing: .1em;
+              color: var(--fg-3); }
+  .cover { font-size: .75rem; color: var(--fg-3); margin: 11px 0 0; }
+  .cover a { color: var(--fg-2); }
 
   /* ── section rhythm ─────────────────────────────────────────────────────
      One heading style, one spacing step. Headings are monospace because that
@@ -445,31 +563,58 @@ ${indexable ? '' : '<meta name="robots" content="noindex,follow">\n'}<meta name=
   .head a:hover { color: var(--cyan); }
 
   /* ── games ──────────────────────────────────────────────────────────────
-     The card is the link. Each has its own mark in the club colour, which is
-     the one place the club's identity recurs after the hero. */
-  /* Explicit column counts rather than auto-fit.
-     auto-fit with a min width gave 4 + 1 at tablet sizes, leaving the fifth
-     game orphaned on its own row — the one layout that reads as a mistake
-     rather than a choice. Five across at full width, 3 + 2 at tablet, 2 + 2 + 1
-     on a phone: every one of those looks deliberate. */
-  ul.games { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px;
-             grid-template-columns: repeat(5, 1fr); }
-  a.game-go { display: grid; grid-template-rows: auto auto 1fr auto; gap: 2px;
-              height: 100%; box-sizing: border-box; padding: 15px 15px 13px;
-              border-radius: var(--r); background: var(--s1); border: 1px solid var(--line);
+     Five identical charcoal rectangles with a 22px icon each was the most
+     entertaining thing on the site rendered as a table of contents. This is
+     one featured card carrying a pitch with an eleven on it, and a 2x2 of
+     smaller cards each with its own picture — so the section reads as five
+     different games before a word of it is read.
+
+     Four columns: the featured card takes two of them and both rows, the other
+     four fill the 2x2 that is left. No orphan row at any width. */
+  ul.games { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px;
+             grid-template-columns: repeat(4, 1fr); }
+  ul.games li.feat { grid-column: span 2; grid-row: span 2; }
+
+  a.game-go { position: relative; display: flex; flex-direction: column; height: 100%;
+              box-sizing: border-box; overflow: hidden; border-radius: var(--r);
+              background: var(--s1); border: 1px solid var(--line);
               text-decoration: none; color: var(--fg);
               transition: background .14s, border-color .14s, transform .14s; }
-  a.game-go:hover, a.game-go:focus-visible { background: var(--s2);
-              border-color: color-mix(in srgb, var(--club) 55%, var(--line-2));
-              transform: translateY(-2px); }
+  a.game-go:hover, a.game-go:focus-visible {
+              background: var(--s2); transform: translateY(-2px);
+              border-color: color-mix(in srgb, var(--club) 60%, var(--line-2)); }
   a.game-go:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
-  a.game-go .ico { width: 22px; height: 22px; color: var(--club); margin-bottom: 8px; }
-  a.game-go .gname { font-family: var(--mono); font-size: .85rem; font-weight: 700;
-                     line-height: 1.25; }
-  a.game-go .gblurb { font-size: .75rem; color: var(--fg-2); line-height: 1.38; margin-top: 3px; }
-  a.game-go .gplay { display: inline-flex; align-items: center; gap: 4px; margin-top: 11px;
-                     font-size: .76rem; font-weight: 700; color: var(--cyan); }
-  a.game-go .gplay svg { width: 13px; height: 13px; transition: transform .14s; }
+
+  /* The illustration sits on its own darker ground so the card has a picture
+     half and a words half, rather than an icon floating in a text block. */
+  .artbox { display: flex; align-items: center; justify-content: center;
+            background: var(--s0); border-bottom: 1px solid var(--line);
+            color: var(--fg-3); overflow: hidden; }
+  /* The illustration is the card, not a header on it — so it takes whatever
+     height is going and the words sit under it. Without flex:1 the four small
+     cards stretched to match the featured one and each gained 60px of nothing
+     below its last line. */
+  a.game-go:not(.feat) .artbox { flex: 1; min-height: 84px; padding: 10px 12px;
+                                 box-sizing: border-box; }
+  a.game-go:not(.feat) .art { width: 100%; height: 100%; max-height: 112px; }
+  a.game-go.feat .artbox { flex: 1; min-height: 190px; padding: 14px 16px;
+                           box-sizing: border-box;
+                           background: color-mix(in srgb, var(--club) 9%, #080B0E); }
+  a.game-go.feat .art-pitch { width: 100%; height: 100%; min-height: 160px; }
+  .artbox .art { display: block; }
+  .artbox .dots { filter: drop-shadow(0 1px 3px rgba(0,0,0,.6)); }
+
+  .gtext { padding: 13px 14px 14px; display: flex; flex-direction: column; }
+  a.game-go.feat .gtext { padding: 16px 18px 17px; }
+  .gtag { font-size: .62rem; font-weight: 700; text-transform: uppercase;
+          letter-spacing: .12em; color: var(--club); margin-bottom: 6px; }
+  .gname { font-family: var(--mono); font-size: .85rem; font-weight: 700; line-height: 1.25; }
+  a.game-go.feat .gname { font-size: 1.3rem; letter-spacing: -.02em; }
+  .gblurb { font-size: .75rem; color: var(--fg-2); line-height: 1.4; margin-top: 4px; }
+  a.game-go.feat .gblurb { font-size: .87rem; max-width: 40ch; margin-top: 6px; }
+  .gplay { display: inline-flex; align-items: center; gap: 5px; margin-top: 13px;
+           font-size: .82rem; font-weight: 700; color: var(--cyan); }
+  .gplay svg { width: 14px; height: 14px; transition: transform .14s; }
   a.game-go:hover .gplay svg { transform: translateX(3px); }
 
   /* ── competition filter ─────────────────────────────────────────────────
@@ -574,6 +719,10 @@ ${indexable ? '' : '<meta name="robots" content="noindex,follow">\n'}<meta name=
   #askAnswer .prov { font-size: .72rem; color: var(--fg-3); margin: 8px 0 0; }
 
   /* ── leaderboard + community, side by side ──────────────────────────────── */
+  /* Secondary. The leaderboard and the community games are worth linking to
+     and not worth the same heading weight as the games or the records. */
+  .minor h2 { font-size: .84rem; color: var(--fg-2); letter-spacing: .02em; }
+  .minor .head { margin-bottom: 10px; }
   .two { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
   .board { font-size: .84rem; }
   .board h3 { font-size: .66rem; text-transform: uppercase; letter-spacing: .09em;
@@ -598,14 +747,17 @@ ${indexable ? '' : '<meta name="robots" content="noindex,follow">\n'}<meta name=
           color: var(--cyan); text-decoration: none; }
   .mini:hover { text-decoration: underline; }
 
-  /* ── related ────────────────────────────────────────────────────────────── */
-  .related { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px; }
-  .related a { display: flex; align-items: center; gap: 8px; font-size: .82rem; padding: 8px 11px;
-               min-height: 38px; box-sizing: border-box; border-radius: var(--r-sm);
-               border: 1px solid var(--line); color: var(--fg); text-decoration: none; }
-  .related a i { width: 3px; align-self: stretch; border-radius: 2px; background: var(--club);
+  /* ── related ─────────────────────────────────────────────────────────────
+     These are links to other clubs, so they look like links. A grid of
+     bordered rectangles gave eight more boxes to a page that already had too
+     many, to say "Everton" eight times. */
+  .related { display: flex; flex-wrap: wrap; gap: 7px 18px; margin: 0; padding: 0;
+             list-style: none; }
+  .related a { display: inline-flex; align-items: center; gap: 7px; font-size: .84rem;
+               color: var(--fg-2); text-decoration: none; padding: 4px 0; min-height: 30px; }
+  .related a i { width: 9px; height: 9px; border-radius: 2px; background: var(--club);
                  flex: 0 0 auto; }
-  .related a:hover { background: var(--s1); border-color: var(--line-2); }
+  .related a:hover { color: var(--cyan); }
 
   footer.page { margin-top: 10px; padding-top: 18px; font-size: .75rem; color: var(--fg-3);
                 border-top: 1px solid var(--line); line-height: 1.7; }
@@ -613,50 +765,70 @@ ${indexable ? '' : '<meta name="robots" content="noindex,follow">\n'}<meta name=
   footer.page a:hover { color: var(--cyan); }
 
   /* ── narrow ─────────────────────────────────────────────────────────────
-     Deliberate decisions, not a stack of the desktop blocks: the filter
-     becomes a select, the two columns become one, the games go two-up rather
-     than one-up so the section stays a glance rather than a scroll. */
-  @media (max-width: 860px) {
-    ul.games { grid-template-columns: repeat(3, 1fr); }
+     Decisions, not a stack of the desktop blocks. The games keep the featured
+     card full width with the other four two-up beneath it, so the section is
+     still "one big game and four more" on a phone rather than five identical
+     rows; the filter becomes a select; the two columns become one. */
+  @media (max-width: 900px) {
+    ul.games { grid-template-columns: repeat(2, 1fr); }
+    ul.games li.feat { grid-column: 1 / -1; grid-row: auto; }
+    a.game-go.feat { flex-direction: row; align-items: stretch; }
+    a.game-go.feat .artbox { flex: 0 0 38%; border-bottom: 0;
+                             border-right: 1px solid var(--line); min-height: 0; }
+    a.game-go.feat .art-pitch { min-height: 128px; }
+    a.game-go.feat .gtext { flex: 1; justify-content: center; }
+    /* Two-up, the small cards are twice as wide as they are at desktop and
+       flex:1 turned that extra width into extra height, floating each shirt in
+       a lot of air. A fixed picture height instead, which also puts the four
+       titles on a shared baseline. */
+    a.game-go:not(.feat) .artbox { flex: 0 0 auto; height: 96px; }
+    a.game-go:not(.feat) .gtext { flex: 1; }
   }
   @media (max-width: 720px) {
     .two { grid-template-columns: 1fr; gap: 26px; }
   }
   @media (max-width: 620px) {
     .wrap { padding: 0 14px 48px; }
-    .ts-header .inner { padding: 10px 14px; gap: 12px;  flex-wrap: wrap;}
-    .hero { gap: 13px; padding-bottom: 15px; margin-bottom: 17px; }
-    .hero .crest { width: 38px; height: 44px; }
-    .hero h1 { font-size: 1.18rem; }
-    .hero .tag { font-size: .8rem; }
-    .figs { gap: 16px; margin-top: 12px; }
-    .fig b { font-size: 1rem; }
-    .paths { grid-template-columns: 1fr; gap: 8px; margin-bottom: 28px; }
-    .path { min-height: 62px; padding: 12px 14px; }
+    nav.crumbs { margin: 12px 0 10px; }
+    .hero { margin-bottom: 20px; }
+    .hero h1 { column-gap: 12px; }
+    .hero .crest { width: 46px; height: 53px; grid-row: 1; }
+    .hero .hsub { grid-column: 1 / -1; font-size: .8rem; margin-top: 7px; }
+    .figs { margin-top: 16px; }
+    .fig b { font-size: 1.1rem; }
+    .fig + .fig { padding-left: 12px; }
     section { margin-bottom: 30px; }
-    ul.games { grid-template-columns: repeat(2, 1fr); gap: 7px; }
-    a.game-go { padding: 12px 12px 11px; }
-    a.game-go .gblurb { font-size: .74rem; }
-    /* The segmented control is six pills on a phone; a select is one row. */
+    /* The featured card goes back to picture-over-words: 38% of a 360px screen
+       is a 136px pitch, which is a smudge. */
+    a.game-go.feat { flex-direction: column; }
+    a.game-go.feat .artbox { flex: 0 0 auto; min-height: 112px;
+                             border-right: 0; border-bottom: 1px solid var(--line); }
+    a.game-go.feat .art-pitch { min-height: 112px; }
+    a.game-go.feat .gname { font-size: 1.12rem; }
+    a.game-go.feat .gblurb { font-size: .8rem; }
+    /* A fixed picture height rather than flex:1. Stretched to equal card
+       height, "Higher or Lower" wrapping to two lines and "Who Am I?" to one
+       left the pair with two different illustration sizes and two different
+       title baselines, side by side. */
+    a.game-go:not(.feat) .artbox { flex: 0 0 auto; height: 76px; }
+    a.game-go:not(.feat) .gtext { flex: 1; }
+    .gtext { padding: 11px 12px 12px; }
     .seg { display: none; }
     .sel { display: block; }
+    .chip { min-height: 44px; }
     .potd { gap: 11px; padding: 11px 12px; flex-wrap: wrap; }
-    .potd .reveal { width: 100%; min-height: 44px; }
-    .related { grid-template-columns: 1fr 1fr; }
-    /* ~44px for anything a thumb lands on, per the platform guidance. The
-       desktop sizes are comfortable with a pointer and too small without one. */
-    .related a { min-height: 44px; }
-    .ask-examples button { min-height: 44px; padding: 10px 14px; }
-    details.rec > summary { min-height: 52px; }
-    .head a { padding: 6px 0; }
+    /* 44px tall, not 100% wide. Full width made a bright cyan slab the
+       loudest thing between the games and the records, for a side attraction. */
+    .potd .reveal { min-height: 44px; padding: 0 22px; }
+    .related { gap: 6px 16px; }
+    .related a { min-height: 36px; }
+    form.ask { flex-direction: column; }
+    form.ask button { padding: 12px; }
   }
   @media (max-width: 380px) {
-    ul.games { grid-template-columns: 1fr; }
-    .paths { gap: 7px; }
-    .figs { gap: 14px; }
+    .fig b { font-size: 1rem; }
+    .fig + .fig { padding-left: 9px; }
   }
-
-  /* Honour the setting. Nothing here is load-bearing animation. */
   @media (prefers-reduced-motion: reduce) {
     * { animation-duration: .01ms !important; transition-duration: .01ms !important; }
     a.game-go:hover { transform: none; }
@@ -684,31 +856,18 @@ ${indexable ? '' : '<meta name="robots" content="noindex,follow">\n'}<meta name=
 <nav class="crumbs"><a href="/">TeleStats</a> › <a href="/teams/">Teams</a> › ${esc(team.name)}</nav>
 
 <header class="hero">
-  ${shield(team, c)}
-  <div>
-    <h1>${esc(team.name)} Stats, Records &amp; Football Quizzes</h1>
-    <p class="tag">Player records and five free games, from a real football database.</p>
+  <h1>${shield(team, c)}<span class="cn">${esc(team.name)}</span><span class="hsub">Stats,
+    Records &amp; Football Quizzes &mdash; and five free games, from a real football
+    database.</span></h1>
+
+  <div class="figs">
+    <div class="fig"><b>${num(team.players)}</b><span>Players</span></div>
+    <div class="fig"><b>${num(totals.appearances)}</b><span>Appearances</span></div>
+    <div class="fig"><b>${num(totals.goals)}</b><span>Goals</span></div>
   </div>
+  <p class="cover">${esc(listOf(compList))} · ${esc(coverage)} ·
+    <a href="/tools/data.html">what the dataset covers</a></p>
 </header>
-
-<div class="figs">
-  <div class="fig"><b>${num(team.players)}</b><span>Players</span></div>
-  <div class="fig"><b>${num(totals.appearances)}</b><span>Appearances</span></div>
-  <div class="fig"><b>${num(totals.goals)}</b><span>Goals</span></div>
-</div>
-<p class="cover">${esc(listOf(compList))} · ${esc(coverage)} ·
-  <a href="/tools/data.html">what the dataset covers</a></p>
-
-<div class="paths${gameCards ? '' : ' one'}">
-  ${gameCards ? `<a class="path primary" href="#play">
-    <strong>Play ${esc(team.name)}</strong>
-    <span>Five football challenges</span>
-  </a>` : ''}
-  <a class="path alt" href="#records">
-    <strong>Explore the records</strong>
-    <span>${num(team.players)} players, appearances, scorers and seasons</span>
-  </a>
-</div>
 
 <section id="play">
   ${gameCards ? `<div class="head">
@@ -812,21 +971,25 @@ ${indexable ? '' : '<meta name="robots" content="noindex,follow">\n'}<meta name=
   <div id="askAnswer"></div>
 </section>
 
-<section>
+<!-- Hidden until team-extras answers, and it stays hidden if there is nothing
+     to show. An empty leaderboard beside an empty community panel, both under
+     their own headings, is two announcements that the club has nothing — on a
+     page whose job is to look worth playing. -->
+<section class="minor" id="extras" hidden>
   <div class="two">
-    <div>
+    <div id="boardCol">
       <div class="head">
         <h2>Leaderboard</h2>
         <a href="/leaderboard/">Full table &rarr;</a>
       </div>
-      <div id="boardBox"><p class="empty">Loading…</p></div>
+      <div id="boardBox"></div>
     </div>
-    <div>
+    <div id="commCol">
       <div class="head">
         <h2>Community games</h2>
         <a href="/community/">Browse &rarr;</a>
       </div>
-      <div id="communityBox"><p class="empty">Loading…</p></div>
+      <div id="communityBox"></div>
     </div>
   </div>
 </section>
@@ -836,9 +999,9 @@ ${nearby.length ? `<section>
     <h2>More clubs</h2>
     <a href="/teams/">Browse all teams &rarr;</a>
   </div>
-  <div class="related">
+  <ul class="related">
           ${relatedLinks}
-  </div>
+  </ul>
 </section>` : ''}
 
 <footer class="page">
