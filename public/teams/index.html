@@ -3,6 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<link rel="manifest" href="/manifest.json">
 <script src="/js/ts-analytics.js"></script>
 <title>Football Teams: Player Stats, Records &amp; Games | TeleStats</title>
 <meta name="description" content="Explore football player records, appearances, goals and games for 355 clubs. Find your team and discover football history on TeleStats.">
@@ -16,46 +20,10 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/telestats-theme.css">
+<link rel="stylesheet" href="/css/ts-page.css">
 <style>
-  /* The same tokens as a club page, so the hub belongs to the same product. */
-  :root {
-    --bg: #0A0E11; --s0: #090C0F; --s1: #11161B; --s2: #161C23;
-    --line: rgba(255,255,255,.07); --line-2: rgba(255,255,255,.12);
-    --fg: #EEF3F7; --fg-2: #9FAEBB; --fg-3: #6B7A87;
-    --cyan: var(--accent-cyan, #00E5FF);
-    --r: 12px;
-    --mono: 'Space Mono', ui-monospace, SFMono-Regular, monospace;
-  }
-  body { margin: 0; background: var(--bg); color: var(--fg);
-         font-family: Inter, system-ui, -apple-system, sans-serif; }
-  .wrap { max-width: 920px; margin: 0 auto; padding: 0 20px 64px; }
-  .vh { position: absolute; width: 1px; height: 1px; overflow: hidden;
-        clip: rect(0 0 0 0); white-space: nowrap; }
-
-  .ts-header { border-bottom: 1px solid var(--line); background: var(--s1); }
-  .ts-header .inner { max-width: 920px; margin: 0 auto; padding: 11px 20px;
-                      display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
-  .ts-header .brand { font-weight: 700; letter-spacing: .04em; color: var(--fg);
-                      text-decoration: none; font-family: var(--mono); }
-  .ts-header nav { display: flex; gap: 15px; flex-wrap: wrap; }
-  .ts-header nav a { font-size: .82rem; color: var(--fg-2); text-decoration: none; }
-  nav.crumbs { font-size: .76rem; color: var(--fg-3); margin: 16px 0 14px; }
-  nav.crumbs a { color: var(--fg-2); text-decoration: none; }
-
-  /* ── hero ───────────────────────────────────────────────────────────────
-     The editorial line is the display type; the H1 underneath it is the one
-     that has to say what this page IS. Both are real text — nothing is hidden
-     from anybody, and the search box is above the fold on a phone. */
-  .hero { padding: 2px 0 0; margin-bottom: 22px; }
-  .kicker { font-family: var(--mono); font-size: clamp(1.5rem, 5.4vw, 2.1rem);
-            font-weight: 700; letter-spacing: -.03em; line-height: 1.12; margin: 0 0 8px; }
-  .kicker em { font-style: normal; color: var(--cyan); }
-  h1 { font-size: .95rem; font-weight: 600; color: var(--fg-2); margin: 0 0 6px;
-       letter-spacing: 0; }
-  .lede { color: var(--fg-3); font-size: .84rem; margin: 0 0 16px; max-width: 60ch;
-          line-height: 1.5; }
-  .lede b { color: var(--fg-2); font-weight: 600; }
-
+  /* Tokens, the shell, headings, the hero and breadcrumbs now come from
+     css/ts-page.css. What stays here is what only this page has. */
   /* ── search ─────────────────────────────────────────────────────────────
      The main action. One input, a live list of matches, Enter goes to the top
      one. No request: every club is already on the page. */
@@ -188,11 +156,11 @@
 <header class="ts-header">
   <div class="inner">
     <a class="brand" href="/">TELESTATS</a>
-    <nav>
-      <a href="/daily/">Daily</a>
+    <nav aria-label="Site">
+      <a href="/">Home</a>
       <a href="/games/">Games</a>
       <a href="/competitions/">Competitions</a>
-      <a href="/teams/">Teams</a>
+      <a href="/teams/" aria-current="page">Teams</a>
       <a href="/ask/">Ask</a>
       <a href="/leaderboard/">Leaderboard</a>
       <a href="/community/">Community</a>
@@ -788,7 +756,8 @@
   <a href="/ask/">Ask TeleStats</a> &middot;
   <a href="/tools/data.html">Data coverage</a>
 </footer>
-</div><!-- /wrap -->
+</main>
+</div><!-- /ts-shell -->
 <script>
 (function () {
   'use strict';

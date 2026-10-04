@@ -6,14 +6,29 @@
  *   - API calls / Supabase: network-only (no caching)
  */
 
-const CACHE_NAME = 'telestats-v6';
+/**
+ * BUMP THIS WHENEVER A SHARED FILE IN /js OR /css GAINS SOMETHING PAGES CALL.
+ *
+ * The activate handler deletes every cache whose name is not this one, so the
+ * version is the only thing that evicts a stale copy of ts-nav.js or
+ * ts-scope.js from a device that already has one. Pages call these modules by
+ * name — TSFooter.render(), TSScope.lockTeam() — and a device still serving
+ * last week's copy from here gets "is not a function". The optional
+ * invocation those call sites use is the seatbelt; this is the brake.
+ */
+const CACHE_NAME = 'telestats-v7';
 
 const STATIC_ASSETS = [
   '/telestats-theme.css',
+  '/css/ts-page.css',
   '/js/ts-analytics.js',
   '/js/ts-auth.js',
   '/js/ts-data.js',
   '/js/ts-nav.js',
+  '/js/ts-footer.js',
+  '/js/ts-howto.js',
+  '/js/ts-scope.js',
+  '/js/ts-streak.js',
   '/offline.html'
 ];
 
@@ -21,7 +36,14 @@ const STATIC_ASSETS = [
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(STATIC_ASSETS))
+      // One at a time, not addAll: addAll is atomic, so a single asset that
+      // 404s rejects the whole install and the site is left with no service
+      // worker at all. A precache miss should cost one cached file.
+      .then(cache => Promise.all(STATIC_ASSETS.map(
+        url => cache.add(url).catch(err => {
+          console.warn('[sw] could not precache', url, err && err.message);
+        })
+      )))
       .then(() => self.skipWaiting())
   );
 });

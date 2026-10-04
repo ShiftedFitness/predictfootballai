@@ -1,0 +1,122 @@
+/**
+ * ts-page.css — the shared page shell.
+ *
+ * The club pages, the Teams hub, Games and Competitions had each grown their
+ * own copy of the same tokens, the same .wrap, the same heading scale and the
+ * same breakpoints. Changing one design decision meant editing four templates
+ * and finding out later which one had been missed.
+ *
+ * This holds what they genuinely share: tokens, the shell, headings,
+ * breadcrumbs, the hero, the how-to popover and the sticky footer. Anything
+ * specific to one page stays on that page.
+ *
+ * It does NOT restyle the games themselves. Those are self-contained
+ * full-screen interfaces with their own layout needs, and the brief is to
+ * leave them compatible.
+ */
+
+:root {
+  --bg: #0A0E11;
+  --s0: #090C0F;
+  --s1: #11161B;
+  --s2: #161C23;
+  --line: rgba(255, 255, 255, .07);
+  --line-2: rgba(255, 255, 255, .12);
+  --fg: #EEF3F7;
+  --fg-2: #9FAEBB;
+  --fg-3: #6B7A87;
+  --cyan: var(--accent-cyan, #00E5FF);
+  --r: 12px;
+  --r-sm: 9px;
+  --mono: 'Space Mono', ui-monospace, SFMono-Regular, monospace;
+  --wrap: 920px;
+}
+
+/* ── the shell ──────────────────────────────────────────────────────────
+   A column the height of the viewport with the main content flexed, so the
+   footer sits at the BOTTOM of a short page instead of floating halfway up
+   an empty screen, and after the content on a long one. */
+.ts-shell { min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; }
+.ts-shell > main { flex: 1 0 auto; }
+.ts-shell > .ts-footer { flex: 0 0 auto; }
+
+body { margin: 0; background: var(--bg); color: var(--fg);
+       font-family: Inter, system-ui, -apple-system, sans-serif; }
+.wrap { max-width: var(--wrap); margin: 0 auto; padding: 0 20px 56px; width: 100%;
+        box-sizing: border-box; }
+.vh { position: absolute; width: 1px; height: 1px; overflow: hidden;
+      clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ── the no-JS header ───────────────────────────────────────────────────
+   TSNav removes .ts-header and prepends the real bar. This is what a visitor
+   sees before the script runs and all a crawler ever sees, so it carries the
+   same links in the same order — the nav config lives in ts-nav.js and this
+   is generated from it by scripts/pages/shell.js. Full width, with its inner
+   content aligned to the same --wrap as the page: the old version constrained
+   the whole header, so the account controls floated outside it. */
+.ts-header { border-bottom: 1px solid var(--line); background: var(--s1); }
+.ts-header .inner { max-width: var(--wrap); margin: 0 auto; padding: 11px 20px;
+                    display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+                    box-sizing: border-box; }
+.ts-header .brand { font-weight: 700; letter-spacing: .04em; color: var(--fg);
+                    text-decoration: none; font-family: var(--mono); }
+.ts-header nav { display: flex; gap: 15px; flex-wrap: wrap; }
+.ts-header nav a { font-size: .82rem; color: var(--fg-2); text-decoration: none; }
+.ts-header nav a:hover, .ts-header nav a[aria-current] { color: var(--cyan); }
+
+nav.crumbs { font-size: .76rem; color: var(--fg-3); margin: 16px 0 14px; }
+nav.crumbs a { color: var(--fg-2); text-decoration: none; }
+nav.crumbs a:hover { color: var(--cyan); }
+
+/* ── hero and section rhythm ───────────────────────────────────────────── */
+.hero { padding: 2px 0 0; margin-bottom: 24px; }
+.kicker { font-family: var(--mono); font-size: clamp(1.5rem, 5.4vw, 2.1rem); font-weight: 700;
+          letter-spacing: -.03em; line-height: 1.12; margin: 0 0 8px; }
+.kicker em { font-style: normal; color: var(--cyan); }
+.hero h1 { font-size: .95rem; font-weight: 600; color: var(--fg-2); margin: 0 0 6px;
+           letter-spacing: 0; }
+.lede { color: var(--fg-3); font-size: .84rem; margin: 0; max-width: 62ch; line-height: 1.5; }
+.lede b { color: var(--fg-2); font-weight: 600; }
+
+section.band { margin-bottom: 34px; }
+h2 { font-family: var(--mono); font-size: 1rem; font-weight: 700; margin: 0 0 3px;
+     letter-spacing: -.01em; }
+.sublede { color: var(--fg-3); font-size: .78rem; margin: 0 0 14px; max-width: 62ch;
+           line-height: 1.5; }
+.head { display: flex; align-items: baseline; justify-content: space-between;
+        gap: 12px; margin-bottom: 14px; }
+.head h2 { margin: 0; }
+.head a { font-size: .78rem; color: var(--fg-2); text-decoration: none; white-space: nowrap; }
+.head a:hover { color: var(--cyan); }
+
+/* ── how to play ────────────────────────────────────────────────────────
+   A question mark on a card. The button is always a SIBLING of the card's
+   anchor, never a child: a <button> inside an <a> is invalid and browsers
+   disagree about which one a tap belongs to. */
+.howto { position: absolute; top: 6px; right: 6px; z-index: 2; width: 30px; height: 30px;
+         display: flex; align-items: center; justify-content: center; padding: 0;
+         border-radius: 50%; cursor: pointer; border: 1px solid var(--line-2);
+         background: rgba(10, 14, 17, .72); color: var(--fg-2); backdrop-filter: blur(3px); }
+.howto svg { width: 15px; height: 15px; }
+.howto:hover { color: var(--fg); border-color: var(--fg-3); }
+.howto:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+.howto[aria-expanded="true"] { background: var(--cyan); color: #06181C; border-color: var(--cyan); }
+.howpop { position: absolute; z-index: 3; top: 40px; right: 6px; left: 6px; padding: 11px 13px;
+          border-radius: 10px; font-size: .77rem; line-height: 1.45; color: var(--fg);
+          background: var(--s2); border: 1px solid var(--line-2);
+          box-shadow: 0 10px 28px rgba(0, 0, 0, .55); }
+.howpop[hidden] { display: none; }
+
+@media (max-width: 620px) {
+  .wrap { padding: 0 14px 44px; }
+  nav.crumbs { margin: 10px 0 9px; font-size: .72rem; }
+  .kicker { font-size: clamp(1.35rem, 7vw, 1.8rem); }
+  .hero h1 { font-size: .86rem; }
+  .lede { font-size: .79rem; }
+  .hero { margin-bottom: 20px; }
+  section.band { margin-bottom: 28px; }
+  h2 { font-size: .95rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}

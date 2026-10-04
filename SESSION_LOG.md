@@ -3143,3 +3143,52 @@ with all 355 links still in the HTML and nothing hidden before JS runs.
 Starting XI page when the browser held a cached ts-scope.js, because the call
 sits inside init()'s try block. Every shared-module call in the game pages is
 now optional invocation, as CLAUDE.md already requires for ts-analytics.
+
+## Site consistency, Games, Daily, Competitions, favicon
+
+**Favicon.** There was none — no `favicon.ico`, and not one page carried a
+`<link rel="icon">`. The only brand asset was the wordmark, which at 16px is a
+smudge. Drew a football (ring, pentagon, five seams) in the brand cyan, and
+DROPPED the seams below 24px, where five of them inside a 16px ring are four
+grey pixels. Generated 16/32/48/180/192/512 plus a real multi-size .ico with
+Pillow, wired into every public page and the manifest. First attempt read as a
+crosshair because the seams ran past the ring; fixed by stopping them at it.
+
+**Service worker.** Bumped `telestats-v6` → `v7`. The activate handler deletes
+every cache that is not the current name, so the version is the only thing
+that evicts a stale `ts-nav.js` or `ts-scope.js` from a device that has one —
+and pages now call `TSFooter.render()` and `TSScope.lockTeam()` by name. Also
+replaced `cache.addAll` with per-asset `cache.add().catch()`: addAll is atomic,
+so one 404 rejected the whole install and left the site with no worker at all.
+
+**One header.** `scripts/pages/shell.js` renders the no-JS header and READS THE
+LINK LIST FROM ts-nav.js, so the fallback and the real nav cannot disagree.
+Teams, Competitions and Games had three hand-written copies, which is how they
+had drifted apart.
+
+**One stylesheet.** `public/css/ts-page.css` holds the tokens, the shell, the
+hero, headings, breadcrumbs and the how-to popover. All three hubs use it. The
+shell is a flex column so the footer sits at the bottom of a short page.
+
+**Games, rebuilt and generated** (`npm run build:games`) so it draws the same
+six illustrations the club pages use rather than a second copy, and so the hero
+figures come from the database. Today's Challenge is the first thing on it,
+reading the same `/daily` function and the same ts-streak store. Six equal
+cards, not 1 + 5: five small cards in a four-column grid leaves one alone on a
+row at every width.
+
+**Daily** left the header; the route still works, is still linked from Games
+three times, and nothing about streak storage changed.
+
+**Competitions** reordered to the football order — England's pyramid top to
+bottom, then cups, then Europe. It had been sorted by club count, which put the
+FA Cup first and the Premier League ninth.
+
+**Overflow fixes, all pre-existing:** `/leaderboard/` (table cells with no
+minimum), `/upgrade/` (a 521px comparison table on a 390px phone), and
+`/tools/player-lookup.html` — that last one was MINE: I added the shared nav to
+a page that had never loaded telestats-theme.css, so `.ts-nav-logo` was
+unstyled and rendered at its intrinsic 1070px.
+
+Verified: 34 page/width combinations, 0 overflows, exactly one header and one
+footer on each.

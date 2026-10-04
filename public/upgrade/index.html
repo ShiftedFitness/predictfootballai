@@ -2,6 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<link rel="manifest" href="/manifest.json">
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <!-- Analytics: GA4 via the central TeleStats helper (never loaded on /fives*) -->
   <script src="/js/ts-analytics.js"></script>
@@ -83,6 +87,18 @@
     @media (max-width: 640px) {
       .up-container { margin-top: 70px; }
       .up-plans { grid-template-columns: 1fr; }
+      /* The comparison table has four columns of 10px-padded cells and no
+         minimum it can fall below, so it sat 521px wide on a 390px phone and
+         scrolled the whole page sideways. Fixed layout and tighter cells keep
+         it inside the viewport; the feature column wraps instead. */
+      .up-table { table-layout: fixed; }
+      .up-table th, .up-table td { padding: 8px 4px; font-size: .78rem; }
+      .up-table td:first-child, .up-table th:first-child { width: 42%; }
+    }
+    /* The narrowest phones. 3px over is still a sideways scroll. */
+    @media (max-width: 400px) {
+      .up-table th, .up-table td { padding: 7px 2px; font-size: .72rem; }
+      .up-table td:first-child, .up-table th:first-child { width: 40%; }
     }
     /* Payment verification banner */
     @keyframes verifyPulse {

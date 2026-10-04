@@ -18,8 +18,12 @@
   // nobody else has, and it was findable from team pages alone.
   const NAV_LINKS = [
     { label: 'Home', href: '/', match: (p) => p === '/' || p === '/index.html' },
-    { label: 'Daily', href: '/daily/', match: (p) => p.startsWith('/daily') },
-    { label: 'Games', href: '/games/', match: (p) => p.startsWith('/games') },
+    // Daily is no longer its own section: today's challenge is the first thing
+    // on /games/. The ROUTE still works and is still linked from there — only
+    // the header entry is gone, because eight top-level sections on a phone is
+    // a hamburger full of near-duplicates. /daily/ counts as Games so somebody
+    // who follows an old link still sees where they are.
+    { label: 'Games', href: '/games/', match: (p) => p.startsWith('/games') || p.startsWith('/daily') },
     { label: 'Competitions', href: '/competitions/', match: (p) => p.startsWith('/competitions') },
     { label: 'Teams', href: '/teams/', match: (p) => p.startsWith('/teams') },
     { label: 'Ask', href: '/ask/', match: (p) => p.startsWith('/ask') },

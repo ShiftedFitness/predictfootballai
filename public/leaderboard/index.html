@@ -2,6 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<link rel="manifest" href="/manifest.json">
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <!-- Analytics: GA4 via the central TeleStats helper (never loaded on /fives*) -->
   <script src="/js/ts-analytics.js"></script>
@@ -57,6 +61,17 @@
       .lb-container { margin-top: 70px; }
       .lb-table th:nth-child(4), .lb-table td:nth-child(4) { display: none; }
       .lb-table th:nth-child(5), .lb-table td:nth-child(5) { display: none; }
+      /* Two columns were already hidden here, but the remaining cells kept
+         their 12px padding and a long username has nowhere to wrap, so the
+         table still ran ~5px past a 390px screen and scrolled the whole page
+         sideways. Tighter cells and a wrappable name column instead. */
+      .lb-table { table-layout: fixed; width: 100%; }
+      .lb-table th, .lb-table td { padding: 10px 6px; }
+      .lb-rank { width: 32px; }
+      .lb-user { gap: 8px; min-width: 0; }
+      .lb-user span { min-width: 0; overflow: hidden; text-overflow: ellipsis;
+                      white-space: nowrap; }
+      .lb-avatar { width: 28px; height: 28px; flex: 0 0 auto; }
     }
   </style>
 </head>

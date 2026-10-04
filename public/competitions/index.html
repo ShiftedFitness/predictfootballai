@@ -2,173 +2,500 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<link rel="manifest" href="/manifest.json">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="/js/ts-analytics.js"></script>
-<title>Football Competitions — Quizzes by League | TeleStats</title>
-<meta name="description" content="Play football quizzes by competition. 12 leagues and cups, from the Premier League and La Liga to League Two and the Segunda División, built from real appearance and goal records.">
+<title>Football Competitions: Player Stats, Records &amp; Games | TeleStats</title>
+<meta name="description" content="Explore player records and play football challenges across 12 of Europe&#39;s leagues and cups, from the Premier League and La Liga to League Two and the Segunda División.">
 <link rel="canonical" href="https://telestats.net/competitions/">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Football Competitions — Quizzes by League | TeleStats">
-<meta property="og:description" content="Play football quizzes by competition. 12 leagues and cups, from the Premier League and La Liga to League Two and the Segunda División, built from real appearance and goal records.">
+<meta property="og:title" content="Football Competitions: Player Stats, Records &amp; Games | TeleStats">
+<meta property="og:description" content="Explore player records and play football challenges across 12 of Europe&#39;s leagues and cups, from the Premier League and La Liga to League Two and the Segunda División.">
 <meta property="og:url" content="https://telestats.net/competitions/">
 <meta name="twitter:card" content="summary">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/telestats-theme.css">
+<link rel="stylesheet" href="/css/ts-page.css">
 <style>
-  body { margin: 0; }
-  .wrap { max-width: 900px; margin: 0 auto; padding: 0 18px 50px; }
-  .ts-header { border-bottom: 1px solid var(--rule, #24313A); background: var(--bg-card, #131A20); }
-  .ts-header .inner { max-width: 900px; margin: 0 auto; padding: 11px 18px;
-                      display: flex; align-items: center; gap: 18px;  flex-wrap: wrap;}
-  .ts-header .brand { font-weight: 700; letter-spacing: .04em; color: var(--text-primary, #F2F5F7);
-                      text-decoration: none; font-family: 'Space Mono', ui-monospace, monospace; }
-  .ts-header nav { display: flex; gap: 15px; flex-wrap: wrap; }
-  .ts-header nav a { font-size: .82rem; color: var(--text-secondary, #9FB0BC); text-decoration: none; }
-  nav.crumbs { font-size: .78rem; color: var(--text-secondary); margin: 16px 0 12px; }
-  nav.crumbs a { color: var(--accent); text-decoration: none; }
-  h1 { font-size: 1.65rem; margin: 0 0 6px; }
-  .lede { color: var(--text-secondary); margin: 0 0 26px; max-width: 62ch; line-height: 1.55; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
-  a.comp { display: flex; gap: 12px; align-items: stretch; text-decoration: none; color: inherit;
-           border: 1px solid var(--rule, #24313A); border-radius: 9px; padding: 14px 15px;
-           background: var(--bg-card, #131A20); transition: border-color .15s, transform .15s; }
-  a.comp:hover { border-color: var(--club); transform: translateY(-1px); }
-  a.comp i { width: 5px; border-radius: 3px; background: var(--club); flex: 0 0 auto; }
-  a.comp h2 { font-size: 1rem; margin: 0 0 3px; }
-  a.comp p { font-size: .8rem; color: var(--text-secondary); margin: 0; }
-  a.comp .yrs { color: var(--text-muted); font-size: .75rem; margin-top: 2px; }
-  footer.page { margin-top: 40px; padding-top: 16px; font-size: .77rem; color: var(--text-muted);
-                border-top: 1px solid var(--rule, #24313A); }
-  footer.page a { color: var(--accent); }
+  /* A competition's identity is a tint and its initials. No crests, no league
+     logos: those are trademarks, and this page is not worth a licence. */
+  ul.comps { list-style: none; padding: 0; margin: 0; display: grid; gap: 9px;
+             grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  ul.feat { list-style: none; padding: 0; margin: 0; display: grid; gap: 9px;
+            grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  a.comp { display: flex; flex-direction: column; gap: 9px; height: 100%; min-width: 0;
+           box-sizing: border-box; padding: 14px 15px 13px; border-radius: 12px;
+           text-decoration: none; color: var(--fg); background: var(--s1);
+           border: 1px solid var(--line); border-top: 2px solid var(--tint);
+           transition: background .14s, border-color .14s, transform .14s; }
+  a.comp:hover { background: var(--s2); transform: translateY(-2px);
+                 border-color: color-mix(in srgb, var(--tint) 55%, var(--line-2));
+                 border-top-color: var(--tint); }
+  a.comp:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+  .ctop { display: flex; align-items: center; gap: 10px; }
+  .cbadge { flex: 0 0 auto; width: 32px; height: 32px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-family: var(--mono); font-size: .72rem; font-weight: 700;
+            color: #06181C; background: var(--tint); letter-spacing: -.02em; }
+  .cwho { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+  .cname { font-family: var(--mono); font-size: .88rem; font-weight: 700; line-height: 1.2; }
+  .cscope { font-size: .68rem; color: var(--fg-3); }
+  .cfig { display: grid; grid-template-columns: repeat(3, minmax(0, auto)); gap: 1px 5px;
+          align-items: baseline; margin-top: auto; min-width: 0; }
+  .cfig b { font-family: var(--mono); font-size: .9rem; font-weight: 700;
+            font-variant-numeric: tabular-nums; grid-row: 1; }
+  .cfig span { font-size: .6rem; text-transform: uppercase; letter-spacing: .08em;
+               color: var(--fg-3); grid-row: 2; }
+  .cyrs { font-size: .68rem; color: var(--fg-3); font-variant-numeric: tabular-nums; }
+  a.comp.big .cbadge { width: 38px; height: 38px; font-size: .8rem; }
+  a.comp.big .cname { font-size: .95rem; }
+
+  .gtabs { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 18px; }
+  .gtab { font: inherit; font-size: .82rem; font-weight: 600; padding: 8px 14px;
+          min-height: 38px; border-radius: 999px; cursor: pointer;
+          background: var(--s1); color: var(--fg-2); border: 1px solid var(--line); }
+  .gtab:hover { color: var(--fg); border-color: var(--line-2); }
+  .gtab.on { background: var(--cyan); color: #06181C; border-color: var(--cyan); }
+  .gtab:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+  .gblock { margin-bottom: 26px; }
+  .gblock[hidden] { display: none; }
+  .ghead { display: flex; align-items: baseline; gap: 9px; margin-bottom: 10px; }
+  .ghead h3 { font-family: var(--mono); font-size: .92rem; margin: 0; }
+  .gcount { font-size: .72rem; color: var(--fg-3); }
+  .csub { font-size: .66rem; text-transform: uppercase; letter-spacing: .1em;
+          color: var(--fg-3); margin: 0 0 7px; }
+  .histnote { font-size: .72rem; color: var(--fg-3); margin: 0 0 16px; }
+
+  @media (max-width: 900px) { ul.feat { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  @media (max-width: 720px) { ul.comps { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 620px) {
+    /* minmax(0, 1fr), not 1fr. A grid track defaults to min-content, and the
+       three-figure row inside a card refuses to go below its own width — so at
+       360px the tracks pushed the page 2px wider than the viewport rather than
+       letting the cards shrink. */
+    ul.feat, ul.comps { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    a.comp { padding: 12px 12px 11px; }
+    .cbadge, a.comp.big .cbadge { width: 28px; height: 28px; font-size: .64rem; }
+    .cname, a.comp.big .cname { font-size: .8rem; }
+    .cfig b { font-size: .8rem; }
+    .gblock { margin-bottom: 22px; }
+  }
 </style>
 </head>
 <body>
+<div class="ts-shell">
 <header class="ts-header">
   <div class="inner">
     <a class="brand" href="/">TELESTATS</a>
-    <nav>
-      <a href="/daily/">Daily</a>
+    <nav aria-label="Site">
+      <a href="/">Home</a>
       <a href="/games/">Games</a>
-      <a href="/competitions/">Competitions</a>
+      <a href="/competitions/" aria-current="page">Competitions</a>
       <a href="/teams/">Teams</a>
       <a href="/ask/">Ask</a>
+      <a href="/leaderboard/">Leaderboard</a>
       <a href="/community/">Community</a>
     </nav>
   </div>
 </header>
-<div class="wrap">
-<nav class="crumbs"><a href="/">TeleStats</a> › Competitions</nav>
-<h1>Football Games by Competition</h1>
-<p class="lede">Play football quizzes by competition. 12 leagues and cups, from the Premier League and La Liga to League Two and the Segunda División, built from real appearance and goal records.</p>
+<main class="wrap">
+<nav class="crumbs"><a href="/">TeleStats</a> &rsaquo; Competitions</nav>
 
-<div class="grid">
-    <a class="comp" href="/competitions/champions-league/" style="--club:#482C83">
-      <i></i>
-      <div>
-        <h2>Champions League</h2>
-        <p>67 clubs · 10,150 players · 37 seasons</p>
-        <p class="yrs">1990/91 – 2026/27</p>
-      </div>
-    </a>
-    <a class="comp" href="/competitions/fa-cup/" style="--club:#004C97">
-      <i></i>
-      <div>
-        <h2>FA Cup</h2>
-        <p>110 clubs · 8,861 players · 12 seasons</p>
-        <p class="yrs">2014/15 – 2025/26</p>
-      </div>
-    </a>
-    <a class="comp" href="/competitions/efl-cup/" style="--club:#004C97">
-      <i></i>
-      <div>
-        <h2>EFL Cup</h2>
-        <p>105 clubs · 6,916 players · 13 seasons</p>
-        <p class="yrs">2014/15 – 2026/27</p>
-      </div>
-    </a>
-    <a class="comp" href="/competitions/league-two/" style="--club:#004C97">
-      <i></i>
-      <div>
-        <h2>League Two</h2>
-        <p>73 clubs · 6,874 players · 25 seasons</p>
-        <p class="yrs">2002/03 – 2026/27</p>
-      </div>
-    </a>
-    <a class="comp" href="/competitions/league-one/" style="--club:#004C97">
-      <i></i>
-      <div>
-        <h2>League One</h2>
-        <p>83 clubs · 6,491 players · 25 seasons</p>
-        <p class="yrs">2002/03 – 2026/27</p>
-      </div>
-    </a>
-    <a class="comp" href="/competitions/segunda-division/" style="--club:#5A2D82">
-      <i></i>
-      <div>
-        <h2>Segunda División</h2>
-        <p>85 clubs · 5,978 players · 26 seasons</p>
-        <p class="yrs">2001/02 – 2026/27</p>
-      </div>
-    </a>
-    <a class="comp" href="/competitions/championship/" style="--club:#00A3E0">
-      <i></i>
-      <div>
-        <h2>Championship</h2>
-        <p>65 clubs · 5,977 players · 26 seasons</p>
-        <p class="yrs">2001/02 – 2026/27</p>
-      </div>
-    </a>
-    <a class="comp" href="/competitions/la-liga/" style="--club:#5A2D82">
-      <i></i>
-      <div>
-        <h2>La Liga</h2>
-        <p>50 clubs · 5,934 players · 39 seasons</p>
-        <p class="yrs">1988/89 – 2026/27</p>
-      </div>
-    </a>
-    <a class="comp" href="/competitions/serie-a/" style="--club:#482C83">
-      <i></i>
-      <div>
-        <h2>Serie A</h2>
-        <p>53 clubs · 5,500 players · 39 seasons</p>
-        <p class="yrs">1988/89 – 2026/27</p>
-      </div>
-    </a>
-    <a class="comp" href="/competitions/ligue-1/" style="--club:#009FE3">
-      <i></i>
-      <div>
-        <h2>Ligue 1</h2>
-        <p>46 clubs · 5,247 players · 32 seasons</p>
-        <p class="yrs">1995/96 – 2026/27</p>
-      </div>
-    </a>
-    <a class="comp" href="/competitions/premier-league/" style="--club:#004C97">
-      <i></i>
-      <div>
-        <h2>Premier League</h2>
-        <p>51 clubs · 5,198 players · 35 seasons</p>
-        <p class="yrs">1992/93 – 2026/27</p>
-      </div>
-    </a>
-    <a class="comp" href="/competitions/bundesliga/" style="--club:#E1000F">
-      <i></i>
-      <div>
-        <h2>Bundesliga</h2>
-        <p>49 clubs · 5,082 players · 39 seasons</p>
-        <p class="yrs">1988/89 – 2026/27</p>
-      </div>
-    </a>
+<div class="hero">
+  <p class="kicker">Pick your <em>competition</em>.</p>
+  <h1>Football competitions: player records, stats and games</h1>
+  <p class="lede">Explore player records and take on football challenges across
+    <b>12 of Europe's leagues and cups</b>.</p>
 </div>
 
-<footer class="page">
-  <a href="/teams/">All teams</a> ·
-  <a href="/games/">All games</a> ·
-  <a href="/ask/">Ask TeleStats</a> ·
-  <a href="/tools/data.html">Dataset coverage</a>
+<section class="band">
+  <h2>Start here</h2>
+  <p class="sublede">A few of the best known. Every competition below has the same
+    records and the same games.</p>
+  <ul class="feat">
+        <li><a class="comp big" href="/competitions/premier-league/"
+        style="--tint:#38E8C0">
+      <span class="ctop">
+        <span class="cbadge" aria-hidden="true">PL</span>
+        <span class="cwho">
+          <span class="cname">Premier League</span>
+          <span class="cscope">England</span>
+        </span>
+      </span>
+      <span class="cfig">
+        <b>51</b><span>clubs</span>
+        <b>5,198</b><span>players</span>
+        <b>35</b><span>seasons</span>
+      </span>
+      <span class="cyrs">1992/93&ndash;2026/27</span>
+    </a></li>
+        <li><a class="comp big" href="/competitions/champions-league/"
+        style="--tint:#00E5FF">
+      <span class="ctop">
+        <span class="cbadge" aria-hidden="true">CL</span>
+        <span class="cwho">
+          <span class="cname">Champions League</span>
+          <span class="cscope">Europe · Cup</span>
+        </span>
+      </span>
+      <span class="cfig">
+        <b>67</b><span>clubs</span>
+        <b>10,150</b><span>players</span>
+        <b>37</b><span>seasons</span>
+      </span>
+      <span class="cyrs">1990/91&ndash;2026/27</span>
+    </a></li>
+        <li><a class="comp big" href="/competitions/la-liga/"
+        style="--tint:#FFC94D">
+      <span class="ctop">
+        <span class="cbadge" aria-hidden="true">LL</span>
+        <span class="cwho">
+          <span class="cname">La Liga</span>
+          <span class="cscope">Spain</span>
+        </span>
+      </span>
+      <span class="cfig">
+        <b>50</b><span>clubs</span>
+        <b>5,934</b><span>players</span>
+        <b>39</b><span>seasons</span>
+      </span>
+      <span class="cyrs">1988/89&ndash;2026/27</span>
+    </a></li>
+        <li><a class="comp big" href="/competitions/bundesliga/"
+        style="--tint:#FF5C5C">
+      <span class="ctop">
+        <span class="cbadge" aria-hidden="true">BUN</span>
+        <span class="cwho">
+          <span class="cname">Bundesliga</span>
+          <span class="cscope">Germany</span>
+        </span>
+      </span>
+      <span class="cfig">
+        <b>49</b><span>clubs</span>
+        <b>5,082</b><span>players</span>
+        <b>39</b><span>seasons</span>
+      </span>
+      <span class="cyrs">1988/89&ndash;2026/27</span>
+    </a></li>
+        <li><a class="comp big" href="/competitions/serie-a/"
+        style="--tint:#5BC8FF">
+      <span class="ctop">
+        <span class="cbadge" aria-hidden="true">SA</span>
+        <span class="cwho">
+          <span class="cname">Serie A</span>
+          <span class="cscope">Italy</span>
+        </span>
+      </span>
+      <span class="cfig">
+        <b>53</b><span>clubs</span>
+        <b>5,500</b><span>players</span>
+        <b>39</b><span>seasons</span>
+      </span>
+      <span class="cyrs">1988/89&ndash;2026/27</span>
+    </a></li>
+  </ul>
+</section>
+
+<section class="band">
+  <h2>All 12 competitions</h2>
+  <p class="sublede">By country, leagues top to bottom, then cups.</p>
+  <div class="gtabs" role="group" aria-label="Filter competitions by country">
+    <button type="button" class="gtab on" data-group="">All</button>
+    <button type="button" class="gtab" data-group="ENG"
+      >England</button>
+    <button type="button" class="gtab" data-group="ESP"
+      >Spain</button>
+    <button type="button" class="gtab" data-group="ITA"
+      >Italy</button>
+    <button type="button" class="gtab" data-group="GER"
+      >Germany</button>
+    <button type="button" class="gtab" data-group="FRA"
+      >France</button>
+    <button type="button" class="gtab" data-group="EUR"
+      >Europe</button>
+  </div>
+  <p class="histnote">Club and player counts cover everyone we hold records for in that
+    competition at any point in its history &mdash; not the current season's entrants.</p>
+
+<section class="gblock" data-group="ENG">
+  <div class="ghead"><h3>England</h3><span class="gcount">6</span></div>
+  
+    <p class="csub">Leagues</p>
+    <ul class="comps">
+          <li><a class="comp" href="/competitions/premier-league/"
+        style="--tint:#38E8C0">
+      <span class="ctop">
+        <span class="cbadge" aria-hidden="true">PL</span>
+        <span class="cwho">
+          <span class="cname">Premier League</span>
+          <span class="cscope">England</span>
+        </span>
+      </span>
+      <span class="cfig">
+        <b>51</b><span>clubs</span>
+        <b>5,198</b><span>players</span>
+        <b>35</b><span>seasons</span>
+      </span>
+      <span class="cyrs">1992/93&ndash;2026/27</span>
+    </a></li>
+          <li><a class="comp" href="/competitions/championship/"
+        style="--tint:#4F8BFF">
+      <span class="ctop">
+        <span class="cbadge" aria-hidden="true">CHA</span>
+        <span class="cwho">
+          <span class="cname">Championship</span>
+          <span class="cscope">England</span>
+        </span>
+      </span>
+      <span class="cfig">
+        <b>65</b><span>clubs</span>
+        <b>5,977</b><span>players</span>
+        <b>26</b><span>seasons</span>
+      </span>
+      <span class="cyrs">2001/02&ndash;2026/27</span>
+    </a></li>
+          <li><a class="comp" href="/competitions/league-one/"
+        style="--tint:#C792EA">
+      <span class="ctop">
+        <span class="cbadge" aria-hidden="true">LO</span>
+        <span class="cwho">
+          <span class="cname">League One</span>
+          <span class="cscope">England</span>
+        </span>
+      </span>
+      <span class="cfig">
+        <b>83</b><span>clubs</span>
+        <b>6,491</b><span>players</span>
+        <b>25</b><span>seasons</span>
+      </span>
+      <span class="cyrs">2002/03&ndash;2026/27</span>
+    </a></li>
+          <li><a class="comp" href="/competitions/league-two/"
+        style="--tint:#F0A35E">
+      <span class="ctop">
+        <span class="cbadge" aria-hidden="true">LT</span>
+        <span class="cwho">
+          <span class="cname">League Two</span>
+          <span class="cscope">England</span>
+        </span>
+      </span>
+      <span class="cfig">
+        <b>73</b><span>clubs</span>
+        <b>6,874</b><span>players</span>
+        <b>25</b><span>seasons</span>
+      </span>
+      <span class="cyrs">2002/03&ndash;2026/27</span>
+    </a></li>
+    </ul>
+  
+    <p class="csub">Cups</p>
+    <ul class="comps">
+          <li><a class="comp" href="/competitions/fa-cup/"
+        style="--tint:#FF6B8A">
+      <span class="ctop">
+        <span class="cbadge" aria-hidden="true">FC</span>
+        <span class="cwho">
+          <span class="cname">FA Cup</span>
+          <span class="cscope">England · Cup</span>
+        </span>
+      </span>
+      <span class="cfig">
+        <b>110</b><span>clubs</span>
+        <b>8,861</b><span>players</span>
+        <b>12</b><span>seasons</span>
+      </span>
+      <span class="cyrs">2014/15&ndash;2025/26</span>
+    </a></li>
+          <li><a class="comp" href="/competitions/efl-cup/"
+        style="--tint:#8FA2B4">
+      <span class="ctop">
+        <span class="cbadge" aria-hidden="true">EC</span>
+        <span class="cwho">
+          <span class="cname">EFL Cup</span>
+          <span class="cscope">England · Cup</span>
+        </span>
+      </span>
+      <span class="cfig">
+        <b>105</b><span>clubs</span>
+        <b>6,916</b><span>players</span>
+        <b>13</b><span>seasons</span>
+      </span>
+      <span class="cyrs">2014/15&ndash;2026/27</span>
+    </a></li>
+    </ul>
+</section>
+
+<section class="gblock" data-group="ESP">
+  <div class="ghead"><h3>Spain</h3><span class="gcount">2</span></div>
+  
+    
+    <ul class="comps">
+          <li><a class="comp" href="/competitions/la-liga/"
+        style="--tint:#FFC94D">
+      <span class="ctop">
+        <span class="cbadge" aria-hidden="true">LL</span>
+        <span class="cwho">
+          <span class="cname">La Liga</span>
+          <span class="cscope">Spain</span>
+        </span>
+      </span>
+      <span class="cfig">
+        <b>50</b><span>clubs</span>
+        <b>5,934</b><span>players</span>
+        <b>39</b><span>seasons</span>
+      </span>
+      <span class="cyrs">1988/89&ndash;2026/27</span>
+    </a></li>
+          <li><a class="comp" href="/competitions/segunda-division/"
+        style="--tint:#FF8A5B">
+      <span class="ctop">
+        <span class="cbadge" aria-hidden="true">SD</span>
+        <span class="cwho">
+          <span class="cname">Segunda División</span>
+          <span class="cscope">Spain</span>
+        </span>
+      </span>
+      <span class="cfig">
+        <b>85</b><span>clubs</span>
+        <b>5,978</b><span>players</span>
+        <b>26</b><span>seasons</span>
+      </span>
+      <span class="cyrs">2001/02&ndash;2026/27</span>
+    </a></li>
+    </ul>
+  
+</section>
+
+<section class="gblock" data-group="ITA">
+  <div class="ghead"><h3>Italy</h3><span class="gcount">1</span></div>
+  
+    
+    <ul class="comps">
+          <li><a class="comp" href="/competitions/serie-a/"
+        style="--tint:#5BC8FF">
+      <span class="ctop">
+        <span class="cbadge" aria-hidden="true">SA</span>
+        <span class="cwho">
+          <span class="cname">Serie A</span>
+          <span class="cscope">Italy</span>
+        </span>
+      </span>
+      <span class="cfig">
+        <b>53</b><span>clubs</span>
+        <b>5,500</b><span>players</span>
+        <b>39</b><span>seasons</span>
+      </span>
+      <span class="cyrs">1988/89&ndash;2026/27</span>
+    </a></li>
+    </ul>
+  
+</section>
+
+<section class="gblock" data-group="GER">
+  <div class="ghead"><h3>Germany</h3><span class="gcount">1</span></div>
+  
+    
+    <ul class="comps">
+          <li><a class="comp" href="/competitions/bundesliga/"
+        style="--tint:#FF5C5C">
+      <span class="ctop">
+        <span class="cbadge" aria-hidden="true">BUN</span>
+        <span class="cwho">
+          <span class="cname">Bundesliga</span>
+          <span class="cscope">Germany</span>
+        </span>
+      </span>
+      <span class="cfig">
+        <b>49</b><span>clubs</span>
+        <b>5,082</b><span>players</span>
+        <b>39</b><span>seasons</span>
+      </span>
+      <span class="cyrs">1988/89&ndash;2026/27</span>
+    </a></li>
+    </ul>
+  
+</section>
+
+<section class="gblock" data-group="FRA">
+  <div class="ghead"><h3>France</h3><span class="gcount">1</span></div>
+  
+    
+    <ul class="comps">
+          <li><a class="comp" href="/competitions/ligue-1/"
+        style="--tint:#7CE37C">
+      <span class="ctop">
+        <span class="cbadge" aria-hidden="true">L1</span>
+        <span class="cwho">
+          <span class="cname">Ligue 1</span>
+          <span class="cscope">France</span>
+        </span>
+      </span>
+      <span class="cfig">
+        <b>46</b><span>clubs</span>
+        <b>5,247</b><span>players</span>
+        <b>32</b><span>seasons</span>
+      </span>
+      <span class="cyrs">1995/96&ndash;2026/27</span>
+    </a></li>
+    </ul>
+  
+</section>
+
+<section class="gblock" data-group="EUR">
+  <div class="ghead"><h3>Europe</h3><span class="gcount">1</span></div>
+  
+  
+    <p class="csub">Cups</p>
+    <ul class="comps">
+          <li><a class="comp" href="/competitions/champions-league/"
+        style="--tint:#00E5FF">
+      <span class="ctop">
+        <span class="cbadge" aria-hidden="true">CL</span>
+        <span class="cwho">
+          <span class="cname">Champions League</span>
+          <span class="cscope">Europe · Cup</span>
+        </span>
+      </span>
+      <span class="cfig">
+        <b>67</b><span>clubs</span>
+        <b>10,150</b><span>players</span>
+        <b>37</b><span>seasons</span>
+      </span>
+      <span class="cyrs">1990/91&ndash;2026/27</span>
+    </a></li>
+    </ul>
+</section>
+</section>
+</main>
+<footer class="page-footer">
+  <noscript><a href="/tools/data.html">View data coverage</a></noscript>
 </footer>
 </div>
+<script>
+(function () {
+  'use strict';
+  var tabs = [].slice.call(document.querySelectorAll('.gtab'));
+  var blocks = [].slice.call(document.querySelectorAll('.gblock'));
+  tabs.forEach(function (t) {
+    t.addEventListener('click', function () {
+      var want = t.getAttribute('data-group');
+      tabs.forEach(function (o) { o.classList.toggle('on', o === t); });
+      blocks.forEach(function (b) {
+        b.hidden = !!want && b.getAttribute('data-group') !== want;
+      });
+    });
+  });
+})();
+</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/js/ts-auth.js"></script>
 <script src="/js/ts-data.js"></script>
+<script src="/js/ts-footer.js"></script>
 <script src="/js/ts-nav.js"></script>
 <script>
   (async function () {
@@ -176,5 +503,6 @@
     try { TSNav.render(); } catch (e) { console.error('[TeleStats] Nav render failed:', e); }
   })();
 </script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TeleStats","item":"https://telestats.net"},{"@type":"ListItem","position":2,"name":"Competitions","item":"https://telestats.net/competitions/"}]},{"@type":"CollectionPage","name":"Football Competitions: Player Stats, Records & Games | TeleStats","description":"Explore player records and play football challenges across 12 of Europe's leagues and cups, from the Premier League and La Liga to League Two and the Segunda División.","url":"https://telestats.net/competitions/"}]}</script>
 </body>
 </html>
