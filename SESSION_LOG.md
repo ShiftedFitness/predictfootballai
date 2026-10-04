@@ -3029,3 +3029,46 @@ Two things it deliberately does not count, because both are correct:
   in the coverage line and on the filter. Players are the unlinked cells;
   competitions link to `/competitions/<slug>/`. The first version of this audit
   missed that and reported 837 leaks, every one of them a false positive.
+
+## Mobile rescue + final polish
+
+The desktop page was close; on a real iPhone it was not. A visitor met the
+nav, an install advertisement, breadcrumbs, a long monospace strapline, three
+figures, a coverage line, a heading, a dropdown and a 300px static pitch before
+anything was playable.
+
+**Measured, at 390x664 (iPhone Safari with its chrome):**
+
+| | before | after |
+|---|---|---|
+| hero height | ~300px | 216px |
+| featured card | ~300px | 144px |
+| first Play action | below the fold | y=521, 143px clear |
+| games section | 589px | 530px |
+| page height | 2680px | 2251px |
+
+- **The install banner.** It appeared under the nav on the FIRST page of a
+  first visit, and dismissal lasted the session. Now it has to be earned — four
+  visits or one finished game — dismissal is remembered for 90 days, it is
+  skipped in standalone PWA mode, and `Add to Home Screen` in the mobile menu
+  shows it on demand. The manifest, the service worker and installation itself
+  are untouched; only the promotion changed.
+- **Pitches are green.** `pitchGround()` returns a dark green for every club,
+  and a slate-teal for green clubs, where green-on-green is the one combination
+  that disappears. The club colour is on the PLAYERS. Arsenal's burgundy pitch
+  was the club colour painting a surface instead of identifying a club.
+- **A dedicated phone layout for the games**, not the desktop one scaled down:
+  the featured card turns sideways (small pitch left, title and Play right) and
+  the other four sit in a 2x2 under it. Four-across between 720px and 900px,
+  because two half-width cards stranded each illustration in the middle of a
+  345px box.
+- **Play / Records / Ask** anchors under the hero — plain links, crawlable and
+  keyboard-reachable, with `scroll-margin-top` so they clear the sticky header.
+  Inline on desktop, stretched on a phone.
+- **Smaller wins:** `#chipNote` no longer reserves 20px for a message that only
+  appears after a tap; the coverage line gives a count rather than four names on
+  a phone; the select is dressed for the dark theme with its own chevron, keeping
+  the native popup; Ask became a panel; suggestions became rows, because a
+  999px pill wrapped over two lines reads as a pill that went wrong.
+
+Fixed in passing: `Build a Arsenal game`.

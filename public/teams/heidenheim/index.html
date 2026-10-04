@@ -28,6 +28,7 @@
   :root {
     --club: hsl(118, 56%, 38%);
     --club-2: hsl(136, 56%, 26%);
+    --pitch: #0C2A1B;
     --bg: #0A0E11;
     --s0: #090C0F;
     --s1: #11161B;          /* raised surface  */
@@ -99,8 +100,28 @@
            font-variant-numeric: tabular-nums; letter-spacing: -.035em; line-height: 1.1; }
   .fig span { font-size: .64rem; text-transform: uppercase; letter-spacing: .1em;
               color: var(--fg-3); }
-  .cover { font-size: .75rem; color: var(--fg-3); margin: 11px 0 0; }
+  .cover { font-size: .73rem; color: var(--fg-3); margin: 9px 0 0; }
+  /* Naming all four competitions wrapped to two lines on a phone. The names
+     are still on the page — in the footer and in the records table — so the
+     short form loses nothing a crawler or a reader needs. */
+  .cover .cov-short { display: none; }
   .cover a { color: var(--fg-2); }
+
+  /* Three anchors, sized like controls rather than buttons. scroll-margin on
+     the targets keeps a heading clear of the sticky site header, which is what
+     makes an anchor land on the section rather than just above it. */
+  /* Inline here, stretched on a phone. Three full-width buttons across 860px
+     read as a control bar for the whole site rather than three links into this
+     page; at 390px the same three need the width to stay tappable. */
+  .jump { display: flex; gap: 7px; margin: 14px 0 0; }
+  .jump a { flex: 0 0 auto; text-align: center; font-family: var(--mono); font-size: .76rem;
+            font-weight: 700; letter-spacing: .03em; padding: 9px 10px; min-height: 38px;
+            box-sizing: border-box; border-radius: 9px; text-decoration: none;
+            color: var(--fg-2); background: var(--s1); border: 1px solid var(--line);
+            display: flex; align-items: center; justify-content: center; }
+  .jump a:hover { color: var(--fg); border-color: var(--line-2); }
+  .jump a:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+  section[id] { scroll-margin-top: 72px; }
 
   /* ── section rhythm ─────────────────────────────────────────────────────
      One heading style, one spacing step. Headings are monospace because that
@@ -151,9 +172,8 @@
   a.game-go:not(.feat) .artbox { flex: 1; min-height: 84px; padding: 10px 12px;
                                  box-sizing: border-box; }
   a.game-go:not(.feat) .art { width: 100%; height: 100%; max-height: 112px; }
-  a.game-go.feat .artbox { flex: 1; min-height: 190px; padding: 14px 16px;
-                           box-sizing: border-box;
-                           background: color-mix(in srgb, var(--club) 9%, #080B0E); }
+  a.game-go.feat .artbox { flex: 1; min-height: 168px; padding: 14px 16px;
+                           box-sizing: border-box; background: var(--pitch); }
   a.game-go.feat .art-pitch { width: 100%; height: 100%; min-height: 160px; }
   .artbox .art { display: block; }
   .artbox .dots { filter: drop-shadow(0 1px 3px rgba(0,0,0,.6)); }
@@ -194,10 +214,26 @@
   .chip.all.on { box-shadow: inset 0 -2px 0 var(--club); }
   .chip:focus-visible { outline: 2px solid var(--cyan); outline-offset: 1px; }
   .sel { display: none; }
-  .sel select { width: 100%; box-sizing: border-box; font: inherit; font-size: .88rem;
-                padding: 11px 13px; min-height: 44px; border-radius: 10px;
-                background: var(--s1); color: var(--fg); border: 1px solid var(--line-2); }
-  .filter-note { font-size: .74rem; color: var(--fg-3); margin: 8px 2px 0; min-height: 1.05em; }
+  /* The native control, dressed. appearance:none loses the platform chevron,
+     so one is drawn in as a background SVG — in --fg-2 rather than the browser
+     default, which on a near-black field was almost invisible. The native
+     POPUP is kept: a custom listbox would be a worse, less accessible version
+     of something the phone already does well. */
+  .sel select { width: 100%; box-sizing: border-box; font: inherit; font-size: .9rem;
+                font-weight: 600; padding: 11px 40px 11px 14px; min-height: 46px;
+                border-radius: 10px; background-color: var(--s1); color: var(--fg);
+                border: 1px solid var(--line-2); cursor: pointer;
+                -webkit-appearance: none; appearance: none;
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%239FAEBB' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+                background-repeat: no-repeat;
+                background-position: right 14px center; }
+  .sel select:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+  /* No reserved line. min-height held 20px open on every page for a message
+     that only appears once somebody filters — directly above the games, which
+     is the space this whole pass is trying to win back. The note only ever
+     appears after a tap, so the shift it causes is one the visitor caused. */
+  .filter-note { font-size: .74rem; color: var(--fg-3); margin: 8px 2px 0; }
+  .filter-note:empty { display: none; }
 
   /* ── mystery player ─────────────────────────────────────────────────────
      A strip, not a panel. It was the tallest thing on the page for one button. */
@@ -251,22 +287,28 @@
   td.yes { color: var(--cyan); font-size: .74rem; }
   td.no { color: var(--fg-3); font-size: .74rem; }
 
-  /* ── ask ────────────────────────────────────────────────────────────────── */
-  form.ask { display: flex; gap: 8px; margin: 0 0 10px; }
+  /* ── ask ─────────────────────────────────────────────────────────────── */
+  .askbox { background: var(--s1); border: 1px solid var(--line-2); border-radius: 14px;
+            padding: 18px 18px 19px; }
+  .askbox h2 { margin-bottom: 2px; }
+  .askbox .lede { margin-bottom: 13px; }
+  form.ask { display: flex; gap: 8px; margin: 0 0 11px; }
   form.ask input { flex: 1; min-width: 0; padding: 12px 15px; font: inherit; font-size: .9rem;
                    min-height: 46px; box-sizing: border-box; border-radius: 10px;
-                   border: 1px solid var(--line-2); background: var(--s1); color: var(--fg); }
+                   border: 1px solid var(--line-2); background: var(--bg); color: var(--fg); }
+  form.ask input::placeholder { color: var(--fg-3); }
   form.ask input:focus { outline: none; border-color: var(--cyan); }
-  form.ask button { padding: 0 20px; min-height: 46px; font: inherit; font-weight: 700;
+  form.ask button { padding: 0 22px; min-height: 46px; font: inherit; font-weight: 700;
                     font-size: .88rem; border: 0; border-radius: 10px;
                     background: var(--cyan); color: #06181C; cursor: pointer; }
   .ask-examples { display: flex; flex-wrap: wrap; gap: 6px; }
-  .ask-examples button { font: inherit; font-size: .76rem; padding: 7px 12px; min-height: 34px;
+  .ask-examples button { font: inherit; font-size: .75rem; padding: 7px 12px; min-height: 34px;
                          border-radius: 999px; border: 1px solid var(--line-2);
-                         background: transparent; color: var(--fg-2); cursor: pointer; }
+                         background: transparent; color: var(--fg-2); cursor: pointer;
+                         text-align: left; }
   .ask-examples button:hover { color: var(--fg); border-color: var(--fg-3); }
   #askAnswer:empty { display: none; }
-  #askAnswer { margin-top: 12px; }
+  #askAnswer { margin-top: 13px; }
   #askAnswer .msg { font-size: .9rem; line-height: 1.55; margin: 0 0 9px; }
   #askAnswer table { border-collapse: collapse; width: 100%; font-size: .83rem; }
   #askAnswer td { padding: 6px 8px; border-bottom: 1px solid var(--line); }
@@ -319,69 +361,112 @@
   footer.page a:hover { color: var(--cyan); }
 
   /* ── narrow ─────────────────────────────────────────────────────────────
-     Decisions, not a stack of the desktop blocks. The games keep the featured
-     card full width with the other four two-up beneath it, so the section is
-     still "one big game and four more" on a phone rather than five identical
-     rows; the filter becomes a select; the two columns become one. */
+     A dedicated phone layout, not the desktop one scaled down.
+
+     The desktop featured card is a tall picture with words beneath it. At
+     390px that became a 300px static pitch the visitor had to scroll past
+     before reaching the title, never mind the Play link — the single worst
+     thing about the page on a real phone. Below 760px it becomes a WIDE card:
+     a small pitch on the left, title and Play on the right, about 150px tall
+     in total, with the 2x2 directly beneath it. */
   @media (max-width: 900px) {
-    ul.games { grid-template-columns: repeat(2, 1fr); }
+    /* Four across, not two. The featured card takes the full width here, and
+       two half-width cards left each illustration stranded in the middle of a
+       345px box with 85px of nothing either side. Four narrow cards match the
+       illustrations' own proportions. */
+    ul.games { grid-template-columns: repeat(4, 1fr); gap: 9px; }
     ul.games li.feat { grid-column: 1 / -1; grid-row: auto; }
     a.game-go.feat { flex-direction: row; align-items: stretch; }
-    a.game-go.feat .artbox { flex: 0 0 38%; border-bottom: 0;
+    a.game-go.feat .artbox { flex: 0 0 40%; border-bottom: 0;
                              border-right: 1px solid var(--line); min-height: 0; }
-    a.game-go.feat .art-pitch { min-height: 128px; }
+    a.game-go.feat .art-pitch { min-height: 124px; }
     a.game-go.feat .gtext { flex: 1; justify-content: center; }
-    /* Two-up, the small cards are twice as wide as they are at desktop and
-       flex:1 turned that extra width into extra height, floating each shirt in
-       a lot of air. A fixed picture height instead, which also puts the four
-       titles on a shared baseline. */
-    a.game-go:not(.feat) .artbox { flex: 0 0 auto; height: 96px; }
+    a.game-go:not(.feat) .artbox { flex: 0 0 auto; height: 92px; }
     a.game-go:not(.feat) .gtext { flex: 1; }
   }
   @media (max-width: 720px) {
-    .two { grid-template-columns: 1fr; gap: 26px; }
+    .two { grid-template-columns: 1fr; gap: 24px; }
+    /* Four across stops being readable about here: "Higher or Lower" over two
+       lines in a 160px card is where it starts to look squeezed. */
+    ul.games { grid-template-columns: repeat(2, 1fr); }
   }
   @media (max-width: 620px) {
-    .wrap { padding: 0 14px 48px; }
-    nav.crumbs { margin: 12px 0 10px; }
-    .hero { margin-bottom: 20px; }
-    .hero h1 { column-gap: 12px; }
-    .hero .crest { width: 46px; height: 53px; grid-row: 1; }
-    .hero .hsub { grid-column: 1 / -1; font-size: .8rem; margin-top: 7px; }
-    .figs { margin-top: 16px; }
-    .fig b { font-size: 1.1rem; }
-    .fig + .fig { padding-left: 12px; }
-    section { margin-bottom: 30px; }
-    /* The featured card goes back to picture-over-words: 38% of a 360px screen
-       is a 136px pitch, which is a smudge. */
-    a.game-go.feat { flex-direction: column; }
-    a.game-go.feat .artbox { flex: 0 0 auto; min-height: 112px;
-                             border-right: 0; border-bottom: 1px solid var(--line); }
-    a.game-go.feat .art-pitch { min-height: 112px; }
-    a.game-go.feat .gname { font-size: 1.12rem; }
-    a.game-go.feat .gblurb { font-size: .8rem; }
-    /* A fixed picture height rather than flex:1. Stretched to equal card
-       height, "Higher or Lower" wrapping to two lines and "Who Am I?" to one
-       left the pair with two different illustration sizes and two different
-       title baselines, side by side. */
-    a.game-go:not(.feat) .artbox { flex: 0 0 auto; height: 76px; }
-    a.game-go:not(.feat) .gtext { flex: 1; }
-    .gtext { padding: 11px 12px 12px; }
+    .wrap { padding: 0 14px 44px; }
+    nav.crumbs { margin: 10px 0 9px; font-size: .72rem; }
+
+    /* Hero. It was over 300px before the first game; this is about half that.
+       One rule under the name and one under the figures — the stat strip's own
+       top border was a third red line in 120px. */
+    .hero { margin-bottom: 18px; }
+    .hero h1 { column-gap: 11px; }
+    .hero .crest { width: 42px; height: 48px; grid-row: 1; }
+    .hero .cn { font-size: clamp(1.75rem, 8.6vw, 2.2rem); padding-bottom: 6px;
+                box-shadow: inset 0 -2px 0 var(--club); }
+    .hero .hsub { grid-column: 1 / -1; font-size: .78rem; margin-top: 6px; }
+    .figs { margin-top: 13px; border-top: 0;
+            border-bottom: 1px solid var(--line); }
+    .fig { padding: 8px 0 9px; }
+    .fig b { font-size: 1.05rem; }
+    .fig span { font-size: .6rem; }
+    .fig + .fig { padding-left: 11px; }
+    .cover { font-size: .7rem; margin-top: 7px; }
+    .cover .cov-long { display: none; }
+    .cover .cov-short { display: inline; }
+    .filter { margin-bottom: 9px; }
+    .head { margin-bottom: 10px; }
+    .jump { margin-top: 12px; gap: 6px; }
+    .jump a { flex: 1; }
+    .jump a { min-height: 42px; font-size: .73rem; }
+
+    section { margin-bottom: 26px; }
+    section[id] { scroll-margin-top: 64px; }
+    h2 { font-size: .95rem; }
+
+    /* The featured card stays WIDE here. Going back to picture-over-words is
+       what made it 300px tall. */
+    a.game-go.feat .artbox { flex: 0 0 38%; padding: 9px 10px; }
+    a.game-go.feat .art-pitch { min-height: 104px; }
+    a.game-go.feat .gtext { padding: 12px 13px; }
+    a.game-go.feat .gname { font-size: 1.02rem; }
+    a.game-go.feat .gblurb { font-size: .76rem; margin-top: 3px; }
+    a.game-go.feat .gtag { font-size: .58rem; margin-bottom: 4px; }
+    a.game-go.feat .gplay { margin-top: 9px; font-size: .78rem; }
+    a.game-go:not(.feat) .artbox { height: 74px; padding: 7px 9px; }
+    .gtext { padding: 10px 11px 11px; }
+    .gname { font-size: .8rem; }
+    .gblurb { font-size: .71rem; margin-top: 2px; }
+
     .seg { display: none; }
     .sel { display: block; }
     .chip { min-height: 44px; }
-    .potd { gap: 11px; padding: 11px 12px; flex-wrap: wrap; }
-    /* 44px tall, not 100% wide. Full width made a bright cyan slab the
-       loudest thing between the games and the records, for a side attraction. */
-    .potd .reveal { min-height: 44px; padding: 0 22px; }
-    .related { gap: 6px 16px; }
-    .related a { min-height: 36px; }
+    .potd { gap: 11px; padding: 11px 12px; }
+    .potd .shirt { width: 34px; height: 34px; }
+    .potd .reveal { min-height: 44px; padding: 0 20px; }
+    .askbox { padding: 15px 14px 16px; border-radius: 12px; }
+    /* Two suggestions, not three, and rows rather than pills.
+       A real question about two clubs does not fit on one line at 390px, and
+       a 999px radius stretched over two lines reads as a pill that went wrong.
+       Full-width rows with a normal radius are honest about the wrapping and
+       give a bigger tap target. Nothing is lost by dropping the third: the
+       input takes any question. */
+    .ask-examples { flex-direction: column; gap: 7px; }
+    .ask-examples button { width: 100%; font-size: .76rem; padding: 10px 13px;
+                           border-radius: 10px; line-height: 1.35; }
+    .ask-examples button:nth-child(n+3) { display: none; }
     form.ask { flex-direction: column; }
     form.ask button { padding: 12px; }
+    .related { gap: 6px 16px; }
+    .related a { min-height: 36px; }
   }
-  @media (max-width: 380px) {
-    .fig b { font-size: 1rem; }
-    .fig + .fig { padding-left: 9px; }
+  /* The narrowest phones. The 2x2 holds — a single column of five cards is a
+     longer scroll than the one this whole pass exists to shorten. */
+  @media (max-width: 400px) {
+    .fig b { font-size: .98rem; }
+    .fig + .fig { padding-left: 8px; }
+    .hero .crest { width: 38px; height: 44px; }
+    a.game-go.feat .art-pitch { min-height: 96px; }
+    a.game-go:not(.feat) .artbox { height: 66px; }
+    .jump a { font-size: .7rem; padding: 9px 6px; }
   }
   @media (prefers-reduced-motion: reduce) {
     * { animation-duration: .01ms !important; transition-duration: .01ms !important; }
@@ -415,17 +500,27 @@
       <path d="M4 20h48v8H4Z" fill="hsl(136, 56%, 26%)" opacity=".55"/>
       <text x="28" y="40" text-anchor="middle" font-size="15" font-weight="700"
             font-family="Space Mono, ui-monospace, monospace" fill="#fff">HEI</text>
-    </svg><span class="cn">Heidenheim</span><span class="hsub">Stats,
-    Records &amp; Football Quizzes &mdash; and five free games, from a real football
-    database.</span></h1>
+    </svg><span class="cn">Heidenheim</span><span class="hsub">Football
+    stats, records &amp; games</span></h1>
 
   <div class="figs">
     <div class="fig"><b>43</b><span>Players</span></div>
     <div class="fig"><b>1,607</b><span>Appearances</span></div>
     <div class="fig"><b>124</b><span>Goals</span></div>
   </div>
-  <p class="cover">Bundesliga · 2023/24–2025/26 ·
-    <a href="/tools/data.html">what the dataset covers</a></p>
+  <p class="cover"><span class="cov-long">Bundesliga</span><span
+    class="cov-short">1 competition</span>
+    &middot; 2023/24–2025/26</p>
+
+  <!-- Three destinations, for the two audiences. Somebody who searched for
+       "Heidenheim top goalscorers" should not have to scroll past five
+       games to reach them. Plain anchors: they work before the script does,
+       they are crawlable, and they are keyboard-reachable for free. -->
+  <nav class="jump" aria-label="On this page">
+    <a href="#play">Play</a>
+    <a href="#records">Records</a>
+    <a href="#ask">Ask</a>
+  </nav>
 </header>
 
 <section id="play">
@@ -439,7 +534,7 @@
           <a class="game-go feat" data-game="xi" data-path="/games/xi.html" href="/games/xi.html?scope=team_heidenheim_bundesliga&amp;play=1">
             <span class="artbox"><svg class="art art-pitch" viewBox="0 0 200 124" aria-hidden="true"
          preserveAspectRatio="xMidYMid meet">
-      <g fill="none" stroke="#fff" stroke-opacity=".26" stroke-width="1.1">
+      <g fill="none" stroke="#fff" stroke-opacity=".3" stroke-width="1.1">
         <rect x="7" y="7" width="186" height="110" rx="2"/>
         <path d="M7 62h186"/>
         <circle cx="100" cy="62" r="19"/>
@@ -611,9 +706,9 @@
             font-family="Space Mono, ui-monospace, monospace" fill="#fff">?</text>
     </svg>
     <div class="pbody">
-      <p class="peyebrow">Today's mystery Heidenheim player</p>
-      <p class="pname" id="potdName">Think you know who it is?</p>
-      <p class="pline" id="potdLine">One of the club's most-used players. A new one every day.</p>
+      <p class="peyebrow">Mystery player</p>
+      <p class="pname" id="potdName">Who is it?</p>
+      <p class="pline" id="potdLine">One of the club&rsquo;s most-used. A new one daily.</p>
     </div>
     <button type="button" class="reveal" id="potdBtn">Reveal</button>
   </div>
@@ -627,7 +722,7 @@
   <p class="spoil">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
          stroke-linecap="round" aria-hidden="true"><path d="M12 9v4m0 3.5v.01"/><path d="M10.3 3.9 2.4 17.4A1.9 1.9 0 0 0 4 20.3h16a1.9 1.9 0 0 0 1.6-2.9L13.7 3.9a1.9 1.9 0 0 0-3.4 0Z"/></svg>
-    These are the answers to the games above — open them when you are ready.
+    Answers to the games above.
   </p>
 
   <details class="rec">
@@ -859,10 +954,11 @@
   </details>
 </section>
 
-<section>
-  <h2>Curious about Heidenheim? Just ask.</h2>
-  <p class="lede">Answers come from the database, never invented. If the data does not support
-    an answer, it says so.</p>
+<!-- Ask is one of the few things here nobody else has, so it gets a panel of
+     its own rather than another heading over another input. -->
+<section id="ask" class="askbox">
+  <h2>Ask about Heidenheim</h2>
+  <p class="lede">Straight from the database. If the data cannot answer, it says so.</p>
   <form class="ask" id="askForm">
     <input id="askQ" autocomplete="off" maxlength="300"
            placeholder="Who has played for both Heidenheim and Hoffenheim?"

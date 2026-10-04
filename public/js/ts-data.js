@@ -69,6 +69,11 @@
         TSAnalytics.gameComplete?.(sessionData.game_type, gaParams);
       }
 
+      // A finished game is the engagement the install invitation waits for.
+      // Optional invocation: a cached ts-nav.js without it must not throw
+      // here and stop the round being saved.
+      if (sessionData && sessionData.completed !== false) window.TSNav?.noteEngagement?.();
+
       // ── Daily challenge ───────────────────────────────────────────
       // Filed here rather than in each game for the same reason game_complete
       // is: this is the one method every genuine end-of-round passes through.

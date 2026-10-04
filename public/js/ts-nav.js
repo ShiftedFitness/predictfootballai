@@ -105,6 +105,7 @@
         </div>
         <div class="ts-nav-mobile" id="tsNavMobile">
           ${linksHTML}
+          ${this.canInstall() ? '<a href="#" class="ts-nav-link" id="tsNavMobileInstall">Add to Home Screen</a>' : ''}
           ${isAnon
             ? '<a href="#" class="ts-nav-link" id="tsNavMobileLogin">Log In</a>'
             : `<a href="/profile/" class="ts-nav-link">Profile</a>${!isPaid ? '<a href="/upgrade/" class="ts-nav-link" style="color:var(--accent-yellow)">Upgrade to Pro</a>' : ''}<a href="#" class="ts-nav-link" id="tsNavMobileLogout">Log Out</a>`
@@ -127,6 +128,15 @@
       const mobileLoginBtn = document.getElementById('tsNavMobileLogin');
       [loginBtn, mobileLoginBtn].forEach(btn => {
         if (btn) btn.addEventListener('click', (e) => { e.preventDefault(); TSNav.showAuthModal(); });
+      });
+
+      // "Add to Home Screen", asked for rather than pushed. Clears any
+      // earlier dismissal, because asking is the opposite of dismissing.
+      document.getElementById('tsNavMobileInstall')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        try { localStorage.removeItem('ts_install_hidden_until'); } catch { /* ignore */ }
+        document.getElementById('tsNavMobile')?.classList.remove('open');
+        TSNav.installInvite();
       });
 
       // Logout
@@ -200,6 +210,7 @@
       }
 
       // ── Mobile install prompt (iOS + Android) ──
+      this.countVisit();
       this.showInstallPrompt();
 
       // ── Footer: database last updated ──
@@ -837,36 +848,93 @@
     },
 
     /**
-     * Show iOS-specific install prompt (Safari has no beforeinstallprompt).
+     * The install invitation.
+     *
+     * It used to appear under the nav on every mobile page, on the FIRST page
+     * of a first visit. Somebody arriving from a search for "Arsenal top
+     * goalscorers" met an advertisement for installing an app they had not
+     * used yet, above the thing they came for, on the part of the screen a
+     * phone has least of. Dismissal lasted the session, so it came back
+     * tomorrow.
+     *
+     * Now it has to be earned: several visits, or a game actually finished.
+     * Dismissing it is remembered for 90 days, and `installInvite()` lets the
+     * menu show it on demand, so nothing is lost by not nagging.
      */
-    showInstallPrompt() {
+    INSTALL_HIDE_DAYS: 90,
+    INSTALL_MIN_VISITS: 4,
+
+    /** One per browsing session, not one per page view. */
+    countVisit() {
+      try {
+        if (sessionStorage.getItem('ts_visit_counted')) return;
+        sessionStorage.setItem('ts_visit_counted', '1');
+        const n = parseInt(localStorage.getItem('ts_visits') || '0', 10) || 0;
+        localStorage.setItem('ts_visits', String(n + 1));
+      } catch { /* private mode: the banner simply never qualifies */ }
+    },
+
+    /** Called when a game is completed — one finished game is engagement. */
+    noteEngagement() {
+      try { localStorage.setItem('ts_played', '1'); } catch { /* ignore */ }
+    },
+
+    canInstall() {
       const isMobileOrTablet = /Android|iPad|iPhone|iPod/i.test(navigator.userAgent) && !window.MSStream;
       const isStandalone = window.matchMedia('(display-mode: standalone)').matches
                         || window.navigator.standalone;
-      const isGamePage = /\/games\/\w+\.html/.test(window.location.pathname);
-      if (!isMobileOrTablet || isStandalone || isGamePage || sessionStorage.getItem('ts_install_dismissed')) return;
-      // showInstallPrompt() is called from render(), which can run twice.
-      if (document.querySelector('.ts-install-banner')) return;
+      return isMobileOrTablet && !isStandalone;
+    },
 
+    showInstallPrompt() {
+      if (!this.canInstall()) return;
+      if (/\/games\/\w+\.html/.test(window.location.pathname)) return;
+
+      let visits = 0, played = false, hiddenUntil = 0;
+      try {
+        visits = parseInt(localStorage.getItem('ts_visits') || '0', 10) || 0;
+        played = localStorage.getItem('ts_played') === '1';
+        hiddenUntil = parseInt(localStorage.getItem('ts_install_hidden_until') || '0', 10) || 0;
+      } catch { return; }
+
+      if (Date.now() < hiddenUntil) return;
+      if (visits < this.INSTALL_MIN_VISITS && !played) return;
+      this.installInvite();
+    },
+
+    /**
+     * Render the invitation. Called by the gate above, and directly by the
+     * "Add to Home Screen" item in the mobile menu, which has no gate because
+     * the visitor asked for it.
+     */
+    installInvite() {
+      if (document.querySelector('.ts-install-banner')) return;
       const nav = document.querySelector('.ts-nav');
       if (!nav) return;
 
       const isIOS = /iPad|iPhone|iPod/i.test(navigator.userAgent);
-      const installText = isIOS
-        ? 'Add TeleStats to your Home Screen: tap <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg> then "Add to Home Screen"'
-        : 'Add TeleStats to your Home Screen: tap ⋮ then "Install app" or "Add to Home Screen"';
+      const how = isIOS
+        ? 'tap <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg> then &ldquo;Add to Home Screen&rdquo;'
+        : 'tap &#8942; then &ldquo;Install app&rdquo;';
 
       const banner = document.createElement('div');
       banner.className = 'ts-install-banner';
-      banner.innerHTML = `
-        <span style="flex:1;font-size:13px;">${installText}</span>
-        <button id="tsInstallDismiss" style="background:none;border:none;color:var(--text-muted);font-size:18px;cursor:pointer;padding:0 4px;">&times;</button>`;
-      banner.style.cssText = 'display:flex;align-items:center;gap:10px;padding:10px 16px;background:var(--bg-card,#171F25);border-bottom:1px solid rgba(255,255,255,0.06);font-family:Inter,sans-serif;';
+      banner.innerHTML =
+        `<span style="flex:1;font-size:13px;">Add TeleStats to your Home Screen: ${how}</span>` +
+        '<button id="tsInstallDismiss" aria-label="Dismiss" style="background:none;border:none;' +
+        'color:var(--text-muted);font-size:20px;line-height:1;cursor:pointer;padding:4px 8px;' +
+        'min-width:40px;min-height:40px;">&times;</button>';
+      banner.style.cssText = 'display:flex;align-items:center;gap:10px;padding:10px 16px;' +
+        'background:var(--bg-card,#171F25);border-bottom:1px solid rgba(255,255,255,0.06);' +
+        'font-family:Inter,sans-serif;';
       nav.after(banner);
 
       document.getElementById('tsInstallDismiss')?.addEventListener('click', () => {
         banner.remove();
-        sessionStorage.setItem('ts_install_dismissed', '1');
+        try {
+          localStorage.setItem('ts_install_hidden_until',
+            String(Date.now() + this.INSTALL_HIDE_DAYS * 864e5));
+        } catch { /* ignore */ }
       });
     },
 

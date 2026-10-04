@@ -246,8 +246,7 @@
             '<p class="empty" style="margin-top:9px">' + num(d.plays) + ' round' +
             (d.plays === 1 ? '' : 's') + ' played on ' + esc(T.name) +
             (rest.length ? ' \u00b7 also ' + rest.join(', ') : '') +
-            (hasComm ? '' : ' \u00b7 <a href="/community/?build=1">build a ' +
-              esc(T.name) + ' game</a>') + '</p>';
+            (hasComm ? '' : ' \u00b7 <a href="/community/?build=1">build a game</a>') + '</p>';
         }
 
         if (hasComm && commBox) {
@@ -259,7 +258,7 @@
               '<span class="meta">' + esc(gameName(g.game_type)) + ' \u00b7 ' +
               num(g.plays) + ' play' + (g.plays === 1 ? '' : 's') + '</span></a></li>';
           }).join('') + '</ul>' +
-          '<a class="mini" href="/community/?build=1">Build a ' + esc(T.name) + ' game &rarr;</a>';
+          '<a class="mini" href="/community/?build=1">Build one for ' + esc(T.name) + ' &rarr;</a>';
         }
 
         if (boardCol) boardCol.hidden = !hasBoard;
