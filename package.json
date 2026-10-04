@@ -17,7 +17,9 @@
     "check:credit": "node scripts/checks/credit.js",
     "build:competitions": "node scripts/teams/build_competitions.js && node scripts/seo/sitemap.js",
     "preflight": "node scripts/fbref/preflight.js",
-    "aggregates": "node scripts/fbref/rebuild_aggregates.js --write"
+    "aggregates": "node scripts/fbref/rebuild_aggregates.js --write",
+    "analytics:weekly": "node scripts/analytics/run-weekly.mjs",
+    "analytics:weekly:noemail": "node scripts/analytics/run-weekly.mjs --no-email"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.117.1",

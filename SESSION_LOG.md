@@ -2866,3 +2866,30 @@ no other branch. It now says where you actually came from.
 ### State
 npm run check + 7 new smoke cases = **40 passed · 0 failed**.
 377 indexable URLs (was 364): 15 core + 13 competitions + 349 teams.
+
+---
+
+# SESSION LOG — 2026-10-04
+
+## Goal
+Weekly analytics report for TeleStats, same design as Malaga Football Tours: a Sunday GitHub Action pulls GA4 +
+Search Console + first-party counts from Supabase, commits a Markdown scorecard and emails it. No LLM step, no site
+changes. `/seo-review` in a Claude session reviews it and proposes changes for approval.
+
+## What counts as a win (owner's definition)
+1. Are people playing the games? (game starts/completions/replays, Daily, Ask; by game)
+2. Are people signing up for accounts? (signup funnel + accounts created in Supabase Auth)
+3. Are they converting to paid? (paywall → upgrade → checkout funnel + Stripe payments in `ts_payments`)
+
+## Tasks
+- [x] Shared engine copied from the Tagsy repo into `scripts/analytics/*.mjs` (next to the existing verify.js)
+- [x] `analytics/site.config.mjs` (TeleStats wins, breakdown by game_type, first-party rows + per-game DB table)
+- [x] `netlify/functions/analytics-stats.js` (token-protected, counts only). Tested locally against live DB:
+      403 on wrong token; 28d to 3 Oct = 1 account, 416 new anon players, 3 saved sessions, 0 payments; 45 accounts / 3 Pro now.
+- [x] Workflow (Sun 07:11 UTC), `/seo-review` command, docs/analytics-automation.md, package scripts, deploy-skip, CLAUDE.md
+- [ ] Owner: service account access, GA4 `game_type` custom dimension, Netlify + GitHub secrets, push, first run
+
+## Finding: most plays aren't saved
+`ts_game_sessions` has ~220 rows since Feb; only 3 in the last 28 days against 416 new anonymous players. RLS allows
+inserts, so `TSData.logGameSession` is failing or being skipped for most players. Not fixed in this session (would also
+affect free-play limits via `ts_daily_plays`). Flagged to the owner.

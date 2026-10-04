@@ -1,0 +1,90 @@
+# Weekly growth report (TeleStats).
+#
+# Pulls GA4, Search Console and TeleStats' own first-party counts, writes a
+# Markdown scorecard to analytics/reports/, commits it and emails it.
+# Deliberately contains no LLM step and changes nothing on the site: acting
+# on the report is a human, or `/seo-review` in a Claude session.
+#
+# Same engine as the other Shifted.Labs sites; TeleStats specifics live in
+# analytics/site.config.mjs. Report-only commits don't trigger a Netlify
+# deploy (see the `ignore` rule in netlify.toml).
+
+name: Weekly analytics report
+
+on:
+  schedule:
+    # 07:23 UTC Sunday. Not on the hour: GitHub delays scheduled runs at popular times.
+    - cron: '11 7 * * 0'
+  workflow_dispatch:
+    inputs:
+      date:
+        description: 'Run as if this were the date (YYYY-MM-DD). Blank = today.'
+        required: false
+      skip_email:
+        description: 'Generate the report without emailing it'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install nodemailer
+        # Into a throwaway directory, not the repo: installing one package inside the
+        # project would reconcile the whole dependency tree for nothing.
+        run: |
+          mkdir -p "$RUNNER_TEMP/mailer"
+          cd "$RUNNER_TEMP/mailer"
+          npm init -y >/dev/null 2>&1
+          npm install --no-audit --no-fund --loglevel=error nodemailer
+          echo "NODEMAILER_BASE=$RUNNER_TEMP/mailer" >> "$GITHUB_ENV"
+
+      - name: Generate report
+        env:
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          GA4_PROPERTY_ID: ${{ secrets.GA4_PROPERTY_ID }}
+          GSC_SITE_URL: ${{ secrets.GSC_SITE_URL }}
+          ANALYTICS_STATS_URL: ${{ secrets.ANALYTICS_STATS_URL }}
+          ANALYTICS_STATS_TOKEN: ${{ secrets.ANALYTICS_STATS_TOKEN }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          REPORT_EMAIL_TO: ${{ secrets.REPORT_EMAIL_TO }}
+          REPORT_EMAIL_FROM: ${{ secrets.REPORT_EMAIL_FROM }}
+          NODEMAILER_BASE: ${{ env.NODEMAILER_BASE }}
+        run: |
+          node scripts/analytics/run-weekly.mjs \
+            ${{ inputs.date && format('--date {0}', inputs.date) || '' }} \
+            ${{ inputs.skip_email && '--no-email' || '' }}
+
+      # Raw pulls are kept as a 90-day artifact; the committed Markdown is the durable record.
+      - name: Upload raw pulls
+        uses: actions/upload-artifact@v4
+        with:
+          name: analytics-raw-${{ github.run_number }}
+          path: analytics/input/*.json
+          retention-days: 90
+          if-no-files-found: warn
+
+      - name: Commit the report
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add analytics/reports
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "Weekly analytics report $(date -u +%Y-%m-%d)"
+            git push
+          fi

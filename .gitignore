@@ -8,3 +8,6 @@ data/backups/
 
 # Raw FBref pages from scripts/fbref/collect.js
 data/fbref/
+
+# Weekly analytics raw pulls (kept as a CI artifact, not committed)
+analytics/input/

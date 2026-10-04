@@ -1,6 +1,9 @@
 [build]
   functions = "netlify/functions"
   publish = "public"
+  # Skip the deploy when a commit only touches the weekly analytics report
+  # (the GitHub Action commits one every Sunday). Exit 0 = no site changes = skip.
+  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- . ':(exclude)analytics' ':(exclude).github' ':(exclude).claude' ':(exclude)docs' ':(exclude)SESSION_LOG.md'"
 
 # Cache headers: HTML pages should always revalidate, static assets can cache longer
 [[headers]]

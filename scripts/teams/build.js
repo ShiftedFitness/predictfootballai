@@ -194,6 +194,7 @@ function renderHub(rows) {
     <nav>
       <a href="/daily/">Daily</a>
       <a href="/games/">Games</a>
+      <a href="/competitions/">Competitions</a>
       <a href="/teams/">Teams</a>
       <a href="/ask/">Ask</a>
       <a href="/leaderboard/">Leaderboard</a>

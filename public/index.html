@@ -311,6 +311,26 @@ body { min-height: 100vh; padding-bottom: 40px; }
 .daily-card.done { border-color: rgba(255,255,255,.12); }
 .daily-card.done .dc-eyebrow { color: var(--text-muted); }
 
+/* ── Browse by competition / team ──
+   The two entry points into the 377 pages that exist for organic discovery.
+   Without these the homepage linked to neither, so the only way in was the
+   nav — and a visitor who lands on the homepage from a search has no reason
+   to look there. */
+.browse {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 24px;
+}
+.browse a {
+  display: block; padding: 16px 18px; border-radius: 12px; text-decoration: none;
+  background: var(--bg-card); border: 1px solid rgba(255,255,255,0.06); color: inherit;
+  transition: border-color .15s, transform .15s;
+}
+.browse a:hover { border-color: var(--accent-cyan); transform: translateY(-1px); }
+.browse h3 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+.browse p { font-size: 12.5px; color: var(--text-muted); line-height: 1.45; }
+.browse .go { display: inline-block; margin-top: 8px; color: var(--accent-cyan);
+              font-size: 12.5px; font-weight: 600; }
+@media (max-width: 520px) { .browse { grid-template-columns: 1fr; } }
+
 .community-teaser {
   background: var(--bg-card);
   border-radius: 12px;
@@ -472,6 +492,19 @@ function renderLoggedOut(page) {
 
     ${GAMES_HTML}
 
+    <div class="browse">
+      <a href="/competitions/">
+        <h3>Browse by competition</h3>
+        <p>Twelve leagues and cups, from the Premier League to the Segunda División — all-time records and a game for each.</p>
+        <span class="go">See all competitions &rarr;</span>
+      </a>
+      <a href="/teams/">
+        <h3>Find your club</h3>
+        <p>355 clubs, each with its own records, leaderboard and games.</p>
+        <span class="go">See all teams &rarr;</span>
+      </a>
+    </div>
+
     <div class="community-teaser">
       <h3>Build Your Own Games</h3>
       <p>Create custom football quizzes and share them with the community. Pick leagues, clubs, nationalities &mdash; the possibilities are endless.</p>
@@ -525,6 +558,19 @@ async function renderLoggedIn(user, page) {
     </div>
 
     ${GAMES_HTML}
+
+    <div class="browse">
+      <a href="/competitions/">
+        <h3>Browse by competition</h3>
+        <p>Twelve leagues and cups, from the Premier League to the Segunda División — all-time records and a game for each.</p>
+        <span class="go">See all competitions &rarr;</span>
+      </a>
+      <a href="/teams/">
+        <h3>Find your club</h3>
+        <p>355 clubs, each with its own records, leaderboard and games.</p>
+        <span class="go">See all teams &rarr;</span>
+      </a>
+    </div>
 
     <!-- Community -->
     <div class="section-title">Community</div>

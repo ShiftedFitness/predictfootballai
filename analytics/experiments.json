@@ -1,0 +1,5 @@
+{
+  "_comment": "Experiment ledger. One entry per deliberate SEO/content/product change, so the weekly report knows what has already been tried and when it is safe to judge the result. Do not edit a page that has an active experiment on it. Fields: date, target, hypothesis, change, metric, baseline, reviewAfter, status (active|worked|no-effect|backfired), result.",
+  "experiments": [],
+  "standingDecisions": []
+}

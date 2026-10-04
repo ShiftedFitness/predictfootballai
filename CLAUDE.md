@@ -242,6 +242,14 @@ applied to the copy around the data rather than the data itself.
 - On localhost the library is not fetched and events log to the console as
   `[TSAnalytics]`; add `?ts_debug=1` to mirror events to the console anywhere.
 
+## Weekly analytics report (Oct 2026)
+Every Sunday `.github/workflows/weekly-analytics.yml` pulls GA4 + Search Console + first-party counts
+(`netlify/functions/analytics-stats.js`: token-protected, counts only) and commits `analytics/reports/latest.md`.
+No LLM step, no site changes; `/seo-review` reviews it and proposes changes for approval. TeleStats settings live in
+`analytics/site.config.mjs`; the engine `scripts/analytics/*.mjs` is shared with the Tagsy repo (copy improvements both
+ways). The "Plays by game" table needs `game_type` registered as an event-scoped custom dimension in GA4. Known gap: most
+finished rounds are not being saved to `ts_game_sessions`, so database play counts are a sample. See `docs/analytics-automation.md`.
+
 ## Pricing Model
 - **Free (no account):** Limited game access
 - **Free account:** More games, leaderboard, streaks
