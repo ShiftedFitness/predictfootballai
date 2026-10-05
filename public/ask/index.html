@@ -6,162 +6,165 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 <link rel="manifest" href="/manifest.json">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <script src="/js/ts-analytics.js"></script>
-<title>Ask TeleStats — Football Database Questions | TeleStats</title>
-<meta name="description" content="Ask the TeleStats football database a question. Which players turned out for both Liverpool and Chelsea? Answers come from real appearance data, never invented.">
+<title>Ask TeleStats — Football Player Questions Answered From Real Data</title>
+<meta name="description" content="Ask about football players and get answers from real appearance and goal records. Find player connections, top scorers and career histories across 355 clubs.">
 <link rel="canonical" href="https://telestats.net/ask/">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Ask TeleStats — Football Database Questions">
-<meta property="og:description" content="Ask a football question and get an answer from real appearance data.">
+<meta property="og:title" content="Ask TeleStats — Football Questions, Real Answers">
+<meta property="og:description" content="Find player connections, compare careers and uncover records — all from real football data.">
 <meta property="og:url" content="https://telestats.net/ask/">
 <meta name="twitter:card" content="summary">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/telestats-theme.css">
+<link rel="stylesheet" href="/css/ts-page.css">
 <style>
-  body { max-width: 760px; margin: 0 auto; padding: 20px; }
-  nav.crumbs { font-size:.8rem; color:var(--text-secondary); margin-bottom:14px; }
-  nav.crumbs a { color:var(--accent); text-decoration:none; }
-  h1 { font-size:1.7rem; margin:0 0 6px; }
-  .lede { color:var(--text-secondary); margin:0 0 20px; max-width:60ch; }
-  form { display:flex; gap:8px; margin-bottom:14px; }
-  input { flex:1; padding:12px 14px; font-size:1rem; border-radius:8px;
-          border:1px solid var(--rule,#24313A); background:var(--bg-card,#171F25); color:var(--text-primary,#F2F5F7); }
-  button { padding:12px 18px; font-size:.95rem; font-weight:600; border:0; border-radius:8px;
-           background:var(--accent,#00E5FF); color:#0B0F12; cursor:pointer; }
-  button:disabled { opacity:.5; cursor:default; }
-  .examples { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:26px; }
-  .examples button { background:var(--bg-elevated,#1E272E); color:var(--accent,#00E5FF);
-                     font-weight:400; font-size:.8rem; padding:6px 11px; }
-  #answer { margin-top:8px; }
-  .msg { font-size:1.05rem; line-height:1.5; margin-bottom:14px; }
-  table { border-collapse:collapse; width:100%; font-size:.875rem; }
-  th,td { text-align:left; padding:7px 10px; border-bottom:1px solid var(--rule,#24313A); }
-  th { font-size:.7rem; text-transform:uppercase; letter-spacing:.05em; color:var(--text-muted); }
-  td.num { text-align:right; font-variant-numeric:tabular-nums; }
-  .prov { margin-top:14px; font-size:.75rem; color:var(--text-muted); }
-  .prov a { color:var(--accent); }
-  footer { margin-top:40px; font-size:.78rem; color:var(--text-muted); }
-  footer a { color:var(--accent); }
+  /* Ask is purple, as it is on the homepage pillar. */
+  :root { --ask: #A78BFA; }
+
+  .a-box { background: var(--s1); border: 1px solid var(--line-2);
+           border-top: 3px solid var(--ask); border-radius: 14px; padding: 18px 18px 19px; }
+  form.a-form { display: flex; gap: 8px; }
+  form.a-form input { flex: 1; min-width: 0; font: inherit; font-size: 1rem; padding: 13px 15px;
+                      min-height: 48px; box-sizing: border-box; border-radius: 11px;
+                      background: var(--bg); color: var(--fg); border: 1px solid var(--line-2); }
+  form.a-form input::placeholder { color: var(--fg-3); }
+  form.a-form input:focus { outline: none; border-color: var(--ask); }
+  form.a-form button { font: inherit; font-size: .9rem; font-weight: 700; padding: 0 22px;
+                       min-height: 48px; border: 0; border-radius: 11px; cursor: pointer;
+                       background: var(--ask); color: #140A2E; }
+  form.a-form button[disabled] { opacity: .6; cursor: default; }
+
+  /* ── guided discovery ──────────────────────────────────────────────────
+     Categories, not a wall of pills. Each one is a thing Ask can ACTUALLY do:
+     there are three intents behind this page and no category promises a
+     fourth. */
+  ul.a-cats { list-style: none; padding: 0; margin: 16px 0 0; display: grid; gap: 8px;
+              grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  ul.a-cats button { width: 100%; text-align: left; font: inherit; cursor: pointer;
+                     padding: 13px 14px; border-radius: 11px; background: var(--s2);
+                     color: var(--fg); border: 1px solid var(--line); }
+  ul.a-cats button:hover { border-color: var(--ask); }
+  ul.a-cats b { display: block; font-size: .85rem; }
+  ul.a-cats span { display: block; font-size: .73rem; color: var(--fg-2); margin-top: 2px;
+                   line-height: 1.4; }
+
+  /* ── the thread ────────────────────────────────────────────────────── */
+  .a-thread { margin-top: 20px; }
+  .a-turn { margin-bottom: 18px; }
+  .a-q { display: flex; gap: 9px; align-items: baseline; font-size: .88rem; font-weight: 600;
+         margin: 0 0 9px; }
+  .a-q i { flex: 0 0 auto; font-style: normal; font-size: .62rem; font-weight: 700;
+           letter-spacing: .1em; text-transform: uppercase; color: var(--ask); }
+  .a-a { background: var(--s1); border: 1px solid var(--line); border-radius: 12px;
+         padding: 14px 15px 15px; }
+  .a-msg { font-size: .9rem; line-height: 1.55; margin: 0; }
+  .a-msg b { color: var(--fg); }
+
+  table.a-tbl { border-collapse: collapse; width: 100%; font-size: .84rem; margin-top: 12px; }
+  table.a-tbl th { text-align: left; font-size: .64rem; text-transform: uppercase;
+                   letter-spacing: .08em; color: var(--fg-3); font-weight: 600;
+                   padding: 6px 8px; border-bottom: 1px solid var(--line-2); cursor: pointer;
+                   white-space: nowrap; }
+  table.a-tbl th[aria-sort] { color: var(--ask); }
+  table.a-tbl td { padding: 7px 8px; border-bottom: 1px solid var(--line); }
+  table.a-tbl tr:last-child td { border-bottom: 0; }
+  table.a-tbl td.num { text-align: right; font-variant-numeric: tabular-nums;
+                       font-family: var(--mono); font-size: .8rem; }
+  table.a-tbl a { color: var(--fg); text-decoration: none; border-bottom: 1px solid var(--line-2); }
+  table.a-tbl a:hover { color: var(--ask); border-bottom-color: var(--ask); }
+  .a-nat { font-size: .68rem; color: var(--fg-3); margin-left: 5px; }
+
+  .a-follow { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 13px; }
+  .a-follow button { font: inherit; font-size: .76rem; padding: 7px 12px; min-height: 36px;
+                     border-radius: 999px; cursor: pointer; background: transparent;
+                     color: var(--fg-2); border: 1px solid var(--line-2); }
+  .a-follow button:hover { color: var(--ask); border-color: var(--ask); }
+  .a-tools { display: flex; gap: 8px; margin-top: 12px; align-items: center; }
+  .a-tools button { font: inherit; font-size: .74rem; padding: 6px 11px; min-height: 34px;
+                    border-radius: 8px; cursor: pointer; background: transparent;
+                    color: var(--fg-3); border: 1px solid var(--line); }
+  .a-tools button:hover { color: var(--fg); }
+  .a-cover { font-size: .7rem; color: var(--fg-3); margin: 10px 0 0; }
+
+  @media (max-width: 760px) { ul.a-cats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 620px) {
+    .a-box { padding: 15px 14px 16px; }
+    form.a-form { flex-direction: column; }
+    form.a-form input { font-size: 16px; /* iOS zooms below 16 */ }
+    form.a-form button { width: 100%; }
+    ul.a-cats { grid-template-columns: 1fr; }
+    /* A five-column stats table does not fit a phone. Nationality and the
+       season range come off; the name and the numbers stay. */
+    table.a-tbl th.opt, table.a-tbl td.opt { display: none; }
+    table.a-tbl th, table.a-tbl td { padding: 7px 5px; }
+  }
 </style>
 </head>
 <body>
-<nav class="crumbs"><a href="/">TeleStats</a> › Ask</nav>
-<h1>Ask TeleStats</h1>
-<p class="lede">Ask about players, clubs and appearances. Every answer is read from the
-  TeleStats database — if the data does not support an answer, it says so rather than
-  guessing.</p>
+<div class="ts-shell">
 
-<form id="f">
-  <input id="q" autocomplete="off" maxlength="300"
-         placeholder="Who has played for both Everton and Liverpool?" aria-label="Your question">
-  <button id="go" type="submit">Ask</button>
-</form>
+<header class="ts-header">
+  <div class="inner">
+    <a class="brand" href="/">TELESTATS</a>
+    <nav aria-label="Site">
+      <a href="/">Home</a>
+      <a href="/games/">Games</a>
+      <a href="/competitions/">Competitions</a>
+      <a href="/teams/">Teams</a>
+      <a href="/ask/" aria-current="page">Ask</a>
+      <a href="/leaderboard/">Leaderboard</a>
+      <a href="/build/">Build</a>
+    </nav>
+  </div>
+</header>
 
-<div class="examples" id="ex"></div>
-<div id="answer"></div>
+<main class="wrap">
+<nav class="crumbs"><a href="/">TeleStats</a> &rsaquo; Ask</nav>
 
-<footer>
-  <a href="/tools/data.html">What data this covers</a> ·
-  <a href="/teams/">Teams</a> ·
-  <a href="/games/">Games</a>
+<div class="hero">
+  <p class="kicker">Curious about football? <em>Just ask.</em></p>
+  <h1>Ask about footballers and get answers from real records</h1>
+  <p class="lede">Find player connections, compare careers and uncover records &mdash;
+    all from real football data. Nothing here is invented: if the database cannot
+    answer, it says so.</p>
+</div>
+
+<section class="band">
+  <div class="a-box">
+    <form class="a-form" id="aForm" autocomplete="off">
+      <label class="vh" for="aQ">Your question about football players</label>
+      <input id="aQ" type="text" maxlength="300" enterkeyhint="search"
+             placeholder="Who has played for both Arsenal and Chelsea?">
+      <button type="submit" id="aGo">Ask</button>
+    </form>
+
+    <ul class="a-cats" id="aCats"></ul>
+  </div>
+
+  <div class="a-thread" id="aThread" aria-live="polite"></div>
+</section>
+
+</main>
+<footer class="page-footer">
+  <noscript><a href="/tools/data.html">View data coverage</a></noscript>
 </footer>
+</div>
 
-<script>
-(function () {
-  var EXAMPLES = [
-    'Who has played for both Everton and Liverpool?',
-    'Which Spanish players have the most Premier League appearances for Liverpool?',
-    'Who played for both Plymouth Argyle and Manchester United?',
-    'Top scorers for Sheffield Wednesday in the Championship',
-    'Which clubs did Peter Crouch play for?'
-  ];
-  var $ = function (id) { return document.getElementById(id); };
-  function esc(s) {
-    return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
-      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
-    });
-  }
-
-  EXAMPLES.forEach(function (t) {
-    var b = document.createElement('button');
-    b.type = 'button'; b.textContent = t;
-    b.onclick = function () { $('q').value = t; $('f').requestSubmit(); };
-    $('ex').appendChild(b);
-  });
-
-  function renderRows(d) {
-    if (!d.rows || !d.rows.length) return '';
-    var r0 = d.rows[0];
-    // Three intents, three shapes.
-    if (r0.clubs && r0.clubs[0] && r0.clubs[0].team && r0.player) {
-      var teams = r0.clubs.map(function (c) { return esc(c.team); });
-      return '<table><thead><tr><th>Player</th>' +
-        teams.map(function (t) { return '<th class="num">' + t + '</th>'; }).join('') +
-        '</tr></thead><tbody>' + d.rows.map(function (r) {
-          return '<tr><td>' + esc(r.player) + '</td>' + r.clubs.map(function (c) {
-            return '<td class="num">' + c.appearances + '</td>'; }).join('') + '</tr>';
-        }).join('') + '</tbody></table>';
-    }
-    if (r0.name && r0.clubs) {
-      return d.rows.map(function (p) {
-        return '<p class="msg">' + esc(p.name) + '</p><table><thead><tr><th>Club</th>' +
-          '<th class="num">Apps</th><th class="num">Goals</th><th>Seasons</th></tr></thead><tbody>' +
-          p.clubs.map(function (c) {
-            return '<tr><td>' + esc(c.team) + '</td><td class="num">' + c.appearances +
-                   '</td><td class="num">' + c.goals + '</td><td>' + esc(c.from) + '–' + esc(c.to) + '</td></tr>';
-          }).join('') + '</tbody></table>';
-      }).join('');
-    }
-    return '<table><thead><tr><th>Player</th><th class="num">Apps</th>' +
-      '<th class="num">Goals</th><th>Seasons</th></tr></thead><tbody>' +
-      d.rows.map(function (r) {
-        return '<tr><td>' + esc(r.player) + '</td><td class="num">' + r.appearances +
-               '</td><td class="num">' + r.goals + '</td><td>' + esc(r.from) + '–' + esc(r.to) + '</td></tr>';
-      }).join('') + '</tbody></table>';
-  }
-
-  $('f').onsubmit = function (e) {
-    e.preventDefault();
-    var q = $('q').value.trim();
-    if (!q) return;
-    $('go').disabled = true;
-    $('answer').innerHTML = '<p class="msg">Looking…</p>';
-
-    fetch('/.netlify/functions/ask', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ question: q, source: 'ask_page' })
-    }).then(function (r) { return r.json(); }).then(function (d) {
-      $('go').disabled = false;
-      if (d.error && !d.message) { $('answer').innerHTML = '<p class="msg">' + esc(d.error) + '</p>'; return; }
-      var html = '<p class="msg">' + esc(d.message) + '</p>' + renderRows(d);
-      if (d.provenance) {
-        html += '<p class="prov">' + esc(d.count) + ' result' + (d.count === 1 ? '' : 's') +
-                ' from the TeleStats database in ' + esc(d.provenance.query_ms) + 'ms · ' +
-                '<a href="/tools/data.html">dataset coverage</a></p>';
-      }
-      $('answer').innerHTML = html;
-
-      // Structured only. The user's question is never sent to analytics.
-      if (d.analytics && window.TSAnalytics) {
-        TSAnalytics.trackEvent('ask_query', d.analytics);
-      }
-    }).catch(function () {
-      $('go').disabled = false;
-      $('answer').innerHTML = '<p class="msg">Could not reach the database. Try again.</p>';
-    });
-  };
-})();
-</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/js/ts-auth.js"></script>
 <script src="/js/ts-data.js"></script>
 <script src="/js/ts-footer.js"></script>
 <script src="/js/ts-nav.js"></script>
+<script src="/js/ts-ask.js"></script>
 <script>
   (async function () {
     try { await TSAuth.init(); } catch (e) { console.error('[TeleStats] Auth init failed:', e); }
     try { TSNav.render(); } catch (e) { console.error('[TeleStats] Nav render failed:', e); }
+    try { TSAsk.init?.(); } catch (e) { console.error('[TeleStats] Ask init failed:', e); }
   })();
 </script>
 </body>

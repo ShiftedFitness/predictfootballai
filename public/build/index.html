@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<link rel="manifest" href="/manifest.json">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<script src="/js/ts-analytics.js"></script>
+<title>Build a Football Challenge | TeleStats</title>
+<meta name="description" content="Describe the football challenge you want and TeleStats builds it from real player records. Pick clubs, competitions and nationalities, then share it with friends.">
+<link rel="canonical" href="https://telestats.net/build/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Build a Football Challenge | TeleStats">
+<meta property="og:description" content="Describe the challenge you want. TeleStats builds it from real player records.">
+<meta property="og:url" content="https://telestats.net/build/">
+<meta name="twitter:card" content="summary">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/telestats-theme.css">
+<link rel="stylesheet" href="/css/ts-page.css">
+<style>
+  /* Build is yellow. That is the rule the rest of the site follows. */
+  .b-wrap { --accent: var(--yellow); }
+  .b-ask { background: var(--s1); border: 1px solid var(--line-2);
+           border-top: 3px solid var(--yellow); border-radius: 14px;
+           padding: 20px 20px 21px; }
+  .b-ask h2 { font-size: 1.05rem; font-family: var(--mono); margin: 0 0 4px; }
+  .b-ask .sublede { margin-bottom: 14px; }
+  .b-field { display: flex; flex-direction: column; gap: 10px; }
+  .b-field textarea { width: 100%; box-sizing: border-box; font: inherit; font-size: 1rem;
+                      padding: 14px 15px; min-height: 92px; resize: vertical;
+                      border-radius: 11px; background: var(--bg); color: var(--fg);
+                      border: 1px solid var(--line-2); line-height: 1.5; }
+  .b-field textarea::placeholder { color: var(--fg-3); }
+  .b-field textarea:focus { outline: none; border-color: var(--yellow); }
+  .b-go { display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+          font: inherit; font-size: .95rem; font-weight: 700; padding: 13px 24px;
+          min-height: 48px; border: 0; border-radius: 11px; cursor: pointer;
+          background: var(--yellow); color: #1A1400; align-self: flex-start; }
+  .b-go:hover { filter: brightness(1.06); }
+  .b-go[disabled] { opacity: .6; cursor: default; }
+  .b-go svg { width: 15px; height: 15px; }
+
+  .b-egs { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 13px; }
+  .b-egs button { font: inherit; font-size: .76rem; padding: 8px 12px; min-height: 36px;
+                  border-radius: 9px; cursor: pointer; background: transparent;
+                  color: var(--fg-2); border: 1px solid var(--line-2); text-align: left; }
+  .b-egs button:hover { color: var(--fg); border-color: var(--fg-3); }
+
+  .b-out { margin-top: 16px; }
+  .b-out:empty { display: none; }
+  .b-card { border: 1px solid var(--line-2); border-radius: 12px; background: var(--s2);
+            padding: 16px 17px 17px; }
+  .b-card h3 { font-family: var(--mono); font-size: 1rem; margin: 0 0 3px; }
+  .b-ok { font-size: .7rem; font-weight: 700; text-transform: uppercase;
+          letter-spacing: .12em; color: var(--yellow); margin: 0 0 8px; }
+  .b-rows { list-style: none; padding: 0; margin: 12px 0 0; }
+  .b-rows li { display: flex; gap: 10px; padding: 7px 0; font-size: .84rem;
+               border-bottom: 1px solid var(--line); }
+  .b-rows li:last-child { border-bottom: 0; }
+  .b-rows b { color: var(--fg-3); font-weight: 500; min-width: 108px; font-size: .78rem; }
+  .b-rows span { color: var(--fg); }
+  .b-pool { color: var(--yellow) !important; font-family: var(--mono); font-weight: 700; }
+  .b-acts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 15px; }
+  .b-acts a, .b-acts button { font: inherit; font-size: .84rem; font-weight: 700;
+    padding: 10px 17px; min-height: 42px; box-sizing: border-box; border-radius: 10px;
+    cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+  .b-primary { background: var(--cyan); color: #06181C; border: 0; }
+  .b-second { background: transparent; color: var(--fg-2); border: 1px solid var(--line-2); }
+  .b-second:hover { color: var(--fg); border-color: var(--fg-3); }
+  .b-msg { font-size: .85rem; line-height: 1.55; margin: 0; }
+  .b-warn { border-left: 3px solid var(--yellow); padding-left: 12px; margin-top: 12px;
+            font-size: .8rem; color: var(--fg-2); }
+  .b-note { font-size: .76rem; color: var(--fg-3); margin-top: 11px; }
+
+  .b-choice { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 12px; }
+  .b-choice button { font: inherit; font-size: .82rem; font-weight: 600; padding: 10px 15px;
+    min-height: 42px; border-radius: 9px; cursor: pointer; background: var(--s1);
+    color: var(--fg); border: 1px solid var(--line-2); }
+  .b-choice button:hover { border-color: var(--yellow); color: var(--yellow); }
+
+  ul.tpl { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px;
+           grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  ul.tpl button { width: 100%; text-align: left; font: inherit; cursor: pointer;
+                  padding: 13px 14px; border-radius: 11px; background: var(--s1);
+                  color: var(--fg); border: 1px solid var(--line); }
+  ul.tpl button:hover { background: var(--s2); border-color: var(--line-2); }
+  ul.tpl b { display: block; font-size: .86rem; }
+  ul.tpl span { display: block; font-size: .74rem; color: var(--fg-2); margin-top: 2px;
+                line-height: 1.4; }
+
+  .b-tabs { display: flex; gap: 6px; margin: 0 0 18px; }
+  .b-tab { font: inherit; font-size: .82rem; font-weight: 600; padding: 9px 16px;
+           min-height: 40px; border-radius: 999px; cursor: pointer; background: var(--s1);
+           color: var(--fg-2); border: 1px solid var(--line); }
+  .b-tab.on { background: var(--yellow); color: #1A1400; border-color: var(--yellow); }
+  .b-tab:focus-visible, .b-go:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+
+  @media (max-width: 760px) { ul.tpl { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 620px) {
+    .b-ask { padding: 16px 14px 17px; }
+    .b-field textarea { font-size: 16px; /* iOS zooms below 16 */ min-height: 84px; }
+    .b-go { width: 100%; }
+    ul.tpl { grid-template-columns: 1fr; }
+    .b-acts a, .b-acts button { flex: 1; justify-content: center; }
+  }
+</style>
+</head>
+<body>
+<div class="ts-shell">
+
+<header class="ts-header">
+  <div class="inner">
+    <a class="brand" href="/">TELESTATS</a>
+    <nav aria-label="Site">
+      <a href="/">Home</a>
+      <a href="/games/">Games</a>
+      <a href="/competitions/">Competitions</a>
+      <a href="/teams/">Teams</a>
+      <a href="/ask/">Ask</a>
+      <a href="/leaderboard/">Leaderboard</a>
+      <a href="/build/" aria-current="page">Build</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap b-wrap">
+<nav class="crumbs"><a href="/">TeleStats</a> &rsaquo; Build</nav>
+
+<div class="hero">
+  <p class="kicker">What football challenge do you <em>want to create?</em></p>
+  <h1>Build a football challenge from real player records</h1>
+  <p class="lede">Describe it in your own words. TeleStats finds the players, sets the
+    rules and works out the answers.</p>
+</div>
+
+<div class="b-tabs" role="group" aria-label="Build sections">
+  <button type="button" class="b-tab on" data-pane="create">Create</button>
+  <button type="button" class="b-tab" data-pane="explore">Explore</button>
+  <button type="button" class="b-tab" data-pane="mine">My games</button>
+</div>
+
+<section class="band" id="pane-create">
+  <div class="b-ask">
+    <h2>Describe your challenge</h2>
+    <p class="sublede">Name a game, and a club, competition or nationality.</p>
+    <form class="b-field" id="bForm">
+      <label class="vh" for="bText">Describe the challenge you want to build</label>
+      <textarea id="bText" maxlength="300" autocomplete="off"
+        placeholder="Build a Starting XI using Liverpool and Manchester United players"></textarea>
+      <button type="submit" class="b-go" id="bGo">Build my game
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
+          ><path d="M3 8h9M9 4.5 12.5 8 9 11.5"/></svg></button>
+    </form>
+    <div class="b-egs" id="bEgs"></div>
+    <div class="b-out" id="bOut" aria-live="polite"></div>
+  </div>
+
+  <h2 style="margin-top:28px">Or start with a template</h2>
+  <p class="sublede">Each one fills the box above &mdash; change it before you build.</p>
+  <ul class="tpl" id="bTpl"></ul>
+
+  <p class="b-note">Prefer the manual controls?
+    <a href="/community/?builder=1">Advanced setup &rarr;</a></p>
+</section>
+
+<section class="band" id="pane-explore" hidden>
+  <h2>Explore community challenges</h2>
+  <p class="sublede">Games built by other players, from the same database.</p>
+  <div id="bExplore"></div>
+</section>
+
+<section class="band" id="pane-mine" hidden>
+  <h2>My games</h2>
+  <div id="bMine"></div>
+</section>
+
+</main>
+<footer class="page-footer">
+  <noscript><a href="/tools/data.html">View data coverage</a></noscript>
+</footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/js/ts-auth.js"></script>
+<script src="/js/ts-data.js"></script>
+<script src="/js/ts-entitlements.js"></script>
+<script src="/js/ts-footer.js"></script>
+<script src="/js/ts-nav.js"></script>
+<script src="/js/ts-build.js"></script>
+<script>
+  (async function () {
+    try { await TSAuth.init(); } catch (e) { console.error('[TeleStats] Auth init failed:', e); }
+    try { TSNav.render(); } catch (e) { console.error('[TeleStats] Nav render failed:', e); }
+    try { TSBuild.init?.(); } catch (e) { console.error('[TeleStats] Build init failed:', e); }
+  })();
+</script>
+</body>
+</html>

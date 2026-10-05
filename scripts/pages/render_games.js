@@ -211,7 +211,7 @@ ${require('./shell').fallbackHeader('/games/')}
       records and games.</span></a></li>
     <li><a href="/competitions/"><b>Choose a competition</b><span>Europe&rsquo;s leagues
       and cups, end to end.</span></a></li>
-    <li><a class="way-build" href="/community/?builder=1"><b>Build your own</b><span>Make a
+    <li><a class="way-build" href="/build/"><b>Build your own</b><span>Make a
       game from the same database and send it to your friends.</span></a></li>
     <li><a href="/community/"><b>Community challenges</b><span>Games built by other
       players, from the same data.</span></a></li>

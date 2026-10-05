@@ -28,7 +28,10 @@
     { label: 'Teams', href: '/teams/', match: (p) => p.startsWith('/teams') },
     { label: 'Ask', href: '/ask/', match: (p) => p.startsWith('/ask') },
     { label: 'Leaderboard', href: '/leaderboard/', match: (p) => p.startsWith('/leaderboard') },
-    { label: 'Community', href: '/community/', match: (p) => p.startsWith('/community') }
+    // "Build" rather than "Community": it names what you DO there, and it is
+    // the B in Play · Build · Ask. /community/ still works and is where
+    // Explore lives, so the old label's route is not lost — only its billing.
+    { label: 'Build', href: '/build/', match: (p) => p.startsWith('/build') || p.startsWith('/community') }
   ];
 
   function esc(s) {

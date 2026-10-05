@@ -92,3 +92,31 @@ Every change this session is in the working tree only, per your standing rule.
 `npm run check` and `npm run check:spoilers` both pass.
 
 - [ ] Review the diff and commit when you are happy
+
+
+---
+
+## 7. Decisions I need from you before Phase 2 can finish  (added 5 Oct)
+
+The Build and Ask work is done. Three things in that brief are **blocked on a
+decision**, not on code, because each changes what Pro is worth to people who
+have already paid for it:
+
+- [ ] **Free publishing.** The brief asks for free accounts to publish ~3
+      challenges. Today publishing needs `tier === 'paid'`. Making it free
+      removes the main thing £4.99 Pro currently buys. Do you want to:
+      (a) do it anyway and give existing Pro something else, (b) keep
+      publishing paid, or (c) wait until the new pricing lands?
+
+- [ ] **Invited friends playing free.** Needs server-side entitlement checks
+      to exist first — otherwise "one free play per invite" is enforced in the
+      browser and is trivially bypassed. This depends on item 1 above.
+
+- [ ] **Remix.** Cheap to build once publishing rules are settled; pointless
+      to build before.
+
+### Already fixed, no decision needed
+
+Three contradictions between the upgrade page and the code (details in
+SESSION_LOG). The notable one: **Day Pass holders could always create
+community games** and the page told them they couldn't.

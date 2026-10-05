@@ -3246,3 +3246,51 @@ Fixed in passing: `/community/?build=1` opened nothing — the builder listens
 for `?builder=`. It was on the team pages and all 12 competition pages. The
 handler now also accepts a bare `?builder`, and prompts signed-out visitors to
 make an account instead of ignoring the click.
+
+## Phase 2 — Build, Ask, entitlement audit
+
+**Phase A, the audit, found three places the upgrade page contradicted the
+code.** All copy, no entitlement changed:
+
+1. *"Day Pass: Community game creation ✗".* Wrong. `TSAuth.getTier()` returns
+   `'paid'` for an unexpired Day Pass and the builder gates on exactly that.
+   Somebody paid £0.99 and was told they could not use something they could.
+2. *"Free: 5 plays per game per day".* Wrong, and under by half: ts-data.js
+   gives 10, and 15 with `referral_unlocked`.
+3. *"Referral: Create games ✗".* This one is CORRECT, and I nearly "fixed" it
+   into a lie. `redeem-referral` sets `referral_unlocked`, which only raises a
+   play limit; `redeem-promo` is the one that sets `tier: 'paid'`. Two
+   different mechanisms with similar names.
+
+`ts-entitlements.js` is now the single client-side definition, with the audit
+recorded in it. It is descriptive, not enforcement — the browser is not a
+security boundary, and server-side enforcement is still outstanding.
+
+**Build.** Nav says Build, `/build/` is the front door, `/community/` still
+works. `_build_parse.js` turns a sentence into a config deterministically — no
+model call, because the things a config can contain are a CLOSED set and
+anything a model produced would have to be validated against these same lists
+anyway. `build-create.js` then counts the players that would REALLY be
+eligible, from the same view the games read, and refuses rather than hands back
+a game of four players.
+
+It never silently drops part of a request: "Liverpool in League Two" says the
+filter was removed and why; "by assists" says assists are not held. Injection
+payloads resolve to nothing because the sentence never reaches a query — only
+ids do.
+
+The preview was the one place this could have lied. The scope vocabulary
+encodes ONE club, so a two-club config linked to a bare `/games/xi.html` would
+have started a generic game wearing the label of the one just built. Two-club
+configs now route to the full builder, which genuinely supports them, and say
+why.
+
+**Ask.** Three intents is the honest capability surface, so the six discovery
+categories are six things it can actually do. Follow-ups are STRUCTURED: each
+synthesises a new plain question through the same parser, so `_ask_intents.js`
+stays the security boundary and nothing suggests an answer the database cannot
+give. Sorting a result the page already holds needs no request at all.
+
+**Deferred, deliberately:** free publishing, invite mechanics and remix all
+change what Pro is worth to people who have already paid for it. Documented
+rather than guessed, per the brief.
