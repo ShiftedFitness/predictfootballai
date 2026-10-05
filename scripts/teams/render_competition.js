@@ -323,7 +323,7 @@ function render(comp, d, opts) {
 <h2>Community games</h2>
 <p class="sub">Made by players from the same database — different rules, same real records.</p>
 <div id="communityBox"><p class="empty">Loading…</p></div>
-<a class="cta" href="/community/?build=1">Build a ${esc(comp.name)} game &rarr;</a>
+<a class="cta" href="/community/?builder=1">Build a ${esc(comp.name)} game &rarr;</a>
 
 <h2>Ask about ${esc(comp.name)}</h2>
 <p class="sub">Answers come from the database and are never invented — if the data does not

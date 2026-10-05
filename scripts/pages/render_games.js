@@ -6,7 +6,7 @@
  * daily itself is still fetched by the same function and the streak still read
  * by the same ts-streak.js, so nothing about anybody's existing run changes.
  */
-const { esc, num, SITE } = require('./build_games');
+const { esc, num, SITE, TINTS } = require('./build_games');
 
 /** The six cards. One featured, five beside it — the club-page arrangement. */
 function cards(GAMES, BRAND) {
@@ -18,10 +18,11 @@ function cards(GAMES, BRAND) {
             <path d="M12 17h.01"/></svg></button>
         <div class="howpop" id="how-${esc(g.key)}" role="note" hidden>${esc(g.how)}</div>` : '';
     const open = `<a class="game-go${g.featured ? ' feat' : ''}" href="${esc(g.path)}" data-game="${esc(g.key)}">`;
+    const tint = TINTS[g.key] || BRAND;
     if (g.featured) {
       return `<li class="feat">
         ${open}
-          <span class="artbox">${g.art(BRAND)}</span>
+          <span class="artbox">${g.art(tint)}</span>
           <span class="gtext">
             <span class="gtag">Most played</span>
             <span class="gname">${esc(g.name)}</span>
@@ -35,7 +36,7 @@ function cards(GAMES, BRAND) {
     }
     return `<li>
         ${open}
-          <span class="artbox">${g.art(BRAND)}</span>
+          <span class="artbox">${g.art(tint)}</span>
           <span class="gtext">
             <span class="gname">${esc(g.name)}</span>
             <span class="gblurb">${esc(g.blurb)}</span>
@@ -87,42 +88,6 @@ function render(cov, GAMES, BRAND) {
 <link rel="stylesheet" href="/telestats-theme.css">
 <link rel="stylesheet" href="/css/ts-page.css">
 <style>
-  /* ── today's challenge ───────────────────────────────────────────────────
-     The reason to come back, so it is the first thing and it is not a card
-     like the others. Hidden until the daily resolves: a skeleton promising a
-     challenge that then fails to load is worse than one that was never there. */
-  .daily { border: 1px solid var(--line-2); border-radius: 14px; overflow: hidden;
-           background: var(--s1); margin-bottom: 30px; }
-  .daily[hidden] { display: none; }
-  .dtop { display: flex; align-items: stretch; }
-  .dart { flex: 0 0 34%; display: flex; align-items: center; justify-content: center;
-          background: var(--s0); border-right: 1px solid var(--line); padding: 14px;
-          color: var(--fg-3); }
-  /* Only the pitch gets the pitch. */
-  .dart:has(.art-pitch) { background: #0C2A1B; }
-  .dart svg { width: 100%; height: auto; max-height: 150px; }
-  .dbody { flex: 1; min-width: 0; padding: 16px 18px 17px; }
-  .dtag { display: inline-flex; align-items: center; gap: 6px; font-size: .62rem; font-weight: 700;
-          text-transform: uppercase; letter-spacing: .12em; color: var(--cyan); margin-bottom: 7px; }
-  .dtag i { width: 6px; height: 6px; border-radius: 50%; background: var(--cyan); }
-  .dname { font-family: var(--mono); font-size: 1.22rem; font-weight: 700; margin: 0;
-           letter-spacing: -.02em; }
-  .dscope { font-size: .84rem; color: var(--fg-2); margin: 5px 0 0; }
-  .dplay { display: inline-flex; align-items: center; gap: 7px; margin-top: 13px;
-           font-size: .88rem; font-weight: 700; padding: 11px 20px; min-height: 44px;
-           box-sizing: border-box; border-radius: 10px; background: var(--cyan);
-           color: #06181C; text-decoration: none; }
-  .dplay:hover { filter: brightness(1.08); }
-  .dplay svg { width: 15px; height: 15px; }
-  .dstreak { display: flex; gap: 0; border-top: 1px solid var(--line); }
-  .dstreak div { flex: 1; padding: 10px 14px; }
-  .dstreak div + div { border-left: 1px solid var(--line); }
-  .dstreak b { display: block; font-family: var(--mono); font-size: 1.05rem; font-weight: 700;
-               font-variant-numeric: tabular-nums; }
-  .dstreak span { font-size: .62rem; text-transform: uppercase; letter-spacing: .1em;
-                  color: var(--fg-3); }
-  .ddone { color: var(--cyan); }
-
   /* ── the six ─────────────────────────────────────────────────────────── */
   /* Six, three across. Not 1 + 5: that leaves one card alone on a third row
      at every width, which reads as a mistake rather than a choice. */
@@ -169,6 +134,9 @@ function render(cov, GAMES, BRAND) {
               background: var(--s1); border: 1px solid var(--line); }
   ul.ways a:hover { background: var(--s2); border-color: var(--line-2); }
   ul.ways b { font-size: .88rem; }
+  /* Building is yellow here too, so the rule holds across the site. */
+  .way-build { border-left: 3px solid var(--yellow) !important; }
+  .way-build b { color: var(--yellow); }
   ul.ways span { font-size: .75rem; color: var(--fg-2); line-height: 1.4; }
 
   @media (max-width: 900px) {
@@ -218,26 +186,12 @@ ${require('./shell').fallbackHeader('/games/')}
 
 <section class="band">
   <h2>Today&rsquo;s challenge</h2>
-  <p class="sublede">One puzzle a day, the same for everyone. Come back tomorrow for the next.</p>
-  <div class="daily" id="dailyBox" hidden>
-    <div class="dtop">
-      <div class="dart" id="dailyArt"></div>
-      <div class="dbody">
-        <p class="dtag"><i></i><span id="dailyDate">Today</span></p>
-        <p class="dname" id="dailyName">&nbsp;</p>
-        <p class="dscope" id="dailyScope">&nbsp;</p>
-        <a class="dplay" id="dailyPlay" href="/daily/">Play today&rsquo;s challenge
-          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
-            ><path d="M3 8h9M9 4.5 12.5 8 9 11.5"/></svg></a>
-      </div>
-    </div>
-    <div class="dstreak">
-      <div><b id="dStreak">0</b><span>Current streak</span></div>
-      <div><b id="dBest">0</b><span>Best streak</span></div>
-      <div><b id="dPlayed">0</b><span>Days played</span></div>
-    </div>
-  </div>
+  <p class="sublede">One puzzle a day, the same for everyone &mdash; plus what others are
+    playing and what they have built.</p>
+  <!-- The shared module. The homepage mounts the same component against the
+       same two endpoints, so the two pages cannot disagree about today's
+       challenge or about your streak. -->
+  <div id="feature"></div>
 </section>
 
 <section class="band">
@@ -257,6 +211,8 @@ ${require('./shell').fallbackHeader('/games/')}
       records and games.</span></a></li>
     <li><a href="/competitions/"><b>Choose a competition</b><span>Europe&rsquo;s leagues
       and cups, end to end.</span></a></li>
+    <li><a class="way-build" href="/community/?builder=1"><b>Build your own</b><span>Make a
+      game from the same database and send it to your friends.</span></a></li>
     <li><a href="/community/"><b>Community challenges</b><span>Games built by other
       players, from the same data.</span></a></li>
     <li><a href="/ask/"><b>Ask TeleStats</b><span>A question about the data, answered
@@ -268,6 +224,10 @@ ${require('./shell').footer()}
 </div>
 <script src="/js/ts-howto.js" defer></script>
 <script src="/js/ts-streak.js"></script>
+<script src="/js/ts-featured.js"></script>
+<script>
+  TSFeatured.mount?.(document.getElementById('feature'));
+</script>
 <script>
 (function () {
   'use strict';
@@ -299,8 +259,8 @@ ${require('./shell').footer()}
 
     box.hidden = false;
 
-    if (window.TSStreak && TSStreak.get) {
-      var s = TSStreak.get();
+    if (window.TSStreak && TSStreak.combined) {
+      var s = TSStreak.combined();
       document.getElementById('dStreak').textContent = s.current || 0;
       document.getElementById('dBest').textContent = s.longest || 0;
       document.getElementById('dPlayed').textContent = s.total || 0;

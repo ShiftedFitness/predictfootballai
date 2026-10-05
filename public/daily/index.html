@@ -177,7 +177,7 @@
                      whoami: 'Who Am I?', quiz: 'Trivia Quiz' };
 
   function paintStreak() {
-    var s = TSStreak.get();
+    var s = TSStreak.combined();
     $('curStreak').textContent = s.current;
     $('bestStreak').textContent = s.longest;
     $('totalDays').textContent = s.total;

@@ -40,6 +40,25 @@ const num = (n) => Number(n || 0).toLocaleString('en-GB');
  */
 const BRAND = { primary: '#00E5FF', secondary: '#0B3B44' };
 
+/**
+ * A colour per game, for the ILLUSTRATION only.
+ *
+ * Six drawings in one cyan made six near-identical cards, which is what made
+ * the page read as a dashboard. This gives each game an identity without
+ * breaking the colour rule the site now follows: cyan still means "an action
+ * you can take" and yellow still means "build, or something you earned", and
+ * every Play link on this page is still cyan. These tints are identity, not
+ * interaction — the same job a club's colour does on a club page.
+ */
+const TINTS = {
+  bullseye: { primary: '#FF5C5C', secondary: '#4A1414' },   // a dartboard is red
+  xi:       { primary: '#38E8C0', secondary: '#0C3A30' },   // on the grass
+  hol:      { primary: '#00E5FF', secondary: '#0B3B44' },
+  whoami:   { primary: '#A78BFA', secondary: '#2A1F4A' },   // the mystery one
+  alpha:    { primary: '#FFD60A', secondary: '#3D3200' },   // letters, and earning them
+  quiz:     { primary: '#5BC8FF', secondary: '#0E2E42' },
+};
+
 const GAMES = [
   // No `featured` here, deliberately. Today's Challenge above IS the featured
   // thing on this page, and a second hero card competes with it for the same
@@ -84,7 +103,7 @@ async function coverage() {
   return { clubs: all.length, players: count || 0, competitions: comps.size, games: GAMES.length };
 }
 
-module.exports = { GAMES, BRAND, esc, num, SITE, coverage };
+module.exports = { GAMES, BRAND, TINTS, esc, num, SITE, coverage };
 
 if (require.main === module) {
   (async () => {
@@ -92,6 +111,16 @@ if (require.main === module) {
     const { render } = require('./render_games');
     const out = path.join(ROOT, 'public', 'games', 'index.html');
     fs.writeFileSync(out, render(cov, GAMES, BRAND));
+
+    // The same figures, written once, for anything that is not generated.
+    // The homepage used to carry "36K+" as a literal while this page derived
+    // 40,148 from the database — two answers to one question, and the smaller
+    // one wrong by four thousand players. Now there is one file and no page
+    // types a total into its own markup.
+    const dataDir = path.join(ROOT, 'public', 'data');
+    fs.mkdirSync(dataDir, { recursive: true });
+    fs.writeFileSync(path.join(dataDir, 'totals.json'),
+      JSON.stringify({ ...cov, generated: new Date().toISOString() }, null, 2) + '\n');
     console.log(`\n  ✓ public/games/index.html — ${cov.games} games, ` +
                 `${num(cov.players)} players, ${cov.clubs} clubs\n`);
   })().catch((e) => { console.error(e); process.exit(1); });

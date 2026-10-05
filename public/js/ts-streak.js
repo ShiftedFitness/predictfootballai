@@ -221,8 +221,48 @@
     return lines.join('\n');
   }
 
+  /**
+   * The streak to SHOW, from both places it can live.
+   *
+   * There are two stores and they had never been reconciled: this file keeps a
+   * local history in the browser, and ts_users.current_streak is kept against
+   * the account. The homepage read the account one in its welcome line and the
+   * local one in its daily card, so a single page could say "1 day streak" and
+   * "0" at the same time, and /games/ said something else again.
+   *
+   * Takes the HIGHER of the two rather than picking a winner. A streak is
+   * something somebody earned: a run built signed-out on this phone and a run
+   * built signed-in on another are both real, and showing the smaller one
+   * reads as having lost it. Nothing is written here, so nothing can be reset
+   * by looking at it.
+   *
+   * Reconciling the two stores properly — handing the local history over on
+   * sign-in via pending(), which is written but has never been called — is a
+   * separate job with real data at stake. This makes the DISPLAY agree
+   * everywhere, which is the bug people can see.
+   */
+  function combined() {
+    var local = get();
+    var acct = 0;
+    try {
+      var u = window.TSAuth && TSAuth.getUser && TSAuth.getUser();
+      acct = (u && u.current_streak) || 0;
+    } catch (_) { acct = 0; }
+    return {
+      current: Math.max(local.current || 0, acct),
+      longest: Math.max(local.longest || 0, acct),
+      playedToday: local.playedToday,
+      today: local.today,
+      total: local.total,
+      worthSaving: local.worthSaving,
+      /** Where the shown number came from, for anything that needs to explain itself. */
+      source: acct > (local.current || 0) ? 'account' : 'local',
+    };
+  }
+
   window.TSStreak = {
-    get: get, record: record, history: history, pending: pending, clear: clear,
+    get: get, combined: combined, record: record, history: history,
+    pending: pending, clear: clear,
     grid: grid, shareText: shareText, utcDate: utcDate,
     PROMPT_AT: PROMPT_AT, STORAGE_KEY: KEY,
   };

@@ -120,3 +120,92 @@ h2 { font-family: var(--mono); font-size: 1rem; font-weight: 700; margin: 0 0 3p
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; animation: none !important; }
 }
+
+/* ── colour roles ────────────────────────────────────────────────────────
+   The brand has two accents and the site had quietly dropped one, which is
+   how /games/ ended up reading as a blue analytics dashboard.
+
+     cyan   — play. Gameplay actions, links, selected states.
+     yellow — build and earn. Creating a game, XP, streaks, achievements.
+
+   The split is a RULE, not decoration: a yellow thing on this site either
+   makes something or records something you earned. That is what stops it
+   becoming "some buttons are yellow now". */
+:root {
+  --yellow: var(--accent-yellow, #FFD60A);
+  --play: var(--cyan);
+  --build: var(--yellow);
+}
+
+/* ── the Daily | Featured | Community module ─────────────────────────── */
+.tsf { border: 1px solid var(--line-2); border-radius: 14px; background: var(--s1);
+       overflow: hidden; }
+.tsf-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--line); background: var(--s0); }
+.tsf-tab { flex: 1; font: inherit; font-family: var(--mono); font-size: .76rem; font-weight: 700;
+           letter-spacing: .04em; padding: 12px 8px; min-height: 44px; cursor: pointer;
+           background: transparent; color: var(--fg-3); border: 0;
+           border-bottom: 2px solid transparent; }
+.tsf-tab:hover { color: var(--fg-2); }
+.tsf-tab.on { color: var(--fg); border-bottom-color: var(--cyan); background: var(--s1); }
+.tsf-tab:focus-visible { outline: 2px solid var(--cyan); outline-offset: -2px; }
+.tsf-panel { padding: 16px 17px 17px; }
+.tsf-panel[hidden] { display: none; }
+.tsf-panel:focus-visible { outline: 2px solid var(--cyan); outline-offset: -2px; }
+.tsf-wait { font-size: .82rem; color: var(--fg-3); margin: 0; padding: 6px 0; }
+
+.tsf-daily { display: flex; gap: 18px; align-items: flex-start; }
+.tsf-dmain { flex: 1; min-width: 0; }
+.tsf-eyebrow { display: flex; align-items: center; gap: 6px; font-size: .62rem; font-weight: 700;
+               text-transform: uppercase; letter-spacing: .12em; color: var(--cyan); margin: 0 0 6px; }
+.tsf-eyebrow i { width: 6px; height: 6px; border-radius: 50%; background: var(--cyan); }
+.tsf-title { font-family: var(--mono); font-size: 1.2rem; font-weight: 700; margin: 0;
+             letter-spacing: -.02em; }
+.tsf-sub { font-size: .83rem; color: var(--fg-2); margin: 4px 0 0; }
+.tsf-cta { display: inline-flex; align-items: center; gap: 7px; margin-top: 12px;
+           font-size: .86rem; font-weight: 700; padding: 10px 18px; min-height: 42px;
+           box-sizing: border-box; border-radius: 10px; background: var(--cyan);
+           color: #06181C; text-decoration: none; }
+.tsf-cta:hover { filter: brightness(1.08); }
+.tsf-cta svg { width: 14px; height: 14px; }
+/* Building is yellow, everywhere, because that is what yellow means here. */
+.tsf-cta.tsf-build { background: var(--build); color: #1A1400; }
+
+/* Streaks are something you earned, so they are yellow too. */
+.tsf-streak { flex: 0 0 auto; display: flex; gap: 0; border: 1px solid var(--line);
+              border-radius: 10px; overflow: hidden; }
+.tsf-streak div { padding: 9px 13px; text-align: center; }
+.tsf-streak div + div { border-left: 1px solid var(--line); }
+.tsf-streak b { display: block; font-family: var(--mono); font-size: 1.05rem; font-weight: 700;
+                font-variant-numeric: tabular-nums; color: var(--yellow); }
+.tsf-streak span { font-size: .58rem; text-transform: uppercase; letter-spacing: .1em;
+                   color: var(--fg-3); }
+
+.tsf-list { list-style: none; padding: 0; margin: 0; }
+.tsf-list a { display: flex; align-items: center; gap: 10px; padding: 11px 2px; min-height: 46px;
+              box-sizing: border-box; text-decoration: none; color: var(--fg); font-size: .86rem;
+              border-bottom: 1px solid var(--line); }
+.tsf-list li:last-child a { border-bottom: 0; }
+.tsf-list a:hover { color: var(--cyan); }
+.tsf-list a svg { width: 14px; height: 14px; flex: 0 0 auto; color: var(--fg-3); }
+.tsf-list a:hover svg { color: var(--cyan); }
+.tsf-ln { font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis;
+          white-space: nowrap; }
+.tsf-lm { font-size: .74rem; color: var(--fg-3); white-space: nowrap; }
+.tsf-lp { margin-left: auto; font-family: var(--mono); font-size: .72rem; color: var(--yellow);
+          font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tsf-list a svg:last-child { margin-left: auto; }
+.tsf-lp + svg { margin-left: 8px !important; }
+.tsf-foot { font-size: .73rem; color: var(--fg-3); margin: 11px 0 0; }
+.tsf-foot a { color: var(--fg-2); }
+.tsf-foot a:hover { color: var(--cyan); }
+.tsf-invite p { font-size: .85rem; color: var(--fg-2); margin: 0 0 12px; line-height: 1.5; }
+
+@media (max-width: 620px) {
+  .tsf-panel { padding: 14px 13px 15px; }
+  .tsf-daily { flex-direction: column; gap: 13px; }
+  .tsf-streak { width: 100%; }
+  .tsf-streak div { flex: 1; }
+  .tsf-title { font-size: 1.05rem; }
+  .tsf-cta { width: 100%; justify-content: center; }
+  .tsf-tab { font-size: .72rem; letter-spacing: .02em; }
+}

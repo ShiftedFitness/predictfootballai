@@ -414,13 +414,23 @@
         openBuilder();
       });
 
-      // Handle ?builder= URL param
+      // Handle ?builder= URL param.
+      //
+      // Accepts a bare ?builder as well as ?builder=<type>: links from the
+      // homepage and the team pages mean "open the builder" without caring
+      // which game, and a value the builder does not recognise should open it
+      // anyway rather than silently do nothing.
       const urlParams = new URLSearchParams(window.location.search);
-      const preselect = urlParams.get('builder');
-      if (preselect && isSignedIn) {
-        setTimeout(() => {
-          openBuilder(preselect);
-        }, 500);
+      if (urlParams.has('builder')) {
+        const preselect = urlParams.get('builder');
+        const KNOWN = ['bullseye', 'starting_xi', 'higher_lower', 'player_alphabet', 'who_am_i', 'pop_quiz'];
+        if (isSignedIn) {
+          setTimeout(() => openBuilder(KNOWN.includes(preselect) ? preselect : undefined), 500);
+        } else {
+          // Signed out: the builder needs an account, so say so rather than
+          // leaving somebody on a page that ignored their click.
+          setTimeout(() => { try { TSNav.showAuthModal('signup', 'builder'); } catch (e) {} }, 400);
+        }
       }
 
       // ============================================================

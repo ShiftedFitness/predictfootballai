@@ -9,738 +9,304 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
 <!-- Analytics: GA4 via the central TeleStats helper (never loaded on /fives*) -->
 <script src="/js/ts-analytics.js"></script>
-<script src="/js/ts-streak.js"></script>
-<title>TeleStats — Premier League Games &amp; Predictions</title>
-<meta name="description" content="Test your Premier League knowledge with Bullseye, Starting XI, Who Am I?, Pop Quiz and more. Track your stats, climb the leaderboard."/>
-<meta property="og:site_name" content="TeleStats"/>
+<title>TeleStats — Play, Build and Ask About Football Stats</title>
+<meta name="description" content="Play football challenges built from real player records, build your own games for friends, and ask anything about footballers. 40,000+ players across 355 clubs."/>
+<link rel="canonical" href="https://telestats.net/"/>
 <meta property="og:type" content="website"/>
-<meta property="og:title" content="TeleStats — Premier League Games & Predictions"/>
-<meta property="og:description" content="Retro-inspired football games powered by 30+ seasons of Premier League data. Play Bullseye, Starting XI, Who Am I? and more."/>
-<meta property="og:image" content="https://res.cloudinary.com/dbfvogb95/image/upload/v1770835428/Screenshot_2026-02-11_at_19.43.16_m7urul.png"/>
+<meta property="og:title" content="TeleStats — Play, Build and Ask About Football Stats"/>
+<meta property="og:description" content="Play football challenges built from real player records, build your own games for friends, and ask anything about footballers."/>
 <meta property="og:url" content="https://telestats.net/"/>
-<meta name="twitter:card" content="summary_large_image"/>
-<meta name="twitter:title" content="TeleStats — Premier League Games & Predictions"/>
-<meta name="twitter:description" content="Retro-inspired football games powered by 30+ seasons of Premier League data."/>
-<meta name="twitter:image" content="https://res.cloudinary.com/dbfvogb95/image/upload/v1770835428/Screenshot_2026-02-11_at_19.43.16_m7urul.png"/>
-<link rel="stylesheet" href="telestats-theme.css"/>
+<meta name="twitter:card" content="summary"/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/telestats-theme.css">
+<link rel="stylesheet" href="/css/ts-page.css">
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { min-height: 100vh; padding-bottom: 40px; }
-.container { max-width: 640px; margin: 0 auto; padding: 0 16px; }
+  /* ── hero ───────────────────────────────────────────────────────────────
+     Compact on purpose. The old one was a headline, a paragraph, three
+     hardcoded statistics and two large buttons before anything on a phone —
+     so a first-time visitor scrolled past the whole proposition to reach it. */
+  .home-hero { padding: 6px 0 0; margin-bottom: 26px; }
+  .home-hero .kicker { margin-bottom: 10px; }
+  .home-hero h1 { font-size: .95rem; font-weight: 600; color: var(--fg-2); margin: 0 0 8px; }
+  .home-hero .lede { font-size: .9rem; color: var(--fg-2); max-width: 54ch; }
+  .totals { display: flex; gap: 18px; flex-wrap: wrap; margin: 14px 0 0;
+            font-size: .76rem; color: var(--fg-3); }
+  .totals b { font-family: var(--mono); color: var(--fg-2); font-weight: 700;
+              font-variant-numeric: tabular-nums; }
 
-/* ── Logged-out hero ── */
-.hero-out {
-  text-align: center;
-  padding: 48px 16px 36px;
-}
-.hero-out h1 { font-size: 36px; font-weight: 800; letter-spacing: -1px; margin-bottom: 8px; }
-.hero-out h1 .accent { color: var(--accent-cyan); }
-.hero-out .tagline {
-  color: var(--text-secondary);
-  font-size: 15px;
-  line-height: 1.5;
-  margin-bottom: 28px;
-  max-width: 440px;
-  margin-left: auto;
-  margin-right: auto;
-}
+  /* ── play · build · ask ─────────────────────────────────────────────────
+     The three things this site does, as three equal doors. Build is NOT the
+     small one: it is the part nothing else has, and it had been buried under
+     the games. */
+  ul.pillars { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px;
+               grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  ul.pillars a { display: flex; flex-direction: column; height: 100%; box-sizing: border-box;
+                 padding: 18px 18px 17px; border-radius: 14px; text-decoration: none;
+                 color: var(--fg); background: var(--s1); border: 1px solid var(--line);
+                 border-top: 3px solid var(--accent); min-width: 0;
+                 transition: background .14s, border-color .14s, transform .14s; }
+  ul.pillars a:hover { background: var(--s2); transform: translateY(-2px);
+                       border-color: color-mix(in srgb, var(--accent) 55%, var(--line-2));
+                       border-top-color: var(--accent); }
+  ul.pillars a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  /* .p-body is a plain span, so inside the row-layout Ask card its children
+     flowed inline and "ASK" sat on the same line as the title. The card's own
+     children stack because the anchor is a flex column; this one needs to say
+     so itself. */
+  .p-body { display: flex; flex-direction: column; min-width: 0; }
+  .p-ico { width: 40px; height: 40px; color: var(--accent); margin-bottom: 11px; }
+  .p-name { font-family: var(--mono); font-size: .68rem; font-weight: 700; letter-spacing: .16em;
+            text-transform: uppercase; color: var(--accent); margin-bottom: 5px; }
+  .p-title { font-size: 1.02rem; font-weight: 700; letter-spacing: -.01em; }
+  .p-copy { font-size: .8rem; color: var(--fg-2); line-height: 1.5; margin-top: 6px; }
+  .p-note { font-size: .7rem; color: var(--fg-3); margin-top: 7px; }
+  .p-cta { display: inline-flex; align-items: center; gap: 6px; margin-top: 13px;
+           font-size: .83rem; font-weight: 700; color: var(--accent); }
+  .p-cta svg { width: 14px; height: 14px; transition: transform .14s; }
+  ul.pillars a:hover .p-cta svg { transform: translateX(3px); }
+  /* Cyan plays, yellow builds. Ask gets its own so the three read as three. */
+  li.p-play  a { --accent: var(--cyan); }
+  li.p-build a { --accent: var(--yellow); }
+  li.p-ask   a { --accent: #A78BFA; }
+  .p-cta { align-self: flex-start; }
 
-/* Big stat counters */
-.hero-stats {
-  display: flex;
-  justify-content: center;
-  gap: 28px;
-  margin-bottom: 28px;
-  flex-wrap: wrap;
-}
-.hero-stat {
-  text-align: center;
-}
-.hero-stat-number {
-  font-family: 'Space Mono', monospace;
-  font-size: 36px;
-  font-weight: 800;
-  color: var(--accent-cyan);
-  display: block;
-  line-height: 1;
-}
-.hero-stat-label {
-  font-size: 11px;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-top: 4px;
-}
+  /* ── signed-in strip ────────────────────────────────────────────────── */
+  .me { display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+        padding: 13px 16px; border-radius: 12px; background: var(--s1);
+        border: 1px solid var(--line); border-left: 3px solid var(--yellow);
+        margin-bottom: 22px; }
+  .me[hidden] { display: none; }
+  .me-name { font-family: var(--mono); font-weight: 700; font-size: .92rem; }
+  .me-lvl { font-size: .72rem; color: var(--fg-3); }
+  .me-bar { flex: 1; min-width: 120px; height: 6px; border-radius: 3px;
+            background: rgba(255,255,255,.08); overflow: hidden; }
+  .me-bar i { display: block; height: 100%; background: var(--yellow); }
+  .me-fig { font-family: var(--mono); font-size: .8rem; color: var(--yellow); font-weight: 700; }
 
-.hero-cta {
-  display: inline-block;
-  background: var(--accent-yellow);
-  color: #0B0F12;
-  font-size: 16px;
-  font-weight: 700;
-  padding: 14px 32px;
-  border-radius: 10px;
-  text-decoration: none;
-  transition: background 0.15s, transform 0.15s;
-  margin-bottom: 12px;
-}
-.hero-cta:hover { background: #E6C009; transform: translateY(-1px); }
-.hero-cta-secondary {
-  display: inline-block;
-  color: var(--accent-cyan);
-  font-size: 13px;
-  font-weight: 600;
-  text-decoration: none;
-  cursor: pointer;
-  border: none;
-  background: none;
-  margin-left: 16px;
-}
-.hero-cta-secondary:hover { text-decoration: underline; }
+  /* ── find your way ──────────────────────────────────────────────────── */
+  ul.ways { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px;
+            grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  ul.ways a { display: flex; flex-direction: column; gap: 3px; height: 100%;
+              box-sizing: border-box; padding: 14px 15px; border-radius: 11px;
+              text-decoration: none; color: var(--fg); background: var(--s1);
+              border: 1px solid var(--line); }
+  ul.ways a:hover { background: var(--s2); border-color: var(--line-2); }
+  ul.ways b { font-size: .87rem; }
+  ul.ways span { font-size: .75rem; color: var(--fg-2); line-height: 1.4; }
 
-/* ── Logged-in hero ── */
-.hero-in {
-  padding: 24px 0 8px;
-}
-.user-welcome {
-  background: var(--bg-card);
-  border-radius: 12px;
-  padding: 16px 20px;
-  margin-bottom: 20px;
-  border: 1px solid rgba(255,255,255,0.04);
-}
-.user-welcome-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 10px;
-}
-.user-welcome-name { font-size: 16px; font-weight: 700; }
-.user-welcome-streak {
-  font-size: 13px;
-  color: var(--accent-yellow);
-  font-weight: 700;
-  font-family: 'Space Mono', monospace;
-}
-.user-xp-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 12px;
-  color: var(--text-muted);
-}
-.user-xp-row .ts-xp-bar { flex: 1; }
-.user-xp-label { white-space: nowrap; font-family: 'Space Mono', monospace; }
-
-/* ── Featured Player (logged-in) ── */
-.featured-player {
-  background: var(--bg-card);
-  border: 2px solid var(--accent-cyan);
-  border-radius: 12px;
-  padding: 20px;
-  margin-bottom: 20px;
-  font-family: 'Space Mono', monospace;
-  position: relative;
-  overflow: hidden;
-}
-.featured-player::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,229,255,0.03) 2px, rgba(0,229,255,0.03) 4px);
-  pointer-events: none;
-}
-.fp-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  color: var(--accent-cyan);
-  margin-bottom: 8px;
-}
-.fp-next-btn {
-  background: none;
-  border: 1px solid var(--accent-cyan);
-  color: var(--accent-cyan);
-  font-family: 'Space Mono', monospace;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  padding: 3px 10px;
-  border-radius: 4px;
-  cursor: pointer;
-  text-transform: uppercase;
-  transition: all 0.15s;
-  position: relative;
-  z-index: 1;
-}
-.fp-next-btn:hover {
-  background: var(--accent-cyan);
-  color: #0B0F12;
-}
-.fp-name { font-size: 20px; font-weight: 800; margin-bottom: 2px; }
-.fp-meta { font-size: 11px; color: var(--text-muted); margin-bottom: 12px; }
-.fp-stats { display: flex; gap: 20px; margin-bottom: 12px; }
-.fp-stat { text-align: center; }
-.fp-val { font-size: 22px; font-weight: 800; color: var(--accent-yellow); display: block; }
-.fp-lbl { font-size: 9px; color: var(--text-muted); text-transform: uppercase; }
-.fp-clubs { font-size: 11px; color: var(--text-muted); }
-
-/* ── Section headers ── */
-.section-title {
-  font-family: 'Space Mono', monospace;
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  margin-bottom: 12px;
-  padding-left: 4px;
-}
-
-/* ── Game cards grid ── */
-.games-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin-bottom: 24px;
-}
-.game-card-mini {
-  display: flex;
-  flex-direction: column;
-  background: var(--bg-card);
-  border-radius: 12px;
-  padding: 16px;
-  text-decoration: none;
-  color: var(--text-primary);
-  border: 1px solid rgba(255,255,255,0.04);
-  transition: all 0.15s;
-}
-.game-card-mini:hover {
-  border-color: var(--accent-cyan);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0,0,0,0.3);
-}
-.game-card-mini .gc-icon { font-size: 28px; margin-bottom: 8px; }
-.game-card-mini .gc-name { font-size: 14px; font-weight: 700; letter-spacing: -0.3px; margin-bottom: 4px; }
-.game-card-mini .gc-desc { font-size: 11px; color: var(--text-muted); line-height: 1.4; }
-
-/* ── Stat banner ── */
-.stat-banner {
-  background: linear-gradient(135deg, var(--bg-card), var(--bg-elevated));
-  border-radius: 12px;
-  padding: 16px 20px;
-  margin-bottom: 24px;
-  border: 1px solid rgba(255,255,255,0.04);
-}
-.stat-banner .stat-label {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--accent-cyan);
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  margin-bottom: 6px;
-  font-family: 'Space Mono', monospace;
-}
-.stat-banner .stat-text {
-  font-size: 14px;
-  color: var(--text-secondary);
-  line-height: 1.5;
-}
-.stat-banner .stat-item { margin-bottom: 6px; }
-.stat-banner .stat-item:last-child { margin-bottom: 0; }
-
-/* ── Leaderboard widget ── */
-.lb-widget {
-  background: var(--bg-card);
-  border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 24px;
-  border: 1px solid rgba(255,255,255,0.04);
-}
-.lb-row { display: flex; align-items: center; padding: 8px 0; gap: 10px; }
-.lb-row + .lb-row { border-top: 1px solid rgba(255,255,255,0.04); }
-.lb-rank { width: 24px; font-family: 'Space Mono', monospace; font-size: 14px; font-weight: 800; color: var(--text-muted); text-align: center; }
-.lb-rank.gold { color: var(--accent-yellow); }
-.lb-rank.silver { color: #C0C0C0; }
-.lb-rank.bronze { color: #CD7F32; }
-.lb-name { flex: 1; font-size: 14px; font-weight: 600; }
-.lb-xp { font-family: 'Space Mono', monospace; font-size: 12px; color: var(--accent-yellow); font-weight: 700; }
-.lb-empty { text-align: center; color: var(--text-muted); font-size: 13px; padding: 20px; }
-.lb-footer { text-align: center; margin-top: 10px; }
-.lb-footer a { color: var(--accent-cyan); font-size: 12px; font-weight: 600; text-decoration: none; }
-.lb-footer a:hover { text-decoration: underline; }
-
-/* ── Community spotlight ── */
-.comm-grid { display: grid; gap: 10px; margin-bottom: 24px; }
-.comm-card {
-  display: flex; align-items: center; gap: 12px;
-  background: var(--bg-card); border-radius: 10px; padding: 12px 14px;
-  text-decoration: none; color: var(--text-primary);
-  border: 1px solid rgba(255,255,255,0.04); transition: border-color 0.15s;
-}
-.comm-card:hover { border-color: var(--accent-cyan); }
-.comm-icon { font-size: 24px; flex-shrink: 0; }
-.comm-info { flex: 1; min-width: 0; }
-.comm-title { font-size: 14px; font-weight: 600; }
-.comm-meta { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
-.comm-plays { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--text-muted); flex-shrink: 0; }
-
-/* ── Community teaser (logged-out) ── */
-/* ── Daily challenge card ──
-   Top of the homepage on purpose: it is the one thing that is different every
-   day, and the only reason on this page to come back tomorrow. */
-.daily-card {
-  display: block;
-  border: 1px solid var(--accent-cyan);
-  border-radius: 12px;
-  padding: 16px 18px;
-  margin-bottom: 18px;
-  text-decoration: none;
-  color: inherit;
-  background: linear-gradient(120deg, rgba(0,229,255,.12), transparent 62%), var(--bg-card, #171F25);
-}
-.daily-card:hover { background: linear-gradient(120deg, rgba(0,229,255,.2), transparent 62%), var(--bg-card, #171F25); }
-.daily-card .dc-eyebrow {
-  font-size: 10px; text-transform: uppercase; letter-spacing: .12em;
-  color: var(--accent-cyan); font-weight: 700; margin-bottom: 5px;
-  display: flex; gap: 9px; align-items: center;
-}
-.daily-card .dc-streak { color: var(--text-muted); letter-spacing: .04em; }
-.daily-card .dc-title { font-size: 19px; font-weight: 800; margin-bottom: 2px; }
-.daily-card .dc-sub { font-size: 13px; color: var(--text-secondary); }
-.daily-card .dc-go { font-size: 13px; font-weight: 700; color: var(--accent-cyan); margin-top: 9px; display: inline-block; }
-.daily-card.done { border-color: rgba(255,255,255,.12); }
-.daily-card.done .dc-eyebrow { color: var(--text-muted); }
-
-/* ── Browse by competition / team ──
-   The two entry points into the 377 pages that exist for organic discovery.
-   Without these the homepage linked to neither, so the only way in was the
-   nav — and a visitor who lands on the homepage from a search has no reason
-   to look there. */
-.browse {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 24px;
-}
-.browse a {
-  display: block; padding: 16px 18px; border-radius: 12px; text-decoration: none;
-  background: var(--bg-card); border: 1px solid rgba(255,255,255,0.06); color: inherit;
-  transition: border-color .15s, transform .15s;
-}
-.browse a:hover { border-color: var(--accent-cyan); transform: translateY(-1px); }
-.browse h3 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
-.browse p { font-size: 12.5px; color: var(--text-muted); line-height: 1.45; }
-.browse .go { display: inline-block; margin-top: 8px; color: var(--accent-cyan);
-              font-size: 12.5px; font-weight: 600; }
-@media (max-width: 520px) { .browse { grid-template-columns: 1fr; } }
-
-.community-teaser {
-  background: var(--bg-card);
-  border-radius: 12px;
-  padding: 20px;
-  margin-bottom: 24px;
-  border: 1px solid rgba(255,255,255,0.04);
-  text-align: center;
-}
-.community-teaser h3 { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
-.community-teaser p { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
-.community-teaser a {
-  display: inline-block; margin-top: 10px;
-  color: var(--accent-cyan); font-size: 13px; font-weight: 600; text-decoration: none;
-}
-.community-teaser a:hover { text-decoration: underline; }
-
-/* ── Footer ── */
-footer {
-  text-align: center;
-  padding: 32px 16px 16px;
-  font-size: 11px;
-  color: var(--text-muted);
-  opacity: 0.5;
-  font-family: 'Space Mono', monospace;
-}
-
-@media (max-width: 400px) {
-  .games-grid { grid-template-columns: 1fr; }
-  .hero-out h1 { font-size: 28px; }
-  .hero-stats { gap: 16px; }
-  .hero-stat-number { font-size: 28px; }
-}
+  @media (max-width: 760px) {
+    /* Not three narrow columns. Play and Build share a row because they are
+       the two things you DO; Ask takes the full width beneath them. */
+    ul.pillars { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    li.p-ask { grid-column: 1 / -1; }
+    li.p-ask a { flex-direction: row; align-items: center; gap: 14px; }
+    li.p-ask .p-ico { margin-bottom: 0; flex: 0 0 auto; width: 34px; height: 34px; }
+    li.p-ask .p-body { min-width: 0; }
+    ul.ways { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  }
+  @media (max-width: 620px) {
+    .home-hero { margin-bottom: 20px; }
+    .home-hero .lede { font-size: .83rem; }
+    .totals { gap: 12px; font-size: .72rem; }
+    ul.pillars a { padding: 15px 15px 14px; }
+    .p-ico { width: 32px; height: 32px; margin-bottom: 9px; }
+    .p-title { font-size: .94rem; }
+    .p-copy { font-size: .76rem; }
+    ul.ways { grid-template-columns: 1fr; }
+  }
 </style>
 </head>
 <body>
+<div class="ts-shell">
 
+<header class="ts-header">
+  <div class="inner">
+    <a class="brand" href="/">TELESTATS</a>
+    <nav aria-label="Site">
+      <a href="/" aria-current="page">Home</a>
+      <a href="/games/">Games</a>
+      <a href="/competitions/">Competitions</a>
+      <a href="/teams/">Teams</a>
+      <a href="/ask/">Ask</a>
+      <a href="/leaderboard/">Leaderboard</a>
+      <a href="/community/">Community</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+<div class="home-hero">
+  <p class="kicker">Football knowledge. <em>Reimagined.</em></p>
+  <h1>Football games, challenge building and player stats, from real records</h1>
+  <p class="lede">Play football challenges, build your own for friends, and discover
+    incredible player stats. All powered by real football data.</p>
+  <p class="totals" id="totals">
+    <span><b id="tPlayers">&mdash;</b> players</span>
+    <span><b id="tClubs">&mdash;</b> clubs</span>
+    <span><b id="tComps">&mdash;</b> competitions</span>
+  </p>
+</div>
+
+<!-- Signed-in only. Nothing here is shown to a visitor with no progress,
+     because an empty progress bar is worse than no progress bar. -->
+<div class="me" id="me" hidden>
+  <span class="me-name" id="meName"></span>
+  <span class="me-lvl" id="meLvl"></span>
+  <span class="me-bar"><i id="meBar" style="width:0%"></i></span>
+  <span class="me-fig" id="meStreak"></span>
+</div>
+
+<section class="band">
+  <ul class="pillars">
+    <li class="p-play"><a href="/games/">
+      <svg class="p-ico" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.4"
+        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="24" cy="24" r="16"/>
+        <path d="M24 13.5 32 19.5 29 29H19L16 19.5Z" fill="currentColor" stroke="none"/>
+        <path d="M24 13.5V8M32 19.5l5.2-3M29 29l3.2 4.6M19 29l-3.2 4.6M16 19.5l-5.2-3"/>
+      </svg>
+      <span class="p-name">Play</span>
+      <span class="p-title">Play football games</span>
+      <span class="p-copy">Six challenges built from real player records. Test your knowledge,
+        beat your scores, take on a new one every day.</span>
+      <span class="p-cta">Play games<svg viewBox="0 0 16 16" fill="none" stroke="currentColor"
+        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
+        ><path d="M3 8h9M9 4.5 12.5 8 9 11.5"/></svg></span>
+    </a></li>
+
+    <li class="p-build"><a href="/community/?builder=1">
+      <svg class="p-ico" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.4"
+        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="7" y="25" width="15" height="15" rx="2"/>
+        <rect x="26" y="25" width="15" height="15" rx="2"/>
+        <rect x="16.5" y="8" width="15" height="15" rx="2"/>
+        <path d="M24 15.5h0"/>
+      </svg>
+      <span class="p-name">Build</span>
+      <span class="p-title">Build your own challenges</span>
+      <span class="p-copy">Make a game from the same database and send it to your friends.
+        Pick clubs, competitions, nationalities and more.</span>
+      <!-- Stated here rather than discovered at the end. Building and
+           previewing really are free; publishing really does need Pro. -->
+      <span class="p-note">Build and preview free &middot; publishing needs Pro</span>
+      <span class="p-cta">Build a game<svg viewBox="0 0 16 16" fill="none" stroke="currentColor"
+        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
+        ><path d="M3 8h9M9 4.5 12.5 8 9 11.5"/></svg></span>
+    </a></li>
+
+    <li class="p-ask"><a href="/ask/">
+      <svg class="p-ico" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.4"
+        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <ellipse cx="24" cy="13" rx="14" ry="5.5"/>
+        <path d="M10 13v10c0 3 6.3 5.5 14 5.5s14-2.5 14-5.5V13"/>
+        <path d="M10 23v10c0 3 6.3 5.5 14 5.5 2.4 0 4.6-.24 6.6-.66"/>
+        <circle cx="34" cy="33" r="6"/><path d="m38.5 37.5 3.5 3.5"/>
+      </svg>
+      <span class="p-body">
+        <span class="p-name">Ask</span>
+        <span class="p-title">Ask anything about footballers</span>
+        <span class="p-copy">Who played for both Arsenal and Chelsea? Which clubs did Peter
+          Crouch play for? Answers come from the database, never invented.</span>
+        <span class="p-cta">Ask TeleStats<svg viewBox="0 0 16 16" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
+          ><path d="M3 8h9M9 4.5 12.5 8 9 11.5"/></svg></span>
+      </span>
+    </a></li>
+  </ul>
+</section>
+
+<section class="band">
+  <h2>What&rsquo;s on</h2>
+  <p class="sublede">Today&rsquo;s challenge, a few good games, and what people have built.</p>
+  <!-- The same component /games/ mounts, against the same endpoints. Two
+       implementations is how the streak ended up reading 1 here and 0 there. -->
+  <div id="feature"></div>
+</section>
+
+<section class="band">
+  <h2>Find your football</h2>
+  <ul class="ways">
+    <li><a href="/teams/"><b>Find your club</b><span>355 clubs, each with its own records
+      and games.</span></a></li>
+    <li><a href="/competitions/"><b>Browse competitions</b><span>Europe&rsquo;s leagues and
+      cups, end to end.</span></a></li>
+    <li><a href="/leaderboard/"><b>Leaderboard</b><span>See where you stand against
+      everyone else.</span></a></li>
+  </ul>
+</section>
+
+</main>
+<footer class="page-footer">
+  <noscript><a href="/tools/data.html">View data coverage</a></noscript>
+</footer>
+</div>
+<script src="/js/ts-streak.js"></script>
+<script src="/js/ts-featured.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  /**
+   * Headline totals, from public/data/totals.json.
+   *
+   * The page used to read "36K+", "30+" and "6" as literals in the markup
+   * while /games/ derived 40,148 from the database — the same question with
+   * two answers, the smaller one wrong by four thousand players. That file is
+   * written by `npm run build:games` from the same coverage() the Games page
+   * uses, so there is one source and no page types a total into itself.
+   */
+  fetch('/data/totals.json').then(function (r) { return r.json(); }).then(function (t) {
+    var set = function (id, v) {
+      var el = document.getElementById(id);
+      if (el && v != null) el.textContent = Number(v).toLocaleString('en-GB');
+    };
+    set('tPlayers', t.players);
+    set('tClubs', t.clubs);
+    set('tComps', t.competitions);
+  }).catch(function () {
+    // Leave the em dashes. A wrong number is worse than a missing one.
+  });
+})();
+</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/js/ts-auth.js"></script>
 <script src="/js/ts-data.js"></script>
 <script src="/js/ts-footer.js"></script>
 <script src="/js/ts-nav.js"></script>
-
-<div class="container">
-  <!-- Content injected by JS based on auth state -->
-  <div id="pageContent"></div>
-</div>
-
-<footer></footer>
-
 <script>
-const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:8888/.netlify/functions' : '/.netlify/functions';
+  (async function () {
+    try { await TSAuth.init(); } catch (e) { console.error('[TeleStats] Auth init failed:', e); }
+    try { TSNav.render(); } catch (e) { console.error('[TeleStats] Nav render failed:', e); }
 
-function escHTML(s) {
-  return String(s).replace(/[&<>"']/g, m =>
-    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
-}
+    // The shared featured module. Mounted after auth so the streak it shows is
+    // the reconciled one — TSStreak.combined() reads the account streak too.
+    try { TSFeatured.mount?.(document.getElementById('feature')); } catch (e) {}
 
-const GAMES_HTML = `
-  <div class="section-title">Games</div>
-  <div class="games-grid">
-    <a href="/games/bullseye.html" class="game-card-mini">
-      <span class="gc-icon">&#127919;</span>
-      <div class="gc-name">Bullseye</div>
-      <div class="gc-desc">Darts-style football 501</div>
-    </a>
-    <a href="/games/xi.html" class="game-card-mini">
-      <span class="gc-icon">&#9917;</span>
-      <div class="gc-name">Starting XI</div>
-      <div class="gc-desc">Name the lineup</div>
-    </a>
-    <a href="/games/whoami.html" class="game-card-mini">
-      <span class="gc-icon">&#128373;&#65039;</span>
-      <div class="gc-name">Who Am I?</div>
-      <div class="gc-desc">Guess the mystery player</div>
-    </a>
-    <a href="/games/quiz.html" class="game-card-mini">
-      <span class="gc-icon">&#129504;</span>
-      <div class="gc-name">Pop Quiz</div>
-      <div class="gc-desc">Data-powered questions</div>
-    </a>
-    <a href="/games/hol.html" class="game-card-mini">
-      <span class="gc-icon">&#127183;</span>
-      <div class="gc-name">Higher or Lower</div>
-      <div class="gc-desc">Guess the stat</div>
-    </a>
-    <a href="/games/alpha.html" class="game-card-mini">
-      <span class="gc-icon">&#128292;</span>
-      <div class="gc-name">Player Alphabet</div>
-      <div class="gc-desc">A-Z player names</div>
-    </a>
-  </div>`;
-
-(async function() {
-  const page = document.getElementById('pageContent');
-  try {
-    await TSAuth.init();
-  } catch (e) {
-    console.error('[TeleStats] Auth init failed:', e);
-    // Fall back to logged-out view so page isn't blank
-    try { TSNav.render(); } catch (_) {}
-    renderLoggedOut(page);
-    return;
-  }
-
-  try {
-    TSNav.render();
-  } catch (e) {
-    console.error('[TeleStats] Nav render failed:', e);
-  }
-
-  const user = TSAuth.getUser();
-  const isLoggedIn = user && !TSAuth.isAnonymous();
-
-  try {
-    if (isLoggedIn) {
-      renderLoggedIn(user, page);
-    } else {
-      renderLoggedOut(page);
-    }
-  } catch (e) {
-    console.error('[TeleStats] Page render failed:', e);
-    renderLoggedOut(page);
-  }
-})();
-
-/* ── LOGGED OUT HOMEPAGE ── */
-function renderLoggedOut(page) {
-  page.innerHTML = `
-    <div class="hero-out">
-      <h1>Tele<span class="accent">Stats</span></h1>
-      <div class="tagline">Retro-inspired football games &mdash; from the birth of modern football in 1992 to today. Test your knowledge across 30+ seasons of global football data.</div>
-      <div class="hero-stats">
-        <div class="hero-stat">
-          <span class="hero-stat-number">30+</span>
-          <span class="hero-stat-label">Seasons</span>
-        </div>
-        <div class="hero-stat">
-          <span class="hero-stat-number">36K+</span>
-          <span class="hero-stat-label">Players</span>
-        </div>
-        <div class="hero-stat">
-          <span class="hero-stat-number">6</span>
-          <span class="hero-stat-label">Games</span>
-        </div>
-      </div>
-      <div>
-        <a href="/games/" class="hero-cta">Play Now</a>
-        <button class="hero-cta-secondary" id="heroSignup">Create Free Account</button>
-      </div>
-    </div>
-
-    <a class="daily-card" id="dailyCard" href="/daily/">
-      <div class="dc-eyebrow"><span>Today's challenge</span><span class="dc-streak" id="dcStreak"></span></div>
-      <div class="dc-title" id="dcTitle">The TeleStats Daily</div>
-      <div class="dc-sub" id="dcSub">One puzzle a day, the same for everyone.</div>
-      <span class="dc-go" id="dcGo">Play today &rarr;</span>
-    </a>
-
-    ${GAMES_HTML}
-
-    <div class="browse">
-      <a href="/competitions/">
-        <h3>Browse by competition</h3>
-        <p>Twelve leagues and cups, from the Premier League to the Segunda División — all-time records and a game for each.</p>
-        <span class="go">See all competitions &rarr;</span>
-      </a>
-      <a href="/teams/">
-        <h3>Find your club</h3>
-        <p>355 clubs, each with its own records, leaderboard and games.</p>
-        <span class="go">See all teams &rarr;</span>
-      </a>
-    </div>
-
-    <div class="community-teaser">
-      <h3>Build Your Own Games</h3>
-      <p>Create custom football quizzes and share them with the community. Pick leagues, clubs, nationalities &mdash; the possibilities are endless.</p>
-      <a href="/community/">Explore Community &rarr;</a>
-    </div>`;
-
-  loadDaily();
-  document.getElementById('heroSignup')?.addEventListener('click', () => TSNav.showAuthModal('signup', 'homepage'));
-}
-
-/* ── LOGGED IN HOMEPAGE ── */
-async function renderLoggedIn(user, page) {
-  const xp = TSAuth.getXPProgress();
-  const streak = user.current_streak || 0;
-
-  page.innerHTML = `
-    <div class="hero-in">
-      <div class="user-welcome">
-        <div class="user-welcome-top">
-          <span class="user-welcome-name">${escHTML(user.username || user.display_name || 'Player')}</span>
-          ${streak > 0 ? `<span class="user-welcome-streak">\uD83D\uDD25 ${streak} day streak</span>` : ''}
-        </div>
-        <div class="user-xp-row">
-          <span class="user-xp-label">Lv.${xp.level} ${escHTML(xp.levelName)}</span>
-          <div class="ts-xp-bar"><div class="ts-xp-bar-fill" style="width:${xp.pct}%"></div></div>
-          <span class="user-xp-label">${xp.current.toLocaleString()} XP</span>
-        </div>
-      </div>
-    </div>
-
-    <a class="daily-card" id="dailyCard" href="/daily/">
-      <div class="dc-eyebrow"><span>Today's challenge</span><span class="dc-streak" id="dcStreak"></span></div>
-      <div class="dc-title" id="dcTitle">The TeleStats Daily</div>
-      <div class="dc-sub" id="dcSub">One puzzle a day, the same for everyone.</div>
-      <span class="dc-go" id="dcGo">Play today &rarr;</span>
-    </a>
-
-    <!-- Featured Player -->
-    <div id="featuredPlayer"></div>
-
-    <!-- Did You Know — game-specific stats to get them hooked -->
-    <div class="stat-banner" id="statBanner" style="display:none">
-      <div class="stat-label">Did You Know?</div>
-      <div class="stat-text" id="statText"></div>
-    </div>
-
-    <!-- Your Top Scores -->
-    <div class="section-title">Your Top Scores</div>
-    <div class="lb-widget" id="lbWidget">
-      <div class="lb-empty">Loading...</div>
-    </div>
-
-    ${GAMES_HTML}
-
-    <div class="browse">
-      <a href="/competitions/">
-        <h3>Browse by competition</h3>
-        <p>Twelve leagues and cups, from the Premier League to the Segunda División — all-time records and a game for each.</p>
-        <span class="go">See all competitions &rarr;</span>
-      </a>
-      <a href="/teams/">
-        <h3>Find your club</h3>
-        <p>355 clubs, each with its own records, leaderboard and games.</p>
-        <span class="go">See all teams &rarr;</span>
-      </a>
-    </div>
-
-    <!-- Community -->
-    <div class="section-title">Community</div>
-    <div class="comm-grid" id="commGrid">
-      <div class="lb-empty">Loading...</div>
-    </div>`;
-
-  loadDaily();
-  // Load featured player
-  loadFeaturedPlayer();
-  // Load did-you-know stats
-  loadDidYouKnow(user);
-  // Load leaderboard
-  loadLeaderboard();
-  // Load community spotlight
-  loadCommunity();
-}
-
-/**
- * Fill in the daily card.
- *
- * The card is a real link to /daily/ before this runs and stays one if the
- * fetch fails, so a slow or broken function costs the detail rather than the
- * whole card.
- */
-async function loadDaily() {
-  const card = document.getElementById('dailyCard');
-  if (!card) return;
-  try {
-    const res = await fetch(API_BASE + '/daily');
-    if (!res.ok) return;
-    const d = await res.json();
-    const c = d.challenge;
-    document.getElementById('dcTitle').textContent = c.game.name;
-    document.getElementById('dcSub').textContent = c.label + ' \u2014 ' + c.game.blurb;
-
-    const s = window.TSStreak ? TSStreak.get() : null;
-    if (s && s.current > 0) {
-      document.getElementById('dcStreak').textContent = '\uD83D\uDD25 ' + s.current + ' day streak';
-    }
-    if (s && s.playedToday) {
-      // Played already: still a link, but it stops shouting.
-      card.classList.add('done');
-      document.getElementById('dcGo').textContent = 'See your result \u2192';
-    } else {
-      // Straight into the game, not to /daily/ — one fewer click for the
-      // people who already know what this is.
-      card.href = c.url;
-      document.getElementById('dcGo').textContent = 'Play today \u2192';
-    }
-  } catch (_) { /* the card is already a working link to /daily/ */ }
-}
-
-async function loadFeaturedPlayer() {
-  try {
-    const el = document.getElementById('featuredPlayer');
-    if (!el) return;
-    const res = await fetch(API_BASE + '/featured-player');
-    if (!res.ok) return;
-    const fp = await res.json();
-    if (!fp.name) return;
-    const seasonsLabel = fp.active ? 'Current' : fp.seasons + ' season' + (fp.seasons !== 1 ? 's' : '');
-    el.innerHTML = `
-      <div class="featured-player">
-        <div class="fp-header">
-          <span>Featured Player</span>
-          <button class="fp-next-btn" id="fpNextBtn">Next &#9654;</button>
-        </div>
-        <div class="fp-name">${escHTML(fp.name)}</div>
-        <div class="fp-meta">${escHTML(fp.nationality)}${fp.position ? ' &middot; ' + escHTML(fp.position) : ''} &middot; ${seasonsLabel}</div>
-        <div class="fp-stats">
-          <div class="fp-stat"><span class="fp-val">${fp.appearances}</span><span class="fp-lbl">Apps</span></div>
-          <div class="fp-stat"><span class="fp-val">${fp.goals}</span><span class="fp-lbl">Goals</span></div>
-          <div class="fp-stat"><span class="fp-val">${fp.assists || 0}</span><span class="fp-lbl">Assists</span></div>
-        </div>
-        <div class="fp-clubs">${fp.clubs.map(c => escHTML(c)).join(' &middot; ')}</div>
-      </div>`;
-    document.getElementById('fpNextBtn').addEventListener('click', () => loadFeaturedPlayer());
-  } catch (e) { /* silent */ }
-}
-
-async function loadDidYouKnow(user) {
-  try {
-    const userId = user?.id || null;
-    const res = await fetch(API_BASE + '/did-you-know', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId })
-    });
-    if (!res.ok) return;
-    const { stats } = await res.json();
-    if (stats && stats.length > 0) {
-      const banner = document.getElementById('statBanner');
-      const text = document.getElementById('statText');
-      if (banner && text) {
-        text.innerHTML = stats.map(s => `<div class="stat-item">${escHTML(s.text)}</div>`).join('');
-        banner.style.display = '';
+    // Signed in: a single compact strip. Signed out: nothing, because an
+    // empty progress bar and a zeroed streak are not an invitation.
+    try {
+      var user = TSAuth.getUser && TSAuth.getUser();
+      if (!user || (TSAuth.isAnonymous && TSAuth.isAnonymous())) return;
+      var xp = TSAuth.getXPProgress ? TSAuth.getXPProgress() : null;
+      var s = (window.TSStreak && TSStreak.combined) ? TSStreak.combined() : null;
+      document.getElementById('meName').textContent =
+        user.username || user.display_name || 'Player';
+      if (xp) {
+        document.getElementById('meLvl').textContent = 'Lv.' + xp.level + ' ' + xp.levelName;
+        document.getElementById('meBar').style.width = (xp.pct || 0) + '%';
       }
-    }
-  } catch (e) { /* silent */ }
-}
-
-async function loadLeaderboard() {
-  const GAME_ICONS = { bullseye: '\u{1F3AF}', starting_xi: '\u26BD', who_am_i: '\u{1F575}\uFE0F', pop_quiz: '\u{1F9E0}', higher_lower: '\u{1F0CF}', player_alphabet: '\u{1F524}' };
-  const GAME_NAMES = { bullseye: 'Bullseye', starting_xi: 'Starting XI', who_am_i: 'Who Am I?', pop_quiz: 'Pop Quiz', higher_lower: 'Higher or Lower', player_alphabet: 'Alphabet' };
-  try {
-    const widget = document.getElementById('lbWidget');
-    if (!widget) return;
-    // Try to get user's personal best scores per game type
-    const user = TSAuth.getUser();
-    if (!user?.id) {
-      widget.innerHTML = '<div class="lb-empty">Play some games to see your top scores!</div>';
-      return;
-    }
-    let scores = [];
-    if (typeof TSData.getUserTopScores === 'function') {
-      scores = await TSData.getUserTopScores(user.id);
-    }
-    if (!scores || scores.length === 0) {
-      // Fallback: show global leaderboard
-      const lb = await TSData.getGlobalLeaderboard(5);
-      if (lb.length === 0) {
-        widget.innerHTML = '<div class="lb-empty">Play some games to see your top scores here!</div>';
-      } else {
-        const rankClass = (i) => i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
-        widget.innerHTML = '<div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;font-family:Space Mono,monospace;">Global Leaderboard</div>' +
-          lb.map((p, i) => `
-          <div class="lb-row">
-            <span class="lb-rank ${rankClass(i)}">${i + 1}</span>
-            <span class="lb-name">${escHTML(p.username || p.display_name || 'Player')}</span>
-            <span class="lb-xp">${(p.total_xp || 0).toLocaleString()} XP</span>
-          </div>`).join('') +
-          '<div class="lb-footer"><a href="/leaderboard/">View Full Leaderboard &rarr;</a></div>';
+      if (s && s.current > 0) {
+        document.getElementById('meStreak').textContent = s.current + ' day streak';
       }
-    } else {
-      widget.innerHTML = scores.map(s => `
-        <div class="lb-row">
-          <span style="font-size:18px;width:28px;text-align:center;">${GAME_ICONS[s.game_type] || '\u{1F3AE}'}</span>
-          <span class="lb-name">${escHTML(GAME_NAMES[s.game_type] || s.game_type)}</span>
-          <span class="lb-xp">${s.best_score || 0}</span>
-        </div>`).join('') +
-        '<div class="lb-footer"><a href="/leaderboard/">View Full Leaderboard &rarr;</a></div>';
-    }
-  } catch (e) { console.warn('Leaderboard load failed:', e); }
-}
-
-async function loadCommunity() {
-  try {
-    const games = await TSData.getCommunityGames('all', 'popular', 3);
-    const grid = document.getElementById('commGrid');
-    if (!grid) return;
-    if (games.length > 0) {
-      grid.innerHTML = games.map(g => `
-        <a href="/community/?game=${g.id}" class="comm-card">
-          <span class="comm-icon">${TSData.GAME_TYPE_ICONS[g.game_type] || ''}</span>
-          <div class="comm-info">
-            <div class="comm-title">${escHTML(g.title)}</div>
-            <div class="comm-meta">by ${escHTML(g.ts_users?.username || 'Unknown')} &middot; ${TSData.GAME_TYPE_LABELS[g.game_type] || g.game_type}</div>
-          </div>
-          <span class="comm-plays">${g.play_count || 0} plays</span>
-        </a>`).join('') +
-        '<div class="lb-footer"><a href="/community/">Browse All &rarr;</a></div>';
-    } else {
-      grid.innerHTML = '<div class="lb-empty">No community games yet. <a href="/community/" style="color:var(--accent-cyan)">Be the first to create one!</a></div>';
-    }
-  } catch (e) { console.warn('Community load failed:', e); }
-}
+      document.getElementById('me').hidden = false;
+    } catch (e) { /* the strip is never worth breaking the page for */ }
+  })();
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebSite","name":"TeleStats","url":"https://telestats.net/","description":"Football games, challenge building and player statistics built from real player records.","potentialAction":{"@type":"SearchAction","target":"https://telestats.net/teams/?q={search_term_string}","query-input":"required name=search_term_string"}}
 </script>
 </body>
 </html>

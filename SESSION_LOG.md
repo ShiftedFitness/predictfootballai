@@ -3192,3 +3192,57 @@ unstyled and rendered at its intrinsic 1070px.
 
 Verified: 34 page/width combinations, 0 overflows, exactly one header and one
 footer on each.
+
+## Homepage, colour, and the shared featured module
+
+**Two data bugs, both real.**
+
+1. *The streak disagreed with itself.* The homepage read
+   `ts_users.current_streak` in its welcome line and the browser-local
+   `TSStreak.get()` in its daily card, so one page could say "1 day streak"
+   and "0" at once, and /games/ said something else again. The two stores had
+   never been reconciled — `TSStreak.pending()`, written to hand local history
+   over at sign-in, has never been called by anything. Added
+   `TSStreak.combined()`, which takes the HIGHER of the two: a run built
+   signed-out on this phone and one built signed-in elsewhere are both real,
+   and showing the smaller reads as having lost it. It writes nothing, so
+   nothing can be reset by looking. Verified: seeded a 2-day streak and Home,
+   Games and Daily all now report 2.
+
+2. *"36K+" was wrong by four thousand.* The homepage carried its three
+   headline figures as literals while /games/ derived 40,148 from the
+   database. `npm run build:games` now also writes `public/data/totals.json`
+   from the same coverage(), and the homepage reads it. No page types a total
+   into its own markup.
+
+**The third tab says Featured, not Trending — on purpose.** ts_game_sessions
+holds 221 rows all time and 7 in the last week, and CLAUDE.md already records
+that most finished rounds never reach the table. Ranking by that and calling
+the winner trending would be inventing a fact. `netlify/functions/featured.js`
+returns `mode: "featured"` below 30 plays in the window and `"trending"` above
+it, with the same shape either way; the UI labels itself from the response. It
+flips on its own when the traffic arrives, with no code change.
+
+Found while testing that path: `teams.teamForCategory()` returns the TEAM
+RECORD, not a slug, so every trending row would have linked to
+`team_[object Object]_all` — a break that would only have appeared once there
+was enough traffic to leave featured mode.
+
+**One module, two pages.** `ts-featured.js` is mounted by both Home and
+/games/ against the same two endpoints. Proper tab semantics: roving tabindex,
+arrows, Home/End, one panel rendered at a time.
+
+**Colour has a rule now.** cyan = an action you can take; yellow = build, or
+something you earned. So streaks and XP are yellow, every "build a game" route
+is yellow, and every Play link stays cyan. The six game illustrations each got
+their own identity tint — identity, not interaction, the same job a club's
+colour does on a club page — which is what stops six cards reading as one.
+
+**Homepage rebuilt** around PLAY · BUILD · ASK: 27.8KB to 15.8KB, three equal
+pillars, Build carrying its real terms ("build and preview free, publishing
+needs Pro") rather than discovering them at the end.
+
+Fixed in passing: `/community/?build=1` opened nothing — the builder listens
+for `?builder=`. It was on the team pages and all 12 competition pages. The
+handler now also accepts a bare `?builder`, and prompts signed-out visitors to
+make an account instead of ignoring the click.
