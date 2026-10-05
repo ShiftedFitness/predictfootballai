@@ -24,6 +24,9 @@
 const { createClient } = require('@supabase/supabase-js');
 const parse = require('./_ask_parse');
 const intents = require('./_ask_intents');
+const measureParse = require('./_ask_measure_parse');
+const measure = require('./_ask_measure');
+const askPlan = require('./_ask_plan');
 const teams = require('./_teams');
 
 const SUPABASE_URL = process.env.Supabase_Project_URL || process.env.SUPABASE_URL;
@@ -155,14 +158,90 @@ exports.handler = async (event) => {
   }
 
   const started = Date.now();
+  const db = createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: false } });
+
+  // ── the general statistical engine ────────────────────────────────────
+  //
+  // Tried FIRST when the question needs something the three original
+  // patterns cannot express: a comparison ("more than 10 goals"), two or more
+  // competitions, or an exclusion. Those patterns are club-shaped and have no
+  // threshold, so left to themselves they either refuse the question or —
+  // worse — match it and silently ignore the threshold, answering an easier
+  // question than the one asked.
+  //
+  // Everything else still goes through them unchanged, so every question that
+  // worked before works the same way.
+  if (measureParse.needsMeasureEngine(body.question)) {
+    const proposed = measureParse.parse(body.question);
+    if (proposed) {
+      let mPlan;
+      try {
+        mPlan = askPlan.validate(proposed);
+      } catch (err) {
+        return respond(200, {
+          answered: false,
+          kind: err.kind || 'unparsed',
+          message: err.message,
+          remaining: gate.remaining,
+        });
+      }
+      try {
+        const r = await measure.run(db, mPlan);
+        return respond(200, {
+          // A query that ran and matched nobody is ANSWERED. Reporting it as
+          // a parsing failure is the thing this whole change exists to stop.
+          answered: true,
+          empty: r.matched === 0,
+          message: r.matched
+            ? `${r.matched} player${r.matched === 1 ? '' : 's'} match: ` +
+              askPlan.describe(mPlan).replace(/^Players /, '') + '.'
+            : `No players match: ${askPlan.describe(mPlan).replace(/^Players /, '')}. ` +
+              'The query ran \u2014 nobody in the database qualifies.',
+          interpreted: askPlan.describe(mPlan),
+          columns: r.columns,
+          measure: r.measure,
+          rows: r.rows,
+          count: r.matched,
+          remaining: gate.remaining,
+          provenance: {
+            intent: mPlan.intent,
+            interpreted_by: 'plan',
+            plan: {
+              measure: mPlan.measure,
+              scope: mPlan.scope.labels,
+              mode: mPlan.scope.mode,
+              exclude: mPlan.scope.excludeLabels,
+              threshold: mPlan.threshold,
+            },
+            dataset: 'TeleStats football database',
+            coverage: '/tools/data.html',
+            query_ms: Date.now() - started,
+          },
+        });
+      } catch (err) {
+        console.error('[ask] measure engine failed:', err.message);
+        return respond(200, {
+          answered: false,
+          kind: 'technical',
+          message: 'That query could not be completed just now. Please try again.',
+          remaining: gate.remaining,
+        });
+      }
+    }
+  }
+
   const plan = await parse.parse(body.question);
   if (plan.error) {
     // A refusal is a legitimate answer, not a server fault.
-    return respond(200, { answered: false, message: plan.error, remaining: gate.remaining });
+    return respond(200, {
+      answered: false,
+      kind: plan.kind || 'unparsed',
+      message: plan.error,
+      remaining: gate.remaining,
+    });
   }
 
   try {
-    const db = createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: false } });
     const result = await intents.execute(db, plan);
 
     return respond(200, {

@@ -5,7 +5,7 @@
   "scripts": {
     "start": "netlify dev",
     "dev": "node scripts/dev/server.js 8888",
-    "check": "node scripts/analytics/verify.js && node scripts/checks/credit.js && node scripts/fbref/check_club_names.js && node scripts/fbref/smoke.js --live && node scripts/daily/verify.js 30",
+    "check": "node scripts/analytics/verify.js && node scripts/checks/credit.js && node scripts/checks/ask.js && node scripts/fbref/check_club_names.js && node scripts/fbref/smoke.js --live && node scripts/daily/verify.js 30",
     "smoke": "node scripts/fbref/smoke.js --live",
     "check:analytics": "node scripts/analytics/verify.js",
     "check:clubs": "node scripts/fbref/check_club_names.js",
@@ -22,7 +22,8 @@
     "analytics:weekly:noemail": "node scripts/analytics/run-weekly.mjs --no-email",
     "ga": "node scripts/analytics/ga-query.mjs",
     "check:spoilers": "node scripts/checks/spoilers.js",
-    "build:games": "node scripts/pages/build_games.js"
+    "build:games": "node scripts/pages/build_games.js",
+    "check:ask": "node scripts/checks/ask.js"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.117.1",

@@ -204,9 +204,16 @@ async function parse(question) {
   }
   if (viaModel) return viaModel;
 
+  // The old wording here told EVERY failed question to "try naming two clubs",
+  // including one that had named three competitions and a goal threshold. A
+  // fallback should describe what Ask can do, not the one shape it happened to
+  // be written around first.
   return {
-    error: 'I could not work out what to look up. Try naming two clubs, ' +
-           'for example "who played for both Everton and Liverpool?"',
+    kind: 'unparsed',
+    error: 'I could not work out what to look up. Name a club, a competition ' +
+           'or a player \u2014 for example "who played for both Everton and ' +
+           'Liverpool?", "top Arsenal goalscorers", or "who scored more than 10 ' +
+           'goals in La Liga, the Premier League and Serie A?"',
   };
 }
 

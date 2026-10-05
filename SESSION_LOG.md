@@ -3294,3 +3294,55 @@ give. Sorting a result the page already holds needs no request at all.
 **Deferred, deliberately:** free publishing, invite mechanics and remix all
 change what Pro is worth to people who have already paid for it. Documented
 rather than guessed, per the brief.
+
+## Ask: a query engine instead of three question shapes
+
+**Root cause.** Not entity recognition — `findCompetition` recognised
+"Premier League" perfectly well. Three structural gaps:
+
+1. `findCompetition` returned ONE competition. Three named collapsed to one.
+2. All three intents were CLUB-shaped, and `parseDeterministic` returns null
+   with zero clubs. The model fallback's intent list had no such intent
+   either, so it ended at `unsupported`.
+3. No threshold vocabulary anywhere, and no per-scope grouping. Even with 1
+   and 2 fixed, nothing could express ">N in EACH of".
+
+Nine players actually qualify. The data was there; the vocabulary was not.
+
+**The architecture.** Question → proposed plan → `validate()` → executor →
+formatter. The plan is COMPONENTS, not shapes: a measure, a set of scopes, a
+mode over them (all/any), an exclusion set, a comparison, filters. "Players for
+both Arsenal and Chelsea" and "20+ goals in each of three leagues" are now the
+same plan with different values.
+
+`_ask_plan.validate()` is the boundary. Ids are checked against the real club
+and competition lists, the operator is one of six NAMES, numbers are clamped,
+and the returned object is rebuilt field by field so nothing unvalidated can
+ride along. A plan is data; it is never interpolated into SQL.
+
+**Deterministic, no model call.** All of it. The grammar is small and regular.
+
+**Bugs found while building it:**
+- `Number(null) === 0` is finite, so an absent season clamped to the floor and
+  stamped "1888–1888" onto every plan.
+- `"20 or more"` parsed as a logical OR, turning "at least 20 in La Liga" into
+  "any of La Liga".
+- "A but never B" negated BOTH competitions. Required and excluded are now
+  separate sets.
+- **Segunda División was not in Ask's competition map at all** — Ask has never
+  been able to recognise Spain's second division by any name, accented or not.
+  Five aliases added.
+- The fallback told every failed question to "try naming two clubs", including
+  one naming three competitions.
+
+**Tests.** `npm run check:ask`, 60 assertions, now in the gate. Half are plan
+assertions with no database, because a wrong plan is a confidently wrong
+ANSWER and "each vs total" is invisible in the output — both return a
+plausible table. The other half run the executor against a fixture where the
+answer is known by construction: 20/15/12 qualifies, 20/15/10 does not,
+100/0/0 does not, and 6+5 at two clubs in one league totals 11.
+
+**Performance.** 4.06s → 1.94s by not fetching rows that contribute zero.
+NOT filtered at the threshold, tempting as that was: 6 and 5 at two clubs is
+11, and filtering rows at >10 would drop both and lose the player — the
+fixture test that would have caught it.

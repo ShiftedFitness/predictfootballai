@@ -131,7 +131,13 @@ const COMPETITIONS = {
   'championship': 'Championship',
   'league one': 'League One', 'league 1': 'League One',
   'league two': 'League Two', 'league 2': 'League Two',
-  'la liga': 'La Liga',
+  'la liga': 'La Liga', 'primera division': 'La Liga', 'laliga': 'La Liga',
+  // Segunda was loaded into the database but never added here, so Ask has
+  // never been able to recognise Spain's second division by any name. The
+  // keys are accent-folded because norm() folds the question the same way.
+  'segunda division': 'Segunda Divisi\u00f3n', 'segunda': 'Segunda Divisi\u00f3n',
+  'la liga 2': 'Segunda Divisi\u00f3n', 'laliga 2': 'Segunda Divisi\u00f3n',
+  'spanish second division': 'Segunda Divisi\u00f3n',
   'serie a': 'Serie A',
   'bundesliga': 'Bundesliga',
   'ligue 1': 'Ligue 1', 'ligue un': 'Ligue 1',
@@ -239,15 +245,41 @@ function findNationality(question) {
 }
 
 function findCompetition(question) {
-  const n = ' ' + norm(question) + ' ';
+  const all = findCompetitions(question);
+  return all.length ? all[0] : null;
+}
+
+/**
+ * EVERY competition named, in the order they appear.
+ *
+ * findCompetition returns one, which was right when a competition was a
+ * single optional filter on a club question. "More than 10 goals in La Liga,
+ * the Premier League and Serie A" names three, and collapsing them to the
+ * first was half the reason that question could not be answered.
+ *
+ * Longest key first, and each match is blanked out before the next pass, so
+ * "La Liga" cannot also be found inside a span already claimed by a longer
+ * alias, and the same competition named twice is only counted once.
+ */
+function findCompetitions(question) {
+  let n = ' ' + norm(question) + ' ';
+  const hits = [];
   for (const key of Object.keys(COMPETITIONS).sort((a, b) => b.length - a.length)) {
-    if (n.includes(' ' + key + ' ')) return COMPETITIONS[key];
+    const needle = ' ' + key + ' ';
+    let at = n.indexOf(needle);
+    while (at !== -1) {
+      const name = COMPETITIONS[key];
+      if (!hits.includes(name)) hits.push(name);
+      // Replace with spaces, not '', so surrounding word boundaries survive.
+      n = n.slice(0, at + 1) + ' '.repeat(key.length) + n.slice(at + 1 + key.length);
+      at = n.indexOf(needle);
+    }
   }
-  return null;
+  return hits;
 }
 
 module.exports = {
   resolveTeam, resolveNationality, resolveCompetition,
-  findTeams, findNationality, findCompetition,
+  findTeams, findNationality, findCompetition, findCompetitions,
   norm, ALIASES, NATIONALITIES, COMPETITIONS,
 };

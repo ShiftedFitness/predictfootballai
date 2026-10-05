@@ -78,6 +78,16 @@
   table.a-tbl a:hover { color: var(--ask); border-bottom-color: var(--ask); }
   .a-nat { font-size: .68rem; color: var(--fg-3); margin-left: 5px; }
 
+  /* How the question was read. Quiet, above the answer, always present for a
+     statistical query — the place to notice a misreading before trusting the
+     numbers. */
+  .a-read { font-size: .74rem; color: var(--ask); margin: 0 0 8px; font-family: var(--mono);
+            letter-spacing: .01em; line-height: 1.45; }
+  /* A competition-per-column table can exceed a phone; it scrolls inside its
+     own box rather than dragging the page sideways. */
+  .a-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 12px; }
+  .a-scroll table.a-tbl { margin-top: 0; min-width: 100%; }
+
   .a-follow { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 13px; }
   .a-follow button { font: inherit; font-size: .76rem; padding: 7px 12px; min-height: 36px;
                      border-radius: 999px; cursor: pointer; background: transparent;

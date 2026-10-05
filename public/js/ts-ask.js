@@ -121,21 +121,37 @@
     if (!d) return;
 
     if (!d.answered) {
-      // An honest no. The parser said it could not label the question, so the
-      // page says that rather than guessing at an answer.
+      // Different failures deserve different words. Telling somebody who asked
+      // about three competitions to "try naming two clubs" was the single
+      // least helpful thing this page did.
+      var HINTS = {
+        unknown_scope: 'Try one of the competitions TeleStats holds: the Premier League, ' +
+          'Championship, League One, League Two, FA Cup, EFL Cup, Champions League, ' +
+          'La Liga, Segunda Divisi\u00f3n, Serie A, Bundesliga or Ligue 1.',
+        no_scope: 'Name a club or a competition, and Ask will take it from there.',
+        unsupported: 'That comparison is not supported yet. Try "more than", ' +
+          '"at least", "fewer than" or "between".',
+        technical: 'This one is on us \u2014 try again in a moment.',
+      };
+      var hint = HINTS[d.kind] || 'Ask can find player connections, club records, top ' +
+        'scorers, career histories, and statistical questions like "who scored more than ' +
+        '10 goals in La Liga, the Premier League and Serie A".';
       box.innerHTML = '<p class="a-msg">' + esc(d.message || 'I could not answer that one.') +
-        '</p><p class="a-cover">Ask can find player connections, club records, top ' +
-        'scorers and career histories. Anything outside the appearance and goal ' +
-        'records is not in the database.</p>';
-      track('ask_answered', { answered: false });
+        '</p><p class="a-cover">' + hint + '</p>';
+      track('ask_answered', { answered: false, kind: d.kind || 'unparsed' });
       return;
     }
 
     var rows = d.rows || [];
     last = { question: question, rows: rows, message: d.message };
 
-    box.innerHTML = '<p class="a-msg">' + esc(d.message) + '</p>' +
-      table(rows) +
+    box.innerHTML =
+      // Natural language is ambiguous, so the reading is shown before the
+      // table. If "both" over three leagues was taken as "each of three",
+      // that should be visible rather than inferred from the numbers.
+      (d.interpreted ? '<p class="a-read">' + esc(d.interpreted) + '</p>' : '') +
+      '<p class="a-msg">' + esc(d.message) + '</p>' +
+      (d.columns && d.columns.length ? scopeTable(rows, d.columns) : table(rows)) +
       follows(question, rows) +
       '<div class="a-tools">' +
         '<button type="button" data-share>Share this</button>' +
@@ -155,6 +171,31 @@
 
     wireSort(box);
     track('ask_answered', { answered: true, rows: rows.length });
+  }
+
+  /**
+   * One column per competition (or club), which is what a question like
+   * "more than 10 goals in each of three leagues" is actually asking to see.
+   * A single "total" column would hide the very thing being tested.
+   */
+  function scopeTable(rows, columns) {
+    if (!rows.length) return '';
+    return '<div class="a-scroll"><table class="a-tbl" data-sortable><thead><tr>' +
+      '<th>Player</th>' +
+      columns.map(function (c) {
+        return '<th class="num" data-k="' + esc(c) + '">' + esc(c) + '</th>';
+      }).join('') +
+      '<th class="num" data-k="total" aria-sort="descending">Total</th>' +
+      '</tr></thead><tbody>' +
+      rows.map(function (r) {
+        return '<tr><td>' + esc(r.player) +
+          (r.nationality ? '<span class="a-nat">' + esc(r.nationality) + '</span>' : '') +
+          '</td>' +
+          columns.map(function (c) {
+            return '<td class="num">' + (r.per && r.per[c] != null ? r.per[c] : 0) + '</td>';
+          }).join('') +
+          '<td class="num">' + (r.total != null ? r.total : '') + '</td></tr>';
+      }).join('') + '</tbody></table></div>';
   }
 
   /** The right shape for the rows that came back, not one shape for all. */
